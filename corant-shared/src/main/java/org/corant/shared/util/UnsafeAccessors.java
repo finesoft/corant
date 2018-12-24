@@ -23,6 +23,7 @@ import sun.misc.Unsafe;
  * @author bingo 下午7:00:37
  *
  */
+@SuppressWarnings("restriction")
 public class UnsafeAccessors {
 
   private static Unsafe UNSAFE = null;

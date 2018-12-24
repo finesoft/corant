@@ -396,11 +396,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-websocket</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-websocket-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -421,11 +416,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-datasource</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-datasource-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -437,21 +427,6 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-datasource-agroal</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-jpa</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-jpa-shared</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-jpa-hibernate</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

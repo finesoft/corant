@@ -31,6 +31,10 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-shared</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.microprofile.config</groupId>
 			<artifactId>microprofile-config-api</artifactId>
 		</dependency>
@@ -48,10 +52,5 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-shared</artifactId>
-		</dependency>
-
 	</dependencies>
 </project>

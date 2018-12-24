@@ -15,17 +15,12 @@ package org.corant.suites.jndi;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
-import org.corant.Corant;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.normal.Names.JndiNames;
 
 /**
@@ -34,27 +29,23 @@ import org.corant.shared.normal.Names.JndiNames;
  * @author bingo 下午7:19:21
  *
  */
-@ApplicationScoped
-public class InitialContextProvider {
+public class InitialContextExtension implements Extension {
 
+  public static final String[] DFLT_SUB_CTX = new String[] {JndiNames.JNDI_ROOT_NME,
+      JndiNames.JNDI_COMP_NME, JndiNames.JNDI_APPS_NME, JndiNames.JNDI_DATS_NME};
+  private final Logger logger = Logger.getLogger(this.getClass().getName());
+  private boolean useCorantContext = false;
   private InitialContext context;
 
-  @Inject
-  private BeanManager beanManager;
+  public InitialContext getContext() {
+    return context;
+  }
 
-  @Inject
-  Logger logger;
+  public boolean isUseCorantContext() {
+    return useCorantContext;
+  }
 
-  @Inject
-  Corant corant;
-
-  // touch, when corant ready service
-  public void initialize(@Observes PostCorantReadyEvent event) {}
-
-  @PostConstruct
-  protected void onPostConstruct() {
-    // if we can not found open context.
-    boolean useCorantContext = false;
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     try {
       if (!NamingManager.hasInitialContextFactoryBuilder()) {
         NamingManager.setInitialContextFactoryBuilder(e -> NamingContext::new);
@@ -64,22 +55,23 @@ public class InitialContextProvider {
       logger.log(Level.WARNING, null, e);
     }
 
+
     try {
       context = new InitialContext();
-      context.createSubcontext(JndiNames.JNDI_ROOT_NME);
-      context.createSubcontext(JndiNames.JNDI_COMP_NME);
-      context.createSubcontext(JndiNames.JNDI_APPS_NME);
-      context.createSubcontext(JndiNames.JNDI_DATS_NME);
-      context.bind(JndiNames.JNDI_COMP_NME + "/BeanManager", beanManager);
-      beanManager.getEvent().fire(new PostCorantJndiReadyEvent(useCorantContext, context));
+      for (String subCtx : DFLT_SUB_CTX) {
+        context.createSubcontext(subCtx);
+      }
+      if (useCorantContext) {
+        logger.info(() -> String.format(
+            "Initial namingcontext that build from corant, create subcontexts with %s.",
+            String.join(" ", DFLT_SUB_CTX)));
+      } else {
+        logger.info(() -> String.format("Initial namingcontext, create subcontexts with %s.",
+            String.join(" ", DFLT_SUB_CTX)));
+      }
     } catch (NamingException e) {
       logger.log(Level.WARNING, null, e);
     }
   }
 
-  @Produces
-  @ApplicationScoped
-  InitialContext initialContext() throws NamingException {
-    return context;
-  }
 }

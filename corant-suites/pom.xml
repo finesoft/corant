@@ -31,7 +31,7 @@
 		<module>corant-suites-websocket</module>
 		<module>corant-suites-query</module>
 	</modules>
-
+	<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -49,4 +49,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	-->
 </project>

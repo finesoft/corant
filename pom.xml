@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.corant</groupId>
+	<artifactId>corant-root</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>corant root</name>
+	<description>Microservice stack with CDI MicroProfile.</description>
+	<scm>
+		<url>https://github.com/finesoft/corant</url>
+		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
+		<developerConnection>scm:git:git@github.com:finesoft/corant.git</developerConnection>
+	</scm>
+	<licenses>
+		<license>
+			<name>AL2</name>
+		</license>
+	</licenses>
+	<modules>
+		<module>corant-boms</module>
+		<module>corant-devops</module>
+		<module>corant-kernel</module>
+		<module>corant-shared</module>
+		<module>corant-suites</module>
+		<module>corant-asosat</module>
+	</modules>
+</project>

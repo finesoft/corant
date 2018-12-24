@@ -1,0 +1,202 @@
+/*
+ * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.corant.suites.webserver.undertow;
+
+import static org.corant.shared.util.ObjectUtils.max;
+import java.util.Optional;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+/**
+ * corant-suites-webserver-undertow
+ *
+ * @author bingo 下午3:08:00
+ *
+ */
+@ApplicationScoped
+public class UndertowWebServerConfig {
+
+  @Inject
+  Config config;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.io-threads")
+  private Optional<Integer> ioThreads;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.not-request-timeout", defaultValue = "60000")
+  private int notRequestTimeout;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.high-water", defaultValue = "1048576")
+  private int highWater;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.low-water", defaultValue = "1048576")
+  private int lowWater;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.tcp-nodelay", defaultValue = "true")
+  private boolean tcpNoDelay;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.reuse-address", defaultValue = "true")
+  private boolean reuseAddress;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.cork", defaultValue = "true")
+  private boolean cork;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.buffer-size", defaultValue = "16364")
+  private int bufferSize;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.eager-filter-init", defaultValue = "true")
+  private boolean eagerFilterInit;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.enableHttp2", defaultValue = "false")
+  private boolean enableHttp2;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.enableAjp", defaultValue = "false")
+  private boolean enableAjp;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.balancing-tokens", defaultValue = "1")
+  private int balancingTokens;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.balancing-connections", defaultValue = "2")
+  private int balancingConnections;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.back-log", defaultValue = "1000")
+  private int backLog;
+
+  /**
+   *
+   * @return the backLog
+   */
+  public int getBackLog() {
+    return backLog;
+  }
+
+  /**
+   *
+   * @return the balancingConnections
+   */
+  public int getBalancingConnections() {
+    return balancingConnections;
+  }
+
+  /**
+   *
+   * @return the balancingTokens
+   */
+  public int getBalancingTokens() {
+    return balancingTokens;
+  }
+
+  /**
+   *
+   * @return the bufferSize
+   */
+  public int getBufferSize() {
+    return bufferSize;
+  }
+
+  /**
+   *
+   * @return the highWater
+   */
+  public int getHighWater() {
+    return highWater;
+  }
+
+  /**
+   *
+   * @return the ioThreads
+   */
+  public Integer getIoThreads() {
+    return ioThreads.orElse(max(Runtime.getRuntime().availableProcessors(), 2));
+  }
+
+  /**
+   *
+   * @return the lowWater
+   */
+  public int getLowWater() {
+    return lowWater;
+  }
+
+  /**
+   *
+   * @return the notRequestTimeout
+   */
+  public int getNotRequestTimeout() {
+    return notRequestTimeout;
+  }
+
+  /**
+   *
+   * @return the cork
+   */
+  public boolean isCork() {
+    return cork;
+  }
+
+  /**
+   *
+   * @return the eagerFilterInit
+   */
+  public boolean isEagerFilterInit() {
+    return eagerFilterInit;
+  }
+
+  /**
+   *
+   * @return the enableAjp
+   */
+  public boolean isEnableAjp() {
+    return enableAjp;
+  }
+
+  /**
+   *
+   * @return the enableHttp2
+   */
+  public boolean isEnableHttp2() {
+    return enableHttp2;
+  }
+
+  /**
+   *
+   * @return the reuseAddress
+   */
+  public boolean isReuseAddress() {
+    return reuseAddress;
+  }
+
+  /**
+   *
+   * @return the tcpNoDelay
+   */
+  public boolean isTcpNoDelay() {
+    return tcpNoDelay;
+  }
+}

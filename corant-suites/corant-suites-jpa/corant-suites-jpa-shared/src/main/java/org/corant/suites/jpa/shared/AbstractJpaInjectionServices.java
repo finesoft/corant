@@ -15,11 +15,18 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
+import org.corant.kernel.util.CdiUtils;
+import org.corant.shared.normal.Names.PersistenceNames;
 import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
@@ -29,6 +36,16 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       new ConcurrentHashMap<>();
   protected static Map<String, ResourceReferenceFactory<EntityManager>> ems =
       new ConcurrentHashMap<>();
+
+  public static ResourceReferenceFactory<EntityManagerFactory> getEntityManagerFactoryReferenceFactory(
+      String puName) {
+    return emfs.get(puName);
+  }
+
+  public static ResourceReferenceFactory<EntityManager> getEntityManagerReferenceFactory(
+      String puName) {
+    return ems.get(puName);
+  }
 
   @Override
   public void cleanup() {
@@ -41,13 +58,21 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   @Override
   public ResourceReferenceFactory<EntityManager> registerPersistenceContextInjectionPoint(
       InjectionPoint injectionPoint) {
-    return null;
+    final PersistenceContext pc =
+        CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
+    String puName = ifNull(pc.unitName(), PersistenceNames.PU_DFLT_NME);
+    String name = defaultString(pc.name());
+    puName = isEmpty(name) ? puName : puName + "." + name;
+    return ems.computeIfAbsent(puName, pn -> new EntityManagerReferenceFactory(pn));
   }
 
   @Override
   public ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnitInjectionPoint(
       InjectionPoint injectionPoint) {
-    return null;
+    final PersistenceUnit pu =
+        CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
+    String puName = ifNull(pu.unitName(), PersistenceNames.PU_DFLT_NME);
+    return emfs.computeIfAbsent(puName, pn -> new EntityManagerFactoryReferenceFactory(puName));
   }
 
   @Override

@@ -15,20 +15,29 @@
  */
 package org.corant.suites.jpa.shared;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
 import org.jboss.weld.injection.spi.ResourceReference;
 
-public abstract class AbstractEntityManagerFactoryReference
-    implements ResourceReference<EntityManagerFactory> {
+/**
+ * corant-suites-jpa-shared
+ *
+ * @author bingo 下午6:46:11
+ *
+ */
+public class EntityManagerReference implements ResourceReference<EntityManager> {
+
+  protected volatile EntityManager entityManager;
 
   @Override
-  public EntityManagerFactory getInstance() {
-    return null;
+  public EntityManager getInstance() {
+    return entityManager;
   }
 
   @Override
   public void release() {
-
+    if (entityManager != null) {
+      entityManager.close();
+    }
   }
 
 }

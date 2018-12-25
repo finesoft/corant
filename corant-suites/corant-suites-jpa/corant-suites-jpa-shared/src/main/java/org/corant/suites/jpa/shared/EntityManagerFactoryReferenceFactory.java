@@ -15,17 +15,36 @@
  */
 package org.corant.suites.jpa.shared;
 
+import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import org.jboss.weld.injection.spi.ResourceReference;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
-public abstract class AbstractEntityManagerFactoryReferenceFactory
+public class EntityManagerFactoryReferenceFactory
     implements ResourceReferenceFactory<EntityManagerFactory> {
+
+  protected final EntityManagerFactoryReference emfr;
+
+  /**
+   * @param emfr
+   */
+  public EntityManagerFactoryReferenceFactory(EntityManagerFactoryReference emfr) {
+    super();
+    this.emfr = emfr;
+  }
+
+  public EntityManagerFactoryReferenceFactory(String persistenceUnitName) {
+    emfr = new EntityManagerFactoryReference(persistenceUnitName);
+  }
+
+  public EntityManagerFactoryReferenceFactory(String persistenceUnitName,
+      Map<String, Object> properties) {
+    emfr = new EntityManagerFactoryReference(persistenceUnitName, properties);
+  }
 
   @Override
   public ResourceReference<EntityManagerFactory> createResource() {
-    return null;
+    return emfr;
   }
-
 
 }

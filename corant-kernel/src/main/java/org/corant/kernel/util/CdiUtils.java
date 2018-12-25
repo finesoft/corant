@@ -27,7 +27,7 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  */
 public abstract class CdiUtils {
 
-  public static Annotated getResourceAnnotated(InjectionPoint injectionPoint) {
+  public static Annotated getAnnotated(InjectionPoint injectionPoint) {
     if (injectionPoint instanceof ParameterInjectionPoint) {
       return ((ParameterInjectionPoint<?, ?>) injectionPoint).getAnnotated().getDeclaringCallable();
     }

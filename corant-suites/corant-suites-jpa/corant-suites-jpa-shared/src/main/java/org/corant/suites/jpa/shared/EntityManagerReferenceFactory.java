@@ -15,12 +15,24 @@
  */
 package org.corant.suites.jpa.shared;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import org.jboss.weld.injection.spi.ResourceReference;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
-public abstract class AbstractEntityManagerReferenceFactory
-    implements ResourceReferenceFactory<EntityManager> {
+public class EntityManagerReferenceFactory implements ResourceReferenceFactory<EntityManager> {
+
+  protected final String persistenceUnitName;
+  protected final Map<String, Object> properties = new HashMap<>();
+
+  /**
+   * @param persistenceUnitName
+   */
+  public EntityManagerReferenceFactory(String persistenceUnitName) {
+    super();
+    this.persistenceUnitName = persistenceUnitName;
+  }
 
   @Override
   public ResourceReference<EntityManager> createResource() {

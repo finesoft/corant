@@ -14,9 +14,9 @@
 package org.corant.asosat.ddd.repository;
 
 import static org.corant.asosat.ddd.repository.JpaQueryBuilder.namedQuery;
-import static org.corant.asosat.ddd.util.JpaUtils.isPersistenceClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.suites.jpa.shared.JpaUtils.isPersistenceClass;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

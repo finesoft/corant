@@ -13,19 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.kernel.util;
 
-import javax.persistence.EntityManagerFactory;
-import org.jboss.weld.injection.spi.ResourceReference;
-import org.jboss.weld.injection.spi.ResourceReferenceFactory;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.InjectionPoint;
+import org.jboss.weld.injection.ParameterInjectionPoint;
 
-public abstract class AbstractEntityManagerFactoryReferenceFactory
-    implements ResourceReferenceFactory<EntityManagerFactory> {
+/**
+ * corant-kernel
+ *
+ * @author bingo 下午6:29:46
+ *
+ */
+public abstract class CdiUtils {
 
-  @Override
-  public ResourceReference<EntityManagerFactory> createResource() {
-    return null;
+  public static Annotated getResourceAnnotated(InjectionPoint injectionPoint) {
+    if (injectionPoint instanceof ParameterInjectionPoint) {
+      return ((ParameterInjectionPoint<?, ?>) injectionPoint).getAnnotated().getDeclaringCallable();
+    }
+    return injectionPoint.getAnnotated();
   }
-
-
 }

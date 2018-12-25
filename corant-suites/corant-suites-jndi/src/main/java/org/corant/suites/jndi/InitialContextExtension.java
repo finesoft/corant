@@ -54,27 +54,30 @@ public class InitialContextExtension implements Extension {
         NamingManager.setInitialContextFactoryBuilder(e -> NamingContext::new);
         useCorantContext = true;
       }
+      context = new InitialContext();
     } catch (IllegalStateException | NamingException e) {
       logger.log(Level.WARNING, null, e);
     }
 
-
-    try {
-      context = new InitialContext();
-      for (String subCtx : DFLT_SUB_CTX) {
-        context.createSubcontext(subCtx);
-      }
-      if (useCorantContext) {
-        logger.info(() -> String.format(
-            "Initial namingcontext that build from corant, create subcontexts with %s.",
-            String.join(" ", DFLT_SUB_CTX)));
-      } else {
-        logger.info(() -> String.format("Initial namingcontext, create subcontexts with %s.",
-            String.join(" ", DFLT_SUB_CTX)));
-      }
-    } catch (NamingException e) {
-      logger.log(Level.WARNING, null, e);
+    if (context == null) {
+      return;
     }
+
+    for (String subCtx : DFLT_SUB_CTX) {
+      try {
+        context.createSubcontext(subCtx);
+      } catch (NamingException e) {
+        logger.log(Level.WARNING, null, e);
+      }
+    }
+    if (useCorantContext) {
+      logger.info(() -> String.format("Initial corant naming context, create subcontexts with %s.",
+          String.join(" ", DFLT_SUB_CTX)));
+    } else {
+      logger.info(() -> String.format("Initial naming context, create subcontexts with %s.",
+          String.join(" ", DFLT_SUB_CTX)));
+    }
+
   }
 
 }

@@ -25,6 +25,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-jpa-shared</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-query</artifactId>
 		</dependency>
 		<dependency>
@@ -55,7 +59,7 @@
 			</exclusions>
 			<optional>false</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
@@ -64,13 +68,13 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-1.2-api</artifactId>
 		</dependency>
+
+		<!-- Test -->
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-devops-test-unit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- Test -->
-		
 		<dependency>
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-config</artifactId>

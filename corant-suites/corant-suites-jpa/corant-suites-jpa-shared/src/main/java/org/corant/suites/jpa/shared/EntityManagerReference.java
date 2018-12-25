@@ -15,7 +15,12 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.CollectionUtils.isEmpty;
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.SynchronizationType;
 import org.jboss.weld.injection.spi.ResourceReference;
 
 /**
@@ -26,15 +31,61 @@ import org.jboss.weld.injection.spi.ResourceReference;
  */
 public class EntityManagerReference implements ResourceReference<EntityManager> {
 
+  protected final EntityManagerFactory entityManagerFactory;
+  protected final Map<String, Object> properties = new HashMap<>();
+  protected final SynchronizationType syncType;
   protected volatile EntityManager entityManager;
 
+  /**
+   * @param entityManagerFactory
+   */
+  public EntityManagerReference(EntityManagerFactory entityManagerFactory) {
+    this(entityManagerFactory, SynchronizationType.SYNCHRONIZED, null);
+  }
+
+  /**
+   *
+   * @param entityManagerFactory
+   * @param syncType
+   */
+  public EntityManagerReference(EntityManagerFactory entityManagerFactory,
+      SynchronizationType syncType) {
+    this(entityManagerFactory, syncType, null);
+  }
+
+  /**
+   * @param entityManagerFactory
+   * @param syncType
+   * @param properties
+   */
+  public EntityManagerReference(EntityManagerFactory entityManagerFactory,
+      SynchronizationType syncType, Map<String, Object> properties) {
+    super();
+    this.entityManagerFactory = entityManagerFactory;
+    this.syncType = syncType;
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
+  }
+
   @Override
-  public EntityManager getInstance() {
+  public synchronized EntityManager getInstance() {
+    if (entityManager == null) {
+      if (!isEmpty(properties) && syncType != null) {
+        entityManager = entityManagerFactory.createEntityManager(syncType, properties);
+      } else if (!isEmpty(properties)) {
+        entityManager = entityManagerFactory.createEntityManager(properties);
+      } else if (!isEmpty(syncType)) {
+        entityManager = entityManagerFactory.createEntityManager(syncType);
+      } else {
+        entityManager = entityManagerFactory.createEntityManager();
+      }
+    }
     return entityManager;
   }
 
   @Override
-  public void release() {
+  public synchronized void release() {
     if (entityManager != null) {
       entityManager.close();
     }

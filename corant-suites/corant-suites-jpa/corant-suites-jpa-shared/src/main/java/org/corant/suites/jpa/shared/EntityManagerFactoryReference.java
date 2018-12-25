@@ -16,7 +16,7 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.ObjectUtils.ifNull;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -29,33 +29,22 @@ import org.jboss.weld.injection.spi.ResourceReference;
  * @author bingo 下午6:46:11
  *
  */
-public class EntityManagerFactoryReference
-    implements ResourceReference<EntityManagerFactory> {
+public class EntityManagerFactoryReference implements ResourceReference<EntityManagerFactory> {
 
   protected final String persistenceUnitName;
-  protected final Map<String, Object> properties = new HashMap<>();
-
-  protected volatile EntityManagerFactory entityManagerFactory;
+  protected final EntityManagerFactory entityManagerFactory;
 
   public EntityManagerFactoryReference(String persistenceUnitName) {
-    super();
-    this.persistenceUnitName = ifNull(persistenceUnitName, PersistenceNames.PU_DFLT_NME);
+    this(persistenceUnitName, Collections.emptyMap());
   }
 
-  public EntityManagerFactoryReference(String persistenceUnitName,
-      Map<String, Object> properties) {
-    this(persistenceUnitName);
-    if (properties != null) {
-      this.properties.putAll(properties);
-    }
+  public EntityManagerFactoryReference(String persistenceUnitName, Map<String, Object> properties) {
+    this.persistenceUnitName = ifNull(persistenceUnitName, PersistenceNames.PU_DFLT_NME);
+    entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName, properties);
   }
 
   @Override
-  public synchronized EntityManagerFactory getInstance() {
-    if (entityManagerFactory == null) {
-      entityManagerFactory =
-          Persistence.createEntityManagerFactory(persistenceUnitName, properties);
-    }
+  public EntityManagerFactory getInstance() {
     return entityManagerFactory;
   }
 

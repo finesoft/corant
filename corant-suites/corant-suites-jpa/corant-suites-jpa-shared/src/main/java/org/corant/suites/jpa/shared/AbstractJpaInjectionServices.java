@@ -37,16 +37,6 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   protected static Map<String, ResourceReferenceFactory<EntityManager>> ems =
       new ConcurrentHashMap<>();
 
-  public static ResourceReferenceFactory<EntityManagerFactory> getEntityManagerFactoryReferenceFactory(
-      String puName) {
-    return emfs.get(puName);
-  }
-
-  public static ResourceReferenceFactory<EntityManager> getEntityManagerReferenceFactory(
-      String puName) {
-    return ems.get(puName);
-  }
-
   @Override
   public void cleanup() {
     for (ResourceReferenceFactory<EntityManagerFactory> rrf : emfs.values()) {
@@ -63,7 +53,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
     String puName = ifNull(pc.unitName(), PersistenceNames.PU_DFLT_NME);
     String name = defaultString(pc.name());
     puName = isEmpty(name) ? puName : puName + "." + name;
-    return ems.computeIfAbsent(puName, pn -> new EntityManagerReferenceFactory(pn));
+    return ems.computeIfAbsent(puName, pn -> new EntityManagerReferenceFactory(null));
   }
 
   @Override
@@ -71,8 +61,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       InjectionPoint injectionPoint) {
     final PersistenceUnit pu =
         CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
-    String puName = ifNull(pu.unitName(), PersistenceNames.PU_DFLT_NME);
-    return emfs.computeIfAbsent(puName, pn -> new EntityManagerFactoryReferenceFactory(puName));
+    return registerPersistenceUnit(pu.name(), pu.unitName());
   }
 
   @Override
@@ -85,4 +74,23 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
     return registerPersistenceUnitInjectionPoint(injectionPoint).createResource().getInstance();
   }
 
+  protected ResourceReferenceFactory<EntityManager> registerPersistenceContext(String name,
+      String unitName) {
+    EntityManagerFactory emf =
+        registerPersistenceUnit(name, unitName).createResource().getInstance();
+    return ems.computeIfAbsent(resolveUnitName(name, unitName),
+        pn -> new EntityManagerReferenceFactory(emf));
+  }
+
+  protected ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnit(String name,
+      String unitName) {
+    return emfs.computeIfAbsent(resolveUnitName(name, unitName),
+        pn -> new EntityManagerFactoryReferenceFactory(pn));
+  }
+
+  protected String resolveUnitName(String name, String unitName) {
+    String usePuName = ifNull(unitName, PersistenceNames.PU_DFLT_NME);
+    usePuName = isEmpty(name) ? usePuName : usePuName + "." + name;
+    return usePuName;
+  }
 }

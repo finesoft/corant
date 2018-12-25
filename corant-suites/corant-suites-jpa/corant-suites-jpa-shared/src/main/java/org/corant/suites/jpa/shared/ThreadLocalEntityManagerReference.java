@@ -16,7 +16,6 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
-import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,17 +28,15 @@ import org.jboss.weld.injection.spi.ResourceReference;
  * @author bingo 下午6:46:11
  *
  */
-public class EntityManagerReference implements ResourceReference<EntityManager> {
+public class ThreadLocalEntityManagerReference implements ResourceReference<EntityManager> {
 
+  protected static ThreadLocal<EntityManager> entityManager = new ThreadLocal<>();
   protected final EntityManagerFactory entityManagerFactory;
-  protected final Map<String, Object> properties = new HashMap<>();
-  protected final SynchronizationType syncType;
-  protected volatile EntityManager entityManager;
 
   /**
    * @param entityManagerFactory
    */
-  public EntityManagerReference(EntityManagerFactory entityManagerFactory) {
+  public ThreadLocalEntityManagerReference(EntityManagerFactory entityManagerFactory) {
     this(entityManagerFactory, SynchronizationType.SYNCHRONIZED, null);
   }
 
@@ -48,7 +45,7 @@ public class EntityManagerReference implements ResourceReference<EntityManager> 
    * @param entityManagerFactory
    * @param syncType
    */
-  public EntityManagerReference(EntityManagerFactory entityManagerFactory,
+  public ThreadLocalEntityManagerReference(EntityManagerFactory entityManagerFactory,
       SynchronizationType syncType) {
     this(entityManagerFactory, syncType, null);
   }
@@ -58,45 +55,35 @@ public class EntityManagerReference implements ResourceReference<EntityManager> 
    * @param syncType
    * @param properties
    */
-  public EntityManagerReference(EntityManagerFactory entityManagerFactory,
+  public ThreadLocalEntityManagerReference(EntityManagerFactory entityManagerFactory,
       SynchronizationType syncType, Map<String, Object> properties) {
     super();
     this.entityManagerFactory = entityManagerFactory;
-    this.syncType = syncType;
-    if (properties != null) {
-      this.properties.putAll(properties);
+    if (!isEmpty(properties) && syncType != null) {
+      entityManager.set(entityManagerFactory.createEntityManager(syncType, properties));
+    } else if (!isEmpty(properties)) {
+      entityManager.set(entityManagerFactory.createEntityManager(properties));
+    } else if (!isEmpty(syncType)) {
+      entityManager.set(entityManagerFactory.createEntityManager(syncType));
+    } else {
+      entityManager.set(entityManagerFactory.createEntityManager());
     }
   }
 
   @Override
   public EntityManager getInstance() {
-    if (entityManager == null) {
-      synchronized (this) {
-        if (entityManager == null) {
-          if (!isEmpty(properties) && syncType != null) {
-            entityManager = entityManagerFactory.createEntityManager(syncType, properties);
-          } else if (!isEmpty(properties)) {
-            entityManager = entityManagerFactory.createEntityManager(properties);
-          } else if (!isEmpty(syncType)) {
-            entityManager = entityManagerFactory.createEntityManager(syncType);
-          } else {
-            entityManager = entityManagerFactory.createEntityManager();
-          }
-        }
-      }
-    }
-    return entityManager;
+    return entityManager.get();
   }
 
   @Override
   public void release() {
-    if (entityManager != null) {
+    EntityManager em = entityManager.get();
+    if (em != null) {
       synchronized (this) {
-        if (entityManager.isOpen()) {
-          entityManager.close();
+        if (em.isOpen()) {
+          em.close();
         }
       }
     }
   }
-
 }

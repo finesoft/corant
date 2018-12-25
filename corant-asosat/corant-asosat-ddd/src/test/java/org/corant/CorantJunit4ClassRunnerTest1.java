@@ -1,23 +1,3 @@
-package org.corant;
-
-import static org.corant.shared.util.MapUtils.getMapString;
-import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import javax.transaction.Transactional;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
-import org.corant.shared.normal.Names.JndiNames;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
@@ -34,6 +14,28 @@ import org.junit.runner.RunWith;
  * the License.
  */
 
+package org.corant;
+
+import static org.corant.shared.util.MapUtils.getMapString;
+import java.sql.SQLException;
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import javax.transaction.Transactional;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
+import org.corant.shared.normal.Names.JndiNames;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+
 /**
  * corant-devops-test-unit
  *
@@ -41,11 +43,11 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(CorantJUnit4ClassRunner.class)
-// @Transactional
+@Transactional
 public class CorantJunit4ClassRunnerTest1 {
 
-  // @Inject
-  // @Named("dmmsRwDs")
+  @Inject
+  @Named("dmmsRwDs")
   DataSource ds;
 
   @Inject
@@ -54,7 +56,7 @@ public class CorantJunit4ClassRunnerTest1 {
   @Inject
   Logger logger;
 
-  // @Test
+  @Test
   public void testDataSource() throws SQLException {
     logger.info("test datasource " + ds);
     new QueryRunner(ds).query("SELECT * FROM CT_DMMS_INDU", new MapListHandler()).forEach(m -> {
@@ -64,11 +66,11 @@ public class CorantJunit4ClassRunnerTest1 {
 
   @Test
   public void testDataSourceJndi() throws NamingException, SQLException {
-    // ds.getConnection();
+    ds.getConnection();
     logger.info("test jndi datasource " + jndi.lookup(JndiNames.JNDI_DATS_NME + "/dmmsRwDs"));
   }
 
-  // @Test
+  @Test
   @Transactional
   public void testDataSourceUpdater() throws SQLException {
     String name = "汽车零部件制造业";

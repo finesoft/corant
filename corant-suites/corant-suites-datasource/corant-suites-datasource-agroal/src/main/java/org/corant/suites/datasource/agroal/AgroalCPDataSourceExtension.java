@@ -17,7 +17,6 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -30,8 +29,6 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.Corant;
-import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
@@ -66,11 +63,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
             }).disposeWith((dataSource, beans) -> dataSource.close());
       }
     }
-  }
-
-  // touch
-  void onPostContainerStarted(@Observes PostContainerStartedEvent e) {
-    Corant.cdi().select(DataSource.class).forEach(ds -> shouldNotNull(ds).toString());
   }
 
   private AgroalDataSource produce(Instance<Object> instance, String name)

@@ -19,4 +19,8 @@
 			<name>AL2</name>
 		</license>
 	</licenses>
+	<modules>
+		<module>corant-suites-jpa-shared</module>
+		<module>corant-suites-jpa-hibernate</module>
+	</modules>
 </project>

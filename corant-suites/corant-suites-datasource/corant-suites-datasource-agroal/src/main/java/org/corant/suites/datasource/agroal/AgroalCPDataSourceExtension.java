@@ -1,20 +1,23 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -27,6 +30,8 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
+import org.corant.Corant;
+import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
@@ -61,6 +66,11 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
             }).disposeWith((dataSource, beans) -> dataSource.close());
       }
     }
+  }
+
+  // touch
+  void onPostContainerStarted(@Observes PostContainerStartedEvent e) {
+    Corant.cdi().select(DataSource.class).forEach(ds -> shouldNotNull(ds).toString());
   }
 
   private AgroalDataSource produce(Instance<Object> instance, String name)

@@ -1,22 +1,26 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant;
 
+import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -29,6 +33,7 @@ import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.util.UnmanageableInstance;
 import org.corant.kernel.util.Unmanageables;
+import org.corant.shared.util.StopWatch;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.jboss.weld.environment.se.Weld;
@@ -47,6 +52,7 @@ public class Corant {
   private Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
+  private Logger logger = Logger.getLogger(getClass().getName());
 
   public Corant(Class<?> configClass) {
     this.configClass = configClass;
@@ -129,6 +135,9 @@ public class Corant {
   }
 
   public synchronized Corant start() {
+    StopWatch stopWatch = new StopWatch(CORANT);
+    stopWatch.start("Initializes the CDI container");
+
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
@@ -137,8 +146,20 @@ public class Corant {
     }
     Thread.currentThread().setContextClassLoader(classLoader);
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+
+    stopWatch.stop((tk) -> logger
+        .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())));
+    stopWatch.start("Initializes all suites");
+
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent());
+
+    stopWatch.stop((tk) -> logger
+        .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())));
+
+    stopWatch.destroy((sw) -> logger.info(() -> String.format(
+        "Complete all initialization in %s seconds, ready to receive the service.",
+        sw.getTotalTimeSeconds())));
     return this;
   }
 

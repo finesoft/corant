@@ -15,8 +15,11 @@
  */
 package org.corant.suites.jpa.shared;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.SynchronizationType;
 import org.jboss.weld.injection.spi.ResourceReference;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
@@ -24,14 +27,22 @@ public class EntityManagerReferenceFactory implements ResourceReferenceFactory<E
 
   private final EntityManagerFactory entityManagerFactory;
 
-  public EntityManagerReferenceFactory(EntityManagerFactory entityManagerFactory) {
+  private final SynchronizationType syncType;
+  private final Map<String, Object> properties = new HashMap<>();
+
+  public EntityManagerReferenceFactory(EntityManagerFactory entityManagerFactory,
+      SynchronizationType syncType, Map<String, Object> properties) {
     super();
     this.entityManagerFactory = entityManagerFactory;
+    this.syncType = syncType == null ? SynchronizationType.SYNCHRONIZED : syncType;
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
   }
 
   @Override
   public ResourceReference<EntityManager> createResource() {
-    return new EntityManagerReference(entityManagerFactory);
+    return new EntityManagerReference(entityManagerFactory, syncType, properties);
   }
 
 }

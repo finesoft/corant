@@ -16,7 +16,6 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
-import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,10 +30,8 @@ import org.jboss.weld.injection.spi.ResourceReference;
  */
 public class EntityManagerReference implements ResourceReference<EntityManager> {
 
+  protected static ThreadLocal<EntityManager> entityManagerHolder = new ThreadLocal<>();
   protected final EntityManagerFactory entityManagerFactory;
-  protected final Map<String, Object> properties = new HashMap<>();
-  protected final SynchronizationType syncType;
-  protected volatile EntityManager entityManager;
 
   /**
    * @param entityManagerFactory
@@ -62,41 +59,32 @@ public class EntityManagerReference implements ResourceReference<EntityManager> 
       SynchronizationType syncType, Map<String, Object> properties) {
     super();
     this.entityManagerFactory = entityManagerFactory;
-    this.syncType = syncType;
-    if (properties != null) {
-      this.properties.putAll(properties);
+    if (!isEmpty(properties) && syncType != null) {
+      entityManagerHolder.set(entityManagerFactory.createEntityManager(syncType, properties));
+    } else if (!isEmpty(properties)) {
+      entityManagerHolder.set(entityManagerFactory.createEntityManager(properties));
+    } else if (!isEmpty(syncType)) {
+      entityManagerHolder.set(entityManagerFactory.createEntityManager(syncType));
+    } else {
+      entityManagerHolder.set(entityManagerFactory.createEntityManager());
     }
   }
 
   @Override
   public EntityManager getInstance() {
-    if (entityManager == null) {
-      synchronized (this) {
-        if (entityManager == null) {
-          if (!isEmpty(properties) && syncType != null) {
-            entityManager = entityManagerFactory.createEntityManager(syncType, properties);
-          } else if (!isEmpty(properties)) {
-            entityManager = entityManagerFactory.createEntityManager(properties);
-          } else if (!isEmpty(syncType)) {
-            entityManager = entityManagerFactory.createEntityManager(syncType);
-          } else {
-            entityManager = entityManagerFactory.createEntityManager();
-          }
-        }
-      }
-    }
-    return entityManager;
+    return entityManagerHolder.get();
   }
 
   @Override
   public void release() {
-    if (entityManager != null) {
+    EntityManager em = entityManagerHolder.get();
+    if (em != null) {
       synchronized (this) {
-        if (entityManager.isOpen()) {
-          entityManager.close();
+        if (em.isOpen()) {
+          em.close();
         }
       }
+      entityManagerHolder.remove();
     }
   }
-
 }

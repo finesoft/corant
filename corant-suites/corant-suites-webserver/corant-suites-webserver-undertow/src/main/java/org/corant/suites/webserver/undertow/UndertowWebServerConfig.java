@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -31,9 +30,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 public class UndertowWebServerConfig {
-
-  @Inject
-  Config config;
 
   @Inject
   @ConfigProperty(name = "webserver.undertow.io-threads")
@@ -94,6 +90,10 @@ public class UndertowWebServerConfig {
   @Inject
   @ConfigProperty(name = "webserver.undertow.jsp-file-path", defaultValue = "jsp")
   private List<String> jspFilePaths;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.persistence-session", defaultValue = "false")
+  private boolean persistenceSession;
 
   /**
    *
@@ -193,6 +193,14 @@ public class UndertowWebServerConfig {
    */
   public boolean isEnableHttp2() {
     return enableHttp2;
+  }
+
+  /**
+   *
+   * @return isPersistenceSession
+   */
+  public boolean isPersistenceSession() {
+    return persistenceSession;
   }
 
   /**

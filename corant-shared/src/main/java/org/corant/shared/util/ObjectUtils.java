@@ -15,11 +15,6 @@
  */
 package org.corant.shared.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -60,15 +55,12 @@ public class ObjectUtils {
     return Objects.compare(a, b, c);
   }
 
-  public static Object deserialize(byte[] bytes) {
-    if (bytes == null) {
-      return null;
-    }
-    try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
-      return ois.readObject();
-    } catch (IOException | ClassNotFoundException ex) {
-      throw new CorantRuntimeException(ex, "Failed to deserialize object, %s" + ex.getMessage());
-    }
+  public static <T> T defaultObject(T obj, Supplier<T> supplier) {
+    return defaultObject(obj, supplier.get());
+  }
+
+  public static <T> T defaultObject(T obj, T altObj) {
+    return obj == null ? altObj : obj;
   }
 
   @SuppressWarnings("unchecked")
@@ -82,14 +74,6 @@ public class ObjectUtils {
 
   public static int hashCode(Object o) {
     return Objects.hashCode(o);
-  }
-
-  public static <T> T defaultObject(T obj, Supplier<T> supplier) {
-    return defaultObject(obj, supplier.get());
-  }
-
-  public static <T> T defaultObject(T obj, T altObj) {
-    return obj == null ? altObj : obj;
   }
 
   public static boolean isDeepEquals(Object a, Object b) {
@@ -126,21 +110,6 @@ public class ObjectUtils {
 
   public static <T> Optional<T> optionalCast(Object o, Class<T> cls) {
     return Optional.ofNullable(tryCast(o, cls));
-  }
-
-  public static byte[] serialize(Object object) {
-    if (object == null) {
-      return new byte[0];
-    }
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-      oos.writeObject(object);
-      oos.flush();
-      return baos.toByteArray();
-    } catch (IOException ex) {
-      throw new CorantRuntimeException(ex, "Failed to serialize object of type: %s",
-          object.getClass());
-    }
   }
 
   public static void shouldBeEquals(Object a, Object b) {

@@ -26,6 +26,11 @@ import java.nio.charset.Charset;
 public interface Defaults {
 
   String DFLT_CHARSET_STR = "utf-8";
+
   Charset DFLT_CHARSET = Charset.forName(DFLT_CHARSET_STR);
+
+  int ONE_KB = 1024;
+
+  long ONE_MB = ONE_KB * ONE_KB;
 
 }

@@ -50,6 +50,7 @@ import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.SecurityInfo.EmptyRoleSemantic;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSecurityInfo;
+import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.api.TransportGuaranteeType;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
@@ -71,6 +72,10 @@ public class UndertowWebServer extends AbstractWebServer {
   @Inject
   @Any
   Instance<UndertowWebServerConfigurator> additionalConfigurators;
+
+  @Inject
+  @Any
+  Instance<SessionPersistenceManager> sessionPersistenceManager;
 
   private Undertow server;
 
@@ -166,6 +171,8 @@ public class UndertowWebServer extends AbstractWebServer {
     DeploymentManager deploymentManager = resolveServerDeploymentManager();
     deploymentManager.deploy();
     try {
+      deploymentManager.getDeployment().getSessionManager()
+          .setDefaultSessionTimeout(config.getSessionTimeout());
       HttpHandler servletHandler = deploymentManager.start();
       PathHandler path = Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
       builder.setHandler(path);
@@ -186,6 +193,9 @@ public class UndertowWebServer extends AbstractWebServer {
     di.setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()));
     di.setClassLoader(getClass().getClassLoader());
     di.setEagerFilterInit(specConfig.isEagerFilterInit());
+    if (specConfig.isPersistenceSession() && sessionPersistenceManager.isResolvable()) {
+      di.setSessionPersistenceManager(sessionPersistenceManager.get());
+    }
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         corant.getBeanManager());

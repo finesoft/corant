@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
@@ -17,6 +19,7 @@ import static org.corant.shared.util.MapUtils.asImmutableMap;
 import static org.corant.shared.util.ObjectUtils.trySupplied;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -75,6 +78,42 @@ public class ClassUtils {
     return asClass(defaultClassLoader(), className, true);
   }
 
+  public static void checkPackageAccess(Class<?> clazz) {
+    checkPackageAccess(clazz.getName());
+    if (Proxy.isProxyClass(clazz)) {
+      checkProxyPackageAccess(clazz);
+    }
+  }
+
+  public static void checkPackageAccess(String name) {
+    SecurityManager s = System.getSecurityManager();
+    if (s != null) {
+      String cname = name.replace('/', '.');
+      if (cname.startsWith("[")) {
+        int b = cname.lastIndexOf('[') + 2;
+        if (b > 1 && b < cname.length()) {
+          cname = cname.substring(b);
+        }
+      }
+      int i = cname.lastIndexOf('.');
+      if (i != -1) {
+        s.checkPackageAccess(cname.substring(0, i));
+      }
+    }
+  }
+
+  public static void checkProxyPackageAccess(Class<?> clazz) {
+    SecurityManager s = System.getSecurityManager();
+    if (s != null) {
+      // check proxy interfaces if the given class is a proxy class
+      if (Proxy.isProxyClass(clazz)) {
+        for (Class<?> intf : clazz.getInterfaces()) {
+          checkPackageAccess(intf);
+        }
+      }
+    }
+  }
+
   public static ClassLoader defaultClassLoader() {
     ClassLoader classLoader = trySupplied(Thread.currentThread()::getContextClassLoader);
     if (classLoader == null) {
@@ -105,6 +144,7 @@ public class ClassUtils {
     return new ArrayList<>(interfaces);
   }
 
+
   public static List<Class<?>> getAllInterfaces(final Object object) {
     return object == null ? new ArrayList<>() : getAllInterfaces(object.getClass());
   }
@@ -127,7 +167,6 @@ public class ClassUtils {
   public static List<Class<?>> getAllSuperClasses(final Object object) {
     return object == null ? new ArrayList<>() : getAllSuperClasses(object.getClass());
   }
-
 
   public static List<Class<?>> getAllSuperclassesAndInterfaces(final Class<?> clazz) {
     List<Class<?>> list = new ArrayList<>();
@@ -307,6 +346,7 @@ public class ClassUtils {
     }
   }
 
+
   public static Class<?>[] wrappersToPrimitives(final Class<?>... classes) {
     final Class<?>[] convertedClasses = new Class[classes.length];
     for (int i = 0; i < classes.length; i++) {
@@ -318,6 +358,5 @@ public class ClassUtils {
   public static Class<?> wrapperToPrimitive(final Class<?> cls) {
     return WRAPPER_PRIMITIVE_MAP.get(cls);
   }
-
 
 }

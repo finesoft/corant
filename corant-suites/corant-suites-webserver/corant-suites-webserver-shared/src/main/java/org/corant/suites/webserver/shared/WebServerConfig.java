@@ -44,16 +44,12 @@ public class WebServerConfig {
   private Optional<String> displayName;
 
   @Inject
-  @ConfigProperty(name = "webserver.port", defaultValue = "8080")
-  private Integer port;
-
-  @Inject
-  @ConfigProperty(name = "webserver.work-threads", defaultValue = "128")
-  private Integer workThreads;
-
-  @Inject
   @ConfigProperty(name = "webserver.host", defaultValue = "0.0.0.0")
   private String host;
+
+  @Inject
+  @ConfigProperty(name = "webserver.port", defaultValue = "8080")
+  private Integer port;
 
   @Inject
   @ConfigProperty(name = "webserver.context-path", defaultValue = "/")
@@ -62,10 +58,6 @@ public class WebServerConfig {
   @Inject
   @ConfigProperty(name = "webserver.locale-charset-mappings")
   private Optional<String> localeCharsetMappings;
-
-  @Inject
-  @ConfigProperty(name = "webserver.file-dir", defaultValue = "/tmp")
-  private String fileDir;
 
   @Inject
   @ConfigProperty(name = "webserver.secured.port")
@@ -95,6 +87,15 @@ public class WebServerConfig {
   @ConfigProperty(name = "webserver.truststore.password")
   private Optional<String> truststorePassword;
 
+  @Inject
+  @ConfigProperty(name = "webserver.work-threads", defaultValue = "128")
+  private Integer workThreads;
+
+  @Inject
+  @ConfigProperty(name = "webserver.session-timeout", defaultValue = "30")
+  private Integer sessionTimeout;
+
+
   public String getContextPath() {
     return contextPath;
   }
@@ -107,7 +108,6 @@ public class WebServerConfig {
     StringBuilder sb = new StringBuilder();
     sb.append("host: ").append(getHost()).append(";");
     sb.append(" port: ").append(getPort()).append(";");
-    sb.append(" dir: ").append(getFileDir()).append(";");
     sb.append(" work-threads: ").append(getWorkThreads()).append(";");
     getSecuredPort().ifPresent(s -> sb.append("secured port: ").append(s).append(";"));
     getKeystorePath().ifPresent(s -> sb.append(" keystore path: ").append(s).append(";"));
@@ -119,14 +119,6 @@ public class WebServerConfig {
 
   public Optional<String> getDisplayName() {
     return displayName;
-  }
-
-  /**
-   *
-   * @return the fileDir
-   */
-  public String getFileDir() {
-    return fileDir;
   }
 
   /**
@@ -196,6 +188,10 @@ public class WebServerConfig {
    */
   public Optional<Integer> getSecuredPort() {
     return securedPort;
+  }
+
+  public Integer getSessionTimeout() {
+    return sessionTimeout;
   }
 
   /**

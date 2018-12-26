@@ -1,19 +1,22 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.webserver.tomcat;
 
 import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.ifBlank;
 import java.io.File;
 import java.nio.charset.Charset;
@@ -35,6 +38,7 @@ import org.apache.tomcat.util.descriptor.web.ContextResourceEnvRef;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.webserver.shared.AbstractWebServer;
 import org.jboss.weld.environment.servlet.WeldServletLifecycle;
@@ -105,7 +109,9 @@ public class TomcatWebServer extends AbstractWebServer {
 
   protected Tomcat resolveServer() {
     Tomcat tomcat = new Tomcat();
-    specConfig.getBasedir().ifPresent(tomcat::setBaseDir);
+    File baseDir = defaultObject(specConfig.getBaseDirFile(),
+        FileUtils.createTempDir("tomcat", asString(config.getPort())));
+    tomcat.setBaseDir(baseDir.getAbsolutePath());
     tomcat.setHostname(config.getHost());
     tomcat.setPort(config.getPort());
     // init http connector
@@ -115,16 +121,20 @@ public class TomcatWebServer extends AbstractWebServer {
     if (config.isSecured()) {
       resolveServerSsl(tomcat);
     }
-    resolveServerContext(tomcat.addContext("", new File(".").getAbsolutePath()));
     if (extraConfigurator.isResolvable()) {
-      extraConfigurator.stream().forEach(cfgr -> cfgr.configure(tomcat));
+      extraConfigurator.stream().forEach(cfgr -> cfgr.configureConnector(dfltConnector));
     }
+    resolveServerContext(tomcat.addContext("", new File(".").getAbsolutePath()));
     tomcat.enableNaming();
     return tomcat;
   }
 
   protected void resolveServerContext(Context ctx) {
     // resolveServerJndiContext(ctx);
+
+    if (extraConfigurator.isResolvable()) {
+      extraConfigurator.stream().forEach(cfgr -> cfgr.configureContext(ctx));
+    }
     ServletContext servletContext = ctx.getServletContext();
     servletContext.setAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         corant.getBeanManager());
@@ -196,10 +206,9 @@ public class TomcatWebServer extends AbstractWebServer {
     connector.setProperty("keystorePass", config.getKeystorePassword().get());
     connector.setProperty("keystoreType", config.getKeystoreType().get());
     connector.setProperty("clientAuth", "false");
-    connector.setProperty("protocol", "HTTP/1.1");
     connector.setProperty("sslProtocol", "TLS");
     connector.setProperty("maxThreads", ObjectUtils.asString(config.getWorkThreads()));
-    connector.setProperty("protocol", "org.apache.coyote.http11.Http11AprProtocol");
+    connector.setProperty("protocol", specConfig.getProtocol());
     connector.setAttribute("SSLEnabled", true);
     connector.setSecure(true);
     tomcat.getService().addConnector(connector);

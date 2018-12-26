@@ -16,6 +16,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.StringUtils.EMPTY;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,13 +103,13 @@ public class StopWatch {
     return totalTimeMillis / 1000.0;
   }
 
-  public void start() throws IllegalStateException {
+  public void start() {
     start(EMPTY);
   }
 
   public void start(String taskName) {
     startTimeMillis = System.currentTimeMillis();
-    currentTaskName = taskName;
+    currentTaskName = defaultString(taskName);
   }
 
   public void stop() throws IllegalStateException {

@@ -25,7 +25,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-webserver-tomcat</artifactId>
+			<artifactId>corant-suites-webserver-undertow</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>

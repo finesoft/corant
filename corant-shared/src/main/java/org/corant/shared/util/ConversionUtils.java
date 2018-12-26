@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -46,7 +46,7 @@ public class ConversionUtils {
   }
 
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal) {
-    return ifNull(Conversions.convert(obj, BigDecimal.class), altVal);
+    return defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
   }
 
   public static List<BigDecimal> toBigDecimalList(Object obj) {
@@ -58,7 +58,7 @@ public class ConversionUtils {
   }
 
   public static BigInteger toBigInteger(Object obj, BigInteger altVal) {
-    return ifNull(Conversions.convert(obj, BigInteger.class), altVal);
+    return defaultObject(Conversions.convert(obj, BigInteger.class), altVal);
   }
 
   public static List<BigInteger> toBigIntegerList(Object obj) {
@@ -66,7 +66,7 @@ public class ConversionUtils {
   }
 
   public static Boolean toBoolean(Object obj) {
-    return ifNull(Conversions.convert(obj, Boolean.class), Boolean.FALSE);
+    return defaultObject(Conversions.convert(obj, Boolean.class), Boolean.FALSE);
   }
 
   public static Character toCharacter(Object obj) {
@@ -78,7 +78,7 @@ public class ConversionUtils {
   }
 
   public static Currency toCurrency(Object obj, Currency altVal) {
-    return ifNull(Conversions.convert(obj, Currency.class), altVal);
+    return defaultObject(Conversions.convert(obj, Currency.class), altVal);
   }
 
   public static Double toDouble(Object obj) {
@@ -86,7 +86,7 @@ public class ConversionUtils {
   }
 
   public static Double toDouble(Object obj, Double altVal) {
-    return ifNull(Conversions.convert(obj, Double.class), altVal);
+    return defaultObject(Conversions.convert(obj, Double.class), altVal);
   }
 
   public static List<Double> toDoubleList(Object obj) {
@@ -106,7 +106,7 @@ public class ConversionUtils {
   }
 
   public static Float toFloat(Object obj, Float altVal) {
-    return ifNull(Conversions.convert(obj, Float.class), altVal);
+    return defaultObject(Conversions.convert(obj, Float.class), altVal);
   }
 
   public static List<Float> toFloatList(Object obj) {
@@ -118,7 +118,7 @@ public class ConversionUtils {
   }
 
   public static Instant toInstant(Object obj, Instant altVal) {
-    return ifNull(Conversions.convert(obj, Instant.class), altVal);
+    return defaultObject(Conversions.convert(obj, Instant.class), altVal);
   }
 
   public static List<Instant> toInstantList(Object obj) {
@@ -130,7 +130,7 @@ public class ConversionUtils {
   }
 
   public static Integer toInteger(Object obj, Integer altVal) {
-    return ifNull(Conversions.convert(obj, Integer.class), altVal);
+    return defaultObject(Conversions.convert(obj, Integer.class), altVal);
   }
 
   public static List<Integer> toIntegerList(Object obj) {
@@ -165,10 +165,10 @@ public class ConversionUtils {
 
   public static LocalDate toLocalDate(Object obj, String pattern, LocalDate altVal) {
     if (pattern != null) {
-      return ifNull(Conversions.convert(obj, LocalDate.class,
+      return defaultObject(Conversions.convert(obj, LocalDate.class,
           asMap(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern)), altVal);
     } else {
-      return ifNull(Conversions.convert(obj, LocalDate.class), altVal);
+      return defaultObject(Conversions.convert(obj, LocalDate.class), altVal);
     }
   }
 
@@ -186,7 +186,7 @@ public class ConversionUtils {
   }
 
   public static Locale toLocale(Object obj, Locale altVal) {
-    return ifNull(Conversions.convert(obj, Locale.class), altVal);
+    return defaultObject(Conversions.convert(obj, Locale.class), altVal);
   }
 
   public static Long toLong(Object obj) {
@@ -194,7 +194,7 @@ public class ConversionUtils {
   }
 
   public static Long toLong(Object obj, Long altVal) {
-    return ifNull(Conversions.convert(obj, Long.class), altVal);
+    return defaultObject(Conversions.convert(obj, Long.class), altVal);
   }
 
   public static List<Long> toLongList(Object obj) {
@@ -210,7 +210,7 @@ public class ConversionUtils {
   }
 
   public static Short toShort(Object obj, Short altVal) {
-    return ifNull(Conversions.convert(obj, Short.class), altVal);
+    return defaultObject(Conversions.convert(obj, Short.class), altVal);
   }
 
   public static List<Short> toShortList(Object obj) {
@@ -234,7 +234,7 @@ public class ConversionUtils {
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, String pattern, ZonedDateTime altVal) {
-    return ifNull(Conversions.convert(obj, ZonedDateTime.class,
+    return defaultObject(Conversions.convert(obj, ZonedDateTime.class,
         asMap(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern)), altVal);
   }
 

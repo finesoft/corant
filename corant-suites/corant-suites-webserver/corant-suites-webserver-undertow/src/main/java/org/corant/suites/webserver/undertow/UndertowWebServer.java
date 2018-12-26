@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.webserver.undertow;
@@ -16,6 +18,7 @@ package org.corant.suites.webserver.undertow;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -23,6 +26,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
 import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
@@ -124,7 +128,7 @@ public class UndertowWebServer extends AbstractWebServer {
     if (wfm != null) {
       FilterInfo fi = new FilterInfo(wfm.getFilterName(), wfm.getClazz());
       fi.setAsyncSupported(wfm.isAsyncSupported());
-      asStream(wfm.getInitParams()).forEach(m -> fi.addInitParam(m.getName(), m.getValue()));
+      wfm.getInitParamsAsMap().forEach(fi::addInitParam);
       di.addFilter(fi);
       asStream(wfm.getUrlPatterns()).forEach(url -> {
         asStream(wfm.getDispatcherTypes()).forEach(dt -> {
@@ -166,6 +170,11 @@ public class UndertowWebServer extends AbstractWebServer {
         .setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()))
         .setClassLoader(ClassLoader.getSystemClassLoader())
         .setEagerFilterInit(specConfig.isEagerFilterInit());
+    // charset
+    di.setDefaultEncoding(Defaults.CHARSET_STR);
+    for (Locale locale : Locale.getAvailableLocales()) {
+      di.addLocaleCharsetMapping(locale.toString(), Defaults.CHARSET_STR);
+    }
     // weld listener
     di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
     // listener

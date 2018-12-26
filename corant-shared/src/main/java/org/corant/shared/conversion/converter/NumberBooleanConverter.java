@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
 import org.corant.shared.conversion.ConversionException;
 
@@ -36,7 +36,7 @@ public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
    */
   public NumberBooleanConverter(Boolean defaultValue, boolean useNullValueIfErr,
       boolean useDefaultValueIfErr) {
-    super(ifNull(defaultValue, Boolean.FALSE), useNullValueIfErr, useDefaultValueIfErr);
+    super(defaultObject(defaultValue, Boolean.FALSE), useNullValueIfErr, useDefaultValueIfErr);
   }
 
   @Override

@@ -1,20 +1,22 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.servlet.metadata;
 
-import static org.corant.shared.util.Preconditions.requireNotNull;
-import java.util.Collection;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
@@ -42,8 +44,6 @@ public class WebServletMetaData {
   private Class<? extends Servlet> clazz;
   private ServletSecurityMetaData security;
 
-
-
   /**
    * @param name
    * @param value
@@ -56,45 +56,31 @@ public class WebServletMetaData {
    * @param description
    * @param displayName
    * @param clazz
+   * @param security
    */
-  public WebServletMetaData(String name, Collection<String> value, Collection<String> urlPatterns,
-      int loadOnStartup, Collection<WebInitParamMetaData> initParams, boolean asyncSupported,
-      String smallIcon, String largeIcon, String description, String displayName,
-      Class<? extends Servlet> clazz) {
+  public WebServletMetaData(String name, String[] value, String[] urlPatterns, int loadOnStartup,
+      WebInitParamMetaData[] initParams, boolean asyncSupported, String smallIcon, String largeIcon,
+      String description, String displayName, Class<? extends Servlet> clazz,
+      ServletSecurityMetaData security) {
     super();
-    this.name = name;
-    if (value != null) {
-      this.value = value.toArray(new String[0]);
-    }
-    if (urlPatterns != null) {
-      this.urlPatterns = urlPatterns.toArray(new String[0]);
-    }
-    this.loadOnStartup = loadOnStartup;
-    if (initParams != null) {
-      this.initParams = initParams.toArray(new WebInitParamMetaData[0]);
-    }
-    this.asyncSupported = asyncSupported;
-    this.smallIcon = smallIcon;
-    this.largeIcon = largeIcon;
-    this.description = description;
-    this.displayName = displayName;
-    this.clazz = clazz;
+    setName(name);
+    setValue(value);
+    setUrlPatterns(urlPatterns);
+    setLoadOnStartup(loadOnStartup);
+    setInitParams(initParams);
+    setAsyncSupported(asyncSupported);
+    setSmallIcon(smallIcon);
+    setLargeIcon(largeIcon);
+    setDescription(description);
+    setDisplayName(displayName);
+    setClazz(clazz);
+    setSecurity(security);
   }
 
   public WebServletMetaData(WebServlet anno, Class<? extends Servlet> clazz) {
-    if (anno != null) {
-      name = anno.name();
-      value = anno.value();
-      urlPatterns = anno.urlPatterns();
-      loadOnStartup = anno.loadOnStartup();
-      initParams = WebInitParamMetaData.of(anno.initParams());
-      asyncSupported = anno.asyncSupported();
-      smallIcon = anno.smallIcon();
-      largeIcon = anno.largeIcon();
-      description = anno.description();
-      displayName = anno.displayName();
-      this.clazz = clazz;
-    }
+    this(shouldNotNull(anno).name(), anno.value(), anno.urlPatterns(), anno.loadOnStartup(),
+        WebInitParamMetaData.of(anno.initParams()), anno.asyncSupported(), anno.smallIcon(),
+        anno.largeIcon(), anno.description(), anno.displayName(), clazz, null);
   }
 
   public WebServletMetaData(WebServlet anno, ServletSecurity secAnno,
@@ -225,7 +211,7 @@ public class WebServletMetaData {
    * @param clazz the clazz to set
    */
   protected void setClazz(Class<? extends Servlet> clazz) {
-    this.clazz = requireNotNull(clazz, "");// FIXME MSG
+    this.clazz = shouldNotNull(clazz);
   }
 
   /**
@@ -249,7 +235,7 @@ public class WebServletMetaData {
    * @param initParams the initParams to set
    */
   protected void setInitParams(WebInitParamMetaData[] initParams) {
-    this.initParams = initParams;
+    this.initParams = defaultObject(initParams, new WebInitParamMetaData[0]);
   }
 
   /**
@@ -297,7 +283,7 @@ public class WebServletMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = urlPatterns;
+    this.urlPatterns = defaultObject(urlPatterns, new String[0]);
   }
 
   /**
@@ -305,8 +291,7 @@ public class WebServletMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = value;
+    this.value = defaultObject(value, new String[0]);
   }
-
 
 }

@@ -1,18 +1,25 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -53,6 +60,17 @@ public class ObjectUtils {
     return Objects.compare(a, b, c);
   }
 
+  public static Object deserialize(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
+    try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+      return ois.readObject();
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new CorantRuntimeException(ex, "Failed to deserialize object, %s" + ex.getMessage());
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public static <T> T forceCast(Object o) {
     return o != null ? (T) o : null;
@@ -66,7 +84,11 @@ public class ObjectUtils {
     return Objects.hashCode(o);
   }
 
-  public static <T> T ifNull(T obj, T altObj) {
+  public static <T> T defaultObject(T obj, Supplier<T> supplier) {
+    return defaultObject(obj, supplier.get());
+  }
+
+  public static <T> T defaultObject(T obj, T altObj) {
     return obj == null ? altObj : obj;
   }
 
@@ -104,6 +126,21 @@ public class ObjectUtils {
 
   public static <T> Optional<T> optionalCast(Object o, Class<T> cls) {
     return Optional.ofNullable(tryCast(o, cls));
+  }
+
+  public static byte[] serialize(Object object) {
+    if (object == null) {
+      return new byte[0];
+    }
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+        ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+      oos.writeObject(object);
+      oos.flush();
+      return baos.toByteArray();
+    } catch (IOException ex) {
+      throw new CorantRuntimeException(ex, "Failed to serialize object of type: %s",
+          object.getClass());
+    }
   }
 
   public static void shouldBeEquals(Object a, Object b) {

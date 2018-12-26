@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -105,7 +105,7 @@ public class ClassPaths {
     String root = defaultString(path);
     Scanner scanner = new Scanner(root);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
-        ifNull(classLoader, defaultClassLoader()), root).entrySet()) {
+        defaultObject(classLoader, defaultClassLoader()), root).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());
     }
     return new ClassPath(scanner.getResources());

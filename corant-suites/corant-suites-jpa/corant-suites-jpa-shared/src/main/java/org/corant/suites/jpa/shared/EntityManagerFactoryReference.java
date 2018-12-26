@@ -15,7 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
@@ -39,7 +39,7 @@ public class EntityManagerFactoryReference implements ResourceReference<EntityMa
   }
 
   public EntityManagerFactoryReference(String persistenceUnitName, Map<String, Object> properties) {
-    this.persistenceUnitName = ifNull(persistenceUnitName, PersistenceNames.PU_DFLT_NME);
+    this.persistenceUnitName = defaultObject(persistenceUnitName, PersistenceNames.PU_DFLT_NME);
     entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName, properties);
   }
 

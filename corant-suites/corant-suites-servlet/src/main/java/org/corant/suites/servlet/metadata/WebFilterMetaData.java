@@ -1,20 +1,24 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.servlet.metadata;
 
-import static org.corant.shared.util.Preconditions.requireNotNull;
-import java.util.Collection;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
@@ -40,6 +44,7 @@ public class WebFilterMetaData {
   private String description;
   private Class<? extends Filter> clazz;
 
+
   /**
    * @param displayName
    * @param initParams
@@ -54,51 +59,31 @@ public class WebFilterMetaData {
    * @param description
    * @param clazz
    */
-  public WebFilterMetaData(String displayName, Collection<WebInitParamMetaData> initParams,
-      String filterName, String smallIcon, String largeIcon, Collection<String> servletNames,
-      Collection<String> value, Collection<String> urlPatterns,
-      Collection<DispatcherType> dispatcherTypes, boolean asyncSupported, String description,
-      Class<? extends Filter> clazz) {
+  public WebFilterMetaData(String displayName, WebInitParamMetaData[] initParams, String filterName,
+      String smallIcon, String largeIcon, String[] servletNames, String[] value,
+      String[] urlPatterns, DispatcherType[] dispatcherTypes, boolean asyncSupported,
+      String description, Class<? extends Filter> clazz) {
     super();
-    this.displayName = displayName;
-    if (initParams != null) {
-      this.initParams = initParams.toArray(new WebInitParamMetaData[0]);
-    }
-    this.filterName = filterName;
-    this.smallIcon = smallIcon;
-    this.largeIcon = largeIcon;
-    if (servletNames != null) {
-      this.servletNames = servletNames.toArray(new String[0]);
-    }
-    if (value != null) {
-      this.value = value.toArray(new String[0]);
-    }
-    if (urlPatterns != null) {
-      this.urlPatterns = urlPatterns.toArray(new String[0]);
-    }
-    if (dispatcherTypes != null) {
-      this.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[0]);
-    }
-    this.asyncSupported = asyncSupported;
-    this.description = description;
-    this.clazz = clazz;
+    setDisplayName(displayName);
+    setInitParams(initParams);
+    setFilterName(filterName);
+    setSmallIcon(smallIcon);
+    setLargeIcon(largeIcon);
+    setServletNames(servletNames);
+    setValue(value);
+    setUrlPatterns(urlPatterns);
+    setDispatcherTypes(dispatcherTypes);
+    setAsyncSupported(asyncSupported);
+    setDescription(description);
+    setClazz(clazz);
   }
 
+
   public WebFilterMetaData(WebFilter anno, Class<? extends Filter> clazz) {
-    if (anno != null) {
-      displayName = anno.displayName();
-      description = anno.description();
-      initParams = WebInitParamMetaData.of(anno.initParams());
-      filterName = anno.filterName();
-      smallIcon = anno.smallIcon();
-      largeIcon = anno.largeIcon();
-      servletNames = anno.servletNames();
-      value = anno.value();
-      urlPatterns = anno.urlPatterns();
-      dispatcherTypes = anno.dispatcherTypes();
-      asyncSupported = anno.asyncSupported();
-      this.clazz = clazz;
-    }
+    this(shouldNotNull(anno).displayName(), WebInitParamMetaData.of(anno.initParams()),
+        anno.filterName(), anno.smallIcon(), anno.largeIcon(), anno.servletNames(), anno.value(),
+        anno.urlPatterns(), anno.dispatcherTypes(), anno.asyncSupported(), anno.description(),
+        clazz);
   }
 
 
@@ -152,6 +137,14 @@ public class WebFilterMetaData {
    */
   public WebInitParamMetaData[] getInitParams() {
     return initParams;
+  }
+
+  public Map<String, String> getInitParamsAsMap() {
+    Map<String, String> map = new HashMap<>(getInitParams().length);
+    for (WebInitParamMetaData ipm : getInitParams()) {
+      map.put(ipm.getName(), ipm.getValue());
+    }
+    return map;
   }
 
   /**
@@ -217,7 +210,7 @@ public class WebFilterMetaData {
    * @param clazz the clazz to set
    */
   protected void setClazz(Class<? extends Filter> clazz) {
-    this.clazz = requireNotNull(clazz, "");// FIXME MSG
+    this.clazz = shouldNotNull(clazz);// FIXME MSG
   }
 
 
@@ -262,7 +255,7 @@ public class WebFilterMetaData {
    * @param initParams the initParams to set
    */
   protected void setInitParams(WebInitParamMetaData[] initParams) {
-    this.initParams = initParams;
+    this.initParams = defaultObject(initParams, new WebInitParamMetaData[0]);
   }
 
 
@@ -280,7 +273,7 @@ public class WebFilterMetaData {
    * @param servletNames the servletNames to set
    */
   protected void setServletNames(String[] servletNames) {
-    this.servletNames = servletNames;
+    this.servletNames = defaultObject(servletNames, new String[0]);
   }
 
 
@@ -298,7 +291,7 @@ public class WebFilterMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = urlPatterns;
+    this.urlPatterns = defaultObject(urlPatterns, new String[0]);
   }
 
 
@@ -307,8 +300,7 @@ public class WebFilterMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = value;
+    this.value = defaultObject(value, new String[0]);
   }
-
 
 }

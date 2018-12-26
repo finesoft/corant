@@ -14,7 +14,7 @@
 package org.corant.shared.conversion;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.ObjectUtils.optional;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
@@ -119,7 +119,7 @@ public class Converters {
   }
 
   static Converter getMatchedConverterFromFactory(Class<?> sourceClass, Class<?> targetClass) {
-    ConverterFactory factory = ifNull(
+    ConverterFactory factory = defaultObject(
         asStream(ConverterRegistry.getConverterFactories())
             .filter(e -> e.getKey().equals(sourceClass)
                 && e.getValue().isSupportTargetClass(targetClass))

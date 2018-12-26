@@ -15,7 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.util.Map;
@@ -50,7 +50,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       InjectionPoint injectionPoint) {
     final PersistenceContext pc =
         CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
-    String puName = ifNull(pc.unitName(), PersistenceNames.PU_DFLT_NME);
+    String puName = defaultObject(pc.unitName(), PersistenceNames.PU_DFLT_NME);
     String name = defaultString(pc.name());
     puName = isEmpty(name) ? puName : puName + "." + name;
     return ems.computeIfAbsent(puName, pn -> new EntityManagerReferenceFactory(null));
@@ -89,7 +89,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   }
 
   protected String resolveUnitName(String name, String unitName) {
-    String usePuName = ifNull(unitName, PersistenceNames.PU_DFLT_NME);
+    String usePuName = defaultObject(unitName, PersistenceNames.PU_DFLT_NME);
     usePuName = isEmpty(name) ? usePuName : usePuName + "." + name;
     return usePuName;
   }

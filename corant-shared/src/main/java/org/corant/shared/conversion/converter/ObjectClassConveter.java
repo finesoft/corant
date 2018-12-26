@@ -14,7 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.ObjectUtils.ifNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
 import org.corant.shared.conversion.ConverterHints;
 
@@ -49,7 +49,7 @@ public class ObjectClassConveter extends AbstractConverter<Object, Class> {
     if (value instanceof Class) {
       return (Class) value;
     } else {
-      ClassLoader cl = ifNull(ConverterHints.getHint(hints, ConverterHints.CVT_CLS_LOADER_KEY),
+      ClassLoader cl = defaultObject(ConverterHints.getHint(hints, ConverterHints.CVT_CLS_LOADER_KEY),
           defaultClassLoader());
       return cl.loadClass(value.toString());
     }

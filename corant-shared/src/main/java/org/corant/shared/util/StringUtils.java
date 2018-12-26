@@ -1,18 +1,21 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,7 +82,7 @@ public class StringUtils {
    * </pre>
    */
   public static String asDefaultString(final Object obj) {
-    return obj == null ? EMPTY : obj.toString();
+    return asString(obj, EMPTY);
   }
 
   /**
@@ -141,7 +144,8 @@ public class StringUtils {
   }
 
   /**
-   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
+   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] =
+   * {key="prefix",value=["1","2","3"]}
    *
    * @param iterable
    * @param prefix
@@ -456,16 +460,16 @@ public class StringUtils {
    * @param str
    * @param wholeSpreator
    * @param trim
-   * @return splitNotBlank
+   * @return split
    */
-  public static String[] splitNotBlank(final String str, final String wholeSpreator,
-      final boolean trim) {
+  public static String[] split(final String str, final String wholeSpreator,
+      final boolean removeBlank, final boolean trim) {
     String[] splits = split(str, wholeSpreator);
     String[] result = new String[splits.length];
     if (splits.length > 0) {
       int i = 0;
       for (String e : splits) {
-        if (isNotBlank(e)) {
+        if (isNotBlank(e) || !removeBlank) {
           result[i++] = trim ? trim(e) : e;
         }
       }

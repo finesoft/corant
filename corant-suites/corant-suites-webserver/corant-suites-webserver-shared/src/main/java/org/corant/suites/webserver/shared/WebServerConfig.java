@@ -15,6 +15,12 @@
  */
 package org.corant.suites.webserver.shared;
 
+import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StringUtils.split;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -30,6 +36,14 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class WebServerConfig {
 
   @Inject
+  @ConfigProperty(name = "webserver.default-charset")
+  private Optional<String> defaultCharset;
+
+  @Inject
+  @ConfigProperty(name = "webserver.display-name")
+  private Optional<String> displayName;
+
+  @Inject
   @ConfigProperty(name = "webserver.port", defaultValue = "8080")
   private Integer port;
 
@@ -38,8 +52,16 @@ public class WebServerConfig {
   private Integer workThreads;
 
   @Inject
-  @ConfigProperty(name = "webserver.host", defaultValue = "localhost")
+  @ConfigProperty(name = "webserver.host", defaultValue = "0.0.0.0")
   private String host;
+
+  @Inject
+  @ConfigProperty(name = "webserver.context-path", defaultValue = "/")
+  private String contextPath;
+
+  @Inject
+  @ConfigProperty(name = "webserver.locale-charset-mappings")
+  private Optional<String> localeCharsetMappings;
 
   @Inject
   @ConfigProperty(name = "webserver.file-dir", defaultValue = "/tmp")
@@ -73,6 +95,14 @@ public class WebServerConfig {
   @ConfigProperty(name = "webserver.truststore.password")
   private Optional<String> truststorePassword;
 
+  public String getContextPath() {
+    return contextPath;
+  }
+
+  public Optional<String> getDefaultCharset() {
+    return defaultCharset;
+  }
+
   public String getDescription() {
     StringBuilder sb = new StringBuilder();
     sb.append("host: ").append(getHost()).append(";");
@@ -85,6 +115,10 @@ public class WebServerConfig {
     getTruststorePath().ifPresent(s -> sb.append(" truststore path: ").append(s).append(";"));
     getTruststoreType().ifPresent(s -> sb.append(" truststore type: ").append(s).append(";"));
     return sb.toString();
+  }
+
+  public Optional<String> getDisplayName() {
+    return displayName;
   }
 
   /**
@@ -125,6 +159,27 @@ public class WebServerConfig {
    */
   public Optional<String> getKeystoreType() {
     return keystoreType;
+  }
+
+  public Map<String, String> getLocaleCharsetMap() {
+    Map<String, String> map = new HashMap<>();
+    if (getLocaleCharsetMappings().isPresent()) {
+      asStream(split(getLocaleCharsetMappings().get(), ";")).forEach(lcm -> {
+        String[] lc = split(lcm, ":", true, true);
+        if (lc.length == 2) {
+          map.put(lc[0], lc[1]);
+        }
+      });
+    } else {
+      for (Locale locale : Locale.getAvailableLocales()) {
+        map.put(locale.toString(), DFLT_CHARSET_STR);
+      }
+    }
+    return map;
+  }
+
+  public Optional<String> getLocaleCharsetMappings() {
+    return localeCharsetMappings;
   }
 
   /**

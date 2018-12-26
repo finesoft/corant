@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
  */
 public interface Defaults {
 
-  String CHARSET_STR = "utf-8";
-  Charset CHARSET = Charset.forName(CHARSET_STR);
+  String DFLT_CHARSET_STR = "utf-8";
+  Charset DFLT_CHARSET = Charset.forName(DFLT_CHARSET_STR);
 
 }

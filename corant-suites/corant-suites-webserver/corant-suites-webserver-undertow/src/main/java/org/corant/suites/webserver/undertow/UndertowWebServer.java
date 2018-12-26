@@ -15,10 +15,11 @@
  */
 package org.corant.suites.webserver.undertow;
 
+import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -26,13 +27,10 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
 import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
-import org.corant.suites.servlet.metadata.WebFilterMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
-import org.corant.suites.servlet.metadata.WebServletMetaData;
 import org.corant.suites.webserver.shared.AbstractWebServer;
 import org.jboss.weld.environment.servlet.WeldServletLifecycle;
 import org.xnio.Options;
@@ -124,18 +122,31 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected void resolveFilterInfo(DeploymentInfo di, WebFilterMetaData wfm) {
-    if (wfm != null) {
-      FilterInfo fi = new FilterInfo(wfm.getFilterName(), wfm.getClazz());
-      fi.setAsyncSupported(wfm.isAsyncSupported());
-      wfm.getInitParamsAsMap().forEach(fi::addInitParam);
-      di.addFilter(fi);
-      asStream(wfm.getUrlPatterns()).forEach(url -> {
-        asStream(wfm.getDispatcherTypes()).forEach(dt -> {
-          di.addFilterUrlMapping(wfm.getFilterName(), url, dt);
+  protected void resolveFilterInfo(DeploymentInfo di) {
+    extension.filterMetaDataStream().forEach(wfm -> {
+      if (wfm != null) {
+        FilterInfo fi = new FilterInfo(wfm.getFilterName(), wfm.getClazz());
+        fi.setAsyncSupported(wfm.isAsyncSupported());
+        wfm.getInitParamsAsMap().forEach(fi::addInitParam);
+        di.addFilter(fi);
+        asStream(wfm.getUrlPatterns()).forEach(url -> {
+          asStream(wfm.getDispatcherTypes()).forEach(dt -> {
+            di.addFilterUrlMapping(wfm.getFilterName(), url, dt);
+          });
         });
-      });
-    }
+      }
+    });
+  }
+
+  protected void resolveJsp(DeploymentInfo di) {
+    // TODO FIXME
+  }
+
+  protected void resolveListener(DeploymentInfo di) {
+    // weld listener
+    di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
+    extension.listenerMetaDataStream().map(WebListenerMetaData::getClazz).map(ListenerInfo::new)
+        .forEach(di::addListener);
   }
 
   protected Undertow resolveServer() throws IOException {
@@ -166,38 +177,30 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected DeploymentManager resolveServerDeploymentManager() {
-    DeploymentInfo di = new DeploymentInfo().setContextPath("/").setDeploymentName("Undertow")
-        .setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()))
-        .setClassLoader(ClassLoader.getSystemClassLoader())
-        .setEagerFilterInit(specConfig.isEagerFilterInit());
-    // charset
-    di.setDefaultEncoding(Defaults.CHARSET_STR);
-    for (Locale locale : Locale.getAvailableLocales()) {
-      di.addLocaleCharsetMapping(locale.toString(), Defaults.CHARSET_STR);
-    }
-    // weld listener
-    di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
-    // listener
-    extension.listenerMetaDataStream().map(WebListenerMetaData::getClazz).map(ListenerInfo::new)
-        .forEach(di::addListener);
-    // web socket endpoint
-    if (!isEmpty(webSocketExtension.getEndpointClasses())) {
-      WebSocketDeploymentInfo wsdi = new WebSocketDeploymentInfo();
-      webSocketExtension.getEndpointClasses().forEach(wsdi::addEndpoint);
-      di.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsdi);
-    }
-    // servlet
-    extension.servletMetaDataStream().map(this::resolveServletInfo).filter(ObjectUtils::isNotNull)
-        .forEach(di::addServlet);
-    // filter
-    extension.filterMetaDataStream().forEach(wsm -> resolveFilterInfo(di, wsm));
-    // weld
+    String name = CORANT + "-undertow";
+    DeploymentInfo di = new DeploymentInfo();
+    di.setContextPath(config.getContextPath());
+    di.setDeploymentName(name);
+    di.setDefaultEncoding(config.getDefaultCharset().orElse(DFLT_CHARSET_STR));
+    di.setDisplayName(config.getDisplayName().orElse(name));
+    di.setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()));
+    di.setClassLoader(getClass().getClassLoader());
+    di.setEagerFilterInit(specConfig.isEagerFilterInit());
+    config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         corant.getBeanManager());
     if (additionalConfigurators.isResolvable()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureDeployment(di));
     }
+    // listener
+    resolveListener(di);
+    // web socket endpoint
+    resolveWebSocket(di);
+    // servlet
+    resolveServletInfo(di);
+    // filter
+    resolveFilterInfo(di);
     return Servlets.defaultContainer().addDeployment(di);
   }
 
@@ -209,30 +212,31 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected ServletInfo resolveServletInfo(WebServletMetaData wsm) {
-    if (wsm != null) {
-      ServletInfo si = new ServletInfo(wsm.getName(), wsm.getClazz());
-      wsm.getInitParamsAsMap().forEach(si::addInitParam);
-      si.addMappings(wsm.getUrlPatterns());
-      si.setLoadOnStartup(wsm.getLoadOnStartup());
-      si.setAsyncSupported(wsm.isAsyncSupported());
-      if (wsm.getSecurity() != null) {
-        ServletSecurityInfo ssi = new ServletSecurityInfo();
-        ServletSecurityMetaData ssm = wsm.getSecurity();
-        if (ssm.getHttpConstraint() != null) {
-          ssi.addRolesAllowed(ssm.getHttpConstraint().getRolesAllowed());
-          ssi.setTransportGuaranteeType(
-              resolveTransportGuaranteeType(ssm.getHttpConstraint().getTransportGuarantee()));
-          ssi.setEmptyRoleSemantic(resolveEmptyRoleSemantic(ssm.getHttpConstraint()));
-          asStream(ssm.getHttpMethodConstraints()).map(m -> m.getValue())
-              .map(m -> new HttpMethodSecurityInfo().setMethod(m))
-              .forEach(ssi::addHttpMethodSecurityInfo);
+  protected void resolveServletInfo(DeploymentInfo di) {
+    extension.servletMetaDataStream().map(wsm -> {
+      if (wsm != null) {
+        ServletInfo si = new ServletInfo(wsm.getName(), wsm.getClazz());
+        wsm.getInitParamsAsMap().forEach(si::addInitParam);
+        si.addMappings(wsm.getUrlPatterns());
+        si.setLoadOnStartup(wsm.getLoadOnStartup());
+        si.setAsyncSupported(wsm.isAsyncSupported());
+        if (wsm.getSecurity() != null) {
+          ServletSecurityInfo ssi = new ServletSecurityInfo();
+          ServletSecurityMetaData ssm = wsm.getSecurity();
+          if (ssm.getHttpConstraint() != null) {
+            ssi.addRolesAllowed(ssm.getHttpConstraint().getRolesAllowed());
+            resolveTransportGuaranteeType(ssi, ssm.getHttpConstraint().getTransportGuarantee());
+            ssi.setEmptyRoleSemantic(resolveEmptyRoleSemantic(ssm.getHttpConstraint()));
+            asStream(ssm.getHttpMethodConstraints()).map(m -> m.getValue())
+                .map(m -> new HttpMethodSecurityInfo().setMethod(m))
+                .forEach(ssi::addHttpMethodSecurityInfo);
+          }
+          si.setServletSecurityInfo(ssi);
         }
-        si.setServletSecurityInfo(ssi);
+        return si;
       }
-      return si;
-    }
-    return null;
+      return null;
+    }).filter(ObjectUtils::isNotNull).forEach(di::addServlet);
   }
 
   protected void resolveSocketOptions(Builder builder) {
@@ -248,11 +252,19 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected TransportGuaranteeType resolveTransportGuaranteeType(TransportGuarantee std) {
+  protected void resolveTransportGuaranteeType(ServletSecurityInfo ssi, TransportGuarantee std) {
     if (std == TransportGuarantee.CONFIDENTIAL) {
-      return TransportGuaranteeType.CONFIDENTIAL;
+      ssi.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
     } else {
-      return TransportGuaranteeType.NONE;
+      ssi.setTransportGuaranteeType(TransportGuaranteeType.NONE);
+    }
+  }
+
+  protected void resolveWebSocket(DeploymentInfo di) {
+    if (!isEmpty(webSocketExtension.getEndpointClasses())) {
+      WebSocketDeploymentInfo wsdi = new WebSocketDeploymentInfo();
+      webSocketExtension.getEndpointClasses().forEach(wsdi::addEndpoint);
+      di.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsdi);
     }
   }
 

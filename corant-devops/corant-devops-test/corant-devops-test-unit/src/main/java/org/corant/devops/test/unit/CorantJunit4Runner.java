@@ -15,6 +15,7 @@
  */
 package org.corant.devops.test.unit;
 
+import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,6 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Unmanaged;
 import javax.enterprise.inject.spi.Unmanaged.UnmanagedInstance;
 import org.corant.Corant;
-import org.corant.shared.normal.Names.ConfigNames;
 import org.junit.runners.model.Statement;
 
 /**
@@ -61,7 +61,7 @@ public interface CorantJunit4Runner {
         } finally {
           if (!isEmbedded()) {
             if (isNotBlank(profiles.get())) {
-              System.clearProperty(ConfigNames.CFG_PF_KEY);
+              System.clearProperty(CFG_PF_KEY);
             }
             if (autoDisposes.get()) {
               logger.fine(() -> "Clean unmanaged test instance from junit test.");
@@ -90,7 +90,7 @@ public interface CorantJunit4Runner {
     enableRdmWebPorts.set(rc.enableRandomWebPort());
     if (isNotBlank(rc.profile())) {
       profiles.set(rc.profile());
-      System.setProperty(ConfigNames.CFG_PF_KEY, rc.profile());
+      System.setProperty(CFG_PF_KEY, rc.profile());
     }
     autoDisposes.set(rc.autoDispose());
   }

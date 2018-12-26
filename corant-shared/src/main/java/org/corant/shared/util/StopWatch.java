@@ -103,20 +103,21 @@ public class StopWatch {
     return totalTimeMillis / 1000.0;
   }
 
-  public void start() {
-    start(EMPTY);
+  public StopWatch start() {
+    return start(EMPTY);
   }
 
-  public void start(String taskName) {
+  public StopWatch start(String taskName) {
     startTimeMillis = System.currentTimeMillis();
     currentTaskName = defaultString(taskName);
+    return this;
   }
 
-  public void stop() throws IllegalStateException {
-    stop(null);
+  public StopWatch stop() throws IllegalStateException {
+    return stop(null);
   }
 
-  public void stop(Consumer<TaskInfo> consumer) throws IllegalStateException {
+  public StopWatch stop(Consumer<TaskInfo> consumer) throws IllegalStateException {
     if (currentTaskName == null) {
       throw new IllegalStateException("Can't stop StopWatch: it's not running");
     }
@@ -128,6 +129,7 @@ public class StopWatch {
     }
     ++taskCount;
     currentTaskName = null;
+    return this;
   }
 
   public static final class TaskInfo {

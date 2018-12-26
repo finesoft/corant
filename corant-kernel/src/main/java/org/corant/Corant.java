@@ -135,8 +135,8 @@ public class Corant {
   }
 
   public synchronized Corant start() {
-    StopWatch stopWatch = new StopWatch(CORANT);
-    stopWatch.start("Initializes the CDI container");
+
+    StopWatch stopWatch = new StopWatch(CORANT).start("Initializes the CDI container");
 
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
@@ -147,19 +147,20 @@ public class Corant {
     Thread.currentThread().setContextClassLoader(classLoader);
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
-    stopWatch.stop((tk) -> logger
-        .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())));
-    stopWatch.start("Initializes all suites");
+    stopWatch
+        .stop((tk) -> logger
+            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .start("Initializes all suites");
 
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent());
 
-    stopWatch.stop((tk) -> logger
-        .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())));
-
-    stopWatch.destroy((sw) -> logger.info(() -> String.format(
-        "Complete all initialization in %s seconds, ready to receive the service.",
-        sw.getTotalTimeSeconds())));
+    stopWatch
+        .stop((tk) -> logger
+            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .destroy((sw) -> logger.info(() -> String.format(
+            "Complete all initialization in %s seconds, ready to receive the service.",
+            sw.getTotalTimeSeconds())));
     return this;
   }
 

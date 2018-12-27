@@ -160,7 +160,7 @@ public class UndertowWebServer extends AbstractWebServer {
     resolveServerOptions(builder);
     resolveWorkerOptions(builder);
     if (specConfig.isEnableAjp()) {
-      builder.addAjpListener(config.getSecuredPort().get(), config.getHost());
+      builder.addAjpListener(config.getPort(), config.getHost());
     }
     builder.addHttpListener(config.getPort(), config.getHost())
         .setBufferSize(specConfig.getBufferSize());

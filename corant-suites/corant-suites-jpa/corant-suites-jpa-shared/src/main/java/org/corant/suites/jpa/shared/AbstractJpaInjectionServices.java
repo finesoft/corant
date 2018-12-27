@@ -24,7 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import javax.persistence.SynchronizationType;
 import org.corant.kernel.util.CdiUtils;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.jboss.weld.injection.spi.JpaInjectionServices;
@@ -50,7 +49,11 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       InjectionPoint injectionPoint) {
     final PersistenceContext pc =
         CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
-    return registerPersistenceContext(pc.name(), pc.unitName());
+    String unitName = resolveUnitName(pc.name(), pc.unitName());
+    ResourceReferenceFactory<EntityManagerFactory> emf =
+        emfs.computeIfAbsent(unitName, this::buildEntityManagerFactoryRrf);
+    return ems.computeIfAbsent(unitName,
+        (un) -> buildEntityManagerRrf(emf.createResource().getInstance(), un));
   }
 
   @Override
@@ -58,7 +61,8 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       InjectionPoint injectionPoint) {
     final PersistenceUnit pu =
         CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
-    return registerPersistenceUnit(pu.name(), pu.unitName());
+    String unitName = resolveUnitName(pu.name(), pu.unitName());
+    return emfs.computeIfAbsent(unitName, this::buildEntityManagerFactoryRrf);
   }
 
   @Override
@@ -71,24 +75,11 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
     return registerPersistenceUnitInjectionPoint(injectionPoint).createResource().getInstance();
   }
 
-  protected abstract Map<String, Object> getProperties(String unitName);
+  protected abstract ResourceReferenceFactory<EntityManagerFactory> buildEntityManagerFactoryRrf(
+      String unitName);
 
-  protected abstract SynchronizationType getSynchronizationType(String unitName);
-
-  protected ResourceReferenceFactory<EntityManager> registerPersistenceContext(String name,
-      String unitName) {
-    EntityManagerFactory emf =
-        registerPersistenceUnit(name, unitName).createResource().getInstance();
-    final String useName = resolveUnitName(name, unitName);
-    return ems.computeIfAbsent(useName, pn -> new EntityManagerReferenceFactory(emf,
-        getSynchronizationType(useName), getProperties(useName)));
-  }
-
-  protected ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnit(String name,
-      String unitName) {
-    return emfs.computeIfAbsent(resolveUnitName(name, unitName),
-        pn -> new EntityManagerFactoryReferenceFactory(pn));
-  }
+  protected abstract ResourceReferenceFactory<EntityManager> buildEntityManagerRrf(
+      EntityManagerFactory emf, String unitName);
 
   protected String resolveUnitName(String name, String unitName) {
     String usePuName = defaultObject(unitName, PersistenceNames.PU_DFLT_NME);

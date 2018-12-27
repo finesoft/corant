@@ -56,10 +56,12 @@
 
 		<version.tomcat>9.0.13</version.tomcat>
 		<version.undertow>2.0.16.Final</version.undertow>
+
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.3</version.agroal>
 		<version.narayana-jta>5.9.2.Final</version.narayana-jta>
 		<version.mysql>5.1.39</version.mysql>
+		<version.hibernate>5.4.0.Final</version.hibernate>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -301,6 +303,13 @@
 				<version>${version.mysql}</version>
 			</dependency>
 
+			<!-- ORM -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${version.hibernate}</version>
+			</dependency>
+
 			<!-- CDI -->
 			<dependency>
 				<groupId>org.jboss.weld.se</groupId>
@@ -312,7 +321,6 @@
 				<artifactId>weld-servlet-core</artifactId>
 				<version>${version.weld}</version>
 			</dependency>
-
 
 			<!-- Java & Javax -->
 			<dependency>
@@ -461,23 +469,8 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-devops-maven-jandex</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>jandex</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	-->
+	<!-- <build> <plugins> <plugin> <groupId>org.corant</groupId> <artifactId>corant-devops-maven-jandex</artifactId> 
+		<version>${project.version}</version> <executions> <execution> <phase>prepare-package</phase> 
+		<goals> <goal>jandex</goal> </goals> </execution> </executions> </plugin> 
+		</plugins> </build> -->
 </project>

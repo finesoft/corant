@@ -15,9 +15,14 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import java.util.HashMap;
 import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.SynchronizationType;
 import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
+import org.hibernate.cfg.AvailableSettings;
+import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
  * corant-suites-jpa-hibernate
@@ -27,13 +32,21 @@ import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
  */
 public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices {
 
+  final Map<String, Object> properties = new HashMap<>();
+  final SynchronizationType syncType = SynchronizationType.SYNCHRONIZED;
+  {
+    properties.put(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+  }
+
   @Override
-  protected Map<String, Object> getProperties(String unitName) {
+  protected ResourceReferenceFactory<EntityManagerFactory> buildEntityManagerFactoryRrf(
+      String unitName) {
     return null;
   }
 
   @Override
-  protected SynchronizationType getSynchronizationType(String unitName) {
+  protected ResourceReferenceFactory<EntityManager> buildEntityManagerRrf(EntityManagerFactory emf,
+      String unitName) {
     return null;
   }
 

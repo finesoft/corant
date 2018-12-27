@@ -59,6 +59,11 @@ public abstract class AbstractDataSourceExtension implements Extension {
     return Collections.unmodifiableMap(dataSourceConfigs);
   }
 
+  /**
+   * Collect the data source configurations for produce data source bean.
+   *
+   * @param bbd onBeforeBeanDiscovery
+   */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     dataSourceConfigs.clear();
     dataSourceNames.clear();

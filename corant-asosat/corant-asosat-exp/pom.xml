@@ -1,15 +1,14 @@
-<?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-asosat</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-asosat-ddd</artifactId>
+	<packaging>jar</packaging>
+	<artifactId>corant-asosat-exp</artifactId>
 	<name>corant-asosat-ddd</name>
 	<dependencyManagement>
 		<dependencies>
@@ -76,8 +75,10 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-1.2-api</artifactId>
 		</dependency>
-
-		<!-- Test -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jul</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-devops-test-unit</artifactId>
@@ -110,7 +111,7 @@
 		</dependency>
 	</dependencies>
 	<description>Domain Driven Design development stack.</description>
-	
+
 	<build>
 		<resources>
 			<resource>
@@ -135,11 +136,8 @@
 							<goal>package</goal>
 						</goals>
 						<configuration>
-							<!--
-							<mode>fat</mode>
-							<format>jar</format>
-							-->
-							<mainClass>org.corant.asosat.ddd.App</mainClass>
+							<!-- <mode>fat</mode> <format>jar</format>-->
+							<mainClass>org.corant.asosat.exp.App</mainClass>
 						</configuration>
 					</execution>
 				</executions>

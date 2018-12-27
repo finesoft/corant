@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package bin;
@@ -36,7 +38,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.CRC32;
-import org.corant.devops.maven.plugin.BuildStageException;
 
 /**
  * corant-devops-maven
@@ -76,7 +77,7 @@ public class JarLauncher {
           getClassLoader().loadClass(manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME));
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (Exception e) {
-      throw new BuildStageException(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -134,7 +135,7 @@ public class JarLauncher {
       try {
         return path.toUri().toURL();
       } catch (MalformedURLException e) {
-        throw new BuildStageException(e);
+        throw new RuntimeException(e);
       }
     }).toArray(URL[]::new));
   }

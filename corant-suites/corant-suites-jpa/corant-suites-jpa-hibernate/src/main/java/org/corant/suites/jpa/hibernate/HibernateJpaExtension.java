@@ -13,36 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.hibernate;
 
-import java.util.HashMap;
 import java.util.Map;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import org.eclipse.microprofile.config.ConfigProvider;
+import org.corant.suites.jpa.shared.AbstractJpaExtension;
+import org.corant.suites.jpa.shared.PersistenceUnitMetaData;
 
 /**
- * corant-suites-jpa-shared
+ * corant-suites-jpa-hibernate
  *
- * @author bingo 下午7:22:45
+ * @author bingo 下午6:54:00
  *
  */
-public abstract class AbstractJpaExtension implements Extension {
+public class HibernateJpaExtension extends AbstractJpaExtension {
 
-  private final Map<String, PersistenceUnitMetaData> persistenceUnitMetaDatas = new HashMap<>();
-
-
+  @Override
   protected Map<String, PersistenceUnitMetaData> getPersistenceUnitMetaDatas() {
-    return persistenceUnitMetaDatas;
+    return super.getPersistenceUnitMetaDatas();
   }
 
-
-  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    JpaConfig cfg = JpaConfig.from(ConfigProvider.getConfig());
-    cfg.getMetaDatas().forEach((n, pu) -> {
-      persistenceUnitMetaDatas.put(n, pu);
-    });
-  }
 
 }

@@ -15,13 +15,22 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import java.util.HashMap;
+import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SynchronizationType;
+import org.corant.kernel.util.ResourceReferences;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
+import org.corant.suites.jpa.shared.PersistenceUnitMetaData;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
@@ -32,22 +41,37 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
  */
 public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices {
 
-  final Map<String, Object> properties = new HashMap<>();
+  @Inject
+  HibernateJpaExtension extension;
+
+  @Inject
+  InitialContext jndi;
+
+  final Map<String, Object> properties =
+      asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
   final SynchronizationType syncType = SynchronizationType.SYNCHRONIZED;
-  {
-    properties.put(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
-  }
 
   @Override
   protected ResourceReferenceFactory<EntityManagerFactory> buildEntityManagerFactoryRrf(
       String unitName) {
-    return null;
+    final PersistenceUnitMetaData pumd =
+        shouldNotNull(extension.getPersistenceUnitMetaDatas().get(unitName),
+            "Can not find persistence unit info for %s", unitName);
+    pumd.configDataSource(dsn -> {
+      try {
+        return forceCast(jndi.lookup(dsn));
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+    return () -> ResourceReferences.ignoreRelease(() -> new HibernatePersistenceProvider()
+        .createContainerEntityManagerFactory(pumd, properties));
   }
 
   @Override
   protected ResourceReferenceFactory<EntityManager> buildEntityManagerRrf(EntityManagerFactory emf,
       String unitName) {
-    return null;
+    return () -> ResourceReferences
+        .ignoreRelease(() -> emf.createEntityManager(syncType, properties));
   }
-
 }

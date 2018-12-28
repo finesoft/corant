@@ -25,24 +25,35 @@ import org.jboss.weld.injection.spi.ResourceReference;
  * @author bingo 下午7:15:41
  *
  */
-public interface ResourceReferences {
+public class ResourceReferences {
 
-  static <T> ResourceReference<T> ignoreRelease(final Supplier<T> supplier) {
-    return releasable(supplier, null);
+  public static <T> ResourceReference<T> of(final Supplier<T> supplier) {
+    return of(supplier, null);
   }
 
-  static <T> ResourceReference<T> releasable(final Supplier<T> supplier,
-      final Consumer<ResourceReference<T>> releaser) {
+  public static <T> ResourceReference<T> of(final Supplier<T> supplier,
+      final Consumer<T> releaser) {
+
     return new ResourceReference<T>() {
+
+      volatile T instance;
+
       @Override
       public T getInstance() {
-        return supplier.get();
+        if (instance == null) {
+          synchronized (this) {
+            if (instance == null) {
+              instance = supplier.get();
+            }
+          }
+        }
+        return instance;
       }
 
       @Override
       public void release() {
         if (releaser != null) {
-          releaser.accept(this);
+          releaser.accept(instance);
         }
       }
     };

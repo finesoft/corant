@@ -64,7 +64,7 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
         throw new CorantRuntimeException(e);
       }
     });
-    return () -> ResourceReferences.ignoreRelease(() -> new HibernatePersistenceProvider()
+    return () -> ResourceReferences.of(() -> new HibernatePersistenceProvider()
         .createContainerEntityManagerFactory(pumd, properties));
   }
 
@@ -72,6 +72,6 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
   protected ResourceReferenceFactory<EntityManager> buildEntityManagerRrf(EntityManagerFactory emf,
       String unitName) {
     return () -> ResourceReferences
-        .ignoreRelease(() -> emf.createEntityManager(syncType, properties));
+        .of(() -> emf.createEntityManager(syncType, properties));
   }
 }

@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
@@ -16,13 +18,22 @@ package org.corant.shared.util;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.Validator;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * @author bingo 2018年3月23日
@@ -34,10 +45,8 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是HTTPURL
-   *
    * @param httpUrl
-   * @return
+   * @return isHttpUrl
    */
   public static boolean isHttpUrl(String httpUrl) {
     return isNotBlank(httpUrl) && httpUrl.matches("[a-zA-z]+://[^\\s]*");
@@ -48,13 +57,14 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断是否是图片
+   * Check if input stream is image format, the process prereads the input stream.
+   * If input stream not support mark, then return false.
    *
    * @param is
    * @return
    */
-  public static boolean isImage(InputStream is, String... extension) {
-    if (is == null) {
+  public static boolean isImage(InputStream is, String... format) {
+    if (is == null || !is.markSupported()) {
       return false;
     }
     if (is.markSupported()) {
@@ -65,10 +75,10 @@ public class ValidateUtils {
       if (!iter.hasNext()) {
         return false;
       }
-      if (extension != null && extension.length > 0) {
+      if (format != null && format.length > 0) {
         ImageReader reader = iter.next();
         String formatName = reader.getFormatName();
-        return Arrays.stream(extension).anyMatch(x -> x.equalsIgnoreCase(formatName));
+        return Arrays.stream(format).anyMatch(x -> x.equalsIgnoreCase(formatName));
       }
       return true;
     } catch (IOException ex) {
@@ -85,8 +95,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否为IP地址
-   *
    * @param ipAddress
    * @return
    */
@@ -99,8 +107,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是mail地址
-   *
    * @param mailAddress
    * @return
    */
@@ -111,8 +117,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是中国的身份证
-   *
    * @param idCardNumber
    * @return
    */
@@ -121,8 +125,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是中国的手机号码
-   *
    * @param mobileNumber
    * @return
    */
@@ -135,8 +137,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是中国的名字
-   *
    * @param name
    * @param length
    * @return
@@ -146,8 +146,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否为中国的电话号码
-   *
    * @param phoneNumber
    * @return
    */
@@ -157,8 +155,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否是中国的邮政编码
-   *
    * @param postcode
    * @return
    */
@@ -167,12 +163,8 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串达到最大长度要求
-   *
    * @param text
    * @param maxLen
-   * @param code
-   * @param params
    * @return
    */
   public static boolean maxLength(String text, int maxLen) {
@@ -180,8 +172,6 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否非空并且达到最小长度要求
-   *
    * @param text
    * @param minLen
    * @return
@@ -191,16 +181,44 @@ public class ValidateUtils {
   }
 
   /**
-   * 判断字符串是否达到最小和最大的长度要求
-   *
    * @param text
    * @param minLen
    * @param maxLen
-   * @param code
-   * @param params
    * @return
    */
   public static boolean minMaxLength(String text, int minLen, int maxLen) {
     return text != null && text.length() <= maxLen && text.length() >= minLen;
+  }
+
+  /**
+   * Validate Xml document with schema
+   *
+   * @param doc
+   * @param schema
+   * @return validateXmlDocument
+   */
+  public static List<Exception> validateXmlDocument(Document doc, Schema schema) {
+    final List<Exception> errors = new ArrayList<>();
+    Validator validator = schema.newValidator();
+    validator.setErrorHandler(new ErrorHandler() {
+      @Override
+      public void error(SAXParseException exception) throws SAXException {
+        errors.add(exception);
+      }
+
+      @Override
+      public void fatalError(SAXParseException exception) throws SAXException {
+        errors.add(exception);
+      }
+
+      @Override
+      public void warning(SAXParseException exception) throws SAXException {}
+    });
+    try {
+      validator.validate(new DOMSource(doc));
+    } catch (SAXException | IOException e) {
+      errors.add(e);
+    }
+    return errors;
   }
 }

@@ -15,6 +15,8 @@
  */
 package org.corant.suites.jpa.shared;
 
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 
 /**
@@ -23,5 +25,7 @@ import javax.enterprise.inject.spi.Extension;
  * @author bingo 下午7:22:45
  *
  */
-public class JpaExtension implements Extension {
+public abstract class AbstractJpaExtension implements Extension {
+
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {}
 }

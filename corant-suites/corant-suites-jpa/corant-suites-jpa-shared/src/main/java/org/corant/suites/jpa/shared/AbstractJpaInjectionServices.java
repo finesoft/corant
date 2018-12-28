@@ -15,7 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +31,9 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 public abstract class AbstractJpaInjectionServices implements JpaInjectionServices {
 
-  protected static Map<String, ResourceReferenceFactory<EntityManagerFactory>> emfs =
+  protected static final Map<String, ResourceReferenceFactory<EntityManagerFactory>> emfs =
       new ConcurrentHashMap<>();
-  protected static Map<String, ResourceReferenceFactory<EntityManager>> ems =
+  protected static final Map<String, ResourceReferenceFactory<EntityManager>> ems =
       new ConcurrentHashMap<>();
 
   @Override
@@ -82,7 +82,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
       EntityManagerFactory emf, String unitName);
 
   protected String resolveUnitName(String name, String unitName) {
-    String usePuName = defaultObject(unitName, PersistenceNames.PU_DFLT_NME);
+    String usePuName = defaultString(unitName, PersistenceNames.PU_DFLT_NME);
     usePuName = isEmpty(name) ? usePuName : usePuName + "." + name;
     return usePuName;
   }

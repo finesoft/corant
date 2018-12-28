@@ -136,8 +136,8 @@
 							<goal>package</goal>
 						</goals>
 						<configuration>
-							<!-- <mode>fat</mode> <format>jar</format>-->
-							<mainClass>org.corant.asosat.exp.App</mainClass>
+							<!-- <mode>fat</mode> <format>jar</format>
+							<mainClass>org.corant.asosat.exp.App</mainClass>-->
 						</configuration>
 					</execution>
 				</executions>

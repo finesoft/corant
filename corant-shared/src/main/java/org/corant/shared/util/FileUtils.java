@@ -16,12 +16,15 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.normal.Defaults.ONE_MB;
+import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
@@ -36,8 +39,12 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class FileUtils {
 
   public static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 16;
+  public static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
+  public static final String JAR_URL_SEPARATOR = "!/";
+  public static final String FILE_URL_PREFIX = "file:";
+  public static final String META_INF = "META-INF";
 
-  private static Logger logger = Logger.getLogger(FileUtils.class.getName());
+  protected static Logger logger = Logger.getLogger(FileUtils.class.getName());
 
   public static Checksum checksum(final File file, final Checksum checksum) throws IOException {
     if (file.isDirectory()) {
@@ -118,5 +125,26 @@ public class FileUtils {
     }
   }
 
+  public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
+    if (asStream(JARS).anyMatch(p -> ObjectUtils.isEquals(p, jarUrl.getProtocol()))) {
+      String urlFile = jarUrl.getFile();
+      int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+      if (separatorIndex != -1) {
+        String jarFile = urlFile.substring(0, separatorIndex);
+        try {
+          return new URL(jarFile);
+        } catch (MalformedURLException ex) {
+          if (!jarFile.startsWith("/")) {
+            jarFile = "/" + jarFile;
+          }
+          return new URL(FILE_URL_PREFIX + jarFile);
+        }
+      } else {
+        return jarUrl;
+      }
+    } else {
+      return null;
+    }
+  }
 
 }

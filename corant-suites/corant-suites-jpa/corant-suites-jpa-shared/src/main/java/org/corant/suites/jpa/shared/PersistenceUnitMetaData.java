@@ -15,6 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -24,20 +25,18 @@ import java.util.Set;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
 
-public class PersistenceUnitMetaData implements PersistenceUnitInfo {
+public class PersistenceUnitMetaData {
 
-  private String persistenceUnitName;
+  private final String persistenceUnitName;
   private boolean excludeUnlistedClasses = true;
   private Set<ClassTransformer> transformers = new LinkedHashSet<>();
   private ClassLoader classLoader;
   private ClassLoader newTempClassLoader;
-  private Set<URL> jarFileUrls = new LinkedHashSet<>();
-  private DataSource jtaDataSource;
-  private DataSource nonJtaDataSource;
+  private List<URL> jarFileUrls = new ArrayList<>();
+  private String jtaDataSource;
+  private String nonJtaDataSource;
   private Set<String> managedClassNames = new LinkedHashSet<>();
   private Set<String> mappingFileNames = new LinkedHashSet<>();
   private String persistenceProviderClassName;
@@ -49,92 +48,168 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
       PersistenceUnitTransactionType.JTA;
   private ValidationMode validationMode = ValidationMode.NONE;
 
+  /**
+   * @param persistenceUnitName
+   */
+  public PersistenceUnitMetaData(String persistenceUnitName) {
+    super();
+    this.persistenceUnitName = persistenceUnitName;
+  }
 
-  @Override
+
   public void addTransformer(ClassTransformer transformer) {
     if (transformer != null) {
       transformers.add(transformer);
     }
   }
 
-  @Override
+
   public boolean excludeUnlistedClasses() {
     return excludeUnlistedClasses;
   }
 
-  @Override
+
   public ClassLoader getClassLoader() {
     return classLoader;
   }
 
-  @Override
+
   public List<URL> getJarFileUrls() {
     return new ArrayList<>(jarFileUrls);
   }
 
-  @Override
-  public DataSource getJtaDataSource() {
+
+  public String getJtaDataSource() {
     return jtaDataSource;
   }
 
-  @Override
+
   public List<String> getManagedClassNames() {
     return new ArrayList<>(managedClassNames);
   }
 
-  @Override
+
   public List<String> getMappingFileNames() {
     return new ArrayList<>(mappingFileNames);
   }
 
-  @Override
+
   public ClassLoader getNewTempClassLoader() {
     return newTempClassLoader;
   }
 
-  @Override
-  public DataSource getNonJtaDataSource() {
+
+  public String getNonJtaDataSource() {
     return nonJtaDataSource;
   }
 
-  @Override
+
   public String getPersistenceProviderClassName() {
     return persistenceProviderClassName;
   }
 
-  @Override
+
   public String getPersistenceUnitName() {
     return persistenceUnitName;
   }
 
-  @Override
+
   public URL getPersistenceUnitRootUrl() {
     return persistenceUnitRootUrl;
   }
 
-  @Override
+
   public String getPersistenceXMLSchemaVersion() {
     return persistenceXMLSchemaVersion;
   }
 
-  @Override
+
   public Properties getProperties() {
     return properties;
   }
 
-  @Override
+
   public SharedCacheMode getSharedCacheMode() {
     return sharedCacheMode;
   }
 
-  @Override
+
   public PersistenceUnitTransactionType getTransactionType() {
     return persistenceUnitTransactionType;
   }
 
-  @Override
+
   public ValidationMode getValidationMode() {
     return validationMode;
+  }
+
+  protected void setClassLoader(ClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
+
+  protected void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
+    this.excludeUnlistedClasses = excludeUnlistedClasses;
+  }
+
+  protected void setJarFileUrls(List<URL> jarFileUrls) {
+    this.jarFileUrls.clear();
+    if (jarFileUrls != null) {
+      this.jarFileUrls.addAll(jarFileUrls);
+    }
+  }
+
+  protected void setJtaDataSource(String jtaDataSource) {
+    this.jtaDataSource = jtaDataSource;
+  }
+
+  protected void setManagedClassNames(Set<String> managedClassNames) {
+    this.managedClassNames = managedClassNames;
+  }
+
+  protected void setMappingFileNames(Set<String> mappingFileNames) {
+    this.mappingFileNames = mappingFileNames;
+  }
+
+  protected void setNewTempClassLoader(ClassLoader newTempClassLoader) {
+    this.newTempClassLoader = newTempClassLoader;
+  }
+
+  protected void setNonJtaDataSource(String nonJtaDataSource) {
+    this.nonJtaDataSource = nonJtaDataSource;
+  }
+
+  protected void setPersistenceProviderClassName(String persistenceProviderClassName) {
+    this.persistenceProviderClassName = persistenceProviderClassName;
+  }
+
+  protected void setPersistenceUnitRootUrl(URL persistenceUnitRootUrl) {
+    this.persistenceUnitRootUrl = persistenceUnitRootUrl;
+  }
+
+  protected void setPersistenceUnitTransactionType(
+      PersistenceUnitTransactionType persistenceUnitTransactionType) {
+    this.persistenceUnitTransactionType =
+        defaultObject(persistenceUnitTransactionType, PersistenceUnitTransactionType.JTA);
+  }
+
+  protected void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
+    this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
+  }
+
+  protected void setProperties(Properties properties) {
+    this.properties = properties;
+  }
+
+  protected void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+    this.sharedCacheMode = sharedCacheMode;
+  }
+
+  protected void setTransformers(Set<ClassTransformer> transformers) {
+    this.transformers = transformers;
+  }
+
+  protected void setValidationMode(ValidationMode validationMode) {
+    this.validationMode = validationMode;
   }
 
 }

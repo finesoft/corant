@@ -19,15 +19,23 @@ import static org.corant.shared.util.ClassUtils.getAllSuperclassesAndInterfaces;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StringUtils.isEmpty;
+import static org.corant.shared.util.StringUtils.replace;
+import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ClassPaths.ClassInfo;
 
@@ -42,6 +50,35 @@ public class JpaUtils {
 
   static final Set<Class<? extends Annotation>> PERSIS_ANN =
       asSet(Entity.class, Embeddable.class, MappedSuperclass.class, Converter.class);
+
+  public static Set<Class<?>> getPersistenceClasses(String packages) {
+    Set<Class<?>> clses = new LinkedHashSet<>();
+    try {
+      ClassPaths.from(replace(packages, ".", "/")).getClasses().map(ClassInfo::load)
+          .filter(JpaUtils::isPersistenceClass).forEach(clses::add);
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+    return clses;
+  }
+
+  public static Set<String> getPersistenceMappingFiles(String regex) {
+    Set<String> paths = new LinkedHashSet<>();
+    Set<Pattern> patterns =
+        asStream(split(regex, ",")).map(Pattern::compile).collect(Collectors.toSet());
+    if (!isEmpty(regex)) {
+      try {
+        ClassPaths.from().getResources().filter(r -> !ClassInfo.class.isInstance(r))
+            .map(r -> r.getResourceName())
+            .filter(n -> patterns.stream().anyMatch(p -> p.matcher(n).find())).forEach(n -> {
+              paths.add(n);
+            });
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return paths;
+  }
 
   public static boolean isPersistenceClass(Class<?> cls) {
     return cls != null && !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers())

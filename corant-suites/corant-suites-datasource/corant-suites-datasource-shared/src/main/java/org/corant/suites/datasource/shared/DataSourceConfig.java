@@ -17,11 +17,8 @@ package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StreamUtils.asStream;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -29,10 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.kernel.util.ConfigUtils;
 import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-suites-datasource-shared
+ *
+ * <pre>
+ * Config key like "datasource.?.driver=org.mysql.driver", the '?' is the datasource name.
+ * </pre>
  *
  * @author bingo 下午3:45:45
  *
@@ -40,6 +42,22 @@ import org.eclipse.microprofile.config.Config;
 public class DataSourceConfig {
 
   public static final String PREFIX = "datasource.";
+  public static final String DS_VALIDATE_CONNECTION = ".validate-connection";
+  public static final String DS_ACQUISITION_TIMEOUT = ".acquisition-timeout";
+  public static final String DS_REAP_TIMEOUT = ".reap-timeout";
+  public static final String DS_VALIDATION_TIMEOUT = ".validation-timeout";
+  public static final String DS_LEAK_TIMEOUT = ".leak-timeout";
+  public static final String DS_MAX_SIZE = ".max-size";
+  public static final String DS_MIN_SIZE = ".min-size";
+  public static final String DS_INITIAL_SIZE = ".initial-size";
+  public static final String DS_XA = ".xa";
+  public static final String DS_JTA = ".jta";
+  public static final String DS_CONNECTABLE = ".connectable";
+  public static final String DS_CONNECTION_URL = ".connection-url";
+  public static final String DS_PASSWORD = ".password";
+  public static final String DS_USER_NAME = ".username";
+  public static final String DS_DRIVER = ".driver";
+
 
   private Class<?> driver;
   private String name;
@@ -65,7 +83,7 @@ public class DataSourceConfig {
 
   public static Map<String, DataSourceConfig> from(Config config) {
     Map<String, DataSourceConfig> map = new LinkedHashMap<>();
-    Map<String, List<String>> cfgNmes = getConfigNames(config);
+    Map<String, List<String>> cfgNmes = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
       final DataSourceConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.name, cfg.connectionUrl)) {
@@ -86,37 +104,37 @@ public class DataSourceConfig {
     final DataSourceConfig cfg = new DataSourceConfig();
     cfg.name = name;
     propertieNames.forEach(pn -> {
-      if (pn.endsWith("driver")) {
+      if (pn.endsWith(DS_DRIVER)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.driver = tryAsClass(s));
-      } else if (pn.endsWith(".username")) {
+      } else if (pn.endsWith(DS_USER_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.username = s);
-      } else if (pn.endsWith(".password")) {
+      } else if (pn.endsWith(DS_PASSWORD)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.password = s);
-      } else if (pn.endsWith(".connection-url")) {
+      } else if (pn.endsWith(DS_CONNECTION_URL)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.connectionUrl = s);
-      } else if (pn.endsWith(".connectable")) {
+      } else if (pn.endsWith(DS_CONNECTABLE)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.connectable = s);
-      } else if (pn.endsWith(".jta")) {
+      } else if (pn.endsWith(DS_JTA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.jta = s);
-      } else if (pn.endsWith(".xa")) {
+      } else if (pn.endsWith(DS_XA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.xa = s);
-      } else if (pn.endsWith(".initial-size")) {
+      } else if (pn.endsWith(DS_INITIAL_SIZE)) {
         config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.initialSize = s);
-      } else if (pn.endsWith(".min-size")) {
+      } else if (pn.endsWith(DS_MIN_SIZE)) {
         config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.minSize = s);
-      } else if (pn.endsWith(".max-size")) {
+      } else if (pn.endsWith(DS_MAX_SIZE)) {
         config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.maxSize = s);
-      } else if (pn.endsWith(".leak-timeout")) {
+      } else if (pn.endsWith(DS_LEAK_TIMEOUT)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.leakTimeout = convert(s));
-      } else if (pn.endsWith(".validation-timeout")) {
+      } else if (pn.endsWith(DS_VALIDATION_TIMEOUT)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> cfg.validationTimeout = convert(s));
-      } else if (pn.endsWith(".reap-timeout")) {
+      } else if (pn.endsWith(DS_REAP_TIMEOUT)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.reapTimeout = convert(s));
-      } else if (pn.endsWith(".acquisition-timeout")) {
+      } else if (pn.endsWith(DS_ACQUISITION_TIMEOUT)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> cfg.acquisitionTimeout = convert(s));
-      } else if (pn.endsWith(".validate-connection")) {
+      } else if (pn.endsWith(DS_VALIDATE_CONNECTION)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.validateConnection = s);
       }
     });
@@ -124,16 +142,6 @@ public class DataSourceConfig {
       return cfg;
     }
     return null;
-  }
-
-  private static Map<String, List<String>> getConfigNames(Config config) {
-    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(PREFIX), (s) -> {
-      String[] arr = split(s, ".", true, true);
-      if (arr.length > 2) {
-        return new String[] {arr[1], s};
-      }
-      return new String[0];
-    });
   }
 
   /**

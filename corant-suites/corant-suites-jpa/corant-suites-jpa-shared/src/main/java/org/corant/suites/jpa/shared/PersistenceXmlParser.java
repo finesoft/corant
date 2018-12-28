@@ -51,23 +51,6 @@ import org.xml.sax.SAXException;
 @ApplicationScoped
 public class PersistenceXmlParser {
 
-  public static final String PUN_TAG = "persistence-unit";
-  public static final String PUN_NME = "name";
-  public static final String PUN_TRANS_TYP = "transaction-type";
-  public static final String PUN_NON_JTA_DS = "non-jta-data-source";
-  public static final String PUN_JTA_DS = "jta-data-source";
-  public static final String PUN_PROVIDER = "provider";
-  public static final String PUN_CLS = "class";
-  public static final String PUN_MAP_FILE = "mapping-file";
-  public static final String PUN_JAR_FILE = "jar-file";
-  public static final String PUN_EX_UL_CLS = "exclude-unlisted-classes";
-  public static final String PUN_VAL_MOD = "validation-mode";
-  public static final String PUN_SHARE_CACHE_MOD = "shared-cache-mode";
-  public static final String PUN_PROS = "properties";
-  public static final String PUN_PRO = "property";
-  public static final String PUN_PRO_NME = "name";
-  public static final String PUN_PRO_VAL = "value";
-
   protected static final Logger logger = Logger.getLogger(PersistenceXmlParser.class.getName());
 
   public static Map<String, PersistenceUnitMetaData> parse(URL url) {
@@ -78,45 +61,45 @@ public class PersistenceXmlParser {
 
   protected static void doParse(Element element, PersistenceUnitMetaData metaData) {
     metaData.setPersistenceUnitTransactionType(
-        parseTransactionType(element.getAttribute(PUN_TRANS_TYP)));
+        parseTransactionType(element.getAttribute(JpaConfig.PUN_TRANS_TYP)));
     NodeList children = element.getChildNodes();
     int len = children.getLength();
     for (int i = 0; i < len; i++) {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         Element subEle = (Element) children.item(i);
         String tag = subEle.getTagName();
-        if (tag.equals(PUN_NON_JTA_DS)) {
-          metaData.setNonJtaDataSource(extractContent(subEle));
-        } else if (tag.equals(PUN_JTA_DS)) {
-          metaData.setJtaDataSource(extractContent(subEle));
-        } else if (tag.equals(PUN_PROVIDER)) {
+        if (tag.equals(JpaConfig.PUN_NON_JTA_DS)) {
+          metaData.setNonJtaDataSourceName(extractContent(subEle));
+        } else if (tag.equals(JpaConfig.PUN_JTA_DS)) {
+          metaData.setJtaDataSourceName(extractContent(subEle));
+        } else if (tag.equals(JpaConfig.PUN_PROVIDER)) {
           metaData.setPersistenceProviderClassName(extractContent(subEle));
-        } else if (tag.equals(PUN_CLS)) {
-          metaData.getManagedClassNames().add(extractContent(subEle));
-        } else if (tag.equals(PUN_MAP_FILE)) {
-          metaData.getMappingFileNames().add(extractContent(subEle));
-        } else if (tag.equals(PUN_JAR_FILE)) {
+        } else if (tag.equals(JpaConfig.PUN_CLS)) {
+          metaData.addManagedClassName(extractContent(subEle));
+        } else if (tag.equals(JpaConfig.PUN_MAP_FILE)) {
+          metaData.addMappingFileName(extractContent(subEle));
+        } else if (tag.equals(JpaConfig.PUN_JAR_FILE)) {
           metaData.getJarFileUrls().add(extractUrlContent(subEle));
-        } else if (tag.equals(PUN_EX_UL_CLS)) {
+        } else if (tag.equals(JpaConfig.PUN_EX_UL_CLS)) {
           metaData.setExcludeUnlistedClasses(extractBooleanContent(subEle, true));
-        } else if (tag.equals(PUN_VAL_MOD)) {
+        } else if (tag.equals(JpaConfig.PUN_VAL_MOD)) {
           metaData.setValidationMode(ValidationMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(PUN_SHARE_CACHE_MOD)) {
+        } else if (tag.equals(JpaConfig.PUN_SHARE_CACHE_MOD)) {
           metaData.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(PUN_PROS)) {
+        } else if (tag.equals(JpaConfig.PUN_PROS)) {
           NodeList props = element.getChildNodes();
           for (int j = 0; j < props.getLength(); j++) {
             if (props.item(j).getNodeType() == Node.ELEMENT_NODE) {
               Element propElement = (Element) props.item(j);
-              if (!PUN_PRO.equals(propElement.getTagName())) {
+              if (!JpaConfig.PUN_PRO.equals(propElement.getTagName())) {
                 continue;
               }
-              String propName = propElement.getAttribute(PUN_PRO_NME).trim();
-              String propValue = propElement.getAttribute(PUN_PRO_VAL).trim();
+              String propName = propElement.getAttribute(JpaConfig.PUN_PRO_NME).trim();
+              String propValue = propElement.getAttribute(JpaConfig.PUN_PRO_VAL).trim();
               if (isEmpty(propValue)) {
                 propValue = extractContent(propElement, "");
               }
-              metaData.getProperties().put(propName, propValue);
+              metaData.putPropertity(propName, propValue);
             }
           }
         }
@@ -128,15 +111,17 @@ public class PersistenceXmlParser {
     final Document doc = loadDocument(url);
     final Element top = doc.getDocumentElement();
     final NodeList children = top.getChildNodes();
+    final String version = doc.getDocumentElement().getAttribute("version");
     int len = children.getLength();
     for (int i = 0; i < len; i++) {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         final Element element = (Element) children.item(i);
         final String tag = element.getTagName();
-        if (tag.equals(PUN_TAG)) {
-          final String puName = element.getAttribute(PUN_NME);
+        if (tag.equals(JpaConfig.PUN_TAG)) {
+          final String puName = element.getAttribute(JpaConfig.PUN_NME);
           shouldBeFalse(map.containsKey(puName), "Persistence unit name %s dup!", tag);
           PersistenceUnitMetaData metaData = new PersistenceUnitMetaData(puName);
+          metaData.setVersion(version);
           metaData.setPersistenceUnitRootUrl(extractRootUrl(url));
           doParse(element, metaData);
         }

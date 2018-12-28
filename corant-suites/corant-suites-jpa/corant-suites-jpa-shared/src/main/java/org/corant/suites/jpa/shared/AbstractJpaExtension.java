@@ -15,9 +15,13 @@
  */
 package org.corant.suites.jpa.shared;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.persistence.spi.PersistenceUnitInfo;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-suites-jpa-shared
@@ -27,5 +31,17 @@ import javax.enterprise.inject.spi.Extension;
  */
 public abstract class AbstractJpaExtension implements Extension {
 
-  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {}
+  private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
+
+  protected Map<String, PersistenceUnitInfo> getPersistenceUnitInfos() {
+    return persistenceUnitInfos;
+  }
+
+  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    JpaConfig cfg = JpaConfig.from(ConfigProvider.getConfig());
+    cfg.getMetaDatas().forEach((n, pu) -> {
+      persistenceUnitInfos.put(n, pu);
+    });
+  }
+
 }

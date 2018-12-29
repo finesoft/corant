@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jndi;
@@ -124,9 +126,9 @@ public class NamingContext implements Context {
     checkClosed();
     try {
       RWL.writeLock().lock();
-      NamingContext newContext = new NamingContext(this.name, getEnvironment(), null);
-      bind(name, newContext);
-      return newContext;
+      NamingContext subContext = new NamingContext(this.name + ":" + name, getEnvironment(), null);
+      bind(name, subContext);
+      return subContext;
     } finally {
       RWL.writeLock().unlock();
     }
@@ -218,7 +220,7 @@ public class NamingContext implements Context {
     checkClosed();
     Name useName = skipEmptyComponent(name);
     if (useName.isEmpty()) {
-      return new NamingContextEnumeration(bindings.values().iterator());
+      return new NamingNameClassPairEnumeration(bindings.values().iterator());
     }
     try {
       RWL.readLock().lock();
@@ -247,7 +249,7 @@ public class NamingContext implements Context {
     checkClosed();
     Name useName = skipEmptyComponent(name);
     if (useName.isEmpty()) {
-      return new NamingContextBindingsEnumeration(bindings.values().iterator(), this);
+      return new NamingBindingEnumeration(bindings.values().iterator(), this);
     }
     try {
       RWL.readLock().lock();
@@ -367,15 +369,16 @@ public class NamingContext implements Context {
   }
 
   /**
-   * Binds a name to an object. All intermediate contexts and the target context (that named by all
-   * but terminal atomic component of the name) must already exist.
+   * Binds a name to an object. All intermediate contexts and the target context
+   * (that named by all but terminal atomic component of the name) must already
+   * exist.
    *
    * @param name the name to bind; may not be empty
    * @param obj the object to bind; possibly null
    * @param rebind if true, then perform a rebind (ie, overwrite)
    * @exception NameAlreadyBoundException if name is already bound
-   * @exception javax.naming.directory.InvalidAttributesException if object did not supply all
-   *            mandatory attributes
+   * @exception javax.naming.directory.InvalidAttributesException if object did
+   *            not supply all mandatory attributes
    * @exception NamingException if a naming exception is encountered
    */
   protected void bind(Name name, Object obj, boolean rebind) throws NamingException {
@@ -383,7 +386,7 @@ public class NamingContext implements Context {
     checkBindingObject(obj);
     Name useName = skipEmptyComponent(name);
     if (useName.isEmpty()) {
-      throw new NamingException("Name is not valid");
+      throw new NamingException("Name is not valid, can not be empty.");
     }
     try {
       RWL.writeLock().lock();
@@ -393,15 +396,13 @@ public class NamingContext implements Context {
           throw new NameNotFoundException(
               String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                   useName.get(0)));
+        } else if (entry.type != NamingContextEntry.CONTEXT) {
+          throw new NamingException("Name must be bound to a Context, since it has children.");
         }
-        if (entry.type == NamingContextEntry.CONTEXT) {
-          if (rebind) {
-            ((Context) entry.value).rebind(useName.getSuffix(1), obj);
-          } else {
-            ((Context) entry.value).bind(useName.getSuffix(1), obj);
-          }
+        if (rebind) {
+          ((Context) entry.value).rebind(useName.getSuffix(1), obj);
         } else {
-          throw new NamingException("Name is not bound to a Context");
+          ((Context) entry.value).bind(useName.getSuffix(1), obj);
         }
       } else {
         if (!rebind && entry != null) {
@@ -458,15 +459,14 @@ public class NamingContext implements Context {
       if (useName.size() > 1) {
         // lookup subcontexts.
         if (entry.type != NamingContextEntry.CONTEXT) {
-          throw new NamingException("Name is not bound to a Context");
+          throw new NamingException("Name must be bound to a Context, since it has children.");
         }
         return ((Context) entry.value).lookup(useName.getSuffix(1));
       } else {
         if (resolveLinks && entry.type == NamingContextEntry.LINK_REF) {
           String link = ((LinkRef) entry.value).getLinkName();
           if (link.startsWith(".")) {
-            // Link relative to this context
-            return lookup(link.substring(1));
+            return lookup(link.substring(1));// Link relative to this context
           } else {
             return new InitialContext(getEnvironment()).lookup(link);
           }

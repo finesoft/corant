@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jndi;
@@ -26,33 +28,19 @@ import javax.naming.NamingException;
  * @author bingo 下午3:23:24
  *
  */
-public class NamingContextBindingsEnumeration implements NamingEnumeration<Binding> {
+public class NamingBindingEnumeration implements NamingEnumeration<Binding> {
 
-  /**
-   * Underlying enumeration.
-   */
   protected final Iterator<NamingContextEntry> iterator;
-
-  /**
-   * The context for which this enumeration is being generated.
-   */
   private final Context ctx;
 
-
-  public NamingContextBindingsEnumeration(Iterator<NamingContextEntry> entries, Context ctx) {
+  public NamingBindingEnumeration(Iterator<NamingContextEntry> entries, Context ctx) {
     iterator = entries;
     this.ctx = ctx;
   }
 
-  /**
-   * Closes this enumeration.
-   */
   @Override
   public void close() throws NamingException {}
 
-  /**
-   * Determines whether there are any more elements in the enumeration.
-   */
   @Override
   public boolean hasMore() throws NamingException {
     return iterator.hasNext();
@@ -63,9 +51,6 @@ public class NamingContextBindingsEnumeration implements NamingEnumeration<Bindi
     return iterator.hasNext();
   }
 
-  /**
-   * Retrieves the next element in the enumeration.
-   */
   @Override
   public Binding next() throws NamingException {
     return nextElementInternal();

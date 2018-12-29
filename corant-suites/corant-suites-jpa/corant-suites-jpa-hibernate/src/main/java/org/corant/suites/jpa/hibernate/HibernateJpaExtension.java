@@ -32,5 +32,4 @@ public class HibernateJpaExtension extends AbstractJpaExtension {
     return super.getPersistenceUnitMetaDatas();
   }
 
-
 }

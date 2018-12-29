@@ -24,6 +24,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.SynchronizationType;
 import org.corant.kernel.util.ResourceReferences;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -70,8 +71,8 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
 
   @Override
   protected ResourceReferenceFactory<EntityManager> buildEntityManagerRrf(EntityManagerFactory emf,
-      String unitName) {
-    return () -> ResourceReferences
-        .of(() -> emf.createEntityManager(syncType, properties));
+      String unitName, PersistenceContextType pcType, SynchronizationType syncType,
+      Map<String, ?> pps) {
+    return () -> ResourceReferences.of(() -> emf.createEntityManager(syncType, pps));
   }
 }

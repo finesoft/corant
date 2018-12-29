@@ -1,0 +1,74 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+          http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+	version="2.1">
+	<persistence-unit name="dmmsPu" transaction-type="JTA">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<jta-data-source>java:comp/datasources/dmmsRwDs</jta-data-source>
+
+		<!-- mapping files -->
+		<mapping-file>cn/cps/dmms/general/domain/script/GeneralArticleCriteriaJpaOrm.xml</mapping-file>
+		<mapping-file>cn/cps/dmms/general/domain/script/GeneralEnumJpaOrm.xml</mapping-file>
+		<mapping-file>cn/cps/dmms/general/domain/script/GeneralEnumTypeJpaOrm.xml</mapping-file>
+		<mapping-file>cn/cps/dmms/general/domain/script/GeneralMeasureUnitJpaOrm.xml</mapping-file>
+		<mapping-file>cn/cps/dmms/location/domain/script/LocationJpaOrm.xml</mapping-file>
+		<!-- mapping classes -->
+		<class>cn.cps.dmms.general.domain.GeneralArticle</class>
+		<class>cn.cps.dmms.general.domain.GeneralArticleCriteria</class>
+		<class>cn.cps.dmms.general.domain.GeneralArticleReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralCategory</class>
+		<class>cn.cps.dmms.general.domain.GeneralCategoryReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralCriteria</class>
+		<class>cn.cps.dmms.general.domain.GeneralCriteriaGroup</class>
+		<class>cn.cps.dmms.general.domain.GeneralCriteriaGroupReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralCriteriaReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralEnum</class>
+		<class>cn.cps.dmms.general.domain.GeneralEnumReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralEnumType</class>
+		<class>cn.cps.dmms.general.domain.GeneralEnumTypeReference</class>
+		<class>cn.cps.dmms.general.domain.GeneralMeasureUnit</class>
+		<class>cn.cps.dmms.general.domain.GeneralMeasureUnitReference</class>
+		<class>cn.cps.dmms.industry.domain.Industry</class>
+		<class>cn.cps.dmms.industry.domain.IndustryReference</class>
+		<class>cn.cps.dmms.location.domain.Location</class>
+		<class>cn.cps.dmms.location.domain.LocationReference</class>
+		<class>cn.cps.dmms.shared.message.DmmsMergableMessage</class>
+		<class>cn.cps.dmms.shared.message.DmmsMessage</class>
+		<class>cn.cps.dmms.shared.message.DmmsMessageHandling</class>
+		<class>cn.cps.dmms.shared.message.DmmsSaga</class>
+
+
+
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+
+		<properties>
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="hibernate.use_sql_comments" value="false" />
+			<property name="hibernate.connection.autocommit"
+				value="false" />
+			<property name="hibernate.dialect"
+				value="cn.cps.base.provider.HibernateMySQLDialect" />
+			<property name="hibernate.archive.autodetection"
+				value="class, hbm" />
+			<!-- <property name="hibernate.dialect.storage_engine" value="innodb" 
+				/> -->
+
+			<property name="javax.persistence.query.timeout"
+				value="100000" />
+			<property
+				name="javax.persistence.schema-generation.database.action"
+				value="none" />
+			<property
+				name="javax.persistence.schema-generation.create-source"
+				value="metadata" />
+			<property
+				name="javax.persistence.schema-generation.drop-source"
+				value="metadata" />
+
+			<!-- <property name="javax.persistence.sql-load-script-source" value="META-INF/load.sql" 
+				/> -->
+		</properties>
+	</persistence-unit>
+</persistence>

@@ -28,10 +28,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-jpa-shared</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-servlet</artifactId>
 		</dependency>
 		<dependency>
@@ -40,15 +36,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-jndi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-datasource-agroal</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jta-narayana</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-jpa-hibernate</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-asosat-ddd</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -111,7 +111,7 @@
 		</dependency>
 	</dependencies>
 	<description>Domain Driven Design development stack.</description>
-
+	
 	<build>
 		<resources>
 			<resource>
@@ -124,6 +124,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+		<!--  
 		<plugins>
 			<plugin>
 				<groupId>org.corant</groupId>
@@ -136,12 +137,11 @@
 							<goal>package</goal>
 						</goals>
 						<configuration>
-							<!-- <mode>fat</mode> <format>jar</format>
-							<mainClass>org.corant.asosat.exp.App</mainClass>-->
+							<mainClass>org.corant.asosat.exp.App</mainClass>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>
+		</plugins>-->
 	</build>
 </project>

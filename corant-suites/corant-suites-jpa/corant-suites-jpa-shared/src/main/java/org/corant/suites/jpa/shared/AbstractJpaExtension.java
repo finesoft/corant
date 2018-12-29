@@ -18,7 +18,7 @@ package org.corant.suites.jpa.shared;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -37,8 +37,7 @@ public abstract class AbstractJpaExtension implements Extension {
     return persistenceUnitMetaDatas;
   }
 
-
-  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     JpaConfig cfg = JpaConfig.from(ConfigProvider.getConfig());
     cfg.getMetaDatas().forEach((n, pu) -> {
       persistenceUnitMetaDatas.put(n, pu);

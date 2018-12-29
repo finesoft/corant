@@ -15,6 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,6 +77,11 @@ public class JpaConfig {
   public static JpaConfig from(Config config) {
     JpaConfig cfg = new JpaConfig();
     cfg.metaDatas.putAll(generateFromConfig(config));
+    Map<String, PersistenceUnitMetaData> fromXml = generateFromXml();
+    if (!fromXml.isEmpty()) {
+      shouldBeFalse(fromXml.keySet().stream().map(cfg.metaDatas::containsKey)
+          .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
+    }
     cfg.metaDatas.putAll(generateFromXml());
     return cfg;
   }

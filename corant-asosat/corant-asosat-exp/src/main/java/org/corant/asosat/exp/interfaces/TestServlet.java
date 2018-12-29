@@ -17,20 +17,18 @@ package org.corant.asosat.exp.interfaces;
 
 import static org.corant.shared.util.MapUtils.getMapString;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import javax.transaction.Transactional;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.corant.kernel.bootstrap.DirectRunner;
+import org.corant.asosat.exp.application.TestApplicationService;
+import org.corant.asosat.exp.application.TestQueryService;
 
 /**
  * corant-asosat-ddd
@@ -45,25 +43,21 @@ public class TestServlet extends HttpServlet {
   private static final long serialVersionUID = 8174294172579816895L;
 
   @Inject
-  @Named("dmmsRwDs")
-  DataSource ds;
+  TestApplicationService as;
 
-  public static void main(String... strings) throws Exception {
-    new DirectRunner(null).run();
-  }
+  @Inject
+  TestQueryService qs;
 
   @Transactional
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
+    as.testEntityManager();
     StringBuilder sb = new StringBuilder("<table>");
-    try {
-      new QueryRunner(ds).query("SELECT * FROM CT_DMMS_INDU", new MapListHandler()).forEach(m -> {
-        sb.append("<tr><td>").append(getMapString(m, "name")).append("</td></tr>");
-      });
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
+    List<Map<String, Object>> list = qs.select("Industries.query", null);
+    list.forEach(m -> {
+      sb.append("<tr><td>").append(getMapString(m, "name")).append("</td></tr>");
+    });
     sb.append("</table>");
     resp.getWriter().write(sb.toString());
   }

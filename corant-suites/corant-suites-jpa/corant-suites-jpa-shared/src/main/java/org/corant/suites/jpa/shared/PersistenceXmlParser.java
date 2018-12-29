@@ -124,6 +124,7 @@ public class PersistenceXmlParser {
           metaData.setVersion(version);
           metaData.setPersistenceUnitRootUrl(extractRootUrl(url));
           doParse(element, metaData);
+          map.put(puName, metaData);
         }
       }
     }
@@ -139,7 +140,7 @@ public class PersistenceXmlParser {
         final InputSource inputSource = new InputSource(inputStream);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.parse(inputSource);
-        validate(document);
+        // validate(document); FIXME
         return document;
       } catch (IOException | ParserConfigurationException | SAXException e) {
         throw new CorantRuntimeException(e);

@@ -464,7 +464,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-jpa-hibernate</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-asosat-ddd</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

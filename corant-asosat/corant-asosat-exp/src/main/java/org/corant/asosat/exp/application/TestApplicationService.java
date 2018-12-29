@@ -13,32 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.normal;
+package org.corant.asosat.exp.application;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.sql.DataSource;
+import javax.transaction.Transactional;
 
 /**
- * corant-kernel
+ * corant-asosat-exp
  *
- * @author bingo 下午11:41:22
+ * @author bingo 上午11:44:27
  *
  */
-public interface Names {
+@ApplicationScoped
+@Transactional
+public class TestApplicationService {
 
-  String CORANT = "corant";
+  @PersistenceContext(unitName = "dmmsPu")
+  EntityManager em;
 
-  interface ConfigNames {
-    String CFG_PF_KEY = CORANT + ".profile";
-    String CFG_LOCATION_KEY = CORANT + ".config.location";
+  @Inject
+  @Named("dmmsRwDs")
+  DataSource ds;
+
+  public void testEntityManager() {
+    em.toString();
   }
 
-  interface JndiNames {
-    String JNDI_ROOT_NME = "java:";
-    String JNDI_COMP_NME = "java:comp";
-    String JNDI_APPS_NME = "java:app";
-    String JNDI_DATS_NME = "java:comp/datasources";
-    String JNDI_JTAM_NME = "java:comp/TransactionManager";
-  }
-
-  interface PersistenceNames {
-    String PU_DFLT_NME = CORANT;
-  }
 }

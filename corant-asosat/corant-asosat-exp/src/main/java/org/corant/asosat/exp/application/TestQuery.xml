@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<query-mappings
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<common-segment>
+		This is common segment!
+	</common-segment>
+	
+	<query name="Industries.get"
+		result-class="java.util.Map" cache="true"
+		cache-resuleset-metadata="false">
+		<script>
+			<![CDATA[
+				SELECT
+					id
+					,vn
+					,mn
+					,createdTime
+					,creatorId
+					,creatorName
+					,modifiedTime
+					,modifierId
+					,modifierName
+					,archived
+					,archivedLog
+					,archivedTime
+					,archivistId
+					,archivistName
+					,description
+					,name
+					,number
+				FROM 
+					CT_DMMS_Indu
+				WHERE
+				    1<>1
+				    OR
+				    id = ${SP(id)}
+			]]>
+		</script>
+	</query>
+
+	<query name="Industries.query" result-class="java.util.Map"
+		cache="true" cache-resuleset-metadata="false">
+		<script>
+			<![CDATA[
+				SELECT
+					id
+					,vn
+					,mn
+					,createdTime
+					,creatorId
+					,creatorName
+					,modifiedTime
+					,modifierId
+					,modifierName
+					,archived
+					,archivedLog
+					,archivedTime
+					,archivistId
+					,archivistName
+					,description
+					,name
+					,number
+				FROM 
+					CT_DMMS_Indu
+				WHERE
+				   1=1
+				<#if archived??>
+					AND archived = ${SP(archived)}
+				<#else>
+					AND archived = 0
+				</#if>   
+				<#if keyword??>
+					AND (name LIKE '%' + ${SP(keyword)} + '%' OR description LIKE '%' + ${SP(keyword)} + '%')
+				</#if>
+			]]>
+		</script>
+	</query>
+</query-mappings>

@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.datasource.hikari;
@@ -55,8 +57,8 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
   }
 
 
-  HikariDataSource doProduce(Instance<Object> beans, String name) throws NamingException {
-    DataSourceConfig cfg = DataSourceConfig.of(beans.select(Config.class).get(), name);
+  HikariDataSource doProduce(Instance<Object> instance, String name) throws NamingException {
+    DataSourceConfig cfg = DataSourceConfig.of(instance.select(Config.class).get(), name);
     shouldBeFalse(cfg.isJta() || cfg.isXa());
     HikariConfig cfgs = new HikariConfig();
     cfgs.setJdbcUrl(cfg.getConnectionUrl());
@@ -71,9 +73,15 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.setMaximumPoolSize(cfg.getMaxSize());
     cfgs.setPoolName(cfg.getName());
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
-    HikariDataSource ds = new HikariDataSource(cfgs);
-    beans.select(InitialContext.class).get().bind(JndiNames.JNDI_DATS_NME + "/" + name, ds);
-    return ds;
+    HikariDataSource datasource = new HikariDataSource(cfgs);
+    registerDataSource(name, datasource);
+    InitialContext jndi = instance.select(InitialContext.class).isResolvable()
+        ? instance.select(InitialContext.class).get()
+        : null;
+    registerDataSource(name, datasource);
+    if (jndi != null) {
+      jndi.bind(JndiNames.JNDI_DATS_NME + "/" + name, datasource);
+    }
+    return datasource;
   }
-
 }

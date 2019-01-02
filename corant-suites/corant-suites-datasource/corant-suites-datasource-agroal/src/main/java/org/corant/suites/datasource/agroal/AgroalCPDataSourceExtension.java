@@ -83,9 +83,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         instance.select(TransactionSynchronizationRegistry.class).isResolvable()
             ? instance.select(TransactionSynchronizationRegistry.class).get()
             : null;
-    InitialContext jndi = instance.select(InitialContext.class).isResolvable()
-        ? instance.select(InitialContext.class).get()
-        : null;
     DataSourceConfig cfg = getDataSourceConfigs().get(name);
     if (cfg.isXa()) {
       shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
@@ -122,6 +119,9 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
           AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
     }
     AgroalDataSource datasource = AgroalDataSource.from(cfgs);
+    InitialContext jndi = instance.select(InitialContext.class).isResolvable()
+        ? instance.select(InitialContext.class).get()
+        : null;
     registerDataSource(name, datasource);
     if (jndi != null) {
       jndi.bind(JndiNames.JNDI_DATS_NME + "/" + name, datasource);

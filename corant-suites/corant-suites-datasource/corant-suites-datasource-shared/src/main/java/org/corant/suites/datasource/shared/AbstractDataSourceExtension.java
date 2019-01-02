@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -39,7 +40,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public abstract class AbstractDataSourceExtension implements Extension {
 
   protected final Set<String> dataSourceNames = new LinkedHashSet<>();
-  protected final Map<String, DataSource> dataSources = new HashMap<>();
+  protected final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 

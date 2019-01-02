@@ -20,6 +20,7 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -57,7 +58,13 @@ public class HibernateJpaInjectionProvider extends AbstractJpaInjectionProvider 
   InitialContext jndi;
 
   @Override
-  protected EntityManagerFactory buildEntityManagerFactoryRrf(String unitName) {
+  protected EntityManager buildEntityManager(EntityManagerFactory emf, String unitName,
+      PersistenceContextType pcType, SynchronizationType syncType, Map<String, ?> pps) {
+    return emf.createEntityManager(syncType, pps);
+  }
+
+  @Override
+  protected EntityManagerFactory buildEntityManagerFactory(String unitName) {
     final PersistenceUnitMetaData pumd = extension.getPersistenceUnitMetaDatas().get(unitName);
     pumd.configDataSource(dsn -> {
       try {
@@ -69,15 +76,8 @@ public class HibernateJpaInjectionProvider extends AbstractJpaInjectionProvider 
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(pumd, properties);
   }
 
-  @Override
-  protected EntityManager buildEntityManagerRrf(EntityManagerFactory emf, String unitName,
-      PersistenceContextType pcType, SynchronizationType syncType, Map<String, ?> pps) {
-    return emf.createEntityManager(syncType, pps);
-  }
-
-
-
   @Produces
+  @Dependent
   @Override
   protected EntityManager produceEntityManager(InjectionPoint injectionPoint) {
     return super.produceEntityManager(injectionPoint);

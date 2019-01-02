@@ -52,9 +52,9 @@ public abstract class AbstractJpaInjectionProvider {
     emfs.clear();
   }
 
-  protected abstract EntityManagerFactory buildEntityManagerFactoryRrf(String unitName);
+  protected abstract EntityManagerFactory buildEntityManagerFactory(String unitName);
 
-  protected abstract EntityManager buildEntityManagerRrf(EntityManagerFactory emf, String unitName,
+  protected abstract EntityManager buildEntityManager(EntityManagerFactory emf, String unitName,
       PersistenceContextType pcType, SynchronizationType syncType, Map<String, ?> pps);
 
   protected EntityManager produceEntityManager(InjectionPoint injectionPoint) {
@@ -65,7 +65,7 @@ public abstract class AbstractJpaInjectionProvider {
     final Map<String, String> pps =
         asStream(pc.properties()).collect(Collectors.toMap(p -> p.name(), p -> p.value()));
     String unitName = resolveUnitName(pc.name(), pc.unitName());
-    return buildEntityManagerRrf(emfs.computeIfAbsent(unitName, this::buildEntityManagerFactoryRrf),
+    return buildEntityManager(emfs.computeIfAbsent(unitName, this::buildEntityManagerFactory),
         unitName, pct, st, pps);
   }
 
@@ -73,7 +73,7 @@ public abstract class AbstractJpaInjectionProvider {
     final PersistenceUnit pu =
         CdiUtils.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
     String unitName = resolveUnitName(pu.name(), pu.unitName());
-    return emfs.computeIfAbsent(unitName, this::buildEntityManagerFactoryRrf);
+    return emfs.computeIfAbsent(unitName, this::buildEntityManagerFactory);
   }
 
   protected String resolveUnitName(String name, String unitName) {

@@ -58,7 +58,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
    *
    * @param event afterBeanDiscovery
    */
-  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String dataSourceName : getDataSourceNames()) {
         event.<DataSource>addBean().addQualifier(NamedLiteral.of(dataSourceName))

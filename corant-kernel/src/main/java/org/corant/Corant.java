@@ -174,7 +174,7 @@ public class Corant {
   }
 
   class CorantExtension implements Extension {
-    void produce(@Observes AfterBeanDiscovery event) {
+    void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
       event.addBean().addType(Corant.class).scope(ApplicationScoped.class)
           .addQualifier(Default.Literal.INSTANCE).addQualifier(Any.Literal.INSTANCE)
           .produceWith((obj) -> Corant.this);

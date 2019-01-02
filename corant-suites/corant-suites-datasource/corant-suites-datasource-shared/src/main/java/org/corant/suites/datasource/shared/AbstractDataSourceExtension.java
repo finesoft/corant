@@ -83,7 +83,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     dataSources.put(name, dataSrouce);
   }
 
-  // touch TODO FIXME
+  // touch for direct lookup data source from jndi. TODO FIXME
   void onPostContainerStarted(@Observes PostContainerStartedEvent e) {
     Corant.cdi().select(DataSource.class).forEach(ds -> shouldNotNull(ds).toString());
   }

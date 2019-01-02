@@ -40,23 +40,6 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
-  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    if (event != null) {
-      for (final String dataSourceName : getDataSourceNames()) {
-        event.<DataSource>addBean().addQualifier(NamedLiteral.of(dataSourceName))
-            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              try {
-                return doProduce(beans, dataSourceName);
-              } catch (NamingException e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((dataSource, beans) -> dataSource.close());
-      }
-    }
-  }
-
-
   HikariDataSource doProduce(Instance<Object> instance, String name) throws NamingException {
     DataSourceConfig cfg = DataSourceConfig.of(instance.select(Config.class).get(), name);
     shouldBeFalse(cfg.isJta() || cfg.isXa());
@@ -83,5 +66,22 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
       jndi.bind(JndiNames.JNDI_DATS_NME + "/" + name, datasource);
     }
     return datasource;
+  }
+
+
+  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    if (event != null) {
+      for (final String dataSourceName : getDataSourceNames()) {
+        event.<DataSource>addBean().addQualifier(NamedLiteral.of(dataSourceName))
+            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
+              try {
+                return doProduce(beans, dataSourceName);
+              } catch (NamingException e) {
+                throw new CorantRuntimeException(e);
+              }
+            }).disposeWith((dataSource, beans) -> dataSource.close());
+      }
+    }
   }
 }

@@ -175,7 +175,7 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
 
   @Override
   public Properties getProperties() {
-    return new Properties(getProperties());
+    return new Properties(properties);
   }
 
   @Override

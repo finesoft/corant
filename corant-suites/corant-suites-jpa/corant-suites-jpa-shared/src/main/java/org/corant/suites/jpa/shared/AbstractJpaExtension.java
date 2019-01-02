@@ -15,6 +15,8 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.util.Collections;
@@ -22,7 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -32,7 +38,6 @@ import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.SynchronizationType;
 import org.corant.kernel.util.CdiUtils;
@@ -55,16 +60,11 @@ public abstract class AbstractJpaExtension implements Extension {
 
   private final Map<String, PersistenceUnitMetaData> persistenceUnitMetaDatas = new HashMap<>();
 
-  protected EntityManager buildEntityManager(Instance<?> instance, EntityManagerFactory emf,
-      String unitName, PersistenceContextType pcType, SynchronizationType syncType,
-      Map<String, ?> pps) {
-    return null;
-  }
+  protected abstract EntityManager buildEntityManager(EntityManagerFactory emf,
+      SynchronizationType syncType, Map<String, ?> pps);
 
-  protected EntityManagerFactory buildEntityManagerFactory(Instance<?> instance, String unitName,
-      PersistenceUnitMetaData persistenceUnitMetaData) {
-    return null;
-  }
+  protected abstract EntityManagerFactory buildEntityManagerFactory(Instance<?> instance,
+      String unitName, PersistenceUnitMetaData persistenceUnitMetaData);
 
   protected EntityManagerFactory getEntityManagerFactory(Instance<?> instance, String unitName,
       PersistenceUnitMetaData persistenceUnitMetaData) {
@@ -85,17 +85,31 @@ public abstract class AbstractJpaExtension implements Extension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd) {
     PUIPS.forEach(ip -> {
       final PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
-      final String unitName = resolveUnitName(pu.name(), pu.unitName());
+      final String pun = resolveUnitName(pu.name(), pu.unitName());
+      PersistenceUnitMetaData pumd = shouldNotNull(persistenceUnitMetaDatas.get(pun));
+      abd.<EntityManagerFactory>addBean().addQualifier(Default.Literal.INSTANCE)
+          .addTransitiveTypeClosure(EntityManagerFactory.class)
+          .beanClass(EntityManagerFactory.class).scope(ApplicationScoped.class)
+          .produceWith(inst -> getEntityManagerFactory(inst, pun, pumd))
+          .disposeWith((emf, beans) -> emf.close());
     });
 
-
-    // persistenceUnitMetaDatas.forEach((pun, pumd) -> {
-    // abd.<EntityManagerFactory>addBean().addQualifier(NamedLiteral.INSTANCE)
-    // .addTransitiveTypeClosure(EntityManagerFactory.class)
-    // .beanClass(EntityManagerFactory.class).scope(ApplicationScoped.class)
-    // .produceWith(inst -> getEntityManagerFactory(inst, pun, pumd))
-    // .disposeWith((emf, beans) -> emf.close());
-    // });
+    PCIPS.forEach(ip -> {
+      final PersistenceContext pc =
+          CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class);
+      // final PersistenceContextType pct = pc.type();
+      final SynchronizationType st = pc.synchronization();
+      final String pun = resolveUnitName(pc.name(), pc.unitName());
+      final PersistenceUnitMetaData pumd = shouldNotNull(persistenceUnitMetaDatas.get(pun));
+      final Map<String, ?> pps =
+          asStream(pc.properties()).collect(Collectors.toMap(p -> p.name(), p -> p.value()));
+      abd.<EntityManager>addBean().addQualifier(Default.Literal.INSTANCE)
+          .addTransitiveTypeClosure(EntityManager.class).beanClass(EntityManager.class)
+          .scope(Dependent.class).produceWith(inst -> {
+            return buildEntityManager(getEntityManagerFactory(inst, pun, pumd), st, pps);
+          }).disposeWith((em, beans) -> {
+          });
+    });
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {

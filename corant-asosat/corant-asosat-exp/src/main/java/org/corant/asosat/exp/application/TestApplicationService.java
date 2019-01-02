@@ -33,6 +33,7 @@ import javax.transaction.Transactional;
 @Transactional
 public class TestApplicationService {
 
+  @Inject
   @PersistenceContext(unitName = "dmmsPu")
   EntityManager em;
 

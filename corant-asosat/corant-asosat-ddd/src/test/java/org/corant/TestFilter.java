@@ -55,6 +55,12 @@ public class TestFilter implements Filter {
   DataSource ds;
 
   @Override
+  public void destroy() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     try {

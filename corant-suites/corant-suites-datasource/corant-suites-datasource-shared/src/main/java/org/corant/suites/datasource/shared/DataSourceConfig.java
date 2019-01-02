@@ -105,37 +105,37 @@ public class DataSourceConfig {
     cfg.name = name;
     propertieNames.forEach(pn -> {
       if (pn.endsWith(DS_DRIVER)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.driver = tryAsClass(s));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.setDriver(tryAsClass(s)));
       } else if (pn.endsWith(DS_USER_NAME)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.username = s);
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setUsername);
       } else if (pn.endsWith(DS_PASSWORD)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.password = s);
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setPassword);
       } else if (pn.endsWith(DS_CONNECTION_URL)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.connectionUrl = s);
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setConnectionUrl);
       } else if (pn.endsWith(DS_CONNECTABLE)) {
-        config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.connectable = s);
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setConnectable);
       } else if (pn.endsWith(DS_JTA)) {
-        config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.jta = s);
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setJta);
       } else if (pn.endsWith(DS_XA)) {
-        config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.xa = s);
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setXa);
       } else if (pn.endsWith(DS_INITIAL_SIZE)) {
-        config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.initialSize = s);
+        config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setInitialSize);
       } else if (pn.endsWith(DS_MIN_SIZE)) {
-        config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.minSize = s);
+        config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setMinSize);
       } else if (pn.endsWith(DS_MAX_SIZE)) {
-        config.getOptionalValue(pn, Integer.class).ifPresent(s -> cfg.maxSize = s);
+        config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setMaxSize);
       } else if (pn.endsWith(DS_LEAK_TIMEOUT)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.leakTimeout = convert(s));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.setLeakTimeout(convert(s)));
       } else if (pn.endsWith(DS_VALIDATION_TIMEOUT)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> cfg.validationTimeout = convert(s));
+            .ifPresent(s -> cfg.setValidationTimeout(convert(s)));
       } else if (pn.endsWith(DS_REAP_TIMEOUT)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.reapTimeout = convert(s));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.setReapTimeout(convert(s)));
       } else if (pn.endsWith(DS_ACQUISITION_TIMEOUT)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> cfg.acquisitionTimeout = convert(s));
+            .ifPresent(s -> cfg.setAcquisitionTimeout(convert(s)));
       } else if (pn.endsWith(DS_VALIDATE_CONNECTION)) {
-        config.getOptionalValue(pn, Boolean.class).ifPresent(s -> cfg.validateConnection = s);
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setValidateConnection);
       }
     });
     if (isNoneBlank(cfg.name, cfg.connectionUrl)) {
@@ -272,5 +272,68 @@ public class DataSourceConfig {
     return xa;
   }
 
+  protected void setAcquisitionTimeout(Duration acquisitionTimeout) {
+    this.acquisitionTimeout = acquisitionTimeout;
+  }
+
+  protected void setConnectable(boolean connectable) {
+    this.connectable = connectable;
+  }
+
+  protected void setConnectionUrl(String connectionUrl) {
+    this.connectionUrl = connectionUrl;
+  }
+
+  protected void setDriver(Class<?> driver) {
+    this.driver = driver;
+  }
+
+  protected void setInitialSize(int initialSize) {
+    this.initialSize = initialSize;
+  }
+
+  protected void setJta(boolean jta) {
+    this.jta = jta;
+  }
+
+  protected void setLeakTimeout(Duration leakTimeout) {
+    this.leakTimeout = leakTimeout;
+  }
+
+  protected void setMaxSize(int maxSize) {
+    this.maxSize = maxSize;
+  }
+
+  protected void setMinSize(int minSize) {
+    this.minSize = minSize;
+  }
+
+  protected void setName(String name) {
+    this.name = name;
+  }
+
+  protected void setPassword(String password) {
+    this.password = password;
+  }
+
+  protected void setReapTimeout(Duration reapTimeout) {
+    this.reapTimeout = reapTimeout;
+  }
+
+  protected void setUsername(String username) {
+    this.username = username;
+  }
+
+  protected void setValidateConnection(boolean validateConnection) {
+    this.validateConnection = validateConnection;
+  }
+
+  protected void setValidationTimeout(Duration validationTimeout) {
+    this.validationTimeout = validationTimeout;
+  }
+
+  protected void setXa(boolean xa) {
+    this.xa = xa;
+  }
 
 }

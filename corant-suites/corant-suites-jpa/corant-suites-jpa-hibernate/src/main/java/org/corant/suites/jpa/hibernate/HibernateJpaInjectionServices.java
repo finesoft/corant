@@ -19,13 +19,13 @@ import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.SynchronizationType;
+import org.corant.Corant;
 import org.corant.kernel.util.ResourceReferences;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
@@ -42,12 +42,6 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
  */
 public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices {
 
-  @Inject
-  HibernateJpaExtension extension;
-
-  @Inject
-  InitialContext jndi;
-
   final Map<String, Object> properties =
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
   final SynchronizationType syncType = SynchronizationType.SYNCHRONIZED;
@@ -55,18 +49,20 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
   @Override
   protected ResourceReferenceFactory<EntityManagerFactory> buildEntityManagerFactoryRrf(
       String unitName) {
-    final PersistenceUnitMetaData pumd =
-        shouldNotNull(extension.getPersistenceUnitMetaDatas().get(unitName),
-            "Can not find persistence unit info for %s", unitName);
-    pumd.configDataSource(dsn -> {
-      try {
-        return forceCast(jndi.lookup(dsn));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
+    return () -> ResourceReferences.of(() -> {
+      final PersistenceUnitMetaData pumd = shouldNotNull(Corant.cdi()
+          .select(HibernateJpaExtension.class).get().getPersistenceUnitMetaDatas().get(unitName),
+          "Can not find persistence unit info for %s", unitName);
+      pumd.configDataSource(dsn -> {
+        try {
+          return forceCast(Corant.cdi().select(InitialContext.class).get().lookup(dsn));
+        } catch (NamingException e) {
+          throw new CorantRuntimeException(e);
+        }
+      });
+      return new HibernatePersistenceProvider().createContainerEntityManagerFactory(pumd,
+          properties);
     });
-    return () -> ResourceReferences.of(() -> new HibernatePersistenceProvider()
-        .createContainerEntityManagerFactory(pumd, properties));
   }
 
   @Override

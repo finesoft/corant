@@ -32,7 +32,6 @@ public abstract class AbstractJpaExtension implements Extension {
 
   private final Map<String, PersistenceUnitMetaData> persistenceUnitMetaDatas = new HashMap<>();
 
-
   protected Map<String, PersistenceUnitMetaData> getPersistenceUnitMetaDatas() {
     return persistenceUnitMetaDatas;
   }
@@ -43,5 +42,4 @@ public abstract class AbstractJpaExtension implements Extension {
       persistenceUnitMetaDatas.put(n, pu);
     });
   }
-
 }

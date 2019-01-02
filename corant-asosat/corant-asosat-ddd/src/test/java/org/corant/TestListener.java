@@ -60,13 +60,11 @@ public class TestListener implements ServletContextListener {
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
-    ServletContextListener.super.contextDestroyed(sce);
     testInject(ds, "contextDestroyed");
   }
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
-    ServletContextListener.super.contextInitialized(sce);
     testInject(ds, "contextInitialized");
   }
 
@@ -79,13 +77,11 @@ public class TestListener implements ServletContextListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-      HttpSessionListener.super.sessionCreated(se);
       testInject(ds, "sessionCreated");
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-      HttpSessionListener.super.sessionDestroyed(se);
       testInject(ds, "sessionDestroyed");
     }
   }
@@ -101,31 +97,26 @@ public class TestListener implements ServletContextListener {
 
     @Override
     public void attributeAdded(ServletRequestAttributeEvent srae) {
-      ServletRequestAttributeListener.super.attributeAdded(srae);
       testInject(ds, "attributeAdded");
     }
 
     @Override
     public void attributeRemoved(ServletRequestAttributeEvent srae) {
-      ServletRequestAttributeListener.super.attributeRemoved(srae);
       testInject(ds, "attributeRemoved");
     }
 
     @Override
     public void attributeReplaced(ServletRequestAttributeEvent srae) {
-      ServletRequestAttributeListener.super.attributeReplaced(srae);
       testInject(ds, "attributeReplaced");
     }
 
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
-      ServletRequestListener.super.requestDestroyed(sre);
       testInject(ds, "requestDestroyed");
     }
 
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
-      ServletRequestListener.super.requestInitialized(sre);
       testInject(ds, "requestInitialized");
     }
 
@@ -141,19 +132,16 @@ public class TestListener implements ServletContextListener {
 
     @Override
     public void attributeAdded(ServletContextAttributeEvent event) {
-      ServletContextAttributeListener.super.attributeAdded(event);
       testInject(ds, "attributeAdded");
     }
 
     @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
-      ServletContextAttributeListener.super.attributeRemoved(event);
       testInject(ds, "attributeRemoved");
     }
 
     @Override
     public void attributeReplaced(ServletContextAttributeEvent event) {
-      ServletContextAttributeListener.super.attributeReplaced(event);
       testInject(ds, "attributeReplaced");
     }
 

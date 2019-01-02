@@ -17,13 +17,17 @@ package org.corant.suites.jndi;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Priority;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 
 /**
@@ -48,7 +52,25 @@ public class InitialContextExtension implements Extension {
     return useCorantContext;
   }
 
-  void beforeBeanDiscovery(@Observes @Priority(Integer.MAX_VALUE) final BeforeBeanDiscovery event) {
+  void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
+    try {
+      getContext().bind(JndiNames.JNDI_COMP_NME + "/BeanManager", bm);
+      abd.<InitialContext>addBean().addQualifier(Default.Literal.INSTANCE)
+          .addTransitiveTypeClosure(InitialContext.class).beanClass(InitialContext.class)
+          .scope(ApplicationScoped.class).produceWith(beans -> getContext())
+          .disposeWith((jndi, beans) -> {
+            try {
+              jndi.close();
+            } catch (NamingException e) {
+              logger.log(Level.WARNING, "An error occurred while closing the context.", e);
+            }
+          });
+    } catch (NamingException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd) {
     try {
       if (!NamingManager.hasInitialContextFactoryBuilder()) {
         NamingManager.setInitialContextFactoryBuilder(e -> NamingContext::new);
@@ -56,7 +78,7 @@ public class InitialContextExtension implements Extension {
       }
       context = new InitialContext();
     } catch (IllegalStateException | NamingException e) {
-      logger.log(Level.WARNING, null, e);
+      logger.log(Level.WARNING, "An error occurred initializing the context.", e);
     }
 
     if (context == null) {

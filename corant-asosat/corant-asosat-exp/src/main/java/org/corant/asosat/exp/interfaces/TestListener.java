@@ -51,7 +51,7 @@ public class TestListener implements ServletContextListener {
 
   static void testInject(DataSource ds, String test) {
     try {
-      new QueryRunner(ds).query("SELECT * FROM CT_DMMS_INDU", new MapListHandler()).stream()
+      new QueryRunner(ds).query("SELECT * FROM EP_Test", new MapListHandler()).stream()
           .map(m -> test + " ->" + getMapString(m, "name")).forEach(System.out::println);
     } catch (SQLException e) {
       e.printStackTrace();

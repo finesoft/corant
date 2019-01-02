@@ -60,6 +60,10 @@ public abstract class AbstractJpaExtension implements Extension {
 
   private final Map<String, PersistenceUnitMetaData> persistenceUnitMetaDatas = new HashMap<>();
 
+  public Map<String, PersistenceUnitMetaData> getPersistenceUnitMetaDatas() {
+    return Collections.unmodifiableMap(persistenceUnitMetaDatas);
+  }
+
   protected abstract EntityManager buildEntityManager(EntityManagerFactory emf,
       SynchronizationType syncType, Map<String, ?> pps);
 
@@ -70,10 +74,6 @@ public abstract class AbstractJpaExtension implements Extension {
       PersistenceUnitMetaData persistenceUnitMetaData) {
     return EMFS.computeIfAbsent(unitName,
         pun -> buildEntityManagerFactory(instance, pun, persistenceUnitMetaData));
-  }
-
-  protected Map<String, PersistenceUnitMetaData> getPersistenceUnitMetaDatas() {
-    return Collections.unmodifiableMap(persistenceUnitMetaDatas);
   }
 
   protected String resolveUnitName(String name, String unitName) {

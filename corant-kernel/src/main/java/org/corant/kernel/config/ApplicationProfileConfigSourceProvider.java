@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Priorities.ConfigPriorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -54,9 +55,10 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
     try {
-      list.addAll(ConfigSourceLoader.load(Ordinals.APPLICATION_PROFILE_ORDINAL, pfFilePaths));
       list.addAll(
-          ConfigSourceLoader.load(classLoader, Ordinals.APPLICATION_PROFILE_ORDINAL, pfClassPaths));
+          ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, pfFilePaths));
+      list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_PROFILE_ORDINAL,
+          pfClassPaths));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

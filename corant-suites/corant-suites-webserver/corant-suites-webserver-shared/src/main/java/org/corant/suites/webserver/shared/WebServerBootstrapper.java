@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-webserver-shared
@@ -47,6 +48,10 @@ public class WebServerBootstrapper {
 
   @Inject
   WebServerExtension extension;
+
+  @Inject
+  @ConfigProperty(name = "webserver.auto-start", defaultValue = "true")
+  Boolean autoStart;
 
   WebServer server;
 
@@ -68,8 +73,10 @@ public class WebServerBootstrapper {
     if (server == null) {
       throw new CorantRuntimeException("Web server not initialized yet!");
     }
-    server.start();
-    beanManager.fireEvent(new PostCorantReadyEvent());
+    if (autoStart) {
+      server.start();
+      beanManager.fireEvent(new PostCorantReadyEvent());
+    }
   }
 
   @PreDestroy

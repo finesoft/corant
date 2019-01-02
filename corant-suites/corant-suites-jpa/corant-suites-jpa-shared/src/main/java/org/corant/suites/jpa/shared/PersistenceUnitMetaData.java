@@ -175,7 +175,9 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
 
   @Override
   public Properties getProperties() {
-    return new Properties(properties);
+    Properties pops = new Properties();
+    properties.forEach(pops::put);
+    return pops;
   }
 
   @Override
@@ -203,6 +205,31 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
 
   public boolean isExcludeUnlistedClasses() {
     return excludeUnlistedClasses;
+  }
+
+  public PersistenceUnitMetaData with(Properties properties, PersistenceUnitTransactionType putt) {
+    PersistenceUnitMetaData newObj = new PersistenceUnitMetaData(getPersistenceUnitName());
+    newObj.setClassLoader(getClassLoader());
+    newObj.setExcludeUnlistedClasses(isExcludeUnlistedClasses());
+    newObj.setJarFileUrls(getJarFileUrls());
+    newObj.setJtaDataSource(getJtaDataSource());
+    newObj.setJtaDataSourceName(getJtaDataSourceName());
+    newObj.setManagedClassNames(getManagedClassNames());
+    newObj.setMappingFileNames(getMappingFileNames());
+    newObj.setNewTempClassLoader(getNewTempClassLoader());
+    newObj.setNonJtaDataSource(getNonJtaDataSource());
+    newObj.setNonJtaDataSourceName(getNonJtaDataSourceName());
+    newObj.setPersistenceProviderClassName(getPersistenceProviderClassName());
+    newObj.setPersistenceUnitRootUrl(getPersistenceUnitRootUrl());
+    newObj.setPersistenceUnitTransactionType(getPersistenceUnitTransactionType());
+    newObj.setPersistenceXMLSchemaVersion(getPersistenceXMLSchemaVersion());
+    newObj.setProperties(properties);
+    newObj.setSharedCacheMode(getSharedCacheMode());
+    newObj.setTransformers(getTransformers());
+    newObj.setValidationMode(getValidationMode());
+    newObj.setVersion(getVersion());
+    newObj.setPersistenceUnitTransactionType(putt);
+    return newObj;
   }
 
   protected void addJarFileUrl(URL url) {

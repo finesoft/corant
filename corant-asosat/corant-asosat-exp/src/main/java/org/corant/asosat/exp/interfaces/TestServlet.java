@@ -52,9 +52,9 @@ public class TestServlet extends HttpServlet {
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    as.testEntityManager();
+    as.testEntityManager(req.getParameter("ok"));
     StringBuilder sb = new StringBuilder("<table>");
-    List<Map<String, Object>> list = qs.select("Industries.query", null);
+    List<Map<String, Object>> list = qs.select("Test.query", null);
     list.forEach(m -> {
       sb.append("<tr><td>").append(getMapString(m, "name")).append("</td></tr>");
     });

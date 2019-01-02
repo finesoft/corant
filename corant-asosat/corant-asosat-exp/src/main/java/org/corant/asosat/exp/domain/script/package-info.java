@@ -13,27 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.normal;
-
 /**
- * corant-shared
- *
- * @author bingo 上午10:20:20
+ * corant-asosat-exp
+ * 
+ * @author bingo 下午1:55:24
  *
  */
-public interface Priorities {
-
-
-  interface ConfigPriorities {
-    int FRAMEWORK_DEFAULTS_ORDINAL = -1000;
-    int APPLICATION_ORDINAL = 200;
-    int APPLICATION_PROFILE_ORDINAL = 250;
-    int APPLICATION_TMP_ORDINAL = 275;
-    int LOCATION_ORDINAL = 300;
-  }
-
-  interface PostReadyEventPriorities {
-
-  }
-
-}
+package org.corant.asosat.exp.domain.script;

@@ -87,7 +87,7 @@ public class PersistenceXmlParser {
         } else if (tag.equals(JpaConfig.PUN_SHARE_CACHE_MOD)) {
           metaData.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
         } else if (tag.equals(JpaConfig.PUN_PROS)) {
-          NodeList props = element.getChildNodes();
+          NodeList props = subEle.getChildNodes();
           for (int j = 0; j < props.getLength(); j++) {
             if (props.item(j).getNodeType() == Node.ELEMENT_NODE) {
               Element propElement = (Element) props.item(j);

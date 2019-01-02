@@ -15,6 +15,7 @@
  */
 package org.corant.asosat.exp.application;
 
+import static org.corant.shared.util.ObjectUtils.isEquals;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,6 +23,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
+import org.corant.asosat.exp.domain.TestDefaultGenericAggregate;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-asosat-exp
@@ -41,8 +44,19 @@ public class TestApplicationService {
   @Named("dmmsRwDs")
   DataSource ds;
 
-  public void testEntityManager() {
-    em.toString();
+  public void testEntityManager(String param) {
+    TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
+    obj.setName("bingo");
+    em.persist(obj);
+    if (isEquals(param, "0")) {
+      testEntityManager1();
+    }
   }
 
+  public void testEntityManager1() {
+    TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
+    obj.setName("jimmy");
+    em.persist(obj);
+    throw new CorantRuntimeException("xxxxxxxxxxxxx");
+  }
 }

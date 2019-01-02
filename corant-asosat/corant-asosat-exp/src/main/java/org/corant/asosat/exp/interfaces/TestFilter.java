@@ -58,7 +58,7 @@ public class TestFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     try {
-      new QueryRunner(ds).query("SELECT * FROM CT_DMMS_INDU", new MapListHandler()).stream()
+      new QueryRunner(ds).query("SELECT * FROM EP_Test", new MapListHandler()).stream()
           .map(m -> "filter inject test ->" + getMapString(m, "name")).forEach(System.out::println);
       asStream(config.getInitParameterNames()).forEach(p -> {
         System.out.println("filter init param test ->" + config.getInitParameter(p));

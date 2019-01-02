@@ -28,6 +28,7 @@ public interface Names {
   interface ConfigNames {
     String CFG_PF_KEY = CORANT + ".profile";
     String CFG_LOCATION_KEY = CORANT + ".config.location";
+    String CFG_TMP_PREFIX = CORANT + ".temp.";
   }
 
   interface JndiNames {

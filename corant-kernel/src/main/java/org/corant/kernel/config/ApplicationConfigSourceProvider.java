@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.kernel.config;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.ConfigNames;
+import org.corant.shared.normal.Priorities.ConfigPriorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
@@ -52,8 +55,9 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
     try {
-      list.addAll(ConfigSourceLoader.load(Ordinals.APPLICATION_ORDINAL, filePaths));
-      list.addAll(ConfigSourceLoader.load(classLoader, Ordinals.APPLICATION_ORDINAL, classPaths));
+      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filePaths));
+      list.addAll(
+          ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL, classPaths));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

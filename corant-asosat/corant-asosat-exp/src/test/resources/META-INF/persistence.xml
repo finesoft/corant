@@ -6,7 +6,8 @@
 	<persistence-unit name="dmmsPu" transaction-type="JTA">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<jta-data-source>java:comp/datasources/dmmsRwDs</jta-data-source>
-		<!-- mapping files <mapping-file>org/corant/asosat/exp/domain/script/TestJpaOrm.xml</mapping-file> -->
+		<!-- mapping files 
+		<mapping-file>org/corant/asosat/exp/domain/script/TestJpaOrm.xml</mapping-file>-->
 		<!-- mapping classes -->
 		<class>org.corant.asosat.exp.domain.TestDefaultGenericAggregate</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
@@ -22,8 +23,6 @@
 				value="class, hbm" />
 			<!-- <property name="hibernate.dialect.storage_engine" value="innodb" 
 				/> -->
-			<property name="hibernate.dialect"
-				value="org.corant.suites.jpa.hibernate.HibernateMySQLDialect" />
 
 			<property name="javax.persistence.query.timeout"
 				value="100000" />

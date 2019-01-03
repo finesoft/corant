@@ -17,4 +17,4 @@
  * @author bingo 上午11:43:07
  *
  */
-package org.corant.kernel.bootstrap;
+package org.corant.kernel.boot;

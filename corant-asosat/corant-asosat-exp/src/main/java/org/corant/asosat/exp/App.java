@@ -15,7 +15,7 @@
  */
 package org.corant.asosat.exp;
 
-import org.corant.kernel.bootstrap.DirectRunner;
+import org.corant.kernel.boot.DirectRunner;
 
 /**
  * corant-asosat-exp

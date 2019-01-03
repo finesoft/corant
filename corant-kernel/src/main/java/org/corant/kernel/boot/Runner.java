@@ -11,21 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.bootstrap;
-
-import org.corant.shared.util.LaunchUtils;
+package org.corant.kernel.boot;
 
 /**
  * corant-kernel
  *
- * @author bingo 下午3:33:04
+ * @author bingo 下午3:30:49
  *
  */
-public class DebugRunner implements Runner {
+public interface Runner {
 
-  @Override
-  public void run() throws Exception {
-    LaunchUtils.debugAs();
-  }
+  void run() throws Exception;
 
 }

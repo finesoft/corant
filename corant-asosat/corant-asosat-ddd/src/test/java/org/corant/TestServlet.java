@@ -30,7 +30,7 @@ import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.corant.kernel.bootstrap.DirectRunner;
+import org.corant.kernel.boot.DirectRunner;
 
 /**
  * corant-asosat-ddd

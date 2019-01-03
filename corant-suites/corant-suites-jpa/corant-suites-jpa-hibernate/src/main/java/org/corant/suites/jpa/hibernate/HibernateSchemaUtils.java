@@ -19,6 +19,7 @@ import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.MapUtils.asProperties;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.tryCast;
+import static org.corant.shared.util.StringUtils.replace;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -115,13 +116,13 @@ public class HibernateSchemaUtils {
 
   public static void stdoutPersistJpaOrmXml(String pkg, String endWith, Consumer<String> out) {
     prepare();
-    String packageNameToUse = shouldNotNull(pkg).replaceAll("\\.", "/");
+    String usePkg = replace(pkg, ".", "/");
     try {
-      ClassPaths.from(packageNameToUse).getResources()
+      ClassPaths.from(usePkg).getResources()
           .filter(f -> f.getResourceName().endsWith(endWith)).map(f -> f.getResourceName())
           .sorted(String::compareTo).forEach(s -> {
-            if (s.contains(packageNameToUse) && s.endsWith(endWith)) {
-              out.accept(s.substring(s.indexOf(packageNameToUse)));
+            if (s.contains(usePkg) && s.endsWith(endWith)) {
+              out.accept(s.substring(s.indexOf(usePkg)));
             }
           });
     } catch (Exception e) {

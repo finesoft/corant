@@ -72,11 +72,11 @@ public class InitialContextExtension implements Extension {
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd) {
     try {
-      if (!NamingManager.hasInitialContextFactoryBuilder()) {
-        NamingManager.setInitialContextFactoryBuilder(e -> NamingContext::new);
-        useCorantContext = true;
+      if (DefaultInitialContextFactory.initialContext == null) {
+        NamingManager.setInitialContextFactoryBuilder(e -> DefaultInitialContextFactory::build);
       }
       context = new InitialContext();
+      useCorantContext = DefaultInitialContextFactory.initialContext != null;
     } catch (IllegalStateException | NamingException e) {
       logger.log(Level.WARNING, "An error occurred initializing the context.", e);
     }
@@ -93,11 +93,10 @@ public class InitialContextExtension implements Extension {
       }
     }
     if (useCorantContext) {
-      logger
-          .config(() -> String.format("Initial corant naming context, create subcontexts with %s.",
-              String.join(" ", DFLT_SUB_CTX)));
+      logger.info(() -> String.format("Initial corant naming context, create subcontexts with %s.",
+          String.join(" ", DFLT_SUB_CTX)));
     } else {
-      logger.config(() -> String.format("Initial naming context, create subcontexts with %s.",
+      logger.info(() -> String.format("Initial naming context, create subcontexts with %s.",
           String.join(" ", DFLT_SUB_CTX)));
     }
 

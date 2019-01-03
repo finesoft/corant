@@ -13,24 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.exp;
-
-import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import org.corant.suites.jpa.hibernate.HibernateSchemaUtils;
+package org.corant.kernel.spi;
 
 /**
- * corant-asosat-exp
+ * corant-kernel
  *
- * @author bingo 下午2:22:39
+ * @author bingo 下午2:30:23
  *
  */
-public class JpaTest {
-
-  public static void main(String... strings) throws NamingException {
-    HibernateSchemaUtils.stdoutUpdateSchema("dmmsPu");
-    System.out.println(new InitialContext().lookup(JNDI_DATS_NME + "/dmmsRwDs"));
-  }
-
+@FunctionalInterface
+public interface CorantConstructHandler {
+  void handle();
 }

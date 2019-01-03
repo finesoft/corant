@@ -121,7 +121,7 @@ public abstract class AbstractJpaExtension implements Extension {
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     JpaConfig.from(ConfigProvider.getConfig()).getMetaDatas()
         .forEach(persistenceUnitMetaDatas::put);
-    logger.config(() -> String.format("Find jpa configurations [%s]",
+    logger.info(() -> String.format("Find jpa configurations [%s]",
         String.join(", ", persistenceUnitMetaDatas.keySet())));
   }
 

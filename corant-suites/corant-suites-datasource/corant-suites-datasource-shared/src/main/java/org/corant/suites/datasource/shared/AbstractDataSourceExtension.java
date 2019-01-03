@@ -72,7 +72,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     dataSourceConfigs.putAll(curCfgs);
     dataSourceNames.addAll(curCfgs.keySet());
     if (dataSourceNames.isEmpty()) {
-      logger.config(() -> "Can not find any data source configurations.");
+      logger.info(() -> "Can not find any data source configurations.");
     } else {
       logger.config(
           () -> String.format("Find data source names %s", String.join(", ", dataSourceNames)));

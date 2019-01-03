@@ -16,9 +16,10 @@
 package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.lang.annotation.Annotation;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -32,6 +33,7 @@ import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
+import org.corant.kernel.spi.CorantConstructHandler;
 import org.corant.kernel.util.UnmanageableInstance;
 import org.corant.kernel.util.Unmanageables;
 import org.corant.shared.util.StopWatch;
@@ -50,27 +52,25 @@ import org.jboss.weld.manager.api.WeldManager;
 public class Corant {
 
   private static Corant INSTANCE;
-  static {
-    if (tryAsClass("org.apache.logging.log4j.jul.LogManager") != null) {
-      System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
-    }
-  }
+  private static Logger logger = Logger.getLogger(Corant.class.getName());
   private Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
-  private Logger logger = Logger.getLogger(getClass().getName());
 
   public Corant(Class<?> configClass) {
-    this.configClass = configClass;
-    if (this.configClass != null) {
-      classLoader = configClass.getClassLoader();
-    }
-    INSTANCE = this;
+    this(configClass, configClass != null ? configClass.getClassLoader() : defaultClassLoader());
   }
 
   public Corant(ClassLoader classLoader) {
-    this.classLoader = classLoader;
+    this(null, classLoader);
+  }
+
+  Corant(Class<?> configClass, ClassLoader classLoader) {
+    this.configClass = configClass;
+    this.classLoader = classLoader == null ? defaultClassLoader() : classLoader;
     INSTANCE = this;
+    ServiceLoader.load(CorantConstructHandler.class, classLoader)
+        .forEach(CorantConstructHandler::handle);
   }
 
   public static CDI<Object> cdi() {

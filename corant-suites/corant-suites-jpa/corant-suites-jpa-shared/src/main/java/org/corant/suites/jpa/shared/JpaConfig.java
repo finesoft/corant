@@ -84,10 +84,9 @@ public class JpaConfig {
           .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
     }
     cfg.metaDatas.putAll(fromXmlPums);
-    logger
-        .config(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
-            String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
-            String.join(",", fromXmlPums.keySet())));
+    logger.info(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
+        String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
+        String.join(",", fromXmlPums.keySet())));
     return cfg;
   }
 

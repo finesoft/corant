@@ -33,6 +33,7 @@ import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
 import org.corant.suites.webserver.shared.AbstractWebServer;
 import org.jboss.weld.environment.servlet.WeldServletLifecycle;
+import org.jboss.weld.environment.undertow.UndertowContainer;
 import org.xnio.Options;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -199,6 +200,8 @@ public class UndertowWebServer extends AbstractWebServer {
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         corant.getBeanManager());
+    di.addInitParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
+        UndertowContainer.class.getName());
     if (additionalConfigurators.isResolvable()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureDeployment(di));

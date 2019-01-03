@@ -22,9 +22,6 @@
 				value="class, hbm" />
 			<!-- <property name="hibernate.dialect.storage_engine" value="innodb" 
 				/> -->
-			<property name="hibernate.dialect"
-				value="org.corant.suites.jpa.hibernate.HibernateMySQLDialect" />
-
 			<property name="javax.persistence.query.timeout"
 				value="100000" />
 			<property

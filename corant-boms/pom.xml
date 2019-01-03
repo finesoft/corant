@@ -63,6 +63,7 @@
 		<version.narayana-jta>5.9.2.Final</version.narayana-jta>
 		<version.mysql>5.1.39</version.mysql>
 		<version.hibernate>5.4.0.Final</version.hibernate>
+		<version.flyway>5.2.0</version.flyway>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -349,6 +350,11 @@
 				<artifactId>mysql-connector-java</artifactId>
 				<version>${version.mysql}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>${version.flyway}</version>
+			</dependency>
 
 			<!-- ORM -->
 			<dependency>
@@ -522,6 +528,11 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-flyway</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

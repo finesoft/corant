@@ -30,6 +30,7 @@
 		<module>corant-suites-webserver</module>
 		<module>corant-suites-websocket</module>
 		<module>corant-suites-query</module>
+		<module>corant-suites-security</module>
 	</modules>
 	<!--
 	<build>

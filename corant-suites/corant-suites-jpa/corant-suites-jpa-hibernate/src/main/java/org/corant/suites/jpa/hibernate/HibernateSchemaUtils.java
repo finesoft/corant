@@ -15,9 +15,11 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.MapUtils.asProperties;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.tryCast;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
@@ -31,6 +33,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassPaths;
+import org.corant.shared.util.MethodUtils;
 import org.corant.suites.jpa.shared.JpaUtils;
 import org.corant.suites.jpa.shared.PersistenceUnitMetaData;
 import org.hibernate.boot.spi.MetadataImplementor;
@@ -54,75 +57,13 @@ import io.agroal.pool.DataSource;
  */
 public class HibernateSchemaUtils {
 
-  public static void stdoutPersistClasses(String pkg, Consumer<String> out) {
-    new ArrayList<>(JpaUtils.getPersistenceClasses(pkg)).stream().map(Class::getName)
-        .sorted(String::compareTo)
-        .map(x -> new StringBuilder("<class>").append(x).append("</class>").toString())
-        .forEach(out);
-  }
+  public static final String JPA_ORM_XML_NAME_END_WITH = "JpaOrm.xml";
 
-  public static void stdoutPersistes(String pkg, Consumer<String> out) {
-    System.out.println("<!-- mapping files -->");
-    stdoutPersistJpaOrmXml(pkg, out);
-    System.out.println("<!-- mapping classes -->");
-    stdoutPersistClasses(pkg, out);
-  }
-
-  public static void stdoutPersistJpaOrmXml(String pkg, Consumer<String> out) {
-    String packageNameToUse = shouldNotNull(pkg).replaceAll("\\.", "/");
-    try {
-      ClassPaths.from(packageNameToUse).getResources()
-          .filter(f -> f.getResourceName().endsWith("JpaOrm.xml")).map(f -> f.getResourceName())
-          .sorted(String::compareTo).forEach(s -> {
-            if (s.contains(packageNameToUse) && s.endsWith("JpaOrm.xml")) {
-              out.accept(new StringBuilder().append("<mapping-file>")
-                  .append(s.substring(s.indexOf(packageNameToUse))).append("</mapping-file>")
-                  .toString());
-            }
-          });
-    } catch (Exception e) {
-
-    }
-  }
-
-  public static void stdoutRebuildSchema(String pu) {
-    out(false);
-    new SchemaExport().setFormat(true).setDelimiter(";").execute(EnumSet.of(TargetType.STDOUT),
-        Action.BOTH, createMetadataImplementor(pu));
-    out(true);
-  }
-
-  public static void stdoutUpdateSchema(String pu) {
-    out(false);
-    new SchemaUpdate().setFormat(true).setDelimiter(";").execute(EnumSet.of(TargetType.STDOUT),
-        createMetadataImplementor(pu));
-    out(true);
-  }
-
-  @SuppressWarnings("deprecation")
-  public static void validateNamedQuery(String pu) {
-    out(false);
-    SessionFactoryImplementor sf =
-        SessionFactoryImplementor.class.cast(createMetadataImplementor(pu));
-    sf.getNamedQueryRepository().checkNamedQueries(sf.getQueryPlanCache());
-    out(true);
-  }
-
-  public static void validateSchema(String pu, String pkg) {
-    new SchemaValidator().validate(createMetadataImplementor(pu));
-  }
-
-  static MetadataImplementor createMetadataImplementor(String pu, String... integrations) {
-    System.setProperty("corant.temp.webserver.auto-start", "false");
+  public static MetadataImplementor createMetadataImplementor(String pu, String... integrations) {
     Properties props = asProperties(integrations);
     props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
-    Logger.getGlobal().setLevel(Level.OFF);
-    Handler[] handlers = Logger.getGlobal().getHandlers();
-    for (Handler handler : handlers) {
-      Logger.getGlobal().removeHandler(handler);
-    }
     Corant corant = new Corant(HibernateSchemaUtils.class);
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();
@@ -148,6 +89,77 @@ public class HibernateSchemaUtils {
     }
   }
 
+  public static void stdoutPersistClasses(String pkg, Consumer<String> out) {
+    prepare();
+    new ArrayList<>(JpaUtils.getPersistenceClasses(pkg)).stream().map(Class::getName)
+        .sorted(String::compareTo).forEach(out);
+  }
+
+  public static void stdoutPersistes(String pkg, Consumer<String> ormFilesOut,
+      Consumer<String> entityClsOut) {
+    prepare();
+    stdoutPersistes(pkg, JPA_ORM_XML_NAME_END_WITH, ormFilesOut, entityClsOut);
+  }
+
+  public static void stdoutPersistes(String pkg, String ormFileNameEndWith,
+      Consumer<String> ormFilesOut, Consumer<String> entityClsOut) {
+    prepare();
+    stdoutPersistJpaOrmXml(pkg, ormFileNameEndWith, ormFilesOut);
+    stdoutPersistClasses(pkg, entityClsOut);
+  }
+
+  public static void stdoutPersistJpaOrmXml(String pkg, Consumer<String> out) {
+    prepare();
+    stdoutPersistJpaOrmXml(pkg, JPA_ORM_XML_NAME_END_WITH, out);
+  }
+
+  public static void stdoutPersistJpaOrmXml(String pkg, String endWith, Consumer<String> out) {
+    prepare();
+    String packageNameToUse = shouldNotNull(pkg).replaceAll("\\.", "/");
+    try {
+      ClassPaths.from(packageNameToUse).getResources()
+          .filter(f -> f.getResourceName().endsWith(endWith)).map(f -> f.getResourceName())
+          .sorted(String::compareTo).forEach(s -> {
+            if (s.contains(packageNameToUse) && s.endsWith(endWith)) {
+              out.accept(s.substring(s.indexOf(packageNameToUse)));
+            }
+          });
+    } catch (Exception e) {
+
+    }
+  }
+
+  public static void stdoutRebuildSchema(String pu) {
+    prepare();
+    out(false);
+    new SchemaExport().setFormat(true).setDelimiter(";").execute(EnumSet.of(TargetType.STDOUT),
+        Action.BOTH, createMetadataImplementor(pu));
+    out(true);
+  }
+
+  public static void stdoutUpdateSchema(String pu, String... integrations) {
+    prepare();
+    out(false);
+    new SchemaUpdate().setFormat(true).setDelimiter(";").execute(EnumSet.of(TargetType.STDOUT),
+        createMetadataImplementor(pu, integrations));
+    out(true);
+  }
+
+  @SuppressWarnings("deprecation")
+  public static void validateNamedQuery(String pu, String... integrations) {
+    prepare();
+    out(false);
+    SessionFactoryImplementor sf =
+        SessionFactoryImplementor.class.cast(createMetadataImplementor(pu, integrations));
+    sf.getNamedQueryRepository().checkNamedQueries(sf.getQueryPlanCache());
+    out(true);
+  }
+
+  public static void validateSchema(String pu, String pkg) {
+    prepare();
+    new SchemaValidator().validate(createMetadataImplementor(pu));
+  }
+
   static void out(boolean end) {
     if (!end) {
       System.out.println("\n/**-->>>>>>>> Schema output start**/");
@@ -155,5 +167,27 @@ public class HibernateSchemaUtils {
       System.out.println("\n/**--Version: V1_0_" + System.currentTimeMillis()
           + "\n\n--<<<<<<<< Schema output end. **/\n");
     }
+  }
+
+  static void prepare() {
+    // disable log4j
+    try {
+      Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
+      if (loggerCfgCls != null) {
+        Method method = MethodUtils.getMatchingMethod(loggerCfgCls, "initialize",
+            tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
+        method.invoke(null,
+            tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
+      }
+    } catch (Exception ignore) {
+      ignore.printStackTrace();
+    }
+    // disable jul
+    Logger.getGlobal().setLevel(Level.OFF);
+    Handler[] handlers = Logger.getGlobal().getHandlers();
+    for (Handler handler : handlers) {
+      Logger.getGlobal().removeHandler(handler);
+    }
+    System.setProperty("corant.temp.webserver.auto-start", "false");
   }
 }

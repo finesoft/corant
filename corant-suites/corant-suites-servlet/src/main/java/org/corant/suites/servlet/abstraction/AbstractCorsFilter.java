@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.servlet.abstraction;
@@ -35,22 +37,22 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public abstract class AbstractCorsFilter implements Filter {
 
   @Inject
-  @ConfigProperty(name = "cors.enabled", defaultValue = "false")
+  @ConfigProperty(name = "servlet.cors.enabled", defaultValue = "false")
   protected boolean enabled;
   @Inject
-  @ConfigProperty(name = "cors.origin", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.origin", defaultValue = "")
   protected String origin;
   @Inject
-  @ConfigProperty(name = "cors.headers", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.headers", defaultValue = "")
   protected String headers;
   @Inject
-  @ConfigProperty(name = "cors.credentials", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.credentials", defaultValue = "")
   protected String credentials;
   @Inject
-  @ConfigProperty(name = "cors.methods", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.methods", defaultValue = "")
   protected String methods;
   @Inject
-  @ConfigProperty(name = "cors.maxAge", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.maxAge", defaultValue = "")
   protected String maxAge;
 
   @Override

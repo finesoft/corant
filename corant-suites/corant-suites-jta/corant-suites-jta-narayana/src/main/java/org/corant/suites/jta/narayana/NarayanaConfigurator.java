@@ -13,27 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.webserver.undertow;
+package org.corant.suites.jta.narayana;
 
-import java.util.function.BiConsumer;
 import org.corant.kernel.config.ComparableConfigurator;
-import org.xnio.Option;
-import io.undertow.servlet.api.DeploymentInfo;
+import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
+import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
+import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
+import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 
 /**
- * corant-suites-webserver-undertow
+ * corant-suites-jta-narayana
  *
- * @author bingo 上午10:32:02
+ * @author bingo 上午10:46:42
  *
  */
-public interface UndertowWebServerConfigurator extends ComparableConfigurator {
+public interface NarayanaConfigurator extends ComparableConfigurator {
 
-  void configureDeployment(DeploymentInfo deploymentInfo);
+  void configCoordinatorEnvironment(CoordinatorEnvironmentBean bean);
 
-  <T> void configureServerOptions(BiConsumer<Option<T>, T> consumer);
+  void configCoreEnvironment(CoreEnvironmentBean bean);
 
-  <T> void configureSocketOptions(BiConsumer<Option<T>, T> consumer);
+  void configObjectStoreEnvironment(ObjectStoreEnvironmentBean bean, String name);
 
-  <T> void configureWorkOptions(BiConsumer<Option<T>, T> consumer);
+  void configRecoveryEnvironment(RecoveryEnvironmentBean bean);
 
 }

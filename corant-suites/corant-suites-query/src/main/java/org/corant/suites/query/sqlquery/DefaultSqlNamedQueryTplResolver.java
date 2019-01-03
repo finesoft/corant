@@ -91,8 +91,8 @@ public class DefaultSqlNamedQueryTplResolver implements DynamicQueryTplResolver<
     } else if (arg instanceof WrapperTemplateModel) {
       return ((WrapperTemplateModel) arg).getWrappedObject();
     } else {
-      throw new QueryRuntimeException(
-          "Unknow arguement,the class is " + (arg == null ? "null" : arg.getClass()));
+      throw new QueryRuntimeException("Unknow arguement,the class is %s",
+          arg == null ? "null" : arg.getClass());
     }
   }
 

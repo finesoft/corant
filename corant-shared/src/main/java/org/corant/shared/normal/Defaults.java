@@ -15,7 +15,11 @@
  */
 package org.corant.shared.normal;
 
+import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * corant-shared
@@ -31,6 +35,12 @@ public interface Defaults {
 
   int ONE_KB = 1024;
 
+  int SIXTEEN_KBS = ONE_KB * 16;
+
   long ONE_MB = ONE_KB * ONE_KB;
+
+  static Path corantUserDir(String suffix) {
+    return Paths.get(System.getProperty("user.home")).resolve("." + CORANT + defaultString(suffix));
+  }
 
 }

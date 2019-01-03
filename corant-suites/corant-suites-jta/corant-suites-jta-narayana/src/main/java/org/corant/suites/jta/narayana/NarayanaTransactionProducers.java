@@ -15,11 +15,13 @@
  */
 package org.corant.suites.jta.narayana;
 
-import java.nio.file.Paths;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
@@ -27,11 +29,14 @@ import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Defaults;
 import org.jboss.tm.JBossXATerminator;
 import org.jboss.tm.XAResourceRecoveryRegistry;
 import org.jboss.tm.usertx.UserTransactionRegistry;
+import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
+import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
+import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.internal.jbossatx.jta.jca.XATerminator;
 import com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
@@ -47,23 +52,39 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 @ApplicationScoped
 public class NarayanaTransactionProducers {
 
+  @Inject
+  @Any
+  Instance<NarayanaConfigurator> configurators;
+
   @PostConstruct
   void onPostConstruct() {
-    // FIXME,here to config
-    String objectStoreDir = Paths.get(System.getProperty("user.home"))
-        .resolve("." + Names.CORANT + "-narayana-objects").toString();
+    String dfltObjStoreDir = Defaults.corantUserDir("-narayana-objects").toString();
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
-    nullActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(objectStoreDir);
+    nullActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
     final ObjectStoreEnvironmentBean defaultActionStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default");
-    defaultActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(objectStoreDir);
+    defaultActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
     final ObjectStoreEnvironmentBean stateStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore");
-    stateStoreObjectStoreEnvironmentBean.setObjectStoreDir(objectStoreDir);
+    stateStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
     final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
-    communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(objectStoreDir);
+    communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+    if (configurators.isResolvable()) {
+      configurators.stream().sorted().forEachOrdered(cfgr -> {
+        cfgr.configCoreEnvironment(BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class));
+        cfgr.configCoordinatorEnvironment(
+            BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class));
+        cfgr.configRecoveryEnvironment(
+            BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class));
+        cfgr.configObjectStoreEnvironment(nullActionStoreObjectStoreEnvironmentBean, null);
+        cfgr.configObjectStoreEnvironment(defaultActionStoreObjectStoreEnvironmentBean, "default");
+        cfgr.configObjectStoreEnvironment(stateStoreObjectStoreEnvironmentBean, "stateStore");
+        cfgr.configObjectStoreEnvironment(communicationStoreObjectStoreEnvironmentBean,
+            "communicationStore");
+      });
+    }
   }
 
   void register(@Observes PostCorantReadyEvent event, InitialContext ctx,

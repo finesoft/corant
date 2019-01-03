@@ -1,21 +1,29 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.StringUtils.isEmpty;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -25,6 +33,46 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
  *
  */
 public class MethodUtils {
+
+  public static Method getMatchingMethod(final Class<?> cls, final String methodName,
+      final Class<?>... parameterTypes) {
+    shouldNotNull(cls, "Null class not allowed.");
+    shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
+    List<Method> methods = asList(cls.getDeclaredMethods());
+    ClassUtils.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
+        .map(CollectionUtils::asList).forEach(methods::addAll);
+    Method inexactMatch = null;
+    for (final Method method : methods) {
+      if (methodName.equals(method.getName())
+          && Objects.deepEquals(parameterTypes, method.getParameterTypes())) {
+        return method;
+      } else if (methodName.equals(method.getName())
+          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)) {
+        if (inexactMatch == null) {
+          inexactMatch = method;
+        } else if (distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
+            inexactMatch.getParameterTypes())) {
+          inexactMatch = method;
+        }
+      }
+    }
+    return inexactMatch;
+  }
+
+  public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
+      final boolean autoboxing) {
+    Class<?>[] useClsArr = classArray == null ? new Class<?>[0] : classArray;
+    Class<?>[] useToClsArr = toClassArray == null ? new Class<?>[0] : toClassArray;
+    if (useClsArr.length != useToClsArr.length) {
+      return false;
+    }
+    for (int i = 0; i < useClsArr.length; i++) {
+      if (!ClassUtils.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   public static MethodSignature signature(Method method) {
     return MethodSignature.of(method);
@@ -53,6 +101,25 @@ public class MethodUtils {
         }
       }
     }
+  }
+
+  static int distance(final Class<?>[] classArray, final Class<?>[] toClassArray) {
+    int answer = 0;
+    if (!isParameterTypesMatching(classArray, toClassArray, true)) {
+      return -1;
+    }
+    for (int offset = 0; offset < classArray.length; offset++) {
+      // Note InheritanceUtils.distance() uses different scoring system.
+      if (classArray[offset].equals(toClassArray[offset])) {
+        continue;
+      } else if (ClassUtils.isAssignable(classArray[offset], toClassArray[offset], true)
+          && !ClassUtils.isAssignable(classArray[offset], toClassArray[offset], false)) {
+        answer++;
+      } else {
+        answer = answer + 2;
+      }
+    }
+    return answer;
   }
 
   public static class MethodSignature implements Serializable {

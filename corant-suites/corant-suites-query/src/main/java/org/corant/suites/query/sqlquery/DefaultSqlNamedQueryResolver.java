@@ -52,7 +52,7 @@ public class DefaultSqlNamedQueryResolver
   protected DefaultSqlNamedQueryTpl buildQueryTemplate(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found Query for key " + key);
+      throw new QueryRuntimeException("Can not found Query for key %s", key);
     }
     return new DefaultSqlNamedQueryTpl(query, conversionService);
   }

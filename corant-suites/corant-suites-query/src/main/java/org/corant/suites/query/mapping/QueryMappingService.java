@@ -70,9 +70,9 @@ public class QueryMappingService {
           m.getQueries().forEach(q -> {
             q.getParamMappings().putAll(m.getParaMapping());// copy
             if (queries.containsKey(q.getVersionedName())) {
-              throw new QueryRuntimeException(String.format(
+              throw new QueryRuntimeException(
                   "The 'name' [%s] of query element in query file [%s] can not repeat!",
-                  q.getVersionedName(), m.getUrl()));
+                  q.getVersionedName(), m.getUrl());
             } else {
               queries.put(q.getVersionedName(), q);
             }
@@ -86,14 +86,14 @@ public class QueryMappingService {
             refs.add(tq);
             if (isEquals(tq, q)) {
               throw new QueryRuntimeException(
-                  String.format("The queries in system circular reference occurred on [%s -> %s]",
-                      q, String.join(" -> ", refs)));
+                  "The queries in system circular reference occurred on [%s -> %s]", q,
+                  String.join(" -> ", refs));
             }
             Query fq = queries.get(tq);
             if (fq == null) {
-              throw new QueryRuntimeException(String.format(
+              throw new QueryRuntimeException(
                   "The 'name' [%s] of 'fetch-query' in query [%s] in system can not found the refered query!",
-                  tq, q));
+                  tq, q);
             }
             tmp.addAll(queries.get(tq).getVersionedFetchQueryNames());
           }

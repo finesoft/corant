@@ -17,7 +17,7 @@ package org.corant.suites.webserver.tomcat;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
-import org.corant.suites.webserver.shared.WebServerConfigurator;
+import org.corant.kernel.config.ComparableConfigurator;
 
 /**
  * corant-suites-webserver-tomcat
@@ -25,7 +25,7 @@ import org.corant.suites.webserver.shared.WebServerConfigurator;
  * @author bingo 上午10:09:52
  *
  */
-public interface TomcatWebServerConfigurator extends WebServerConfigurator {
+public interface TomcatWebServerConfigurator extends ComparableConfigurator {
 
   void configureConnector(Connector connector);
 

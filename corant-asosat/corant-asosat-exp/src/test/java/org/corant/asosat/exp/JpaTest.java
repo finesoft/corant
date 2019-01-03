@@ -15,10 +15,7 @@
  */
 package org.corant.asosat.exp;
 
-import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
 import org.corant.suites.jpa.hibernate.HibernateSchemaUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * corant-asosat-exp
@@ -26,15 +23,10 @@ import org.junit.runner.RunWith;
  * @author bingo 下午2:22:39
  *
  */
-@RunWith(CorantJUnit4ClassRunner.class)
 public class JpaTest {
 
   public static void main(String... strings) {
     HibernateSchemaUtils.stdoutUpdateSchema("dmmsPu");
   }
 
-  @Test
-  public void outSchema() {
-    HibernateSchemaUtils.stdoutUpdateSchema("dmmsPu");
-  }
 }

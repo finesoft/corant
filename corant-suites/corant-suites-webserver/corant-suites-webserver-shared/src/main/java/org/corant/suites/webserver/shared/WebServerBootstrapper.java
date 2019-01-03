@@ -69,11 +69,11 @@ public class WebServerBootstrapper {
   }
 
   protected void onPostContainerStartedEvent(@Observes PostContainerStartedEvent event) {
-    logger.info(() -> String.format("Start web server %s ", server));
-    if (server == null) {
-      throw new CorantRuntimeException("Web server not initialized yet!");
-    }
     if (autoStart) {
+      if (server == null) {
+        throw new CorantRuntimeException("Web server not initialized yet!");
+      }
+      logger.info(() -> String.format("Start web server %s ", server));
       server.start();
       beanManager.fireEvent(new PostCorantReadyEvent());
     }

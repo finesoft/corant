@@ -16,6 +16,7 @@
 package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
@@ -49,6 +50,11 @@ import org.jboss.weld.manager.api.WeldManager;
 public class Corant {
 
   private static Corant INSTANCE;
+  static {
+    if (tryAsClass("org.apache.logging.log4j.jul.LogManager") != null) {
+      System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    }
+  }
   private Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
@@ -148,17 +154,17 @@ public class Corant {
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
     stopWatch
-        .stop((tk) -> logger.config(
-            () -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .stop((tk) -> logger
+            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
         .start("Initializes all suites");
 
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent());
 
     stopWatch
-        .stop((tk) -> logger.config(
-            () -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
-        .destroy((sw) -> logger.config(() -> String.format(
+        .stop((tk) -> logger
+            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .destroy((sw) -> logger.info(() -> String.format(
             "Complete all initialization in %s seconds, ready to receive the service.",
             sw.getTotalTimeSeconds())));
     return this;

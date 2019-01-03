@@ -13,27 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.webserver.undertow;
-
-import java.util.function.BiConsumer;
-import org.corant.kernel.config.ComparableConfigurator;
-import org.xnio.Option;
-import io.undertow.servlet.api.DeploymentInfo;
+package org.corant.kernel.config;
 
 /**
- * corant-suites-webserver-undertow
+ * corant-kernel
  *
- * @author bingo 上午10:32:02
+ * @author bingo 上午10:44:33
  *
  */
-public interface UndertowWebServerConfigurator extends ComparableConfigurator {
+public interface ComparableConfigurator extends Comparable<ComparableConfigurator> {
 
-  void configureDeployment(DeploymentInfo deploymentInfo);
+  @Override
+  default int compareTo(ComparableConfigurator o) {
+    return Integer.compare(getOrdinal(), o.getOrdinal());
+  }
 
-  <T> void configureServerOptions(BiConsumer<Option<T>, T> consumer);
-
-  <T> void configureSocketOptions(BiConsumer<Option<T>, T> consumer);
-
-  <T> void configureWorkOptions(BiConsumer<Option<T>, T> consumer);
-
+  default int getOrdinal() {
+    return 0;
+  }
 }

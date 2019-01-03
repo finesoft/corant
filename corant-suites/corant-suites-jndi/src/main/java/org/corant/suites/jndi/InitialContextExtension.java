@@ -93,10 +93,11 @@ public class InitialContextExtension implements Extension {
       }
     }
     if (useCorantContext) {
-      logger.info(() -> String.format("Initial corant naming context, create subcontexts with %s.",
-          String.join(" ", DFLT_SUB_CTX)));
+      logger
+          .config(() -> String.format("Initial corant naming context, create subcontexts with %s.",
+              String.join(" ", DFLT_SUB_CTX)));
     } else {
-      logger.info(() -> String.format("Initial naming context, create subcontexts with %s.",
+      logger.config(() -> String.format("Initial naming context, create subcontexts with %s.",
           String.join(" ", DFLT_SUB_CTX)));
     }
 

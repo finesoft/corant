@@ -53,6 +53,8 @@ public class HibernateJpaExtension extends AbstractJpaExtension {
   @Override
   protected EntityManagerFactory buildEntityManagerFactory(final Instance instance, String unitName,
       PersistenceUnitMetaData persistenceUnitMetaData) {
+    logger.config(
+        () -> String.format("Build entity manager factory for persistence unit %s", unitName));
     PersistenceUnitMetaData pumd = persistenceUnitMetaData;
     pumd.configDataSource(dsn -> {
       try {

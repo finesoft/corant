@@ -148,17 +148,17 @@ public class Corant {
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
     stopWatch
-        .stop((tk) -> logger
-            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .stop((tk) -> logger.config(
+            () -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
         .start("Initializes all suites");
 
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent());
 
     stopWatch
-        .stop((tk) -> logger
-            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
-        .destroy((sw) -> logger.info(() -> String.format(
+        .stop((tk) -> logger.config(
+            () -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+        .destroy((sw) -> logger.config(() -> String.format(
             "Complete all initialization in %s seconds, ready to receive the service.",
             sw.getTotalTimeSeconds())));
     return this;

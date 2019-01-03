@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.query.mapping;
@@ -63,7 +65,7 @@ public class QueryMappingService {
         new QueryParser().parse(paths, queryFileNameRegex).forEach(m -> {
           List<String> brokens = m.selfValidate();
           if (!brokens.isEmpty()) {
-            throw new QueryRuntimeException(String.join("\n", brokens.toArray(new String[0])));
+            throw new QueryRuntimeException(String.join("\n", brokens));
           }
           m.getQueries().forEach(q -> {
             q.getParamMappings().putAll(m.getParaMapping());// copy
@@ -85,7 +87,7 @@ public class QueryMappingService {
             if (isEquals(tq, q)) {
               throw new QueryRuntimeException(
                   String.format("The queries in system circular reference occurred on [%s -> %s]",
-                      q, String.join(" -> ", refs.toArray(new String[0]))));
+                      q, String.join(" -> ", refs)));
             }
             Query fq = queries.get(tq);
             if (fq == null) {

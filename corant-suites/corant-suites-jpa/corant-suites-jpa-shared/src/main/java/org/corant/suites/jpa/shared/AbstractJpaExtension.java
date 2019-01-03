@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -57,7 +58,7 @@ public abstract class AbstractJpaExtension implements Extension {
       Collections.newSetFromMap(new ConcurrentHashMap<InjectionPoint, Boolean>());
   protected static final Set<InjectionPoint> PCIPS =
       Collections.newSetFromMap(new ConcurrentHashMap<InjectionPoint, Boolean>());
-
+  protected Logger logger = Logger.getLogger(getClass().getName());
   private final Map<String, PersistenceUnitMetaData> persistenceUnitMetaDatas = new HashMap<>();
 
   public Map<String, PersistenceUnitMetaData> getPersistenceUnitMetaDatas() {
@@ -65,7 +66,7 @@ public abstract class AbstractJpaExtension implements Extension {
   }
 
   protected abstract EntityManager buildEntityManager(EntityManagerFactory emf,
-      SynchronizationType syncType, Map<String, ?> pps);
+      SynchronizationType syncType, Map<String, ?> properties);
 
   protected abstract EntityManagerFactory buildEntityManagerFactory(Instance<?> instance,
       String unitName, PersistenceUnitMetaData persistenceUnitMetaData);
@@ -83,6 +84,7 @@ public abstract class AbstractJpaExtension implements Extension {
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd) {
+
     PUIPS.forEach(ip -> {
       final PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
       final String pun = resolveUnitName(pu.name(), pu.unitName());
@@ -107,16 +109,20 @@ public abstract class AbstractJpaExtension implements Extension {
           .addTransitiveTypeClosure(EntityManager.class).beanClass(EntityManager.class)
           .scope(Dependent.class).produceWith(inst -> {
             return buildEntityManager(getEntityManagerFactory(inst, pun, pumd), st, pps);
-          }).disposeWith((em, beans) -> {
           });
     });
+
+    logger.config(
+        () -> String.format("Finish jpa PersistenceUnit/PersistenceContext injection process.",
+            String.join(", ", persistenceUnitMetaDatas.keySet())));
+
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
-    JpaConfig cfg = JpaConfig.from(ConfigProvider.getConfig());
-    cfg.getMetaDatas().forEach((n, pu) -> {
-      persistenceUnitMetaDatas.put(n, pu);
-    });
+    JpaConfig.from(ConfigProvider.getConfig()).getMetaDatas()
+        .forEach(persistenceUnitMetaDatas::put);
+    logger.config(() -> String.format("Find jpa configurations [%s]",
+        String.join(", ", persistenceUnitMetaDatas.keySet())));
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {

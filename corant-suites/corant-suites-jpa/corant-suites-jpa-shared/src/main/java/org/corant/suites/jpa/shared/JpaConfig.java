@@ -76,13 +76,18 @@ public class JpaConfig {
 
   public static JpaConfig from(Config config) {
     JpaConfig cfg = new JpaConfig();
-    cfg.metaDatas.putAll(generateFromConfig(config));
-    Map<String, PersistenceUnitMetaData> fromXml = generateFromXml();
-    if (!fromXml.isEmpty()) {
-      shouldBeFalse(fromXml.keySet().stream().map(cfg.metaDatas::containsKey)
+    Map<String, PersistenceUnitMetaData> fromCfgPums = generateFromConfig(config);
+    cfg.metaDatas.putAll(fromCfgPums);
+    Map<String, PersistenceUnitMetaData> fromXmlPums = generateFromXml();
+    if (!fromXmlPums.isEmpty()) {
+      shouldBeFalse(fromXmlPums.keySet().stream().map(cfg.metaDatas::containsKey)
           .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
     }
-    cfg.metaDatas.putAll(generateFromXml());
+    cfg.metaDatas.putAll(fromXmlPums);
+    logger
+        .config(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
+            String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
+            String.join(",", fromXmlPums.keySet())));
     return cfg;
   }
 

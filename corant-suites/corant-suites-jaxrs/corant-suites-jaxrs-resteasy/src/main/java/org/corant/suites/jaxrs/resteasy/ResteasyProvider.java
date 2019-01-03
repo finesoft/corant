@@ -16,6 +16,10 @@
 package org.corant.suites.jaxrs.resteasy;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.ws.rs.core.Application;
+import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 
 /**
  * corant-suites-jaxrs-resteasy
@@ -24,6 +28,13 @@ import javax.enterprise.context.ApplicationScoped;
  *
  */
 @ApplicationScoped
-public class RestEasyProvider {
+public class ResteasyProvider {
+
+  @Inject
+  ResteasyCdiExtension extension;
+
+  @Inject
+  Instance<Application> applications;
+
 
 }

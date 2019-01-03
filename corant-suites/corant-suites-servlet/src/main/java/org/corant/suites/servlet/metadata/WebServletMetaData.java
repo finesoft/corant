@@ -20,6 +20,7 @@ import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 
@@ -43,6 +44,7 @@ public class WebServletMetaData {
   private String displayName;
   private Class<? extends Servlet> clazz;
   private ServletSecurityMetaData security;
+  private MultipartConfigMetaData multipartConfig;
 
   /**
    * @param name
@@ -57,11 +59,12 @@ public class WebServletMetaData {
    * @param displayName
    * @param clazz
    * @param security
+   * @param multipartConfig
    */
   public WebServletMetaData(String name, String[] value, String[] urlPatterns, int loadOnStartup,
       WebInitParamMetaData[] initParams, boolean asyncSupported, String smallIcon, String largeIcon,
       String description, String displayName, Class<? extends Servlet> clazz,
-      ServletSecurityMetaData security) {
+      ServletSecurityMetaData security, MultipartConfigMetaData multipartConfig) {
     super();
     setName(name);
     setValue(value);
@@ -75,20 +78,16 @@ public class WebServletMetaData {
     setDisplayName(displayName);
     setClazz(clazz);
     setSecurity(security);
-  }
-
-  public WebServletMetaData(WebServlet anno, Class<? extends Servlet> clazz) {
-    this(shouldNotNull(anno).name(), anno.value(), anno.urlPatterns(), anno.loadOnStartup(),
-        WebInitParamMetaData.of(anno.initParams()), anno.asyncSupported(), anno.smallIcon(),
-        anno.largeIcon(), anno.description(), anno.displayName(), clazz, null);
+    setMultipartConfig(multipartConfig);
   }
 
   public WebServletMetaData(WebServlet anno, ServletSecurity secAnno,
-      Class<? extends Servlet> clazz) {
-    this(anno, clazz);
-    if (secAnno != null) {
-      setSecurity(new ServletSecurityMetaData(secAnno, clazz));
-    }
+      MultipartConfig multipartConfig, Class<? extends Servlet> clazz) {
+    this(shouldNotNull(anno).name(), anno.value(), anno.urlPatterns(), anno.loadOnStartup(),
+        WebInitParamMetaData.of(anno.initParams()), anno.asyncSupported(), anno.smallIcon(),
+        anno.largeIcon(), anno.description(), anno.displayName(), clazz,
+        secAnno == null ? null : new ServletSecurityMetaData(secAnno, clazz),
+        multipartConfig == null ? null : new MultipartConfigMetaData(multipartConfig));
   }
 
   protected WebServletMetaData() {}
@@ -148,6 +147,10 @@ public class WebServletMetaData {
    */
   public int getLoadOnStartup() {
     return loadOnStartup;
+  }
+
+  public MultipartConfigMetaData getMultipartConfig() {
+    return multipartConfig;
   }
 
   /**
@@ -252,6 +255,10 @@ public class WebServletMetaData {
    */
   protected void setLoadOnStartup(int loadOnStartup) {
     this.loadOnStartup = loadOnStartup;
+  }
+
+  protected void setMultipartConfig(MultipartConfigMetaData multipartConfig) {
+    this.multipartConfig = multipartConfig;
   }
 
   /**

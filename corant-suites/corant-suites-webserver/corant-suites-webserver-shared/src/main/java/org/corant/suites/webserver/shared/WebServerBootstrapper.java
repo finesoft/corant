@@ -47,9 +47,6 @@ public class WebServerBootstrapper {
   BeanManager beanManager;
 
   @Inject
-  WebServerExtension extension;
-
-  @Inject
   @ConfigProperty(name = "webserver.auto-start", defaultValue = "true")
   Boolean autoStart;
 

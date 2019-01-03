@@ -38,6 +38,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.servlet.WebExtension;
 import org.corant.suites.webserver.shared.WebServerHandlers.PostStartedHandler;
 import org.corant.suites.webserver.shared.WebServerHandlers.PostStoppedHandler;
 import org.corant.suites.webserver.shared.WebServerHandlers.PreStartHandler;
@@ -57,7 +58,7 @@ public abstract class AbstractWebServer implements WebServer {
   protected WebServerConfig config;
 
   @Inject
-  protected WebServerExtension extension;
+  protected WebExtension extension;
 
   @Inject
   @Any

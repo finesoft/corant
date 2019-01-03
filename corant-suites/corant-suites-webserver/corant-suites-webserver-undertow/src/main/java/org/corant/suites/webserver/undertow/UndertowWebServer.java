@@ -25,6 +25,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
@@ -245,6 +246,12 @@ public class UndertowWebServer extends AbstractWebServer {
                 .forEach(ssi::addHttpMethodSecurityInfo);
           }
           si.setServletSecurityInfo(ssi);
+        }
+        if (wsm.getMultipartConfig() != null) {
+          si.setMultipartConfig(new MultipartConfigElement(wsm.getMultipartConfig().getLocation(),
+              wsm.getMultipartConfig().getMaxFileSize(),
+              wsm.getMultipartConfig().getMaxRequestSize(),
+              wsm.getMultipartConfig().getFileSizeThreshold()));
         }
         return si;
       }

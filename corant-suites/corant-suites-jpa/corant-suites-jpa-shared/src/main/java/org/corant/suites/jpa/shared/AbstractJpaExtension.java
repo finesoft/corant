@@ -54,6 +54,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public abstract class AbstractJpaExtension implements Extension {
 
   protected static final Map<String, EntityManagerFactory> EMFS = new ConcurrentHashMap<>();
+  protected static final Set<String> PUNS =
+      Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
   protected static final Set<InjectionPoint> PUIPS =
       Collections.newSetFromMap(new ConcurrentHashMap<InjectionPoint, Boolean>());
   protected static final Set<InjectionPoint> PCIPS =
@@ -89,11 +91,13 @@ public abstract class AbstractJpaExtension implements Extension {
       final PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
       final String pun = resolveUnitName(pu.name(), pu.unitName());
       PersistenceUnitMetaData pumd = shouldNotNull(persistenceUnitMetaDatas.get(pun));
-      abd.<EntityManagerFactory>addBean().addQualifier(Default.Literal.INSTANCE)
-          .addTransitiveTypeClosure(EntityManagerFactory.class)
-          .beanClass(EntityManagerFactory.class).scope(ApplicationScoped.class)
-          .produceWith(inst -> getEntityManagerFactory(inst, pun, pumd))
-          .disposeWith((emf, beans) -> emf.close());
+      if (PUNS.add(pun)) {
+        abd.<EntityManagerFactory>addBean().addQualifier(Default.Literal.INSTANCE)
+            .addTransitiveTypeClosure(EntityManagerFactory.class)
+            .beanClass(EntityManagerFactory.class).scope(ApplicationScoped.class)
+            .produceWith(inst -> getEntityManagerFactory(inst, pun, pumd))
+            .disposeWith((emf, beans) -> emf.close());
+      }
     });
 
     PCIPS.forEach(ip -> {
@@ -105,11 +109,13 @@ public abstract class AbstractJpaExtension implements Extension {
       final PersistenceUnitMetaData pumd = shouldNotNull(persistenceUnitMetaDatas.get(pun));
       final Map<String, ?> pps =
           asStream(pc.properties()).collect(Collectors.toMap(p -> p.name(), p -> p.value()));
-      abd.<EntityManager>addBean().addQualifier(Default.Literal.INSTANCE)
-          .addTransitiveTypeClosure(EntityManager.class).beanClass(EntityManager.class)
-          .scope(Dependent.class).produceWith(inst -> {
-            return buildEntityManager(getEntityManagerFactory(inst, pun, pumd), st, pps);
-          });
+      if (PUNS.add(pun)) {
+        abd.<EntityManager>addBean().addQualifier(Default.Literal.INSTANCE)
+            .addTransitiveTypeClosure(EntityManager.class).beanClass(EntityManager.class)
+            .scope(Dependent.class).produceWith(inst -> {
+              return buildEntityManager(getEntityManagerFactory(inst, pun, pumd), st, pps);
+            });
+      }
     });
 
     logger.info(() -> String.format(

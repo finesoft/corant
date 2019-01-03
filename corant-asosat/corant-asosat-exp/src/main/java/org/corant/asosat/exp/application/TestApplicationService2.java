@@ -16,8 +16,6 @@
 package org.corant.asosat.exp.application;
 
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,9 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 @ApplicationScoped
 @Transactional
-public class TestApplicationService {
-
-  AtomicLong al = new AtomicLong();
+public class TestApplicationService2 {
 
   @Inject
   @PersistenceContext(unitName = "dmmsPu")
@@ -48,17 +44,13 @@ public class TestApplicationService {
   @Named("dmmsRwDs")
   DataSource ds;
 
-  @Inject
-  TestApplicationService2 s2;
-
   public void testEntityManager(String param) {
     TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
-    obj.setName("bingo" + al.incrementAndGet());
+    obj.setName(param);
     em.persist(obj);
     em.flush();
-    s2.testEntityManager(obj.getName() + UUID.randomUUID().toString());
     if (isEquals(param, "0")) {
-      s2.testEntityManager1();
+      testEntityManager1();
     }
   }
 

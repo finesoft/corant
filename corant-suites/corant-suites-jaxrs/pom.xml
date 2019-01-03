@@ -19,4 +19,7 @@
 			<name>AL2</name>
 		</license>
 	</licenses>
+	<modules>
+		<module>corant-suites-jaxrs-resteasy</module>
+	</modules>
 </project>

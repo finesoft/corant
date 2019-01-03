@@ -40,7 +40,7 @@ import org.corant.suites.servlet.metadata.WebServletMetaData;
  * @author bingo 下午1:21:00
  *
  */
-public class WebExtension implements Extension {
+public class WebExtension implements Extension, WebMetaDataProvider {
 
   private final List<WebListenerMetaData> listenerMetaDatas = new ArrayList<>();
   private final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
@@ -50,14 +50,17 @@ public class WebExtension implements Extension {
     return !filterMetaDatas.isEmpty() && servletMetaDatas.isEmpty();
   }
 
+  @Override
   public Stream<WebFilterMetaData> filterMetaDataStream() {
     return filterMetaDatas.stream();
   }
 
+  @Override
   public Stream<WebListenerMetaData> listenerMetaDataStream() {
     return listenerMetaDatas.stream();
   }
 
+  @Override
   public Stream<WebServletMetaData> servletMetaDataStream() {
     return servletMetaDatas.stream();
   }

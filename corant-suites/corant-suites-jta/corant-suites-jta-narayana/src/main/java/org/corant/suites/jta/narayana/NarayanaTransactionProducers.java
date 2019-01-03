@@ -71,7 +71,7 @@ public class NarayanaTransactionProducers {
     final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
-    if (configurators.isResolvable()) {
+    if (!configurators.isUnsatisfied()) {
       configurators.stream().sorted().forEachOrdered(cfgr -> {
         cfgr.configCoreEnvironment(BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class));
         cfgr.configCoordinatorEnvironment(

@@ -40,6 +40,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.suites.servlet.WebMetaDataProvider;
 import org.corant.suites.webserver.shared.AbstractWebServer;
 import org.jboss.weld.environment.servlet.WeldServletLifecycle;
 import org.jboss.weld.environment.tomcat.TomcatContainer;
@@ -121,7 +122,7 @@ public class TomcatWebServer extends AbstractWebServer {
     if (config.isSecured()) {
       resolveServerSsl(tomcat);
     }
-    if (extraConfigurator.isResolvable()) {
+    if (!extraConfigurator.isUnsatisfied()) {
       extraConfigurator.stream().forEach(cfgr -> cfgr.configureConnector(dfltConnector));
     }
     resolveServerContext(tomcat.addContext("", new File(".").getAbsolutePath()));
@@ -132,7 +133,7 @@ public class TomcatWebServer extends AbstractWebServer {
   protected void resolveServerContext(Context ctx) {
     // resolveServerJndiContext(ctx);
 
-    if (extraConfigurator.isResolvable()) {
+    if (!extraConfigurator.isUnsatisfied()) {
       extraConfigurator.stream().forEach(cfgr -> cfgr.configureContext(ctx));
     }
     ServletContext servletContext = ctx.getServletContext();
@@ -140,20 +141,20 @@ public class TomcatWebServer extends AbstractWebServer {
         corant.getBeanManager());
     servletContext.setAttribute(org.jboss.weld.Container.CONTEXT_ID_KEY,
         corant.getBeanManager().getId());
+    getServletContextAttributes().forEach(servletContext::setAttribute);
     ctx.addParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
         TomcatContainer.class.getName());
     ctx.addApplicationListener(org.jboss.weld.environment.servlet.Listener.class.getName());
 
-    extension.listenerMetaDataStream().map(l -> l.getClazz().getName())
-        .forEach(ctx::addApplicationListener);
+    getListenerMetaDatas().map(l -> l.getClazz().getName()).forEach(ctx::addApplicationListener);
 
-    if (extension.defaultServlet()) {
+    if (WebMetaDataProvider.isNeedDfltServlet(getFilterMetaDatas(), getServletMetaDatas())) {
       String servletName = "Tomcat";
       Wrapper wrapper = Tomcat.addServlet(ctx, servletName, DefaultServlet.class.getName());
       wrapper.setAsyncSupported(true);
       ctx.addServletMappingDecoded("/*", servletName);
     }
-    extension.servletMetaDataStream().forEach(sm -> {
+    getServletMetaDatas().forEach(sm -> {
       Wrapper wrapper = Tomcat.addServlet(ctx, ifBlank(sm.getName(), sm.getClazz().getName()),
           sm.getClazz().getName());
       wrapper.setLoadOnStartup(sm.getLoadOnStartup());
@@ -162,7 +163,7 @@ public class TomcatWebServer extends AbstractWebServer {
       Arrays.stream(sm.getUrlPatterns())
           .forEach(u -> ctx.addServletMappingDecoded(u, sm.getName()));
     });
-    extension.filterMetaDataStream().forEach(fm -> {
+    getFilterMetaDatas().forEach(fm -> {
       FilterDef filterDef = new FilterDef();
       filterDef.setFilterName(fm.getFilterName());
       filterDef.setFilterClass(fm.getClazz().getName());

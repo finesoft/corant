@@ -25,6 +25,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -38,7 +40,10 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.servlet.WebExtension;
+import org.corant.suites.servlet.WebMetaDataProvider;
+import org.corant.suites.servlet.metadata.WebFilterMetaData;
+import org.corant.suites.servlet.metadata.WebListenerMetaData;
+import org.corant.suites.servlet.metadata.WebServletMetaData;
 import org.corant.suites.webserver.shared.WebServerHandlers.PostStartedHandler;
 import org.corant.suites.webserver.shared.WebServerHandlers.PostStoppedHandler;
 import org.corant.suites.webserver.shared.WebServerHandlers.PreStartHandler;
@@ -58,7 +63,8 @@ public abstract class AbstractWebServer implements WebServer {
   protected WebServerConfig config;
 
   @Inject
-  protected WebExtension extension;
+  @Any
+  protected Instance<WebMetaDataProvider> metaDataProviders;
 
   @Inject
   @Any
@@ -89,7 +95,7 @@ public abstract class AbstractWebServer implements WebServer {
    * @return the postStartedHandlers
    */
   public Stream<PostStartedHandler> getPostStartedHandlers() {
-    if (postStartedHandlers.isResolvable()) {
+    if (!postStartedHandlers.isUnsatisfied()) {
       return postStartedHandlers.stream();
     }
     return Stream.empty();
@@ -100,7 +106,7 @@ public abstract class AbstractWebServer implements WebServer {
    * @return the postStoppedHandlers
    */
   public Stream<PostStoppedHandler> getPostStoppedHandlers() {
-    if (postStoppedHandlers.isResolvable()) {
+    if (!postStoppedHandlers.isUnsatisfied()) {
       return postStoppedHandlers.stream();
     }
     return Stream.empty();
@@ -111,7 +117,7 @@ public abstract class AbstractWebServer implements WebServer {
    * @return the preStartHandlers
    */
   public Stream<PreStartHandler> getPreStartHandlers() {
-    if (preStartHandlers.isResolvable()) {
+    if (!preStartHandlers.isUnsatisfied()) {
       return preStartHandlers.stream();
     }
     return Stream.empty();
@@ -122,10 +128,43 @@ public abstract class AbstractWebServer implements WebServer {
    * @return the preStopHandlers
    */
   public Stream<PreStopHandler> getPreStopHandlers() {
-    if (preStopHandlers.isResolvable()) {
+    if (!preStopHandlers.isUnsatisfied()) {
       return preStopHandlers.stream();
     }
     return Stream.empty();
+  }
+
+  protected Stream<WebFilterMetaData> getFilterMetaDatas() {
+    if (!metaDataProviders.isUnsatisfied()) {
+      return metaDataProviders.stream().flatMap(WebMetaDataProvider::filterMetaDataStream);
+    } else {
+      return Stream.empty();
+    }
+  }
+
+  protected Stream<WebListenerMetaData> getListenerMetaDatas() {
+    if (!metaDataProviders.isUnsatisfied()) {
+      return metaDataProviders.stream().flatMap(WebMetaDataProvider::listenerMetaDataStream);
+    } else {
+      return Stream.empty();
+    }
+  }
+
+  protected Map<String, Object> getServletContextAttributes() {
+    Map<String, Object> map = new HashMap<>();
+    if (!metaDataProviders.isUnsatisfied()) {
+      metaDataProviders.stream().map(WebMetaDataProvider::servletContextAttributes)
+          .forEach(map::putAll);
+    }
+    return map;
+  }
+
+  protected Stream<WebServletMetaData> getServletMetaDatas() {
+    if (!metaDataProviders.isUnsatisfied()) {
+      return metaDataProviders.stream().flatMap(WebMetaDataProvider::servletMetaDataStream);
+    } else {
+      return Stream.empty();
+    }
   }
 
   protected KeyManager[] resolveKeyManagers() {

@@ -15,11 +15,27 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import org.corant.shared.util.AnnotationUtils;
+import org.corant.shared.util.ClassUtils;
+import org.corant.suites.servlet.WebMetaDataProvider;
+import org.corant.suites.servlet.metadata.WebInitParamMetaData;
+import org.corant.suites.servlet.metadata.WebServletMetaData;
+import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
+import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
+import org.jboss.resteasy.spi.ResteasyDeployment;
 
 /**
  * corant-suites-jaxrs-resteasy
@@ -28,7 +44,7 @@ import org.jboss.resteasy.cdi.ResteasyCdiExtension;
  *
  */
 @ApplicationScoped
-public class ResteasyProvider {
+public class ResteasyProvider implements WebMetaDataProvider {
 
   @Inject
   ResteasyCdiExtension extension;
@@ -36,5 +52,52 @@ public class ResteasyProvider {
   @Inject
   Instance<Application> applications;
 
+  final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
 
+  final Map<String, Object> servletContextAttributes = new HashMap<>();
+
+  @Override
+  public Map<String, Object> servletContextAttributes() {
+    return servletContextAttributes;
+  }
+
+  @Override
+  public Stream<WebServletMetaData> servletMetaDataStream() {
+    return servletMetaDatas.stream();
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    if (applications.isResolvable()) {
+      applications.stream().forEach(this::handle);
+      servletContextAttributes.put("resteasy.role.based.security", true);
+    }
+  }
+
+  private void handle(Application app) {
+    ApplicationPath ap =
+        AnnotationUtils.findAnnotation(app.getClass(), ApplicationPath.class, true);
+    String contextPath = ap == null ? "/" : ap.value();
+    if (!contextPath.startsWith("/")) {
+      contextPath = "/" + contextPath;
+    }
+    ResteasyDeployment deployment = new ResteasyDeployment();
+    deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
+    deployment.setScannedResourceClasses(
+        extension.getResources().stream().map(e -> e.getName()).collect(Collectors.toList()));
+    deployment.setScannedProviderClasses(
+        extension.getProviders().stream().map(e -> e.getName()).collect(Collectors.toList()));
+    handle(app, deployment, contextPath);
+  }
+
+  private void handle(Application app, ResteasyDeployment deployment, String contextPath) {
+    String pattern = contextPath.endsWith("/") ? contextPath + "*" : contextPath + "/*";
+    WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {
+        new WebInitParamMetaData("resteasy.servlet.mapping.prefix", contextPath, null)};
+    servletMetaDatas.add(new WebServletMetaData("ResteasyServlet", new String[] {pattern},
+        new String[] {pattern}, 1, ipmds, true, null, null, null,
+        "jaxrs-" + ClassUtils.getShortClassName(app.getClass().getName()),
+        HttpServlet30Dispatcher.class, null, null));
+    servletContextAttributes.put(ResteasyDeployment.class.getName(), deployment);
+  }
 }

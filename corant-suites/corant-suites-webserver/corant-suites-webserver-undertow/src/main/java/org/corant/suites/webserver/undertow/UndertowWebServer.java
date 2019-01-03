@@ -130,7 +130,7 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected void resolveFilterInfo(DeploymentInfo di) {
-    extension.filterMetaDataStream().forEach(wfm -> {
+    getFilterMetaDatas().forEach(wfm -> {
       if (wfm != null) {
         FilterInfo fi = new FilterInfo(wfm.getFilterName(), wfm.getClazz());
         fi.setAsyncSupported(wfm.isAsyncSupported());
@@ -152,7 +152,7 @@ public class UndertowWebServer extends AbstractWebServer {
   protected void resolveListener(DeploymentInfo di) {
     // weld listener
     di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
-    extension.listenerMetaDataStream().map(WebListenerMetaData::getClazz).map(ListenerInfo::new)
+    getListenerMetaDatas().map(WebListenerMetaData::getClazz).map(ListenerInfo::new)
         .forEach(di::addListener);
   }
 
@@ -201,9 +201,10 @@ public class UndertowWebServer extends AbstractWebServer {
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         corant.getBeanManager());
+    getServletContextAttributes().forEach(di::addServletContextAttribute);
     di.addInitParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
         UndertowContainer.class.getName());
-    if (additionalConfigurators.isResolvable()) {
+    if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureDeployment(di));
     }
@@ -220,14 +221,14 @@ public class UndertowWebServer extends AbstractWebServer {
 
   protected void resolveServerOptions(Builder builder) {
     builder.setServerOption(UndertowOptions.NO_REQUEST_TIMEOUT, specConfig.getNotRequestTimeout());
-    if (additionalConfigurators.isResolvable()) {
+    if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureServerOptions(builder::setServerOption));
     }
   }
 
   protected void resolveServletInfo(DeploymentInfo di) {
-    extension.servletMetaDataStream().map(wsm -> {
+    getServletMetaDatas().map(wsm -> {
       if (wsm != null) {
         ServletInfo si = new ServletInfo(wsm.getName(), wsm.getClazz());
         wsm.getInitParamsAsMap().forEach(si::addInitParam);
@@ -266,7 +267,7 @@ public class UndertowWebServer extends AbstractWebServer {
         .setSocketOption(Options.BALANCING_TOKENS, specConfig.getBalancingTokens())
         .setSocketOption(Options.BALANCING_CONNECTIONS, specConfig.getBalancingConnections())
         .setSocketOption(Options.BACKLOG, specConfig.getBackLog());
-    if (additionalConfigurators.isResolvable()) {
+    if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureSocketOptions(builder::setSocketOption));
     }
@@ -296,7 +297,7 @@ public class UndertowWebServer extends AbstractWebServer {
         .setWorkerOption(Options.WORKER_TASK_MAX_THREADS, config.getWorkThreads())
         .setWorkerOption(Options.TCP_NODELAY, specConfig.isTcpNoDelay())
         .setWorkerOption(Options.CORK, specConfig.isCork());
-    if (additionalConfigurators.isResolvable()) {
+    if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureWorkOptions(builder::setWorkerOption));
     }

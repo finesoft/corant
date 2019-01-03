@@ -28,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-servlet</artifactId>
+			<artifactId>corant-suites-jaxrs-resteasy</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>

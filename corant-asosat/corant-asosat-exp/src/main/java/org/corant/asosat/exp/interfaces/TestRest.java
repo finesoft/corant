@@ -13,24 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.exp;
+package org.corant.asosat.exp.interfaces;
 
+import static org.corant.shared.util.MapUtils.asMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import org.corant.kernel.boot.DirectRunner;
+import javax.websocket.server.PathParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * corant-asosat-exp
  *
- * @author bingo 上午10:29:07
+ * @author bingo 下午6:04:40
  *
  */
+@Path("/test")
 @ApplicationScoped
-@ApplicationPath("/exp")
-public class App extends Application {
+public class TestRest {
 
-  public static void main(String... strings) throws Exception {
-    new DirectRunner(null).run();
+  @Path("/get/{id}/")
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(@PathParam("id") String id) {
+    return Response.ok(asMap("rep", "Hello resteasy!"), MediaType.APPLICATION_JSON).build();
   }
 }

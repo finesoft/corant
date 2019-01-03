@@ -39,12 +39,11 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class FileUtils {
 
   public static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 16;
-  public static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
   public static final String META_INF = "META-INF";
-
-  protected static Logger logger = Logger.getLogger(FileUtils.class.getName());
+  protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+  static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
 
   public static Checksum checksum(final File file, final Checksum checksum) throws IOException {
     if (file.isDirectory()) {

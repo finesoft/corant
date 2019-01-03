@@ -118,15 +118,14 @@ public class HibernateSchemaUtils {
     prepare();
     String usePkg = replace(pkg, ".", "/");
     try {
-      ClassPaths.from(usePkg).getResources()
-          .filter(f -> f.getResourceName().endsWith(endWith)).map(f -> f.getResourceName())
-          .sorted(String::compareTo).forEach(s -> {
+      ClassPaths.from(usePkg).getResources().filter(f -> f.getResourceName().endsWith(endWith))
+          .map(f -> f.getResourceName()).sorted(String::compareTo).forEach(s -> {
             if (s.contains(usePkg) && s.endsWith(endWith)) {
               out.accept(s.substring(s.indexOf(usePkg)));
             }
           });
     } catch (Exception e) {
-
+      throw new CorantRuntimeException(e);
     }
   }
 
@@ -181,7 +180,6 @@ public class HibernateSchemaUtils {
             tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
       }
     } catch (Exception ignore) {
-      ignore.printStackTrace();
     }
     // disable jul
     Logger.getGlobal().setLevel(Level.OFF);

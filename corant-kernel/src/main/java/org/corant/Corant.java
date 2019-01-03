@@ -53,7 +53,7 @@ public class Corant {
 
   private static Corant INSTANCE;
   private static Logger logger = Logger.getLogger(Corant.class.getName());
-  private Class<?> configClass;
+  private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
 

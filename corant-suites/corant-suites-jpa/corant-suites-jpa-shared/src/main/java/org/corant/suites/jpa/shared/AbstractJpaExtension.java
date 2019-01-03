@@ -112,9 +112,9 @@ public abstract class AbstractJpaExtension implements Extension {
           });
     });
 
-    logger.config(
-        () -> String.format("Finish jpa PersistenceUnit/PersistenceContext injection process.",
-            String.join(", ", persistenceUnitMetaDatas.keySet())));
+    logger.info(() -> String.format(
+        "Finish jpa PersistenceUnit/PersistenceContext names [%s] injection process.",
+        String.join(", ", persistenceUnitMetaDatas.keySet())));
 
   }
 

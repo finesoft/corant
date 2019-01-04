@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.Bean;
@@ -30,7 +29,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContextType;
 import javax.transaction.TransactionScoped;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
@@ -109,9 +107,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public Class<? extends Annotation> getScope() {
-    return persistenceContextMetaData.getType() == PersistenceContextType.TRANSACTION
-        ? TransactionScoped.class
-        : Dependent.class;
+    return TransactionScoped.class;
   }
 
   @Override

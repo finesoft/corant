@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Default;
@@ -43,9 +44,10 @@ import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
  */
 public class EntityManagerBean implements Bean<EntityManager>, PassivationCapable {
 
-  final static Set<Annotation> QUALIFIERS =
+  static final Logger LOGGER = Logger.getLogger(EntityManagerBean.class.getName());
+  static final Set<Annotation> QUALIFIERS =
       Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE));
-  final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManager.class));
+  static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManager.class));
   final BeanManager beanManager;
   final PersistenceContextMetaData persistenceContextMetaData;
 
@@ -62,6 +64,9 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
+    LOGGER.fine(
+        () -> String.format("Create an entity manager with persistence unit name %s scope is %s",
+            persistenceContextMetaData.getUnit().getMixedName(), getScope().getSimpleName()));
     shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
     AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
     return provider.getEntityManager(persistenceContextMetaData);
@@ -69,9 +74,10 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public void destroy(EntityManager instance, CreationalContext<EntityManager> creationalContext) {
-    if (instance != null && instance.isOpen() && getScope().equals(TransactionScoped.class)) {
-      instance.flush();
-      instance.clear();
+    if (instance != null && instance.isOpen()) {
+      LOGGER.fine(
+          () -> String.format("Destroy an entity manager with persistence unit name %s scope is %s",
+              persistenceContextMetaData.getUnit().getMixedName(), getScope().getSimpleName()));
       instance.close();
     }
   }

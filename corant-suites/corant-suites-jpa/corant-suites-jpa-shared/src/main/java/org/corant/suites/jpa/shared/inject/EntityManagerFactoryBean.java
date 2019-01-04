@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Default;
@@ -42,9 +43,10 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
  */
 public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, PassivationCapable {
 
-  final static Set<Annotation> QUALIFIERS =
+  static final Logger LOGGER = Logger.getLogger(EntityManagerFactoryBean.class.getName());
+  static final Set<Annotation> QUALIFIERS =
       Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE));
-  final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
+  static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
   final BeanManager beanManager;
   final PersistenceUnitMetaData persistenceUnitMetaData;
 
@@ -63,6 +65,9 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
     shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
     AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
+    LOGGER.fine(() -> String.format(
+        "Create an entity manager factory with persistence unit name %s scope is ApplicationScoped.",
+        persistenceUnitMetaData.getMixedName(), getScope().getSimpleName()));
     return shouldNotNull(provider.getEntityManagerFactory(persistenceUnitMetaData));
   }
 
@@ -70,6 +75,9 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
   public void destroy(EntityManagerFactory instance,
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
+      LOGGER.fine(() -> String.format(
+          "Destroy an entity manager factory with persistence unit name %s scope is ApplicationScoped.",
+          persistenceUnitMetaData.getMixedName(), getScope().getSimpleName()));
       instance.close();
     }
   }

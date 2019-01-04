@@ -53,6 +53,7 @@ public class JpaExtension implements Extension {
 
   static final Set<PersistenceUnitMetaData> PUMDS =
       Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnitMetaData, Boolean>());
+
   static final Set<PersistenceContextMetaData> PCMDS =
       Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContextMetaData, Boolean>());
 
@@ -76,6 +77,7 @@ public class JpaExtension implements Extension {
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
+    PCMDS.stream().map(pcmd -> pcmd.getUnit()).forEach(PUMDS::add);
     PUMDS.forEach(pumd -> {
       abd.addBean(new EntityManagerFactoryBean(beanManager, pumd));
     });
@@ -93,18 +95,19 @@ public class JpaExtension implements Extension {
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     final InjectionPoint ip = pip.getInjectionPoint();
-    if (CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class) != null) {
-      PUMDS.add(PersistenceUnitMetaData
-          .of(CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class)));
+    PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
+    if (pu != null) {
+      PUMDS.add(PersistenceUnitMetaData.of(pu));
     }
-    if (CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class) != null) {
-      PersistenceContextMetaData pcmd = PersistenceContextMetaData
-          .of(CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class));
+    PersistenceContext pc = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class);
+    if (pc != null) {
+      PersistenceContextMetaData pcmd = PersistenceContextMetaData.of(pc);
       if (pcmd.getType() != PersistenceContextType.TRANSACTION) {
+        // FIXME check member declare class scope annotation
       }
       if (PCMDS.stream().anyMatch(m -> m.getUnit().equals(pcmd.getUnit()) && !m.equals(pcmd))) {
         pip.addDefinitionError(new CorantRuntimeException(
-            "We accept only that the same persistence unit (name & unit name) must have the same persistence context."));
+            "Only accept that the same persistence unit (name & unit name) must have the same persistence context."));
       }
       PCMDS.add(pcmd);
     }

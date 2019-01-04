@@ -40,7 +40,7 @@ public class PersistenceContextMetaData {
 
   private PersistenceContextMetaData(PersistenceContext pc) {
     shouldBeTrue(pc.synchronization() == SynchronizationType.SYNCHRONIZED,
-        "We only support SYNCHRONIZED persistence context!");
+        "Only support SYNCHRONIZED persistence context!");
     type = pc.type();
     synchronization = pc.synchronization();
     unit = new PersistenceUnitMetaData(pc.name(), pc.unitName());

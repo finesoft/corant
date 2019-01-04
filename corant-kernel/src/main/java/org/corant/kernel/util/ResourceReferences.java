@@ -18,6 +18,7 @@ package org.corant.kernel.util;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.jboss.weld.injection.spi.ResourceReference;
+import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
  * corant-kernel
@@ -27,11 +28,11 @@ import org.jboss.weld.injection.spi.ResourceReference;
  */
 public class ResourceReferences {
 
-  public static <T> ResourceReference<T> of(final Supplier<T> supplier) {
-    return of(supplier, null);
+  public static <T> ResourceReference<T> ref(final Supplier<T> supplier) {
+    return ref(supplier, null);
   }
 
-  public static <T> ResourceReference<T> of(final Supplier<T> supplier,
+  public static <T> ResourceReference<T> ref(final Supplier<T> supplier,
       final Consumer<T> releaser) {
 
     return new ResourceReference<T>() {
@@ -57,5 +58,9 @@ public class ResourceReferences {
         }
       }
     };
+  }
+
+  public static <T> ResourceReferenceFactory<T> refac(final Supplier<T> supplier) {
+    return () -> ref(supplier);
   }
 }

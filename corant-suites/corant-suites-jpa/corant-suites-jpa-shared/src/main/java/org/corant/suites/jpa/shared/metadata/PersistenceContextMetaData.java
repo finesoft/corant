@@ -16,7 +16,7 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,8 +39,10 @@ public class PersistenceContextMetaData {
   private final PersistenceUnitMetaData unit;
 
   private PersistenceContextMetaData(PersistenceContext pc) {
+    shouldBeTrue(pc.synchronization() == SynchronizationType.SYNCHRONIZED,
+        "We only support SYNCHRONIZED persistence context!");
     type = pc.type();
-    synchronization = defaultObject(pc.synchronization(), SynchronizationType.SYNCHRONIZED);
+    synchronization = pc.synchronization();
     unit = new PersistenceUnitMetaData(pc.name(), pc.unitName());
     Map<String, String> map = new HashMap<>();
     if (!isEmpty(pc.properties())) {

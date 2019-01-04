@@ -6,7 +6,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>corant-asosat-cqs</artifactId>
-  <name>corant-asosat-ddd</name>
+  <name>corant-asosat-cqs</name>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

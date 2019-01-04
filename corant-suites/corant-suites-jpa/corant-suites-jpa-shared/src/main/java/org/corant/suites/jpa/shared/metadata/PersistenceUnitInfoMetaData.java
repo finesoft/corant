@@ -16,6 +16,7 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.net.URL;
 import java.util.ArrayList;
@@ -207,7 +208,8 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return excludeUnlistedClasses;
   }
 
-  public PersistenceUnitInfoMetaData with(Properties properties, PersistenceUnitTransactionType putt) {
+  public PersistenceUnitInfoMetaData with(Properties properties,
+      PersistenceUnitTransactionType putt) {
     PersistenceUnitInfoMetaData newObj = new PersistenceUnitInfoMetaData(getPersistenceUnitName());
     newObj.setClassLoader(getClassLoader());
     newObj.setExcludeUnlistedClasses(isExcludeUnlistedClasses());
@@ -313,6 +315,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   protected void setPersistenceUnitTransactionType(
       PersistenceUnitTransactionType persistenceUnitTransactionType) {
+    shouldBeTrue(
+        persistenceUnitTransactionType == null
+            || persistenceUnitTransactionType == PersistenceUnitTransactionType.JTA,
+        "At present we only support JTA"); // FIXME
     this.persistenceUnitTransactionType =
         defaultObject(persistenceUnitTransactionType, PersistenceUnitTransactionType.JTA);
   }

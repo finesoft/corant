@@ -35,7 +35,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 @ApplicationScoped
-@Transactional
 public class TestApplicationService {
 
   AtomicLong al = new AtomicLong();
@@ -51,6 +50,7 @@ public class TestApplicationService {
   @Inject
   TestApplicationService2 s2;
 
+  @Transactional
   public void testEntityManager(String param) {
     TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
     obj.setName("bingo" + al.incrementAndGet());

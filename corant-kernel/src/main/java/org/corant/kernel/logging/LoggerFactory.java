@@ -23,7 +23,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
  *
  */
 @ApplicationScoped
-public class LogFactory {
+public class LoggerFactory {
 
   @Produces
   Logger createLogger(InjectionPoint injectionPoint) {

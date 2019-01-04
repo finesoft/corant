@@ -15,11 +15,14 @@
  */
 package org.corant.suites.jpa.shared;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 
 /**
@@ -34,11 +37,38 @@ public abstract class AbstractJpaProvider {
   protected static final Map<PersistenceUnitMetaData, EntityManagerFactory> EMFS =
       new ConcurrentHashMap<>();
 
+  protected static final ThreadLocal<Map<PersistenceContextMetaData, EntityManager>> EMS =
+      ThreadLocal.withInitial(HashMap::new);
+
   protected Logger logger = Logger.getLogger(getClass().getName());
 
-  public EntityManagerFactory get(PersistenceUnitMetaData metaData) {
-    return EMFS.computeIfAbsent(metaData, this::build);
+  /**
+   * Be careful when PersistenceContextType is EXTENDED
+   *
+   * @param metaData
+   * @return buildEntityManager
+   */
+  public EntityManager getEntityManager(PersistenceContextMetaData metaData) {
+    return buildEntityManager(metaData);
   }
 
-  protected abstract EntityManagerFactory build(PersistenceUnitMetaData metaData);
+  /**
+   * A persistence unit is associated with an entity manager factory, like
+   * singleton and that is thread safe.
+   *
+   * @param metaData
+   * @return getEntityManagerFactory
+   */
+  public EntityManagerFactory getEntityManagerFactory(PersistenceUnitMetaData metaData) {
+    return EMFS.computeIfAbsent(metaData, this::buildEntityManagerFactory);
+  }
+
+
+  protected EntityManager buildEntityManager(PersistenceContextMetaData metaData) {
+    return getEntityManagerFactory(metaData.getUnit())
+        .createEntityManager(metaData.getSynchronization(), metaData.getProperties());
+  }
+
+  protected abstract EntityManagerFactory buildEntityManagerFactory(
+      PersistenceUnitMetaData metaData);
 }

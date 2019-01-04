@@ -31,8 +31,10 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import org.corant.kernel.util.CdiUtils;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
@@ -85,7 +87,7 @@ public class JpaExtension implements Extension {
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     JpaConfig.from(ConfigProvider.getConfig()).getMetaDatas()
         .forEach(persistenceUnitInfoMetaDatas::put);
-    logger.info(() -> String.format("Find jpa configurations [%s]",
+    logger.info(() -> String.format("Find jpa persistence unit [%s]",
         String.join(", ", persistenceUnitInfoMetaDatas.keySet())));
   }
 
@@ -96,8 +98,15 @@ public class JpaExtension implements Extension {
           .of(CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class)));
     }
     if (CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class) != null) {
-      PCMDS.add(PersistenceContextMetaData
-          .of(CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class)));
+      PersistenceContextMetaData pcmd = PersistenceContextMetaData
+          .of(CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class));
+      if (pcmd.getType() != PersistenceContextType.TRANSACTION) {
+      }
+      if (PCMDS.stream().anyMatch(m -> m.getUnit().equals(pcmd.getUnit()) && !m.equals(pcmd))) {
+        pip.addDefinitionError(new CorantRuntimeException(
+            "We accept only that the same persistence unit (name & unit name) must have the same persistence context."));
+      }
+      PCMDS.add(pcmd);
     }
   }
 }

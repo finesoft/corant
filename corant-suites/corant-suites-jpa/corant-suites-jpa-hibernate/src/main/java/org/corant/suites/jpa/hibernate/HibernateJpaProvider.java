@@ -41,7 +41,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 @ApplicationScoped
 public class HibernateJpaProvider extends AbstractJpaProvider {
 
-  final Map<String, Object> properties =
+  static final Map<String, Object> PROPERTIES =
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Inject
@@ -51,7 +51,7 @@ public class HibernateJpaProvider extends AbstractJpaProvider {
   InitialContext jndi;
 
   @Override
-  protected EntityManagerFactory build(PersistenceUnitMetaData metaData) {
+  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitMetaData metaData) {
     String name = metaData.getMixedName();
     PersistenceUnitInfoMetaData puimd =
         shouldNotNull(extension.getPersistenceUnitInfoMetaData(name));
@@ -63,7 +63,7 @@ public class HibernateJpaProvider extends AbstractJpaProvider {
       }
     });
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(puimd,
-        properties);
+        PROPERTIES);
   }
 
 }

@@ -63,7 +63,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
     shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
     AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
-    return shouldNotNull(provider.get(persistenceUnitMetaData));
+    return shouldNotNull(provider.getEntityManagerFactory(persistenceUnitMetaData));
   }
 
   @Override

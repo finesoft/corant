@@ -15,8 +15,6 @@
  */
 package org.corant.asosat.exp.interfaces;
 
-import static org.corant.shared.util.MapUtils.getMapString;
-import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,8 +30,6 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import javax.sql.DataSource;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 
 /**
  * corant-asosat-ddd
@@ -50,12 +46,7 @@ public class TestListener implements ServletContextListener {
   DataSource ds;
 
   static void testInject(DataSource ds, String test) {
-    try {
-      new QueryRunner(ds).query("SELECT * FROM EP_Test", new MapListHandler()).stream()
-          .map(m -> test + " ->" + getMapString(m, "name")).forEach(System.out::println);
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
+
   }
 
   @Override

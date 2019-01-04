@@ -17,7 +17,6 @@ package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -30,11 +29,11 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContextType;
+import javax.transaction.TransactionScoped;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 
 /**
  * corant-suites-jpa-shared
@@ -65,15 +64,16 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
     shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
     AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
-    PersistenceUnitMetaData pu = persistenceContextMetaData.getUnit();
-    EntityManagerFactory emf = shouldNotNull(provider.get(pu));
-    return emf.createEntityManager(persistenceContextMetaData.getSynchronization(),
-        persistenceContextMetaData.getProperties());
+    return provider.getEntityManager(persistenceContextMetaData);
   }
 
   @Override
   public void destroy(EntityManager instance, CreationalContext<EntityManager> creationalContext) {
-    // TODO
+    if (instance != null && instance.isOpen() && getScope().equals(TransactionScoped.class)) {
+      instance.flush();
+      instance.clear();
+      instance.close();
+    }
   }
 
   @Override
@@ -103,7 +103,9 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public Class<? extends Annotation> getScope() {
-    return Dependent.class;
+    return persistenceContextMetaData.getType() == PersistenceContextType.TRANSACTION
+        ? TransactionScoped.class
+        : Dependent.class;
   }
 
   @Override

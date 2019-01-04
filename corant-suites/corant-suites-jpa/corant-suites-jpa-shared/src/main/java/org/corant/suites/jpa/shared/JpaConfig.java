@@ -88,7 +88,7 @@ public class JpaConfig {
     }
     cfg.metaDatas.putAll(fromXmlPums);
     logger
-        .info(() -> String.format("Find persistence unit metadata from config file %s and [%s %s]",
+        .info(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
             String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
             String.join(",", fromXmlPums.keySet())));
     return cfg;

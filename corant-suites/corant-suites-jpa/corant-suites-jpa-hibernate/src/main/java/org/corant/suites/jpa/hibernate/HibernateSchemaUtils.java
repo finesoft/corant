@@ -66,6 +66,7 @@ public class HibernateSchemaUtils {
     props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
+    props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
     Corant corant = new Corant(HibernateSchemaUtils.class);
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();

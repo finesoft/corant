@@ -72,11 +72,11 @@ public class InitialContextExtension implements Extension {
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd) {
     try {
-      if (DefaultInitialContextFactory.initialContext == null) {
+      if (!NamingManager.hasInitialContextFactoryBuilder()) {
         NamingManager.setInitialContextFactoryBuilder(e -> DefaultInitialContextFactory::build);
+        useCorantContext = true;
       }
       context = new InitialContext();
-      useCorantContext = DefaultInitialContextFactory.initialContext != null;
     } catch (IllegalStateException | NamingException e) {
       logger.log(Level.WARNING, "An error occurred initializing the context.", e);
     }

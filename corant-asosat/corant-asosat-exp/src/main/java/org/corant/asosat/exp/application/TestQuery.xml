@@ -41,6 +41,8 @@
 				<#if keyword??>
 					AND (name LIKE '%' + ${SP(keyword)} + '%')
 				</#if>
+				ORDER BY
+					id desc
 			]]>
 		</script>
 	</query>

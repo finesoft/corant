@@ -23,6 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.corant.shared.util.ClassPaths;
+import org.corant.suites.jpa.shared.metadata.PersistenceConfigParser;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceXmlParser;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -72,13 +75,13 @@ public class JpaConfig {
   public static final String DOT_PUN_PRO_VAL = "." + PUN_PRO_VAL;
 
   protected static final Logger logger = Logger.getLogger(JpaConfig.class.getName());
-  private final Map<String, PersistenceUnitMetaData> metaDatas = new HashMap<>();
+  private final Map<String, PersistenceUnitInfoMetaData> metaDatas = new HashMap<>();
 
   public static JpaConfig from(Config config) {
     JpaConfig cfg = new JpaConfig();
-    Map<String, PersistenceUnitMetaData> fromCfgPums = generateFromConfig(config);
+    Map<String, PersistenceUnitInfoMetaData> fromCfgPums = generateFromConfig(config);
     cfg.metaDatas.putAll(fromCfgPums);
-    Map<String, PersistenceUnitMetaData> fromXmlPums = generateFromXml();
+    Map<String, PersistenceUnitInfoMetaData> fromXmlPums = generateFromXml();
     if (!fromXmlPums.isEmpty()) {
       shouldBeFalse(fromXmlPums.keySet().stream().map(cfg.metaDatas::containsKey)
           .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
@@ -90,12 +93,12 @@ public class JpaConfig {
     return cfg;
   }
 
-  private static Map<String, PersistenceUnitMetaData> generateFromConfig(Config config) {
+  private static Map<String, PersistenceUnitInfoMetaData> generateFromConfig(Config config) {
     return PersistenceConfigParser.parse(config);
   }
 
-  private static Map<String, PersistenceUnitMetaData> generateFromXml() {
-    Map<String, PersistenceUnitMetaData> map = new LinkedHashMap<>();
+  private static Map<String, PersistenceUnitInfoMetaData> generateFromXml() {
+    Map<String, PersistenceUnitInfoMetaData> map = new LinkedHashMap<>();
     try {
       ClassPaths.from(DFLT_PU_XML_LOCATION).getResources().map(r -> r.getUrl())
           .map(PersistenceXmlParser::parse).forEach(m -> {
@@ -108,7 +111,7 @@ public class JpaConfig {
     return map;
   }
 
-  public Map<String, PersistenceUnitMetaData> getMetaDatas() {
+  public Map<String, PersistenceUnitInfoMetaData> getMetaDatas() {
     return Collections.unmodifiableMap(metaDatas);
   }
 

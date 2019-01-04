@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.StringUtils.replace;
 import java.io.IOException;

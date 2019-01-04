@@ -17,56 +17,53 @@ package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import java.lang.annotation.Annotation;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
-import javax.enterprise.inject.Instance;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.AbstractJpaExtension;
-import org.corant.suites.jpa.shared.PersistenceUnitMetaData;
+import org.corant.suites.jpa.shared.AbstractJpaProvider;
+import org.corant.suites.jpa.shared.JpaExtension;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
 /**
  * corant-suites-jpa-hibernate
  *
- * @author bingo 下午6:54:00
+ * @author bingo 上午11:44:00
  *
  */
-public class HibernateJpaExtension extends AbstractJpaExtension {
+@ApplicationScoped
+public class HibernateJpaProvider extends AbstractJpaProvider {
 
   final Map<String, Object> properties =
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
-  final SynchronizationType syncType = SynchronizationType.SYNCHRONIZED;
+
+  @Inject
+  JpaExtension extension;
+
+  @Inject
+  InitialContext jndi;
 
   @Override
-  protected EntityManager buildEntityManager(EntityManagerFactory emf, SynchronizationType syncType,
-      Map<String, ?> pps) {
-    return emf.createEntityManager(syncType, pps);
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  @Override
-  protected EntityManagerFactory buildEntityManagerFactory(final Instance instance, String unitName,
-      PersistenceUnitMetaData persistenceUnitMetaData) {
-    logger.config(
-        () -> String.format("Build entity manager factory for persistence unit %s", unitName));
-    PersistenceUnitMetaData pumd = persistenceUnitMetaData;
-    pumd.configDataSource(dsn -> {
+  protected EntityManagerFactory build(PersistenceUnitMetaData metaData) {
+    String name = metaData.getMixedName();
+    PersistenceUnitInfoMetaData puimd =
+        shouldNotNull(extension.getPersistenceUnitInfoMetaData(name));
+    puimd.configDataSource(dsn -> {
       try {
-        InitialContext jndi =
-            (InitialContext) instance.select(InitialContext.class, new Annotation[0]).get();
         return forceCast(jndi.lookup(dsn));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     });
-    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(pumd, properties);
+    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(puimd,
+        properties);
   }
-
 
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -30,7 +30,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-public class PersistenceUnitMetaData implements PersistenceUnitInfo {
+public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   private final String persistenceUnitName;
   private String version;
@@ -57,7 +57,7 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
   /**
    * @param persistenceUnitName
    */
-  public PersistenceUnitMetaData(String persistenceUnitName) {
+  public PersistenceUnitInfoMetaData(String persistenceUnitName) {
     super();
     this.persistenceUnitName = persistenceUnitName;
   }
@@ -73,12 +73,12 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
     }
   }
 
-  public PersistenceUnitMetaData configClassLoader(ClassLoader classLoader) {
+  public PersistenceUnitInfoMetaData configClassLoader(ClassLoader classLoader) {
     setClassLoader(classLoader);
     return this;
   }
 
-  public PersistenceUnitMetaData configDataSource(Function<String, DataSource> dsSupplier) {
+  public PersistenceUnitInfoMetaData configDataSource(Function<String, DataSource> dsSupplier) {
     if (isNotBlank(getJtaDataSourceName())) {
       setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
     }
@@ -88,12 +88,12 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
     return this;
   }
 
-  public PersistenceUnitMetaData configNewTempClassLoader(ClassLoader newTempClassLoader) {
+  public PersistenceUnitInfoMetaData configNewTempClassLoader(ClassLoader newTempClassLoader) {
     setNewTempClassLoader(newTempClassLoader);
     return this;
   }
 
-  public PersistenceUnitMetaData configTransformers(ClassTransformer... classTransformers) {
+  public PersistenceUnitInfoMetaData configTransformers(ClassTransformer... classTransformers) {
     transformers.clear();
     for (ClassTransformer ctf : classTransformers) {
       transformers.add(ctf);
@@ -207,8 +207,8 @@ public class PersistenceUnitMetaData implements PersistenceUnitInfo {
     return excludeUnlistedClasses;
   }
 
-  public PersistenceUnitMetaData with(Properties properties, PersistenceUnitTransactionType putt) {
-    PersistenceUnitMetaData newObj = new PersistenceUnitMetaData(getPersistenceUnitName());
+  public PersistenceUnitInfoMetaData with(Properties properties, PersistenceUnitTransactionType putt) {
+    PersistenceUnitInfoMetaData newObj = new PersistenceUnitInfoMetaData(getPersistenceUnitName());
     newObj.setClassLoader(getClassLoader());
     newObj.setExcludeUnlistedClasses(isExcludeUnlistedClasses());
     newObj.setJarFileUrls(getJarFileUrls());

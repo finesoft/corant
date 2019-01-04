@@ -35,8 +35,9 @@ import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.MethodUtils;
+import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.JpaUtils;
-import org.corant.suites.jpa.shared.PersistenceUnitMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -68,9 +69,10 @@ public class HibernateSchemaUtils {
     Corant corant = new Corant(HibernateSchemaUtils.class);
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();
-    HibernateJpaExtension extension = Corant.cdi().select(HibernateJpaExtension.class).get();
-    PersistenceUnitMetaData pum = shouldNotNull(extension.getPersistenceUnitMetaDatas().get(pu));
-    PersistenceUnitMetaData usePum =
+    JpaExtension extension = Corant.cdi().select(JpaExtension.class).get();
+    PersistenceUnitInfoMetaData pum =
+        shouldNotNull(extension.getPersistenceUnitInfoMetaDatas().get(pu));
+    PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource((dn) -> {
       try {

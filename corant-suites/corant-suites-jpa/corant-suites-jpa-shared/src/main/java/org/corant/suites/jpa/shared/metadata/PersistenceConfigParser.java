@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.split;
@@ -29,6 +29,8 @@ import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.kernel.util.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jpa.shared.JpaConfig;
+import org.corant.suites.jpa.shared.JpaUtils;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -39,8 +41,8 @@ import org.eclipse.microprofile.config.Config;
  */
 public class PersistenceConfigParser {
 
-  public static Map<String, PersistenceUnitMetaData> parse(Config config) {
-    Map<String, PersistenceUnitMetaData> map = new HashMap<>();
+  public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
+    Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     Map<String, List<String>> cfgNmes =
         ConfigUtils.getGroupConfigNames(config, JpaConfig.PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
@@ -50,55 +52,55 @@ public class PersistenceConfigParser {
   }
 
   protected static void doParse(Config config, String name, List<String> cfgNmes,
-      Map<String, PersistenceUnitMetaData> map) {
-    PersistenceUnitMetaData cfg = new PersistenceUnitMetaData(name);
+      Map<String, PersistenceUnitInfoMetaData> map) {
+    PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(name);
     final String proPrefix = JpaConfig.PREFIX + name + JpaConfig.DOT_PUN_PRO;
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
     cfgNmes.forEach(pn -> {
       if (pn.endsWith(JpaConfig.DOT_PUN_TRANS_TYP)) {
         config.getOptionalValue(pn, String.class).ifPresent(
-            s -> cfg.setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
+            s -> puimd.setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_NON_JTA_DS)) {
-        config.getOptionalValue(pn, String.class).ifPresent(cfg::setNonJtaDataSourceName);
+        config.getOptionalValue(pn, String.class).ifPresent(puimd::setNonJtaDataSourceName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JTA_DS)) {
-        config.getOptionalValue(pn, String.class).ifPresent(cfg::setJtaDataSourceName);
+        config.getOptionalValue(pn, String.class).ifPresent(puimd::setJtaDataSourceName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_PROVIDER)) {
-        config.getOptionalValue(pn, String.class).ifPresent(cfg::setPersistenceProviderClassName);
+        config.getOptionalValue(pn, String.class).ifPresent(puimd::setPersistenceProviderClassName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> asStream(split(s, ",")).forEach(cfg::addManagedClassName));
+            .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addManagedClassName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> asStream(split(s, ",")).forEach(cfg::addMappingFileName));
+            .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addMappingFileName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> asStream(split(s, ","))
-            .map(PersistenceConfigParser::toUrl).forEach(cfg::addJarFileUrl));
+            .map(PersistenceConfigParser::toUrl).forEach(puimd::addJarFileUrl));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_EX_UL_CLS)) {
-        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setExcludeUnlistedClasses);
+        config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setExcludeUnlistedClasses);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_VAL_MOD)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> cfg.setValidationMode(ValidationMode.valueOf(s)));
+            .ifPresent(s -> puimd.setValidationMode(ValidationMode.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_SHARE_CACHE_MOD)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> cfg.setSharedCacheMode(SharedCacheMode.valueOf(s)));
+            .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_PKG)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> JpaUtils.getPersistenceClasses(s)
-            .stream().map(Class::getName).forEach(cfg::addManagedClassName));
+            .stream().map(Class::getName).forEach(puimd::addManagedClassName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_REGEX)) {
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> cfg.addJarFileUrl(toUrl(s)));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
         // handle properties
         proCfgNmes.add(pn);
       }
     });
-    doParseProperties(config, proPrefix, proCfgNmes, cfg);
-    map.put(name, cfg);
+    doParseProperties(config, proPrefix, proCfgNmes, puimd);
+    map.put(name, puimd);
   }
 
   private static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,
-      PersistenceUnitMetaData metaData) {
+      PersistenceUnitInfoMetaData metaData) {
     if (!proCfgNmes.isEmpty()) {
       int len = proPrefix.length() + 1;
       for (String cfgNme : proCfgNmes) {

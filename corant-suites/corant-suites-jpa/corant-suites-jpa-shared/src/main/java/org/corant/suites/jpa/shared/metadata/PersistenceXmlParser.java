@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
+import org.corant.suites.jpa.shared.JpaConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,14 +54,14 @@ public class PersistenceXmlParser {
 
   protected static final Logger logger = Logger.getLogger(PersistenceXmlParser.class.getName());
 
-  public static Map<String, PersistenceUnitMetaData> parse(URL url) {
-    Map<String, PersistenceUnitMetaData> map = new HashMap<>();
+  public static Map<String, PersistenceUnitInfoMetaData> parse(URL url) {
+    Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     doParse(url, map);
     return map;
   }
 
-  protected static void doParse(Element element, PersistenceUnitMetaData metaData) {
-    metaData.setPersistenceUnitTransactionType(
+  static void doParse(Element element, PersistenceUnitInfoMetaData puimd) {
+    puimd.setPersistenceUnitTransactionType(
         parseTransactionType(element.getAttribute(JpaConfig.PUN_TRANS_TYP)));
     NodeList children = element.getChildNodes();
     int len = children.getLength();
@@ -69,23 +70,23 @@ public class PersistenceXmlParser {
         Element subEle = (Element) children.item(i);
         String tag = subEle.getTagName();
         if (tag.equals(JpaConfig.PUN_NON_JTA_DS)) {
-          metaData.setNonJtaDataSourceName(extractContent(subEle));
+          puimd.setNonJtaDataSourceName(extractContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_JTA_DS)) {
-          metaData.setJtaDataSourceName(extractContent(subEle));
+          puimd.setJtaDataSourceName(extractContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_PROVIDER)) {
-          metaData.setPersistenceProviderClassName(extractContent(subEle));
+          puimd.setPersistenceProviderClassName(extractContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_CLS)) {
-          metaData.addManagedClassName(extractContent(subEle));
+          puimd.addManagedClassName(extractContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_MAP_FILE)) {
-          metaData.addMappingFileName(extractContent(subEle));
+          puimd.addMappingFileName(extractContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_JAR_FILE)) {
-          metaData.getJarFileUrls().add(extractUrlContent(subEle));
+          puimd.getJarFileUrls().add(extractUrlContent(subEle));
         } else if (tag.equals(JpaConfig.PUN_EX_UL_CLS)) {
-          metaData.setExcludeUnlistedClasses(extractBooleanContent(subEle, true));
+          puimd.setExcludeUnlistedClasses(extractBooleanContent(subEle, true));
         } else if (tag.equals(JpaConfig.PUN_VAL_MOD)) {
-          metaData.setValidationMode(ValidationMode.valueOf(extractContent(subEle)));
+          puimd.setValidationMode(ValidationMode.valueOf(extractContent(subEle)));
         } else if (tag.equals(JpaConfig.PUN_SHARE_CACHE_MOD)) {
-          metaData.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
+          puimd.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
         } else if (tag.equals(JpaConfig.PUN_PROS)) {
           NodeList props = subEle.getChildNodes();
           for (int j = 0; j < props.getLength(); j++) {
@@ -99,7 +100,7 @@ public class PersistenceXmlParser {
               if (isEmpty(propValue)) {
                 propValue = extractContent(propElement, "");
               }
-              metaData.putPropertity(propName, propValue);
+              puimd.putPropertity(propName, propValue);
             }
           }
         }
@@ -107,7 +108,7 @@ public class PersistenceXmlParser {
     }
   }
 
-  protected static void doParse(URL url, Map<String, PersistenceUnitMetaData> map) {
+  static void doParse(URL url, Map<String, PersistenceUnitInfoMetaData> map) {
     final Document doc = loadDocument(url);
     final Element top = doc.getDocumentElement();
     final NodeList children = top.getChildNodes();
@@ -120,17 +121,17 @@ public class PersistenceXmlParser {
         if (tag.equals(JpaConfig.PUN_TAG)) {
           final String puName = element.getAttribute(JpaConfig.PUN_NME);
           shouldBeFalse(map.containsKey(puName), "Persistence unit name %s dup!", tag);
-          PersistenceUnitMetaData metaData = new PersistenceUnitMetaData(puName);
-          metaData.setVersion(version);
-          metaData.setPersistenceUnitRootUrl(extractRootUrl(url));
-          doParse(element, metaData);
-          map.put(puName, metaData);
+          PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(puName);
+          puimd.setVersion(version);
+          puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
+          doParse(element, puimd);
+          map.put(puName, puimd);
         }
       }
     }
   }
 
-  protected static Document loadDocument(URL url) {
+  static Document loadDocument(URL url) {
     try {
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
       documentBuilderFactory.setNamespaceAware(false);
@@ -150,7 +151,7 @@ public class PersistenceXmlParser {
     }
   }
 
-  protected static PersistenceUnitTransactionType parseTransactionType(String value) {
+  static PersistenceUnitTransactionType parseTransactionType(String value) {
     if (isEmpty(value)) {
       return null;
     } else if (value.equalsIgnoreCase("JTA")) {
@@ -162,7 +163,7 @@ public class PersistenceXmlParser {
     }
   }
 
-  protected static void validate(Document document) throws SAXException {
+  static void validate(Document document) throws SAXException {
     final String version = document.getDocumentElement().getAttribute("version");
     List<Exception> exs = PersistenceSchema.validate(document, version);
     if (!isEmpty(exs)) {

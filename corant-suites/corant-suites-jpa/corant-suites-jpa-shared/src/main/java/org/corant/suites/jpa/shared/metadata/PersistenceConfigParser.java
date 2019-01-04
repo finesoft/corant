@@ -59,8 +59,8 @@ public class PersistenceConfigParser {
     Set<String> proCfgNmes = new HashSet<>();
     cfgNmes.forEach(pn -> {
       if (pn.endsWith(JpaConfig.DOT_PUN_TRANS_TYP)) {
-        config.getOptionalValue(pn, String.class).ifPresent(
-            s -> puimd.setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> puimd
+            .setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_NON_JTA_DS)) {
         config.getOptionalValue(pn, String.class).ifPresent(puimd::setNonJtaDataSourceName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JTA_DS)) {
@@ -88,6 +88,7 @@ public class PersistenceConfigParser {
         config.getOptionalValue(pn, String.class).ifPresent(s -> JpaUtils.getPersistenceClasses(s)
             .stream().map(Class::getName).forEach(puimd::addManagedClassName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_REGEX)) {
+        // TODO FIXME
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {

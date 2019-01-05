@@ -15,7 +15,6 @@
  */
 package org.corant.suites.jpa.shared;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -36,9 +35,6 @@ public abstract class AbstractJpaProvider {
 
   protected static final Map<PersistenceUnitMetaData, EntityManagerFactory> EMFS =
       new ConcurrentHashMap<>();
-
-  protected static final ThreadLocal<Map<PersistenceContextMetaData, EntityManager>> EMS =
-      ThreadLocal.withInitial(HashMap::new);
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 

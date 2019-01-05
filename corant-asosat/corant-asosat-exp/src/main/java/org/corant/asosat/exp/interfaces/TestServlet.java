@@ -48,6 +48,11 @@ public class TestServlet extends HttpServlet {
   @Inject
   TestQueryService qs;
 
+  // @Inject
+  // @PersistenceContext(unitName = "dmmsPu", type =
+  // PersistenceContextType.EXTENDED)
+  // EntityManager em;
+
   @Transactional
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp)

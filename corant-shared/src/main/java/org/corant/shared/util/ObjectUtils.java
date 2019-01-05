@@ -123,7 +123,7 @@ public class ObjectUtils {
   }
 
   public static void shouldBeFalse(boolean condition) {
-    shouldBeTrue(condition, "This shoud be false");
+    shouldBeFalse(condition, "This shoud be false");
   }
 
   public static void shouldBeFalse(boolean condition, String messageOrFormat, Object... args) {

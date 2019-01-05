@@ -17,6 +17,10 @@ package org.corant.asosat.exp.interfaces;
 
 import static org.corant.shared.util.MapUtils.asMap;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import javax.websocket.server.PathParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,12 +36,18 @@ import javax.ws.rs.core.Response;
  */
 @Path("/test")
 @ApplicationScoped
+@Transactional
 public class TestRest {
+
+  @Inject
+  @PersistenceContext(unitName = "dmmsPu")
+  EntityManager em;
 
   @Path("/get/{id}/")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(@PathParam("id") String id) {
+    em.toString();
     return Response.ok(asMap("rep", "Hello resteasy!"), MediaType.APPLICATION_JSON).build();
   }
 }

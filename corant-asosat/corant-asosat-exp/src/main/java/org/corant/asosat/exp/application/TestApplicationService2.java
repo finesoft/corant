@@ -16,11 +16,12 @@
 package org.corant.asosat.exp.application;
 
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.corant.asosat.exp.domain.TestDefaultGenericAggregate;
@@ -32,12 +33,12 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 上午11:44:27
  *
  */
-@ApplicationScoped
+@RequestScoped
 @Transactional
 public class TestApplicationService2 {
 
   @Inject
-  @PersistenceContext(unitName = "dmmsPu")
+  @PersistenceContext(unitName = "dmmsPu", type = PersistenceContextType.EXTENDED)
   EntityManager em;
 
   @Inject

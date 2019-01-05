@@ -15,6 +15,7 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.util.Collections;
@@ -23,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -34,10 +37,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import org.corant.kernel.util.CdiUtils;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
+import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
+import org.corant.suites.jpa.shared.inject.PersistenceContextInjectionPoint;
+import org.corant.suites.jpa.shared.inject.TransactionPersistenceContextType;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
@@ -77,7 +82,6 @@ public class JpaExtension implements Extension {
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
-    PCMDS.stream().map(pcmd -> pcmd.getUnit()).forEach(PUMDS::add);
     PUMDS.forEach(pumd -> {
       abd.addBean(new EntityManagerFactoryBean(beanManager, pumd));
     });
@@ -93,7 +97,7 @@ public class JpaExtension implements Extension {
         String.join(", ", persistenceUnitInfoMetaDatas.keySet())));
   }
 
-  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
+  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();
     PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
@@ -103,13 +107,16 @@ public class JpaExtension implements Extension {
     if (pc != null) {
       PersistenceContextMetaData pcmd = PersistenceContextMetaData.of(pc);
       if (pcmd.getType() != PersistenceContextType.TRANSACTION) {
-        // FIXME check member declare class scope annotation
+        shouldBeFalse(ip.getBean().getScope().equals(ApplicationScoped.class));
+        pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
+            ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
+      } else {
+        pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
+            TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
       }
-      if (PCMDS.stream().anyMatch(m -> m.getUnit().equals(pcmd.getUnit()) && !m.equals(pcmd))) {
-        pip.addDefinitionError(new CorantRuntimeException(
-            "Only accept that the same persistence unit (name & unit name) must have the same persistence context."));
-      }
+      PUMDS.add(pcmd.getUnit());
       PCMDS.add(pcmd);
     }
   }
+
 }

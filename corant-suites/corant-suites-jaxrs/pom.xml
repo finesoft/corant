@@ -21,5 +21,6 @@
 	</licenses>
 	<modules>
 		<module>corant-suites-jaxrs-resteasy</module>
+		<module>corant-suites-jaxrs-shared</module>
 	</modules>
 </project>

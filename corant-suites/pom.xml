@@ -32,6 +32,7 @@
 		<module>corant-suites-query</module>
 		<module>corant-suites-security</module>
 		<module>corant-suites-flyway</module>
+		<module>corant-suites-bundle</module>
 	</modules>
 	<!--
 	<build>

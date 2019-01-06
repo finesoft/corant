@@ -33,7 +33,7 @@ import org.corant.Corant;
 import org.corant.asosat.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.asosat.ddd.message.MessageService;
 import org.corant.asosat.ddd.saga.SagaService;
-import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.kernel.exception.GeneralRuntimeException;
 
 /**
  * corant-asosat-ddd

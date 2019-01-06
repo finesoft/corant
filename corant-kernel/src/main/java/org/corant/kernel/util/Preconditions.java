@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.util;
+package org.corant.kernel.util;
 
 import static org.corant.shared.util.ObjectUtils.isDeepEquals;
 import static org.corant.shared.util.ObjectUtils.isEquals;
@@ -28,7 +28,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.util.CollectionUtils;
+import org.corant.shared.util.MapUtils;
+import org.corant.shared.util.ValidateUtils;
 
 /**
  * @author bingo 2013年6月24日

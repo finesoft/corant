@@ -13,17 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.exception;
-
 /**
- * @author bingo 上午12:23:49
+ * corant-kernel
+ * 
+ * @author bingo 下午3:15:23
  *
  */
-public class NotSupportedException extends CorantRuntimeException {
-
-  private static final long serialVersionUID = 6106399720806482079L;
-
-  public NotSupportedException() {
-    super("ERR_OP_NON_SUP");// FIXME message code
-  }
-}
+package org.corant.kernel.service;

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
  * @author bingo 下午10:08:22
@@ -130,15 +129,6 @@ public class MethodUtils {
 
     private final String[] parameterTypes;
 
-    public MethodSignature(AnnotatedMethod<?> method) {
-      methodName = method.getJavaMember().getName();
-      parameterTypes = new String[method.getParameters().size()];
-      for (int i = 0; i < method.getParameters().size(); i++) {
-        parameterTypes[i] =
-            TypeUtils.getRawType(method.getParameters().get(i).getBaseType()).getName();
-      }
-    }
-
     public MethodSignature(Method method) {
       methodName = method.getName();
       parameterTypes = new String[method.getParameterTypes().length];
@@ -152,12 +142,12 @@ public class MethodUtils {
       this.parameterTypes = parameterTypes;
     }
 
-    public static MethodSignature of(AnnotatedMethod<?> method) {
+    public static MethodSignature of(Method method) {
       return new MethodSignature(method);
     }
 
-    public static MethodSignature of(Method method) {
-      return new MethodSignature(method);
+    public static MethodSignature of(String methodName, String... parameterTypes) {
+      return new MethodSignature(methodName, parameterTypes);
     }
 
     @Override

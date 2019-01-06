@@ -32,7 +32,7 @@ import org.corant.asosat.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
 import org.corant.asosat.ddd.model.Aggregate;
 import org.corant.asosat.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.asosat.ddd.model.Aggregate.Lifecycle;
-import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.kernel.exception.GeneralRuntimeException;
 
 /**
  * corant-asosat-ddd

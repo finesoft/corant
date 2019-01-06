@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.corant.shared.conversion.ConversionService;
+import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;

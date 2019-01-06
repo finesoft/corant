@@ -16,7 +16,10 @@
 package org.corant.kernel.util;
 
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.InjectionPoint;
+import org.corant.shared.util.MethodUtils.MethodSignature;
+import org.corant.shared.util.TypeUtils;
 import org.jboss.weld.injection.ParameterInjectionPoint;
 
 /**
@@ -33,4 +36,15 @@ public abstract class CdiUtils {
     }
     return injectionPoint.getAnnotated();
   }
+
+  public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {
+    String methodName = method.getJavaMember().getName();
+    String[] parameterTypes = new String[method.getParameters().size()];
+    for (int i = 0; i < method.getParameters().size(); i++) {
+      parameterTypes[i] =
+          TypeUtils.getRawType(method.getParameters().get(i).getBaseType()).getName();
+    }
+    return MethodSignature.of(methodName, parameterTypes);
+  }
+
 }

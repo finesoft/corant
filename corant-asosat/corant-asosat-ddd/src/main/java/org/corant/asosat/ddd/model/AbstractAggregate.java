@@ -15,8 +15,8 @@
  */
 package org.corant.asosat.ddd.model;
 
-import static org.corant.shared.util.Preconditions.requireFalse;
-import static org.corant.shared.util.Preconditions.requireNotNull;
+import static org.corant.kernel.util.Preconditions.requireFalse;
+import static org.corant.kernel.util.Preconditions.requireNotNull;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.ObjectInputStream;

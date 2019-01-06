@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.exception;
+package org.corant.kernel.exception;
 
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.StringUtils.asDefaultString;
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Function;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * @author bingo 下午6:19:52

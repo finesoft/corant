@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.conversion.ConversionService;
+import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.NamedQueryResolver;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;

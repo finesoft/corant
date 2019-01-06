@@ -11,27 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.conversion;
+package org.corant.kernel.exception;
 
-import java.util.Collection;
-import org.corant.shared.conversion.ConverterRegistry.ConverterType;
+import java.util.Locale;
 
 /**
- *
- * @author bingo 上午12:16:42
+ * @author bingo 上午10:19:35
  *
  */
-public interface ConversionService {
+public interface GeneralRuntimeExceptionMessager {
 
-  <C extends Collection<T>, T> C convert(final Object value, final Class<C> collectionClazz,
-      final Class<T> clazz, Object... hints);
+  String getMessage(Locale locale, GeneralRuntimeException exception);
 
-  <T> T convert(final Object value, final Class<T> clazz, Object... hints);
-
-  void deregister(ConverterType<?, ?> converterType);
-
-  <S, T> Converter<S, T> getConverter(final Class<S> sourceType, final Class<T> targetType);
-
-  <T> void register(Converter<?, ?> converter);
-
+  String getUnknowErrorMessage(Locale locale);
 }

@@ -13,8 +13,8 @@
  */
 package org.corant.asosat.ddd.model;
 
-import static org.corant.shared.util.Preconditions.requireGaet;
-import static org.corant.shared.util.Preconditions.requireNotNull;
+import static org.corant.kernel.util.Preconditions.requireGaet;
+import static org.corant.kernel.util.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;

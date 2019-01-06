@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import org.corant.shared.conversion.ConversionService;
+import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.dynamic.template.DynamicQueryTplResolver;
 import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;

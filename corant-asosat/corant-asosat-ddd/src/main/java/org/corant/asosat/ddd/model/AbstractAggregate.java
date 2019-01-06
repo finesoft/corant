@@ -1,14 +1,16 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.model;
@@ -62,8 +64,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Identifies whether the aggregate has been persisted or deleted.
    * <li>INITIAL: Just created</li>
    * <li>ENABLED: Has been persisted</li>
-   * <li>DESTROYED: If already persisted, the representation is removed from the persistence
-   * facility; otherwise it is just a token</li>
+   * <li>DESTROYED: If already persisted, the representation is removed from the
+   * persistence facility; otherwise it is just a token</li>
    */
   @Override
   @Transient
@@ -121,7 +123,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Changed the aggregate's property value and return self for lambda use case, Example:
+   * Changed the aggregate's property value and return self for lambda use case,
+   * Example:
    *
    * <pre>
    * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)
@@ -134,13 +137,14 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Obtain an assistant for the aggregate, subclass can rewrite this method for supply an assistant
+   * Obtain an assistant for the aggregate, subclass can rewrite this method for
+   * supply an assistant
    */
   protected abstract AggregateAssistant callAssistant();
 
   /**
-   * Destroy the aggregate if is persisted then remove it from entity manager else just mark
-   * destroyed
+   * Destroy the aggregate if is persisted then remove it from entity manager else
+   * just mark destroyed
    */
   protected synchronized void destroy(boolean immediately) {
     this.raise(new LifecycleEvent(this, LifcyclePhase.DESTROY, immediately),
@@ -187,7 +191,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     stream.defaultWriteObject();
   }
 
-  static class DefaultAggregateIdentifier implements AggregateIdentifier {
+  public static class DefaultAggregateIdentifier implements AggregateIdentifier {
 
     private static final long serialVersionUID = -930151000998600572L;
 

@@ -20,7 +20,7 @@
 		</license>
 	</licenses>
 	<modules>
-		<module>corant-suites-jaxrs-resteasy</module>
 		<module>corant-suites-jaxrs-shared</module>
+		<module>corant-suites-jaxrs-resteasy</module>
 	</modules>
 </project>

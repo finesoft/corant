@@ -61,12 +61,5 @@
 			<artifactId>javax.jms-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- TEST -->
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

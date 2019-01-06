@@ -50,11 +50,5 @@
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-websocket</artifactId>
 		</dependency>
-		<!-- TEST -->
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

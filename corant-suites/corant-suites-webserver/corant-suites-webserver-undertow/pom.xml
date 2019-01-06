@@ -42,11 +42,5 @@
 			<groupId>io.undertow</groupId>
 			<artifactId>undertow-websockets-jsr</artifactId>
 		</dependency>
-		<!-- TEST -->
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

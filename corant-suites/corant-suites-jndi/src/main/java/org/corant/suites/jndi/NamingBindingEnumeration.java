@@ -39,7 +39,9 @@ public class NamingBindingEnumeration implements NamingEnumeration<Binding> {
   }
 
   @Override
-  public void close() throws NamingException {}
+  public void close() throws NamingException {
+    // NOOP
+  }
 
   @Override
   public boolean hasMore() throws NamingException {

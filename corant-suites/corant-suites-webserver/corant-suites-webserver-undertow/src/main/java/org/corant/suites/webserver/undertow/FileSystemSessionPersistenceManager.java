@@ -112,10 +112,8 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
     if (!file.exists()) {
       boolean created = false;
       try {
-        if (!file.getParentFile().exists()) {
-          if (file.getParentFile().mkdirs()) {
-            created = file.createNewFile();
-          }
+        if (!file.getParentFile().exists() && file.getParentFile().mkdirs()) {
+          created = file.createNewFile();
         }
       } catch (IOException e) {
         UndertowServletLogger.ROOT_LOGGER.failedToPersistSessions(e);

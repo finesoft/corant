@@ -87,11 +87,9 @@ public class FileUtils {
       throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile
           + "' Expected length: " + srcLen + " Actual: " + dstLen);
     }
-    if (preserveFileDate) {
-      if (destFile.setLastModified(srcFile.lastModified())) {
-        logger.warning(() -> String.format("Can not preserve file date for file %s!",
-            destFile.getAbsolutePath()));
-      }
+    if (preserveFileDate && destFile.setLastModified(srcFile.lastModified())) {
+      logger.warning(() -> String.format("Can not preserve file date for file %s!",
+          destFile.getAbsolutePath()));
     }
   }
 

@@ -104,12 +104,10 @@ public class ClassUtils {
 
   public static void checkProxyPackageAccess(Class<?> clazz) {
     SecurityManager s = System.getSecurityManager();
-    if (s != null) {
+    if (s != null && Proxy.isProxyClass(clazz)) {
       // check proxy interfaces if the given class is a proxy class
-      if (Proxy.isProxyClass(clazz)) {
-        for (Class<?> intf : clazz.getInterfaces()) {
-          checkPackageAccess(intf);
-        }
+      for (Class<?> intf : clazz.getInterfaces()) {
+        checkPackageAccess(intf);
       }
     }
   }

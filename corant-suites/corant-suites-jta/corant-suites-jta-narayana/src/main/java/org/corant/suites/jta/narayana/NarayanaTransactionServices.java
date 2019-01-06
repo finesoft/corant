@@ -34,7 +34,7 @@ public class NarayanaTransactionServices implements TransactionServices {
 
   @Override
   public void cleanup() {
-
+    // NOOP
   }
 
   @Override

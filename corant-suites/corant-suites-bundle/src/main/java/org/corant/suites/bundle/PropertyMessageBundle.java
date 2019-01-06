@@ -60,11 +60,6 @@ public class PropertyMessageBundle implements MessageBundle {
   @ConfigProperty(name = "bundle.message.source.packages", defaultValue = "META-INF/")
   String packages;
 
-  @Inject
-  @Any
-  @ConfigProperty(name = "bundle.message.source.load.way", defaultValue = "false")
-  volatile boolean lazyLoad = false;
-
   public PropertyMessageBundle() {}
 
   @Override
@@ -113,12 +108,16 @@ public class PropertyMessageBundle implements MessageBundle {
     load();
   }
 
+  protected boolean isInitialized() {
+    return initialized;
+  }
+
   protected void load() {
-    if (!initialized) {
+    if (!isInitialized()) {
       synchronized (this) {
-        if (!initialized) {
+        if (!isInitialized()) {
           try {
-            destroy();
+            onPreDestroy();
             Set<String> pkgs = asSet(split(packages, ";"));
             final Pattern filter = Pattern.compile(pathRegex, Pattern.CASE_INSENSITIVE);
             pkgs.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
@@ -142,17 +141,15 @@ public class PropertyMessageBundle implements MessageBundle {
     }
   }
 
-  @PreDestroy
-  synchronized void destroy() {
-    holder.forEach((k, v) -> v.clear());
-    holder.clear();
+  @PostConstruct
+  synchronized void onPostConstruct() {
+    load();
   }
 
-  @PostConstruct
-  synchronized void init() {
-    if (!lazyLoad) {
-      load();
-    }
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    holder.forEach((k, v) -> v.clear());
+    holder.clear();
   }
 
 }

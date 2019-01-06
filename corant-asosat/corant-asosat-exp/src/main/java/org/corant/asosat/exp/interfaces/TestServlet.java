@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
-import org.corant.asosat.exp.application.TestApplicationService;
+import org.corant.asosat.exp.application.TestApplicationService1;
 import org.corant.asosat.exp.application.TestQueryService;
 
 /**
@@ -43,7 +43,7 @@ public class TestServlet extends HttpServlet {
   private static final long serialVersionUID = 8174294172579816895L;
 
   @Inject
-  TestApplicationService as;
+  TestApplicationService1 as;
 
   @Inject
   TestQueryService qs;

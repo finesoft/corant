@@ -25,7 +25,8 @@ import javax.persistence.PersistenceContextType;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.corant.asosat.exp.domain.TestDefaultGenericAggregate;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.suites.bundle.GlobalMessageCodes;
 
 /**
  * corant-asosat-exp
@@ -51,14 +52,14 @@ public class TestApplicationService2 {
     em.persist(obj);
     em.flush();
     if (isEquals(param, "0")) {
-      testEntityManager1();
+      testRollback();
     }
   }
 
-  public void testEntityManager1() {
+  public void testRollback() {
     TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
     obj.setName("jimmy");
     em.persist(obj);
-    throw new CorantRuntimeException("xxxxxxxxxxxxx");
+    throw new GeneralRuntimeException(GlobalMessageCodes.INF_OP_FAL);
   }
 }

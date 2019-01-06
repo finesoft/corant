@@ -35,7 +35,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 @ApplicationScoped
-public class TestApplicationService {
+public class TestApplicationService1 {
 
   AtomicLong al = new AtomicLong();
 
@@ -58,14 +58,14 @@ public class TestApplicationService {
     em.flush();
     s2.testEntityManager(obj.getName() + UUID.randomUUID().toString());
     if (isEquals(param, "0")) {
-      s2.testEntityManager1();
+      s2.testRollback();
     }
   }
 
-  public void testEntityManager1() {
+  public void testRollback() {
     TestDefaultGenericAggregate obj = new TestDefaultGenericAggregate();
     obj.setName("jimmy");
     em.persist(obj);
-    throw new CorantRuntimeException("xxxxxxxxxxxxx");
+    throw new CorantRuntimeException("test roll back");
   }
 }

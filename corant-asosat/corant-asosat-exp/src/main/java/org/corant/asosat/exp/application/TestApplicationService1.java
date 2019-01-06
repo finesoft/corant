@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.corant.asosat.exp.domain.TestDefaultGenericAggregate;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
  * corant-asosat-exp
@@ -48,6 +49,10 @@ public class TestApplicationService1 {
   DataSource ds;
 
   @Inject
+  @RestClient
+  TestRestClientService client;
+
+  @Inject
   TestApplicationService2 s2;
 
   @Transactional
@@ -60,6 +65,8 @@ public class TestApplicationService1 {
     if (isEquals(param, "0")) {
       s2.testRollback();
     }
+
+    System.out.println(client.get("1"));
   }
 
   public void testRollback() {

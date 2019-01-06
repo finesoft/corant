@@ -17,7 +17,6 @@ package org.corant.suites.bundle;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ClassPaths.ResourceInfo;
 
@@ -58,7 +58,9 @@ public class PropertyResourceBundle extends ResourceBundle {
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
     Properties properties = new Properties();
-    properties.load(new InputStreamReader(fo.openStream(), Charset.forName("utf-8")));
+    try (InputStreamReader isr = new InputStreamReader(fo.openStream(), Defaults.DFLT_CHARSET)) {
+      properties.load(isr);
+    }
     lookup = new HashMap(properties);
   }
 
@@ -92,9 +94,7 @@ public class PropertyResourceBundle extends ResourceBundle {
     while (msgKeys.hasMoreElements()) {
       String msgKey = msgKeys.nextElement();
       String mfv = getString(msgKey);
-      if (mfv != null) {
-        map.put(msgKey, mfv);
-      }
+      map.put(msgKey, mfv);
     }
     return map;
   }

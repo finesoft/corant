@@ -33,7 +33,6 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.corant.Corant;
 import org.corant.suites.query.QueryRuntimeException;
 
 /**
@@ -65,8 +64,9 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
     String useJndiDsName = shouldNotNull(jndiDsName).startsWith(JNDI_DATS_NME) ? jndiDsName
         : JNDI_DATS_NME + "/" + jndiDsName;
     try {
-      return of(new SqlQueryConfiguration.Builder().dataSource(
-          forceCast(Corant.cdi().select(InitialContext.class).get().lookup(useJndiDsName))));
+      InitialContext jndi = new InitialContext();
+      DataSource ds = shouldNotNull(forceCast(jndi.lookup(useJndiDsName)));
+      return of(ds);
     } catch (NamingException e) {
       throw new QueryRuntimeException(e);
     }

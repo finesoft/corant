@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
@@ -50,6 +51,10 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
             confiuration.getMaxFieldSize(), confiuration.getMaxRows(),
             confiuration.getQueryTimeout()));
+  }
+
+  public static DefaultSqlQueryExecutor of(DataSource ds) {
+    return of(new SqlQueryConfiguration.Builder().dataSource(shouldNotNull(ds)));
   }
 
   public static DefaultSqlQueryExecutor of(SqlQueryConfiguration.Builder builder) {

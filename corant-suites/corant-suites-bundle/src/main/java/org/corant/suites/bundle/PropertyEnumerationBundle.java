@@ -50,7 +50,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
 
   final Map<Locale, EnumLiteralsObject> holder = new ConcurrentHashMap<>();
 
-  private volatile boolean init = false;
+  private volatile boolean initialized = false;
 
   @Inject
   @Any
@@ -99,15 +99,15 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   }
 
   public synchronized void reload() {
-    init = false;
+    initialized = false;
     load();
   }
 
   @SuppressWarnings("unchecked")
   protected void load() {
-    if (!init) {
+    if (!initialized) {
       synchronized (this) {
-        if (!init) {
+        if (!initialized) {
           try {
             destroy();
             Set<String> pkgs = asSet(split(packages, ";"));
@@ -145,7 +145,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
             });
             // TODO validate
           } finally {
-            init = true;
+            initialized = true;
           }
         }
       }

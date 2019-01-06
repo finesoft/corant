@@ -40,11 +40,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public class PropertyMessageResource implements MessageBundle {
+public class PropertyMessageBundle implements MessageBundle {
 
   final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
 
-  private volatile boolean init = false;
+  private volatile boolean initialized = false;
 
   @Inject
   Logger logger;
@@ -65,7 +65,7 @@ public class PropertyMessageResource implements MessageBundle {
   @ConfigProperty(name = "bundle.message.source.load.way", defaultValue = "false")
   volatile boolean lazyLoad = false;
 
-  public PropertyMessageResource() {}
+  public PropertyMessageBundle() {}
 
   @Override
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException {
@@ -109,14 +109,14 @@ public class PropertyMessageResource implements MessageBundle {
   }
 
   public synchronized void reload() {
-    init = false;
+    initialized = false;
     load();
   }
 
   protected void load() {
-    if (!init) {
+    if (!initialized) {
       synchronized (this) {
-        if (!init) {
+        if (!initialized) {
           try {
             destroy();
             Set<String> pkgs = asSet(split(packages, ";"));
@@ -135,7 +135,7 @@ public class PropertyMessageResource implements MessageBundle {
             });
 
           } finally {
-            init = true;
+            initialized = true;
           }
         }
       }

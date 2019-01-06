@@ -15,12 +15,16 @@
  */
 package org.corant.suites.query.sqlquery;
 
+import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
@@ -28,6 +32,8 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.Corant;
+import org.corant.suites.query.QueryRuntimeException;
 
 /**
  * asosat-query
@@ -44,6 +50,21 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
             confiuration.getMaxFieldSize(), confiuration.getMaxRows(),
             confiuration.getQueryTimeout()));
+  }
+
+  public static DefaultSqlQueryExecutor of(SqlQueryConfiguration.Builder builder) {
+    return new DefaultSqlQueryExecutor(builder.build());
+  }
+
+  public static DefaultSqlQueryExecutor of(String jndiDsName) {
+    String useJndiDsName = shouldNotNull(jndiDsName).startsWith(JNDI_DATS_NME) ? jndiDsName
+        : JNDI_DATS_NME + "/" + jndiDsName;
+    try {
+      return of(new SqlQueryConfiguration.Builder().dataSource(
+          forceCast(Corant.cdi().select(InitialContext.class).get().lookup(useJndiDsName))));
+    } catch (NamingException e) {
+      throw new QueryRuntimeException(e);
+    }
   }
 
   @Override

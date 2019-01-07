@@ -11,10 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-/**
- * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
- *
- */
 package org.corant.suites.ddd.model;
+
+import java.io.Serializable;
+
+public interface Value extends Serializable {
+
+}

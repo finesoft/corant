@@ -11,10 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.model;
+
+import java.io.Serializable;
+import java.util.Optional;
+
 /**
  * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
+ *
+ * @author bingo 上午10:31:05
  *
  */
-package org.corant.suites.ddd.model;
+public interface Reference<T> extends Serializable {
+
+  Optional<T> retrieve();
+
+}

@@ -11,10 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.unitwork;
+
+import java.lang.annotation.Annotation;
+
 /**
  * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
+ *
+ * @author bingo 下午3:26:37
  *
  */
-package org.corant.suites.ddd.model;
+public interface Commands {
+
+  public static <C> void accept(C command, Annotation... annotations) {
+    return;
+  }
+
+  public static <C, R> R apply(C command, Annotation... annotations) {
+    return null;
+  }
+
+}

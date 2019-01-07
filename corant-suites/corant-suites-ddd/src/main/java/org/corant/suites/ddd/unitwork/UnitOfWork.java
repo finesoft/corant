@@ -11,10 +11,46 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.unitwork;
+
 /**
  * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
+ *
+ * @author bingo 下午3:02:04
  *
  */
-package org.corant.suites.ddd.model;
+public interface UnitOfWork {
+
+  /**
+   * Complete unit of works, clean registers, release effect.
+   */
+  void complete(boolean success);
+
+  /**
+   * Deregister an object from this unit of works
+   *
+   * @param obj
+   */
+  default void deregister(Object obj) {}
+
+  /**
+   * The unit of works id
+   *
+   * @return
+   */
+  Object getId();
+
+  /**
+   * The registers in this unit of works
+   */
+  Object getRegisters();
+
+  /**
+   * Register an object to this unit of works
+   *
+   * @param obj
+   */
+  void register(Object obj);
+
+
+}

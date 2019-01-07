@@ -11,10 +11,31 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.saga;
+
+import java.util.Collection;
+import org.corant.suites.ddd.message.Message.MessageIdentifier;
+import org.corant.suites.ddd.model.Entity;
+
 /**
  * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
+ *
+ * @author bingo 下午3:48:37
  *
  */
-package org.corant.suites.ddd.model;
+public interface Saga extends Entity {
+
+  Collection<?> getAttributes();
+
+  Object getOriginal();
+
+  Collection<? extends MessageIdentifier> getRelevantMessages();
+
+  String getTrackingToken();
+
+  MessageIdentifier getTriggerMessage();
+
+  boolean isActived();
+
+  Saga withTrackingToken(String trackingToken);
+}

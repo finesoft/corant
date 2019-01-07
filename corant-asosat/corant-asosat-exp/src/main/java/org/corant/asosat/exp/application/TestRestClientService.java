@@ -22,7 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.corant.asosat.ddd.annotation.stereotype.ApplicationServices;
+import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**

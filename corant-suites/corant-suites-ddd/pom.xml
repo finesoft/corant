@@ -38,20 +38,6 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-bundle</artifactId>
 		</dependency>
-
-		<!-- Test -->
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-devops-test-unit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-
 		<!-- Standard JEE -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>

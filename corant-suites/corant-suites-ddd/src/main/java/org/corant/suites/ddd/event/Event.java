@@ -11,10 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.event;
+
+import java.beans.Transient;
+import java.io.Serializable;
+import java.time.Instant;
+
 /**
- * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
- *
+ * @author bingo 上午12:27:12
  */
-package org.corant.suites.ddd.model;
+public interface Event extends Serializable, Cloneable {
+
+  Instant getOccurredTime();
+
+  @Transient
+  default <T> T getSource() {
+    return null;
+  }
+}

@@ -23,7 +23,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.corant.asosat.ddd.model.AbstractDefaultGenericAggregate;
+import org.corant.suites.ddd.model.AbstractDefaultGenericAggregate;
 import org.hibernate.annotations.GenericGenerator;
 
 /**

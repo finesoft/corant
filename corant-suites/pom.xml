@@ -54,4 +54,5 @@
 		</plugins>
 	</build>
 	-->
+	<description>The Corant integration suite, which contains various components involved in enterprise development.</description>
 </project>

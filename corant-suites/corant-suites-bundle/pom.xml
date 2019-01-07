@@ -70,4 +70,5 @@
 			</resource>
 		</resources>
 	</build>
+	<description>The Corant resource bundle, which contains enum literal and message content involved in enterprise development.</description>
 </project>

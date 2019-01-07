@@ -11,10 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.ddd.repository;
+
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * corant-asosat-ddd
- * 
- * @author bingo 下午3:49:10
+ *
+ * @author bingo 下午9:39:03
  *
  */
-package org.corant.suites.ddd.model;
+public interface Repository<Q> {
+
+  <T> T get(Class<T> cls, Serializable id);
+
+  <T> T merge(T obj);
+
+  <T> boolean persist(T obj);
+
+  <T> boolean remove(T obj);
+
+  <T> List<T> select(Q q);
+
+}

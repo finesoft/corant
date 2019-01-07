@@ -108,6 +108,13 @@ public class Corant {
     return Unmanageables.create(clazz);
   }
 
+  public static <T> T resolveManageable(Class<T> manageableBeanClass, Annotation... qualifiers) {
+    if (cdi().select(manageableBeanClass, qualifiers).isResolvable()) {
+      return cdi().select(manageableBeanClass, qualifiers).get();
+    }
+    return null;
+  }
+
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
     return Unmanageables.accpet(object);
   }

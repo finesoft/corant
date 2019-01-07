@@ -13,16 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.domain.model;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import javax.persistence.MappedSuperclass;
+import org.corant.suites.ddd.model.Value;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * corant-asosat-ddd
+ *
+ * @author bingo 下午1:33:25
+ *
+ */
+@MappedSuperclass
+public abstract class AbstractValueObject implements Value {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  private static final long serialVersionUID = -4414975083746116630L;
 
-  private PkgMsgCds() {}
+  public AbstractValueObject() {}
 }

@@ -15,16 +15,31 @@
  */
 package org.corant.suites.ddd.model;
 
-import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Stream;
+import org.corant.suites.ddd.message.Message;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
- * @author bingo 上午10:31:05
+ * @author bingo 下午2:05:56
  *
  */
-public interface Reference<T> extends Serializable {
+public abstract class AbstractAuditableAggregate extends AbstractAggregate {
 
-  T retrieve();
+  private static final long serialVersionUID = 3636641230618671037L;
+
+  public AbstractAuditableAggregate() {}
+
+  public AbstractAuditableAggregate(Stream<? extends Message> messageStream) {}
+
+  @Override
+  public synchronized List<Message> extractMessages(boolean flush) {
+    List<Message> events = super.extractMessages(flush);
+    if (flush && !events.isEmpty()) {
+      setVn(getVn() + events.size());
+    }
+    return events;
+  }
 
 }

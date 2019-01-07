@@ -15,14 +15,23 @@
  */
 package org.corant.asosat.ddd.message;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import org.corant.suites.ddd.annotation.stereotype.Messages;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * @author bingo 下午2:54:57
+ *
+ */
+@Messages
+public abstract class AbstractGenericMessage<P, A> extends AbstractMessage {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  private static final long serialVersionUID = -8162356952693715290L;
 
-  private PkgMsgCds() {}
+  protected AbstractGenericMessage() {}
+
+  @Override
+  public abstract AbstractGenericMessageMetadata<A> getMetadata();
+
+  @Override
+  public abstract P getPayload();
+
 }

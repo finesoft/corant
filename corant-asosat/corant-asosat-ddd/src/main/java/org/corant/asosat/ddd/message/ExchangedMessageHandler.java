@@ -15,14 +15,14 @@
  */
 package org.corant.asosat.ddd.message;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import org.corant.suites.ddd.message.Message.ExchangedMessage;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * @author bingo 下午2:37:44
+ *
+ */
+public interface ExchangedMessageHandler {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  void handle(ExchangedMessage message);
 
-  private PkgMsgCds() {}
 }

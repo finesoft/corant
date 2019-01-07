@@ -13,16 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.domain.shared;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
 
-class PkgMsgCds implements GlobalMessageCodes {
+@Embeddable
+@MappedSuperclass
+@AttributeOverrides(value = {@AttributeOverride(column = @Column(name = "buyerId"), name = "id"),
+    @AttributeOverride(column = @Column(name = "buyerName"), name = "name")})
+public class BuyerOrg extends Participator {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  private static final long serialVersionUID = 2482047799269041296L;
 
-  private PkgMsgCds() {}
 }

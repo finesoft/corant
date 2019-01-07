@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.pattern.concurrent;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import javax.enterprise.context.ApplicationScoped;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ *
+ * @author bingo 上午9:28:38
+ *
+ */
+@ApplicationScoped
+public class ThreadLocalProvider {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
-
-  private PkgMsgCds() {}
 }

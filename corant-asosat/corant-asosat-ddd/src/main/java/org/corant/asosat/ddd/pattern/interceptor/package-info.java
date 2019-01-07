@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.pattern.interceptor;
 
 import org.corant.suites.bundle.GlobalMessageCodes;
 
 class PkgMsgCds implements GlobalMessageCodes {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  static final String ERR_RETRY_CTX_NULL = "retryInterceptor.ctx_null";
+  static final String ERR_RETRY_DFLT = "retryInterceptor.defaultThrowing";
+  static final String ERR_CT_CTX_NULL = "concurrencyThrottleInterceptor.ctx_null";
+  static final String ERR_CT_DFLT = "concurrencyThrottleInterceptor.defaultThrowing";
+  static final String ERR_ASYNC_CTX_NULL = "asynchronousInterceptor.ctx_null";
+  static final String ERR_ASYNC_EXE = "asynchronousInterceptor.execute_error";
 
-  private PkgMsgCds() {}
 }

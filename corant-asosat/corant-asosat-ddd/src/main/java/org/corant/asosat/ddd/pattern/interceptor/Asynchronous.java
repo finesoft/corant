@@ -13,16 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.pattern.interceptor;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.enterprise.util.Nonbinding;
+import javax.interceptor.InterceptorBinding;
 
-class PkgMsgCds implements GlobalMessageCodes {
-
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
-
-  private PkgMsgCds() {}
+/**
+ * @author bingo 下午2:04:51
+ *
+ */
+@InterceptorBinding
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+public @interface Asynchronous {
+  @Nonbinding
+  boolean fair() default true;
 }

@@ -13,16 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.domain.shared;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import java.time.Instant;
+import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
+import org.corant.suites.ddd.model.Value;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * @author bingo 下午7:49:44
+ *
+ */
+@Embeddable
+@MappedSuperclass
+public interface OperationInfo extends Value {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  Instant obtainOperatedTime();
 
-  private PkgMsgCds() {}
+  Long obtainOperatorId();
+
 }

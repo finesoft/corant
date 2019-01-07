@@ -13,16 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.application.service;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+/**
+ * corant-asosat-ddd
+ *
+ * @author bingo 下午1:20:14
+ *
+ */
+public interface ApplicationService {
 
-class PkgMsgCds implements GlobalMessageCodes {
+  default String getAppVerNum() {
+    return "V1";
+  }
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
-
-  private PkgMsgCds() {}
 }

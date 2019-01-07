@@ -14,7 +14,7 @@
 /**
  * corant-asosat-ddd
  * 
- * @author bingo 下午2:14:38
+ * @author bingo 下午4:01:49
  *
  */
-package org.corant.asosat.ddd.annotation;
+package org.corant.asosat.ddd.interfaces;

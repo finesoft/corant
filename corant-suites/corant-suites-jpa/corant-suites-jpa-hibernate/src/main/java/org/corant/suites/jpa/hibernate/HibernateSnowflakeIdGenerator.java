@@ -33,6 +33,7 @@ import org.hibernate.id.IdentifierGenerator;
  *
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
+  public static final String NAME = HibernateSnowflakeIdGenerator.class.getName();
   static final String IDGEN_SF_WK_ID = "app.identifier-generator.worker.id";
   static final String IDGEN_SF_DC_ID = "app.identifier-generator.datacenter.id";
   static Identifiers.IdentifierGenerator GENERATOR;

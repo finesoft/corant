@@ -33,11 +33,27 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-kernel</artifactId>
+			<artifactId>corant-suites-ddd</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-ddd</artifactId>
+			<artifactId>corant-suites-jaxrs-resteasy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-query</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-datasource-agroal</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-jta-narayana</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-jpa-hibernate</artifactId>
 		</dependency>
 
 		<!-- Test -->
@@ -51,8 +67,7 @@
 			<artifactId>smallrye-config</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
+		
 		<!-- Standard JEE -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>

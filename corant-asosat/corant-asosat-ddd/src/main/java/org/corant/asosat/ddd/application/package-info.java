@@ -14,7 +14,7 @@
 /**
  * corant-asosat-ddd
  * 
- * @author bingo 下午3:49:36
+ * @author bingo 下午2:14:38
  *
  */
-package org.corant.asosat.ddd.event;
+package org.corant.asosat.ddd.application;

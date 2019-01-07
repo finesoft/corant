@@ -13,16 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.message;
+package org.corant.asosat.ddd.interfaces;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * @author bingo 下午5:51:09
+ *
+ */
+@ApplicationScoped
+@ApplicationServices
+public abstract class AbstractRestService {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  protected Response ok() {
+    return Response.ok().type(MediaType.APPLICATION_JSON).build();
+  }
 
-  private PkgMsgCds() {}
+  protected Response ok(Object obj) {
+    return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+  }
 }

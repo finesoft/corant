@@ -15,14 +15,27 @@
  */
 package org.corant.asosat.ddd.message;
 
-import org.corant.suites.bundle.GlobalMessageCodes;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import org.corant.asosat.ddd.util.JsonUtils;
+import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.suites.ddd.message.Message.ExchangedMessage;
 
-class PkgMsgCds implements GlobalMessageCodes {
+/**
+ * @author bingo 下午12:02:33
+ *
+ */
+public abstract class AbstractBaseJmsMessageReceiver extends AbstractJmsMessageReceiver {
 
-  static final String ERR_EXMSG_CVT = "exchangeMessage.convert_error";
-  static final String ERR_MSG_CFG_QUEUE_NULL = "message.annotation_error_queue_not_found";
-  static final String ERR_MSG_CFG_QUEUE_DUP = "message.annotation_error_queue_repeat";
-  static final String ERR_MSG_QUEUE_NULL = "message.queue_error_null";
+  public AbstractBaseJmsMessageReceiver() {}
 
-  private PkgMsgCds() {}
+  @Override
+  protected ExchangedMessage convert(Message message) {
+    try {
+      return JsonUtils.fromJsonStr(message.getBody(String.class), BaseExchangedMessage.class);
+    } catch (JMSException e) {
+      throw new GeneralRuntimeException(e);
+    }
+  }
+
 }

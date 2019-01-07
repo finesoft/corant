@@ -16,7 +16,6 @@
 package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -60,7 +59,7 @@ public class Corant {
   private WeldContainer container;
 
   public Corant(Class<?> configClass) {
-    this(configClass, configClass != null ? configClass.getClassLoader() : defaultClassLoader());
+    this(configClass, configClass != null ? configClass.getClassLoader() : null);
   }
 
   public Corant(ClassLoader classLoader) {
@@ -69,9 +68,11 @@ public class Corant {
 
   Corant(Class<?> configClass, ClassLoader classLoader) {
     this.configClass = configClass;
-    this.classLoader = classLoader == null ? defaultClassLoader() : classLoader;
+    if (classLoader != null) {
+      this.classLoader = classLoader;
+    }
     INSTANCE = this;
-    ServiceLoader.load(CorantConstructHandler.class, classLoader)
+    ServiceLoader.load(CorantConstructHandler.class, this.classLoader)
         .forEach(CorantConstructHandler::handle);
   }
 

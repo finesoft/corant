@@ -128,7 +128,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-		<!--  
+		  
 		<plugins>
 			<plugin>
 				<groupId>org.corant</groupId>
@@ -146,6 +146,6 @@
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>-->
+		</plugins>
 	</build>
 </project>

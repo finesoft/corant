@@ -33,6 +33,7 @@
 		<module>corant-suites-security</module>
 		<module>corant-suites-flyway</module>
 		<module>corant-suites-bundle</module>
+		<module>corant-suites-ddd</module>
 	</modules>
 	<!--
 	<build>

@@ -15,6 +15,7 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
+import static org.corant.shared.util.MapUtils.asMap;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -68,6 +69,10 @@ public interface DynamicAttributes {
       if (map != null) {
         putAll(map);
       }
+    }
+
+    public static DynamicAttributeMap of(Object... objects) {
+      return new DynamicAttributeMap(asMap(objects));
     }
 
     @Override

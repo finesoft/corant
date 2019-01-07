@@ -25,6 +25,7 @@ import javax.transaction.Synchronization;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageService;
 import org.corant.suites.ddd.message.MessageService.MessageConvertor;
+import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 import org.corant.suites.ddd.saga.SagaService;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager.UnitOfWorksHandler;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager.UnitOfWorksListener;
@@ -32,7 +33,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWorksManager.UnitOfWorksListener;
 /**
  * @author bingo 下午7:13:58
  */
-public abstract class AbstractUnitOfWork implements UnitOfWork, Synchronization {
+public abstract class AbstractUnitOfWork
+    implements UnitOfWork, Synchronization, EntityManagerProvider {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
   protected final List<Message> message = new LinkedList<>();

@@ -19,6 +19,7 @@ import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.lang.annotation.Annotation;
+import java.time.Instant;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +37,7 @@ import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantConstructHandler;
 import org.corant.kernel.util.Unmanageables;
 import org.corant.kernel.util.Unmanageables.UnmanageableInstance;
+import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.StopWatch;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -174,6 +176,11 @@ public class Corant {
         .destroy((sw) -> logger.info(() -> String.format(
             "Complete all initialization in %s seconds, ready to receive the service.",
             sw.getTotalTimeSeconds())));
+
+    logger.info(() -> String.format("Finished at: %s", Instant.now()));
+    logger.info(() -> String.format("Final memory: %sM/%sM", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb()));
+    logger.info(() -> "----------------------------------------------------------------");
     return this;
   }
 

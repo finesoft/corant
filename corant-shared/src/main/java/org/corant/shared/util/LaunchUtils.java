@@ -1,18 +1,21 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.normal.Defaults.ONE_MB;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +67,10 @@ public class LaunchUtils {
     return "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000";
   }
 
+  public static Long getFreeMemoryMb() {
+    return Runtime.getRuntime().freeMemory() / ONE_MB;
+  }
+
   public static String getJavaHome() {
     return Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java").toString();
   }
@@ -75,6 +82,14 @@ public class LaunchUtils {
   public static List<String> getMainCommands() {
     return Arrays.stream(split(System.getProperty("sun.java.command"), " "))
         .filter(StringUtils::isNotBlank).collect(Collectors.toList());
+  }
+
+  public static Long getTotalMemoryMb() {
+    return Runtime.getRuntime().totalMemory() / ONE_MB;
+  }
+
+  public static Long getUsedMemoryMb() {
+    return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / ONE_MB;
   }
 
   public static void runAs() throws IOException, InterruptedException {

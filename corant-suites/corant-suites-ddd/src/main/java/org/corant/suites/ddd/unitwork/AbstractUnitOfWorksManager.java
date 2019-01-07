@@ -17,7 +17,6 @@ package org.corant.suites.ddd.unitwork;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -32,8 +31,7 @@ import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.message.MessageService;
-import org.corant.suites.ddd.saga.SagaService;
+import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
  * corant-asosat-ddd
@@ -43,7 +41,8 @@ import org.corant.suites.ddd.saga.SagaService;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
+public abstract class AbstractUnitOfWorksManager
+    implements UnitOfWorksManager, EntityManagerProvider {
 
   protected ThreadLocal<AbstractUnitOfWork> UOWS;
 
@@ -59,28 +58,13 @@ public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
   }
 
   @Override
-  public UnitOfWork getCurrentUnitOfWorks() {
-    return null;
+  public AbstractUnitOfWork getCurrentUnitOfWorks() {
+    return UOWS.get();
   }
 
   @Override
-  public Stream<UnitOfWorksHandler> getHandlers() {
-    return null;
-  }
-
-  @Override
-  public Stream<UnitOfWorksListener> getListeners() {
-    return null;
-  }
-
-  @Override
-  public MessageService getMessageService() {
-    return null;
-  }
-
-  @Override
-  public SagaService getSagaService() {
-    return null;
+  public EntityManager getEntityManager() {
+    return getCurrentUnitOfWorks().getEntityManager();
   }
 
   public TransactionManager getTransactionManager() {
@@ -126,6 +110,4 @@ public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
       }
     });
   }
-
-
 }

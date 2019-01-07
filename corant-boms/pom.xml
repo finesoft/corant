@@ -64,7 +64,9 @@
 		<version.tomcat>9.0.13</version.tomcat>
 		<version.undertow>2.0.16.Final</version.undertow>
 		<version.resteasy>3.6.2.Final</version.resteasy>
-
+	
+		<version.artemis-cdi-client>2.6.3</version.artemis-cdi-client>
+	
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.3</version.agroal>
 		<version.narayana-jta>5.9.2.Final</version.narayana-jta>
@@ -384,6 +386,13 @@
 				<groupId>io.agroal</groupId>
 				<artifactId>agroal-narayana</artifactId>
 				<version>${version.agroal}</version>
+			</dependency>
+
+			<!-- MSG/JMS -->
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>artemis-cdi-client</artifactId>
+				<version>${version.artemis-cdi-client}</version>
 			</dependency>
 
 			<!-- DataBase -->

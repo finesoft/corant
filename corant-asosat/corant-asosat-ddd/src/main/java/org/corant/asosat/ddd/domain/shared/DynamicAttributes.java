@@ -15,6 +15,7 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,7 +50,9 @@ public interface DynamicAttributes {
     }
   }
 
-  public static class DynamicAttributeMap implements WrappedMap<String, Object> {
+  public static class DynamicAttributeMap implements WrappedMap<String, Object>, Serializable {
+
+    private static final long serialVersionUID = 6020146368094520321L;
 
     private final Map<String, Object> map = new LinkedHashMap<>();
 
@@ -79,7 +82,14 @@ public interface DynamicAttributes {
         return false;
       }
       DynamicAttributeMap other = (DynamicAttributeMap) obj;
-      return map.equals(other.map);
+      if (map == null) {
+        if (other.map != null) {
+          return false;
+        }
+      } else if (!map.equals(other.map)) {
+        return false;
+      }
+      return true;
     }
 
     @Override
@@ -98,12 +108,15 @@ public interface DynamicAttributes {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + map.hashCode();
+      result = prime * result + (map == null ? 0 : map.hashCode());
       return result;
     }
 
     public DynamicAttributeMap unmodifiable() {
       return new DynamicAttributeMap() {
+
+        private static final long serialVersionUID = 4947260095982487700L;
+
         final Map<String, Object> unmodifiable = Collections.unmodifiableMap(map);
 
         @Override

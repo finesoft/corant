@@ -20,6 +20,9 @@ import static org.corant.kernel.util.Preconditions.requireTrue;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StreamUtils.asStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -215,5 +218,11 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
 
   protected abstract AbstractTreeNodeAggregateReference<T> toReference();
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
 
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

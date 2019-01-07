@@ -15,6 +15,9 @@
  */
 package org.corant.asosat.ddd.message;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -118,6 +121,14 @@ public abstract class AbstractBaseMessage
     if (getMetadata() != null) {
       metadata.serializeAttributeContent();
     }
+  }
+
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
   }
 
 }

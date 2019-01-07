@@ -16,6 +16,9 @@
 package org.corant.asosat.ddd.message;
 
 import static org.corant.kernel.util.Preconditions.requireNotNull;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Basic;
@@ -116,4 +119,11 @@ public class BaseMessageMetadata extends AbstractGenericMessageMetadata<DynamicA
     attributeContent = JsonUtils.toJsonStr(attributes);
   }
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

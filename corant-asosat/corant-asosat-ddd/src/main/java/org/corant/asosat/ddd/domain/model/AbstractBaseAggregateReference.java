@@ -18,6 +18,9 @@ package org.corant.asosat.ddd.domain.model;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import static org.corant.suites.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.suites.bundle.GlobalMessageCodes.ERR_SYS;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import javax.persistence.Column;
@@ -158,4 +161,11 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
     this.vn = vn;
   }
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

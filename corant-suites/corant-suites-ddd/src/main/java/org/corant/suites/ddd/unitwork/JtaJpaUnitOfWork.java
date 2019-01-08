@@ -29,8 +29,8 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
@@ -40,7 +40,7 @@ import org.corant.suites.ddd.model.Aggregate.Lifecycle;
  * @author bingo 上午11:38:39
  *
  */
-public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork, Synchronization {
+public class JtaJpaUnitOfWork extends AbstractUnitOfWork implements UnitOfWork, Synchronization {
 
   static final String BGN_LOG = "Begin unit of work [%s]";
   static final String END_LOG = "End unit of work [%s].";
@@ -48,7 +48,7 @@ public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork,
   final transient EntityManager entityManager;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
-  protected DefaultUnitOfWork(AbstractUnitOfWorksManager manager, EntityManager entityManager,
+  protected JtaJpaUnitOfWork(JtaJpaUnitOfWorksManager manager, EntityManager entityManager,
       Transaction transaction) {
     super(manager);
     this.transaction = transaction;
@@ -91,10 +91,11 @@ public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork,
         message.remove(obj);
       }
     } else {
-      throw new GeneralRuntimeException("");
+      throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
     }
   }
 
+  @Override
   public EntityManager getEntityManager() {
     return entityManager;
   }
@@ -124,7 +125,7 @@ public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork,
             || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
       }
     } catch (SystemException e) {
-      throw new GeneralRuntimeException(e, "");
+      throw new GeneralRuntimeException(e, PkgMsgCds.ERR_UOW_TRANS);
     }
   }
 
@@ -147,7 +148,7 @@ public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork,
         message.add((Message) obj);
       }
     } else {
-      throw new GeneralRuntimeException("");
+      throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
     }
   }
 
@@ -167,8 +168,8 @@ public class DefaultUnitOfWork extends AbstractUnitOfWork implements UnitOfWork,
   }
 
   @Override
-  protected AbstractUnitOfWorksManager getManager() {
-    return (AbstractUnitOfWorksManager) super.getManager();
+  protected JtaJpaUnitOfWorksManager getManager() {
+    return (JtaJpaUnitOfWorksManager) super.getManager();
   }
 
   protected void handleMessage() {

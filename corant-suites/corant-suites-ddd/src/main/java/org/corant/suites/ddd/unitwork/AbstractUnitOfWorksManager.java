@@ -15,23 +15,11 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.util.Collections;
-import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.SynchronizationType;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.Corant;
-import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
  * corant-asosat-ddd
@@ -41,73 +29,28 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractUnitOfWorksManager
-    implements UnitOfWorksManager, EntityManagerProvider {
-
-  protected ThreadLocal<AbstractUnitOfWork> UOWS;
+public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
 
   @Inject
-  TransactionManager transactionManager;
+  Instance<UnitOfWorksListener> listeners;
 
   @Inject
-  TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+  Instance<UnitOfWorksHandler> handlers;
 
-  public static DefaultUnitOfWork currentUnitOfWork() {
-    Corant.cdi().select(AbstractUnitOfWorksManager.class).get();
-    return AbstractUnitOfWorksManager.currentUnitOfWork();
+  @Override
+  public Stream<UnitOfWorksHandler> getHandlers() {
+    if (!handlers.isUnsatisfied()) {
+      return handlers.stream().sorted(UnitOfWorksHandler::compareTo);
+    }
+    return Stream.empty();
   }
 
   @Override
-  public AbstractUnitOfWork getCurrentUnitOfWorks() {
-    return UOWS.get();
+  public Stream<UnitOfWorksListener> getListeners() {
+    if (!listeners.isUnsatisfied()) {
+      return listeners.stream();
+    }
+    return Stream.empty();
   }
 
-  @Override
-  public EntityManager getEntityManager() {
-    return getCurrentUnitOfWorks().getEntityManager();
-  }
-
-  public TransactionManager getTransactionManager() {
-    return transactionManager;
-  }
-
-  public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
-    return transactionSynchronizationRegistry;
-  }
-
-  protected AbstractUnitOfWork buildUnitOfWork(AbstractUnitOfWorksManager unitOfWorksManager,
-      EntityManager entityManager, Transaction transaction) {
-    return new DefaultUnitOfWork(unitOfWorksManager, entityManager, transaction);
-  }
-
-  protected abstract EntityManagerFactory getEntityManagerFactory();
-
-  protected Map<?, ?> getEntityManagerProperties() {
-    return Collections.emptyMap();
-  }
-
-  void clearCurrentUnitOfWorks(Object key) {
-    UOWS.remove();
-  }
-
-  @PreDestroy
-  void destroy() {
-    clearCurrentUnitOfWorks(null);
-  }
-
-  @PostConstruct
-  void init() {
-    UOWS = ThreadLocal.withInitial(() -> {
-      try {
-        final Transaction tx = getTransactionManager().getTransaction();
-        final EntityManager em = getEntityManagerFactory()
-            .createEntityManager(SynchronizationType.SYNCHRONIZED, getEntityManagerProperties());
-        AbstractUnitOfWork uow = buildUnitOfWork(this, em, tx);
-        getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
-        return uow;
-      } catch (SystemException e) {
-        throw new GeneralRuntimeException(e, "");
-      }
-    });
-  }
 }

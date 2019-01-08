@@ -22,9 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
@@ -34,8 +32,8 @@ import javax.persistence.Query;
 import org.corant.suites.ddd.annotation.qualifier.JPA;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
@@ -54,6 +52,11 @@ public abstract class AbstractJpaRepository implements JpaRepository {
 
   @Inject
   protected Logger logger;
+
+  @Override
+  public void clear() {
+    getEntityManager().clear();
+  }
 
   @Override
   public void detach(Object entity) {
@@ -80,6 +83,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
     }
   }
 
+
   @Override
   public void evictCache(Entity entity) {
     if (entity == null || entity.getId() == null) {
@@ -88,6 +92,10 @@ public abstract class AbstractJpaRepository implements JpaRepository {
     this.evictCache(entity.getClass(), entity.getId());
   }
 
+  @Override
+  public void flush() {
+    getEntityManager().flush();
+  }
 
   @SuppressWarnings("unchecked")
   public <T> T get(AggregateIdentifier identifier) {
@@ -213,11 +221,6 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   @Override
   public <T> List<T> select(String queryName, Object... param) {
     return this.select(namedQuery(queryName).parameters(param).createQuery(getEntityManager()));
-  }
-
-  public <R, T> List<T> selectAs(Query query, Function<R, T> mapper) {
-    List<R> resultList = this.select(query);
-    return resultList.stream().map(mapper).collect(Collectors.toList());
   }
 
 }

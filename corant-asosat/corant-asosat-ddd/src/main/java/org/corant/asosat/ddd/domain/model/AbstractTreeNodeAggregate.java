@@ -18,6 +18,7 @@ package org.corant.asosat.ddd.domain.model;
 import static org.corant.kernel.util.Preconditions.requireFalse;
 import static org.corant.kernel.util.Preconditions.requireTrue;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.IOException;
@@ -103,7 +104,7 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
   public List<T> getPathChilds() {
     List<T> childs = new ArrayList<>();
     if (!isPhantom()) {
-      Iterator<T> it = CollectionUtils.depthIterator(null);// FIXME
+      Iterator<T> it = CollectionUtils.depthIterator(forceCast(this));// FIXME
       while (it.hasNext()) {
         T t = it.next();
         childs.add(t);

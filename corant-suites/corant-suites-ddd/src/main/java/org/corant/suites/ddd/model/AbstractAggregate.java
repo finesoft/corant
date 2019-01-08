@@ -29,6 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
+import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.annotation.qualifier.JPA;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleEvent;
@@ -156,7 +157,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Enable the aggregate if is not persisted then persist it else merge it.
    */
   protected synchronized AbstractAggregate enable(boolean immediately) {
-    requireFalse(getLifecycle() == Lifecycle.DESTROYED, "");
+    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
     this.raise(new LifecycleEvent(this, LifcyclePhase.ENABLE, immediately),
         lifecycleServiceQualifier());
     this.raise(new LifecycleEvent(this, LifcyclePhase.ENABLED));
@@ -178,7 +179,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   protected synchronized AbstractAggregate withLifecycle(Lifecycle lifecycle) {
-    requireFalse(getLifecycle() == Lifecycle.DESTROYED, "");
+    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
     this.lifecycle = lifecycle;
     return this;
   }
@@ -200,8 +201,9 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     private final Class<?> typeCls;
 
     public DefaultAggregateIdentifier(Aggregate aggregate) {
-      id = requireNotNull(requireNotNull(aggregate, "").getId(), "");
-      typeCls = requireNotNull(aggregate.getClass(), "");// FIXME MSG
+      id = requireNotNull(requireNotNull(aggregate, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
+          GlobalMessageCodes.ERR_SYS);
+      typeCls = requireNotNull(aggregate.getClass(), GlobalMessageCodes.ERR_SYS);
     }
 
     @Override

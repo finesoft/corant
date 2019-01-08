@@ -180,8 +180,7 @@ public class Corant {
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb()));
 
     doAfterStarted(classLoader);
-    String csSep = "------------------------------------------------------------------------";
-    System.out.println(csSep + csSep);
+    System.out.println("------------------------------------------------------------------------");
     return this;
   }
 

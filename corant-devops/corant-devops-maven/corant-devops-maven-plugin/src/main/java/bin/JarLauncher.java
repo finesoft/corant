@@ -72,9 +72,11 @@ public class JarLauncher {
 
   public void launch() {
     try {
+      log("Extracting archives to work space %s ...", true, workPath);
       extract();
       Class<?> mainClass =
           getClassLoader().loadClass(manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME));
+      log("Find application main class %s, the application is starting...", true, mainClass);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -157,6 +159,22 @@ public class JarLauncher {
   void loadManifest(JarFile jar, JarEntry each) throws IOException {
     try (InputStream in = jar.getInputStream(each)) {
       manifest = new Manifest(in);
+    }
+  }
+
+  void log(String msgOrFmt, boolean newLine, Object... args) {
+    if (args.length == 0) {
+      if (newLine) {
+        System.out.println(msgOrFmt);
+      } else {
+        System.out.print(msgOrFmt);
+      }
+    } else {
+      if (newLine) {
+        System.out.println(String.format(msgOrFmt, args));
+      } else {
+        System.out.print(String.format(msgOrFmt, args));
+      }
     }
   }
 }

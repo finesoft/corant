@@ -59,6 +59,9 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
           ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, pfFilePaths));
       list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_PROFILE_ORDINAL,
           pfClassPaths));
+      list.forEach(cs -> logger
+          .info(() -> String.format("Loaded profile config source priority is %s, name is %s.",
+              cs.getOrdinal(), cs.getName())));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

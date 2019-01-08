@@ -33,7 +33,7 @@ import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.kernel.spi.CorantConstructHandler;
+import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Unmanageables;
 import org.corant.kernel.util.Unmanageables.UnmanageableInstance;
 import org.corant.shared.util.LaunchUtils;
@@ -72,8 +72,6 @@ public class Corant {
       this.classLoader = classLoader;
     }
     INSTANCE = this;
-    ServiceLoader.load(CorantConstructHandler.class, this.classLoader)
-        .forEach(CorantConstructHandler::handle);
   }
 
   public static CDI<Object> cdi() {
@@ -153,7 +151,7 @@ public class Corant {
   public synchronized Corant start() {
 
     StopWatch stopWatch = new StopWatch(CORANT).start("Initializes the CDI container");
-
+    doBeforeStart(classLoader);
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
@@ -168,8 +166,7 @@ public class Corant {
             .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
         .start("Initializes all suites");
 
-    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostContainerStartedEvent());
+    doAfterInitialize();
 
     stopWatch
         .stop((tk) -> logger
@@ -179,9 +176,11 @@ public class Corant {
             sw.getTotalTimeSeconds())));
 
     logger.info(() -> String.format("Finished at: %s", Instant.now()));
-    logger.info(() -> String.format("Final memory: %sM/%sM", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb()));
-    logger.info(() -> "----------------------------------------------------------------");
+    logger.info(() -> String.format("Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb()));
+
+    doAfterStarted(classLoader);
+    System.out.println("------------------------------------------------------------------------");
     return this;
   }
 
@@ -192,6 +191,21 @@ public class Corant {
       ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
       container.close();
     }
+  }
+
+  void doAfterInitialize() {
+    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
+    emitter.fire(new PostContainerStartedEvent());
+  }
+
+  void doAfterStarted(ClassLoader classLoader) {
+    ServiceLoader.load(CorantBootHandler.class, classLoader)
+        .forEach(h -> h.handleAfterStarted(this));
+  }
+
+  void doBeforeStart(ClassLoader classLoader) {
+    ServiceLoader.load(CorantBootHandler.class, classLoader)
+        .forEach(h -> h.handleBeforeStart(classLoader));
   }
 
   class CorantExtension implements Extension {

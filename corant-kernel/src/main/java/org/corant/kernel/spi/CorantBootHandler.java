@@ -15,13 +15,18 @@
  */
 package org.corant.kernel.spi;
 
+import org.corant.Corant;
+
 /**
  * corant-kernel
  *
  * @author bingo 下午2:30:23
  *
  */
-@FunctionalInterface
-public interface CorantConstructHandler {
-  void handle();
+public interface CorantBootHandler {
+
+  void handleAfterStarted(Corant corant);
+
+  void handleBeforeStart(ClassLoader classLoader);
+
 }

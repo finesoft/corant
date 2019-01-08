@@ -15,7 +15,8 @@
  */
 package org.corant.suites.jndi;
 
-import org.corant.kernel.spi.CorantConstructHandler;
+import org.corant.Corant;
+import org.corant.kernel.spi.CorantBootHandler;
 
 /**
  * corant-suites-jndi
@@ -23,10 +24,12 @@ import org.corant.kernel.spi.CorantConstructHandler;
  * @author bingo 下午2:35:41
  *
  */
-public class JndiCorantConstructHandler implements CorantConstructHandler {
+public class JndiCorantBootHandler implements CorantBootHandler {
   @Override
-  public void handle() {
-    // System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-    // "org.corant.suites.jndi.DefaultInitialContextFactory");
+  public void handleAfterStarted(Corant corant) {}
+
+  @Override
+  public void handleBeforeStart(ClassLoader classLoader) {
+
   }
 }

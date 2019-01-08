@@ -84,6 +84,10 @@ public class LaunchUtils {
         .filter(StringUtils::isNotBlank).collect(Collectors.toList());
   }
 
+  public static Long getMaxMemoryMb() {
+    return Runtime.getRuntime().maxMemory() / ONE_MB;
+  }
+
   public static Long getTotalMemoryMb() {
     return Runtime.getRuntime().totalMemory() / ONE_MB;
   }

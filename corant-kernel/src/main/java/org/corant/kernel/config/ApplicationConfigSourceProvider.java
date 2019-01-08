@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.normal.Priorities.ConfigPriorities;
@@ -37,6 +38,7 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
  */
 public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
 
+  static Logger logger = Logger.getLogger(ApplicationConfigSourceProvider.class.getName());
   static String appBaseName = "application";
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
@@ -58,6 +60,9 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
       list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filePaths));
       list.addAll(
           ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL, classPaths));
+      list.forEach(
+          cs -> logger.info(() -> String.format("Loaded config source priority is %s, name is %s.",
+              cs.getOrdinal(), cs.getName())));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

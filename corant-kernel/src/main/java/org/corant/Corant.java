@@ -166,7 +166,7 @@ public class Corant {
             .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
         .start("Initializes all suites");
 
-    doAfterInitialize();
+    doAfterContainerInitialized();
 
     stopWatch
         .stop((tk) -> logger
@@ -194,7 +194,7 @@ public class Corant {
     }
   }
 
-  void doAfterInitialize() {
+  void doAfterContainerInitialized() {
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent());
   }

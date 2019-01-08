@@ -61,4 +61,23 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<!-- 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-devops-maven-jandex</artifactId>
+				<version>${project.version}</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jandex</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	-->
 </project>

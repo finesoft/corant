@@ -29,7 +29,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.LocaleUtils;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ClassPaths.ResourceInfo;
@@ -43,6 +42,8 @@ import org.corant.shared.util.ClassPaths.ResourceInfo;
 public class PropertyResourceBundle extends ResourceBundle {
 
   public static final String LOCALE_SPT = "_";
+
+  public static final char LOCALE_SPT_CHAR = '_';
 
   private Map<String, Object> lookup;
 
@@ -82,7 +83,8 @@ public class PropertyResourceBundle extends ResourceBundle {
   protected static Locale detectLocaleByName(String name) {
     int f = name != null ? name.indexOf(LOCALE_SPT) : -1;
     if (f > 0) {
-      return LocaleUtils.toLocale(FilenameUtils.getBaseName(name.substring(f + 1)));
+      return LocaleUtils.langToLocale(FilenameUtils.getBaseName(name.substring(f + 1)),
+          LOCALE_SPT_CHAR);
     } else {
       return Locale.getDefault();
     }

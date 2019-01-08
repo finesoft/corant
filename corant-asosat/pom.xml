@@ -25,7 +25,6 @@
 		<module>corant-asosat-cqs</module>
 		<module>corant-asosat-exp</module>
 	</modules>
-	<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -43,5 +42,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	-->
 </project>

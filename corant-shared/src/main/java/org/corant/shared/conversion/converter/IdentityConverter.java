@@ -23,7 +23,7 @@ import java.util.Map;
  * @author bingo 下午4:56:55
  *
  */
-public class IdentityConverter<T> extends AbstractConverter<T, T> {
+public final class IdentityConverter<T> extends AbstractConverter<T, T> {
 
   public static final IdentityConverter<?> INSTANCE = new IdentityConverter<>();
 

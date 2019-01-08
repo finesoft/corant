@@ -20,6 +20,7 @@ import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.corant.shared.util.ClassPaths;
+import org.corant.shared.util.ClassPaths.ClassInfo;
 import org.corant.shared.util.TypeUtils;
 
 /**
@@ -60,6 +63,13 @@ public class ConverterRegistry {
     if (SUPPORT_CONVERTERS.remove(converterType) != null) {
       removeConverterPipeTypes(converterType);
     }
+  }
+
+  public static void main(String... pipeTypes) throws IOException {
+    ClassPaths
+        .from(ConverterRegistry.class.getClassLoader(), "org/corant/shared/conversion/converter")
+        .getClasses().map(ClassInfo::load).filter(x -> Converter.class.isAssignableFrom(x))
+        .map(Class::getName).forEach(System.out::println);
   }
 
   public synchronized static <S, T> void register(Converter<S, T> converter) {

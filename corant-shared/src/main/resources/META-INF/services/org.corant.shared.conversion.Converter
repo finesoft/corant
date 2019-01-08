@@ -1,5 +1,4 @@
 org.corant.shared.conversion.converter.DateInstantConverter
-org.corant.shared.conversion.converter.IdentityConverter
 org.corant.shared.conversion.converter.NumberBigDecimalConverter
 org.corant.shared.conversion.converter.NumberBigIntegerConverter
 org.corant.shared.conversion.converter.NumberBooleanConverter

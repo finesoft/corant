@@ -15,6 +15,7 @@
  */
 package org.corant.shared.conversion;
 
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
@@ -24,48 +25,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import org.corant.shared.conversion.converter.DateInstantConverter;
-import org.corant.shared.conversion.converter.NumberBigDecimalConverter;
-import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
-import org.corant.shared.conversion.converter.NumberBooleanConverter;
-import org.corant.shared.conversion.converter.NumberByteConverter;
-import org.corant.shared.conversion.converter.NumberDoubleConverter;
-import org.corant.shared.conversion.converter.NumberFloatConverter;
-import org.corant.shared.conversion.converter.NumberInstantConverter;
-import org.corant.shared.conversion.converter.NumberIntegerConverter;
-import org.corant.shared.conversion.converter.NumberLocalDateConverter;
-import org.corant.shared.conversion.converter.NumberLocalDateTimeConverter;
-import org.corant.shared.conversion.converter.NumberLongConverter;
-import org.corant.shared.conversion.converter.NumberShortConverter;
-import org.corant.shared.conversion.converter.NumberZonedDateTimeConverter;
-import org.corant.shared.conversion.converter.ObjectClassConveter;
-import org.corant.shared.conversion.converter.SqlDateInstantConverter;
-import org.corant.shared.conversion.converter.StringBigDecimalConverter;
-import org.corant.shared.conversion.converter.StringBigIntegerConverter;
-import org.corant.shared.conversion.converter.StringBooleanConverter;
-import org.corant.shared.conversion.converter.StringByteConverter;
-import org.corant.shared.conversion.converter.StringCharacterConveter;
-import org.corant.shared.conversion.converter.StringCurrencyConverter;
-import org.corant.shared.conversion.converter.StringDoubleConveter;
-import org.corant.shared.conversion.converter.StringFloatConveter;
-import org.corant.shared.conversion.converter.StringInstantConverter;
-import org.corant.shared.conversion.converter.StringIntegerConverter;
-import org.corant.shared.conversion.converter.StringLocalDateConverter;
-import org.corant.shared.conversion.converter.StringLocalDateTimeConverter;
-import org.corant.shared.conversion.converter.StringLocaleConverter;
-import org.corant.shared.conversion.converter.StringLongConverter;
-import org.corant.shared.conversion.converter.StringShortConverter;
-import org.corant.shared.conversion.converter.StringTimeZoneConverter;
-import org.corant.shared.conversion.converter.StringURLConverter;
-import org.corant.shared.conversion.converter.StringZonedDateTimeConverter;
-import org.corant.shared.conversion.converter.TemporalInstantConverter;
-import org.corant.shared.conversion.converter.TemporalLocalDateConverter;
-import org.corant.shared.conversion.converter.TemporalLocalDateTimeConverter;
-import org.corant.shared.conversion.converter.TemporalZonedDateTimeConverter;
-import org.corant.shared.conversion.converter.factory.ObjectEnumConverterFactory;
 import org.corant.shared.util.TypeUtils;
 
 /**
@@ -87,45 +50,10 @@ public class ConverterRegistry {
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   static {
-    register(new DateInstantConverter(null, false, false));
-    register(new NumberBigDecimalConverter(null, false, false));
-    register(new NumberBigIntegerConverter(null, false, false));
-    register(new NumberBooleanConverter(null, false, false));
-    register(new NumberByteConverter(null, false, false));
-    register(new NumberDoubleConverter(null, false, false));
-    register(new NumberFloatConverter(null, false, false));
-    register(new NumberIntegerConverter(null, false, false));
-    register(new NumberInstantConverter(null, false, false));
-    register(new NumberLocalDateConverter(null, false, false));
-    register(new NumberLocalDateTimeConverter(null, false, false));
-    register(new NumberLongConverter(null, false, false));
-    register(new NumberShortConverter(null, false, false));
-    register(new NumberZonedDateTimeConverter(null, false, false));
-    register(new ObjectClassConveter(null, false, false));
-    register(new SqlDateInstantConverter(null, false, false));
-    register(new StringBigDecimalConverter(null, false, false));
-    register(new StringBigIntegerConverter(null, false, false));
-    register(new StringBooleanConverter(null, false, false));
-    register(new StringByteConverter(null, false, false));
-    register(new StringCharacterConveter(null, false, false));
-    register(new StringCurrencyConverter(null, false, false));
-    register(new StringDoubleConveter(null, false, false));
-    register(new StringFloatConveter(null, false, false));
-    register(new StringInstantConverter(null, false, false));
-    register(new StringIntegerConverter(null, false, false));
-    register(new StringLocalDateConverter(null, false, false));
-    register(new StringLocalDateTimeConverter(null, false, false));
-    register(new StringLocaleConverter(null, false, false));
-    register(new StringLongConverter(null, false, false));
-    register(new StringShortConverter(null, false, false));
-    register(new StringTimeZoneConverter(null, false, false));
-    register(new StringURLConverter(null, false, false));
-    register(new StringZonedDateTimeConverter(null, false, false));
-    register(new TemporalInstantConverter(null, false, false));
-    register(new TemporalLocalDateConverter(null, false, false));
-    register(new TemporalLocalDateTimeConverter(null, false, false));
-    register(new TemporalZonedDateTimeConverter(null, false, false));
-    register(new ObjectEnumConverterFactory());
+    asStream(ServiceLoader.load(Converter.class, defaultClassLoader()))
+        .forEach(ConverterRegistry::register);
+    asStream(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
+        .forEach(ConverterRegistry::register);
   }
 
   public synchronized static void deregister(ConverterType<?, ?> converterType) {
@@ -133,15 +61,6 @@ public class ConverterRegistry {
       removeConverterPipeTypes(converterType);
     }
   }
-
-  // public static void main(String... pipeTypes) throws IOException {
-  // ClassPaths
-  // .from(ConverterRegistry.class.getClassLoader(),
-  // "org/corant/shared/conversion/converter")
-  // .getClasses().map(x -> "register(new " + x.getSimpleName() + "(null, false,
-  // false));")
-  // .forEach(System.out::println);
-  // }
 
   public synchronized static <S, T> void register(Converter<S, T> converter) {
     Type[] types =

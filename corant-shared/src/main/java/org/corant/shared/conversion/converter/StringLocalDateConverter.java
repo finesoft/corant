@@ -32,6 +32,10 @@ import org.corant.shared.exception.NotSupportedException;
  */
 public class StringLocalDateConverter extends AbstractConverter<String, LocalDate> {
 
+  public StringLocalDateConverter() {
+    super();
+  }
+
   /**
    * @param defaultValue
    */

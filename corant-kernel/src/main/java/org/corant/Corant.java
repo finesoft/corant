@@ -17,6 +17,7 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
+import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.ServiceLoader;
@@ -53,7 +54,6 @@ import org.jboss.weld.manager.api.WeldManager;
 public class Corant {
 
   private static Corant INSTANCE;
-  private static Logger logger = Logger.getLogger(Corant.class.getName());
   private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
@@ -149,16 +149,16 @@ public class Corant {
   }
 
   public synchronized Corant start() {
-
+    Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = new StopWatch(CORANT).start("Initializes the CDI container");
     doBeforeStart(classLoader);
+    final Logger logger = Logger.getLogger(Corant.class.getName());
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
     if (configClass != null) {
       weld.addPackages(true, configClass);
     }
-    Thread.currentThread().setContextClassLoader(classLoader);
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
     stopWatch
@@ -172,7 +172,7 @@ public class Corant {
         .stop((tk) -> logger
             .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
         .destroy((sw) -> logger.info(() -> String.format(
-            "Complete all initialization in %s seconds, ready to receive the service.",
+            "Finished all initialization in %s seconds, ready to receive the service.",
             sw.getTotalTimeSeconds())));
 
     logger.info(() -> String.format("Finished at: %s", Instant.now()));
@@ -180,7 +180,8 @@ public class Corant {
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb()));
 
     doAfterStarted(classLoader);
-    System.out.println("------------------------------------------------------------------------");
+    String csSep = "------------------------------------------------------------------------";
+    System.out.println(csSep + csSep);
     return this;
   }
 
@@ -199,13 +200,13 @@ public class Corant {
   }
 
   void doAfterStarted(ClassLoader classLoader) {
-    ServiceLoader.load(CorantBootHandler.class, classLoader)
-        .forEach(h -> h.handleAfterStarted(this));
+    asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleAfterStarted(this));
   }
 
   void doBeforeStart(ClassLoader classLoader) {
-    ServiceLoader.load(CorantBootHandler.class, classLoader)
-        .forEach(h -> h.handleBeforeStart(classLoader));
+    asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleBeforeStart(classLoader));
   }
 
   class CorantExtension implements Extension {

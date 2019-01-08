@@ -96,7 +96,7 @@ public abstract class AbstractWebServer implements WebServer {
    */
   public Stream<PostStartedHandler> getPostStartedHandlers() {
     if (!postStartedHandlers.isUnsatisfied()) {
-      return postStartedHandlers.stream();
+      return postStartedHandlers.stream().sorted(PostStartedHandler::compareTo);
     }
     return Stream.empty();
   }
@@ -107,7 +107,7 @@ public abstract class AbstractWebServer implements WebServer {
    */
   public Stream<PostStoppedHandler> getPostStoppedHandlers() {
     if (!postStoppedHandlers.isUnsatisfied()) {
-      return postStoppedHandlers.stream();
+      return postStoppedHandlers.stream().sorted(PostStoppedHandler::compareTo);
     }
     return Stream.empty();
   }
@@ -118,7 +118,7 @@ public abstract class AbstractWebServer implements WebServer {
    */
   public Stream<PreStartHandler> getPreStartHandlers() {
     if (!preStartHandlers.isUnsatisfied()) {
-      return preStartHandlers.stream();
+      return preStartHandlers.stream().sorted(PreStartHandler::compareTo);
     }
     return Stream.empty();
   }
@@ -129,7 +129,7 @@ public abstract class AbstractWebServer implements WebServer {
    */
   public Stream<PreStopHandler> getPreStopHandlers() {
     if (!preStopHandlers.isUnsatisfied()) {
-      return preStopHandlers.stream();
+      return preStopHandlers.stream().sorted(PreStopHandler::compareTo);
     }
     return Stream.empty();
   }

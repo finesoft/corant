@@ -23,10 +23,18 @@ import org.corant.Corant;
  * @author bingo 下午2:30:23
  *
  */
-public interface CorantBootHandler {
+public interface CorantBootHandler extends Comparable<CorantBootHandler> {
+
+  @Override
+  default int compareTo(CorantBootHandler o) {
+    return Integer.compare(getOrdinal(), o.getOrdinal());
+  }
+
+  default int getOrdinal() {
+    return 0;
+  }
 
   void handleAfterStarted(Corant corant);
 
   void handleBeforeStart(ClassLoader classLoader);
-
 }

@@ -35,7 +35,6 @@
 		<module>corant-suites-bundle</module>
 		<module>corant-suites-ddd</module>
 	</modules>
-	<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -53,6 +52,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	 -->
 	<description>The Corant integration suite, which contains various components involved in enterprise development.</description>
 </project>

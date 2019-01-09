@@ -15,12 +15,13 @@
  */
 package org.corant.suites.flyway;
 
-import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
@@ -30,6 +31,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.shared.util.ClassPaths;
+import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.flyway.FlywayConfigProvider.DefaultFlywayConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -64,7 +67,7 @@ public class FlywayMigrator {
   public void migrate(@Observes PostCorantReadyEvent e) {
     if (enable.booleanValue()) {
       logger.info(() -> "Start migrate process");
-      getConfigProviders().map(this::build).forEach(this::doMigrate);
+      getConfigProviders().map(this::build).filter(ObjectUtils::isNotNull).forEach(this::doMigrate);
     } else {
       logger.info(() -> String.format(
           "Disable migrate process, If you want to migrate, set %s in the configuration file!",
@@ -78,21 +81,42 @@ public class FlywayMigrator {
 
   protected Flyway build(FlywayConfigProvider provider) {
     DataSource ds = provider.getDataSource();
-    Collection<String> locations = provider.getLocations();
     Set<String> locationsToUse = new LinkedHashSet<>();
-    if (!isEmpty(locations)) {
-      locationsToUse.addAll(locations);
+    for (String location : provider.getLocations()) {
+      if (checkLocation(location)) {
+        locationsToUse.add(location);
+      }
     }
-    additionalLocation(provider).ifPresent(locationsToUse::addAll);
-    logger.info(() -> String.format("Build flyway instance from locations [%s]",
-        String.join(";", locationsToUse)));
-    FluentConfiguration fc =
-        Flyway.configure().dataSource(ds).locations(locationsToUse.toArray(new String[0]));
-    if (!callbacks.isUnsatisfied()) {
-      fc.callbacks(callbacks.stream().toArray(Callback[]::new));
+    additionalLocation(provider).ifPresent(adls -> {
+      for (String adl : adls) {
+        if (checkLocation(adl)) {
+          locationsToUse.add(adl);
+        }
+      }
+    });
+    if (!locationsToUse.isEmpty()) {
+      logger.info(() -> String.format("Build flyway instance from locations [%s]",
+          String.join(";", locationsToUse)));
+      FluentConfiguration fc =
+          Flyway.configure().dataSource(ds).locations(locationsToUse.toArray(new String[0]));
+      if (!callbacks.isUnsatisfied()) {
+        fc.callbacks(callbacks.stream().toArray(Callback[]::new));
+      }
+      config(provider, fc);
+      return fc.load();
     }
-    config(provider, fc);
-    return fc.load();
+    return null;
+  }
+
+  protected boolean checkLocation(String location) {
+    try {
+      return ClassPaths.from(location).getResources()
+          .anyMatch(r -> r.getResourceName().toLowerCase(Locale.ROOT).endsWith(".sql"));
+    } catch (IOException e) {
+      logger.log(Level.WARNING, e,
+          () -> String.format("Can't find any migrated data from location %s", location));
+      return false;
+    }
   }
 
   protected void config(FlywayConfigProvider provider, FluentConfiguration fc) {}

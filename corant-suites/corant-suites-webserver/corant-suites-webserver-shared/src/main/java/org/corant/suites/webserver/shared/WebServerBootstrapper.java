@@ -27,7 +27,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import org.corant.kernel.event.PostContainerStartedEvent;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -70,16 +69,15 @@ public class WebServerBootstrapper {
       if (server == null) {
         throw new CorantRuntimeException("Web server not initialized yet!");
       }
-      logger.info(() -> String.format("Start web server %s ", server));
+      logger.info(() -> String.format("Start web server %s ", server.getClass().getSimpleName()));
       server.start();
-      beanManager.fireEvent(new PostCorantReadyEvent());
     }
   }
 
   @PreDestroy
   protected void onPreDestroy() {
     if (server != null) {
-      logger.info(() -> String.format("Stop web server %s ", server));
+      logger.info(() -> String.format("Stop web server %s ", server.getClass().getSimpleName()));
       server.stop();
     }
   }

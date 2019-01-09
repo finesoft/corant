@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.corant.shared.normal.Priorities.ConfigPriorities;
 
 /**
  * corant-devops-test-unit
@@ -31,6 +32,14 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 @Inherited
 public @interface RunConfig {
+
+  /**
+   * additional config property, the priorities is tmp
+   *
+   * @see ConfigPriorities.APPLICATION_TMP_ORDINAL
+   * @return properties
+   */
+  AdditionalConfigProperty[] additionalConfigProperties() default {};
 
   /**
    * Dispose Corant instance, clear test object and resource after test end in

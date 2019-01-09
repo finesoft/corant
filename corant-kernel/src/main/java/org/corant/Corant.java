@@ -33,6 +33,7 @@ import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
+import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Unmanageables;
@@ -201,6 +202,8 @@ public class Corant {
   void doAfterStarted(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleAfterStarted(this));
+    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
+    emitter.fire(new PostCorantReadyEvent());
   }
 
   void doBeforeStart(ClassLoader classLoader) {

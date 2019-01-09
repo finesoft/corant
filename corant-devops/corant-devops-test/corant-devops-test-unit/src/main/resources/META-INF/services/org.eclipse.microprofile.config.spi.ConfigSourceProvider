@@ -1,1 +1,2 @@
 org.corant.devops.test.unit.web.RandomWebServerPortSourceProvider
+org.corant.devops.test.unit.AdditionalConfigPropertyProvider

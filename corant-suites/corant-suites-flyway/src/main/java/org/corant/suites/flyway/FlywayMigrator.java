@@ -15,18 +15,21 @@
  */
 package org.corant.suites.flyway;
 
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.flyway.FlywayConfigProvider.DefaultFlywayConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -58,24 +61,31 @@ public class FlywayMigrator {
   @Any
   Instance<AbstractDataSourceExtension> dataSourceExtensions;
 
-  public void migrate() {
-    if (enable != null && enable.booleanValue()) {
+  public void migrate(@Observes PostCorantReadyEvent e) {
+    if (enable.booleanValue()) {
       logger.info(() -> "Start migrate process");
       getConfigProviders().map(this::build).forEach(this::doMigrate);
     } else {
       logger.info(() -> String.format(
           "Disable migrate process, If you want to migrate, set %s in the configuration file!",
-          "migrate.enable=true"));
+          "flyway.migrate.enable=true"));
     }
+  }
+
+  protected Optional<Set<String>> additionalLocation(FlywayConfigProvider provider) {
+    return Optional.empty();
   }
 
   protected Flyway build(FlywayConfigProvider provider) {
     DataSource ds = provider.getDataSource();
     Collection<String> locations = provider.getLocations();
-    Set<String> locationsToUse =
-        locations == null ? asSet(defaultLocation(ds)) : new HashSet<>(locations);
-    logger.info(() -> String.format("Build flyway instance that location is [%s]",
-        String.join(";", locationsToUse.toArray(new String[0]))));
+    Set<String> locationsToUse = new LinkedHashSet<>();
+    if (!isEmpty(locations)) {
+      locationsToUse.addAll(locations);
+    }
+    additionalLocation(provider).ifPresent(locationsToUse::addAll);
+    logger.info(() -> String.format("Build flyway instance from locations [%s]",
+        String.join(";", locationsToUse)));
     FluentConfiguration fc =
         Flyway.configure().dataSource(ds).locations(locationsToUse.toArray(new String[0]));
     if (!callbacks.isUnsatisfied()) {
@@ -87,8 +97,8 @@ public class FlywayMigrator {
 
   protected void config(FlywayConfigProvider provider, FluentConfiguration fc) {}
 
-  protected String defaultLocation(DataSource ds) {
-    return "META-INF/dbmigration";
+  protected String defaultLocation(String name) {
+    return "META-INF/dbmigration/" + name;
   }
 
   protected void doMigrate(Flyway flyway) {
@@ -96,11 +106,10 @@ public class FlywayMigrator {
   }
 
   protected Stream<FlywayConfigProvider> getConfigProviders() {
-    // FIXME
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
-        return asStream(dse.getDataSources()).map((e) -> DefaultFlywayConfigProvider
-            .of(defaultLocation(null) + "/" + e.getKey(), e.getValue()));
+        return asStream(dse.getDataSources())
+            .map((e) -> DefaultFlywayConfigProvider.of(defaultLocation(e.getKey()), e.getValue()));
       });
     } else {
       return Stream.empty();

@@ -39,6 +39,7 @@ public interface CorantJunit4Runner {
   ThreadLocal<Boolean> enableRdmWebPorts = ThreadLocal.withInitial(() -> Boolean.FALSE);
   ThreadLocal<String> profiles = new ThreadLocal<>();
   ThreadLocal<Boolean> autoDisposes = ThreadLocal.withInitial(() -> Boolean.TRUE);
+  ThreadLocal<Map<String, String>> addCfgPros = ThreadLocal.withInitial(HashMap::new);
   ThreadLocal<Map<Class<?>, UnmanagedInstance<?>>> testObjects =
       ThreadLocal.withInitial(HashMap::new);
 
@@ -76,6 +77,10 @@ public interface CorantJunit4Runner {
                 corants.remove();
               }
             }
+            autoDisposes.remove();
+            addCfgPros.remove();
+            profiles.remove();
+            enableRdmWebPorts.remove();
           }
         }
       }
@@ -91,6 +96,11 @@ public interface CorantJunit4Runner {
     if (isNotBlank(rc.profile())) {
       profiles.set(rc.profile());
       System.setProperty(CFG_PF_KEY, rc.profile());
+    }
+    if (rc.additionalConfigProperties().length > 0) {
+      for (AdditionalConfigProperty acp : rc.additionalConfigProperties()) {
+        addCfgPros.get().put(acp.name(), acp.value());
+      }
     }
     autoDisposes.set(rc.autoDispose());
   }

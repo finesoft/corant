@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jpa.hibernate;
@@ -19,6 +17,7 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 import org.corant.shared.util.Identifiers;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.hibernate.HibernateException;
@@ -33,28 +32,32 @@ import org.hibernate.id.IdentifierGenerator;
  *
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
-  public static final String NAME = HibernateSnowflakeIdGenerator.class.getName();
-  static final String IDGEN_SF_WK_ID = "app.identifier-generator.worker.id";
-  static final String IDGEN_SF_DC_ID = "app.identifier-generator.datacenter.id";
+  static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
+  static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
+  static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
   static Identifiers.IdentifierGenerator GENERATOR;
   static volatile boolean ENABLED = false;
   static volatile String TSSQL = null;
-  static int dataCenterId;
-  static int workerId;
+  static volatile int DATA_CENTER_ID;
+  static volatile int WORKER_ID;
   static {
-    workerId = ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElse(0);
-    dataCenterId =
+    DATA_CENTER_ID =
         ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
+    WORKER_ID =
+        ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElse(0);
+    logger.info(() -> String.format(
+        "Use Snowflake id generator for hibernate data center id is %s, worker id is %s.",
+        DATA_CENTER_ID, WORKER_ID));
   }
 
   public HibernateSnowflakeIdGenerator() {
     if (!ENABLED) {
       synchronized (HibernateSnowflakeIdGenerator.class) {
         if (!ENABLED) {
-          if (dataCenterId >= 0) {
-            GENERATOR = Identifiers.snowflakeUUIDGenerator(dataCenterId, workerId);
+          if (DATA_CENTER_ID >= 0) {
+            GENERATOR = Identifiers.snowflakeUUIDGenerator(DATA_CENTER_ID, WORKER_ID);
           } else {
-            GENERATOR = Identifiers.snowflakeBufferUUIDGenerator(workerId, true);
+            GENERATOR = Identifiers.snowflakeBufferUUIDGenerator(WORKER_ID, true);
           }
           ENABLED = true;
         }

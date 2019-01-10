@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
@@ -34,6 +32,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,6 +45,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -116,6 +116,23 @@ public class ClassPaths {
 
   public static ClassPath from(String path) throws IOException {
     return from(defaultClassLoader(), path);
+  }
+
+  public static ClassPath fromAnyway(ClassLoader classLoader) {
+    return fromAnyway(classLoader, StringUtils.EMPTY);
+  }
+
+  public static ClassPath fromAnyway(ClassLoader classLoader, String path) {
+    try {
+      return from(classLoader, path);
+    } catch (IOException e) {
+      LOGGER.log(Level.WARNING, e.getMessage(), e);
+      return ClassPath.empty();
+    }
+  }
+
+  public static ClassPath fromAnyway(String path) {
+    return fromAnyway(defaultClassLoader(), path);
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {
@@ -229,10 +246,16 @@ public class ClassPaths {
 
   public static final class ClassPath {
 
+    static final ClassPath EMPTY_INSTANCE = new ClassPath(Collections.emptySet());
+
     final Set<ResourceInfo> resources;
 
     private ClassPath(Set<ResourceInfo> resources) {
       this.resources = resources;
+    }
+
+    public static ClassPath empty() {
+      return EMPTY_INSTANCE;
     }
 
     public Stream<ClassInfo> getClasses() {
@@ -287,8 +310,7 @@ public class ClassPaths {
     }
 
     /**
-     * Returns the fully qualified name of the resource. Such as
-     * "com/mycomp/foo/bar.txt".
+     * Returns the fully qualified name of the resource. Such as "com/mycomp/foo/bar.txt".
      */
     public final String getResourceName() {
       return resourceName;

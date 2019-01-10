@@ -80,6 +80,7 @@
 		<version.arquillian-core>1.2.1.Final</version.arquillian-core>
 		<version.testng>6.9.9</version.testng>
 		<version.rest-assured>3.0.6</version.rest-assured>
+		<version.org.openjdk.jmh>1.21</version.org.openjdk.jmh>
 
 	</properties>
 
@@ -494,6 +495,18 @@
 				<version>${version.arquillian-core}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-core</artifactId>
+				<version>${version.org.openjdk.jmh}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-generator-annprocess</artifactId>
+				<version>${version.org.openjdk.jmh}</version>
+				<scope>test</scope>
 			</dependency>
 
 			<!-- corant -->

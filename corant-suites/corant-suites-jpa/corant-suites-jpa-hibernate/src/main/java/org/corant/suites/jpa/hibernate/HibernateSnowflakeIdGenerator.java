@@ -48,21 +48,12 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     logger.info(() -> String.format(
         "Use Snowflake id generator for hibernate data center id is %s, worker id is %s.",
         DATA_CENTER_ID, WORKER_ID));
-  }
-
-  public HibernateSnowflakeIdGenerator() {
-    if (!ENABLED) {
-      synchronized (HibernateSnowflakeIdGenerator.class) {
-        if (!ENABLED) {
-          if (DATA_CENTER_ID >= 0) {
-            GENERATOR = Identifiers.snowflakeUUIDGenerator(DATA_CENTER_ID, WORKER_ID);
-          } else {
-            GENERATOR = Identifiers.snowflakeBufferUUIDGenerator(WORKER_ID, true);
-          }
-          ENABLED = true;
-        }
-      }
+    if (DATA_CENTER_ID >= 0) {
+      GENERATOR = Identifiers.snowflakeUUIDGenerator(DATA_CENTER_ID, WORKER_ID);
+    } else {
+      GENERATOR = Identifiers.snowflakeBufferUUIDGenerator(WORKER_ID, true);
     }
+    ENABLED = true;
   }
 
   @Override

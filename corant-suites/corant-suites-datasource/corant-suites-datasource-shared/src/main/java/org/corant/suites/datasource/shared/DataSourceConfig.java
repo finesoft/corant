@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.datasource.shared;
@@ -57,6 +55,7 @@ public class DataSourceConfig {
   public static final String DS_PASSWORD = ".password";
   public static final String DS_USER_NAME = ".username";
   public static final String DS_DRIVER = ".driver";
+  public static final String DS_METRICS = ".enable-metrics";
 
 
   private Class<?> driver;
@@ -76,6 +75,7 @@ public class DataSourceConfig {
   private Duration reapTimeout = Duration.ZERO;
   private volatile Duration acquisitionTimeout = Duration.ZERO;
   private boolean validateConnection = false;
+  private boolean enableMetrics = false;
 
   public static Duration convert(String value) {
     return value != null ? Duration.parse(value) : null;
@@ -136,6 +136,8 @@ public class DataSourceConfig {
             .ifPresent(s -> cfg.setAcquisitionTimeout(convert(s)));
       } else if (pn.endsWith(DS_VALIDATE_CONNECTION)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setValidateConnection);
+      } else if (pn.endsWith(DS_METRICS)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setEnableMetrics);
       }
     });
     if (isNoneBlank(cfg.name, cfg.connectionUrl)) {
@@ -250,6 +252,15 @@ public class DataSourceConfig {
 
   /**
    *
+   * @return the enableMetrics
+   */
+  public boolean isEnableMetrics() {
+    return enableMetrics;
+  }
+
+
+  /**
+   *
    * @return the jta
    */
   public boolean isJta() {
@@ -288,6 +299,10 @@ public class DataSourceConfig {
     this.driver = driver;
   }
 
+  protected void setEnableMetrics(boolean enableMetrics) {
+    this.enableMetrics = enableMetrics;
+  }
+
   protected void setInitialSize(int initialSize) {
     this.initialSize = initialSize;
   }
@@ -303,6 +318,7 @@ public class DataSourceConfig {
   protected void setMaxSize(int maxSize) {
     this.maxSize = maxSize;
   }
+
 
   protected void setMinSize(int minSize) {
     this.minSize = minSize;

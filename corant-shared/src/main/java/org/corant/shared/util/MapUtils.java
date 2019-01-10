@@ -217,6 +217,11 @@ public class MapUtils {
   }
 
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
+      final Function<Object, T> extractor) {
+    return getMapObject(map, key, extractor, null);
+  }
+
+  public static <T> T getMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor, final T nvt) {
     return map != null ? extractor.apply(map.get(key)) : nvt;
   }

@@ -18,23 +18,13 @@ import org.corant.Corant;
 /**
  * corant-kernel
  *
- * @author bingo 下午3:32:02
+ * @author bingo 下午4:54:10
  *
  */
-public class DirectRunner implements Runner {
+public class Main {
 
-  private final Class<?> configClass;
-
-  /**
-   * @param configClass
-   */
-  public DirectRunner(Class<?> configClass) {
-    super();
-    this.configClass = configClass;
+  public static void main(String... args) {
+    new Corant((Class<?>) null).start();
   }
 
-  @Override
-  public void run() throws Exception {
-    new Corant(configClass).start();
-  }
 }

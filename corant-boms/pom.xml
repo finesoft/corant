@@ -75,6 +75,8 @@
 		<version.mysql>5.1.39</version.mysql>
 		<version.hibernate>5.4.0.Final</version.hibernate>
 		<version.flyway>5.2.0</version.flyway>
+		
+		<version.elasticsearch>6.5.4</version.elasticsearch>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -408,6 +410,12 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-core</artifactId>
 				<version>${version.flyway}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>transport</artifactId>
+				<version>${version.elasticsearch}</version>
 			</dependency>
 
 			<!-- ORM -->

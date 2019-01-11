@@ -34,6 +34,7 @@
 		<module>corant-suites-flyway</module>
 		<module>corant-suites-bundle</module>
 		<module>corant-suites-ddd</module>
+		<module>corant-suites-elastic</module>
 	</modules>
 	<build>
 		<plugins>

@@ -19,10 +19,19 @@ package org.corant.shared.conversion;
  * @author bingo 下午12:08:59
  *
  */
-public interface ConverterFactory<S, T> {
+public interface ConverterFactory<S, T> extends Comparable<ConverterFactory<S, T>> {
+
+  @Override
+  default int compareTo(ConverterFactory<S, T> converterFactory) {
+    return Integer.compare(getPriority(), converterFactory.getPriority());
+  }
 
   Converter<S, T> create(Class<T> targetClass, T defaultValue, boolean useNullValueIfErr,
       boolean useDefaultValueIfErr);
+
+  default int getPriority() {
+    return 0;
+  }
 
   boolean isSupportTargetClass(Class<?> targetClass);
 }

@@ -160,7 +160,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
     map.put("index", ann.index());
-    // if (MyStringUtils.isNotBlank(ann.null_value()))
+    // if (isNotBlank(ann.null_value()))
     // map.put("null_value", ann.null_value());
     map.put("include_in_all", ann.include_in_all());
     map.put("store", ann.store());
@@ -224,8 +224,8 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     if (ann.type() == EsNumericType.SCALED_FLOAT) {
       map.put("scaling_factor", ann.scaling_factor());
     }
-    // if (MyStringUtils.isNotBlank(ann.null_value())) {
-    // map.put("null_value", CasterUtils.toDouble(ann.null_value()));
+    // if (isNotBlank(ann.null_value())) {
+    // map.put("null_value", toDouble(ann.null_value()));
     // }
     return map;
   }
@@ -267,7 +267,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     map.put("store", ann.store());
     map.put("eager_global_ordinals", ann.eager_global_ordinals());
     map.put("index_options", ann.index_options().getValue());
-    // if (MyStringUtils.isNotBlank(ann.normalizer()))
+    // if (isNotBlank(ann.normalizer()))
     // map.put("normalizer", ann.normalizer());
     map.put("norms", ann.norms());
     if (ann.position_increment_gap() != 100) {

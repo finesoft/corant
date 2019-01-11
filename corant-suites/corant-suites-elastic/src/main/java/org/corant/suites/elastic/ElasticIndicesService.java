@@ -11,10 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.elastic;
+
+import java.util.Map;
+
 /**
  * corant-suites-elastic
- * 
- * @author bingo 下午1:20:24
+ *
+ * @author bingo 下午4:08:34
  *
  */
-package org.corant.suites.elastic.metadata.jpa;
+public interface ElasticIndicesService {
+
+  boolean checkIndicesExist(String... indexName);
+
+  boolean checkMappingExist(String indexName, String typeName);
+
+  boolean createIndex(String indexName, Map<String, Object> setting,
+      Map<String, Map<String, Object>> schemas);
+
+  boolean deleteIndex(String indexName);
+
+}

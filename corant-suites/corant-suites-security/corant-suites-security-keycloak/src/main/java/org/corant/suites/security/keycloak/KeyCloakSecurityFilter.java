@@ -206,12 +206,12 @@ public class KeyCloakSecurityFilter implements ContainerRequestFilter {
 
   public static class MyJaxrsHttpFacade implements OIDCHttpFacade {
 
-    private final ContainerRequestContext requestContext;
-    private final SecurityContext securityContext;
-    private final RequestFacade requestFacade = new RequestFacade();
-    private final ResponseFacade responseFacade = new ResponseFacade();
-    private KeycloakSecurityContext keycloakSecurityContext;
-    private boolean responseFinished;
+    protected final ContainerRequestContext requestContext;
+    protected final SecurityContext securityContext;
+    protected final RequestFacade requestFacade = new RequestFacade();
+    protected final ResponseFacade responseFacade = new ResponseFacade();
+    protected KeycloakSecurityContext keycloakSecurityContext;
+    protected boolean responseFinished;
 
     MyJaxrsHttpFacade(ContainerRequestContext containerRequestContext,
         SecurityContext securityContext) {
@@ -407,7 +407,6 @@ public class KeyCloakSecurityFilter implements ContainerRequestFilter {
   public static class MyKeycloakConfigResolver implements KeycloakConfigResolver {
 
     KeycloakDeployment deployment;
-
 
     @Inject
     @ConfigProperty(name = "secutiry.keycloak.deployment-file-path",

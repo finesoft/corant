@@ -74,7 +74,7 @@ public class StringZonedDateTimeConverter extends AbstractConverter<String, Zone
     String zoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
     if (dtf != null) {
       return ZonedDateTime.parse(value, dtf);
-    } else if (value.indexOf("[") != -1 && value.indexOf("]") != -1) {
+    } else if (value.indexOf('[') != -1 && value.indexOf(']') != -1) {
       return ZonedDateTime.parse(value);
     } else {
       StringBuilder zone = new StringBuilder("[")

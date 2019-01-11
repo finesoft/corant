@@ -77,7 +77,7 @@ public class Corant {
     INSTANCE = this;
   }
 
-  public static CDI<Object> cdi() {
+  public synchronized static CDI<Object> cdi() {
     validateRunning();
     return INSTANCE.container;
   }

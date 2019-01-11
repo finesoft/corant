@@ -27,8 +27,8 @@ import java.util.function.Function;
  */
 public class GeneralRuntimeExceptionWrapper {
 
-  private final GeneralRuntimeException exception;
-  private final List<ConjoinedBuilder> builders = new LinkedList<>();
+  protected final GeneralRuntimeException exception;
+  protected final List<ConjoinedBuilder> builders = new LinkedList<>();
 
   GeneralRuntimeExceptionWrapper(GeneralRuntimeException exception) {
     this.exception = exception;
@@ -43,11 +43,11 @@ public class GeneralRuntimeExceptionWrapper {
   }
 
   public static class Builder {
-    private Object[] parameters = new Object[0];
-    private Map<Object, Object> attributes = new HashMap<>();
-    private Object subCode;
-    private final Object code;
-    private final GeneralRuntimeExceptionWrapper wrapper;
+    protected Object[] parameters = new Object[0];
+    protected Object subCode;
+    protected final Object code;
+    protected final GeneralRuntimeExceptionWrapper wrapper;
+    protected Map<Object, Object> attributes = new HashMap<>();
 
     Builder(GeneralRuntimeExceptionWrapper wrapper, Object code) {
       super();

@@ -37,13 +37,14 @@ public class RandomWebServerPortProducer {
       serverPort = openServerSocket(new Random().nextInt(RANGE) + START);
       tryTimes++;
     }
-    shouldNotNull(serverPort, "Can not find available port from range [%s - %s]!", START,
-        START + RANGE);
     try {
-      return serverPort.getLocalPort();
+      return shouldNotNull(serverPort, "Can not find available port from range [%s - %s]!", START,
+          START + RANGE).getLocalPort();
     } finally {
       try {
-        serverPort.close();
+        if (serverPort != null) {
+          serverPort.close();
+        }
       } catch (IOException ex) {
       }
     }

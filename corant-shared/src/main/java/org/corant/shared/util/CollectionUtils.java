@@ -378,11 +378,11 @@ public class CollectionUtils {
     return result;
   }
 
-  public static final class BreadthIterable<T extends Iterable<T>> implements Iterable<T> {
+  public static class BreadthIterable<T extends Iterable<T>> implements Iterable<T> {
 
-    private final Iterable<T> node;
+    protected final Iterable<T> node;
 
-    private volatile Iterator<T> current;
+    protected volatile Iterator<T> current;
 
     public BreadthIterable(Iterable<T> node) {
       this.node = node;
@@ -443,8 +443,8 @@ public class CollectionUtils {
     }
   }
 
-  public static final class DepthIterable<T extends Iterable<T>> implements Iterable<T> {
-    private final Iterable<T> node;
+  public static class DepthIterable<T extends Iterable<T>> implements Iterable<T> {
+    protected final Iterable<T> node;
 
     public DepthIterable(Iterable<T> node) {
       this.node = node;

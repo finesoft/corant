@@ -13,6 +13,7 @@
  */
 package org.corant.suites.security.keycloak;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -281,6 +282,15 @@ public class KeyCloakSecurityFilter implements ContainerRequestFilter {
       @Override
       public InputStream getInputStream() {
         return requestContext.getEntityStream();
+      }
+
+      @Override
+      public InputStream getInputStream(boolean buffered) {
+        if (!buffered) {
+          return getInputStream();
+        } else {
+          return new BufferedInputStream(getInputStream());
+        }
       }
 
       @Override

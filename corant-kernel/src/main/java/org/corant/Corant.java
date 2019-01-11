@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant;
@@ -58,6 +56,10 @@ public class Corant {
   private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
+
+  public Corant() {
+    this(null, null);
+  }
 
   public Corant(Class<?> configClass) {
     this(configClass, configClass != null ? configClass.getClassLoader() : null);
@@ -151,9 +153,11 @@ public class Corant {
 
   public synchronized Corant start() {
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = new StopWatch(CORANT).start("Initializes the CDI container");
+    StopWatch stopWatch = new StopWatch(CORANT).start("Handle before corant start");
     doBeforeStart(classLoader);
     final Logger logger = Logger.getLogger(Corant.class.getName());
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+        .start("Initializes the CDI container");
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
@@ -162,25 +166,23 @@ public class Corant {
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
-    stopWatch
-        .stop((tk) -> logger
-            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
 
     doAfterContainerInitialized();
 
-    stopWatch
-        .stop((tk) -> logger
-            .info(() -> String.format("%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds())))
-        .destroy((sw) -> logger.info(() -> String.format(
-            "Finished all initialization in %s seconds, ready to receive the service.",
-            sw.getTotalTimeSeconds())));
-
-    logger.info(() -> String.format("Finished at: %s", Instant.now()));
-    logger.info(() -> String.format("Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb()));
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+        .start("Handle after corant initialized");
 
     doAfterStarted(classLoader);
+
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+        .destroy(sw -> log(logger,
+            "Finished all initialization in %s seconds, ready to receive the service.",
+            sw.getTotalTimeSeconds()));
+    log(logger, "Finished at: %s", Instant.now());
+    log(logger, "Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb());
     System.out.println("------------------------------------------------------------------------");
     return this;
   }
@@ -209,6 +211,15 @@ public class Corant {
   void doBeforeStart(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleBeforeStart(classLoader));
+  }
+
+  private void log(Logger logger, String msgOrFmt, Object... args) {
+    if (args.length > 0) {
+      logger.info(() -> String.format(msgOrFmt, args));
+    } else {
+      logger.info(() -> msgOrFmt);
+    }
+
   }
 
   class CorantExtension implements Extension {

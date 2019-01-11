@@ -319,7 +319,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put("store", false);
     } else if (Number.class.isAssignableFrom(acls)) {
       String esTypeName = acls.getSimpleName().toLowerCase(Locale.ENGLISH);
-      if (acls.equals(BigDecimal.class)) {
+      if (acls.equals(BigDecimal.class) || acls.equals(Double.class) || acls.equals(Float.class)) {
         esTypeName = "double";
       } else if (acls.equals(BigInteger.class)) {
         esTypeName = "long";
@@ -365,8 +365,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put("boost", 1.0f);
       map.put("doc_values", true);
       map.put("index", true);
-      map.put("format",
-          "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz");
+      map.put("format", DATE_FMT);
       map.put("include_in_all", false);
       map.put("ignore_malformed", false);
       map.put("store", false);

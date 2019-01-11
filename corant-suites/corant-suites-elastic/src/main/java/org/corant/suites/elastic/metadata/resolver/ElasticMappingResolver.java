@@ -23,6 +23,8 @@ import org.corant.suites.elastic.metadata.ElasticMapping;
  */
 public interface ElasticMappingResolver {
 
+  String DATE_FMT = "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz";
+
   ElasticMapping resolve(Class<?> documentClass);
 
 }

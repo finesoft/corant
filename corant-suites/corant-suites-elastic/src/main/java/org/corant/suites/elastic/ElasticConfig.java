@@ -102,4 +102,166 @@ public class ElasticConfig {
   @Inject
   @ConfigProperty(name = "elastic.transport.ping_schedule")
   private Duration transportPingSchedule;
+
+  /**
+   * 
+   * @return the clusterName
+   */
+  public String getClusterName() {
+    return clusterName;
+  }
+
+  /**
+   * 
+   * @return the clusterNodes
+   */
+  public Optional<String> getClusterNodes() {
+    return clusterNodes;
+  }
+
+  /**
+   * 
+   * @return the transportBindHost
+   */
+  public String getTransportBindHost() {
+    return transportBindHost;
+  }
+
+  /**
+   * 
+   * @return the transportHost
+   */
+  public String getTransportHost() {
+    return transportHost;
+  }
+
+  /**
+   * 
+   * @return the transportPingSchedule
+   */
+  public Duration getTransportPingSchedule() {
+    return transportPingSchedule;
+  }
+
+  /**
+   * 
+   * @return the transportPublishHost
+   */
+  public String getTransportPublishHost() {
+    return transportPublishHost;
+  }
+
+  /**
+   * 
+   * @return the transportPublishPort
+   */
+  public String getTransportPublishPort() {
+    return transportPublishPort;
+  }
+
+  /**
+   * 
+   * @return the transportTcpCompress
+   */
+  public Boolean getTransportTcpCompress() {
+    return transportTcpCompress;
+  }
+
+  /**
+   * 
+   * @return the transportTcpConnectionTimeout
+   */
+  public int getTransportTcpConnectionTimeout() {
+    return transportTcpConnectionTimeout;
+  }
+
+  /**
+   * 
+   * @return the transportTcpPort
+   */
+  public String getTransportTcpPort() {
+    return transportTcpPort;
+  }
+
+  /**
+   *
+   * @param clusterName the clusterName to set
+   */
+  public void setClusterName(String clusterName) {
+    this.clusterName = clusterName;
+  }
+
+  /**
+   *
+   * @param clusterNodes the clusterNodes to set
+   */
+  public void setClusterNodes(Optional<String> clusterNodes) {
+    this.clusterNodes = clusterNodes;
+  }
+
+  /**
+   *
+   * @param transportBindHost the transportBindHost to set
+   */
+  public void setTransportBindHost(String transportBindHost) {
+    this.transportBindHost = transportBindHost;
+  }
+
+  /**
+   *
+   * @param transportHost the transportHost to set
+   */
+  public void setTransportHost(String transportHost) {
+    this.transportHost = transportHost;
+  }
+
+  /**
+   *
+   * @param transportPingSchedule the transportPingSchedule to set
+   */
+  public void setTransportPingSchedule(Duration transportPingSchedule) {
+    this.transportPingSchedule = transportPingSchedule;
+  }
+
+  /**
+   *
+   * @param transportPublishHost the transportPublishHost to set
+   */
+  public void setTransportPublishHost(String transportPublishHost) {
+    this.transportPublishHost = transportPublishHost;
+  }
+
+  /**
+   *
+   * @param transportPublishPort the transportPublishPort to set
+   */
+  public void setTransportPublishPort(String transportPublishPort) {
+    this.transportPublishPort = transportPublishPort;
+  }
+
+  /**
+   *
+   * @param transportTcpCompress the transportTcpCompress to set
+   */
+  public void setTransportTcpCompress(Boolean transportTcpCompress) {
+    this.transportTcpCompress = transportTcpCompress;
+  }
+
+  /**
+   *
+   * @param transportTcpConnectionTimeout the transportTcpConnectionTimeout to set
+   */
+  public void setTransportTcpConnectionTimeout(int transportTcpConnectionTimeout) {
+    this.transportTcpConnectionTimeout = transportTcpConnectionTimeout;
+  }
+
+  /**
+   *
+   * @param transportTcpPort the transportTcpPort to set
+   */
+  public void setTransportTcpPort(String transportTcpPort) {
+    this.transportTcpPort = transportTcpPort;
+  }
+
+
 }

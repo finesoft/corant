@@ -14,6 +14,8 @@
 package org.corant.suites.elastic;
 
 import java.util.Map;
+import org.corant.suites.elastic.metadata.ElasticMapping;
+import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
 
 /**
  * corant-suites-elastic
@@ -31,5 +33,9 @@ public interface ElasticIndicesService {
       Map<String, Map<String, Object>> schemas);
 
   boolean deleteIndex(String indexName);
+
+  ElasticMapping getMapping(Class<?> cls);
+
+  ElasticMappingResolver getMappingResolver();
 
 }

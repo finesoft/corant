@@ -14,6 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
@@ -72,10 +73,12 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
         logger.warning(() -> String.format("Can not convert %s", asString(value)));
       }
     }
-    return result == null ? getDefaultValue() : result;
+    return defaultObject(result, getDefaultValue());
   }
 
   /**
+   * If the object to be converted is null or the converted result is null then use this value as
+   * converted as result. The default value is null.
    *
    * @return the defaultValue
    */
@@ -84,7 +87,6 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
   }
 
   /**
-   *
    * @return the throwException
    */
   @Override

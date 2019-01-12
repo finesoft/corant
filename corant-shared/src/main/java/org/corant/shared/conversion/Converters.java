@@ -87,7 +87,7 @@ public class Converters {
 
   static <S, T> Converter<S, T> getMatchedConverter(Class<S> sourceClass, Class<T> targetClass,
       int maxNestingDepth, Consumer<Set<ConverterType<?, ?>>> consumer) {
-    // Only orginal converter type to compose
+    // Only original converter type to compose
     Set<ConverterType<?, ?>> converterTypes = ConverterRegistry.getNotSyntheticConverterTypes();
     Queue<ConverterPipe> candidatedPipes = new LinkedList<>(), matchedPipes = new LinkedList<>();
     if (quickMatch(converterTypes, sourceClass, targetClass)) {
@@ -129,7 +129,7 @@ public class Converters {
             .map(Entry::getValue).findFirst().orElse(null));
     if (factory != null) {
       // FIXME initialize parameter
-      return factory.create(targetClass, null, true, true);
+      return factory.create(targetClass, null, true);
     } else {
       return null;
     }

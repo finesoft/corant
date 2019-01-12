@@ -36,14 +36,17 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 /**
  * corant-asosat-ddd
  *
+ * <pre>
+ * All entityManager from this unit of work are SynchronizationType.SYNCHRONIZED,
+ * and must be in transactional.
+ * </pre>
+ *
  * @author bingo 上午11:38:39
  *
  */
 public class JtaJpaUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
 
-  static final String BGN_LOG = "Begin unit of work [%s]";
-  static final String END_LOG = "End unit of work [%s].";
   final transient Transaction transaction;
   final transient EntityManager entityManager;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
@@ -54,19 +57,20 @@ public class JtaJpaUnitOfWork extends AbstractUnitOfWork
     this.transaction = transaction;
     this.entityManager = entityManager;
     Arrays.stream(Lifecycle.values()).forEach(e -> registration.put(e, new LinkedHashSet<>()));
-    logger.fine(() -> String.format(BGN_LOG, transaction.toString()));
+    logger.fine(() -> String.format("Begin unit of work [%s]", transaction.toString()));
   }
 
   @Override
   public void afterCompletion(int status) {
     final boolean success = status == Status.STATUS_COMMITTED;
+    final Map<Lifecycle, Set<AggregateIdentifier>> registers = new EnumMap<>(Lifecycle.class);
     try {
       complete(success);
+      registers.putAll(getRegisters());
     } finally {
-      final Map<Lifecycle, Set<AggregateIdentifier>> cloneRegistration = getRegisters();
       clear();
-      logger.fine(() -> String.format(END_LOG, transaction.toString()));
-      handlePostCompleted(cloneRegistration, success);
+      logger.fine(() -> String.format("End unit of work [%s].", transaction.toString()));
+      handlePostCompleted(registers, success);
     }
   }
 
@@ -159,12 +163,15 @@ public class JtaJpaUnitOfWork extends AbstractUnitOfWork
 
   @Override
   protected void clear() {
-    if (entityManager.isOpen()) {
-      entityManager.close();
+    try {
+      if (entityManager.isOpen()) {
+        entityManager.close();
+      }
+      registration.clear();
+    } finally {
+      getManager().clearCurrentUnitOfWorks(transaction);
+      super.clear();
     }
-    registration.clear();
-    getManager().clearCurrentUnitOfWorks(transaction);
-    super.clear();
   }
 
   @Override

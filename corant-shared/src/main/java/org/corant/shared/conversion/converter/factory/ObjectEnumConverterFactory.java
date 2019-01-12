@@ -1,22 +1,23 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.conversion.converter.factory;
 
+import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
@@ -29,20 +30,23 @@ import org.corant.shared.conversion.ConverterFactory;
  */
 public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum<?>> {
 
+  final Logger logger = Logger.getLogger(this.getClass().getName());
+
   @Override
   public Converter<Object, Enum<?>> create(Class<Enum<?>> targetClass, Enum<?> defaultValue,
-      boolean useNullValueIfErr, boolean useDefaultValueIfErr) {
+      boolean throwException) {
     return (t, h) -> {
+      Enum<?> result = null;
       try {
-        return convert(t, targetClass, h);
+        result = convert(t, targetClass, h);
       } catch (Exception e) {
-        if (useNullValueIfErr) {
-          return null;
-        } else if (useDefaultValueIfErr) {
-          return defaultValue;
+        if (throwException) {
+          throw new ConversionException(e);
+        } else {
+          logger.warning(() -> String.format("Can not convert %s", asString(t)));
         }
-        throw new ConversionException(e);
       }
+      return defaultObject(result, defaultValue);
     };
   }
 
@@ -69,6 +73,5 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     }
 
   }
-
 
 }

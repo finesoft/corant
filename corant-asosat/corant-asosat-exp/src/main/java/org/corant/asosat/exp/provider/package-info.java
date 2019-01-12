@@ -11,21 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.conversion;
-
 /**
- * corant-shared
- *
- * @author bingo 下午12:08:59
+ * corant-asosat-exp
+ * 
+ * @author bingo 上午12:57:02
  *
  */
-public interface ConverterFactory<S, T> {
-
-  Converter<S, T> create(Class<T> targetClass, T defaultValue, boolean throwException);
-
-  default int getPriority() {
-    return 0;
-  }
-
-  boolean isSupportTargetClass(Class<?> targetClass);
-}
+package org.corant.asosat.exp.provider;

@@ -24,18 +24,13 @@ import java.util.Map;
  *
  */
 @FunctionalInterface
-public interface Converter<S, T> extends Comparable<Converter<S, T>> {
+public interface Converter<S, T> {
 
   default <V> Converter<S, V> andThen(Converter<? super T, ? extends V> after) {
     return (t, hints) -> shouldNotNull(after).apply(apply(t, hints), hints);
   }
 
   T apply(S t, Map<String, ?> hints);
-
-  @Override
-  default int compareTo(Converter<S, T> converter) {
-    return Integer.compare(getPriority(), converter.getPriority());
-  }
 
   default <V> Converter<V, T> compose(Converter<? super V, ? extends S> before) {
     return (v, hints) -> apply(shouldNotNull(before).apply(v, hints), hints);

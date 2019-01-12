@@ -48,9 +48,11 @@ public class ConverterRegistry {
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   static {
-    asStream(ServiceLoader.load(Converter.class, defaultClassLoader())).sorted()
+    asStream(ServiceLoader.load(Converter.class, defaultClassLoader()))
+        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
         .forEach(ConverterRegistry::register);
-    asStream(ServiceLoader.load(ConverterFactory.class, defaultClassLoader())).sorted()
+    asStream(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
+        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
         .forEach(ConverterRegistry::register);
   }
 

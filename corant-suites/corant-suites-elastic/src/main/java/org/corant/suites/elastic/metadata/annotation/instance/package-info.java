@@ -14,7 +14,7 @@
 /**
  * corant-suites-elastic
  * 
- * @author bingo 下午4:13:14
+ * @author bingo 下午8:02:32
  *
  */
-package org.corant.suites.elastic.metadata.annotation.jpa;
+package org.corant.suites.elastic.metadata.annotation.instance;

@@ -16,7 +16,6 @@ package org.corant.suites.elastic.metadata.resolver;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.ClassUtils.isPrimitiveArray;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
-import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.FieldUtils.traverseFields;
@@ -28,19 +27,11 @@ import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URL;
-import java.time.temporal.Temporal;
 import java.util.Collection;
-import java.util.Currency;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -374,87 +365,6 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     return map;
   }
 
-  protected Map<String, Object> genPrimitiveTypeDfltMapping(Class<?> cls) {
-    Map<String, Object> map = new LinkedHashMap<>();
-    Class<?> tcls = cls.isArray() ? cls.getComponentType() : cls;
-    Class<?> acls = primitiveToWrapper(tcls);
-    if (Boolean.class.isAssignableFrom(acls)) {
-      map.put("type", "boolean");
-      map.put("boost", 1.0f);
-      map.put("doc_values", true);
-      map.put("index", true);
-      map.put("null_value", false);
-      map.put("store", false);
-    } else if (Number.class.isAssignableFrom(acls)) {
-      String esTypeName = acls.getSimpleName().toLowerCase(Locale.ENGLISH);
-      if (acls.equals(BigDecimal.class) || acls.equals(Double.class) || acls.equals(Float.class)) {
-        esTypeName = "double";
-      } else if (acls.equals(BigInteger.class)) {
-        esTypeName = "long";
-      }
-      map.put("type", esTypeName);
-      map.put("boost", 1.0f);
-      map.put("doc_values", true);
-      map.put("index", true);
-      map.put("store", false);
-      map.put("coerce", true);
-      map.put("include_in_all", false);
-      map.put("ignore_malformed", false);
-    } else if (Character.class.isAssignableFrom(acls)) {
-      map.put("type", "keyword");
-      map.put("boost", 1.0f);
-      map.put("index", true);
-      map.put("include_in_all", false);
-      map.put("store", false);
-      map.put("eager_global_ordinals", false);
-      map.put("ignore_above", 256);
-      map.put("index_options", "docs");
-      map.put("norms", false);
-      // map.put("search_analyzer", "standard"); FIXME
-      map.put("similarity", "classic");
-    } else if (CharSequence.class.isAssignableFrom(acls)) {
-      map.put("type", "text");
-      map.put("boost", 1.0f);
-      map.put("fielddata", false);
-      map.put("index", true);
-      map.put("include_in_all", false);
-      map.put("store", false);
-      map.put("eager_global_ordinals", false);
-      map.put("index_options", "docs");
-      map.put("norms", false);
-      // map.put("position_increment_gap", 0); FIXME
-      map.put("analyzer", "standard");
-      map.put("search_analyzer", "standard");
-      map.put("similarity", "classic");
-      map.put("search_quote_analyzer", "standard");
-      map.put("term_vector", "no");
-    } else if (Temporal.class.isAssignableFrom(acls) || Date.class.isAssignableFrom(acls)) {
-      map.put("type", "date");
-      map.put("boost", 1.0f);
-      map.put("doc_values", true);
-      map.put("index", true);
-      map.put("format", DATE_FMT);
-      map.put("include_in_all", false);
-      map.put("ignore_malformed", false);
-      map.put("store", false);
-    } else if (Enum.class.isAssignableFrom(acls) || acls.equals(Locale.class)
-        || acls.equals(Class.class) || acls.equals(Currency.class) || acls.equals(TimeZone.class)
-        || acls.equals(URI.class) || acls.equals(URL.class)) {
-      map.put("type", "keyword");
-      map.put("boost", 1.0f);
-      map.put("index", true);
-      map.put("include_in_all", false);
-      map.put("store", false);
-      map.put("eager_global_ordinals", false);
-      map.put("ignore_above", 256);
-      map.put("index_options", "docs");
-      map.put("norms", false);
-      map.put("search_analyzer", "standard");
-      map.put("similarity", "classic");
-    }
-    return map;
-  }
-
   protected void handleCollectionField(Class<?> docCls, Field f, Map<String, Object> map) {
     Type colEleType = getCollectionFieldElementType(f, Collection.class);
     if (!(colEleType instanceof Class<?>)) {
@@ -467,20 +377,14 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
         if (f.isAnnotationPresent(EsArray.class)) {
           handleFieldAnnotation(f, map);
         } else {
-          Map<String, Object> tmp = genPrimitiveTypeDfltMapping(colFieldCls);
-          if (!tmp.isEmpty()) {
-            map.put(f.getName(), tmp);
-          }
+          handlePrimitiveOrWrappersField(docCls, f, map);
         }
       } else if (f.isAnnotationPresent(EsNested.class)
           && colFieldCls.isAnnotationPresent(EsEmbeddable.class)) {
-        Map<String, Object> nestedProMap = new LinkedHashMap<>();
-        handleFields(colFieldCls, nestedProMap);
-        if (!nestedProMap.isEmpty()) {
-          Map<String, Object> nestedMap = genFieldMapping(f.getAnnotation(EsNested.class));
-          map.put(f.getName(), nestedMap);
-          nestedMap.put("properties", nestedProMap);
-        }
+        handleNestedField(docCls, f, map);
+      } else if (f.isAnnotationPresent(EsEmbedded.class)
+          && colFieldCls.isAnnotationPresent(EsEmbeddable.class)) {
+        handleEmbeddedField(docCls, f, map);
       }
     }
   }

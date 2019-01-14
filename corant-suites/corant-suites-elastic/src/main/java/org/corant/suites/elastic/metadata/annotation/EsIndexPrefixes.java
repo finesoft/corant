@@ -13,6 +13,7 @@
  */
 package org.corant.suites.elastic.metadata.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -22,27 +23,43 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
- * @author bingo 下午5:44:26
+ * @author bingo 下午7:03:39
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Inherited
-public @interface EsNestedElementCollection {
-  /**
-   * Whether or not new properties should be added dynamically to an existing object. Accepts true
-   * (default), false and strict.
-   *
-   * @return
-   */
-  boolean dynamic() default true;
+public @interface EsIndexPrefixes {
+
+  public static final EsIndexPrefixes DefaultEsIndexPrefixes = new EsIndexPrefixes() {
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return EsIndexPrefixes.class;
+    }
+
+    @Override
+    public int max_chars() {
+      return 5;
+    }
+
+    @Override
+    public int min_chars() {
+      return 2;
+    }
+  };
 
   /**
+   * must be greater than or equal to min_chars and less than 20, defaults to 5
    *
-   * Sets the default include_in_all value for all the properties within the object. The object
-   * itself is not added to the _all field.
-   *
-   * @return
+   * @return max_chars
    */
-  boolean include_in_all() default false;
+  int max_chars() default 5;
+
+  /**
+   * must be greater than zero, defaults to 2
+   *
+   * @return max_chars
+   */
+  int min_chars() default 2;
 }

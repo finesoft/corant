@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
- * 
+ *
  * @author bingo 2017年3月3日
  * @since
  */
@@ -62,21 +62,19 @@ public @interface EsNumeric {
   boolean ignore_malformed() default false;
 
   /**
-   *
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to false, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to true.
-   *
-   * @return
-   */
-  boolean include_in_all() default false;
-
-  /**
    * Should the field be searchable? Accepts true (default) and false.
    *
    * @return
    */
   boolean index() default true;
+
+  /**
+   * Accepts a numeric value of the same type as the field which is substituted for any explicit
+   * null values. Defaults to null, which means the field is treated as missing.
+   *
+   * @return
+   */
+  String null_value() default "";
 
   /**
    *
@@ -90,14 +88,6 @@ public @interface EsNumeric {
    * @return
    */
   short scaling_factor() default 1;
-
-  /**
-   * Accepts a numeric value of the same type as the field which is substituted for any explicit
-   * null values. Defaults to null, which means the field is treated as missing.
-   *
-   * @return
-   */
-  // String null_value();
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

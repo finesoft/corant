@@ -18,7 +18,6 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.corant.suites.elastic.metadata.annotation.EsString.EsIndexOption;
 
 /**
  * corant-suites-elastic
@@ -82,16 +81,6 @@ public @interface EsText {
   EsMultiFields fields() default @EsMultiFields(entries = {});
 
   /**
-   *
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to no, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to true.
-   *
-   * @return
-   */
-  boolean include_in_all() default false;
-
-  /**
    * Should the field be searchable? Accepts true (default) and false.
    *
    * @return
@@ -104,7 +93,28 @@ public @interface EsText {
    *
    * @return
    */
-  EsIndexOption index_options() default EsIndexOption.DOCS;
+  EsIndexOption index_options() default EsIndexOption.POSITIONS;
+
+  /**
+   * If enabled, two-term word combinations (shingles) are indexed into a separate field. This
+   * allows exact phrase queries to run more efficiently, at the expense of a larger index. Note
+   * that this works best when stopwords are not removed, as phrases containing stopwords will not
+   * use the subsidiary field and will fall back to a standard phrase query. Accepts true or false
+   * (default).
+   */
+  boolean index_phrases() default false;
+
+  /**
+   * f enabled, term prefixes of between 2 and 5 characters are indexed into a separate field. This
+   * allows prefix searches to run more efficiently, at the expense of a larger index.
+   */
+  int index_prefixes_max_chars() default 0;
+
+  /**
+   * f enabled, term prefixes of between 2 and 5 characters are indexed into a separate field. This
+   * allows prefix searches to run more efficiently, at the expense of a larger index.
+   */
+  int index_prefixes_min_chars() default 0;
 
   /**
    * Whether field-length should be taken into account when scoring queries. Accepts true (default)
@@ -113,16 +123,6 @@ public @interface EsText {
    * @return
    */
   boolean norms() default true;
-
-  /**
-   * [experimental] This functionality is experimental and may be changed or removed completely in a
-   * future release. Elastic will take a best effort approach to fix any issues, but experimental
-   * features are not subject to the support SLA of official GA features. How to pre-process the
-   * keyword prior to indexing. Defaults to null, meaning the keyword is kept as-is.
-   *
-   * @return
-   */
-  // String normalizer() default "$null$";
 
   /**
    * The number of fake term position which should be inserted between each element of an array of

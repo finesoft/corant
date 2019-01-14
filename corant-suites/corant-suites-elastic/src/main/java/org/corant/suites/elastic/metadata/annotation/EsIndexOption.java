@@ -13,35 +13,17 @@
  */
 package org.corant.suites.elastic.metadata.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public enum EsIndexOption {
+  DOCS("docs"), FREQS("freqs"), POSITIONS("positions"), OFFECTS("offsets");
 
-/**
- * corant-suites-elastic
- *
- * @author bingo 2017年3月3日
- * @since
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-@Inherited
-public @interface EsString {
+  private final String value;
 
-  public static enum EsIndexOption {
-    DOCS("docs"), FREQS("freqs"), POSITIONS("positions"), OFFECTS("offsets");
-
-    private final String value;
-
-    private EsIndexOption(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
+  private EsIndexOption(String value) {
+    this.value = value;
   }
+
+  public String getValue() {
+    return value;
+  }
+
 }

@@ -18,7 +18,6 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.corant.suites.elastic.metadata.annotation.EsString.EsIndexOption;
 
 /**
  * corant-suites-elastic
@@ -64,24 +63,15 @@ public @interface EsKeyword {
 
   /**
    * Do not index any string longer than this value. Defaults to 2147483647 so that all values would
-   * be accepted.
+   * be accepted. Please however note that default dynamic mapping rules create a sub keyword field
+   * that overrides this default by setting ignore_above: 256.
    *
    * @return
    */
   short ignore_above() default 256;
 
   /**
-   *
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to no, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to false.
-   *
-   * @return
-   */
-  boolean include_in_all() default false;
-
-  /**
-   * Should the field be searchable? Accepts true (default) and false.
+   * Should the field be searchable? Accepts true (default) or false.
    *
    * @return
    */
@@ -119,15 +109,7 @@ public @interface EsKeyword {
    *
    * @return
    */
-  // String null_value() default "$null$";
-
-  /**
-   * The analyzer that should be used at search time on analyzed fields. Defaults to the analyzer
-   * setting.
-   *
-   * @return
-   */
-  String search_analyzer() default "standard";
+  String null_value() default "";
 
   /**
    *
@@ -136,6 +118,12 @@ public @interface EsKeyword {
    * @return
    */
   String similarity() default "BM25";
+
+  /**
+   * Whether full text queries should split the input on whitespace when building a query for this
+   * field. Accepts true or false (default).
+   */
+  boolean split_queries_on_whitespace() default false;
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

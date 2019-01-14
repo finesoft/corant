@@ -62,13 +62,14 @@ import org.corant.suites.elastic.metadata.annotation.EsMap;
 import org.corant.suites.elastic.metadata.annotation.EsMappedSuperclass;
 import org.corant.suites.elastic.metadata.annotation.EsMultiFieldsEntry;
 import org.corant.suites.elastic.metadata.annotation.EsMultiFieldsPair;
-import org.corant.suites.elastic.metadata.annotation.EsNestedElementCollection;
+import org.corant.suites.elastic.metadata.annotation.EsNested;
 import org.corant.suites.elastic.metadata.annotation.EsNumeric;
 import org.corant.suites.elastic.metadata.annotation.EsNumeric.EsNumericType;
 import org.corant.suites.elastic.metadata.annotation.EsPercolator;
 import org.corant.suites.elastic.metadata.annotation.EsProperty;
 import org.corant.suites.elastic.metadata.annotation.EsRange;
 import org.corant.suites.elastic.metadata.annotation.EsText;
+import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.index.VersionType;
 
@@ -176,7 +177,6 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
 
   protected Map<String, Object> genFieldMapping(EsEmbedded ann) {
     Map<String, Object> map = new LinkedHashMap<>();
-    map.put("include_in_all", ann.include_in_all());
     map.put("dynamic", ann.dynamic());
     map.put("enabled", ann.enabled());
     return map;
@@ -224,7 +224,6 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
     map.put("index", ann.index());
-    map.put("include_in_all", ann.include_in_all());
     map.put("store", ann.store());
     map.put("eager_global_ordinals", ann.eager_global_ordinals());
     map.put("ignore_above", ann.ignore_above());
@@ -233,7 +232,6 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put("normalizer", ann.normalizer());
     }
     map.put("norms", ann.norms());
-    // map.put("search_analyzer", ann.search_analyzer()); FIXME
     map.put("similarity", ann.similarity());
     if (ann.fields() != null && ann.fields().entries().length != 0) {
       Map<String, Object> fm = new LinkedHashMap<>();
@@ -250,13 +248,16 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
         map.put("fields", fm);
       }
     }
+    if (isNotBlank(ann.null_value())) {
+      map.put("null_value", ann.null_value());
+    }
+    map.put("split_queries_on_whitespace", ann.split_queries_on_whitespace());
     return map;
   }
 
-  protected Map<String, Object> genFieldMapping(EsNestedElementCollection ann) {
+  protected Map<String, Object> genFieldMapping(EsNested ann) {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("type", "nested");
-    map.put("include_in_all", ann.include_in_all());
     map.put("dynamic", ann.dynamic());
     return map;
   }
@@ -267,17 +268,15 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
     map.put("index", ann.index());
-    // map.put("null_value", ann.null_value());
+    if (isNotBlank(ann.null_value())) {
+      map.put("null_value", ann.null_value());
+    }
     map.put("store", ann.store());
     map.put("coerce", ann.coerce());
-    map.put("include_in_all", ann.include_in_all());
     map.put("ignore_malformed", ann.ignore_malformed());
     if (ann.type() == EsNumericType.SCALED_FLOAT) {
       map.put("scaling_factor", ann.scaling_factor());
     }
-    // if (isNotBlank(ann.null_value())) {
-    // map.put("null_value", toDouble(ann.null_value()));
-    // }
     return map;
   }
 
@@ -316,12 +315,9 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put("fielddata_frequency_filter", fm);
     }
     map.put("index", ann.index());
-    map.put("include_in_all", ann.include_in_all());
     map.put("store", ann.store());
     map.put("eager_global_ordinals", ann.eager_global_ordinals());
     map.put("index_options", ann.index_options().getValue());
-    // if (isNotBlank(ann.normalizer()))
-    // map.put("normalizer", ann.normalizer());
     map.put("norms", ann.norms());
     if (ann.position_increment_gap() != 100) {
       map.put("position_increment_gap", ann.position_increment_gap());
@@ -355,6 +351,26 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put("search_quote_analyzer", ann.search_analyzer());
     }
     map.put("term_vector", ann.term_vector().getValue());
+    if (ann.index_prefixes_min_chars() >= 0 && ann.index_prefixes_max_chars() > 0) {
+      map.put("index_prefixes", asMap("min_chars", ann.index_prefixes_min_chars(), "max_chars",
+          ann.index_prefixes_max_chars()));
+    }
+    map.put("index_phrases", ann.index_phrases());
+    return map;
+  }
+
+  protected Map<String, Object> genFieldMapping(EsTokenCount ann) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("type", "token_count");
+    map.put("boost", ann.boost());
+    map.put("doc_values", ann.doc_values());
+    map.put("index", ann.index());
+    map.put("analyzer", ann.analyzer());
+    map.put("enable_position_increments", ann.enable_position_increments());
+    if (isNotBlank(ann.null_value())) {
+      map.put("null_value", ann.null_value());
+    }
+    map.put("store", ann.store());
     return map;
   }
 
@@ -456,13 +472,12 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
             map.put(f.getName(), tmp);
           }
         }
-      } else if (f.isAnnotationPresent(EsNestedElementCollection.class)
+      } else if (f.isAnnotationPresent(EsNested.class)
           && colFieldCls.isAnnotationPresent(EsEmbeddable.class)) {
         Map<String, Object> nestedProMap = new LinkedHashMap<>();
         handleFields(colFieldCls, nestedProMap);
         if (!nestedProMap.isEmpty()) {
-          Map<String, Object> nestedMap =
-              genFieldMapping(f.getAnnotation(EsNestedElementCollection.class));
+          Map<String, Object> nestedMap = genFieldMapping(f.getAnnotation(EsNested.class));
           map.put(f.getName(), nestedMap);
           nestedMap.put("properties", nestedProMap);
         }
@@ -496,8 +511,10 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       handleCollectionField(documentClass, f, map);
     } else if (Map.class.isAssignableFrom(ft) && f.isAnnotationPresent(EsMap.class)) {
       handleMapField(documentClass, f, map);
-    } else if (ft.isAnnotationPresent(EsEmbeddable.class)) {
+    } else if (ft.isAnnotationPresent(EsEmbedded.class)) {
       handleEmbeddedField(documentClass, f, map);
+    } else if (ft.isAnnotationPresent(EsNested.class)) {
+      handleNestedField(documentClass, f, map);
     } else {
       logger.warning(() -> String.format(
           "Field mapping of this type %s.%s is not supported for the time being",
@@ -530,6 +547,8 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       map.put(f.getName(), genFieldMapping(f.getAnnotation(EsRange.class)));
     } else if (f.isAnnotationPresent(EsText.class)) {
       map.put(f.getName(), genFieldMapping(f.getAnnotation(EsText.class)));
+    } else if (f.isAnnotationPresent(EsTokenCount.class)) {
+      map.put(f.getName(), genFieldMapping(f.getAnnotation(EsTokenCount.class)));
     }
   }
 
@@ -562,12 +581,26 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
           || keyCls.isAnnotationPresent(EsEmbeddable.class))
           && (isPrimitiveOrWrapper(valCls) || isPrimitiveArray(valCls)
               || valCls.isAnnotationPresent(EsEmbeddable.class))) {
-        Map<String, Object> keyMap = new LinkedHashMap<>();
-        if (isPrimitiveOrWrapper(keyCls) || isPrimitiveArray(keyCls)) {
-          // keyMap = handlePrimitiveOrWrappersField(keyCls, "key", keyMap);
-          // TODO
-        }
+        // TODO FIXME
       }
+    }
+  }
+
+  protected void handleNestedField(Class<?> docCls, Field f, Map<String, Object> map) {
+    if (f.isAnnotationPresent(EsNested.class)) {
+      Map<String, Object> objProMap = new LinkedHashMap<>();
+      handleFields(f.getType(), objProMap);
+      if (!objProMap.isEmpty()) {
+        Map<String, Object> objMap = genFieldMapping(f.getAnnotation(EsNested.class));
+        map.put(f.getName(), objMap);
+        objMap.put("properties", objProMap);
+      }
+    } else if (f.isAnnotationPresent(EsRange.class)) {
+      map.put(f.getName(), genFieldMapping(f.getAnnotation(EsRange.class)));
+    } else {
+      logger.warning(() -> String.format(
+          "Field mapping of this type %s.%s is not supported for the time being", docCls.getName(),
+          f.getName()));
     }
   }
 
@@ -575,9 +608,9 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     if (f.isAnnotationPresent(EsArray.class) || f.isAnnotationPresent(EsBinary.class)
         || f.isAnnotationPresent(EsBoolean.class) || f.isAnnotationPresent(EsDate.class)
         || f.isAnnotationPresent(EsGeoPoint.class) || f.isAnnotationPresent(EsGeoShape.class)
-        || f.isAnnotationPresent(EsIp.class) || f.isAnnotationPresent(EsKeyword.class)
-        || f.isAnnotationPresent(EsNumeric.class) || f.isAnnotationPresent(EsPercolator.class)
-        || f.isAnnotationPresent(EsText.class)) {
+        || f.isAnnotationPresent(EsTokenCount.class) || f.isAnnotationPresent(EsIp.class)
+        || f.isAnnotationPresent(EsKeyword.class) || f.isAnnotationPresent(EsNumeric.class)
+        || f.isAnnotationPresent(EsPercolator.class) || f.isAnnotationPresent(EsText.class)) {
       handleFieldAnnotation(f, map);
     } else {
       logger.warning(() -> String.format(

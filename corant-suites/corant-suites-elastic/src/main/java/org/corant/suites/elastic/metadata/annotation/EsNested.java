@@ -22,16 +22,15 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
- * For Object DataType in elastic
+ * For nested type in elastic
  *
- * @author bingo 上午11:44:44
+ * @author bingo 下午5:44:26
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Inherited
-public @interface EsEmbedded {
-
+public @interface EsNested {
   /**
    * Whether or not new properties should be added dynamically to an existing object. Accepts true
    * (default), false and strict.
@@ -39,14 +38,5 @@ public @interface EsEmbedded {
    * @return
    */
   boolean dynamic() default true;
-
-  /**
-   *
-   * Whether the JSON value given for the object field should be parsed and indexed (true, default)
-   * or completely ignored (false).
-   *
-   * @return
-   */
-  boolean enabled() default true;
 
 }

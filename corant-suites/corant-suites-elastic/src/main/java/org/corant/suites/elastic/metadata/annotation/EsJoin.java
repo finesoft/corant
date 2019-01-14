@@ -13,40 +13,22 @@
  */
 package org.corant.suites.elastic.metadata.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
  *
- * For Object DataType in elastic
- *
- * @author bingo 上午11:44:44
+ * @author bingo 下午7:27:17
  *
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-@Inherited
-public @interface EsEmbedded {
+@Retention(RUNTIME)
+@Target(FIELD)
+public @interface EsJoin {
 
-  /**
-   * Whether or not new properties should be added dynamically to an existing object. Accepts true
-   * (default), false and strict.
-   *
-   * @return
-   */
-  boolean dynamic() default true;
+  String name();
 
-  /**
-   *
-   * Whether the JSON value given for the object field should be parsed and indexed (true, default)
-   * or completely ignored (false).
-   *
-   * @return
-   */
-  boolean enabled() default true;
-
+  EsJoinRelation relation();
 }

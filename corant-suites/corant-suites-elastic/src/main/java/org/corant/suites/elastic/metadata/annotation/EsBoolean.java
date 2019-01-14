@@ -22,6 +22,12 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
+ * Boolean fields accept JSON true and false values, but can also accept strings which are
+ * interpreted as either true or false: False values false, "false" True values true, "true"
+ *
+ * Aggregations like the terms aggregation use 1 and 0 for the key, and the strings "true" and
+ * "false" for the key_as_string. Boolean fields when used in scripts, return 1 and 0
+ *
  * @author bingo 上午11:42:28
  *
  */
@@ -54,11 +60,11 @@ public @interface EsBoolean {
 
   /**
    * Accepts any of the true or false values listed above. The value is substituted for any explicit
-   * null values. Defaults to false.
+   * null values. Defaults to null, which means the field is treated as missing.
    *
    * @return
    */
-  boolean null_value() default false;
+  String null_value() default "";
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

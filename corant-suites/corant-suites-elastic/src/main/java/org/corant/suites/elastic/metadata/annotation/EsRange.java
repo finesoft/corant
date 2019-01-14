@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
- * 
+ *
  * @author bingo 2017年3月3日
  * @since
  */
@@ -45,30 +45,20 @@ public @interface EsRange {
   boolean coerce() default true;
 
   /**
-   * {@link #type()}
-   *
-   * @see RangeType#DATE_RANGE
-   *
-   * @return
-   */
-  String dateFormat() default "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz";
-
-  /**
-   *
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to false, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to true.
-   *
-   * @return
-   */
-  boolean include_in_all() default false;
-
-  /**
    * Should the field be searchable? Accepts true (default) and false.
    *
    * @return
    */
   boolean index() default true;
+
+  /**
+   * Additional properties for mapping, for instance in the date range, you can assign
+   * {name="format" value = "yyyy-MM-dd
+   * HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz"} to the field.
+   *
+   * @return properties
+   */
+  EsProperty[] properties();
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

@@ -22,6 +22,10 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
+ * The geo_shape datatype facilitates the indexing of and searching with arbitrary geo shapes such
+ * as rectangles and polygons. It should be used when either the data being indexed or the queries
+ * being executed contain shapes other than just points.
+ *
  * @author bingo 上午11:46:30
  *
  */
@@ -30,4 +34,11 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface EsGeoShape {
 
+  /**
+   * The geo_shape mapping maps geo_json geometry objects to the geo_shape type. To enable it, users
+   * must explicitly map fields to the geo_shape type.
+   *
+   * @return options
+   */
+  EsProperty[] options();
 }

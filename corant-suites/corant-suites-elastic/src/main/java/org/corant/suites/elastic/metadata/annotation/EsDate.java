@@ -22,6 +22,21 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
+ * JSON doesn’t have a date datatype, so dates in Elasticsearch can either be:
+ * <li>strings containing formatted dates, e.g. "2015-01-01" or "2015/01/01 12:10:30".</li>
+ * <li>a long number representing milliseconds-since-the-epoch.</li>
+ * <li>an integer representing seconds-since-the-epoch.</li>
+ *
+ * Internally, dates are converted to UTC (if the time-zone is specified) and stored as a long
+ * number representing milliseconds-since-the-epoch.
+ *
+ * Queries on dates are internally converted to range queries on this long representation, and the
+ * result of aggregations and stored fields is converted back to a string depending on the date
+ * format that is associated with the field.
+ *
+ * Dates will always be rendered as strings, even if they were initially supplied as a long in the
+ * JSON document.
+ *
  * @author bingo 上午11:42:57
  *
  */
@@ -61,18 +76,27 @@ public @interface EsDate {
   boolean ignore_malformed() default false;
 
   /**
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to false, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to true.
-   */
-  boolean include_in_all() default false;
-
-  /**
    * Should the field be searchable? Accepts true (default) and false.
    *
    * @return
    */
   boolean index() default true;
+
+  /**
+   * The locale to use when parsing dates since months do not have the same names and/or
+   * abbreviations in all languages.
+   *
+   * @return locale
+   */
+  String locale() default "";
+
+  /**
+   * Accepts a date value in one of the configured format's as the field which is substituted for
+   * any explicit null values. Defaults to null, which means the field is treated as missing.
+   *
+   * @return null_value
+   */
+  String null_value() default "";
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

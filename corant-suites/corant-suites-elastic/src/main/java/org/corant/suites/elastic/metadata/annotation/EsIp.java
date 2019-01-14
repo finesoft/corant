@@ -46,18 +46,19 @@ public @interface EsIp {
   boolean doc_values() default true;
 
   /**
-   * Whether or not the field value should be included in the _all field? Accepts true or false.
-   * Defaults to false if index is set to false, or if a parent object field sets include_in_all to
-   * false. Otherwise defaults to true.
-   */
-  boolean include_in_all() default false;
-
-  /**
    * Should the field be searchable? Accepts true (default) and false.
    *
    * @return
    */
   boolean index() default true;
+
+  /**
+   * Accepts an IPv4 value which is substituted for any explicit null values. Defaults to null,
+   * which means the field is treated as missing.
+   *
+   * @return null_value
+   */
+  String null_value() default "";
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

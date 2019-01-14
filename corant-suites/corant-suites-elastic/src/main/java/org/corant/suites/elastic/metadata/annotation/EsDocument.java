@@ -45,7 +45,4 @@ public @interface EsDocument {
 
   VersionType versionType() default VersionType.EXTERNAL_GTE;
 
-  // boolean routing() default false;
-
-  // boolean source() default true;
 }

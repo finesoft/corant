@@ -22,31 +22,16 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
- * The binary type accepts a binary value as a Base64 encoded string. The field is not stored by
- * default and is not searchable
- *
- * @author bingo 上午11:41:48
- *
+ * @author bingo 2017年3月3日
+ * @since
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Inherited
-public @interface EsBinary {
+public @interface EsProperty {
 
-  /**
-   * Should the field be stored on disk in a column-stride fashion, so that it can later be used for
-   * sorting, aggregations, or scripting? Accepts true or false (default).
-   *
-   * @return
-   */
-  boolean doc_values() default false;
+  String name() default "";
 
-  /**
-   * Whether the field value should be stored and retrievable separately from the _source field.
-   * Accepts true or false (default).
-   *
-   * @return
-   */
-  boolean store() default false;
+  String value() default "";
 
 }

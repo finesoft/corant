@@ -22,6 +22,13 @@ import java.lang.annotation.Target;
 /**
  * corant-suites-elastic
  *
+ * Arrays of objects Arrays of objects do not work as you would expect: you cannot query each object
+ * independently of the other objects in the array. If you need to be able to do this then you
+ * should use the nested datatype instead of the object datatype.
+ *
+ * An array may contain null values, which are either replaced by the configured null_value or
+ * skipped entirely. An empty array [] is treated as a missing field — a field with no values
+ *
  * @author bingo 下午5:41:20
  *
  */
@@ -32,4 +39,3 @@ public @interface EsArray {
 
   String eleType();
 }
-

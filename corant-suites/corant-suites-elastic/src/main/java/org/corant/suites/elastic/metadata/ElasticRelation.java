@@ -41,6 +41,42 @@ public class ElasticRelation {
     fieldName = ann.fieldName();
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ElasticRelation other = (ElasticRelation) obj;
+    if (childrenClasses == null) {
+      if (other.childrenClasses != null) {
+        return false;
+      }
+    } else if (!childrenClasses.equals(other.childrenClasses)) {
+      return false;
+    }
+    if (fieldName == null) {
+      if (other.fieldName != null) {
+        return false;
+      }
+    } else if (!fieldName.equals(other.fieldName)) {
+      return false;
+    }
+    if (parentClass == null) {
+      if (other.parentClass != null) {
+        return false;
+      }
+    } else if (!parentClass.equals(other.parentClass)) {
+      return false;
+    }
+    return true;
+  }
+
   public Map<String, Object> genSchema() {
     String parent = parentClass.getSimpleName();
     Set<String> children =
@@ -70,6 +106,16 @@ public class ElasticRelation {
    */
   public Class<?> getParentClass() {
     return parentClass;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (childrenClasses == null ? 0 : childrenClasses.hashCode());
+    result = prime * result + (fieldName == null ? 0 : fieldName.hashCode());
+    result = prime * result + (parentClass == null ? 0 : parentClass.hashCode());
+    return result;
   }
 
 }

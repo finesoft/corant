@@ -13,27 +13,12 @@
  */
 package org.corant.suites.elastic;
 
-import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticMapping;
-import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
-
 /**
  * corant-suites-elastic
- *
- * @author bingo 下午4:08:34
+ * 
+ * @author bingo 下午6:38:41
  *
  */
-public interface ElasticIndicesService {
-
-  boolean checkIndicesExist(String... indexName);
-
-  boolean createIndex(String indexName, Map<String, Object> setting,
-      Map<String, Map<String, Object>> schemas);
-
-  boolean deleteIndex(String indexName);
-
-  ElasticMapping getMapping(Class<?> cls);
-
-  ElasticMappingResolver getMappingResolver();
+public class DefaultElasticQueryService implements ElasticQueryService {
 
 }

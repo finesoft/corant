@@ -29,7 +29,6 @@ public class ElasticMapping {
 
   private final ElasticIndexing index;
   private final Class<?> documentClass;
-  private final String typeName;
   private final Map<String, Object> schema = new LinkedHashMap<>();
   private final boolean versioned;
   private final String versionPropertyName;
@@ -39,20 +38,18 @@ public class ElasticMapping {
   /**
    * @param index
    * @param documentClass
-   * @param typeName
    * @param schema
    * @param relation
    * @param versioned
    * @param versionPropertyName
    * @param versionType
    */
-  public ElasticMapping(ElasticIndexing index, Class<?> documentClass, String typeName,
-      Map<String, Object> schema, ElasticRelation relation, boolean versioned,
-      String versionPropertyName, VersionType versionType) {
+  public ElasticMapping(ElasticIndexing index, Class<?> documentClass, Map<String, Object> schema,
+      ElasticRelation relation, boolean versioned, String versionPropertyName,
+      VersionType versionType) {
     super();
     this.index = index;
     this.documentClass = documentClass;
-    this.typeName = typeName;
     this.relation = relation;
     this.versioned = versioned;
     this.versionPropertyName = versionPropertyName;
@@ -60,6 +57,35 @@ public class ElasticMapping {
     if (schema != null) {
       this.schema.putAll(schema);
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ElasticMapping other = (ElasticMapping) obj;
+    if (documentClass == null) {
+      if (other.documentClass != null) {
+        return false;
+      }
+    } else if (!documentClass.equals(other.documentClass)) {
+      return false;
+    }
+    if (index == null) {
+      if (other.index != null) {
+        return false;
+      }
+    } else if (!index.equals(other.index)) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -96,14 +122,6 @@ public class ElasticMapping {
 
   /**
    *
-   * @return the typeName
-   */
-  public String getTypeName() {
-    return typeName;
-  }
-
-  /**
-   *
    * @return the versionPropertyName
    */
   public String getVersionPropertyName() {
@@ -116,6 +134,15 @@ public class ElasticMapping {
    */
   public VersionType getVersionType() {
     return versionType;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (documentClass == null ? 0 : documentClass.hashCode());
+    result = prime * result + (index == null ? 0 : index.hashCode());
+    return result;
   }
 
   /**

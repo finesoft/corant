@@ -14,26 +14,43 @@
 package org.corant.suites.elastic;
 
 import java.util.Map;
+import javax.enterprise.context.ApplicationScoped;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
 
 /**
  * corant-suites-elastic
  *
- * @author bingo 下午4:08:34
+ * @author bingo 下午6:36:42
  *
  */
-public interface ElasticIndicesService {
+@ApplicationScoped
+public class DefaultElasticIndicesService implements ElasticIndicesService {
 
-  boolean checkIndicesExist(String... indexName);
+  @Override
+  public boolean checkIndicesExist(String... indexName) {
+    return false;
+  }
 
-  boolean createIndex(String indexName, Map<String, Object> setting,
-      Map<String, Map<String, Object>> schemas);
+  @Override
+  public boolean createIndex(String indexName, Map<String, Object> setting,
+      Map<String, Map<String, Object>> schemas) {
+    return false;
+  }
 
-  boolean deleteIndex(String indexName);
+  @Override
+  public boolean deleteIndex(String indexName) {
+    return false;
+  }
 
-  ElasticMapping getMapping(Class<?> cls);
+  @Override
+  public ElasticMapping getMapping(Class<?> cls) {
+    return null;
+  }
 
-  ElasticMappingResolver getMappingResolver();
+  @Override
+  public ElasticMappingResolver getMappingResolver() {
+    return null;
+  }
 
 }

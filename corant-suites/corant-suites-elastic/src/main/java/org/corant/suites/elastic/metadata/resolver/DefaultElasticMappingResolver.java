@@ -80,24 +80,20 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
   public ElasticMapping resolve(Class<?> documentClass) {
     EsDocument document = findAnnotation(shouldNotNull(documentClass), EsDocument.class, false);
     ElasticIndexing indexing = ElasticIndexing.of(null, document, version);
-    String typeName = resolveTypeName(documentClass, document);
     String versionPropertyName = document.versionPropertyName();
     boolean versioned = isNotBlank(versionPropertyName);
     VersionType versionType = document.versionType();
-    boolean allIndexed = document.allIndexed();
     ElasticRelation relation = null;
     EsRelation relAnn = findAnnotation(shouldNotNull(documentClass), EsRelation.class, false);
     if (relAnn != null) {
       relation = new ElasticRelation(documentClass, relAnn);
     }
 
-    return new ElasticMapping(indexing, documentClass, typeName,
-        resolveSchema(documentClass, relation, typeName, allIndexed), relation, versioned,
-        versionPropertyName, versionType);
+    return new ElasticMapping(indexing, documentClass, resolveSchema(documentClass, relation),
+        relation, versioned, versionPropertyName, versionType);
   }
 
-  public Map<String, Object> resolveSchema(Class<?> documentClass, ElasticRelation relation,
-      String typeName, boolean allIndexed) {
+  public Map<String, Object> resolveSchema(Class<?> documentClass, ElasticRelation relation) {
     Map<String, Object> bodyMap = new LinkedHashMap<>();
     Map<String, Object> fieldMap = new LinkedHashMap<>();
     handleFields(documentClass, fieldMap, new LinkedList<>());
@@ -105,10 +101,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       fieldMap.putAll(relation.genSchema());
     }
     bodyMap.put("properties", fieldMap);
-    if (!allIndexed) {
-      bodyMap.put("_all", asMap("enabled", false));
-    }
-    return asMap(typeName, bodyMap);
+    return asMap("_doc", bodyMap);
   }
 
   protected void handleCollectionField(Class<?> docCls, Field f, Map<String, Object> map,

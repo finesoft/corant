@@ -54,8 +54,6 @@ import java.util.stream.Stream;
 /**
  * corant-shared
  *
- * TODO introduce wildcard capture
- *
  * @author bingo 上午11:21:01
  *
  */
@@ -66,6 +64,23 @@ public class ClassPaths {
   public static final String PATH_SEPARATOR_STRING = Character.toString(PATH_SEPARATOR);
   public static final String CLASSES_FOLDER = "classes" + File.separator;
   private static final Logger LOGGER = Logger.getLogger(ClassPaths.class.getName());
+
+  public static ClassPath anyway(ClassLoader classLoader) {
+    return anyway(classLoader, StringUtils.EMPTY);
+  }
+
+  public static ClassPath anyway(ClassLoader classLoader, String path) {
+    try {
+      return from(classLoader, path);
+    } catch (IOException e) {
+      LOGGER.log(Level.WARNING, e.getMessage(), e);
+      return ClassPath.empty();
+    }
+  }
+
+  public static ClassPath anyway(String path) {
+    return anyway(defaultClassLoader(), path);
+  }
 
   /**
    * Use default classloader to scan all class path resources.
@@ -121,23 +136,6 @@ public class ClassPaths {
 
   public static ClassPath from(String path) throws IOException {
     return from(defaultClassLoader(), path);
-  }
-
-  public static ClassPath anyway(ClassLoader classLoader) {
-    return anyway(classLoader, StringUtils.EMPTY);
-  }
-
-  public static ClassPath anyway(ClassLoader classLoader, String path) {
-    try {
-      return from(classLoader, path);
-    } catch (IOException e) {
-      LOGGER.log(Level.WARNING, e.getMessage(), e);
-      return ClassPath.empty();
-    }
-  }
-
-  public static ClassPath anyway(String path) {
-    return anyway(defaultClassLoader(), path);
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {

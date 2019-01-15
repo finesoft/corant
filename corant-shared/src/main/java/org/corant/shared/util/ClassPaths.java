@@ -182,7 +182,7 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Describe class resource.
+   * Describe class resource, but doesn't load it right away.
    *
    * @author bingo 下午8:35:36
    *
@@ -422,7 +422,7 @@ public class ClassPaths {
       return str.regionMatches(!sensitive, strStartIndex, search, 0, search.length());
     }
 
-    String[] getWcs() {
+    String[] getPathTokens() {
       return pathTokens;
     }
 
@@ -496,9 +496,6 @@ public class ClassPaths {
       return false;
     }
 
-    /**
-     * Returns the fully qualified name of the resource. Such as "com/mycomp/foo/bar.txt".
-     */
     public final String getResourceName() {
       return resourceName;
     }
@@ -520,7 +517,6 @@ public class ClassPaths {
       return conn.getInputStream();
     }
 
-    // Do not change this arbitrarily. We rely on it for sorting ResourceInfo.
     @Override
     public String toString() {
       return resourceName;
@@ -687,8 +683,10 @@ public class ClassPaths {
         if ((classesIdx = canonicalPath.indexOf(CLASSES_FOLDER)) != -1) {
           canonicalPath = canonicalPath.substring(classesIdx + CLASSES_FOLDER.length());
         }
-        resources.add(ResourceInfo.of(replace(canonicalPath, File.separator, PATH_SEPARATOR_STRING),
-            classloader));
+        String resourceName = replace(canonicalPath, File.separator, PATH_SEPARATOR_STRING);
+        if (filter.test(resourceName)) {
+          resources.add(ResourceInfo.of(resourceName, classloader));
+        }
       }
     }
 

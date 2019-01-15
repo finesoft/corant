@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jpa.shared.metadata;
@@ -57,6 +55,8 @@ public class PersistenceConfigParser {
     final String proPrefix = JpaConfig.PREFIX + name + JpaConfig.DOT_PUN_PRO;
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
+    Set<String> mapFileRegexs = new HashSet<>();
+    Set<String> mapFilePaths = new HashSet<>();
     cfgNmes.forEach(pn -> {
       if (pn.endsWith(JpaConfig.DOT_PUN_TRANS_TYP)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd
@@ -84,11 +84,15 @@ public class PersistenceConfigParser {
       } else if (pn.endsWith(JpaConfig.DOT_PUN_SHARE_CACHE_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_PKG)) {
+      } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS_PKG)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> JpaUtils.getPersistenceClasses(s)
             .stream().map(Class::getName).forEach(puimd::addManagedClassName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_REGEX)) {
         // TODO FIXME
+        config.getOptionalValue(pn, String.class).ifPresent(mapFileRegexs::add);
+      } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_PATH)) {
+        // TODO FIXME
+        config.getOptionalValue(pn, String.class).ifPresent(mapFilePaths::add);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
@@ -96,8 +100,21 @@ public class PersistenceConfigParser {
         proCfgNmes.add(pn);
       }
     });
+    if (mapFileRegexs.isEmpty()) {
+      mapFileRegexs.add(JpaConfig.DFLT_ORM_XML_REGEX);
+    }
     doParseProperties(config, proPrefix, proCfgNmes, puimd);
+    doParseMapFiles(mapFilePaths, mapFileRegexs, puimd);
     map.put(name, puimd);
+  }
+
+  private static void doParseMapFiles(Set<String> paths, Set<String> regexs,
+      PersistenceUnitInfoMetaData metaData) {
+    for (String path : paths) {
+      for (String regex : regexs) {
+        JpaUtils.getPersistenceMappingFiles(path, regex).forEach(metaData::addMappingFileName);
+      }
+    }
   }
 
   private static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,

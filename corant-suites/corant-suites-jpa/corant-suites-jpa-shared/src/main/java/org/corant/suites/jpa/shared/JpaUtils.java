@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jpa.shared;
@@ -63,12 +61,16 @@ public class JpaUtils {
   }
 
   public static Set<String> getPersistenceMappingFiles(String regex) {
+    return getPersistenceMappingFiles(null, regex);
+  }
+
+  public static Set<String> getPersistenceMappingFiles(String path, String regex) {
     Set<String> paths = new LinkedHashSet<>();
     Set<Pattern> patterns =
         asStream(split(regex, ",")).map(Pattern::compile).collect(Collectors.toSet());
     if (!isEmpty(regex)) {
       try {
-        ClassPaths.from().getResources().filter(r -> !ClassInfo.class.isInstance(r))
+        ClassPaths.from(path).getResources().filter(r -> !ClassInfo.class.isInstance(r))
             .map(r -> r.getResourceName())
             .filter(n -> patterns.stream().anyMatch(p -> p.matcher(n).find())).forEach(n -> {
               paths.add(n);

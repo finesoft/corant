@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jpa.shared;
@@ -39,6 +37,8 @@ public class JpaConfig {
   public static final String PREFIX = "jpa.";
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
   public static final String DFLT_ORM_XML_LOCATION = "META-INF/orm.xml";
+  public static final String DFLT_ORM_XML_REGEX = ".*JpaOrm\\.xml$";
+
   public static final String PUN_TAG = "persistence-unit";
   public static final String PUN_NME = "name";
   public static final String PUN_TRANS_TYP = "transaction-type";
@@ -62,8 +62,9 @@ public class JpaConfig {
   public static final String DOT_PUN_JTA_DS = "." + PUN_JTA_DS;
   public static final String DOT_PUN_PROVIDER = "." + PUN_PROVIDER;
   public static final String DOT_PUN_CLS = "." + PUN_CLS;
-  public static final String DOT_PUN_PKG = DOT_PUN_CLS + "-package";
+  public static final String DOT_PUN_CLS_PKG = DOT_PUN_CLS + "-package";
   public static final String DOT_PUN_MAP_FILE = "." + PUN_MAP_FILE;
+  public static final String DOT_PUN_MAP_FILE_PATH = "." + PUN_MAP_FILE + "-path";
   public static final String DOT_PUN_MAP_FILE_REGEX = DOT_PUN_MAP_FILE + "-regex";
   public static final String DOT_PUN_JAR_FILE = "." + PUN_JAR_FILE;
   public static final String DOT_PUN_EX_UL_CLS = "." + PUN_EX_UL_CLS;
@@ -87,10 +88,9 @@ public class JpaConfig {
           .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
     }
     cfg.metaDatas.putAll(fromXmlPums);
-    logger
-        .info(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
-            String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
-            String.join(",", fromXmlPums.keySet())));
+    logger.info(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
+        String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
+        String.join(",", fromXmlPums.keySet())));
     return cfg;
   }
 

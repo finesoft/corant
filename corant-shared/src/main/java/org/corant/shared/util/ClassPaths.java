@@ -52,6 +52,8 @@ import java.util.stream.Stream;
 /**
  * corant-shared
  *
+ * TODO introduce wildcard capture
+ *
  * @author bingo 上午11:21:01
  *
  */

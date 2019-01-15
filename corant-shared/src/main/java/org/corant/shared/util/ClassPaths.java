@@ -32,6 +32,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -99,6 +101,8 @@ public class ClassPaths {
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven" then will scan all resources under the META-INF/maven.
    * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
+   * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filte class name
+   * end with Driver.class.
    * </pre>
    *
    * @param classLoader
@@ -107,10 +111,9 @@ public class ClassPaths {
    * @throws IOException from
    */
   public static ClassPath from(ClassLoader classLoader, String path) throws IOException {
-    String root = defaultString(path);
-    Scanner scanner = new Scanner(root);
+    Scanner scanner = PathFilter.buildScanner(defaultString(path), true);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
-        defaultObject(classLoader, defaultClassLoader()), root).entrySet()) {
+        defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());
     }
     return new ClassPath(scanner.getResources());
@@ -120,11 +123,11 @@ public class ClassPaths {
     return from(defaultClassLoader(), path);
   }
 
-  public static ClassPath fromAnyway(ClassLoader classLoader) {
-    return fromAnyway(classLoader, StringUtils.EMPTY);
+  public static ClassPath anyway(ClassLoader classLoader) {
+    return anyway(classLoader, StringUtils.EMPTY);
   }
 
-  public static ClassPath fromAnyway(ClassLoader classLoader, String path) {
+  public static ClassPath anyway(ClassLoader classLoader, String path) {
     try {
       return from(classLoader, path);
     } catch (IOException e) {
@@ -133,8 +136,8 @@ public class ClassPaths {
     }
   }
 
-  public static ClassPath fromAnyway(String path) {
-    return fromAnyway(defaultClassLoader(), path);
+  public static ClassPath anyway(String path) {
+    return anyway(defaultClassLoader(), path);
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {
@@ -178,6 +181,14 @@ public class ClassPaths {
     return isBlank(path) || asStream(split(sysEnvLib, ";")).anyMatch(sp -> path.startsWith(sp));
   }
 
+  /**
+   * corant-shared
+   *
+   * Describe class resource.
+   *
+   * @author bingo 下午8:35:36
+   *
+   */
   public static final class ClassInfo extends ResourceInfo {
 
     private final String className;
@@ -246,10 +257,17 @@ public class ClassPaths {
 
   }
 
+  /**
+   * corant-shared
+   *
+   * Describe class path resources
+   *
+   * @author bingo 下午8:33:44
+   *
+   */
   public static final class ClassPath {
 
     static final ClassPath EMPTY_INSTANCE = new ClassPath(Collections.emptySet());
-
     final Set<ResourceInfo> resources;
 
     private ClassPath(Set<ResourceInfo> resources) {
@@ -283,10 +301,179 @@ public class ClassPaths {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * Use wildcards for filtering, algorithm from apache.org.
+   *
+   * @author bingo 下午8:32:50
+   *
+   */
+  public static final class PathFilter implements Predicate<String> {
+
+    private final boolean sensitive;
+    private final String[] pathTokens;
+
+    /**
+     * @param sensitive
+     * @param pathExpress
+     */
+    public PathFilter(boolean sensitive, String pathExpress) {
+      super();
+      this.sensitive = sensitive;
+      pathTokens = splitOnTokens(pathExpress);
+    }
+
+    public static Scanner buildScanner(String pathExpress, boolean sensitive) {
+      if (hasWildcard(pathExpress)) {
+        PathFilter pf = new PathFilter(sensitive, pathExpress);
+        return new Scanner(pf.getRoot(), pf);
+      } else {
+        return new Scanner(pathExpress);
+      }
+    }
+
+    public static boolean hasWildcard(String path) {
+      return path.indexOf('?') != -1 || path.indexOf('*') != -1;
+    }
+
+    public String getRoot() {
+      if (pathTokens.length == 1) {
+        return pathTokens[0];
+      }
+      for (String path : pathTokens) {
+        if (!hasWildcard(path)) {
+          if (path.indexOf(PATH_SEPARATOR_STRING) != -1) {
+            return path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
+          } else {
+            return path;
+          }
+        } else {
+          break;
+        }
+      }
+      return StringUtils.EMPTY;
+    }
+
+    @Override
+    public boolean test(final String path) {
+      boolean anyChars = false;
+      int pathIdx = 0;
+      int pathTokenIdx = 0;
+      final Stack<int[]> backtrack = new Stack<>();
+      do {
+        if (backtrack.size() > 0) {
+          final int[] array = backtrack.pop();
+          pathTokenIdx = array[0];
+          pathIdx = array[1];
+          anyChars = true;
+        }
+        while (pathTokenIdx < pathTokens.length) {
+          if (pathTokens[pathTokenIdx].equals("?")) {
+            pathIdx++;
+            if (pathIdx > path.length()) {
+              break;
+            }
+            anyChars = false;
+          } else if (pathTokens[pathTokenIdx].equals("*")) {
+            anyChars = true;
+            if (pathTokenIdx == pathTokens.length - 1) {
+              pathIdx = path.length();
+            }
+          } else {
+            if (anyChars) {
+              pathIdx = checkIndexOf(path, pathIdx, pathTokens[pathTokenIdx]);
+              if (pathIdx == -1) {
+                break;
+              }
+              final int repeat = checkIndexOf(path, pathIdx + 1, pathTokens[pathTokenIdx]);
+              if (repeat >= 0) {
+                backtrack.push(new int[] {pathTokenIdx, repeat});
+              }
+            } else {
+              if (!checkRegionMatches(path, pathIdx, pathTokens[pathTokenIdx])) {
+                break;
+              }
+            }
+            pathIdx += pathTokens[pathTokenIdx].length();
+            anyChars = false;
+          }
+          pathTokenIdx++;
+        }
+        if (pathTokenIdx == pathTokens.length && pathIdx == path.length()) {
+          return true;
+        }
+      } while (backtrack.size() > 0);
+
+      return false;
+    }
+
+    int checkIndexOf(final String str, final int strStartIndex, final String search) {
+      final int endIndex = str.length() - search.length();
+      if (endIndex >= strStartIndex) {
+        for (int i = strStartIndex; i <= endIndex; i++) {
+          if (checkRegionMatches(str, i, search)) {
+            return i;
+          }
+        }
+      }
+      return -1;
+    }
+
+    boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+      return str.regionMatches(!sensitive, strStartIndex, search, 0, search.length());
+    }
+
+    String[] getWcs() {
+      return pathTokens;
+    }
+
+    boolean isSensitive() {
+      return sensitive;
+    }
+
+    String[] splitOnTokens(final String pathExpress) {
+      if (!hasWildcard(pathExpress)) {
+        return new String[] {pathExpress};
+      }
+      final char[] array = pathExpress.toCharArray();
+      final ArrayList<String> list = new ArrayList<>();
+      final StringBuilder buffer = new StringBuilder();
+      char prevChar = 0;
+      for (final char ch : array) {
+        if (ch == '?' || ch == '*') {
+          if (buffer.length() != 0) {
+            list.add(buffer.toString());
+            buffer.setLength(0);
+          }
+          if (ch == '?') {
+            list.add("?");
+          } else if (prevChar != '*') {
+            list.add("*");
+          }
+        } else {
+          buffer.append(ch);
+        }
+        prevChar = ch;
+      }
+      if (buffer.length() != 0) {
+        list.add(buffer.toString());
+      }
+      return list.toArray(new String[list.size()]);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * Describe class path resource include class resource.
+   *
+   * @author bingo 下午8:37:56
+   *
+   */
   public static class ResourceInfo {
 
     final ClassLoader loader;
-
     private final String resourceName;
 
     public ResourceInfo(String resourceName, ClassLoader loader) {
@@ -342,15 +529,20 @@ public class ClassPaths {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * Scan resource from path, include nested jars.
+   *
+   * @author bingo 下午8:39:26
+   *
+   */
   static final class Scanner {
 
     private final Set<ResourceInfo> resources = new LinkedHashSet<>();
     private final Set<URI> scannedUris = new HashSet<>();
     private final String root;
-
-    Scanner() {
-      this("");
-    }
+    private Predicate<String> filter = s -> true;
 
     /**
      * @param root
@@ -358,6 +550,13 @@ public class ClassPaths {
     Scanner(String root) {
       super();
       this.root = root;
+    }
+
+    Scanner(String root, Predicate<String> filter) {
+      this(root);
+      if (filter != null) {
+        this.filter = filter;
+      }
     }
 
     URI getClassPathEntry(File jarFile, String path) throws URISyntaxException {
@@ -390,6 +589,10 @@ public class ClassPaths {
 
     Set<ResourceInfo> getResources() {
       return resources;
+    }
+
+    String getRoot() {
+      return root;
     }
 
     void scan(URI uri, ClassLoader classloader) throws IOException {
@@ -436,17 +639,13 @@ public class ClassPaths {
       }
       Set<File> fileSet = new LinkedHashSet<>(ancestors);
       fileSet.add(canonical);
-      String cmprPackagePrefix = replace(packagePrefix, PATH_SEPARATOR_STRING, File.separator);
       for (File f : files) {
         String name = f.getName();
-        if (!isBlank(packagePrefix) && !f.getPath().endsWith(cmprPackagePrefix + name)) {
-          continue;
-        }
         if (f.isDirectory()) {
           scanDirectory(f, classloader, packagePrefix + name + PATH_SEPARATOR, fileSet);
         } else {
           String resourceName = packagePrefix + name;
-          if (!resourceName.equals(JarFile.MANIFEST_NAME)) {
+          if (!resourceName.equals(JarFile.MANIFEST_NAME) && filter.test(resourceName)) {
             resources.add(ResourceInfo.of(resourceName, classloader));
           }
         }
@@ -469,7 +668,8 @@ public class ClassPaths {
         while (entries.hasMoreElements()) {
           JarEntry entry = entries.nextElement();
           if (entry.isDirectory() || entry.getName().equals(JarFile.MANIFEST_NAME)
-              || isNotBlank(root) && !entry.getName().startsWith(root)) {
+              || isNotBlank(root) && !entry.getName().startsWith(root)
+              || !filter.test(entry.getName())) {
             continue;
           }
           resources.add(ResourceInfo.of(entry.getName(), classloader));

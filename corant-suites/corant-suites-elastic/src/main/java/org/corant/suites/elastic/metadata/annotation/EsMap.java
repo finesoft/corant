@@ -13,6 +13,7 @@
  */
 package org.corant.suites.elastic.metadata.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -21,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
- * 
+ *
  * @author bingo 2017年3月3日
  * @since
  */
@@ -29,20 +30,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Inherited
 public @interface EsMap {
-  /**
-   * Whether or not new properties should be added dynamically to an existing object. Accepts true
-   * (default), false and strict.
-   *
-   * @return
-   */
-  boolean dynamic() default true;
 
-  /**
-   *
-   * Sets the default include_in_all value for all the properties within the object. The object
-   * itself is not added to the _all field.
-   *
-   * @return
-   */
-  boolean include_in_all() default false;
+  Class<? extends Annotation> key();
+
+  Class<? extends Annotation> value();
 }

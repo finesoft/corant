@@ -13,22 +13,35 @@
  */
 package org.corant.suites.elastic.metadata.annotation;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
  *
- * @author bingo 下午7:27:17
+ * @author bingo 下午6:12:49
  *
  */
-@Retention(RUNTIME)
-@Target(FIELD)
-public @interface EsJoin {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface EsRelation {
 
-  String name();
+  /**
+   * children
+   *
+   * @return children
+   */
+  Class<?>[] children();
 
-  EsJoinRelation relation();
+  /**
+   * Field name
+   *
+   * @return fieldName
+   */
+  String fieldName();
+
 }

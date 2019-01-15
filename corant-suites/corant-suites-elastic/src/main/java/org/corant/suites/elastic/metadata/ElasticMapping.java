@@ -34,22 +34,26 @@ public class ElasticMapping {
   private final boolean versioned;
   private final String versionPropertyName;
   private final VersionType versionType;
+  private final ElasticRelation relation;
 
   /**
    * @param index
    * @param documentClass
    * @param typeName
+   * @param schema
+   * @param relation
    * @param versioned
    * @param versionPropertyName
    * @param versionType
    */
   public ElasticMapping(ElasticIndexing index, Class<?> documentClass, String typeName,
-      Map<String, Object> schema, boolean versioned, String versionPropertyName,
-      VersionType versionType) {
+      Map<String, Object> schema, ElasticRelation relation, boolean versioned,
+      String versionPropertyName, VersionType versionType) {
     super();
     this.index = index;
     this.documentClass = documentClass;
     this.typeName = typeName;
+    this.relation = relation;
     this.versioned = versioned;
     this.versionPropertyName = versionPropertyName;
     this.versionType = versionType;
@@ -76,6 +80,14 @@ public class ElasticMapping {
 
   /**
    *
+   * @return the relation
+   */
+  public ElasticRelation getRelation() {
+    return relation;
+  }
+
+  /**
+   *
    * @return the schema
    */
   public Map<String, Object> getSchema() {
@@ -90,9 +102,8 @@ public class ElasticMapping {
     return typeName;
   }
 
-
   /**
-   * 
+   *
    * @return the versionPropertyName
    */
   public String getVersionPropertyName() {
@@ -114,6 +125,5 @@ public class ElasticMapping {
   public boolean isVersioned() {
     return versioned;
   }
-
 
 }

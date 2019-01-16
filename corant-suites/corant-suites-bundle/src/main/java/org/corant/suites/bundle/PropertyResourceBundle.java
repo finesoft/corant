@@ -26,6 +26,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.ClassPaths;
@@ -42,6 +44,8 @@ public class PropertyResourceBundle extends ResourceBundle {
   public static final String LOCALE_SPT = "_";
 
   public static final char LOCALE_SPT_CHAR = '_';
+
+  private static Logger logger = Logger.getLogger(PropertyResourceBundle.class.getName());
 
   private Map<String, Object> lookup;
 
@@ -71,9 +75,13 @@ public class PropertyResourceBundle extends ResourceBundle {
         try {
           map.putIfAbsent(fo.getResourceName(), new PropertyResourceBundle(fo));
         } catch (IOException e) {
+          logger.log(Level.WARNING, e, () -> String
+              .format("Can not load property resource bundle %s", fo.getResourceName()));
         }
       });
     } catch (IOException e) {
+      logger.log(Level.WARNING, e,
+          () -> String.format("Can not load property resource bundles from paths %s", classPath));
     }
     return map;
   }

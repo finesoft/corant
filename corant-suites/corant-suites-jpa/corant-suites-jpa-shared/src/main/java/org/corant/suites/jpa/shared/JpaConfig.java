@@ -36,8 +36,7 @@ public class JpaConfig {
 
   public static final String PREFIX = "jpa.";
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
-  public static final String DFLT_ORM_XML_LOCATION = "META-INF/orm.xml";
-  public static final String DFLT_ORM_XML_REGEX = ".*JpaOrm\\.xml$";
+  public static final String DFLT_ORM_XML_LOCATION = "META-INF/*JpaOrm.xml";
 
   public static final String PUN_TAG = "persistence-unit";
   public static final String PUN_NME = "name";
@@ -62,10 +61,9 @@ public class JpaConfig {
   public static final String DOT_PUN_JTA_DS = "." + PUN_JTA_DS;
   public static final String DOT_PUN_PROVIDER = "." + PUN_PROVIDER;
   public static final String DOT_PUN_CLS = "." + PUN_CLS;
-  public static final String DOT_PUN_CLS_PKG = DOT_PUN_CLS + "-package";
+  public static final String DOT_PUN_CLS_PKG = DOT_PUN_CLS + "-packages";
   public static final String DOT_PUN_MAP_FILE = "." + PUN_MAP_FILE;
-  public static final String DOT_PUN_MAP_FILE_PATH = "." + PUN_MAP_FILE + "-path";
-  public static final String DOT_PUN_MAP_FILE_REGEX = DOT_PUN_MAP_FILE + "-regex";
+  public static final String DOT_PUN_MAP_FILE_PATH = "." + PUN_MAP_FILE + ".paths";
   public static final String DOT_PUN_JAR_FILE = "." + PUN_JAR_FILE;
   public static final String DOT_PUN_EX_UL_CLS = "." + PUN_EX_UL_CLS;
   public static final String DOT_PUN_VAL_MOD = "." + PUN_VAL_MOD;

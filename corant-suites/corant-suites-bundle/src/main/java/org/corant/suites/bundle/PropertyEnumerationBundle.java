@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018. BIN.CHEN
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.bundle;
@@ -27,13 +25,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -53,15 +50,8 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   private volatile boolean initialized = false;
 
   @Inject
-  @Any
-  @ConfigProperty(name = "bundle.enum.source.path.regex",
-      defaultValue = ".*enum([A-Za-z0-9_-]*)\\.properties$")
-  String pathRegex;
-
-  @Inject
-  @Any
-  @ConfigProperty(name = "bundle.enum.packages", defaultValue = "META-INF/")
-  String packages;
+  @ConfigProperty(name = "bundle.enum-file.paths", defaultValue = "META-INF/*Enums_*.properties")
+  String bundleFilePaths;
 
   public PropertyEnumerationBundle() {}
 
@@ -109,38 +99,33 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
         if (!isInitialized()) {
           try {
             onPreDestroy();
-            Set<String> pkgs = asSet(split(packages, ";"));
-            final Pattern filter = Pattern.compile(pathRegex, Pattern.CASE_INSENSITIVE);
-            pkgs.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
-              PropertyResourceBundle
-                  .getBundles(pkg, (r) -> filter.matcher(r.getResourceName()).find())
-                  .forEach((s, res) -> {
-                    logger.info(() -> String.format(
-                        "Find enumeration resource, the path is %s, use pattern [%s]", s,
-                        pathRegex));
-                    Locale locale = res.getLocale();
-                    EnumLiteralsObject obj =
-                        holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
-                    res.dump().forEach((k, v) -> {
-                      int i = k.lastIndexOf(".");
-                      String enumClsName = k.substring(0, i), enumItemKey = null;
-                      Class enumCls = null;
-                      try {
-                        enumCls = Class.forName(enumClsName);
-                        enumItemKey = k.substring(i + 1);
-                      } catch (ClassNotFoundException e) {
-                        enumCls = tryAsClass(k);
-                        if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
-                          obj.putEnumClass(enumCls, v);
-                        } else {
-                          throw new RuntimeException("enum class " + s + " error");
-                        }
-                      }
-                      if (enumItemKey != null) {
-                        obj.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
-                      }
-                    });
-                  });
+            Set<String> paths = asSet(split(bundleFilePaths, ";"));
+            paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
+              PropertyResourceBundle.getBundles(path, (r) -> true).forEach((s, res) -> {
+                logger.info(() -> String.format("Find enumeration resource, the path is %s", s));
+                Locale locale = res.getLocale();
+                EnumLiteralsObject obj =
+                    holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
+                res.dump().forEach((k, v) -> {
+                  int i = k.lastIndexOf(".");
+                  String enumClsName = k.substring(0, i), enumItemKey = null;
+                  Class enumCls = null;
+                  try {
+                    enumCls = Class.forName(enumClsName);
+                    enumItemKey = k.substring(i + 1);
+                  } catch (ClassNotFoundException e) {
+                    enumCls = tryAsClass(k);
+                    if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
+                      obj.putEnumClass(enumCls, v);
+                    } else {
+                      throw new CorantRuntimeException("enum class %s error", s);
+                    }
+                  }
+                  if (enumItemKey != null) {
+                    obj.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
+                  }
+                });
+              });
             });
             // TODO validate
           } finally {
@@ -187,14 +172,15 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
       }
       Map<Enum, String> map = enumLiterals.get(declaringClass);
       if (map.put(e, literal) != null) {
-        throw new RuntimeException("enum " + e.getClass() + ", value " + e + " is duplicate");
+        throw new CorantRuntimeException("enum %s, value %s is duplicate", e.getClass().getName(),
+            e);
       }
     }
 
     @SuppressWarnings("unchecked")
     public void putEnumClass(Class clz, String literal) {
       if (classLiteral.put(clz, literal) != null) {
-        throw new RuntimeException("enum " + clz + ", is duplicate");
+        throw new CorantRuntimeException("enum %s, is duplicate", clz);
       }
     }
   }

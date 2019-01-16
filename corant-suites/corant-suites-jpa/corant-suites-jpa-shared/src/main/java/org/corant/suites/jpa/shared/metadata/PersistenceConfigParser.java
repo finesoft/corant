@@ -55,8 +55,6 @@ public class PersistenceConfigParser {
     final String proPrefix = JpaConfig.PREFIX + name + JpaConfig.DOT_PUN_PRO;
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
-    Set<String> mapFileRegexs = new HashSet<>();
-    Set<String> mapFilePaths = new HashSet<>();
     cfgNmes.forEach(pn -> {
       if (pn.endsWith(JpaConfig.DOT_PUN_TRANS_TYP)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd
@@ -87,12 +85,11 @@ public class PersistenceConfigParser {
       } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS_PKG)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> JpaUtils.getPersistenceClasses(s)
             .stream().map(Class::getName).forEach(puimd::addManagedClassName));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_REGEX)) {
-        // TODO FIXME
-        config.getOptionalValue(pn, String.class).ifPresent(mapFileRegexs::add);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_PATH)) {
-        // TODO FIXME
-        config.getOptionalValue(pn, String.class).ifPresent(mapFilePaths::add);
+        JpaUtils.getPersistenceMappingFiles(
+            split(config.getOptionalValue(pn, String.class).orElse(JpaConfig.DFLT_ORM_XML_LOCATION),
+                ";", true, true))
+            .forEach(puimd::addMappingFileName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
@@ -100,21 +97,8 @@ public class PersistenceConfigParser {
         proCfgNmes.add(pn);
       }
     });
-    if (mapFileRegexs.isEmpty()) {
-      mapFileRegexs.add(JpaConfig.DFLT_ORM_XML_REGEX);
-    }
     doParseProperties(config, proPrefix, proCfgNmes, puimd);
-    doParseMapFiles(mapFilePaths, mapFileRegexs, puimd);
     map.put(name, puimd);
-  }
-
-  private static void doParseMapFiles(Set<String> paths, Set<String> regexs,
-      PersistenceUnitInfoMetaData metaData) {
-    for (String path : paths) {
-      for (String regex : regexs) {
-        JpaUtils.getPersistenceMappingFiles(path, regex).forEach(metaData::addMappingFileName);
-      }
-    }
   }
 
   private static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,

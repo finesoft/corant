@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jta.narayana;
@@ -30,6 +28,7 @@ import javax.transaction.UserTransaction;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.tm.JBossXATerminator;
 import org.jboss.tm.XAResourceRecoveryRegistry;
 import org.jboss.tm.usertx.UserTransactionRegistry;
@@ -53,6 +52,10 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 public class NarayanaTransactionProducers {
 
   @Inject
+  @ConfigProperty(name = "jta.transaction.timeout", defaultValue = "60")
+  Integer transactionTimeout;
+
+  @Inject
   @Any
   Instance<NarayanaConfigurator> configurators;
 
@@ -71,13 +74,19 @@ public class NarayanaTransactionProducers {
     final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+
+    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
+        BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
+    coordinatorEnvironmentBean.setDefaultTimeout(transactionTimeout);
+    final CoreEnvironmentBean coreEnvironmentBean =
+        BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class);
+    final RecoveryEnvironmentBean recoveryEnvironmentBean =
+        BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     if (!configurators.isUnsatisfied()) {
       configurators.stream().sorted().forEachOrdered(cfgr -> {
-        cfgr.configCoreEnvironment(BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class));
-        cfgr.configCoordinatorEnvironment(
-            BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class));
-        cfgr.configRecoveryEnvironment(
-            BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class));
+        cfgr.configCoreEnvironment(coreEnvironmentBean);
+        cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);
+        cfgr.configRecoveryEnvironment(recoveryEnvironmentBean);
         cfgr.configObjectStoreEnvironment(nullActionStoreObjectStoreEnvironmentBean, null);
         cfgr.configObjectStoreEnvironment(defaultActionStoreObjectStoreEnvironmentBean, "default");
         cfgr.configObjectStoreEnvironment(stateStoreObjectStoreEnvironmentBean, "stateStore");

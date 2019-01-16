@@ -69,8 +69,6 @@ public class JpaConfig {
   public static final String DOT_PUN_VAL_MOD = "." + PUN_VAL_MOD;
   public static final String DOT_PUN_SHARE_CACHE_MOD = "." + PUN_SHARE_CACHE_MOD;
   public static final String DOT_PUN_PRO = "." + "property";
-  public static final String DOT_PUN_PRO_NME = "." + PUN_PRO_NME;
-  public static final String DOT_PUN_PRO_VAL = "." + PUN_PRO_VAL;
 
   protected static final Logger logger = Logger.getLogger(JpaConfig.class.getName());
   private final Map<String, PersistenceUnitInfoMetaData> metaDatas = new HashMap<>();

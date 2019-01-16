@@ -13,11 +13,16 @@
  */
 package org.corant.suites.elastic;
 
-import java.time.Duration;
-import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.corant.kernel.util.ConfigUtils;
+import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-suites-elastic
@@ -25,86 +30,85 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 上午11:54:10
  *
  */
-@ApplicationScoped
 public class ElasticConfig {
 
   public static final String PREFIX = "elastic.";
+  public static final String ES_CLU_NOD = ".cluster-nodes";
+  public static final String ES_ADD_PRO = ".property";
 
-  @Inject
-  @ConfigProperty(name = "elastic.cluster.name", defaultValue = "elasticsearch")
   private String clusterName;
 
-  @Inject
-  @ConfigProperty(name = "elastic.cluster.nodes")
-  private Optional<String> clusterNodes;
+  private String clusterNodes;
+
+  private final Map<String, String> properties = new HashMap<>();
+
+  public static Map<String, ElasticConfig> from(Config config) {
+    Map<String, ElasticConfig> map = new HashMap<>();
+    Map<String, List<String>> cfgNmes = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
+    cfgNmes.forEach((k, v) -> {
+      final ElasticConfig cfg = of(config, k, v);
+      if (isNoneBlank(cfg.clusterName, cfg.clusterNodes)) {
+        map.put(k, cfg);
+      }
+    });
+    return map;
+  }
+
+  public static ElasticConfig of(Config config, String name, Collection<String> propertieNames) {
+    final ElasticConfig cfg = new ElasticConfig();
+    final String proPrefix = PREFIX + name + ES_ADD_PRO;
+    final int proPrefixLen = proPrefix.length();
+    Set<String> proCfgNmes = new HashSet<>();
+    cfg.clusterName = name;
+    propertieNames.forEach(pn -> {
+      if (pn.endsWith(ES_CLU_NOD)) {
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setClusterNodes);
+      } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
+        // handle properties
+        proCfgNmes.add(pn);
+      }
+    });
+    doParseProperties(config, proPrefix, proCfgNmes, cfg);
+    return cfg;
+  }
+
+  static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,
+      ElasticConfig esConfig) {
+    if (!proCfgNmes.isEmpty()) {
+      int len = proPrefix.length() + 1;
+      for (String cfgNme : proCfgNmes) {
+        config.getOptionalValue(cfgNme, String.class).ifPresent(s -> {
+          String proName = cfgNme.substring(len);
+          esConfig.properties.put(proName, s);
+        });
+      }
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ElasticConfig other = (ElasticConfig) obj;
+    if (clusterName == null) {
+      if (other.clusterName != null) {
+        return false;
+      }
+    } else if (!clusterName.equals(other.clusterName)) {
+      return false;
+    }
+    return true;
+  }
 
   /**
-   * A bind port range. Defaults to 9300-9400
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.tcp.port")
-  private String transportTcpPort;
-
-  /**
-   * The port that other nodes in the cluster should use when communicating with this node. Useful
-   * when a cluster node is behind a proxy or firewall and the transport.tcp.port is not directly
-   * addressable from the outside. Defaults to the actual port assigned via transport.tcp.port.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.publish_port")
-  private String transportPublishPort;
-
-  /**
-   * The host address to bind the transport service to. Defaults to transport.host (if set) or
-   * network.bind_host.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.bind_host")
-  private String transportBindHost;
-
-
-  /**
-   * The host address to publish for nodes in the cluster to connect to. Defaults to transport.host
-   * (if set) or network.publish_host.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.publish_host")
-  private String transportPublishHost;
-
-  /**
-   * Used to set the transport.bind_host and the transport.publish_host Defaults to transport.host
-   * or network.host.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.host")
-  private String transportHost;
-
-  /**
-   * The socket connect timeout setting (in time setting format). Defaults to 30s.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.tcp.connect_timeout")
-  private int transportTcpConnectionTimeout;
-
-  /**
-   * Set to true to enable compression (DEFLATE) between all nodes. Defaults to false.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.tcp.compress")
-  private Boolean transportTcpCompress;
-
-  /**
-   * Schedule a regular application-level ping message to ensure that transport connections between
-   * nodes are kept alive. Defaults to 5s in the transport client and -1 (disabled) elsewhere. It is
-   * preferable to correctly configure TCP keep-alives instead of using this feature, because TCP
-   * keep-alives apply to all kinds of long-lived connection and not just to transport connections.
-   */
-  @Inject
-  @ConfigProperty(name = "elastic.transport.ping_schedule")
-  private Duration transportPingSchedule;
-
-  /**
-   * 
+   *
    * @return the clusterName
    */
   public String getClusterName() {
@@ -112,76 +116,47 @@ public class ElasticConfig {
   }
 
   /**
-   * 
+   *
    * @return the clusterNodes
    */
-  public Optional<String> getClusterNodes() {
+  public String getClusterNodes() {
     return clusterNodes;
   }
 
   /**
-   * 
-   * @return the transportBindHost
+   *
+   * @return the properties
    */
-  public String getTransportBindHost() {
-    return transportBindHost;
+  public Map<String, String> getProperties() {
+    return Collections.unmodifiableMap(properties);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (clusterName == null ? 0 : clusterName.hashCode());
+    return result;
+  }
+
+  protected Map<String, String> obtainProperties() {
+    return properties;
   }
 
   /**
-   * 
-   * @return the transportHost
+   *
+   * @param clusterName the clusterName to set
    */
-  public String getTransportHost() {
-    return transportHost;
+  protected void setClusterName(String clusterName) {
+    this.clusterName = clusterName;
   }
 
   /**
-   * 
-   * @return the transportPingSchedule
+   *
+   * @param clusterNodes the clusterNodes to set
    */
-  public Duration getTransportPingSchedule() {
-    return transportPingSchedule;
+  protected void setClusterNodes(String clusterNodes) {
+    this.clusterNodes = clusterNodes;
   }
-
-  /**
-   * 
-   * @return the transportPublishHost
-   */
-  public String getTransportPublishHost() {
-    return transportPublishHost;
-  }
-
-  /**
-   * 
-   * @return the transportPublishPort
-   */
-  public String getTransportPublishPort() {
-    return transportPublishPort;
-  }
-
-  /**
-   * 
-   * @return the transportTcpCompress
-   */
-  public Boolean getTransportTcpCompress() {
-    return transportTcpCompress;
-  }
-
-  /**
-   * 
-   * @return the transportTcpConnectionTimeout
-   */
-  public int getTransportTcpConnectionTimeout() {
-    return transportTcpConnectionTimeout;
-  }
-
-  /**
-   * 
-   * @return the transportTcpPort
-   */
-  public String getTransportTcpPort() {
-    return transportTcpPort;
-  }
-
 
 }

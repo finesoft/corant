@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package bin;
@@ -55,6 +53,7 @@ public class JarLauncher {
   public static final int JAREXT_LEN = JAREXT.length();
   private final Path workPath;
   private final List<Path> classpaths = new ArrayList<>();
+  private final boolean needCleanWorkDir;
 
   private String[] args;
   private Manifest manifest;
@@ -64,6 +63,7 @@ public class JarLauncher {
     Arrays.stream(args).filter(arg -> arg.startsWith("+")).map(arg -> Paths.get(arg.substring(1)))
         .forEach(classpaths::add);
     workPath = Paths.get(System.getProperty("user.home")).resolve(WORK_DIR);
+    needCleanWorkDir = Arrays.stream(args).anyMatch(arg -> "!cwd".equalsIgnoreCase(arg));
   }
 
   public static void main(String... args) throws Exception {
@@ -72,18 +72,32 @@ public class JarLauncher {
 
   public void launch() {
     try {
-      log("Extracting archives to work space %s ...", true, workPath);
+      Files.createDirectories(workPath);
+      cleanWorkDir();
       extract();
       Class<?> mainClass =
           getClassLoader().loadClass(manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME));
-      log("Find application main class %s, the application is starting...", true, mainClass);
+      log(true, "Find application main class %s, the application is starting...", mainClass);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
+  void cleanWorkDir() {
+    if (needCleanWorkDir) {
+      log(true, "Clearing archives from work space %s ...", workPath);
+      File file = workPath.toFile();
+      if (file.exists()) {
+        for (File archive : file.listFiles()) {
+          archive.delete();
+        }
+      }
+    }
+  }
+
   void extract() throws IOException, NoSuchAlgorithmException {
+    log(true, "Extracting archives to work space %s ...", workPath);
     URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
     if (location.toExternalForm().endsWith(JAREXT)) {
       try (JarFile jar = new JarFile(new File(location.getPath()))) {
@@ -101,7 +115,6 @@ public class JarLauncher {
   }
 
   void extract(JarFile jar, JarEntry entry) throws IOException, NoSuchAlgorithmException {
-    Files.createDirectories(workPath);
     String entryName = entry.getName();
     int slashLoc = entryName.lastIndexOf("/");
     if (slashLoc > 0) {
@@ -162,7 +175,7 @@ public class JarLauncher {
     }
   }
 
-  void log(String msgOrFmt, boolean newLine, Object... args) {
+  void log(boolean newLine, String msgOrFmt, Object... args) {
     if (args.length == 0) {
       if (newLine) {
         System.out.println(msgOrFmt);

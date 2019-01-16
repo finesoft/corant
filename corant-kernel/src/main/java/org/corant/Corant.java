@@ -183,7 +183,8 @@ public class Corant {
     log(logger, "Finished at: %s", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb());
-    System.out.println("------------------------------------------------------------------------");
+    String spLine = "--------------------------------------------------";
+    System.out.println(spLine + spLine + "\n");
     return this;
   }
 

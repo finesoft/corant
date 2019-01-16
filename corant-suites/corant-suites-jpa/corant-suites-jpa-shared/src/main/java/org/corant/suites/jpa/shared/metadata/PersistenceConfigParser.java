@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -39,12 +40,15 @@ import org.eclipse.microprofile.config.Config;
  */
 public class PersistenceConfigParser {
 
+  private static Logger logger = Logger.getLogger(PersistenceConfigParser.class.getName());
+
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     Map<String, List<String>> cfgNmes =
         ConfigUtils.getGroupConfigNames(config, JpaConfig.PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
       doParse(config, k, v, map);
+      logger.info(() -> String.format("Parsed persistence unit %s from config file.", k));
     });
     return map;
   }

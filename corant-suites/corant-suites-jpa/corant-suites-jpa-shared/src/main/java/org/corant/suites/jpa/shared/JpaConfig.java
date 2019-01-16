@@ -68,7 +68,6 @@ public class JpaConfig {
   public static final String DOT_PUN_EX_UL_CLS = "." + PUN_EX_UL_CLS;
   public static final String DOT_PUN_VAL_MOD = "." + PUN_VAL_MOD;
   public static final String DOT_PUN_SHARE_CACHE_MOD = "." + PUN_SHARE_CACHE_MOD;
-  public static final String DOT_PUN_PROS = "." + PUN_PROS;
   public static final String DOT_PUN_PRO = "." + "property";
   public static final String DOT_PUN_PRO_NME = "." + PUN_PRO_NME;
   public static final String DOT_PUN_PRO_VAL = "." + PUN_PRO_VAL;
@@ -82,11 +81,12 @@ public class JpaConfig {
     cfg.metaDatas.putAll(fromCfgPums);
     Map<String, PersistenceUnitInfoMetaData> fromXmlPums = generateFromXml();
     if (!fromXmlPums.isEmpty()) {
-      shouldBeFalse(fromXmlPums.keySet().stream().map(cfg.metaDatas::containsKey)
-          .reduce(Boolean::logicalOr).orElse(Boolean.FALSE), "The persistence unit name dup!");
+      for (String pun : fromXmlPums.keySet()) {
+        shouldBeFalse(cfg.metaDatas.containsKey(pun), "The persistence unit name %s is dup!", pun);
+      }
     }
     cfg.metaDatas.putAll(fromXmlPums);
-    logger.info(() -> String.format("Find persistence unit metadata from config file %s and %s %s",
+    logger.info(() -> String.format("Find persistence unit metadatas from config file %s and %s %s",
         String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
         String.join(",", fromXmlPums.keySet())));
     return cfg;

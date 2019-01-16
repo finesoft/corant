@@ -35,6 +35,7 @@
 		<module>corant-suites-bundle</module>
 		<module>corant-suites-ddd</module>
 		<module>corant-suites-elastic</module>
+		<module>corant-suites-mongodb</module>
 	</modules>
 	<build>
 		<plugins>

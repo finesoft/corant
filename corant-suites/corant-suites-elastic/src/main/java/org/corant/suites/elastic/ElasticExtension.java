@@ -86,6 +86,8 @@ public class ElasticExtension implements Extension {
       tc.addTransportAddress(
           new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.valueOf(hostPort[1])));
     }
+    logger.info(() -> String.format("Built elastic transport client with cluster name is %s.",
+        clusterName));
     return tc;
   }
 }

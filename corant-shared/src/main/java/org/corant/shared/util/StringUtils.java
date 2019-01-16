@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
@@ -144,8 +142,7 @@ public class StringUtils {
   }
 
   /**
-   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] =
-   * {key="prefix",value=["1","2","3"]}
+   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
    *
    * @param iterable
    * @param prefix
@@ -385,7 +382,7 @@ public class StringUtils {
     if (splitor == null) {
       return new String[] {str};
     }
-    int i = 0, s = 0, g = (len >> 1) + 1, ai = 0;
+    int i = 0, s = 0, g = len > 16 ? 16 : (len >> 1) + 1, ai = 0;
     String[] array = new String[g];
     boolean match = false;
     while (i < len) {
@@ -431,7 +428,7 @@ public class StringUtils {
       char wholeChar = wholeSpreator.charAt(0);
       return split(str, c -> c.charValue() == wholeChar);
     }
-    int s = 0, e = 0, i = 0, g = (len >> 1) + 1;
+    int s = 0, e = 0, i = 0, g = len > 16 ? 16 : (len >> 1) + 1;
     String[] array = new String[g];
     while (e < len) {
       e = str.indexOf(wholeSpreator, s);
@@ -444,10 +441,10 @@ public class StringUtils {
         }
         s = e + slen;
       } else {
-        if (i == g) {
-          array = Arrays.copyOf(array, g += g);
+        if (s < len) {
+          array = Arrays.copyOf(array, i + 1);
+          array[i++] = str.substring(s);
         }
-        array[i++] = str.substring(s);
         e = len;
       }
     }

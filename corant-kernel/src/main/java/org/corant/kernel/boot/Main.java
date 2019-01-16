@@ -24,7 +24,7 @@ import org.corant.Corant;
 public class Main {
 
   public static void main(String... args) {
-    new Corant().start();
+    new Corant(args).start();
   }
 
 }

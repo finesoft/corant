@@ -13,6 +13,8 @@
  */
 package org.corant.kernel.event;
 
+import java.util.Arrays;
+
 /**
  * corant-kernel
  *
@@ -20,5 +22,23 @@ package org.corant.kernel.event;
  *
  */
 public class PostContainerStartedEvent implements CorantLifecycleEvent {
+
+  private final String[] args;
+
+  /**
+   * @param args
+   */
+  public PostContainerStartedEvent(String[] args) {
+    super();
+    this.args = Arrays.copyOf(args, args.length);
+  }
+
+  /**
+   *
+   * @return the args
+   */
+  public String[] getArgs() {
+    return Arrays.copyOf(args, args.length);
+  }
 
 }

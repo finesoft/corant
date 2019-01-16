@@ -21,6 +21,6 @@ package org.corant.kernel.boot;
  */
 public interface Runner {
 
-  void run() throws Exception;
+  void run(String... args) throws Exception;
 
 }

@@ -53,9 +53,8 @@ public class JarLauncher {
   public static final int JAREXT_LEN = JAREXT.length();
   private final Path workPath;
   private final List<Path> classpaths = new ArrayList<>();
-  private final boolean needCleanWorkDir;
 
-  private String[] args;
+  private String[] args = new String[0];
   private Manifest manifest;
 
   JarLauncher(String... args) {
@@ -63,7 +62,6 @@ public class JarLauncher {
     Arrays.stream(args).filter(arg -> arg.startsWith("+")).map(arg -> Paths.get(arg.substring(1)))
         .forEach(classpaths::add);
     workPath = Paths.get(System.getProperty("user.home")).resolve(WORK_DIR);
-    needCleanWorkDir = Arrays.stream(args).anyMatch(arg -> "!cwd".equalsIgnoreCase(arg));
   }
 
   public static void main(String... args) throws Exception {
@@ -85,7 +83,7 @@ public class JarLauncher {
   }
 
   void cleanWorkDir() {
-    if (needCleanWorkDir) {
+    if (Arrays.stream(args).anyMatch(arg -> "-cwd".equalsIgnoreCase(arg))) {
       log(true, "Clearing archives from work space %s ...", workPath);
       File file = workPath.toFile();
       if (file.exists()) {

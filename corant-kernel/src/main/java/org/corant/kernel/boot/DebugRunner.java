@@ -24,7 +24,7 @@ import org.corant.shared.util.LaunchUtils;
 public class DebugRunner implements Runner {
 
   @Override
-  public void run() throws Exception {
+  public void run(String... args) throws Exception {
     LaunchUtils.debugAs();
   }
 

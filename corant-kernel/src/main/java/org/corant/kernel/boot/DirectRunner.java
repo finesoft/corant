@@ -34,7 +34,7 @@ public class DirectRunner implements Runner {
   }
 
   @Override
-  public void run() throws Exception {
-    new Corant(configClass).start();
+  public void run(String... args) throws Exception {
+    new Corant(configClass, args).start();
   }
 }

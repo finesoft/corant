@@ -18,6 +18,7 @@ import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -56,24 +57,30 @@ public class Corant {
   private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private WeldContainer container;
+  private final String[] args;
 
   public Corant() {
-    this(null, null);
+    this(null, null, new String[0]);
   }
 
-  public Corant(Class<?> configClass) {
-    this(configClass, configClass != null ? configClass.getClassLoader() : null);
+  public Corant(Class<?> configClass, String... args) {
+    this(configClass, configClass != null ? configClass.getClassLoader() : null, args);
   }
 
-  public Corant(ClassLoader classLoader) {
-    this(null, classLoader);
+  public Corant(ClassLoader classLoader, String... args) {
+    this(null, classLoader, args);
   }
 
-  Corant(Class<?> configClass, ClassLoader classLoader) {
+  public Corant(String... args) {
+    this(null, null, args);
+  }
+
+  Corant(Class<?> configClass, ClassLoader classLoader, String... args) {
     this.configClass = configClass;
     if (classLoader != null) {
       this.classLoader = classLoader;
     }
+    this.args = args;
     INSTANCE = this;
   }
 
@@ -199,19 +206,21 @@ public class Corant {
 
   void doAfterContainerInitialized() {
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostContainerStartedEvent());
+    emitter.fire(new PostContainerStartedEvent(args));
   }
 
   void doAfterStarted(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleAfterStarted(this));
+        .sorted(CorantBootHandler::compareTo)
+        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostCorantReadyEvent());
+    emitter.fire(new PostCorantReadyEvent(args));
   }
 
   void doBeforeStart(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compareTo).forEach(h -> h.handleBeforeStart(classLoader));
+        .sorted(CorantBootHandler::compareTo)
+        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
   }
 
   private void log(Logger logger, String msgOrFmt, Object... args) {

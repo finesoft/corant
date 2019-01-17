@@ -62,6 +62,9 @@ public interface PathMatcher {
 
     @Override
     public boolean match(String path) {
+      if (compareds.isEmpty()) {
+        return false;
+      }
       return path != null && ignoreCase ? compareds.contains(path.toLowerCase(Locale.ROOT))
           : compareds.contains(path);
     }

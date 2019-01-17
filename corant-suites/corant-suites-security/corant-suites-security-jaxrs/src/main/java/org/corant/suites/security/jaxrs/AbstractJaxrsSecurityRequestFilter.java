@@ -16,9 +16,7 @@ package org.corant.suites.security.jaxrs;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -39,29 +37,44 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerRequestFilter {
 
   @Inject
-  @ConfigProperty(name = "security.jarxrs.secured-urls")
-  Optional<String> configSecuredUrls;
+  @ConfigProperty(name = "security.jarxrs.covered-urls")
+  Optional<String> coveredUrls;
 
-  protected Set<String> securedUrls = new HashSet<>();
-  protected Set<String> securedWcUrls = new HashSet<>();
+  @Inject
+  @ConfigProperty(name = "security.jarxrs.uncovered-urls")
+  Optional<String> uncoveredUrls;
 
-  protected final CompletePathMatcher completePathMatcher = new CompletePathMatcher(true);
-  protected final WildcardPathMatcher wildcardPathMatcher = new WildcardPathMatcher(true);
+  protected final CompletePathMatcher coveredCompletePathMatcher = new CompletePathMatcher(true);
+  protected final WildcardPathMatcher coveredWildcardPathMatcher = new WildcardPathMatcher(true);
+  protected final CompletePathMatcher uncoveredCompletePathMatcher = new CompletePathMatcher(true);
+  protected final WildcardPathMatcher uncoveredWildcardPathMatcher = new WildcardPathMatcher(true);
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    if (isSecuredUrl(resolvePath(requestContext))) {
+    if (isCoveredUrl(resolvePath(requestContext))) {
       doSecurityFilter(requestContext);
     }
   }
 
-  protected void addSecuredUrls(String... urls) {
-    for (String url : urls) {
-      if (isNotBlank(url)) {
-        if (WildcardMatcher.hasWildcard(url)) {
-          wildcardPathMatcher.addExpresses(url);
-        } else {
-          completePathMatcher.addCompareds(url);
+  protected void addUrls(boolean covered, String... urls) {
+    if (covered) {
+      for (String url : urls) {
+        if (isNotBlank(url)) {
+          if (WildcardMatcher.hasWildcard(url)) {
+            coveredWildcardPathMatcher.addExpresses(url);
+          } else {
+            coveredCompletePathMatcher.addCompareds(url);
+          }
+        }
+      }
+    } else {
+      for (String url : urls) {
+        if (isNotBlank(url)) {
+          if (WildcardMatcher.hasWildcard(url)) {
+            uncoveredWildcardPathMatcher.addExpresses(url);
+          } else {
+            uncoveredCompletePathMatcher.addCompareds(url);
+          }
         }
       }
     }
@@ -70,17 +83,25 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
   protected abstract void doSecurityFilter(ContainerRequestContext requestContext)
       throws IOException;
 
-  protected boolean isSecuredUrl(String url) {
+  protected boolean isCoveredUrl(String url) {
     if (WildcardMatcher.hasWildcard(url)) {
-      return wildcardPathMatcher.match(url);
+      if (uncoveredCompletePathMatcher.match(url)) {
+        return false;
+      }
+      return coveredWildcardPathMatcher.match(url);
     } else {
-      return completePathMatcher.match(url);
+      if (coveredCompletePathMatcher.match(url)) {
+        return false;
+      }
+      return coveredCompletePathMatcher.match(url);
     }
   }
 
-  protected void removeSecuredUrls(String... urls) {
-    wildcardPathMatcher.removeExpresses(urls);
-    completePathMatcher.removeCompareds(urls);
+  protected void removeUrls(String... urls) {
+    coveredWildcardPathMatcher.removeExpresses(urls);
+    coveredCompletePathMatcher.removeCompareds(urls);
+    uncoveredWildcardPathMatcher.removeExpresses(urls);
+    uncoveredCompletePathMatcher.removeCompareds(urls);
   }
 
   protected String resolvePath(ContainerRequestContext requestContext) {
@@ -89,6 +110,7 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
 
   @PostConstruct
   void onPostConstruct() {
-    configSecuredUrls.ifPresent(u -> addSecuredUrls(split(u, ";")));
+    coveredUrls.ifPresent(u -> addUrls(true, split(u, ";")));
+    uncoveredUrls.ifPresent(u -> addUrls(false, split(u, ";")));
   }
 }

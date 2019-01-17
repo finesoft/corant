@@ -49,25 +49,21 @@ public class KeycloakConfigResolverImpl implements KeycloakConfigResolver {
     return deployment;
   }
 
-  @PostConstruct
-  void init() {
-    URL kcf;
-    try {
-      kcf = ClassPaths.from(deploymentFilePath).getResources().map(ResourceInfo::getUrl).findFirst()
-          .orElse(null);
-      if (kcf != null) {
-        try (InputStream is = kcf.openStream()) {
-          deployment = KeycloakDeploymentBuilder.build(is);
-        } catch (IOException e) {
-          throw new CorantRuntimeException(e);
-        }
-      }
-    } catch (IOException e1) {
-    }
-  }
-
   boolean isConfigured() {
     return deployment != null && deployment.isConfigured();
   }
 
+  @PostConstruct
+  void onPostConstruct() {
+    URL kcf;
+    kcf = ClassPaths.anyway(deploymentFilePath).getResources().map(ResourceInfo::getUrl).findFirst()
+        .orElse(null);
+    if (kcf != null) {
+      try (InputStream is = kcf.openStream()) {
+        deployment = KeycloakDeploymentBuilder.build(is);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
 }

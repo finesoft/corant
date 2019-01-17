@@ -15,6 +15,7 @@ package org.corant.suites.elastic;
 
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
 
@@ -25,7 +26,13 @@ import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
  *
  */
 @ApplicationScoped
-public class DefaultElasticIndicesService implements ElasticIndicesService {
+public abstract class DefaultElasticIndicesService implements ElasticIndicesService {
+
+  @Inject
+  ElasticExtension extension;
+
+  @Inject
+  ElasticTransportClientService transportClientService;
 
   @Override
   public boolean checkIndicesExist(String... indexName) {

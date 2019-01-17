@@ -17,7 +17,8 @@ import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -44,7 +45,15 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 public class ElasticExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-  protected final Map<String, ElasticConfig> configs = new HashMap<>();
+  protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
+
+  /**
+   *
+   * @return the configs
+   */
+  public Map<String, ElasticConfig> getConfigs() {
+    return Collections.unmodifiableMap(configs);
+  }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     configs.clear();

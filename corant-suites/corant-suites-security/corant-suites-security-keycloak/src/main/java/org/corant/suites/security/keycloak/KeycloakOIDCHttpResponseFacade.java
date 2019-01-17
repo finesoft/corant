@@ -24,7 +24,7 @@ import org.keycloak.adapters.OIDCHttpFacade;
  * @author bingo 下午4:51:37
  *
  */
-public class KeyCloakOIDCHttpResponseFacade implements OIDCHttpFacade.Response {
+public class KeycloakOIDCHttpResponseFacade implements OIDCHttpFacade.Response {
 
   final ContainerRequestContext requestContext;
   final ResponseBuilder responseBuilder = javax.ws.rs.core.Response.status(204);
@@ -33,7 +33,7 @@ public class KeyCloakOIDCHttpResponseFacade implements OIDCHttpFacade.Response {
   /**
    * @param requestContext
    */
-  public KeyCloakOIDCHttpResponseFacade(ContainerRequestContext requestContext) {
+  public KeycloakOIDCHttpResponseFacade(ContainerRequestContext requestContext) {
     super();
     this.requestContext = requestContext;
   }

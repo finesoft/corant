@@ -29,10 +29,13 @@ public class JaxrsSecurityContext implements SecurityContext {
   private final Principal principal;
   private final Set<String> roles = new HashSet<>();
   private final boolean secure;
+  private final String principalName;
 
-  public JaxrsSecurityContext(Principal principal, Set<String> roles, boolean secure) {
+  public JaxrsSecurityContext(Principal principal, String principalName, Set<String> roles,
+      boolean secure) {
     super();
     this.principal = principal;
+    this.principalName = principalName;
     if (roles != null) {
       this.roles.addAll(roles);
     }
@@ -49,6 +52,10 @@ public class JaxrsSecurityContext implements SecurityContext {
     return principal;
   }
 
+  public String getUserPrincipalName() {
+    return principalName;
+  }
+
   @Override
   public boolean isSecure() {
     return secure;
@@ -58,4 +65,5 @@ public class JaxrsSecurityContext implements SecurityContext {
   public boolean isUserInRole(String role) {
     return roles.contains(role);
   }
+
 }

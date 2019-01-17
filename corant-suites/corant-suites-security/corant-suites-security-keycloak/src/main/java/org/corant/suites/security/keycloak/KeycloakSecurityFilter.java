@@ -54,13 +54,13 @@ import org.keycloak.adapters.spi.UserSessionManagement;
 @PreMatching
 @Priority(Priorities.AUTHENTICATION)
 @Provider
-public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
+public class KeycloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
 
   @Inject
   Logger logger;
 
   @Inject
-  MyKeycloakConfigResolver kcConfigResolver;
+  KeycloakConfigResolverImpl kcConfigResolver;
 
   @Inject
   UserSessionManagement kcUserSessionManagement;
@@ -75,7 +75,7 @@ public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
       return;
     }
     SecurityContext sc = crc.getSecurityContext();
-    KeyCloakOIDCHttpFacade facade = new KeyCloakOIDCHttpFacade(crc, sc);
+    KeycloakOIDCHttpFacade facade = new KeycloakOIDCHttpFacade(crc, sc);
     if (handlePreauth(facade)) {
       return;
     }
@@ -97,43 +97,41 @@ public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
     }
   }
 
-  private void bearerAuthentication(KeyCloakOIDCHttpFacade facade, ContainerRequestContext request,
-      KeycloakDeployment resolvedDeployment) {
-    BearerTokenRequestAuthenticator authenticator =
-        new BearerTokenRequestAuthenticator(resolvedDeployment);
+  private void bearerAuthentication(KeycloakOIDCHttpFacade facade, ContainerRequestContext request,
+      KeycloakDeployment deployment) {
+
+    BearerTokenRequestAuthenticator authenticator = new BearerTokenRequestAuthenticator(deployment);
+    // Get token from header 'Authorization' that has 'Bearer'
     AuthOutcome outcome = authenticator.authenticate(facade);
 
+    // If token not found we need to try use query parameter
     if (outcome == AuthOutcome.NOT_ATTEMPTED) {
-      authenticator = new QueryParamterTokenRequestAuthenticator(resolvedDeployment);
+      authenticator = new QueryParamterTokenRequestAuthenticator(deployment);
       outcome = authenticator.authenticate(facade);
     }
-
-    if (outcome == AuthOutcome.NOT_ATTEMPTED && resolvedDeployment.isEnableBasicAuth()) {
-      authenticator = new BasicAuthRequestAuthenticator(resolvedDeployment);
+    // The token was not found from header and query parameter, and deployment is enable basic auth.
+    if (outcome == AuthOutcome.NOT_ATTEMPTED && deployment.isEnableBasicAuth()) {
+      authenticator = new BasicAuthRequestAuthenticator(deployment);
       outcome = authenticator.authenticate(facade);
     }
-
+    // We got the result, may be failed or token not found in header(Bearer,Basic)/query parameter
     if (outcome == AuthOutcome.FAILED || outcome == AuthOutcome.NOT_ATTEMPTED) {
       AuthChallenge challenge = authenticator.getChallenge();
-      boolean challengeSent = challenge.challenge(facade);
-      if (!challengeSent) {
+      if (!challenge.challenge(facade)) {
         facade.getResponse().setStatus(Response.Status.UNAUTHORIZED.getStatusCode());
       }
       if (!facade.isResponseFinished()) {
         facade.getResponse().end();
       }
       return;
-    } else {
-      if (verifySslFailed(facade, resolvedDeployment)) {
-        return;
-      }
+    } else if (verifySslFailed(facade, deployment)) {
+      return;
     }
-
-    propagateSecurityContext(facade, request, resolvedDeployment, authenticator);
-    handleAuthActions(facade, resolvedDeployment);
+    propagateSecurityContext(facade, request, deployment, authenticator);
+    handleAuthActions(facade, deployment);
   }
 
-  private void handleAuthActions(KeyCloakOIDCHttpFacade facade, KeycloakDeployment deployment) {
+  private void handleAuthActions(KeycloakOIDCHttpFacade facade, KeycloakDeployment deployment) {
     AuthenticatedActionsHandler authActionsHandler =
         new AuthenticatedActionsHandler(deployment, facade);
     if (authActionsHandler.handledRequest()) {
@@ -143,7 +141,7 @@ public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
     }
   }
 
-  private boolean handlePreauth(KeyCloakOIDCHttpFacade facade) {
+  private boolean handlePreauth(KeycloakOIDCHttpFacade facade) {
     PreAuthActionsHandler handler =
         new PreAuthActionsHandler(kcUserSessionManagement, kcDeploymentContext, facade);
     if (handler.handleRequest()) {
@@ -156,7 +154,8 @@ public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
     return false;
   }
 
-  private void propagateSecurityContext(KeyCloakOIDCHttpFacade facade,
+  // FIXME inject userId orgId orgName to security context.
+  private void propagateSecurityContext(KeycloakOIDCHttpFacade facade,
       ContainerRequestContext request, KeycloakDeployment resolvedDeployment,
       BearerTokenRequestAuthenticator bearer) {
     final RefreshableKeycloakSecurityContext skSession = new RefreshableKeycloakSecurityContext(
@@ -167,15 +166,15 @@ public class KeyCloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
     final KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal =
         new KeycloakPrincipal<>(principalName, skSession);
     final Set<String> roles = AdapterUtils.getRolesFromSecurityContext(skSession);
-    request.setSecurityContext(
-        new JaxrsSecurityContext(principal, roles, request.getSecurityContext().isSecure()));
+    request.setSecurityContext(new JaxrsSecurityContext(principal, principalName, roles,
+        request.getSecurityContext().isSecure()));
   }
 
-  private boolean verifySslFailed(KeyCloakOIDCHttpFacade facade, KeycloakDeployment deployment) {
+  private boolean verifySslFailed(KeycloakOIDCHttpFacade facade, KeycloakDeployment deployment) {
     if (!facade.getRequest().isSecure()
         && deployment.getSslRequired().isRequired(facade.getRequest().getRemoteAddr())) {
       logger.warning(() -> "SSL is required to authenticate, but request is not secured");
-      facade.getResponse().sendError(403, "SSL required!");
+      facade.getResponse().sendError(Response.Status.FORBIDDEN.getStatusCode(), "SSL required!");
       return true;
     }
     return false;

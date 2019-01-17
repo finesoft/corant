@@ -22,7 +22,7 @@ import org.keycloak.adapters.spi.UserSessionManagement;
  * @author bingo 下午5:10:06
  *
  */
-public class KeyCloakUserSessionManagement implements UserSessionManagement {
+public class KeycloakUserSessionManagement implements UserSessionManagement {
 
   @Override
   public void logoutAll() {

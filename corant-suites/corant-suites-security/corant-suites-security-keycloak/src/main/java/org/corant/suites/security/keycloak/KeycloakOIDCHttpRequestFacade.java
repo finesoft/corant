@@ -31,7 +31,7 @@ import org.keycloak.common.util.HostUtils;
  * @author bingo 下午4:51:37
  *
  */
-public class KeyCloakOIDCHttpRequestFacade implements OIDCHttpFacade.Request {
+public class KeycloakOIDCHttpRequestFacade implements OIDCHttpFacade.Request {
 
   final ContainerRequestContext requestContext;
   final boolean secure;
@@ -40,7 +40,7 @@ public class KeyCloakOIDCHttpRequestFacade implements OIDCHttpFacade.Request {
    * @param requestContext
    * @param secure
    */
-  public KeyCloakOIDCHttpRequestFacade(ContainerRequestContext requestContext, boolean secure) {
+  public KeycloakOIDCHttpRequestFacade(ContainerRequestContext requestContext, boolean secure) {
     super();
     this.requestContext = requestContext;
     this.secure = secure;

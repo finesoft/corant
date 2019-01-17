@@ -35,7 +35,7 @@ import org.keycloak.adapters.spi.HttpFacade.Request;
  *
  */
 @ApplicationScoped
-public class MyKeycloakConfigResolver implements KeycloakConfigResolver {
+public class KeycloakConfigResolverImpl implements KeycloakConfigResolver {
 
   KeycloakDeployment deployment;
 

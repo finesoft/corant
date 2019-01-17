@@ -26,22 +26,22 @@ import org.keycloak.adapters.spi.HttpFacade;
  * @author bingo 下午5:12:50
  *
  */
-public class KeyCloakOIDCHttpFacade implements OIDCHttpFacade {
+public class KeycloakOIDCHttpFacade implements OIDCHttpFacade {
 
   protected final ContainerRequestContext requestContext;
   protected final SecurityContext securityContext;
-  protected final KeyCloakOIDCHttpRequestFacade requestFacade;
-  protected final KeyCloakOIDCHttpResponseFacade responseFacade;
+  protected final KeycloakOIDCHttpRequestFacade requestFacade;
+  protected final KeycloakOIDCHttpResponseFacade responseFacade;
   protected KeycloakSecurityContext keycloakSecurityContext;
   protected boolean responseFinished;
 
-  public KeyCloakOIDCHttpFacade(ContainerRequestContext containerRequestContext,
+  public KeycloakOIDCHttpFacade(ContainerRequestContext containerRequestContext,
       SecurityContext securityContext) {
     requestContext = containerRequestContext;
     this.securityContext = securityContext;
     requestFacade =
-        new KeyCloakOIDCHttpRequestFacade(containerRequestContext, securityContext.isSecure());
-    responseFacade = new KeyCloakOIDCHttpResponseFacade(containerRequestContext);
+        new KeycloakOIDCHttpRequestFacade(containerRequestContext, securityContext.isSecure());
+    responseFacade = new KeycloakOIDCHttpResponseFacade(containerRequestContext);
   }
 
   @Override

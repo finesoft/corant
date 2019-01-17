@@ -15,10 +15,14 @@ package org.corant.suites.elastic;
 
 /**
  * corant-suites-elastic
- * 
- * @author bingo 下午6:38:41
+ *
+ * @author bingo 下午3:22:56
  *
  */
-public class DefaultElasticQueryService implements ElasticQueryService {
+public interface Elastic6Constants {
+
+  String TYP_NME = "_doc";
+
+  int DFLT_SELECT_SIZE = 64;
 
 }

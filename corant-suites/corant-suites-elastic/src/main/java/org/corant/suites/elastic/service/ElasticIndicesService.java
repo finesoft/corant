@@ -11,14 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic;
+package org.corant.suites.elastic.service;
+
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import java.util.Map;
+import org.corant.suites.elastic.metadata.ElasticMapping;
 
 /**
  * corant-suites-elastic
- * 
- * @author bingo 下午4:11:22
+ *
+ * @author bingo 下午4:08:34
  *
  */
-public interface ElasticQueryService {
+public interface ElasticIndicesService {
 
+  default boolean create(ElasticMapping<?> mapping) {
+    shouldNotNull(mapping);
+    return create(mapping.getIndex().getName(), mapping.getIndex().getSetting().getSetting(),
+        mapping.getSchema());
+  }
+
+  boolean create(String indexName, Map<String, Object> setting, Map<String, Object> schema);
+
+  boolean delete(String indexName);
+
+  boolean isExist(String... indexName);
 }

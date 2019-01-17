@@ -11,29 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic;
+package org.corant.suites.security.keycloak;
 
-import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticMapping;
-import org.corant.suites.elastic.metadata.resolver.ElasticMappingResolver;
+import java.util.List;
+import org.keycloak.adapters.spi.UserSessionManagement;
 
 /**
- * corant-suites-elastic
+ * corant-suites-security-keycloak
  *
- * @author bingo 下午4:08:34
+ * @author bingo 下午5:10:06
  *
  */
-public interface ElasticIndicesService {
+public class KeyCloakUserSessionManagement implements UserSessionManagement {
 
-  boolean checkIndicesExist(String... indexName);
+  @Override
+  public void logoutAll() {
 
-  boolean createIndex(String indexName, Map<String, Object> setting,
-      Map<String, Map<String, Object>> schemas);
+  }
 
-  boolean deleteIndex(String indexName);
+  @Override
+  public void logoutHttpSessions(List<String> ids) {
 
-  ElasticMapping getMapping(Class<?> cls);
-
-  ElasticMappingResolver getMappingResolver();
+  }
 
 }

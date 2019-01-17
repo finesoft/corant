@@ -32,7 +32,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -41,7 +40,6 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -50,6 +48,7 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import org.corant.shared.util.StringUtils.WildcardMatcher;
 
 /**
  * corant-shared
@@ -126,7 +125,7 @@ public class ClassPaths {
    * @throws IOException from
    */
   public static ClassPath from(ClassLoader classLoader, String path) throws IOException {
-    Scanner scanner = PathFilter.buildScanner(defaultString(path), true);
+    Scanner scanner = PathFilter.buildScanner(defaultString(path), false);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
         defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());
@@ -307,35 +306,27 @@ public class ClassPaths {
    * @author bingo 下午8:32:50
    *
    */
-  public static final class PathFilter implements Predicate<String> {
-
-    private final boolean sensitive;
-    private final String[] pathTokens;
+  public static final class PathFilter extends WildcardMatcher {
 
     /**
-     * @param sensitive
+     * @param ignoreCase
      * @param pathExpress
      */
-    public PathFilter(boolean sensitive, String pathExpress) {
-      super();
-      this.sensitive = sensitive;
-      pathTokens = splitOnTokens(pathExpress);
+    public PathFilter(boolean ignoreCase, String pathExpress) {
+      super(ignoreCase, pathExpress);
     }
 
-    public static Scanner buildScanner(String pathExpress, boolean sensitive) {
+    public static Scanner buildScanner(String pathExpress, boolean ignoreCase) {
       if (hasWildcard(pathExpress)) {
-        PathFilter pf = new PathFilter(sensitive, pathExpress);
+        PathFilter pf = new PathFilter(ignoreCase, pathExpress);
         return new Scanner(pf.getRoot(), pf);
       } else {
         return new Scanner(pathExpress);
       }
     }
 
-    public static boolean hasWildcard(String path) {
-      return path.indexOf('?') != -1 || path.indexOf('*') != -1;
-    }
-
     public String getRoot() {
+      String[] pathTokens = getTokens();
       if (pathTokens.length == 1) {
         return pathTokens[0];
       }
@@ -351,113 +342,6 @@ public class ClassPaths {
         }
       }
       return StringUtils.EMPTY;
-    }
-
-    @Override
-    public boolean test(final String path) {
-      boolean anyChars = false;
-      int pathIdx = 0;
-      int pathTokenIdx = 0;
-      final Stack<int[]> backtrack = new Stack<>();
-      do {
-        if (backtrack.size() > 0) {
-          final int[] array = backtrack.pop();
-          pathTokenIdx = array[0];
-          pathIdx = array[1];
-          anyChars = true;
-        }
-        while (pathTokenIdx < pathTokens.length) {
-          if (pathTokens[pathTokenIdx].equals("?")) {
-            pathIdx++;
-            if (pathIdx > path.length()) {
-              break;
-            }
-            anyChars = false;
-          } else if (pathTokens[pathTokenIdx].equals("*")) {
-            anyChars = true;
-            if (pathTokenIdx == pathTokens.length - 1) {
-              pathIdx = path.length();
-            }
-          } else {
-            if (anyChars) {
-              pathIdx = checkIndexOf(path, pathIdx, pathTokens[pathTokenIdx]);
-              if (pathIdx == -1) {
-                break;
-              }
-              final int repeat = checkIndexOf(path, pathIdx + 1, pathTokens[pathTokenIdx]);
-              if (repeat >= 0) {
-                backtrack.push(new int[] {pathTokenIdx, repeat});
-              }
-            } else {
-              if (!checkRegionMatches(path, pathIdx, pathTokens[pathTokenIdx])) {
-                break;
-              }
-            }
-            pathIdx += pathTokens[pathTokenIdx].length();
-            anyChars = false;
-          }
-          pathTokenIdx++;
-        }
-        if (pathTokenIdx == pathTokens.length && pathIdx == path.length()) {
-          return true;
-        }
-      } while (backtrack.size() > 0);
-
-      return false;
-    }
-
-    int checkIndexOf(final String str, final int strStartIndex, final String search) {
-      final int endIndex = str.length() - search.length();
-      if (endIndex >= strStartIndex) {
-        for (int i = strStartIndex; i <= endIndex; i++) {
-          if (checkRegionMatches(str, i, search)) {
-            return i;
-          }
-        }
-      }
-      return -1;
-    }
-
-    boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
-      return str.regionMatches(!sensitive, strStartIndex, search, 0, search.length());
-    }
-
-    String[] getPathTokens() {
-      return pathTokens;
-    }
-
-    boolean isSensitive() {
-      return sensitive;
-    }
-
-    String[] splitOnTokens(final String pathExpress) {
-      if (!hasWildcard(pathExpress)) {
-        return new String[] {pathExpress};
-      }
-      final char[] array = pathExpress.toCharArray();
-      final ArrayList<String> list = new ArrayList<>();
-      final StringBuilder buffer = new StringBuilder();
-      char prevChar = 0;
-      for (final char ch : array) {
-        if (ch == '?' || ch == '*') {
-          if (buffer.length() != 0) {
-            list.add(buffer.toString());
-            buffer.setLength(0);
-          }
-          if (ch == '?') {
-            list.add("?");
-          } else if (prevChar != '*') {
-            list.add("*");
-          }
-        } else {
-          buffer.append(ch);
-        }
-        prevChar = ch;
-      }
-      if (buffer.length() != 0) {
-        list.add(buffer.toString());
-      }
-      return list.toArray(new String[list.size()]);
     }
   }
 

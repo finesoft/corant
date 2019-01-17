@@ -11,14 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic;
+package org.corant.suites.elastic.model;
+
+import java.io.Serializable;
 
 /**
  * corant-suites-elastic
- * 
- * @author bingo 下午6:37:55
+ *
+ * @author bingo 下午2:16:59
  *
  */
-public class DefaultElasticDocumentService implements ElasticDocumentService {
+public interface ElasticDocument extends Serializable {
 
+  String getEsId();
+
+  default String getEsParentId() {
+    return null;
+  }
 }

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -490,5 +491,186 @@ public class StringUtils {
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();
+  }
+
+  /**
+   * @param text
+   * @param ignoreCase
+   * @param wildcardExpress
+   * @return wildCardMatch
+   */
+  public static boolean wildCardMatch(final String text, final boolean ignoreCase,
+      final String wildcardExpress) {
+    if (text == null || isEmpty(wildcardExpress)) {
+      return false;
+    } else {
+      return new WildcardMatcher(ignoreCase, wildcardExpress).test(text);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * Use wildcards for filtering, algorithm from apache.org.
+   *
+   * @author bingo 下午8:32:50
+   *
+   */
+  public static class WildcardMatcher implements Predicate<String> {
+
+    private final boolean ignoreCase;
+    private final String[] tokens;
+
+    /**
+     * @param ignoreCase
+     * @param wildcardExpress
+     */
+    public WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
+      super();
+      this.ignoreCase = ignoreCase;
+      tokens = splitOnTokens(wildcardExpress);
+    }
+
+    public static boolean hasWildcard(String text) {
+      return text.indexOf('?') != -1 || text.indexOf('*') != -1;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      WildcardMatcher other = (WildcardMatcher) obj;
+      if (ignoreCase != other.ignoreCase) {
+        return false;
+      }
+      if (!Arrays.equals(tokens, other.tokens)) {
+        return false;
+      }
+      return true;
+    }
+
+    public String[] getTokens() {
+      return Arrays.copyOf(tokens, tokens.length);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (ignoreCase ? 1231 : 1237);
+      result = prime * result + Arrays.hashCode(tokens);
+      return result;
+    }
+
+    public boolean isIgnoreCase() {
+      return ignoreCase;
+    }
+
+    @Override
+    public boolean test(final String text) {
+      boolean anyChars = false;
+      int textIdx = 0;
+      int tokenIdx = 0;
+      final Stack<int[]> backtrack = new Stack<>();
+      do {
+        if (backtrack.size() > 0) {
+          final int[] array = backtrack.pop();
+          tokenIdx = array[0];
+          textIdx = array[1];
+          anyChars = true;
+        }
+        while (tokenIdx < tokens.length) {
+          if (tokens[tokenIdx].equals("?")) {
+            textIdx++;
+            if (textIdx > text.length()) {
+              break;
+            }
+            anyChars = false;
+          } else if (tokens[tokenIdx].equals("*")) {
+            anyChars = true;
+            if (tokenIdx == tokens.length - 1) {
+              textIdx = text.length();
+            }
+          } else {
+            if (anyChars) {
+              textIdx = checkIndexOf(text, textIdx, tokens[tokenIdx]);
+              if (textIdx == -1) {
+                break;
+              }
+              final int repeat = checkIndexOf(text, textIdx + 1, tokens[tokenIdx]);
+              if (repeat >= 0) {
+                backtrack.push(new int[] {tokenIdx, repeat});
+              }
+            } else {
+              if (!checkRegionMatches(text, textIdx, tokens[tokenIdx])) {
+                break;
+              }
+            }
+            textIdx += tokens[tokenIdx].length();
+            anyChars = false;
+          }
+          tokenIdx++;
+        }
+        if (tokenIdx == tokens.length && textIdx == text.length()) {
+          return true;
+        }
+      } while (backtrack.size() > 0);
+
+      return false;
+    }
+
+    int checkIndexOf(final String str, final int strStartIndex, final String search) {
+      final int endIndex = str.length() - search.length();
+      if (endIndex >= strStartIndex) {
+        for (int i = strStartIndex; i <= endIndex; i++) {
+          if (checkRegionMatches(str, i, search)) {
+            return i;
+          }
+        }
+      }
+      return -1;
+    }
+
+    boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+      return str.regionMatches(ignoreCase, strStartIndex, search, 0, search.length());
+    }
+
+    String[] splitOnTokens(final String wildcardExpress) {
+      if (!hasWildcard(wildcardExpress)) {
+        return new String[] {wildcardExpress};
+      }
+      final char[] array = wildcardExpress.toCharArray();
+      final ArrayList<String> list = new ArrayList<>();
+      final StringBuilder buffer = new StringBuilder();
+      char prevChar = 0;
+      for (final char ch : array) {
+        if (ch == '?' || ch == '*') {
+          if (buffer.length() != 0) {
+            list.add(buffer.toString());
+            buffer.setLength(0);
+          }
+          if (ch == '?') {
+            list.add("?");
+          } else if (prevChar != '*') {
+            list.add("*");
+          }
+        } else {
+          buffer.append(ch);
+        }
+        prevChar = ch;
+      }
+      if (buffer.length() != 0) {
+        list.add(buffer.toString());
+      }
+      return list.toArray(new String[list.size()]);
+    }
+
   }
 }

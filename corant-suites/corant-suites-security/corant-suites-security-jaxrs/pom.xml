@@ -7,7 +7,8 @@
 		<artifactId>corant-suites-security</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-suites-security-keycloak</artifactId>
+	<artifactId>corant-suites-security-jaxrs</artifactId>
+
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
@@ -23,7 +24,7 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-boms</artifactId>
-				<version>${project.version}</version>
+				<version>0.0.1-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -35,38 +36,15 @@
 			<artifactId>corant-kernel</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-security-jaxrs</artifactId>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-core</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-adapter-spi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-adapter-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-authz-client</artifactId>
-		</dependency>
-		<!-- Test -->
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-devops-test-unit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Standard JEE -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
@@ -75,11 +53,6 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>javax.jms-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

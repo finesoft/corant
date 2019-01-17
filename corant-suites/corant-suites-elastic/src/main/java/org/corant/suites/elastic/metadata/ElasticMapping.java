@@ -23,12 +23,12 @@ import org.elasticsearch.index.VersionType;
  * @author bingo 下午4:12:48
  *
  */
-public class ElasticMapping {
+public class ElasticMapping<T> {
 
   public static final String VERSION_SEPARATOR = "_";
 
   private final ElasticIndexing index;
-  private final Class<?> documentClass;
+  private final Class<T> documentClass;
   private final Map<String, Object> schema = new LinkedHashMap<>();
   private final boolean versioned;
   private final String versionPropertyName;
@@ -44,7 +44,7 @@ public class ElasticMapping {
    * @param versionPropertyName
    * @param versionType
    */
-  public ElasticMapping(ElasticIndexing index, Class<?> documentClass, Map<String, Object> schema,
+  public ElasticMapping(ElasticIndexing index, Class<T> documentClass, Map<String, Object> schema,
       ElasticRelation relation, boolean versioned, String versionPropertyName,
       VersionType versionType) {
     super();
@@ -59,6 +59,7 @@ public class ElasticMapping {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -86,6 +87,10 @@ public class ElasticMapping {
       return false;
     }
     return true;
+  }
+
+  public T fromMap(Map<String, Object> record) {
+    return null;
   }
 
   /**
@@ -151,6 +156,10 @@ public class ElasticMapping {
    */
   public boolean isVersioned() {
     return versioned;
+  }
+
+  public Map<String, Object> toMap(Object obj) {
+    return null;
   }
 
 }

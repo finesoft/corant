@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic;
+package org.corant.suites.elastic.service;
 
 /**
  * corant-suites-elastic
  * 
- * @author bingo 下午6:38:14
+ * @author bingo 下午4:11:22
  *
  */
-public class DefaultElasticCatService implements ElasticCatService {
+public interface ElasticQueryService {
 
 }

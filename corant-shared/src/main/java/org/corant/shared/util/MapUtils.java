@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
@@ -96,7 +97,6 @@ public class MapUtils {
     stringKeyMap.forEach((k, v) -> stringMap.put(k, asString(v, null)));
     return stringMap;
   }
-
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, ConversionUtils::toBigDecimal, null);
@@ -223,7 +223,7 @@ public class MapUtils {
 
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor, final T nvt) {
-    return map != null ? extractor.apply(map.get(key)) : nvt;
+    return map != null ? defaultObject(extractor.apply(map.get(key)), nvt) : nvt;
   }
 
   public static <T> List<T> getMapObjectList(final Map<?, ?> map, final Object key,

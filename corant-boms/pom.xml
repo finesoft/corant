@@ -663,6 +663,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-security-jaxrs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-keycloak</artifactId>
 				<version>${project.version}</version>
 			</dependency>

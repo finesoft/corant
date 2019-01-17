@@ -36,7 +36,7 @@ import org.corant.suites.elastic.metadata.ElasticMapping;
 public class JpaElasticMappingResolver extends DefaultElasticMappingResolver {
 
   @Override
-  public ElasticMapping resolve(Class<?> documentClass) {
+  public <T> ElasticMapping<T> resolve(Class<T> documentClass) {
     return null;
   }
 

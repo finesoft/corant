@@ -11,14 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic;
-
 /**
  * corant-suites-elastic
  * 
- * @author bingo 下午4:11:33
+ * @author bingo 下午4:42:39
  *
  */
-public interface ElasticCatService {
-
-}
+package org.corant.suites.elastic.model;

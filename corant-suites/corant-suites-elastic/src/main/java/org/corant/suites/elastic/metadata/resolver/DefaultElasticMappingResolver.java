@@ -17,6 +17,7 @@ import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genFieldMapping;
@@ -30,9 +31,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.ElasticRelation;
@@ -76,8 +79,9 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
   @Inject
   protected Logger logger;
 
-  @Override
-  public ElasticMapping resolve(Class<?> documentClass) {
+  protected Map<Class<?>, ElasticMapping<?>> resolvedMappings = new ConcurrentHashMap<>();
+
+  public <T> ElasticMapping<T> doResolve(Class<T> documentClass) {
     EsDocument document = findAnnotation(shouldNotNull(documentClass), EsDocument.class, false);
     ElasticIndexing indexing = ElasticIndexing.of(null, document, version);
     String versionPropertyName = document.versionPropertyName();
@@ -89,8 +93,13 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       relation = new ElasticRelation(documentClass, relAnn);
     }
 
-    return new ElasticMapping(indexing, documentClass, resolveSchema(documentClass, relation),
+    return new ElasticMapping<>(indexing, documentClass, resolveSchema(documentClass, relation),
         relation, versioned, versionPropertyName, versionType);
+  }
+
+  @Override
+  public <T> ElasticMapping<T> resolve(Class<T> documentClass) {
+    return forceCast(resolvedMappings.computeIfAbsent(documentClass, this::doResolve));
   }
 
   public Map<String, Object> resolveSchema(Class<?> documentClass, ElasticRelation relation) {
@@ -101,7 +110,7 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
       fieldMap.putAll(relation.genSchema());
     }
     bodyMap.put("properties", fieldMap);
-    return asMap("_doc", bodyMap);
+    return asMap(Elastic6Constants.TYP_NME, bodyMap);
   }
 
   protected void handleCollectionField(Class<?> docCls, Field f, Map<String, Object> map,

@@ -25,8 +25,12 @@ import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.sql.Date;
+import java.time.temporal.Temporal;
+import java.util.Currency;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -336,7 +340,10 @@ public class ResolverUtils {
   }
 
   public static boolean isSimpleType(Class<?> ft) {
-    return isPrimitiveOrWrapper(ft) || isPrimitiveArray(ft) || isPrimitiveWrapperArray(ft);
+    return isPrimitiveOrWrapper(ft) || isPrimitiveArray(ft) || isPrimitiveWrapperArray(ft)
+        || Date.class.isAssignableFrom(ft) || String.class.isAssignableFrom(ft)
+        || Temporal.class.isAssignableFrom(ft) || Locale.class.isAssignableFrom(ft)
+        || Currency.class.isAssignableFrom(ft) || Number.class.isAssignableFrom(ft);
   }
 
 }

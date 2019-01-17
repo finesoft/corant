@@ -11,20 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.resolver;
-
-import org.corant.suites.elastic.metadata.ElasticMapping;
+package org.corant.suites.elastic.service;
 
 /**
  * corant-suites-elastic
- *
- * @author bingo 下午4:20:32
+ * 
+ * @author bingo 下午6:38:41
  *
  */
-public interface ElasticMappingResolver {
-
-  String DATE_FMT = "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz";
-
-  <T> ElasticMapping<T> resolve(Class<T> documentClass);
+public class DefaultElasticQueryService implements ElasticQueryService {
 
 }

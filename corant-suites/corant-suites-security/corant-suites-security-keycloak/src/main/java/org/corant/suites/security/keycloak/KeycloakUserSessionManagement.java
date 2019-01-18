@@ -14,6 +14,7 @@
 package org.corant.suites.security.keycloak;
 
 import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
 import org.keycloak.adapters.spi.UserSessionManagement;
 
 /**
@@ -22,6 +23,7 @@ import org.keycloak.adapters.spi.UserSessionManagement;
  * @author bingo 下午5:10:06
  *
  */
+@ApplicationScoped
 public class KeycloakUserSessionManagement implements UserSessionManagement {
 
   @Override

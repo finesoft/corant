@@ -21,7 +21,6 @@ import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
-import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -32,8 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.corant.shared.util.TypeUtils;
 import org.corant.suites.elastic.metadata.annotation.EsAlias;
 import org.corant.suites.elastic.metadata.annotation.EsArray;
@@ -53,7 +50,6 @@ import org.corant.suites.elastic.metadata.annotation.EsNumeric.EsNumericType;
 import org.corant.suites.elastic.metadata.annotation.EsPercolator;
 import org.corant.suites.elastic.metadata.annotation.EsProperty;
 import org.corant.suites.elastic.metadata.annotation.EsRange;
-import org.corant.suites.elastic.metadata.annotation.EsRelation;
 import org.corant.suites.elastic.metadata.annotation.EsText;
 import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
 
@@ -315,13 +311,13 @@ public class ResolverUtils {
     map.put("store", ann.store());
     return map;
   }
-
-  public static Map<String, Object> genRelation(Class<?> parentClass, EsRelation rel) {
-    String parent = parentClass.getSimpleName();
-    Set<String> children =
-        asStream(rel.children()).map(Class::getSimpleName).collect(Collectors.toSet());
-    return asMap(rel.fieldName(), asMap(parent, children));
-  }
+  // TODO FIXME
+  // public static Map<String, Object> genRelation(Class<?> parentClass, EsRelation rel) {
+  // String parent = parentClass.getSimpleName();
+  // Set<String> children =
+  // asStream(rel.children()).map(Class::getSimpleName).collect(Collectors.toSet());
+  // return asMap(rel.fieldName(), asMap(parent, children));
+  // }
 
   public static Type getCollectionFieldEleType(Field f, Class<?> contextRawType) {
     return TypeUtils

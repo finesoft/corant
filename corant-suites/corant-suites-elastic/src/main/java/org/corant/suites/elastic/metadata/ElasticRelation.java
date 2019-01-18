@@ -13,13 +13,11 @@
  */
 package org.corant.suites.elastic.metadata;
 
-import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.corant.suites.elastic.metadata.annotation.EsRelation;
+import org.corant.suites.elastic.metadata.annotation.EsJoinChild;
+import org.corant.suites.elastic.metadata.annotation.EsJoinParent;
 
 /**
  * corant-suites-elastic
@@ -29,67 +27,27 @@ import org.corant.suites.elastic.metadata.annotation.EsRelation;
  */
 public class ElasticRelation {
 
-  private Class<?> parentClass;
+  private final Class<?> parentClass;
 
-  private Set<Class<?>> childrenClasses = new LinkedHashSet<>();
+  private final String parentName;
 
-  private String fieldName;
+  private final Set<String> childrenNames = new LinkedHashSet<>();
 
-  public ElasticRelation(Class<?> parentClass, EsRelation ann) {
+  private final String fieldName;
+
+  public ElasticRelation(Class<?> parentClass, EsJoinParent parent, EsJoinChild... children) {
     this.parentClass = parentClass;
-    asStream(ann.children()).forEach(childrenClasses::add);
-    fieldName = ann.fieldName();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ElasticRelation other = (ElasticRelation) obj;
-    if (childrenClasses == null) {
-      if (other.childrenClasses != null) {
-        return false;
-      }
-    } else if (!childrenClasses.equals(other.childrenClasses)) {
-      return false;
-    }
-    if (fieldName == null) {
-      if (other.fieldName != null) {
-        return false;
-      }
-    } else if (!fieldName.equals(other.fieldName)) {
-      return false;
-    }
-    if (parentClass == null) {
-      if (other.parentClass != null) {
-        return false;
-      }
-    } else if (!parentClass.equals(other.parentClass)) {
-      return false;
-    }
-    return true;
-  }
-
-  public Map<String, Object> genSchema() {
-    String parent = parentClass.getSimpleName();
-    Set<String> children =
-        childrenClasses.stream().map(Class::getSimpleName).collect(Collectors.toSet());
-    return asMap(fieldName, asMap(parent, children));
+    fieldName = parent.fieldName();
+    parentName = parent.parentName();
+    asStream(children).map(EsJoinChild::childName).forEach(childrenNames::add);
   }
 
   /**
    *
-   * @return the childrenClasses
+   * @return the childrenNames
    */
-  public Set<Class<?>> getChildrenClasses() {
-    return childrenClasses;
+  public Set<String> getChildrenNames() {
+    return childrenNames;
   }
 
   /**
@@ -101,21 +59,19 @@ public class ElasticRelation {
   }
 
   /**
-   *
+   * 
    * @return the parentClass
    */
   public Class<?> getParentClass() {
     return parentClass;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (childrenClasses == null ? 0 : childrenClasses.hashCode());
-    result = prime * result + (fieldName == null ? 0 : fieldName.hashCode());
-    result = prime * result + (parentClass == null ? 0 : parentClass.hashCode());
-    return result;
+  /**
+   *
+   * @return the parentName
+   */
+  public String getParentName() {
+    return parentName;
   }
 
 }

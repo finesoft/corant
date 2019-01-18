@@ -150,7 +150,6 @@ public class KeycloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
       }
       return true;
     }
-
     return false;
   }
 

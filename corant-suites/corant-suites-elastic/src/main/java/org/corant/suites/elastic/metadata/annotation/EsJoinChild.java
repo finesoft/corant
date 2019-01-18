@@ -28,20 +28,19 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
-public @interface EsRelation {
+public @interface EsJoinChild {
 
   /**
-   * children
    *
-   * @return children
+   * @return parentName
    */
-  Class<?>[] children();
+  String childName();
 
   /**
-   * Field name
+   * Parent name
    *
-   * @return fieldName
+   * @return parentName
    */
-  String fieldName();
+  Class<?> parentClass();
 
 }

@@ -18,6 +18,7 @@ import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genFieldMapping;
@@ -50,6 +51,8 @@ import org.corant.suites.elastic.metadata.annotation.EsEmbedded;
 import org.corant.suites.elastic.metadata.annotation.EsGeoPoint;
 import org.corant.suites.elastic.metadata.annotation.EsGeoShape;
 import org.corant.suites.elastic.metadata.annotation.EsIp;
+import org.corant.suites.elastic.metadata.annotation.EsJoinChild;
+import org.corant.suites.elastic.metadata.annotation.EsJoinParent;
 import org.corant.suites.elastic.metadata.annotation.EsKeyword;
 import org.corant.suites.elastic.metadata.annotation.EsMap;
 import org.corant.suites.elastic.metadata.annotation.EsMappedSuperclass;
@@ -57,7 +60,6 @@ import org.corant.suites.elastic.metadata.annotation.EsNested;
 import org.corant.suites.elastic.metadata.annotation.EsNumeric;
 import org.corant.suites.elastic.metadata.annotation.EsPercolator;
 import org.corant.suites.elastic.metadata.annotation.EsRange;
-import org.corant.suites.elastic.metadata.annotation.EsRelation;
 import org.corant.suites.elastic.metadata.annotation.EsText;
 import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -83,16 +85,36 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
 
   public <T> ElasticMapping<T> doResolve(Class<T> documentClass) {
     EsDocument document = findAnnotation(shouldNotNull(documentClass), EsDocument.class, false);
+    EsJoinChild joinChild = findAnnotation(shouldNotNull(documentClass), EsJoinChild.class, false);
+    shouldBeFalse(document != null && joinChild != null);
+    if (document != null) {
+      return doResolveDocument(documentClass);
+    } else if (joinChild != null) {
+      return doResolveChildDocument(documentClass);
+    }
+    return null;
+  }
+
+  public <T> ElasticMapping<T> doResolveChildDocument(Class<T> documentClass) {
+    // TODO FIXME
+    // EsJoinChild joinChild = findAnnotation(shouldNotNull(documentClass), EsJoinChild.class,
+    // false);
+    // ElasticMapping<?> parentElasticMapping = resolve(joinChild.parentClass());
+    return null;
+  }
+
+  public <T> ElasticMapping<T> doResolveDocument(Class<T> documentClass) {
+    EsDocument document = findAnnotation(shouldNotNull(documentClass), EsDocument.class, false);
     ElasticIndexing indexing = ElasticIndexing.of(null, document, version);
     String versionPropertyName = document.versionPropertyName();
     boolean versioned = isNotBlank(versionPropertyName);
     VersionType versionType = document.versionType();
     ElasticRelation relation = null;
-    EsRelation relAnn = findAnnotation(shouldNotNull(documentClass), EsRelation.class, false);
-    if (relAnn != null) {
-      relation = new ElasticRelation(documentClass, relAnn);
+    EsJoinParent joinParent =
+        findAnnotation(shouldNotNull(documentClass), EsJoinParent.class, false);
+    if (joinParent != null) {
+      relation = new ElasticRelation(documentClass, joinParent);
     }
-
     return new ElasticMapping<>(indexing, documentClass, resolveSchema(documentClass, relation),
         relation, versioned, versionPropertyName, versionType);
   }
@@ -106,9 +128,10 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     Map<String, Object> bodyMap = new LinkedHashMap<>();
     Map<String, Object> fieldMap = new LinkedHashMap<>();
     handleFields(documentClass, fieldMap, new LinkedList<>());
-    if (relation != null) {
-      fieldMap.putAll(relation.genSchema());
-    }
+    // TODO FIXME
+    // if (relation != null) {
+    // fieldMap.putAll(relation.genSchema());
+    // }
     bodyMap.put("properties", fieldMap);
     return asMap(Elastic6Constants.TYP_NME, bodyMap);
   }
@@ -207,10 +230,6 @@ public class DefaultElasticMappingResolver implements ElasticMappingResolver {
     } else {
       notSupportLog(docCls, path);
     }
-  }
-
-  protected void handleRelation(EsRelation ann) {
-
   }
 
   protected void handleSimpleField(Class<?> docCls, Field f, Map<String, Object> map,

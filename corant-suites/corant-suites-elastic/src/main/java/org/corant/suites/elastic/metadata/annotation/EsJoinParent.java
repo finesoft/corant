@@ -11,10 +11,36 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.elastic.metadata.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * corant-suites-elastic
- * 
- * @author bingo 下午8:02:32
+ *
+ * @author bingo 下午6:12:49
  *
  */
-package org.corant.suites.elastic.metadata.annotation.instance;
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface EsJoinParent {
+
+  /**
+   * Field name
+   *
+   * @return fieldName
+   */
+  String fieldName();
+
+  /**
+   *
+   * @return parentName
+   */
+  String parentName();
+
+}

@@ -494,9 +494,6 @@ public class ClassPaths {
     private final String root;
     private Predicate<String> filter = s -> true;
 
-    /**
-     * @param root
-     */
     public Scanner(String root) {
       super();
       this.root = root;

@@ -84,16 +84,12 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
       throws IOException;
 
   protected boolean isCoveredUrl(String url) {
-    if (WildcardMatcher.hasWildcard(url)) {
-      if (uncoveredCompletePathMatcher.match(url)) {
-        return false;
-      }
-      return coveredWildcardPathMatcher.match(url);
+    if (uncoveredCompletePathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredWildcardPathMatcher.match(url)) {
+      return false;
     } else {
-      if (coveredCompletePathMatcher.match(url)) {
-        return false;
-      }
-      return coveredCompletePathMatcher.match(url);
+      return coveredCompletePathMatcher.match(url) || coveredWildcardPathMatcher.match(url);
     }
   }
 

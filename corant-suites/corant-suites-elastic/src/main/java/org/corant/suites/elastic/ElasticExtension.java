@@ -14,6 +14,7 @@
 package org.corant.suites.elastic;
 
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -90,8 +91,8 @@ public class ElasticExtension implements Extension {
     TransportClient tc = new PreBuiltTransportClient(builder.build());
     for (String clusterNode : split(cfg.getClusterNodes(), ",")) {
       String[] hostPort = split(clusterNode, ":");
-      shouldBeTrue(hostPort != null && hostPort.length == 2, "Cluster %s node property error",
-          clusterName);
+      shouldBeTrue(hostPort != null && hostPort.length == 2 && isNoneBlank(hostPort),
+          "Cluster %s node property error", clusterName);
       tc.addTransportAddress(
           new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.valueOf(hostPort[1])));
     }

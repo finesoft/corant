@@ -41,6 +41,8 @@ public class ElasticTransportClientService {
   @Any
   protected Instance<TransportClient> instance;
 
+  protected volatile TransportClient dfltTransportClient;
+
   public TransportClient get(String clusterName) {
     if (!instance.isUnsatisfied()) {
       return instance.select(NamedLiteral.of(clusterName)).get();
@@ -62,10 +64,13 @@ public class ElasticTransportClientService {
    * @return getTransportClient
    */
   public TransportClient getTransportClient() {
-    Set<String> clusterNames = extension.getConfigs().keySet();
-    shouldBeTrue(clusterNames.size() == 1, "By default we only support one cluster.");
-    String clusterName = clusterNames.iterator().next();
-    return get(clusterName);
+    if (dfltTransportClient == null) {
+      Set<String> clusterNames = extension.getConfigs().keySet();
+      shouldBeTrue(clusterNames.size() == 1, "By default we only support one cluster.");
+      String clusterName = clusterNames.iterator().next();
+      dfltTransportClient = get(clusterName);
+    }
+    return dfltTransportClient;
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent e) {

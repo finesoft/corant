@@ -14,7 +14,6 @@
 package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
-import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,11 +83,11 @@ public interface ElasticDocumentService {
     ElasticMapping mapping = shouldNotNull(resolveMapping(document.getClass()));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
-      return index(mapping.getIndex().getName(), asString(document.getEsId()), parentId,
+      return index(mapping.getIndex().getName(), document.getEsId(), parentId,
           mapping.toMap(verDoc), flush, verDoc.getVn(), mapping.getVersionType());
     } else {
-      return index(mapping.getIndex().getName(), asString(document.getEsId()), parentId,
-          mapping.toMap(document), flush, 0, null);
+      return index(mapping.getIndex().getName(), document.getEsId(), parentId,
+          mapping.toMap(document), flush, 0L, null);
     }
   }
 

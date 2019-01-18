@@ -77,8 +77,8 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
       ElasticMapping<?> mapping = entry.getKey();
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
-        IndexRequest rb = indexRequestBuilder(mapping.getIndex().getName(), doc.getEsId() + "", null,
-            mapping.toMap(doc), false, 0l, null).request();
+        IndexRequest rb = indexRequestBuilder(mapping.getIndex().getName(), doc.getEsId(),
+            doc.getEsParentId(), mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
     }
@@ -107,10 +107,6 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
     return getTransportClientService().getTransportClient();
   }
 
-  /**
-   *
-   * @return the transportClientService
-   */
   public ElasticTransportClientService getTransportClientService() {
     return transportClientService;
   }

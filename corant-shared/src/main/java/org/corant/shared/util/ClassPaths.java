@@ -144,10 +144,8 @@ public class ClassPaths {
                 throws IOException {
               if (file != null && asString(file.getFileName()).endsWith(JAR_EXT)) {
                 urls.add(file.toUri().toURL());
-                return FileVisitResult.CONTINUE;
-              } else {
-                return FileVisitResult.TERMINATE;
               }
+              return FileVisitResult.TERMINATE;
             }
           });
         }

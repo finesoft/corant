@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -45,14 +44,19 @@ public class MapUtils {
   }
 
   public static <K, V> Map<K, V> asImmutableMap(Object... objects) {
+    if (objects == null || objects.length == 0) {
+      return Collections.emptyMap();
+    }
     return Collections.unmodifiableMap(asMap(objects));
   }
 
   public static <K, V> Map<K, V> asMap(Object... objects) {
-    int oLen = objects.length;
+    int oLen;
+    if (objects == null || (oLen = objects.length) == 0) {
+      return new HashMap<>(0);
+    }
     int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
-    int size = rLen > 0 ? rLen < oLen ? (rLen >> 1) + 1 : rLen >> 1 : oLen > 0 ? 1 : 0;
-    Map<K, V> map = new LinkedHashMap<>(size);
+    Map<K, V> map = new HashMap<>((rLen >> 1) + 1);
     for (int i = 0; i < rLen; i += 2) {
       map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
     }
@@ -69,7 +73,7 @@ public class MapUtils {
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
-    Map<FlatMapKey, Object> flatMap = new LinkedHashMap<>();
+    Map<FlatMapKey, Object> flatMap = new HashMap<>();
     if (map != null) {
       for (Entry<?, ?> entry : map.entrySet()) {
         doFlatMap(flatMap, FlatMapKey.of(entry.getKey()), entry.getValue(), maxDepth);
@@ -79,8 +83,8 @@ public class MapUtils {
   }
 
   public static Map<String, Object> flatMap(Map<String, ?> map, String splitor, int maxDepth) {
-    Map<FlatMapKey, Object> flatMap = new LinkedHashMap<>();
-    Map<String, Object> stringKeyMap = new LinkedHashMap<>();
+    Map<FlatMapKey, Object> flatMap = new HashMap<>();
+    Map<String, Object> stringKeyMap = new HashMap<>();
     if (map != null) {
       for (Entry<?, ?> entry : map.entrySet()) {
         doFlatMap(flatMap, FlatMapKey.of(entry.getKey()), entry.getValue(), maxDepth);
@@ -253,7 +257,7 @@ public class MapUtils {
   }
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
-    Map<V, K> result = new LinkedHashMap<>();
+    Map<V, K> result = new HashMap<>();
     if (map != null) {
       map.forEach((k, v) -> result.put(v, k));
     }

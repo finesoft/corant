@@ -65,11 +65,17 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> List<T> asImmutableList(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return Collections.emptyList();
+    }
     return Collections.unmodifiableList(asList(objects));
   }
 
   @SafeVarargs
   public static <T> Set<T> asImmutableSet(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return Collections.emptySet();
+    }
     return Collections.unmodifiableSet(asSet(objects));
   }
 

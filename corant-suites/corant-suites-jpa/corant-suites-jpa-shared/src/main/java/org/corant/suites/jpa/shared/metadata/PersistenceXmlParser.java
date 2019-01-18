@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.FileUtils;
 import org.corant.suites.jpa.shared.JpaConfig;
 import org.w3c.dom.Document;
@@ -204,17 +205,17 @@ public class PersistenceXmlParser {
       URL rootUrl = FileUtils.extractJarFileURL(originalURL);
       if (rootUrl == null) {
         String urlToString = originalURL.toExternalForm();
-        if (!urlToString.contains(FileUtils.META_INF)) {
+        if (!urlToString.contains(ClassPaths.META_INF)) {
           logger.info(
               () -> String.format("%s should be located inside META-INF directory", urlToString));
           return null;
         }
-        if (urlToString.lastIndexOf(FileUtils.META_INF) == urlToString.lastIndexOf('/')
-            - (1 + FileUtils.META_INF.length())) {
+        if (urlToString.lastIndexOf(ClassPaths.META_INF) == urlToString.lastIndexOf('/')
+            - (1 + ClassPaths.META_INF.length())) {
           logger.info(() -> String.format("%s is not located in the root of META-INF directory",
               urlToString));
         }
-        String rootUrlStr = urlToString.substring(0, urlToString.lastIndexOf(FileUtils.META_INF));
+        String rootUrlStr = urlToString.substring(0, urlToString.lastIndexOf(ClassPaths.META_INF));
         if (rootUrlStr.endsWith("/")) {
           rootUrlStr = rootUrlStr.substring(0, rootUrlStr.length() - 1);
         }

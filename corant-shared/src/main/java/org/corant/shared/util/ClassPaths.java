@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
+import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
@@ -82,9 +83,12 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
-  public static final Map<Path, URLClassLoader> CACHED_RESOURCE_LOADER = new ConcurrentHashMap<>();
+  public static final Map<Path, URLClassLoader> CACHED_CLASS_LOADERS = new ConcurrentHashMap<>();
+  public static final Set<String> SYS_LIBS =
+      asImmutableSet("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
+          "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
 
-  private static final Logger LOGGER = Logger.getLogger(ClassPaths.class.getName());
+  private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 
   public static ClassPath anyway(ClassLoader classLoader) {
     return anyway(classLoader, StringUtils.EMPTY);
@@ -94,7 +98,7 @@ public class ClassPaths {
     try {
       return from(classLoader, path);
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, e.getMessage(), e);
+      logger.log(Level.WARNING, e.getMessage(), e);
       return ClassPath.empty();
     }
   }
@@ -107,71 +111,56 @@ public class ClassPaths {
    * Careful use may result in leakage
    *
    * @param path
-   * @param parent
+   * @param parentClassLoader
    * @return
    * @throws IOException buildWarClassLoader
    */
-  public static synchronized URLClassLoader buildWarClassLoader(Path path, final ClassLoader parent)
-      throws IOException {
-    shouldBeTrue(path != null && path.getFileName() != null,
-        "Build war class loader error path is null");
-    if (CACHED_RESOURCE_LOADER.containsKey(path)) {
-      return CACHED_RESOURCE_LOADER.get(path);
+  public static synchronized URLClassLoader buildWarClassLoader(Path path,
+      final ClassLoader parentClassLoader) throws IOException {
+    shouldBeTrue(path != null, "Build war class loader error path is null");
+    if (CACHED_CLASS_LOADERS.containsKey(path)) {
+      return CACHED_CLASS_LOADERS.get(path);
     }
-    Path usePath = path;
-    Path warExtDir = Files.createTempDirectory(usePath.getFileName().toString());
+    Path tmpDir = Files.createTempDirectory(asString(path.getFileName()));
+    // We only extract the WEB-INF folder, it is class path resource.
+    FileUtils.extractJarFile(path, tmpDir, (e) -> e.getName().contains(WEB_INF));
     final List<URL> urls = new ArrayList<>();
-    try (JarFile jar = new JarFile(usePath.toFile())) {
-      Enumeration<JarEntry> entries = jar.entries();
-      while (entries.hasMoreElements()) {
-        JarEntry each = entries.nextElement();
-        if (each.getName().contains(WEB_INF)) {
-          // We only extract web-inf folder, it is class path resource.
-          String fsPath = each.getName().replace(PATH_SEPARATOR, File.separatorChar);
-          usePath = warExtDir.resolve(fsPath);
-          if (each.isDirectory()) {
-            if (!Files.exists(usePath)) {
-              Files.createDirectories(usePath);
+    if (shouldNotNull(tmpDir.toFile()).exists()) {
+      Path webInf = tmpDir.resolve(WEB_INF);
+      if (webInf.toFile().canRead()) {
+        Path classes = webInf.resolve(CLASSES);
+        Path lib = webInf.resolve(LIB);
+        Path metaInf = webInf.resolve(META_INF);
+        if (metaInf.toFile().canRead()) {
+          urls.add(metaInf.toUri().toURL());
+        }
+        if (classes.toFile().canRead()) {
+          urls.add(classes.toUri().toURL());
+        }
+        if (lib.toFile().canRead()) {
+          Files.walkFileTree(lib, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                throws IOException {
+              if (file != null && asString(file.getFileName()).endsWith(JAR_EXT)) {
+                urls.add(file.toUri().toURL());
+                return FileVisitResult.CONTINUE;
+              } else {
+                return FileVisitResult.TERMINATE;
+              }
             }
-          } else {
-            Files.copy(jar.getInputStream(each), usePath);
-          }
+          });
         }
       }
+      tmpDir.toFile().deleteOnExit();
     }
-    Path webInf = warExtDir.resolve(WEB_INF);
-    Path webInfClasses = webInf.resolve(CLASSES);
-    Path webInfLib = webInf.resolve(LIB);
-    Path webMateInf = webInf.resolve(META_INF);
-    if (webMateInf.toFile().canRead()) {
-      urls.add(webMateInf.toUri().toURL());
-    }
-    if (webInfClasses.toFile().canRead()) {
-      urls.add(webInfClasses.toUri().toURL());
-    }
-    if (webInfLib.toFile().canRead()) {
-      Files.walkFileTree(webInfLib, new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          if (file != null && file.getFileName() != null
-              && file.getFileName().toString().endsWith(JAR_EXT)) {
-            urls.add(file.toUri().toURL());
-          }
-          return super.visitFile(file, attrs);
-        }
-      });
-    }
-    // clear
-    if (warExtDir.toFile().canWrite()) {
-      warExtDir.toFile().deleteOnExit();
-    }
-    return CACHED_RESOURCE_LOADER.put(path,
+    return CACHED_CLASS_LOADERS.put(path,
         AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(
-            urls.toArray(new URL[urls.size()]), parent)));
+            urls.toArray(new URL[urls.size()]), parentClassLoader)));
   }
 
   /**
-   * Use default classloader to scan all class path resources.
+   * Use default classLoader to scan all class path resources.
    *
    * @see #from(ClassLoader, String)
    * @see ClassUtils#defaultClassLoader()
@@ -262,9 +251,7 @@ public class ClassPaths {
   }
 
   static boolean loadAll(String path) {
-    final String sysEnvLib = "java;javax;javafx;jdk;sun;oracle;netscape;"
-        + "org/ietf;org/jcp;org/omg;org/w3c;org/xml;com/sun;com/oracle;";
-    return isBlank(path) || asStream(split(sysEnvLib, ";")).anyMatch(sp -> path.startsWith(sp));
+    return isBlank(path) || SYS_LIBS.stream().anyMatch(sp -> path.startsWith(sp));
   }
 
   /**
@@ -397,7 +384,7 @@ public class ClassPaths {
    */
   public static final class PathFilter extends WildcardMatcher {
 
-    public PathFilter(boolean ignoreCase, String pathExpress) {
+    protected PathFilter(boolean ignoreCase, String pathExpress) {
       super(ignoreCase, pathExpress);
     }
 
@@ -552,7 +539,7 @@ public class ClassPaths {
         try {
           uriSet.add(getClassPathEntry(jarFile, path));
         } catch (URISyntaxException e) {
-          LOGGER.warning(() -> "Invalid Class-Path entry: " + path);
+          logger.warning(() -> "Invalid Class-Path entry: " + path);
           continue;
         }
       }
@@ -571,10 +558,10 @@ public class ClassPaths {
     }
 
     protected void scanDirectory(File directory, ClassLoader classloader) throws IOException {
-      String packagePrefix =
+      scanDirectory(directory, classloader,
           isNotBlank(root) && !root.endsWith(PATH_SEPARATOR_STRING) ? root + PATH_SEPARATOR_STRING
-              : root;
-      scanDirectory(directory, classloader, packagePrefix, new LinkedHashSet<>());
+              : root,
+          new LinkedHashSet<>());
     }
 
     protected void scanDirectory(File directory, ClassLoader classloader, String packagePrefix,
@@ -585,7 +572,7 @@ public class ClassPaths {
       }
       File[] files = directory.listFiles();
       if (files == null) {
-        LOGGER.warning(() -> "Cannot read directory " + directory);
+        logger.warning(() -> "Cannot read directory " + directory);
         return;
       }
       Set<File> fileSet = new LinkedHashSet<>(ancestors);
@@ -624,7 +611,7 @@ public class ClassPaths {
       try {
         jarFile = new JarFile(file);
       } catch (IOException notJarFile) {
-        LOGGER.warning(() -> String.format("The file %s is not jar file!", file.getName()));
+        logger.warning(() -> String.format("The file %s is not jar file!", file.getName()));
         return;
       }
       try {
@@ -634,12 +621,12 @@ public class ClassPaths {
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
           JarEntry entry = entries.nextElement();
-          if (entry.isDirectory() || entry.getName().equals(JarFile.MANIFEST_NAME)
-              || isNotBlank(root) && !entry.getName().startsWith(root)
-              || !filter.test(entry.getName())) {
+          String name = entry.getName();
+          if (entry.isDirectory() || name.equals(JarFile.MANIFEST_NAME)
+              || isNotBlank(root) && !name.startsWith(root) || !filter.test(name)) {
             continue;
           }
-          resources.add(ResourceInfo.of(entry.getName(), classloader));
+          resources.add(ResourceInfo.of(name, classloader));
         }
       } finally {
         try {
@@ -651,12 +638,12 @@ public class ClassPaths {
 
     protected void scanSingleFile(File file, ClassLoader classloader) throws IOException {
       if (!file.getCanonicalPath().equals(JarFile.MANIFEST_NAME)) {
-        String canonicalPath = file.getCanonicalPath();
+        String filePath = file.getCanonicalPath();
         int classesIdx = -1;
-        if ((classesIdx = canonicalPath.indexOf(CLASSES_FOLDER)) != -1) {
-          canonicalPath = canonicalPath.substring(classesIdx + CLASSES_FOLDER.length());
+        if ((classesIdx = filePath.indexOf(CLASSES_FOLDER)) != -1) {
+          filePath = filePath.substring(classesIdx + CLASSES_FOLDER.length());
         }
-        String resourceName = replace(canonicalPath, File.separator, PATH_SEPARATOR_STRING);
+        String resourceName = replace(filePath, File.separator, PATH_SEPARATOR_STRING);
         if (filter.test(resourceName)) {
           resources.add(ResourceInfo.of(resourceName, classloader));
         }
@@ -664,7 +651,7 @@ public class ClassPaths {
     }
 
     protected void scanWar(File file, ClassLoader parent) throws IOException {
-      // first we need to build war class loader;
+      // We need to build an temporary war class loader;
       Scanner warScanner = new Scanner(root, filter);
       final URLClassLoader warClassLoader = buildWarClassLoader(file.toPath(), parent);
       for (URL url : warClassLoader.getURLs()) {
@@ -693,7 +680,7 @@ public class ClassPaths {
           specPart = fileUri.getSchemeSpecificPart();
         }
       } catch (MalformedURLException | URISyntaxException ignore) {
-        LOGGER.warning(() -> String.format("Can not extract file uri from %s.", jarUri.toString()));
+        logger.warning(() -> String.format("Can not extract file uri from %s.", jarUri.toString()));
       }
       return null;
     }

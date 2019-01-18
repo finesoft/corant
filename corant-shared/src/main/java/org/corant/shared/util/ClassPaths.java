@@ -145,7 +145,7 @@ public class ClassPaths {
               if (file != null && asString(file.getFileName()).endsWith(JAR_EXT)) {
                 urls.add(file.toUri().toURL());
               }
-              return FileVisitResult.TERMINATE;
+              return FileVisitResult.CONTINUE;
             }
           });
         }

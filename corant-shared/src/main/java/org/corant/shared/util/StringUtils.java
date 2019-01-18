@@ -192,7 +192,16 @@ public class StringUtils {
    * @return isBlank
    */
   public static boolean isBlank(final CharSequence cs) {
-    return isEmpty(cs) || cs.chars().allMatch(Character::isWhitespace);
+    int len;
+    if (cs == null || (len = cs.length()) == 0) {
+      return true;
+    }
+    for (int i = 0; i < len; i++) {
+      if (!Character.isWhitespace(cs.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -209,12 +218,33 @@ public class StringUtils {
   }
 
   /**
-   * @see StringUtils#isNoneBlank(CharSequence...)
+   * <pre>
+   * StringUtils.isNoneBlank((String) null)    = false
+   * StringUtils.isNoneBlank((String[]) null)  = true
+   * StringUtils.isNoneBlank(null, "abc")      = false
+   * StringUtils.isNoneBlank(null, null)       = false
+   * StringUtils.isNoneBlank("", "123")        = false
+   * StringUtils.isNoneBlank("xyz", "")        = false
+   * StringUtils.isNoneBlank("  xyz  ", null)  = false
+   * StringUtils.isNoneBlank(" ", "123")       = false
+   * StringUtils.isNoneBlank(new String[] {})  = true
+   * StringUtils.isNoneBlank(new String[]{""}) = false
+   * StringUtils.isNoneBlank("abc", "123")     = true
+   * </pre>
+   *
    * @param css
    * @return
    */
   public static boolean isNoneBlank(final CharSequence... css) {
-    return Arrays.stream(css).noneMatch(StringUtils::isBlank);
+    if (css == null || css.length == 0) {
+      return true;
+    }
+    for (final CharSequence cs : css) {
+      if (isBlank(cs)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -499,7 +529,7 @@ public class StringUtils {
    * @param wildcardExpress
    * @return wildCardMatch
    */
-  public static boolean wildCardMatch(final String text, final boolean ignoreCase,
+  public static boolean wildcardMatch(final String text, final boolean ignoreCase,
       final String wildcardExpress) {
     if (text == null || isEmpty(wildcardExpress)) {
       return false;
@@ -520,19 +550,25 @@ public class StringUtils {
 
     private final boolean ignoreCase;
     private final String[] tokens;
+    private final String wildcardExpress;
 
     /**
      * @param ignoreCase
      * @param wildcardExpress
      */
-    public WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
+    protected WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
       super();
       this.ignoreCase = ignoreCase;
+      this.wildcardExpress = wildcardExpress;
       tokens = splitOnTokens(wildcardExpress);
     }
 
     public static boolean hasWildcard(String text) {
       return text.indexOf('?') != -1 || text.indexOf('*') != -1;
+    }
+
+    public static WildcardMatcher of(boolean ignoreCase, String wildcardExpress) {
+      return new WildcardMatcher(ignoreCase, wildcardExpress);
     }
 
     @Override
@@ -558,6 +594,10 @@ public class StringUtils {
 
     public String[] getTokens() {
       return Arrays.copyOf(tokens, tokens.length);
+    }
+
+    public String getWildcardExpress() {
+      return wildcardExpress;
     }
 
     @Override

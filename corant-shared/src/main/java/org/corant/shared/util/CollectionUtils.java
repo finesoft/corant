@@ -13,6 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class CollectionUtils {
   }
 
   public static <T> Iterable<T> asIterable(final Enumeration<T> enums) {
-    return () -> new Iterator<T>() {
+    return enums == null ? emptyIterable() : () -> new Iterator<T>() {
       final Enumeration<T> fromEnums = enums;
 
       @Override
@@ -87,9 +89,11 @@ public class CollectionUtils {
     };
   }
 
-  public static <T> Iterable<T> asIterable(Iterable<?> it, Function<Object, T> convert) {
-    return () -> new Iterator<T>() {
+  public static <T> Iterable<T> asIterable(final Iterable<?> it,
+      final Function<Object, T> convert) {
+    return it == null ? emptyIterable() : () -> new Iterator<T>() {
       private final Iterator<?> fromIterator = it.iterator();
+      private final Function<Object, T> useConvert = defaultObject(convert, ObjectUtils::forceCast);
 
       @Override
       public boolean hasNext() {
@@ -98,7 +102,7 @@ public class CollectionUtils {
 
       @Override
       public T next() {
-        return convert.apply(fromIterator.next());
+        return useConvert.apply(fromIterator.next());
       }
 
       @Override
@@ -147,11 +151,15 @@ public class CollectionUtils {
   }
 
   public static <T> List<T> asList(final Iterable<T> iterable) {
-    List<T> list = new ArrayList<>();
-    if (iterable != null) {
-      iterable.forEach(list::add);
+    if (iterable instanceof List) {
+      return forceCast(iterable);
+    } else {
+      List<T> list = new ArrayList<>();
+      if (iterable != null) {
+        iterable.forEach(list::add);
+      }
+      return list;
     }
-    return list;
   }
 
   public static <T> List<T> asList(final Iterator<T> iterator) {
@@ -243,6 +251,10 @@ public class CollectionUtils {
     if (i < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
     }
+    if (iterable instanceof List) {
+      List<E> list = forceCast(iterable);
+      return list.get(i);
+    }
     return get(iterable.iterator(), index);
   }
 
@@ -269,12 +281,12 @@ public class CollectionUtils {
     if (object == null) {
       throw new IllegalArgumentException("Unsupported object type: null");
     }
-    if (object instanceof Object[]) {
+    if (object instanceof Iterable<?>) {
+      return get((Iterable<?>) object, i);
+    } else if (object instanceof Object[]) {
       return ((Object[]) object)[i];
     } else if (object instanceof Iterator<?>) {
       return get((Iterator<?>) object, index);
-    } else if (object instanceof Iterable<?>) {
-      return get((Iterable<?>) object, i);
     } else if (object instanceof Enumeration<?>) {
       return get((Enumeration<?>) object, index);
     } else {
@@ -297,7 +309,9 @@ public class CollectionUtils {
   }
 
   public static int getSize(final Iterable<?> iterable) {
-    if (iterable != null) {
+    if (iterable instanceof Collection) {
+      return Collection.class.cast(iterable).size();
+    } else if (iterable != null) {
       getSize(iterable.iterator());
     }
     return 0;
@@ -317,14 +331,14 @@ public class CollectionUtils {
   public static int getSize(final Object object) {
     if (object == null) {
       return 0;
-    } else if (object instanceof Object[]) {
-      return ((Object[]) object).length;
     } else if (object instanceof Collection<?>) {
       return ((Collection<?>) object).size();
-    } else if (object instanceof Iterator<?>) {
-      return getSize((Iterator<?>) object);
+    } else if (object instanceof Object[]) {
+      return ((Object[]) object).length;
     } else if (object instanceof Iterable<?>) {
       return getSize((Iterable<?>) object);
+    } else if (object instanceof Iterator<?>) {
+      return getSize((Iterator<?>) object);
     } else if (object instanceof Enumeration<?>) {
       return getSize((Enumeration<?>) object);
     } else {

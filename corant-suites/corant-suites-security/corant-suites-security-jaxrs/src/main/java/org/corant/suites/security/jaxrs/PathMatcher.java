@@ -103,7 +103,7 @@ public interface PathMatcher {
     public void addExpresses(String... strings) {
       for (String s : strings) {
         if (isNotBlank(s)) {
-          matchers.add(new WildcardMatcher(ignoreCase, s));
+          matchers.add(WildcardMatcher.of(ignoreCase, s));
         }
       }
     }
@@ -123,7 +123,7 @@ public interface PathMatcher {
 
     public void removeExpresses(String... strings) {
       for (String s : strings) {
-        matchers.remove(new WildcardMatcher(ignoreCase, s));
+        matchers.remove(WildcardMatcher.of(ignoreCase, s));
       }
     }
 

@@ -13,14 +13,19 @@
  */
 package org.corant.suites.elastic.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.elastic.Elastic6Constants;
-import org.corant.suites.elastic.metadata.resolver.DefaultElasticIndexingResolver;
+import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 
 /**
  * corant-suites-elastic
@@ -29,13 +34,10 @@ import org.elasticsearch.client.transport.TransportClient;
  *
  */
 @ApplicationScoped
-public class DefaultElasticIndicesService implements ElasticIndicesService {
+public abstract class AbstractElasticIndicesService implements ElasticIndicesService {
 
   @Inject
-  protected DefaultElasticIndexingResolver indexingResolver;
-
-  @Inject
-  protected ElasticTransportClientService transportClientService;
+  protected AbstractElasticIndexingResolver indexingResolver;
 
   @Override
   public boolean create(String indexName, Map<String, Object> setting, Map<String, Object> schema) {
@@ -55,21 +57,28 @@ public class DefaultElasticIndicesService implements ElasticIndicesService {
         .actionGet().isAcknowledged();
   }
 
-  public TransportClient getTransportClient() {
-    return getTransportClientService().getTransportClient();
+  @Override
+  public Map<String, Settings> getSetting(String... indexName) {
+    GetSettingsResponse response =
+        getTransportClient().admin().indices().prepareGetSettings(indexName).get();
+    Map<String, Settings> setting = new HashMap<>();
+    for (ObjectObjectCursor<String, Settings> cursor : response.getIndexToSettings()) {
+      String index = cursor.key;
+      setting.put(index, cursor.value);
+    }
+    return setting;
   }
 
-  /**
-   *
-   * @return the transportClientService
-   */
-  public ElasticTransportClientService getTransportClientService() {
-    return transportClientService;
-  }
+  public abstract TransportClient getTransportClient();
 
   @Override
   public boolean isExist(String... indexName) {
     return getTransportClient().admin().indices().exists(new IndicesExistsRequest(indexName))
         .actionGet().isExists();
+  }
+
+  @Override
+  public RefreshResponse refersh(String... indexName) {
+    return getTransportClient().admin().indices().prepareRefresh(indexName).get();
   }
 }

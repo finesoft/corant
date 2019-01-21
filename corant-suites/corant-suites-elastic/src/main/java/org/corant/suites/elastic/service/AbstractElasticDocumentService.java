@@ -31,7 +31,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
-import org.corant.suites.elastic.metadata.resolver.DefaultElasticIndexingResolver;
+import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.DocWriteResponse.Result;
@@ -54,17 +54,15 @@ import org.elasticsearch.search.sort.SortBuilder;
  *
  */
 @ApplicationScoped
-public class DefaultElasticDocumentService implements ElasticDocumentService {
+public abstract class AbstractElasticDocumentService implements ElasticDocumentService {
 
   @Inject
-  protected DefaultElasticIndexingResolver indexingResolver;
-
-  @Inject
-  protected ElasticTransportClientService transportClientService;
+  protected ElasticIndexingResolver indexingResolver;
 
   @Override
   public int bulkIndex(List<ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticIndexing> mapper) {
+      Function<Class<? extends ElasticDocument>, ElasticIndexing> idxGetter,
+      Function<Class<? extends ElasticDocument>, ElasticMapping> mapGetter) {
     Map<Class<? extends ElasticDocument>, List<ElasticDocument>> docMap = new HashMap<>();
     for (ElasticDocument doc : shouldNotNull(docList)) {
       if (isNotNull(doc)) {
@@ -75,17 +73,14 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
         .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE);
     for (Entry<Class<? extends ElasticDocument>, List<ElasticDocument>> entry : docMap.entrySet()) {
       Class<? extends ElasticDocument> docCls = entry.getKey();
-      ElasticIndexing indexing = mapper.apply(docCls);
-      ElasticMapping mapping = indexing.getMapping(docCls);
+      ElasticIndexing indexing = idxGetter.apply(docCls);
+      ElasticMapping mapping = mapGetter.apply(docCls);
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
         IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getEsId(),
             doc.getEsParentId(), mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
-    }
-    if (flush) {
-      brb.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
     }
     try {
       return Arrays.stream(brb.execute().actionGet().getItems()).map(x -> x.isFailed() ? 0 : 1)
@@ -105,13 +100,7 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
     }
   }
 
-  public TransportClient getTransportClient() {
-    return getTransportClientService().getTransportClient();
-  }
-
-  public ElasticTransportClientService getTransportClientService() {
-    return transportClientService;
-  }
+  public abstract TransportClient getTransportClient();
 
   @Override
   public boolean index(String indexName, String id, String parentId, Map<?, ?> obj, boolean flush,
@@ -126,7 +115,12 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
 
   @Override
   public ElasticIndexing resolveIndexing(Class<?> docCls) {
-    return indexingResolver.get(docCls);
+    return indexingResolver.getIndexing(docCls);
+  }
+
+  @Override
+  public ElasticMapping resolveMapping(Class<?> docCls) {
+    return indexingResolver.getMapping(docCls);
   }
 
   @Override

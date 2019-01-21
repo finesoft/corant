@@ -40,11 +40,12 @@ import org.elasticsearch.search.sort.SortBuilder;
 public interface ElasticDocumentService {
 
   default int bulkIndex(List<ElasticDocument> docList, boolean flush) {
-    return bulkIndex(docList, flush, this::resolveIndexing);
+    return bulkIndex(docList, flush, this::resolveIndexing, this::resolveMapping);
   }
 
   int bulkIndex(List<ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticIndexing> indexing);
+      Function<Class<? extends ElasticDocument>, ElasticIndexing> indexFunction,
+      Function<Class<? extends ElasticDocument>, ElasticMapping> mappingFunction);
 
   default boolean delete(String indexName, String id) {
     return delete(indexName, id, false);
@@ -83,7 +84,7 @@ public interface ElasticDocumentService {
   default boolean index(ElasticDocument document, String parentId, boolean flush) {
     Class<?> docCls = shouldNotNull(document.getClass());
     ElasticIndexing indexing = shouldNotNull(resolveIndexing(docCls));
-    ElasticMapping mapping = shouldNotNull(indexing.getMapping(docCls));
+    ElasticMapping mapping = shouldNotNull(resolveMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
       return index(indexing.getName(), document.getEsId(), parentId, mapping.toMap(verDoc), flush,
@@ -99,13 +100,15 @@ public interface ElasticDocumentService {
 
   ElasticIndexing resolveIndexing(Class<?> docCls);
 
+  ElasticMapping resolveMapping(Class<?> docCls);
+
   default <T> List<T> select(Class<T> cls, QueryBuilder qb) {
     return select(cls, qb, null, Elastic6Constants.DFLT_SELECT_SIZE);
   }
 
   default <T> List<T> select(Class<T> cls, QueryBuilder qb, SortBuilder<?> sb, int size) {
     ElasticIndexing indexing = shouldNotNull(resolveIndexing(cls));
-    ElasticMapping mapping = shouldNotNull(indexing.getMapping(cls));
+    ElasticMapping mapping = shouldNotNull(resolveMapping(cls));
     List<Map<String, Object>> rawResults = select(indexing.getName(), qb, sb, size);
     if (!isEmpty(rawResults)) {
       return forceCast(rawResults.stream().map(mapping::fromMap).collect(Collectors.toList()));

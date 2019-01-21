@@ -19,7 +19,6 @@ import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.shouldBeEquals;
 import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.split;
@@ -46,7 +45,7 @@ import javax.inject.Inject;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ClassPaths.ClassInfo;
 import org.corant.suites.elastic.Elastic6Constants;
-import org.corant.suites.elastic.ElasticExtension;
+import org.corant.suites.elastic.ElasticConfig;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.ElasticSetting;
@@ -81,13 +80,10 @@ import org.elasticsearch.index.VersionType;
  *
  */
 @ApplicationScoped
-public class DefaultElasticIndexingResolver implements ElasticIndexingResolver {
+public abstract class AbstractElasticIndexingResolver implements ElasticIndexingResolver {
 
   @Inject
   protected Logger logger;
-
-  @Inject
-  protected ElasticExtension extension;
 
   protected Map<Class<?>, ElasticIndexing> classIndices = new ConcurrentHashMap<>();
 
@@ -96,41 +92,49 @@ public class DefaultElasticIndexingResolver implements ElasticIndexingResolver {
   protected Map<Class<?>, ElasticMapping> classMaps = new ConcurrentHashMap<>();
 
   @Override
-  public ElasticIndexing get(Class<?> documentClass) {
+  public ElasticIndexing getIndexing(Class<?> documentClass) {
     return classIndices.get(documentClass);
   }
 
+  @Override
+  public ElasticMapping getMapping(Class<?> documentClass) {
+    return classMaps.get(documentClass);
+  }
+
+  protected void assembly(ElasticIndexing indexing, ElasticMapping mapping) {
+    classIndices.put(mapping.getDocumentClass(), indexing);
+    classMaps.put(mapping.getDocumentClass(), mapping);
+    for (ElasticMapping childMapping : mapping) {
+      classIndices.put(childMapping.getDocumentClass(), indexing);
+      classMaps.put(childMapping.getDocumentClass(), childMapping);
+    }
+    namedIndices.put(indexing.getName(), indexing);
+  }
+
   protected void buildIndex(Class<?> docCls) {
+    ElasticConfig config = getConfig();
     EsDocument doc = findAnnotation(shouldNotNull(docCls), EsDocument.class, false);
     VersionType versionType = doc.versionType();
     String indexName = shouldNotNull(doc.indexName());
-    shouldNotNull(extension.getConfig(indexName));
-    EsParentDocument poc = findAnnotation(shouldNotNull(docCls), EsParentDocument.class, false);
     Map<String, Object> propertiesSchema = resolveSchema(docCls);
+    EsParentDocument poc = findAnnotation(shouldNotNull(docCls), EsParentDocument.class, false);
     ElasticMapping mapping = null;
     if (poc != null) {
-      shouldNotNull(poc.fieldName());
+      propertiesSchema.put(shouldNotNull(poc.fieldName()),
+          asMap("relations", genJoinMapping(mapping)));
       Class<?>[] childClses = poc.children();
       shouldBeFalse(isEmpty(childClses));
       mapping = new ElasticMapping(docCls, shouldNotNull(poc.name()), versionType);
       for (Class<?> childCls : childClses) {
         buildIndex(childCls, mapping, propertiesSchema);
       }
-      shouldBeTrue(propertiesSchema.put(poc.fieldName(),
-          asMap("relations", genJoinMapping(mapping))) == null);
     } else {
       mapping = new ElasticMapping(docCls, null, versionType);
     }
-    ElasticSetting setting = new ElasticSetting(extension.getConfig(indexName).getSetting());
+    ElasticSetting setting = new ElasticSetting(config.getSetting());
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping,
         asMap(Elastic6Constants.TYP_NME, asMap("properties", propertiesSchema)));
-    classIndices.put(mapping.getDocumentClass(), indexing);
-    classMaps.put(docCls, mapping);
-    for (ElasticMapping childMapping : mapping) {
-      classIndices.put(childMapping.getDocumentClass(), indexing);
-      classMaps.put(childMapping.getDocumentClass(), childMapping);
-    }
-    namedIndices.put(indexName, indexing);
+    assembly(indexing, mapping);
   }
 
   protected void buildIndex(Class<?> childDocCls, ElasticMapping parentMapping,
@@ -156,9 +160,10 @@ public class DefaultElasticIndexingResolver implements ElasticIndexingResolver {
     }
   }
 
+  protected abstract ElasticConfig getConfig();
+
   protected Set<Class<?>> getDocumentClasses() {
-    Set<String> docPaths = extension.getConfigs().values().stream()
-        .flatMap(v -> asStream(split(";", v.getDocumentPaths(), true, true)))
+    Set<String> docPaths = asStream(split(";", getConfig().getDocumentPaths(), true, true))
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {
@@ -166,13 +171,6 @@ public class DefaultElasticIndexingResolver implements ElasticIndexingResolver {
           .filter(dc -> dc.isAnnotationPresent(EsDocument.class)).forEach(docClses::add);
     }
     return docClses;
-  }
-
-  protected void initialize() {
-    Set<Class<?>> docClses = getDocumentClasses();
-    for (Class<?> docCls : docClses) {
-      buildIndex(docCls);
-    }
   }
 
   protected void notSupportLog(Class<?> docCls, List<String> path) {
@@ -183,7 +181,10 @@ public class DefaultElasticIndexingResolver implements ElasticIndexingResolver {
 
   @PostConstruct
   protected void onPostConstruct() {
-    initialize();
+    Set<Class<?>> docClses = getDocumentClasses();
+    for (Class<?> docCls : docClses) {
+      buildIndex(docCls);
+    }
   }
 
   protected void resolveClassSchema(Class<?> docCls, Map<String, Object> map, List<String> path) {

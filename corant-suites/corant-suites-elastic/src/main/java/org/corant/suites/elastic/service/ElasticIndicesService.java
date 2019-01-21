@@ -16,6 +16,8 @@ package org.corant.suites.elastic.service;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.common.settings.Settings;
 
 /**
  * corant-suites-elastic
@@ -34,5 +36,9 @@ public interface ElasticIndicesService {
 
   boolean delete(String indexName);
 
+  Map<String, Settings> getSetting(String... indexName);
+
   boolean isExist(String... indexName);
+
+  RefreshResponse refersh(String... indexName);
 }

@@ -14,6 +14,7 @@
 package org.corant.suites.elastic.metadata.resolver;
 
 import org.corant.suites.elastic.metadata.ElasticIndexing;
+import org.corant.suites.elastic.metadata.ElasticMapping;
 
 /**
  * corant-suites-elastic
@@ -23,6 +24,8 @@ import org.corant.suites.elastic.metadata.ElasticIndexing;
  */
 public interface ElasticIndexingResolver {
 
-  ElasticIndexing get(Class<?> documentClass);
+  ElasticIndexing getIndexing(Class<?> documentClass);
+
+  ElasticMapping getMapping(Class<?> documentClass);
 
 }

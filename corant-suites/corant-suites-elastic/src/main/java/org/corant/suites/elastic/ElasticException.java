@@ -30,7 +30,6 @@ public class ElasticException extends CorantRuntimeException {
    */
   public ElasticException() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -39,7 +38,6 @@ public class ElasticException extends CorantRuntimeException {
    */
   public ElasticException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -47,7 +45,6 @@ public class ElasticException extends CorantRuntimeException {
    */
   public ElasticException(Throwable cause) {
     super(cause);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -60,7 +57,6 @@ public class ElasticException extends CorantRuntimeException {
   public ElasticException(Throwable cause, boolean enableSuppression, boolean writableStackTrace,
       String msgOrFormat, Object... args) {
     super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -70,7 +66,6 @@ public class ElasticException extends CorantRuntimeException {
    */
   public ElasticException(Throwable cause, String msgOrFormat, Object... args) {
     super(cause, msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
 }

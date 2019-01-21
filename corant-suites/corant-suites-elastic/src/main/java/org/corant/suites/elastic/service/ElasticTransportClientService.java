@@ -13,8 +13,6 @@
  */
 package org.corant.suites.elastic.service;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import java.util.Set;
 import javax.ejb.ApplicationException;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -41,8 +39,6 @@ public class ElasticTransportClientService {
   @Any
   protected Instance<TransportClient> instance;
 
-  protected volatile TransportClient dfltTransportClient;
-
   public TransportClient get(String clusterName) {
     if (!instance.isUnsatisfied()) {
       return instance.select(NamedLiteral.of(clusterName)).get();
@@ -55,22 +51,6 @@ public class ElasticTransportClientService {
    */
   public ElasticExtension getExtension() {
     return extension;
-  }
-
-  /**
-   * By default we only support one cluster, if want to support multi clusters then extend this
-   * class and rewrite this method.
-   *
-   * @return getTransportClient
-   */
-  public TransportClient getTransportClient() {
-    if (dfltTransportClient == null) {
-      Set<String> clusterNames = extension.getConfigs().keySet();
-      shouldBeTrue(clusterNames.size() == 1, "By default we only support one cluster.");
-      String clusterName = clusterNames.iterator().next();
-      dfltTransportClient = get(clusterName);
-    }
-    return dfltTransportClient;
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent e) {

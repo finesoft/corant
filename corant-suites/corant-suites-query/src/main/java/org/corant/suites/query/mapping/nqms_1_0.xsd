@@ -42,7 +42,7 @@
     </xsd:attribute>
     <xsd:attribute name="result-set-mapping" type="xsd:string" use="optional"></xsd:attribute>
     <xsd:attribute name="cache" type="xsd:boolean" use="optional"></xsd:attribute>
-    <xsd:attribute name="cache-resuleset-metadata" type="xsd:boolean" use="optional" default="true"></xsd:attribute>
+    <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="true"></xsd:attribute>
     <xsd:attribute name="version" type="xsd:string" use="optional"></xsd:attribute>
   </xsd:complexType>
 

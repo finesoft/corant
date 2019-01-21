@@ -15,7 +15,7 @@ package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticMapping;
+import org.corant.suites.elastic.metadata.ElasticIndexing;
 
 /**
  * corant-suites-elastic
@@ -25,10 +25,9 @@ import org.corant.suites.elastic.metadata.ElasticMapping;
  */
 public interface ElasticIndicesService {
 
-  default boolean create(ElasticMapping<?> mapping) {
-    shouldNotNull(mapping);
-    return create(mapping.getIndex().getName(), mapping.getIndex().getSetting().getSetting(),
-        mapping.getSchema());
+  default boolean create(ElasticIndexing indexing) {
+    shouldNotNull(indexing);
+    return create(indexing.getName(), indexing.getSetting().getSetting(), indexing.getSchema());
   }
 
   boolean create(String indexName, Map<String, Object> setting, Map<String, Object> schema);

@@ -13,9 +13,10 @@
  */
 package org.corant.suites.elastic.metadata;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.isEquals;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import org.corant.suites.elastic.metadata.annotation.EsDocument;
 
 /**
  * corant-suites-elastic
@@ -26,45 +27,35 @@ import org.corant.suites.elastic.metadata.annotation.EsDocument;
 public class ElasticIndexing {
 
   private final String name;
-
   private final ElasticSetting setting;
+  private final Map<String, Object> schema = new LinkedHashMap<>();
+  private final ElasticMapping mapping;
 
   /**
    * @param name
+   * @param setting
+   * @param mapping
    */
-  public ElasticIndexing(String name, ElasticSetting setting) {
+  public ElasticIndexing(String name, ElasticSetting setting, ElasticMapping mapping,
+      Map<String, Object> schema) {
     super();
-    this.name = shouldNotNull(name);
+    this.name = name;
     this.setting = setting;
+    this.mapping = mapping;
+    this.schema.putAll(schema);
   }
 
-  public static ElasticIndexing of(Map<String, Object> golbalSetting, EsDocument docAnn,
-      String version) {
-    String name =
-        String.join(ElasticMapping.VERSION_SEPARATOR, shouldNotNull(docAnn.indexName()), version);
-    return new ElasticIndexing(name, ElasticSetting.of(golbalSetting, docAnn));
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ElasticIndexing other = (ElasticIndexing) obj;
-    if (name == null) {
-      if (other.name != null) {
-        return false;
+  public ElasticMapping getMapping(Class<?> clazz) {
+    if (isEquals(mapping.getDocumentClass(), clazz)) {
+      return forceCast(mapping);
+    } else {
+      for (ElasticMapping childMapping : mapping) {
+        if (isEquals(childMapping.getDocumentClass(), clazz)) {
+          return forceCast(childMapping);
+        }
       }
-    } else if (!name.equals(other.name)) {
-      return false;
     }
-    return true;
+    return null;
   }
 
   /**
@@ -77,18 +68,18 @@ public class ElasticIndexing {
 
   /**
    *
+   * @return the schema
+   */
+  public Map<String, Object> getSchema() {
+    return schema;
+  }
+
+  /**
+   *
    * @return the setting
    */
   public ElasticSetting getSetting() {
     return setting;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (name == null ? 0 : name.hashCode());
-    return result;
   }
 
 }

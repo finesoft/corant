@@ -20,6 +20,7 @@ import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
@@ -27,11 +28,14 @@ import java.lang.reflect.Type;
 import java.sql.Date;
 import java.time.temporal.Temporal;
 import java.util.Currency;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.corant.shared.util.TypeUtils;
+import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.annotation.EsAlias;
 import org.corant.suites.elastic.metadata.annotation.EsArray;
 import org.corant.suites.elastic.metadata.annotation.EsBinary;
@@ -62,20 +66,20 @@ import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
 public class ResolverUtils {
 
   public static Map<String, Object> genFieldMapping(EsAlias ann, List<String> path) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "alias");
     map.put("path", String.join(".", path));
     return map;
   }
 
   public static Map<String, Object> genFieldMapping(EsArray ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", ann.eleType());
     return map;
   }
 
   public static Map<String, Object> genFieldMapping(EsBinary ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "binary");
     map.put("doc_values", ann.doc_values());
     map.put("store", ann.store());
@@ -83,7 +87,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsBoolean ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "boolean");
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -96,7 +100,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsDate ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "date");
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -114,14 +118,14 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsEmbedded ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("dynamic", ann.dynamic());
     map.put("enabled", ann.enabled());
     return map;
   }
 
   public static Map<String, Object> genFieldMapping(EsGeoPoint ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "geo_point");
     map.put("ignore_malformed", ann.ignore_malformed());
     map.put("ignore_z_value", ann.ignore_z_value());
@@ -132,7 +136,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsGeoShape ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "geo_shape");
     EsProperty[] properties = ann.options();
     if (!isEmpty(properties)) {
@@ -144,7 +148,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsIp ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "ip");
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -157,7 +161,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsKeyword ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "keyword");
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -172,11 +176,11 @@ public class ResolverUtils {
     map.put("norms", ann.norms());
     map.put("similarity", ann.similarity());
     if (ann.fields() != null && ann.fields().entries().length != 0) {
-      Map<String, Object> fm = new LinkedHashMap<>();
+      Map<String, Object> fm = new HashMap<>();
       for (EsMultiFieldsEntry e : ann.fields().entries()) {
         shouldNotNull(e.fieldName());
         shouldBeFalse(fm.containsKey(e.fieldName()));
-        Map<String, String> pm = new LinkedHashMap<>();
+        Map<String, String> pm = new HashMap<>();
         for (EsMultiFieldsPair p : e.pairs()) {
           pm.put(p.key(), p.value());
         }
@@ -194,14 +198,14 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsNested ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "nested");
     map.put("dynamic", ann.dynamic());
     return map;
   }
 
   public static Map<String, Object> genFieldMapping(EsNumeric ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", ann.type().getValue());
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -219,13 +223,13 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsPercolator ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "percolator");
     return map;
   }
 
   public static Map<String, Object> genFieldMapping(EsRange ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", ann.type().getValue());
     map.put("boost", ann.boost());
     map.put("coerce", ann.coerce());
@@ -241,12 +245,12 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsText ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "text");
     map.put("boost", ann.boost());
     map.put("fielddata", ann.fielddata());
     if (ann.fielddata() && ann.fielddata_frequency_filter() != null) {
-      Map<String, Object> fm = new LinkedHashMap<>();
+      Map<String, Object> fm = new HashMap<>();
       fm.put("max", ann.fielddata_frequency_filter().max());
       fm.put("min", ann.fielddata_frequency_filter().min());
       fm.put("min_segment_size", ann.fielddata_frequency_filter().min_segment_size());
@@ -264,11 +268,11 @@ public class ResolverUtils {
     map.put("search_analyzer", ann.search_analyzer());
     map.put("similarity", ann.similarity());
     if (ann.fields() != null && ann.fields().entries().length != 0) {
-      Map<String, Object> fm = new LinkedHashMap<>();
+      Map<String, Object> fm = new HashMap<>();
       for (EsMultiFieldsEntry e : ann.fields().entries()) {
         shouldNotNull(e.fieldName());
         shouldBeFalse(fm.containsKey(e.fieldName()));
-        Map<String, Object> pm = new LinkedHashMap<>();
+        Map<String, Object> pm = new HashMap<>();
         for (EsMultiFieldsPair p : e.pairs()) {
           if (p.valueType() == java.lang.String.class) {
             pm.put(p.key(), p.value());
@@ -298,7 +302,7 @@ public class ResolverUtils {
   }
 
   public static Map<String, Object> genFieldMapping(EsTokenCount ann) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new HashMap<>();
     map.put("type", "token_count");
     map.put("boost", ann.boost());
     map.put("doc_values", ann.doc_values());
@@ -311,13 +315,15 @@ public class ResolverUtils {
     map.put("store", ann.store());
     return map;
   }
-  // TODO FIXME
-  // public static Map<String, Object> genRelation(Class<?> parentClass, EsRelation rel) {
-  // String parent = parentClass.getSimpleName();
-  // Set<String> children =
-  // asStream(rel.children()).map(Class::getSimpleName).collect(Collectors.toSet());
-  // return asMap(rel.fieldName(), asMap(parent, children));
-  // }
+
+  public static Map<String, Object> genJoinMapping(ElasticMapping mapping) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("type", "join");
+    Map<String, Set<String>> relations = new HashMap<>();
+    resolveJoinMapping(mapping, relations);
+    map.put("relations", relations);
+    return map;
+  }
 
   public static Type getCollectionFieldEleType(Field f, Class<?> contextRawType) {
     return TypeUtils
@@ -342,4 +348,16 @@ public class ResolverUtils {
         || Currency.class.isAssignableFrom(ft) || Number.class.isAssignableFrom(ft);
   }
 
+  private static void resolveJoinMapping(ElasticMapping mapping,
+      Map<String, Set<String>> relation) {
+    if (!isEmpty(mapping.getChildren())) {
+      shouldBeTrue(relation.put(mapping.getName(), mapping.getChildren().stream()
+          .map(c -> c.getName()).collect(Collectors.toSet())) == null);
+      for (ElasticMapping childMapping : mapping) {
+        if (!isEmpty(childMapping.getChildren())) {
+          resolveJoinMapping(childMapping, relation);
+        }
+      }
+    }
+  }
 }

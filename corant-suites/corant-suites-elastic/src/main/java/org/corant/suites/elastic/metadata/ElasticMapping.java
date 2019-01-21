@@ -13,84 +13,49 @@
  */
 package org.corant.suites.elastic.metadata;
 
-import java.util.LinkedHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import org.elasticsearch.index.VersionType;
 
 /**
  * corant-suites-elastic
  *
- * @author bingo 下午4:12:48
+ * @author bingo 下午2:47:08
  *
  */
-public class ElasticMapping<T> {
+public class ElasticMapping implements Iterable<ElasticMapping> {
 
-  public static final String VERSION_SEPARATOR = "_";
-
-  private final ElasticIndexing index;
-  private final Class<T> documentClass;
-  private final Map<String, Object> schema = new LinkedHashMap<>();
+  private final Class<?> documentClass;
   private final boolean versioned;
-  private final String versionPropertyName;
   private final VersionType versionType;
-  private final ElasticRelation relation;
+  private final Set<ElasticMapping> children = new LinkedHashSet<>();
+  private final String name;
 
   /**
-   * @param index
    * @param documentClass
-   * @param schema
-   * @param relation
-   * @param versioned
-   * @param versionPropertyName
+   * @param name
    * @param versionType
    */
-  public ElasticMapping(ElasticIndexing index, Class<T> documentClass, Map<String, Object> schema,
-      ElasticRelation relation, boolean versioned, String versionPropertyName,
-      VersionType versionType) {
+  public ElasticMapping(Class<?> documentClass, String name, VersionType versionType) {
     super();
-    this.index = index;
     this.documentClass = documentClass;
-    this.relation = relation;
-    this.versioned = versioned;
-    this.versionPropertyName = versionPropertyName;
+    this.name = name;
     this.versionType = versionType;
-    if (schema != null) {
-      this.schema.putAll(schema);
-    }
+    versioned = versionType != VersionType.INTERNAL;
   }
 
-  @SuppressWarnings("rawtypes")
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ElasticMapping other = (ElasticMapping) obj;
-    if (documentClass == null) {
-      if (other.documentClass != null) {
-        return false;
-      }
-    } else if (!documentClass.equals(other.documentClass)) {
-      return false;
-    }
-    if (index == null) {
-      if (other.index != null) {
-        return false;
-      }
-    } else if (!index.equals(other.index)) {
-      return false;
-    }
-    return true;
-  }
-
-  public T fromMap(Map<String, Object> record) {
+  public <T> T fromMap(Map<String, Object> map) {
     return null;
+  }
+
+  /**
+   *
+   * @return the children
+   */
+  public Set<ElasticMapping> getChildren() {
+    return children;
   }
 
   /**
@@ -103,34 +68,10 @@ public class ElasticMapping<T> {
 
   /**
    *
-   * @return the index
+   * @return the name
    */
-  public ElasticIndexing getIndex() {
-    return index;
-  }
-
-  /**
-   *
-   * @return the relation
-   */
-  public ElasticRelation getRelation() {
-    return relation;
-  }
-
-  /**
-   *
-   * @return the schema
-   */
-  public Map<String, Object> getSchema() {
-    return schema;
-  }
-
-  /**
-   *
-   * @return the versionPropertyName
-   */
-  public String getVersionPropertyName() {
-    return versionPropertyName;
+  public String getName() {
+    return name;
   }
 
   /**
@@ -141,21 +82,17 @@ public class ElasticMapping<T> {
     return versionType;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (documentClass == null ? 0 : documentClass.hashCode());
-    result = prime * result + (index == null ? 0 : index.hashCode());
-    return result;
-  }
-
   /**
    *
    * @return the versioned
    */
   public boolean isVersioned() {
     return versioned;
+  }
+
+  @Override
+  public Iterator<ElasticMapping> iterator() {
+    return children.iterator();
   }
 
   public Map<String, Object> toMap(Object obj) {

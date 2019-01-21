@@ -19,7 +19,7 @@ import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,8 +29,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.Elastic6Constants;
+import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
-import org.corant.suites.elastic.metadata.resolver.DefaultElasticMappingResolver;
+import org.corant.suites.elastic.metadata.resolver.DefaultElasticIndexingResolver;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.DocWriteResponse.Result;
@@ -56,28 +57,29 @@ import org.elasticsearch.search.sort.SortBuilder;
 public class DefaultElasticDocumentService implements ElasticDocumentService {
 
   @Inject
-  protected DefaultElasticMappingResolver mappingResolver;
+  protected DefaultElasticIndexingResolver indexingResolver;
 
   @Inject
   protected ElasticTransportClientService transportClientService;
 
   @Override
   public int bulkIndex(List<ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticMapping<?>> mapper) {
-    Map<ElasticMapping<?>, List<ElasticDocument>> map = new LinkedHashMap<>();
+      Function<Class<? extends ElasticDocument>, ElasticIndexing> mapper) {
+    Map<Class<? extends ElasticDocument>, List<ElasticDocument>> docMap = new HashMap<>();
     for (ElasticDocument doc : shouldNotNull(docList)) {
-      ElasticMapping<?> mapping = doc == null ? null : mapper.apply(doc.getClass());
-      if (isNotNull(mapping)) {
-        map.computeIfAbsent(mapping, (k) -> new ArrayList<>()).add(doc);
+      if (isNotNull(doc)) {
+        docMap.computeIfAbsent(doc.getClass(), (c) -> new ArrayList<>()).add(doc);
       }
     }
     BulkRequestBuilder brb = getTransportClient().prepareBulk()
         .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE);
-    for (Entry<ElasticMapping<?>, List<ElasticDocument>> entry : map.entrySet()) {
-      ElasticMapping<?> mapping = entry.getKey();
+    for (Entry<Class<? extends ElasticDocument>, List<ElasticDocument>> entry : docMap.entrySet()) {
+      Class<? extends ElasticDocument> docCls = entry.getKey();
+      ElasticIndexing indexing = mapper.apply(docCls);
+      ElasticMapping mapping = indexing.getMapping(docCls);
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
-        IndexRequest rb = indexRequestBuilder(mapping.getIndex().getName(), doc.getEsId(),
+        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getEsId(),
             doc.getEsParentId(), mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
@@ -123,8 +125,8 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
   }
 
   @Override
-  public <T> ElasticMapping<T> resolveMapping(Class<T> docCls) {
-    return mappingResolver.resolve(docCls);
+  public ElasticIndexing resolveIndexing(Class<?> docCls) {
+    return indexingResolver.get(docCls);
   }
 
   @Override
@@ -154,7 +156,7 @@ public class DefaultElasticDocumentService implements ElasticDocumentService {
     if (isNotBlank(parentId)) {
       rb.setParent(parentId);
     }
-    if (isNotNull(versionType)) {
+    if (versionType != VersionType.INTERNAL) {
       shouldBeTrue(version > 0);
       rb.setVersion(version);
       rb.setVersionType(versionType);

@@ -17,7 +17,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.elastic.Elastic6Constants;
-import org.corant.suites.elastic.metadata.resolver.DefaultElasticMappingResolver;
+import org.corant.suites.elastic.metadata.resolver.DefaultElasticIndexingResolver;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.client.transport.TransportClient;
@@ -32,7 +32,7 @@ import org.elasticsearch.client.transport.TransportClient;
 public class DefaultElasticIndicesService implements ElasticIndicesService {
 
   @Inject
-  protected DefaultElasticMappingResolver mappingResolver;
+  protected DefaultElasticIndexingResolver indexingResolver;
 
   @Inject
   protected ElasticTransportClientService transportClientService;

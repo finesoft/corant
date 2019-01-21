@@ -14,6 +14,7 @@
 package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.corant.suites.elastic.Elastic6Constants;
+import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.corant.suites.elastic.model.ElasticVersionedDocument;
@@ -38,11 +40,11 @@ import org.elasticsearch.search.sort.SortBuilder;
 public interface ElasticDocumentService {
 
   default int bulkIndex(List<ElasticDocument> docList, boolean flush) {
-    return bulkIndex(docList, flush, this::resolveMapping);
+    return bulkIndex(docList, flush, this::resolveIndexing);
   }
 
   int bulkIndex(List<ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticMapping<?>> mapper);
+      Function<Class<? extends ElasticDocument>, ElasticIndexing> indexing);
 
   default boolean delete(String indexName, String id) {
     return delete(indexName, id, false);
@@ -56,8 +58,8 @@ public interface ElasticDocumentService {
   long deleteByQuery(String indexName, QueryBuilder qb, boolean flush);
 
   default <T> T get(Class<T> cls, QueryBuilder qb) {
-    ElasticMapping<T> mapping = shouldNotNull(resolveMapping(cls));
-    return get(cls, mapping.getIndex().getName(), qb);
+    ElasticIndexing indexing = shouldNotNull(resolveIndexing(cls));
+    return get(cls, indexing.getName(), qb);
   }
 
   default <T> T get(Class<T> cls, String id) {
@@ -78,33 +80,35 @@ public interface ElasticDocumentService {
     return index(document, document.getEsParentId(), false);
   }
 
-  @SuppressWarnings({"rawtypes"})
   default boolean index(ElasticDocument document, String parentId, boolean flush) {
-    ElasticMapping mapping = shouldNotNull(resolveMapping(document.getClass()));
+    Class<?> docCls = shouldNotNull(document.getClass());
+    ElasticIndexing indexing = shouldNotNull(resolveIndexing(docCls));
+    ElasticMapping mapping = shouldNotNull(indexing.getMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
-      return index(mapping.getIndex().getName(), document.getEsId(), parentId,
-          mapping.toMap(verDoc), flush, verDoc.getVn(), mapping.getVersionType());
+      return index(indexing.getName(), document.getEsId(), parentId, mapping.toMap(verDoc), flush,
+          verDoc.getVn(), mapping.getVersionType());
     } else {
-      return index(mapping.getIndex().getName(), document.getEsId(), parentId,
-          mapping.toMap(document), flush, 0L, null);
+      return index(indexing.getName(), document.getEsId(), parentId, mapping.toMap(document), flush,
+          0L, null);
     }
   }
 
   boolean index(String indexName, String id, String parentId, Map<?, ?> obj, boolean flush,
       long version, VersionType versionType);
 
-  <T> ElasticMapping<T> resolveMapping(Class<T> docCls);
+  ElasticIndexing resolveIndexing(Class<?> docCls);
 
   default <T> List<T> select(Class<T> cls, QueryBuilder qb) {
     return select(cls, qb, null, Elastic6Constants.DFLT_SELECT_SIZE);
   }
 
   default <T> List<T> select(Class<T> cls, QueryBuilder qb, SortBuilder<?> sb, int size) {
-    ElasticMapping<T> mapping = resolveMapping(cls);
-    List<Map<String, Object>> rawResults = select(mapping.getIndex().getName(), qb, sb, size);
+    ElasticIndexing indexing = shouldNotNull(resolveIndexing(cls));
+    ElasticMapping mapping = shouldNotNull(indexing.getMapping(cls));
+    List<Map<String, Object>> rawResults = select(indexing.getName(), qb, sb, size);
     if (!isEmpty(rawResults)) {
-      return rawResults.stream().map(mapping::fromMap).collect(Collectors.toList());
+      return forceCast(rawResults.stream().map(mapping::fromMap).collect(Collectors.toList()));
     }
     return new ArrayList<>();
   }

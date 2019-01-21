@@ -14,15 +14,26 @@
 package org.corant.suites.elastic;
 
 import static org.corant.shared.util.StringUtils.isNoneBlank;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.util.ConfigUtils;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ClassPaths;
+import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.StreamUtils;
 import org.eclipse.microprofile.config.Config;
+import org.elasticsearch.common.bytes.BytesArray;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.XContentType;
 
 /**
  * corant-suites-elastic
@@ -34,11 +45,16 @@ public class ElasticConfig {
 
   public static final String PREFIX = "elastic.";
   public static final String ES_CLU_NOD = ".cluster-nodes";
+  public static final String ES_DOC_PATHS = ".document-paths";
+  public static final String ES_SETTING_PATH = ".setting-path";
   public static final String ES_ADD_PRO = ".property";
+  public static final String ES_IDX_VER = ".index-version";
 
   private String clusterName;
-
   private String clusterNodes;
+  private String documentPaths;
+  private String indexVersion;
+  private Map<String, Object> setting = new LinkedHashMap<>();
 
   private final Map<String, String> properties = new HashMap<>();
 
@@ -63,9 +79,14 @@ public class ElasticConfig {
     propertieNames.forEach(pn -> {
       if (pn.endsWith(ES_CLU_NOD)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setClusterNodes);
+      } else if (pn.endsWith(ES_DOC_PATHS)) {
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setDocumentPaths);
+      } else if (pn.endsWith(ES_SETTING_PATH)) {
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::initSetting);
+      } else if (pn.endsWith(ES_IDX_VER)) {
+        config.getOptionalValue(pn, String.class).ifPresent(cfg::setIndexVersion);
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
-        // handle properties
-        proCfgNmes.add(pn);
+        proCfgNmes.add(pn);// handle properties
       }
     });
     doParseProperties(config, proPrefix, proCfgNmes, cfg);
@@ -125,10 +146,34 @@ public class ElasticConfig {
 
   /**
    *
+   * @return the documentPaths
+   */
+  public String getDocumentPaths() {
+    return documentPaths;
+  }
+
+  /**
+   *
+   * @return the indexVersion
+   */
+  public String getIndexVersion() {
+    return indexVersion;
+  }
+
+  /**
+   *
    * @return the properties
    */
   public Map<String, String> getProperties() {
     return Collections.unmodifiableMap(properties);
+  }
+
+  /**
+   *
+   * @return the setting
+   */
+  public Map<String, Object> getSetting() {
+    return Collections.unmodifiableMap(setting);
   }
 
   @Override
@@ -137,6 +182,28 @@ public class ElasticConfig {
     int result = 1;
     result = prime * result + (clusterName == null ? 0 : clusterName.hashCode());
     return result;
+  }
+
+  /**
+   *
+   * @param setting the setting to set
+   */
+  public void setSetting(Map<String, Object> setting) {
+    this.setting = setting;
+  }
+
+  protected void initSetting(String path) {
+    ResourceInfo setting = ClassPaths.anyway(path).getResources().findFirst().orElse(null);
+    if (setting != null) {
+      try (ByteArrayOutputStream os = new ByteArrayOutputStream();
+          InputStream is = setting.openStream();) {
+        StreamUtils.copy(is, os);
+        this.setting.putAll(XContentHelper
+            .convertToMap(new BytesArray(os.toByteArray()), true, XContentType.JSON).v2());
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e, "%s not found in class path!", path);
+      }
+    }
   }
 
   protected Map<String, String> obtainProperties() {
@@ -157,6 +224,22 @@ public class ElasticConfig {
    */
   protected void setClusterNodes(String clusterNodes) {
     this.clusterNodes = clusterNodes;
+  }
+
+  /**
+   *
+   * @param documentPaths the documentPaths to set
+   */
+  protected void setDocumentPaths(String documentPaths) {
+    this.documentPaths = documentPaths;
+  }
+
+  /**
+   *
+   * @param indexVersion the indexVersion to set
+   */
+  protected void setIndexVersion(String indexVersion) {
+    this.indexVersion = indexVersion;
   }
 
 }

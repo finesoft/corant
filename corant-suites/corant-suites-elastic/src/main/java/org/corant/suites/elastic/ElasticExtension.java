@@ -48,6 +48,10 @@ public class ElasticExtension implements Extension {
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
 
+  public ElasticConfig getConfig(String clusterName) {
+    return configs.get(clusterName);
+  }
+
   /**
    *
    * @return the configs

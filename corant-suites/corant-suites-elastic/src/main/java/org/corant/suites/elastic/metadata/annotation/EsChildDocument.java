@@ -11,20 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.resolver;
+package org.corant.suites.elastic.metadata.annotation;
 
-import org.corant.suites.elastic.metadata.ElasticMapping;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.elasticsearch.index.VersionType;
 
 /**
  * corant-suites-elastic
  *
- * @author bingo 下午4:20:32
+ * @author bingo 下午6:12:49
  *
  */
-public interface ElasticMappingResolver {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface EsChildDocument {
 
-  String DATE_FMT = "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz";
+  Class<?>[] children();
 
-  <T> ElasticMapping<T> resolve(Class<T> documentClass);
+  /**
+   * child name
+   */
+  String name();
 
+  /**
+   * versionType
+   */
+  VersionType versionType() default VersionType.INTERNAL;
 }

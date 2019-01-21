@@ -43,6 +43,6 @@ public @interface EsDocument {
 
   String versionPropertyName() default "";
 
-  VersionType versionType() default VersionType.EXTERNAL_GTE;
+  VersionType versionType() default VersionType.INTERNAL;
 
 }

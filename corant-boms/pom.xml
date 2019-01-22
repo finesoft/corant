@@ -65,6 +65,7 @@
 		<version.tomcat>9.0.13</version.tomcat>
 		<version.undertow>2.0.16.Final</version.undertow>
 		<version.resteasy>3.6.2.Final</version.resteasy>
+		<version.com.fasterxml.jackson>2.9.5</version.com.fasterxml.jackson>
 
 		<version.artemis-cdi-client>2.6.3</version.artemis-cdi-client>
 		<version.keycloak>4.8.2.Final</version.keycloak>
@@ -370,7 +371,29 @@
 				<artifactId>resteasy-multipart-provider</artifactId>
 				<version>${version.resteasy}</version>
 			</dependency>
-			
+
+			<!-- Json -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${version.com.fasterxml.jackson}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${version.com.fasterxml.jackson}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${version.com.fasterxml.jackson}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.jaxrs</groupId>
+				<artifactId>jackson-jaxrs-json-provider</artifactId>
+				<version>${version.com.fasterxml.jackson}</version>
+			</dependency>
+
 			<!-- DataSource -->
 			<dependency>
 				<groupId>com.zaxxer</groupId>

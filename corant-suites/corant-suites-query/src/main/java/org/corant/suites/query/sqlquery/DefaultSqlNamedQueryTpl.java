@@ -42,15 +42,15 @@ public class DefaultSqlNamedQueryTpl
 
   @Override
   public DefaultSqlNamedQuerier doProcess(Map<String, Object> param) {
-    StringWriter sw = new StringWriter();
-    try {
+    try (StringWriter sw = new StringWriter()) {
       Map<String, Object> paramClone = new HashMap<>(param);
       getTemplate().process(paramClone, sw);
+      return new DefaultSqlNamedQuerier(sw.toString(), new Object[0], getResultClass(),
+          getFetchQueries());// FIXME process parameter
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
     }
-    return new DefaultSqlNamedQuerier(sw.toString(), new Object[0], getResultClass(),
-        getFetchQueries());// FIXME process parameter
+
   }
 
   @Override

@@ -13,11 +13,17 @@
  */
 package org.corant.suites.query.esquery;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
+import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.dynamic.template.DynamicQueryTplResolver;
 import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
 import org.corant.suites.query.mapping.Query;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import freemarker.template.TemplateException;
 
 /**
  * corant-suites-query
@@ -27,6 +33,8 @@ import org.corant.suites.query.mapping.Query;
  */
 public class DefaultEsNamedQueryTpl
     extends FreemarkerDynamicQueryTpl<DefaultEsNamedQuerier, Map<String, Object>> {
+
+  final static ObjectMapper objectMapper = new ObjectMapper();
 
   /**
    * @param query
@@ -38,7 +46,16 @@ public class DefaultEsNamedQueryTpl
 
   @Override
   protected DefaultEsNamedQuerier doProcess(Map<String, Object> param) {
-    return null;
+    try (StringWriter sw = new StringWriter()) {
+      Map<String, Object> paramClone = new HashMap<>(param);
+      getTemplate().process(paramClone, sw);
+      return new DefaultEsNamedQuerier(
+          objectMapper.writeValueAsString(objectMapper.readValue(sw.toString(), Object.class)),
+          param, getResultClass(), getFetchQueries());
+    } catch (TemplateException | IOException | NullPointerException e) {
+      throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
+    }
+
   }
 
   @Override

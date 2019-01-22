@@ -13,10 +13,15 @@
  */
 package org.corant.kernel.logging;
 
+import static org.corant.shared.util.ClassUtils.tryAsClass;
+import java.lang.reflect.Method;
+import java.util.logging.Handler;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import org.corant.shared.util.MethodUtils;
 
 /**
  * @author bingo 下午7:37:00
@@ -25,9 +30,28 @@ import javax.enterprise.inject.spi.InjectionPoint;
 @ApplicationScoped
 public class LoggerFactory {
 
+  public static void disableLogger() {
+    LogManager.getLogManager().reset();
+    Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
+    globalLogger.setLevel(java.util.logging.Level.OFF);
+    Handler[] handlers = globalLogger.getHandlers();
+    for (Handler handler : handlers) {
+      globalLogger.removeHandler(handler);
+    }
+    try {
+      Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
+      if (loggerCfgCls != null) {
+        Method method = MethodUtils.getMatchingMethod(loggerCfgCls, "initialize",
+            tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
+        method.invoke(null,
+            tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
+      }
+    } catch (Exception ignore) {
+    }
+  }
+
   @Produces
   Logger createLogger(InjectionPoint injectionPoint) {
     return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
   }
-
 }

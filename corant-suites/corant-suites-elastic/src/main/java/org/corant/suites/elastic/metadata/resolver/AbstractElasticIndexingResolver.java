@@ -141,7 +141,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     } else {
       mapping = new ElasticMapping(docCls, null, versionType);
     }
-    ElasticSetting setting = new ElasticSetting(config.getSetting());
+    ElasticSetting setting = ElasticSetting.of(config.getSetting(), doc);
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping,
         asMap(Elastic6Constants.TYP_NME, asMap("properties", propertiesSchema)));
     assembly(indexing, mapping);

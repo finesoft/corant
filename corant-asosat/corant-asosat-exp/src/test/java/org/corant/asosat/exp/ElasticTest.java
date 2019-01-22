@@ -27,8 +27,8 @@ public class ElasticTest {
   public static void main(String... strings) {
     ElasticSchemaUtils.stdout("my-application", (in, idx) -> {
       System.out.println(in);
+      System.out.println(JsonUtils.toJsonStr(idx.getSetting().getSetting(), true));
       System.out.println(JsonUtils.toJsonStr(idx.getSchema(), true));
-      System.out.println("============================================");
     });
   }
 }

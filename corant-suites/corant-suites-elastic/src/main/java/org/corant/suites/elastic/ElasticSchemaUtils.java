@@ -13,15 +13,10 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
-import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.corant.Corant;
-import org.corant.shared.util.MethodUtils;
+import org.corant.kernel.logging.LoggerFactory;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 
@@ -35,7 +30,7 @@ public class ElasticSchemaUtils {
 
   public static void stdout(String clusterName, BiConsumer<String, ElasticIndexing> out) {
     prepare();
-    Corant corant = new Corant(ElasticSchemaUtils.class);
+    Corant corant = new Corant(ElasticSchemaUtils.class, "-disable_boost_line");
     corant.start();
     ElasticExtension extension = Corant.cdi().select(ElasticExtension.class).get();
     TempElasticIndexingResolver indexingResolver =
@@ -46,23 +41,7 @@ public class ElasticSchemaUtils {
   }
 
   static void prepare() {
-    // disable log4j
-    try {
-      Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
-      if (loggerCfgCls != null) {
-        Method method = MethodUtils.getMatchingMethod(loggerCfgCls, "initialize",
-            tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
-        method.invoke(null,
-            tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
-      }
-    } catch (Exception ignore) {
-    }
-    // disable jul
-    Logger.getGlobal().setLevel(Level.OFF);
-    Handler[] handlers = Logger.getGlobal().getHandlers();
-    for (Handler handler : handlers) {
-      Logger.getGlobal().removeHandler(handler);
-    }
+    LoggerFactory.disableLogger();
     System.setProperty("corant.temp.webserver.auto-start", "false");
   }
 

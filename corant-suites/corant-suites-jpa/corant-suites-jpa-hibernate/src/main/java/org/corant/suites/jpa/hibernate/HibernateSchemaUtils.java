@@ -14,26 +14,21 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.MapUtils.asProperties;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import static org.corant.shared.util.StringUtils.replace;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
+import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.MethodUtils;
 import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.JpaUtils;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -66,7 +61,7 @@ public class HibernateSchemaUtils {
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
-    Corant corant = new Corant(HibernateSchemaUtils.class);
+    Corant corant = new Corant(HibernateSchemaUtils.class, "-disable_logger");
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();
     JpaExtension extension = Corant.cdi().select(JpaExtension.class).get();
@@ -175,23 +170,7 @@ public class HibernateSchemaUtils {
   }
 
   static void prepare() {
-    // disable log4j
-    try {
-      Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
-      if (loggerCfgCls != null) {
-        Method method = MethodUtils.getMatchingMethod(loggerCfgCls, "initialize",
-            tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
-        method.invoke(null,
-            tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
-      }
-    } catch (Exception ignore) {
-    }
-    // disable jul
-    Logger.getGlobal().setLevel(Level.OFF);
-    Handler[] handlers = Logger.getGlobal().getHandlers();
-    for (Handler handler : handlers) {
-      Logger.getGlobal().removeHandler(handler);
-    }
+    LoggerFactory.disableLogger();
     System.setProperty("corant.temp.webserver.auto-start", "false");
   }
 }

@@ -14,6 +14,7 @@
 package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Annotation;
@@ -190,8 +191,7 @@ public class Corant {
     log(logger, "Finished at: %s", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb());
-    String spLine = "--------------------------------------------------";
-    System.out.println(spLine + spLine + "\n");
+    printBoostLine();
     return this;
   }
 
@@ -230,6 +230,13 @@ public class Corant {
       logger.info(() -> msgOrFmt);
     }
 
+  }
+
+  private void printBoostLine() {
+    if (!asSet(args).contains("-disable_boost_line")) {
+      String spLine = "--------------------------------------------------";
+      System.out.println(spLine + spLine + "\n");
+    }
   }
 
   class CorantExtension implements Extension {

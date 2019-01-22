@@ -54,8 +54,8 @@ public class FieldUtils {
           if (!visitor.apply(field)) {
             break stop;
           }
-          current = current.getSuperclass();
         }
+        current = current.getSuperclass();
       }
     }
   }

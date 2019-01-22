@@ -51,6 +51,10 @@
 			<artifactId>corant-asosat-ddd</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-elastic</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<optional>false</optional>
@@ -115,7 +119,7 @@
 		</dependency>
 	</dependencies>
 	<description>Domain Driven Design development stack.</description>
-	
+
 	<build>
 		<resources>
 			<resource>
@@ -128,7 +132,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-		  
+
 		<plugins>
 			<plugin>
 				<groupId>org.corant</groupId>

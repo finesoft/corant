@@ -11,25 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.resolver;
+package org.corant.asosat.exp.provider;
 
-import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticIndexing;
-import org.corant.suites.elastic.metadata.ElasticMapping;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.corant.suites.elastic.ElasticConfig;
+import org.corant.suites.elastic.ElasticExtension;
+import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 
 /**
- * corant-suites-elastic
+ * corant-asosat-exp
  *
- * @author bingo 下午2:55:11
+ * @author bingo 上午10:44:13
  *
  */
-public interface ElasticIndexingResolver {
+@ApplicationScoped
+public class TestElasticIndexingResolver extends AbstractElasticIndexingResolver {
 
-  ElasticIndexing getIndexing(Class<?> documentClass);
+  @Inject
+  ElasticExtension extension;
 
-  Map<String, ElasticIndexing> getIndexings();
+  @Override
+  protected ElasticConfig getConfig() {
+    return extension.getConfig("my-application");
+  }
 
-  ElasticMapping getMapping(Class<?> documentClass);
-
-  Map<Class<?>, ElasticIndexing> getMappings();
 }

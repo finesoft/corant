@@ -30,7 +30,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +63,6 @@ import org.corant.suites.elastic.metadata.annotation.EsGeoPoint;
 import org.corant.suites.elastic.metadata.annotation.EsGeoShape;
 import org.corant.suites.elastic.metadata.annotation.EsIp;
 import org.corant.suites.elastic.metadata.annotation.EsKeyword;
-import org.corant.suites.elastic.metadata.annotation.EsMap;
 import org.corant.suites.elastic.metadata.annotation.EsMappedSuperclass;
 import org.corant.suites.elastic.metadata.annotation.EsNested;
 import org.corant.suites.elastic.metadata.annotation.EsNumeric;
@@ -97,8 +97,18 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   }
 
   @Override
+  public Map<String, ElasticIndexing> getIndexings() {
+    return Collections.unmodifiableMap(namedIndices);
+  }
+
+  @Override
   public ElasticMapping getMapping(Class<?> documentClass) {
     return classMaps.get(documentClass);
+  }
+
+  @Override
+  public Map<Class<?>, ElasticIndexing> getMappings() {
+    return Collections.unmodifiableMap(classIndices);
   }
 
   protected void assembly(ElasticIndexing indexing, ElasticMapping mapping) {
@@ -163,7 +173,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected abstract ElasticConfig getConfig();
 
   protected Set<Class<?>> getDocumentClasses() {
-    Set<String> docPaths = asStream(split(";", getConfig().getDocumentPaths(), true, true))
+    Set<String> docPaths = asStream(split(getConfig().getDocumentPaths(), ";", true, true))
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {
@@ -171,6 +181,13 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
           .filter(dc -> dc.isAnnotationPresent(EsDocument.class)).forEach(docClses::add);
     }
     return docClses;
+  }
+
+  protected void initialize() {
+    Set<Class<?>> docClses = getDocumentClasses();
+    for (Class<?> docCls : docClses) {
+      buildIndex(docCls);
+    }
   }
 
   protected void notSupportLog(Class<?> docCls, List<String> path) {
@@ -181,16 +198,13 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
 
   @PostConstruct
   protected void onPostConstruct() {
-    Set<Class<?>> docClses = getDocumentClasses();
-    for (Class<?> docCls : docClses) {
-      buildIndex(docCls);
-    }
+    initialize();
   }
 
   protected void resolveClassSchema(Class<?> docCls, Map<String, Object> map, List<String> path) {
     traverseFields(docCls, f -> {
       if (!Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
-          && (f.getDeclaringClass().equals(docCls)
+          && (f.getDeclaringClass().equals(docCls) || isSimpleType(f.getType())
               || f.getDeclaringClass().isAnnotationPresent(EsMappedSuperclass.class)
               || f.getDeclaringClass().isAnnotationPresent(EsEmbeddable.class)
               || f.getDeclaringClass().isAnnotationPresent(EsDocument.class))) {
@@ -212,11 +226,13 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
         handled = true;
       } else if (f.isAnnotationPresent(EsNested.class)
           && fcls.isAnnotationPresent(EsEmbeddable.class)) {
-        resolveNestedFieldSchema(docCls, f, map, new LinkedList<>(path));
+        // resolveNestedFieldSchema(docCls, f, map, new LinkedList<>(path));
+        resolveNestedFieldSchema(f.getName(), fcls, f.getAnnotation(EsNested.class), map, path);
         handled = true;
       } else if (f.isAnnotationPresent(EsEmbedded.class)
           && fcls.isAnnotationPresent(EsEmbeddable.class)) {
-        resolveEmbeddedFieldSchema(docCls, f, map, new LinkedList<>(path));
+        // resolveEmbeddedFieldSchema(docCls, f, map, new LinkedList<>(path));
+        resolveEmbeddedFieldSchema(f.getName(), fcls, f.getAnnotation(EsEmbedded.class), map, path);
         handled = true;
       }
     }
@@ -225,18 +241,35 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     }
   }
 
+  protected void resolveComponentFieldSchema(Class<?> docCls, Field f, Map<String, Object> map,
+      List<String> path) {
+    if (f.isAnnotationPresent(EsEmbedded.class)) {
+      resolveEmbeddedFieldSchema(docCls, f, map, new LinkedList<>(path));
+    } else if (f.isAnnotationPresent(EsNested.class)) {
+      resolveNestedFieldSchema(docCls, f, map, new LinkedList<>(path));
+    } else {
+      notSupportLog(docCls, path);
+    }
+  }
+
   protected void resolveEmbeddedFieldSchema(Class<?> docCls, Field f, Map<String, Object> map,
       List<String> path) {
     if (f.isAnnotationPresent(EsEmbedded.class)) {
-      Map<String, Object> objProMap = new LinkedHashMap<>();
-      resolveClassSchema(f.getType(), objProMap, new LinkedList<>(path));
-      if (!objProMap.isEmpty()) {
-        Map<String, Object> objMap = genFieldMapping(f.getAnnotation(EsEmbedded.class));
-        map.put(f.getName(), objMap);
-        objMap.put("properties", objProMap);
-      }
+      resolveEmbeddedFieldSchema(f.getName(), f.getType(), f.getAnnotation(EsEmbedded.class), map,
+          path);
     } else {
       notSupportLog(docCls, path);
+    }
+  }
+
+  protected void resolveEmbeddedFieldSchema(String fn, Class<?> fc, EsEmbedded esEmbedded,
+      Map<String, Object> map, List<String> path) {
+    Map<String, Object> objProMap = new HashMap<>();
+    resolveClassSchema(fc, objProMap, new LinkedList<>(path));
+    if (!objProMap.isEmpty()) {
+      Map<String, Object> objMap = genFieldMapping(esEmbedded);
+      map.put(fn, objMap);
+      objMap.put("properties", objProMap);
     }
   }
 
@@ -249,14 +282,10 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       resolveSimpleFieldSchema(docCls, f, map, new LinkedList<>(curPath));
     } else if (Collection.class.isAssignableFrom(ft)) {
       resolveCollectionFieldSchema(docCls, f, map, new LinkedList<>(curPath));
-    } else if (Map.class.isAssignableFrom(ft) && f.isAnnotationPresent(EsMap.class)) {
+    } else if (Map.class.isAssignableFrom(ft)) {
       resolveMapFieldSchema(docCls, f, map, new LinkedList<>(curPath));
-    } else if (ft.isAnnotationPresent(EsEmbedded.class)) {
-      resolveEmbeddedFieldSchema(docCls, f, map, new LinkedList<>(curPath));
-    } else if (ft.isAnnotationPresent(EsNested.class)) {
-      resolveNestedFieldSchema(docCls, f, map, new LinkedList<>(curPath));
     } else {
-      notSupportLog(docCls, path);
+      resolveComponentFieldSchema(docCls, f, map, new LinkedList<>(curPath));
     }
     if (f.isAnnotationPresent(EsAlias.class)) {
       EsAlias aliasAnn = f.getAnnotation(EsAlias.class);
@@ -272,20 +301,26 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected void resolveNestedFieldSchema(Class<?> docCls, Field f, Map<String, Object> map,
       List<String> path) {
     if (f.isAnnotationPresent(EsNested.class)) {
-      Map<String, Object> objProMap = new LinkedHashMap<>();
-      resolveClassSchema(f.getType(), objProMap, new LinkedList<>(path));
-      if (!objProMap.isEmpty()) {
-        Map<String, Object> objMap = genFieldMapping(f.getAnnotation(EsNested.class));
-        map.put(f.getName(), objMap);
-        objMap.put("properties", objProMap);
-      }
+      resolveNestedFieldSchema(f.getName(), f.getType(), f.getAnnotation(EsNested.class), map,
+          path);
     } else {
       notSupportLog(docCls, path);
     }
   }
 
+  protected void resolveNestedFieldSchema(String fn, Class<?> fc, EsNested nested,
+      Map<String, Object> map, List<String> path) {
+    Map<String, Object> objProMap = new HashMap<>();
+    resolveClassSchema(fc, objProMap, new LinkedList<>(path));
+    if (!objProMap.isEmpty()) {
+      Map<String, Object> objMap = genFieldMapping(nested);
+      map.put(fn, objMap);
+      objMap.put("properties", objProMap);
+    }
+  }
+
   protected Map<String, Object> resolveSchema(Class<?> docCls) {
-    Map<String, Object> fieldMap = new LinkedHashMap<>();
+    Map<String, Object> fieldMap = new HashMap<>();
     resolveClassSchema(docCls, fieldMap, new LinkedList<>());
     return fieldMap;
   }

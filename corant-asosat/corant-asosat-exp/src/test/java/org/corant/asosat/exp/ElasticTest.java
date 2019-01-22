@@ -11,25 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.resolver;
+package org.corant.asosat.exp;
 
-import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticIndexing;
-import org.corant.suites.elastic.metadata.ElasticMapping;
+import org.corant.asosat.ddd.util.JsonUtils;
+import org.corant.suites.elastic.ElasticSchemaUtils;
 
 /**
- * corant-suites-elastic
+ * corant-asosat-exp
  *
- * @author bingo 下午2:55:11
+ * @author bingo 上午10:52:52
  *
  */
-public interface ElasticIndexingResolver {
+public class ElasticTest {
 
-  ElasticIndexing getIndexing(Class<?> documentClass);
-
-  Map<String, ElasticIndexing> getIndexings();
-
-  ElasticMapping getMapping(Class<?> documentClass);
-
-  Map<Class<?>, ElasticIndexing> getMappings();
+  public static void main(String... strings) {
+    ElasticSchemaUtils.stdout("my-application", (in, idx) -> {
+      System.out.println(in);
+      System.out.println(JsonUtils.toJsonStr(idx.getSchema(), true));
+      System.out.println("============================================");
+    });
+  }
 }

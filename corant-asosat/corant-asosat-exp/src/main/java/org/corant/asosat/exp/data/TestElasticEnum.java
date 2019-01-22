@@ -11,25 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.resolver;
-
-import java.util.Map;
-import org.corant.suites.elastic.metadata.ElasticIndexing;
-import org.corant.suites.elastic.metadata.ElasticMapping;
+package org.corant.asosat.exp.data;
 
 /**
- * corant-suites-elastic
+ * corant-asosat-exp
  *
- * @author bingo 下午2:55:11
+ * @author bingo 上午10:35:07
  *
  */
-public interface ElasticIndexingResolver {
+public enum TestElasticEnum {
 
-  ElasticIndexing getIndexing(Class<?> documentClass);
+  ENUM_NONE, ENUM_TWO
 
-  Map<String, ElasticIndexing> getIndexings();
-
-  ElasticMapping getMapping(Class<?> documentClass);
-
-  Map<Class<?>, ElasticIndexing> getMappings();
 }

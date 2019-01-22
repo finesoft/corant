@@ -15,21 +15,18 @@ package org.corant.suites.elastic;
 
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.elasticsearch.client.transport.TransportClient;
@@ -48,17 +45,18 @@ public class ElasticExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
+  protected final Map<String, TransportClient> clients = new ConcurrentHashMap<>();
 
   public ElasticConfig getConfig(String clusterName) {
     return configs.get(clusterName);
   }
 
-  /**
-   *
-   * @return the configs
-   */
   public Map<String, ElasticConfig> getConfigs() {
     return Collections.unmodifiableMap(configs);
+  }
+
+  public TransportClient getTransportClient(String clusterName) {
+    return clients.computeIfAbsent(clusterName, this::produce);
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
@@ -72,35 +70,28 @@ public class ElasticExtension implements Extension {
     }
   }
 
-  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    if (event != null) {
-      for (final String clusterName : configs.keySet()) {
-        event.<TransportClient>addBean().addQualifier(NamedLiteral.of(clusterName))
-            .addTransitiveTypeClosure(TransportClient.class).beanClass(TransportClient.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              try {
-                return produce(beans, clusterName);
-              } catch (UnknownHostException e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((tc, beans) -> tc.close());
-      }
-    }
+  protected void onPreContainerStopEvent(@Observes PreContainerStopEvent e) {
+    clients.values().forEach(TransportClient::close);
   }
 
-  TransportClient produce(Instance<Object> beans, String clusterName) throws UnknownHostException {
+  @SuppressWarnings("resource")
+  TransportClient produce(String clusterName) {
     ElasticConfig cfg = shouldNotNull(configs.get(clusterName));
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());
     TransportClient tc = new PreBuiltTransportClient(builder.build());
-    for (String clusterNode : split(cfg.getClusterNodes(), ",")) {
-      final String[] hostPort = split(clusterNode, ":");
-      shouldBeTrue(
-          hostPort != null && hostPort.length == 2 && isNoneBlank(hostPort[0], hostPort[1]),
-          "Cluster %s node property error", clusterName);
-      tc.addTransportAddress(
-          new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.parseInt(hostPort[1])));
+    for (String clusterNode : split(cfg.getClusterNodes(), ",", true, true)) {
+      final String[] hostPort = split(clusterNode, ":", true, true);
+      shouldBeTrue(hostPort.length == 2, "Cluster %s node property error", clusterName);
+      try {
+        tc.addTransportAddress(new TransportAddress(InetAddress.getByName(hostPort[0]),
+            Integer.parseInt(hostPort[1])));
+        tc.connectedNodes();
+      } catch (NumberFormatException | UnknownHostException e) {
+        throw new CorantRuntimeException(e, "Can not build transport client from %s:%s",
+            (Object[]) hostPort);
+      }
     }
     logger.info(() -> String.format("Built elastic transport client with cluster name is %s.",
         clusterName));

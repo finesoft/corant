@@ -30,7 +30,7 @@ import org.corant.suites.elastic.metadata.annotation.EsText;
  * @author bingo 上午9:57:22
  *
  */
-@EsDocument(indexName = "Test", number_of_replicas = 1, number_of_shards = 5)
+@EsDocument(indexName = "test", number_of_replicas = 1, number_of_shards = 5)
 public class TestElasticDocument extends AbstractElasticDocument {
 
   private static final long serialVersionUID = 270292539040242697L;

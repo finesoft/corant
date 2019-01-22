@@ -48,8 +48,9 @@ public class ElasticSetting {
     int numberOfShards = defaultObject(docAnn.number_of_shards(), DFLT_NUM_OF_SHARDS);
     int numberOfReplicas = defaultObject(docAnn.number_of_replicas(), DFLT_NUM_OF_REPS);
     XContentHelper.update(map,
-        asMap("number_of_shards", numberOfShards <= 0 ? DFLT_NUM_OF_SHARDS : numberOfShards,
-            "number_of_replicas", numberOfReplicas < 0 ? DFLT_NUM_OF_REPS : numberOfReplicas),
+        asMap("index",
+            asMap("number_of_shards", numberOfShards <= 0 ? DFLT_NUM_OF_SHARDS : numberOfShards,
+                "number_of_replicas", numberOfReplicas < 0 ? DFLT_NUM_OF_REPS : numberOfReplicas)),
         true);
     return new ElasticSetting(map);
   }

@@ -49,11 +49,13 @@ public class ElasticConfig {
   public static final String ES_SETTING_PATH = ".setting-path";
   public static final String ES_ADD_PRO = ".property";
   public static final String ES_IDX_VER = ".index-version";
+  public static final String ES_AUTO_UPDATE_SCHEMA = ".auto-update-schame";
 
   private String clusterName;
   private String clusterNodes;
   private String documentPaths;
   private String indexVersion;
+  private boolean autoUpdateSchema = false;
   private Map<String, Object> setting = new LinkedHashMap<>();
 
   private final Map<String, String> properties = new HashMap<>();
@@ -75,7 +77,7 @@ public class ElasticConfig {
     final String proPrefix = PREFIX + name + ES_ADD_PRO;
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
-    cfg.clusterName = name;
+    cfg.setClusterName(name);
     propertieNames.forEach(pn -> {
       if (pn.endsWith(ES_CLU_NOD)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setClusterNodes);
@@ -85,6 +87,8 @@ public class ElasticConfig {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::initSetting);
       } else if (pn.endsWith(ES_IDX_VER)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setIndexVersion);
+      } else if (pn.endsWith(ES_AUTO_UPDATE_SCHEMA)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setAutoUpdateSchema);
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
         proCfgNmes.add(pn);// handle properties
       }
@@ -186,6 +190,14 @@ public class ElasticConfig {
 
   /**
    *
+   * @return the autoUpdateSchema
+   */
+  public boolean isAutoUpdateSchema() {
+    return autoUpdateSchema;
+  }
+
+  /**
+   *
    * @param setting the setting to set
    */
   public void setSetting(Map<String, Object> setting) {
@@ -208,6 +220,14 @@ public class ElasticConfig {
 
   protected Map<String, String> obtainProperties() {
     return properties;
+  }
+
+  /**
+   *
+   * @param autoUpdateSchema the autoUpdateSchema to set
+   */
+  protected void setAutoUpdateSchema(boolean autoUpdateSchema) {
+    this.autoUpdateSchema = autoUpdateSchema;
   }
 
   /**

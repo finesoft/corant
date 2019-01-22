@@ -74,13 +74,13 @@ public class ElasticTest {
   }
 
   public static void main(String... strings) {
-    buildTestPc();
+    schemaOut();
   }
 
   public static void schemaOut(String... strings) {
-    ElasticSchemaUtils.stdout("my-application", (in, idx) -> {
+    ElasticSchemaUtils.stdout("bingo", (in, idx) -> {
       System.out.println(in);
-      System.out.println(JsonUtils.toJsonStr(idx.getSchema(), true));
+      System.out.println(JsonUtils.toJsonStr(idx, true));
     });
   }
 }

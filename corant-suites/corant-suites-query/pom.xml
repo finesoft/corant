@@ -55,10 +55,6 @@
 			<artifactId>calcite-mongodb</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.calcite</groupId>
-			<artifactId>calcite-elasticsearch</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 		</dependency>

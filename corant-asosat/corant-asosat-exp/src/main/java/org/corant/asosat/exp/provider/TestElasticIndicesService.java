@@ -13,41 +13,27 @@
  */
 package org.corant.asosat.exp.provider;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.suites.elastic.ElasticConfig;
 import org.corant.suites.elastic.ElasticExtension;
-import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
+import org.corant.suites.elastic.service.AbstractElasticIndicesService;
+import org.elasticsearch.client.transport.TransportClient;
 
 /**
  * corant-asosat-exp
  *
- * @author bingo 上午10:44:13
+ * @author bingo 下午6:10:30
  *
  */
 @ApplicationScoped
-public class TestElasticIndexingResolver extends AbstractElasticIndexingResolver {
+public class TestElasticIndicesService extends AbstractElasticIndicesService {
 
   @Inject
   ElasticExtension extension;
 
-  @Inject
-  TestElasticIndicesService indexService;
-
   @Override
-  protected void createIndex() {
-    namedIndices.values().forEach(indexService::create);
+  public TransportClient getTransportClient() {
+    return extension.getTransportClient("bingo");
   }
 
-  @Override
-  protected ElasticConfig getConfig() {
-    return extension.getConfig("bingo");
-  }
-
-  @Override
-  @PostConstruct
-  protected void onPostConstruct() {
-    super.onPostConstruct();
-  }
 }

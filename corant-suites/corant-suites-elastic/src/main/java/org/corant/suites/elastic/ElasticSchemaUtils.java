@@ -13,12 +13,12 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.MapUtils.asMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
-import org.corant.suites.elastic.metadata.ElasticIndexing;
-import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
+import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 
 /**
  * corant-suites-elastic
@@ -28,41 +28,21 @@ import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolv
  */
 public class ElasticSchemaUtils {
 
-  public static void stdout(String clusterName, BiConsumer<String, ElasticIndexing> out) {
-    prepare();
+  public static void stdout(String clusterName, BiConsumer<String, Map<String, Object>> out) {
+    prepare(clusterName);
     Corant corant = new Corant(ElasticSchemaUtils.class, "-disable_boost_line");
     corant.start();
-    ElasticExtension extension = Corant.cdi().select(ElasticExtension.class).get();
-    TempElasticIndexingResolver indexingResolver =
-        Corant.wrapUnmanageableBean(new TempElasticIndexingResolver()).get();
-    indexingResolver.config = shouldNotNull(extension.getConfig(clusterName));
-    indexingResolver.initialize();
-    indexingResolver.getIndexings().forEach(out::accept);
+    ElasticIndexingResolver indexingResolver =
+        Corant.cdi().select(ElasticIndexingResolver.class).get();
+    indexingResolver.getIndexings().forEach((n, i) -> {
+      out.accept(n, asMap("setting", i.getSetting().getSetting(), "mappings",
+          asMap(Elastic6Constants.TYP_NME, i.getSchema())));
+    });
   }
 
-  static void prepare() {
+  static void prepare(String clusterName) {
     LoggerFactory.disableLogger();
     System.setProperty("corant.temp.webserver.auto-start", "false");
-  }
-
-  public static class TempElasticIndexingResolver extends AbstractElasticIndexingResolver {
-
-    ElasticConfig config;
-
-    public TempElasticIndexingResolver() {}
-
-    @Override
-    protected ElasticConfig getConfig() {
-      return config;
-    }
-
-    @Override
-    protected void initialize() {
-      super.initialize();
-    }
-
-    @Override
-    protected void onPostConstruct() {}
-
+    System.setProperty("corant.temp.elastic." + clusterName + ".auto-update-schame", "false");
   }
 }

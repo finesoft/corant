@@ -45,7 +45,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ClassPaths.ClassInfo;
-import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.ElasticConfig;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
@@ -141,9 +140,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       mapping = new ElasticMapping(docCls, null, versionType);
     }
     ElasticSetting setting = ElasticSetting.of(config.getSetting(), doc);
-    final Map<String, Object> schema = new HashMap<>();
-    schema.put("mappings", asMap(Elastic6Constants.TYP_NME, asMap("properties", propertiesSchema)));
-    schema.put("settings", asMap("index", setting.getSetting()));
+    final Map<String, Object> schema = new HashMap<>(asMap("properties", propertiesSchema));
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping, schema);
     assembly(indexing, mapping);
   }
@@ -151,9 +148,8 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected void buildIndex(Class<?> childDocCls, ElasticMapping parentMapping,
       Map<String, Object> propertiesSchema) {
     EsChildDocument coc = shouldNotNull(findAnnotation(childDocCls, EsChildDocument.class, false));
-    String childName = coc.name();
     VersionType versionType = coc.versionType();
-    ElasticMapping childMapping = new ElasticMapping(childDocCls, childName, versionType);
+    ElasticMapping childMapping = new ElasticMapping(childDocCls, coc.name(), versionType);
     Map<String, Object> childPropertiesSchema = resolveSchema(childDocCls);
     parentMapping.getChildren().add(childMapping);
     childPropertiesSchema.forEach((k, s) -> {
@@ -170,6 +166,8 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       }
     }
   }
+
+  protected abstract void createIndex();
 
   protected abstract ElasticConfig getConfig();
 
@@ -188,6 +186,9 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     Set<Class<?>> docClses = getDocumentClasses();
     for (Class<?> docCls : docClses) {
       buildIndex(docCls);
+    }
+    if (getConfig().isAutoUpdateSchema()) {
+      createIndex();
     }
   }
 

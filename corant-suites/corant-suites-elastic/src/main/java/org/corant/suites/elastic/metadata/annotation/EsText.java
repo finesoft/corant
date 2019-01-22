@@ -37,7 +37,7 @@ public @interface EsText {
    *
    * @return
    */
-  String analyzer() default "en_standard_edge_ngram";
+  String analyzer() default "standard";
 
   /**
    * Mapping field-level query time boosting. Accepts a floating point number, defaults to 1.0.
@@ -140,7 +140,7 @@ public @interface EsText {
    *
    * @return
    */
-  String search_analyzer() default "en_standard";
+  String search_analyzer() default "standard";
 
   /**
    * The analyzer that should be used at search time when a phrase is encountered. Defaults to the

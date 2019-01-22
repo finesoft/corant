@@ -31,7 +31,7 @@ import org.elasticsearch.index.VersionType;
 @Inherited
 public @interface EsChildDocument {
 
-  Class<?>[] children();
+  Class<?>[] children() default {};
 
   /**
    * child name

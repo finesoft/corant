@@ -126,24 +126,25 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     EsDocument doc = findAnnotation(shouldNotNull(docCls), EsDocument.class, false);
     VersionType versionType = doc.versionType();
     String indexName = shouldNotNull(doc.indexName());
-    Map<String, Object> propertiesSchema = resolveSchema(docCls);
+    final Map<String, Object> propertiesSchema = resolveSchema(docCls);
     EsParentDocument poc = findAnnotation(shouldNotNull(docCls), EsParentDocument.class, false);
     ElasticMapping mapping = null;
     if (poc != null) {
-      propertiesSchema.put(shouldNotNull(poc.fieldName()),
-          asMap("relations", genJoinMapping(mapping)));
       Class<?>[] childClses = poc.children();
       shouldBeFalse(isEmpty(childClses));
       mapping = new ElasticMapping(docCls, shouldNotNull(poc.name()), versionType);
       for (Class<?> childCls : childClses) {
         buildIndex(childCls, mapping, propertiesSchema);
       }
+      propertiesSchema.put(shouldNotNull(poc.fieldName()), genJoinMapping(mapping));
     } else {
       mapping = new ElasticMapping(docCls, null, versionType);
     }
     ElasticSetting setting = ElasticSetting.of(config.getSetting(), doc);
-    ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping,
-        asMap(Elastic6Constants.TYP_NME, asMap("properties", propertiesSchema)));
+    final Map<String, Object> schema = new HashMap<>();
+    schema.put("mappings", asMap(Elastic6Constants.TYP_NME, asMap("properties", propertiesSchema)));
+    schema.put("settings", asMap("index", setting.getSetting()));
+    ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping, schema);
     assembly(indexing, mapping);
   }
 

@@ -93,7 +93,7 @@ public @interface EsKeyword {
    *
    * @return
    */
-  String normalizer() default "lowercase";
+  String normalizer() default "";
 
   /**
    * Whether field-length should be taken into account when scoring queries. Accepts true or false

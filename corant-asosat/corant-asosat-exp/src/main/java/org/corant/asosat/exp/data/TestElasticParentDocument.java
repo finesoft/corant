@@ -11,32 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.metadata.annotation;
+package org.corant.asosat.exp.data;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.elasticsearch.index.VersionType;
+import org.corant.suites.elastic.metadata.annotation.EsDocument;
+import org.corant.suites.elastic.metadata.annotation.EsParentDocument;
 
 /**
- * corant-suites-elastic
+ * corant-asosat-exp
  *
- * @author bingo 上午11:45:06
+ * @author bingo 下午4:38:49
  *
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-@Inherited
-public @interface EsDocument {
+@EsDocument(indexName = "test-pc", number_of_replicas = 1, number_of_shards = 2)
+@EsParentDocument(fieldName = "relation", name = "parent",
+    children = {TestElasticChildDocument.class})
+public class TestElasticParentDocument extends AbstractElasticDocument {
 
-  String indexName();
+  private static final long serialVersionUID = 926155821793202368L;
 
-  int number_of_replicas() default 0;
-
-  int number_of_shards() default 1;
-
-  VersionType versionType() default VersionType.INTERNAL;
+  @Override
+  public String getEsId() {
+    return null;
+  }
 
 }

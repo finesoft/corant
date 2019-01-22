@@ -14,6 +14,7 @@
 package org.corant.suites.elastic;
 
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
@@ -88,17 +89,18 @@ public class ElasticExtension implements Extension {
   }
 
   TransportClient produce(Instance<Object> beans, String clusterName) throws UnknownHostException {
-    ElasticConfig cfg = configs.get(clusterName);
+    ElasticConfig cfg = shouldNotNull(configs.get(clusterName));
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());
     TransportClient tc = new PreBuiltTransportClient(builder.build());
     for (String clusterNode : split(cfg.getClusterNodes(), ",")) {
-      String[] hostPort = split(clusterNode, ":");
-      shouldBeTrue(hostPort != null && hostPort.length == 2 && isNoneBlank(hostPort),
+      final String[] hostPort = split(clusterNode, ":");
+      shouldBeTrue(
+          hostPort != null && hostPort.length == 2 && isNoneBlank(hostPort[0], hostPort[1]),
           "Cluster %s node property error", clusterName);
       tc.addTransportAddress(
-          new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.valueOf(hostPort[1])));
+          new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.parseInt(hostPort[1])));
     }
     logger.info(() -> String.format("Built elastic transport client with cluster name is %s.",
         clusterName));

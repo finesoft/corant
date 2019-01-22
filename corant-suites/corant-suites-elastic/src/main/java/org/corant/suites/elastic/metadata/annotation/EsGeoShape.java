@@ -40,5 +40,5 @@ public @interface EsGeoShape {
    *
    * @return options
    */
-  EsProperty[] options();
+  EsProperty[] options() default {};
 }

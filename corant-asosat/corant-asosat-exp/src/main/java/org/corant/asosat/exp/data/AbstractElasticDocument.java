@@ -55,7 +55,7 @@ public abstract class AbstractElasticDocument implements ElasticDocument {
   private Instant dateRange;
 
   @EsRange(type = RangeType.INTEGER_RANGE, properties = {})
-  private Integer range;
+  private Integer integerRange;
 
   @EsBoolean
   private boolean bool;
@@ -64,11 +64,35 @@ public abstract class AbstractElasticDocument implements ElasticDocument {
   private TestElasticEnum enums;
 
   /**
+   * 
+   * @return the dateRange
+   */
+  public Instant getDateRange() {
+    return dateRange;
+  }
+
+  /**
+   * 
+   * @return the enums
+   */
+  public TestElasticEnum getEnums() {
+    return enums;
+  }
+
+  /**
    *
    * @return the instant
    */
   public Instant getInstant() {
     return instant;
+  }
+
+  /**
+   * 
+   * @return the integerRange
+   */
+  public Integer getIntegerRange() {
+    return integerRange;
   }
 
   /**
@@ -85,14 +109,6 @@ public abstract class AbstractElasticDocument implements ElasticDocument {
    */
   public BigDecimal getNumber() {
     return number;
-  }
-
-  /**
-   *
-   * @return the range
-   */
-  public Integer getRange() {
-    return range;
   }
 
   /**
@@ -121,10 +137,34 @@ public abstract class AbstractElasticDocument implements ElasticDocument {
 
   /**
    *
+   * @param dateRange the dateRange to set
+   */
+  public void setDateRange(Instant dateRange) {
+    this.dateRange = dateRange;
+  }
+
+  /**
+   *
+   * @param enums the enums to set
+   */
+  public void setEnums(TestElasticEnum enums) {
+    this.enums = enums;
+  }
+
+  /**
+   *
    * @param instant the instant to set
    */
   public void setInstant(Instant instant) {
     this.instant = instant;
+  }
+
+  /**
+   *
+   * @param integerRange the integerRange to set
+   */
+  public void setIntegerRange(Integer integerRange) {
+    this.integerRange = integerRange;
   }
 
   /**
@@ -141,14 +181,6 @@ public abstract class AbstractElasticDocument implements ElasticDocument {
    */
   public void setNumber(BigDecimal number) {
     this.number = number;
-  }
-
-  /**
-   *
-   * @param range the range to set
-   */
-  public void setRange(Integer range) {
-    this.range = range;
   }
 
   /**

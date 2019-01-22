@@ -13,6 +13,10 @@
  */
 package org.corant.asosat.exp.data;
 
+import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.ObjectUtils.asString;
+import java.util.ArrayList;
+import java.util.List;
 import org.corant.suites.elastic.metadata.annotation.EsEmbeddable;
 import org.corant.suites.elastic.metadata.annotation.EsKeyword;
 import org.corant.suites.elastic.metadata.annotation.EsText;
@@ -31,6 +35,22 @@ public class TestElasticNested {
 
   @EsText
   private String neText;
+
+  /**
+   * @param neKeyword
+   * @param neText
+   */
+  public TestElasticNested(Object neKeyword, Object neText) {
+    super();
+    this.neKeyword = asString(neKeyword);
+    this.neText = asString(neText);
+  }
+
+  public static List<TestElasticNested> of(String... args) {
+    List<TestElasticNested> list = new ArrayList<>();
+    asMap((Object[]) args).forEach((k, v) -> list.add(new TestElasticNested(k, v)));
+    return list;
+  }
 
   /**
    *

@@ -58,7 +58,7 @@ public @interface EsRange {
    *
    * @return properties
    */
-  EsProperty[] properties();
+  EsProperty[] properties() default {};
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

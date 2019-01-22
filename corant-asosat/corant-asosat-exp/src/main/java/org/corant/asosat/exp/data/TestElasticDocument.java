@@ -53,10 +53,9 @@ public class TestElasticDocument extends AbstractElasticDocument {
   @EsArray(eleType = "long")
   private Long[] longArr;
 
-  @EsText(analyzer = "edge_ngram", search_analyzer = "standard",
+  @EsText(analyzer = "standard", search_analyzer = "standard",
       fields = @EsMultiFields(entries = {@EsMultiFieldsEntry(fieldName = "value",
-          pairs = {@EsMultiFieldsPair(key = "type", value = "keyword"),
-              @EsMultiFieldsPair(key = "normalizer", value = "lowercase")})}))
+          pairs = {@EsMultiFieldsPair(key = "type", value = "keyword")})}))
   private String multi;
 
   /**

@@ -17,18 +17,21 @@ import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.asString;
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.elastic.metadata.annotation.EsEmbeddable;
+import org.corant.suites.elastic.metadata.annotation.EsChildDocument;
 import org.corant.suites.elastic.metadata.annotation.EsKeyword;
 import org.corant.suites.elastic.metadata.annotation.EsText;
+import org.corant.suites.elastic.model.ElasticDocument;
 
 /**
  * corant-asosat-exp
  *
- * @author bingo 上午10:03:22
+ * @author bingo 下午4:39:40
  *
  */
-@EsEmbeddable
-public class TestElasticEmbeddable {
+@EsChildDocument(name = "child")
+public class TestElasticChildDocument implements ElasticDocument {
+
+  private static final long serialVersionUID = 6716789932694310476L;
 
   @EsKeyword(ignore_above = 256)
   private String emKeyword;
@@ -40,15 +43,15 @@ public class TestElasticEmbeddable {
    * @param emKeyword
    * @param emText
    */
-  public TestElasticEmbeddable(Object emKeyword, Object emText) {
+  public TestElasticChildDocument(Object emKeyword, Object emText) {
     super();
     this.emKeyword = asString(emKeyword);
     this.emText = asString(emText);
   }
 
-  public static List<TestElasticEmbeddable> of(String... args) {
-    List<TestElasticEmbeddable> list = new ArrayList<>();
-    asMap((Object[]) args).forEach((k, v) -> list.add(new TestElasticEmbeddable(k, v)));
+  public static List<TestElasticChildDocument> of(String... args) {
+    List<TestElasticChildDocument> list = new ArrayList<>();
+    asMap((Object[]) args).forEach((k, v) -> list.add(new TestElasticChildDocument(k, v)));
     return list;
   }
 
@@ -68,6 +71,11 @@ public class TestElasticEmbeddable {
     return emText;
   }
 
+  @Override
+  public String getEsId() {
+    return null;
+  }
+
   /**
    *
    * @param emKeyword the emKeyword to set
@@ -83,5 +91,4 @@ public class TestElasticEmbeddable {
   public void setEmText(String emText) {
     this.emText = emText;
   }
-
 }

@@ -13,7 +13,9 @@
  */
 package org.corant.suites.query.esquery;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.corant.suites.query.esquery.EsInLineNamedQueryResolver.Querier;
 import org.corant.suites.query.mapping.FetchQuery;
 
@@ -28,22 +30,33 @@ public class DefaultEsNamedQuerier implements Querier<String, FetchQuery> {
   protected final String script;
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
+  protected final Map<String, String> hints = new HashMap<>();
 
   /**
    * @param script
    * @param resultClass
+   * @param hints
    * @param fetchQueries
    */
-  public DefaultEsNamedQuerier(String script, Class<?> resultClass, List<FetchQuery> fetchQueries) {
+  public DefaultEsNamedQuerier(String script, Class<?> resultClass, Map<String, String> hints,
+      List<FetchQuery> fetchQueries) {
     super();
     this.script = script;
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
+    if (hints != null) {
+      this.hints.putAll(hints);
+    }
   }
 
   @Override
   public List<FetchQuery> getFetchQueries() {
     return fetchQueries;
+  }
+
+  @Override
+  public Map<String, String> getHints() {
+    return hints;
   }
 
   /**

@@ -24,6 +24,7 @@ import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
 import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
 import org.corant.suites.query.mapping.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 
@@ -72,8 +73,9 @@ public class DefaultEsNamedQueryTpl
     try (StringWriter sw = new StringWriter()) {
       getTemplate().process(param, sw);
       return new DefaultEsNamedQuerier(
-          OM.writeValueAsString(OM.readValue(sw.toString(), Object.class)), getResultClass(),
-          getFetchQueries());
+          OM.writer(JsonpCharacterEscapes.instance())
+              .writeValueAsString(OM.readValue(sw.toString(), Object.class)),
+          getResultClass(), resolveHints(), getFetchQueries());
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
     }
@@ -83,6 +85,12 @@ public class DefaultEsNamedQueryTpl
   protected DynamicQueryTplMmResolver<Map<String, Object>> getTemplateMethodModel(
       Map<String, Object> param) {
     return null;// We are in line
+  }
+
+  protected Map<String, String> resolveHints() {
+    Map<String, String> map = new HashMap<>();
+    getHints().forEach(hint -> map.put(hint.getKey(), hint.getValue()));
+    return map;
   }
 
 }

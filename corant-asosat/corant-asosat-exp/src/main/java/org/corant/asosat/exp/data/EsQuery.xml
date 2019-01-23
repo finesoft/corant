@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<query-mappings
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<common-segment>
+		This is common segment!
+	</common-segment>
+
+	<query name="test.searchAll" result-class="java.util.Map"
+		cache="true" cache-resultset-metadata="false">
+		<script>
+			<![CDATA[
+			 	{
+				  	<#if keyword??>
+				  		"term": {
+						      "instant": "${keyword}"
+						    }
+				  	<#else>
+				    	"match_all": {}
+				    </#if>
+				}
+				
+			]]>
+		</script>
+	</query>
+</query-mappings>

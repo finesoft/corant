@@ -13,8 +13,10 @@
  */
 package org.corant.suites.query.dynamic.template;
 
+import static org.corant.shared.util.CollectionUtils.isEmpty;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
+import org.corant.suites.query.mapping.QueryHint;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -44,6 +47,7 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
   protected final ConversionService conversionService;
+  protected final List<QueryHint> hints = new ArrayList<>();
 
   public FreemarkerDynamicQueryTpl(Query query, ConversionService conversionService) {
     if (query == null || conversionService == null) {
@@ -56,7 +60,11 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
     this.resultClass = query.getResultClass() == null ? Map.class : query.getResultClass();
     this.paramConvertSchema = Collections.unmodifiableMap(query.getParamMappings().entrySet()
         .stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getType())));
+    if (!isEmpty(query.getHints())) {
+      query.getHints().forEach(hints::add);
+    }
     this.cachedTimestemp = Instant.now().toEpochMilli();
+
     try {
       this.template = new Template(this.queryName, query.getScript(), FM_CFG);
     } catch (IOException e) {
@@ -78,6 +86,13 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
   @Override
   public List<FetchQuery> getFetchQueries() {
     return this.fetchQueries;
+  }
+
+  /**
+   * @return the hints
+   */
+  public List<QueryHint> getHints() {
+    return hints;
   }
 
   /**

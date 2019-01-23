@@ -14,6 +14,7 @@
 package org.corant.asosat.exp;
 
 import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.MapUtils.asMap;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.corant.asosat.ddd.util.JsonUtils;
 import org.corant.asosat.exp.provider.TestElasticIndicesService;
+import org.corant.asosat.exp.provider.TestEsNamedQuery;
 import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -55,7 +57,20 @@ public class MultipartTest {
   @Inject
   TestElasticIndicesService es;
 
+  @Inject
+  TestEsNamedQuery eq;
+
   @Test
+  public void elasticQuery() throws IOException {
+    Map<String, Object> list = eq.get("test.searchAll", asMap("keyword", "1548145685337"));
+    System.out.println(JsonUtils.toJsonStr(list, true));
+    // String query = " {\"term\": { \"enums\": \"enum_one\" } } ";
+    // System.out.println(query);
+    // WrapperQueryBuilder qb = QueryBuilders.wrapperQuery(query);
+    // es.getTransportClient().prepareSearch("test").setQuery(qb).get();
+  }
+
+  // @Test
   public void elasticTest() throws IOException {
     TransportClient tc = es.getTransportClient();
     SearchResponse sr = tc.prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).get();

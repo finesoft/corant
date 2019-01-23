@@ -7,7 +7,7 @@
 	
 	<query name="Test.get"
 		result-class="java.util.Map" cache="true"
-		cache-resuleset-metadata="false">
+		cache-resultset-metadata="false">
 		<script>
 			<![CDATA[
 				SELECT
@@ -26,7 +26,7 @@
 	</query>
 
 	<query name="Test.query" result-class="java.util.Map"
-		cache="true" cache-resuleset-metadata="false">
+		cache="true" cache-resultset-metadata="false">
 		<script>
 			<![CDATA[
 				SELECT

@@ -11,30 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.esquery;
+package org.corant.asosat.exp.provider;
 
-import java.util.List;
-import java.util.Map;
+import javax.inject.Inject;
+import org.corant.suites.elastic.ElasticExtension;
+import org.corant.suites.elastic.service.AbstractElasticDocumentService;
+import org.elasticsearch.client.transport.TransportClient;
 
 /**
- * asosat-query
+ * corant-asosat-exp
  *
- * @author bingo 下午3:13:37
+ * @author bingo 下午7:40:34
  *
  */
-public interface EsInLineNamedQueryResolver<K, P, S, F> {
+public class TestElasticDocumentService extends AbstractElasticDocumentService {
 
-  Querier<S, F> resolve(K key, P param);
+  @Inject
+  ElasticExtension extension;
 
-  interface Querier<S, F> {
-
-    List<F> getFetchQueries();
-
-    Map<String, String> getHints();
-
-    <T> Class<T> getResultClass();
-
-    S getScript();
+  @Override
+  public TransportClient getTransportClient() {
+    return extension.getTransportClient("bingo");
   }
 
 }

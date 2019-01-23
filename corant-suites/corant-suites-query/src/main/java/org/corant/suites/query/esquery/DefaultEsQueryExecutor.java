@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.suites.query.QueryUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -65,7 +66,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
     QueryBuilder qb = QueryBuilders.wrapperQuery(script);
     SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(1).get();
     if (sr != null) {
-      List<?> list = extractResult(sr, hints, false);
+      List<?> list = extractResult(sr, hints, true);
       if (!isEmpty(list)) {
         return getObjMapper().convertValue(list.get(0), resultClass);
       }
@@ -79,7 +80,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
     QueryBuilder qb = QueryBuilders.wrapperQuery(script);
     SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(1).get();
     if (sr != null) {
-      List<?> list = extractResult(sr, hints, false);
+      List<?> list = extractResult(sr, hints, true);
       if (!isEmpty(list)) {
         return getObjMapper().convertValue(list.get(0),
             new TypeReference<Map<String, Object>>() {});
@@ -125,12 +126,12 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
       XContentBuilder xbuilder = new XContentBuilder(XContentType.JSON.xContent(),
           new ByteArrayOutputStream(), asSet(extractPath));
       XContentBuilder builder = sr.toXContent(xbuilder, ToXContent.EMPTY_PARAMS);
-      BytesReference bytes = BytesReference.bytes(builder.field(extractPath));
+      BytesReference bytes = BytesReference.bytes(builder);
       Map<String, Object> result =
           XContentHelper.convertToMap(bytes, false, XContentType.JSON).v2();
       // now we have structured result map;
       if (!isEmpty(result)) {
-        ResultExtractor.extractResult(result, split(extractPath, ".", true, false), flat, list);
+        QueryUtils.extractResult(result, split(extractPath, ".", true, false), flat, list);
       }
     }
     return list;

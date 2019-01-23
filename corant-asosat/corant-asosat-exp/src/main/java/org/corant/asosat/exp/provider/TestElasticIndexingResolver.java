@@ -13,7 +13,6 @@
  */
 package org.corant.asosat.exp.provider;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.elastic.ElasticConfig;
@@ -45,9 +44,4 @@ public class TestElasticIndexingResolver extends AbstractElasticIndexingResolver
     return extension.getConfig("bingo");
   }
 
-  @Override
-  @PostConstruct
-  protected void onPostConstruct() {
-    super.onPostConstruct();
-  }
 }

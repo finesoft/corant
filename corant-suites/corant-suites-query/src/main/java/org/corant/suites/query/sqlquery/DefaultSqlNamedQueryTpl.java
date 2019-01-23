@@ -15,11 +15,10 @@ package org.corant.suites.query.sqlquery;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
-import org.corant.suites.query.dynamic.template.DynamicQueryTplResolver;
+import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
 import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
 import org.corant.suites.query.mapping.Query;
 import freemarker.template.TemplateException;
@@ -33,41 +32,28 @@ import freemarker.template.TemplateException;
 public class DefaultSqlNamedQueryTpl
     extends FreemarkerDynamicQueryTpl<DefaultSqlNamedQuerier, Object[]> {
 
-  /**
-   * @param query
-   */
   public DefaultSqlNamedQueryTpl(Query query, ConversionService conversionService) {
     super(query, conversionService);
   }
 
+  /**
+   * Generate SQL script with placeholder, and converted the parameter to appropriate type.
+   */
   @Override
-  public DefaultSqlNamedQuerier doProcess(Map<String, Object> param) {
+  public DefaultSqlNamedQuerier doProcess(Map<String, Object> param,
+      DynamicQueryTplMmResolver<Object[]> tmm) {
     try (StringWriter sw = new StringWriter()) {
-      Map<String, Object> paramClone = new HashMap<>(param);
-      getTemplate().process(paramClone, sw);
-      return new DefaultSqlNamedQuerier(sw.toString(), new Object[0], getResultClass(),
-          getFetchQueries());// FIXME process parameter
+      getTemplate().process(param, sw);
+      return new DefaultSqlNamedQuerier(sw.toString(), tmm.getParameters(), getResultClass(),
+          getFetchQueries());
     } catch (TemplateException | IOException | NullPointerException e) {
-      throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
+      throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
     }
-
   }
 
   @Override
-  protected DynamicQueryTplResolver<Object[]> getTemplateMethodModel() {
-    return new DefaultSqlNamedQueryTplResolver();
-  }
-
-  @Override
-  protected void postProcess(DefaultSqlNamedQuerier result,
-      DynamicQueryTplResolver<Object[]> qtmm) {
-    result.withParam(qtmm.getParameters());
-    super.postProcess(result, qtmm);
-  }
-
-  @Override
-  protected void preProcess(Map<String, Object> param, DynamicQueryTplResolver<Object[]> qtmm) {
-    super.preProcess(param, qtmm);
+  protected DynamicQueryTplMmResolver<Object[]> getTemplateMethodModel(Map<String, Object> param) {
+    return new DefaultSqlNamedQueryTplMmResolver().injectTo(param);
   }
 
 }

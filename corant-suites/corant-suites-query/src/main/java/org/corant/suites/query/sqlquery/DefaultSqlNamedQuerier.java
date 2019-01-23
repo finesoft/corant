@@ -15,8 +15,8 @@ package org.corant.suites.query.sqlquery;
 
 import java.util.Arrays;
 import java.util.List;
-import org.corant.suites.query.NamedQueryResolver.Querier;
 import org.corant.suites.query.mapping.FetchQuery;
+import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
 
 /**
  * asosat-query

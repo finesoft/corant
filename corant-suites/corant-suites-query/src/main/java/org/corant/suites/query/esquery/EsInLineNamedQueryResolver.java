@@ -14,28 +14,24 @@
 package org.corant.suites.query.esquery;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 /**
- * corant-suites-query
+ * asosat-query
  *
- * @author bingo 下午8:18:15
+ * @author bingo 下午3:13:37
  *
  */
-public interface EsQueryExecutor {
+public interface EsInLineNamedQueryResolver<K, P, S, F> {
 
-  <T> T get(String indexName, String script, Class<T> resultClass, Map<String, String> hints)
-      throws Exception;
+  Querier<S, F> resolve(K key, P param);
 
-  Map<String, Object> get(String indexName, String script, Map<String, String> hints)
-      throws Exception;
+  interface Querier<S, F> {
 
-  <T> List<T> select(String indexName, String script, Class<T> resultClass,
-      Map<String, String> hints) throws Exception;
+    List<F> getFetchQueries();
 
-  List<Map<String, Object>> select(String indexName, String script, Map<String, String> hints)
-      throws Exception;
+    <T> Class<T> getResultClass();
 
-  <T> Stream<T> stream(String indexName, String script, Map<String, String> hints);
+    S getScript();
+  }
+
 }

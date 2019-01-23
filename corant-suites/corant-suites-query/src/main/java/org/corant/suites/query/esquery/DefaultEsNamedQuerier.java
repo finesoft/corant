@@ -13,10 +13,8 @@
  */
 package org.corant.suites.query.esquery;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import org.corant.suites.query.NamedQueryResolver.Querier;
+import org.corant.suites.query.esquery.EsInLineNamedQueryResolver.Querier;
 import org.corant.suites.query.mapping.FetchQuery;
 
 /**
@@ -25,10 +23,9 @@ import org.corant.suites.query.mapping.FetchQuery;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultEsNamedQuerier implements Querier<String, Map<String, Object>, FetchQuery> {
+public class DefaultEsNamedQuerier implements Querier<String, FetchQuery> {
 
   protected final String script;
-  protected Map<String, Object> convertedParams;
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
 
@@ -39,26 +36,9 @@ public class DefaultEsNamedQuerier implements Querier<String, Map<String, Object
    */
   public DefaultEsNamedQuerier(String script, Class<?> resultClass, List<FetchQuery> fetchQueries) {
     super();
-    this.script = script.replaceAll("[\\t\\n\\r]", " ");
+    this.script = script;
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
-  }
-
-  /**
-   * @param script
-   * @param convertedParams
-   * @param resultClass
-   * @param fetchQueries
-   */
-  public DefaultEsNamedQuerier(String script, Map<String, Object> convertedParams,
-      Class<?> resultClass, List<FetchQuery> fetchQueries) {
-    this(script, resultClass, fetchQueries);
-    setConvertedParams(convertedParams);
-  }
-
-  @Override
-  public Map<String, Object> getConvertedParameters() {
-    return Collections.unmodifiableMap(convertedParams);
   }
 
   @Override
@@ -80,14 +60,4 @@ public class DefaultEsNamedQuerier implements Querier<String, Map<String, Object
     return script;
   }
 
-  void setConvertedParams(Map<String, Object> param) {
-    if (param != null) {
-      convertedParams.putAll(param);
-    }
-  }
-
-  DefaultEsNamedQuerier withParam(Map<String, Object> convertedParams) {
-    setConvertedParams(convertedParams);
-    return this;
-  }
 }

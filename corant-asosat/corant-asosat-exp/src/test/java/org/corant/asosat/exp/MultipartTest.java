@@ -13,14 +13,29 @@
  */
 package org.corant.asosat.exp;
 
+import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Map;
+import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.corant.asosat.ddd.util.JsonUtils;
+import org.corant.asosat.exp.provider.TestElasticIndicesService;
 import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -37,7 +52,25 @@ import org.junit.runner.RunWith;
 @RunWith(CorantJUnit4ClassRunner.class)
 public class MultipartTest {
 
+  @Inject
+  TestElasticIndicesService es;
+
   @Test
+  public void elasticTest() throws IOException {
+    TransportClient tc = es.getTransportClient();
+    SearchResponse sr = tc.prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).get();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+    XContentBuilder xbuilder = new XContentBuilder(XContentType.JSON.xContent(), baos,
+        asSet("hits.hits._source.embeddedCollection.emText"));
+    XContentBuilder builder = sr.toXContent(xbuilder, ToXContent.EMPTY_PARAMS);
+    // String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), DFLT_RS_ETR_PATH);
+    // builder = builder.contentType().xContent().
+    BytesReference bytes = BytesReference.bytes(builder);
+    Map<String, Object> result = XContentHelper.convertToMap(bytes, false, XContentType.JSON).v2();
+    System.out.println(JsonUtils.toJsonStr(result, true));
+  }
+
+  // @Test
   public void sendFile() throws Exception {
     ResteasyClient client = new ResteasyClientBuilder().build();
     ResteasyWebTarget target = client.target("http://localhost:7676/exp/testMultipart/upload");

@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.dynamic.template;
 
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import java.util.Map;
 import freemarker.template.TemplateMethodModelEx;
 
 /**
@@ -21,11 +23,20 @@ import freemarker.template.TemplateMethodModelEx;
  * @author bingo 下午5:40:20
  *
  */
-public interface DynamicQueryTplResolver<CP> extends TemplateMethodModelEx {
+public interface DynamicQueryTplMmResolver<CP> extends TemplateMethodModelEx {
 
   CP getParameters();
 
   QueryTemplateMethodModelType getType();
+
+  default DynamicQueryTplMmResolver<CP> injectTo(Map<String, Object> parameters) {
+    if (parameters != null) {
+      String tmmName = getType().name();
+      shouldBeFalse(parameters.containsKey(tmmName));
+      parameters.put(getType().name(), this);
+    }
+    return this;
+  }
 
   public enum QueryTemplateMethodModelType {
     SP, MP, EP

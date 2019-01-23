@@ -16,7 +16,7 @@ package org.corant.suites.query.sqlquery;
 import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.QueryRuntimeException;
-import org.corant.suites.query.dynamic.template.DynamicQueryTplResolver;
+import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
@@ -32,7 +32,7 @@ import freemarker.template.TemplateSequenceModel;
  * @author bingo 下午7:56:57
  *
  */
-public class DefaultSqlNamedQueryTplResolver implements DynamicQueryTplResolver<Object[]> {
+public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResolver<Object[]> {
 
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);

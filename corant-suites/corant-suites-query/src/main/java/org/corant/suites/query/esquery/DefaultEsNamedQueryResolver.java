@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.kernel.service.ConversionService;
-import org.corant.suites.query.NamedQueryResolver;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
@@ -31,8 +30,8 @@ import org.corant.suites.query.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-public class DefaultEsNamedQueryResolver implements
-    NamedQueryResolver<String, Map<String, Object>, String, Map<String, Object>, FetchQuery> {
+public class DefaultEsNamedQueryResolver
+    implements EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery> {
 
   final Map<String, DefaultEsNamedQueryTpl> cachedQueTpls = new ConcurrentHashMap<>();
 

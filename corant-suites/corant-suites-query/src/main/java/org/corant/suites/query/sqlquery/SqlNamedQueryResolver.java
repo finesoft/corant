@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query;
+package org.corant.suites.query.sqlquery;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * @author bingo 下午3:13:37
  *
  */
-public interface NamedQueryResolver<K, P, S, CP, F> {
+public interface SqlNamedQueryResolver<K, P, S, CP, F> {
 
   Querier<S, CP, F> resolve(K key, P param);
 

@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.query.sqlquery;
@@ -18,9 +16,9 @@ package org.corant.suites.query.sqlquery;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.asStrings;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.query.sqlquery.SqlHelper.getLimit;
 import static org.corant.suites.query.sqlquery.SqlHelper.getOffset;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +27,11 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.apache.commons.beanutils.BeanUtils;
 import org.corant.suites.query.NamedQuery;
-import org.corant.suites.query.NamedQueryResolver;
-import org.corant.suites.query.NamedQueryResolver.Querier;
 import org.corant.suites.query.QueryRuntimeException;
+import org.corant.suites.query.QueryUtils;
 import org.corant.suites.query.mapping.FetchQuery;
-import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
 import org.corant.suites.query.sqlquery.dialect.Dialect;
 
 /**
@@ -53,7 +49,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   Logger logger;
 
   @Inject
-  NamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery> resolver;
+  SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery> resolver;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
     if (param != null && param.containsKey(SqlHelper.OFFSET_PARAM_NME)) {
@@ -74,7 +70,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     String sql = querier.getScript();
-    int offset = getOffset(param), limit = getLimit(param);
+    int offset = getOffset(param);
+    int limit = getLimit(param);
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
@@ -119,7 +116,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     String sql = querier.getScript();
-    int offset = getOffset(param), limit = getLimit(param);
+    int offset = getOffset(param);
+    int limit = getLimit(param);
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
@@ -171,21 +169,18 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     }
   }
 
-  @SuppressWarnings("unchecked")
   protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
     if (null == obj || fetchQuery == null) {
       return;
     }
-    // handle fetch
-    Map<String, Object> fetchParam = resolveFetchParam(obj, fetchQuery, param);
+    Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
     int maxSize = fetchQuery.getMaxSize();
     boolean multiRecords = fetchQuery.isMultiRecords();
-    String injectProName = fetchQuery.getInjectPropertyName(),
-        refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    String injectProName = fetchQuery.getInjectPropertyName();
+    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     Querier<String, Object[], FetchQuery> querier = resolver.resolve(refQueryName, fetchParam);
-    Class<?> rcls = fetchQuery.getResultClass() == null ? querier.getResultClass()
-        : fetchQuery.getResultClass();
     String sql = querier.getScript();
+    Class<?> rcls = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     Object[] params = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     if (maxSize > 0) {
@@ -201,13 +196,9 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         fetchedResult = fetchedList.get(0);
         fetchedList = fetchedList.subList(0, 1);
       }
-      if (obj instanceof Map) {
-        Map.class.cast(obj).put(injectProName, fetchedResult);
-      } else {
-        BeanUtils.setProperty(obj, injectProName, fetchedResult);
-      }
+      QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
       this.fetch(fetchedList, fetchQueries, param);
-    } catch (SQLException | IllegalAccessException | InvocationTargetException e) {
+    } catch (SQLException e) {
       throw new QueryRuntimeException(e);
     }
   }
@@ -228,7 +219,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     return executor;
   }
 
-  protected NamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery> getResolver() {
+  protected SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery> getResolver() {
     return resolver;
   }
 
@@ -236,30 +227,6 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     logger.fine(
         () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query sql]: %s",
             name, String.join(",", asStrings(param)), String.join("; ", sql)));
-  }
-
-  protected Map<String, Object> resolveFetchParam(Object obj, FetchQuery fetchQuery,
-      Map<String, Object> param) {
-    Map<String, Object> pmToUse = new HashMap<>();
-    fetchQuery.getParameters().forEach(p -> {
-      if (p.getSource() == FetchQueryParameterSource.P) {
-        pmToUse.put(p.getName(), param.get(p.getSourceName()));
-      } else if (obj != null) {
-        if (obj instanceof Map) {
-          pmToUse.put(p.getName(), Map.class.cast(obj).get(p.getSourceName()));
-        } else {
-          try {
-            pmToUse.put(p.getName(), BeanUtils.getProperty(obj, p.getSourceName()));
-          } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new QueryRuntimeException(
-                String.format("Can not extract value from query result for fetch query [%s] param!",
-                    fetchQuery.getReferenceQuery()),
-                e);
-          }
-        }
-      }
-    });
-    return pmToUse;
   }
 
   /**

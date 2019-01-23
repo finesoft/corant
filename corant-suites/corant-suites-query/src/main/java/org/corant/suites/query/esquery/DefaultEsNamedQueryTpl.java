@@ -18,10 +18,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.QueryRuntimeException;
-import org.corant.suites.query.dynamic.template.DynamicQueryTplResolver;
+import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
 import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
 import org.corant.suites.query.mapping.Query;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 
@@ -34,7 +36,7 @@ import freemarker.template.TemplateException;
 public class DefaultEsNamedQueryTpl
     extends FreemarkerDynamicQueryTpl<DefaultEsNamedQuerier, Map<String, Object>> {
 
-  final static ObjectMapper objectMapper = new ObjectMapper();
+  public final static ObjectMapper OM = new ObjectMapper();
 
   /**
    * @param query
@@ -45,22 +47,42 @@ public class DefaultEsNamedQueryTpl
   }
 
   @Override
-  protected DefaultEsNamedQuerier doProcess(Map<String, Object> param) {
-    try (StringWriter sw = new StringWriter()) {
-      Map<String, Object> paramClone = new HashMap<>(param);
-      getTemplate().process(paramClone, sw);
-      return new DefaultEsNamedQuerier(
-          objectMapper.writeValueAsString(objectMapper.readValue(sw.toString(), Object.class)),
-          param, getResultClass(), getFetchQueries());
-    } catch (TemplateException | IOException | NullPointerException e) {
-      throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
+  protected Map<String, Object> convertParameter(Map<String, Object> param) {
+    Map<String, Object> convertedParam = new HashMap<>();
+    if (param != null) {
+      convertedParam.putAll(param);
+      getParamConvertSchema().forEach((pn, pc) -> {
+        if (convertedParam.containsKey(pn)) {
+          try {
+            Object cvtVal = conversionService.convert(param.get(pn), pc);
+            String jsonVal = cvtVal == null ? null : OM.writeValueAsString(cvtVal);
+            convertedParam.put(pn, jsonVal);
+          } catch (JsonProcessingException e) {
+            throw new CorantRuntimeException(e, "Can not convert parameter %s to json string", pn);
+          }
+        }
+      });
     }
-
+    return convertedParam;
   }
 
   @Override
-  protected DynamicQueryTplResolver<Map<String, Object>> getTemplateMethodModel() {
-    return null;
+  protected DefaultEsNamedQuerier doProcess(Map<String, Object> param,
+      DynamicQueryTplMmResolver<Map<String, Object>> tmm) {
+    try (StringWriter sw = new StringWriter()) {
+      getTemplate().process(param, sw);
+      return new DefaultEsNamedQuerier(
+          OM.writeValueAsString(OM.readValue(sw.toString(), Object.class)), getResultClass(),
+          getFetchQueries());
+    } catch (TemplateException | IOException | NullPointerException e) {
+      throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
+    }
+  }
+
+  @Override
+  protected DynamicQueryTplMmResolver<Map<String, Object>> getTemplateMethodModel(
+      Map<String, Object> param) {
+    return null;// We are in line
   }
 
 }

@@ -497,7 +497,7 @@ public class StringUtils {
     if (splits.length > 0) {
       int i = 0;
       for (String e : splits) {
-        if (isNotBlank(e) || !removeBlank) {
+        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
           result[i++] = trim ? trim(e) : e;
         }
       }

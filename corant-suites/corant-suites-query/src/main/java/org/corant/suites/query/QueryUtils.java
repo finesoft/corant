@@ -73,7 +73,7 @@ public class QueryUtils {
 
   public static boolean interruptExtract(Object result, String[] paths, boolean flatList,
       List<Object> list) {
-    if (isEmpty(paths) || paths.length == 1) {
+    if (isEmpty(paths)) {
       if (result instanceof Iterable && flatList) {
         asList((Iterable<?>) result).forEach(list::add);
       } else {

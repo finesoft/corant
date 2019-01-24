@@ -23,19 +23,26 @@ import static org.corant.shared.util.StringUtils.split;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.QueryUtils;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.DeprecationHandler;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.search.SearchModule;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,7 +55,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DefaultEsQueryExecutor implements EsQueryExecutor {
 
   public static final String HIT_RS_ETR_PATH_NME = "extract-path";
-  public static final String DFLT_RS_ETR_PATH = "hits.hits._source";
+  public static final String SRC_RS_ETR_PATH = "hits.hits._source";
+  public static final String AGG_RS_ETR_PATH = "aggregations";
+  public static final String SUG_RS_ERT_PATH = "suggest";
+  public static final String COU_RS_ERT_PATH = "hits.total";
 
   final TransportClient transportClient;
 
@@ -63,8 +73,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   @Override
   public <T> T get(String indexName, String script, Class<T> resultClass, Map<String, String> hints)
       throws Exception {
-    QueryBuilder qb = QueryBuilders.wrapperQuery(script);
-    SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(1).get();
+    SearchResponse sr = transportClient.search(buildSearchRequest(script, indexName)).get();
     if (sr != null) {
       List<?> list = extractResult(sr, hints, true);
       if (!isEmpty(list)) {
@@ -77,8 +86,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   @Override
   public Map<String, Object> get(String indexName, String script, Map<String, String> hints)
       throws Exception {
-    QueryBuilder qb = QueryBuilders.wrapperQuery(script);
-    SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(1).get();
+    SearchResponse sr = transportClient.search(buildSearchRequest(script, indexName)).get();
     if (sr != null) {
       List<?> list = extractResult(sr, hints, true);
       if (!isEmpty(list)) {
@@ -92,8 +100,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   @Override
   public <T> List<T> select(String indexName, String script, Class<T> resultClass,
       Map<String, String> hints) throws Exception {
-    QueryBuilder qb = QueryBuilders.wrapperQuery(script);
-    SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(128).get();
+    SearchResponse sr = transportClient.search(buildSearchRequest(script, indexName)).get();
     if (sr != null) {
       List<?> list = extractResult(sr, hints, true);
       return getObjMapper().convertValue(list, new TypeReference<List<T>>() {});
@@ -104,8 +111,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   @Override
   public List<Map<String, Object>> select(String indexName, String script,
       Map<String, String> hints) throws Exception {
-    QueryBuilder qb = QueryBuilders.wrapperQuery(script);
-    SearchResponse sr = transportClient.prepareSearch(indexName).setQuery(qb).setSize(128).get();
+    SearchResponse sr = transportClient.search(buildSearchRequest(script, indexName)).get();
     if (sr != null) {
       List<?> list = extractResult(sr, hints, true);
       return getObjMapper().convertValue(list, new TypeReference<List<Map<String, Object>>>() {});
@@ -118,18 +124,26 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
     return Stream.empty();
   }
 
+  protected SearchRequest buildSearchRequest(String script, String... indexNames) {
+    try {
+      return new SearchRequest(indexNames).source(SearchSourceBuilder
+          .fromXContent(JsonXContent.jsonXContent.createParser(new NamedXContentRegistry(
+              new SearchModule(Settings.EMPTY, false, Collections.emptyList()).getNamedXContents()),
+              DeprecationHandler.THROW_UNSUPPORTED_OPERATION, script)));
+    } catch (IOException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
   protected List<?> extractResult(SearchResponse sr, Map<String, String> hints, boolean flat)
       throws IOException {
     List<Object> list = new ArrayList<>();
     if (sr != null) {
-      String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), DFLT_RS_ETR_PATH);
-      XContentBuilder xbuilder = new XContentBuilder(XContentType.JSON.xContent(),
-          new ByteArrayOutputStream(), asSet(extractPath));
-      XContentBuilder builder = sr.toXContent(xbuilder, ToXContent.EMPTY_PARAMS);
-      BytesReference bytes = BytesReference.bytes(builder);
-      Map<String, Object> result =
-          XContentHelper.convertToMap(bytes, false, XContentType.JSON).v2();
-      // now we have structured result map;
+      String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), SRC_RS_ETR_PATH);
+      Map<String, Object> result = XContentHelper.convertToMap(
+          BytesReference.bytes(sr.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
+              new ByteArrayOutputStream(), asSet(extractPath)), ToXContent.EMPTY_PARAMS)),
+          false, XContentType.JSON).v2();
       if (!isEmpty(result)) {
         QueryUtils.extractResult(result, split(extractPath, ".", true, false), flat, list);
       }

@@ -18,6 +18,7 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.StringUtils.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -34,6 +35,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -84,7 +86,13 @@ public class MapUtils {
 
   public static Map<String, Object> flatMap(Map<String, ?> map, String splitor, int maxDepth) {
     Map<FlatMapKey, Object> flatMap = new HashMap<>();
-    Map<String, Object> stringKeyMap = new HashMap<>();
+    Map<String, Object> stringKeyMap = new TreeMap<>((k1, k2) -> {
+      int s = Integer.compare(split(k1, splitor).length, split(k2, splitor).length);
+      if (s == 0) {
+        return k1.compareTo(k2);
+      }
+      return s;
+    });
     if (map != null) {
       for (Entry<?, ?> entry : map.entrySet()) {
         doFlatMap(flatMap, FlatMapKey.of(entry.getKey()), entry.getValue(), maxDepth);

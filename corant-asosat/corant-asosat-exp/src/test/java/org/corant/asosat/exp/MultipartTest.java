@@ -20,7 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericEntity;
@@ -61,13 +63,37 @@ public class MultipartTest {
   TestEsNamedQuery eq;
 
   @Test
-  public void elasticQuery() throws IOException {
-    Map<String, Object> list = eq.get("test.searchAll", asMap("keyword", "1548145685337"));
+  public void elasticQuery() throws IOException, InterruptedException, ExecutionException {
+    List<Map<String, Object>> list = eq.select("test.searchAll", asMap("keyword", "1548145685337"));
     System.out.println(JsonUtils.toJsonStr(list, true));
-    // String query = " {\"term\": { \"enums\": \"enum_one\" } } ";
-    // System.out.println(query);
-    // WrapperQueryBuilder qb = QueryBuilders.wrapperQuery(query);
-    // es.getTransportClient().prepareSearch("test").setQuery(qb).get();
+    // String query =
+    // "{ \"size\": 10, \"query\": {\"term\": { \"enums\": \"enum_one\"} }, \"aggs\": {\"top_tags\":
+    // { \"terms\": {\"field\": \"esId\",\"size\": 10 }, \"aggs\": {\"top_doc_hits\": {
+    // \"top_hits\": {\"_source\": { \"includes\": [\"keyword\",\"instant\" ]},\"size\": 1 }} }} },
+    // \"sort\": [{ \"esId\": {\"order\": \"desc\" }} ]}";
+    // System.out.println(JsonUtils.toJsonStr(JsonUtils.fromJsonStr(query, Object.class), true));
+    // SearchSourceBuilder ssb = SearchSourceBuilder
+    // .fromXContent(JsonXContent.jsonXContent.createParser(new NamedXContentRegistry(
+    // new SearchModule(Settings.EMPTY, false, Collections.emptyList()).getNamedXContents()),
+    // DeprecationHandler.THROW_UNSUPPORTED_OPERATION, query));
+    // SearchResponse sr = es.getTransportClient().search(new
+    // SearchRequest("test").source(ssb)).get();
+    // ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    // XContentBuilder xbuilder = new XContentBuilder(XContentType.JSON.xContent(), baos);
+    // XContentBuilder builder = sr.toXContent(xbuilder, ToXContent.EMPTY_PARAMS);
+    // BytesReference bytes = BytesReference.bytes(builder);
+    // Map<String, Object> result = XContentHelper.convertToMap(bytes, false,
+    // XContentType.JSON).v2();
+    // System.out.println(JsonUtils.toJsonStr(result, true));
+    // Map<String, Object> flatResult = flatMap(result, ".", 16);
+    // System.out.println(JsonUtils.toJsonStr(flatResult, true));
+    // SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    // SearchModule searchModule = new SearchModule(Settings.EMPTY, false, Collections.emptyList());
+    // try (XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(new
+    // NamedXContentRegistry(searchModule
+    // .getNamedXContents()), query)) {
+    // searchSourceBuilder.parseXContent(parser);
+    // }
   }
 
   // @Test

@@ -9,7 +9,8 @@
 		cache="true" cache-resultset-metadata="false">
 		<script>
 			<![CDATA[
-			 	{
+			 {
+			 	"query":{
 				  	<#if keyword??>
 				  		"term": {
 						      "instant": "${keyword}"
@@ -18,6 +19,7 @@
 				    	"match_all": {}
 				    </#if>
 				}
+			}
 				
 			]]>
 		</script>

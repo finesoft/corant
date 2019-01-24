@@ -541,7 +541,7 @@ public class StringUtils {
   /**
    * corant-shared
    *
-   * Use Glob wildcards for filtering, algorithm from apache.org.
+   * Use Glob wildcards for filtering.
    *
    * @author bingo 下午8:32:50
    *

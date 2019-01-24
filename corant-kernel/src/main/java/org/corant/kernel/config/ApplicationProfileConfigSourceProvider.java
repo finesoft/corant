@@ -17,7 +17,7 @@ package org.corant.kernel.config;
 
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.ifBlank;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
@@ -39,7 +39,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
 
   static String sysPfPro = System.getProperty(CFG_PF_KEY);
   static String sysPfEvn = System.getenv(CFG_PF_KEY);
-  static String[] profiles = split(defaultString(ifBlank(sysPfPro, sysPfEvn)), ",");
+  static String[] profiles = split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
 
   static String[] pfClassPaths = Arrays.stream(profiles)
       .flatMap(p -> Arrays.stream(appExtName).map(e -> metaInf + appBaseName + "-" + p + e))

@@ -16,7 +16,7 @@
 package org.corant.kernel.config;
 
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.ifBlank;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String metaInf = "META-INF/";
   static String sysPro = System.getProperty(ConfigNames.CFG_LOCATION_KEY);
   static String sysEnv = System.getenv(ConfigNames.CFG_LOCATION_KEY);
-  static String fileDir = defaultString(ifBlank(sysPro, sysEnv));
+  static String fileDir = defaultString(defaultBlank(sysPro, sysEnv));
 
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);

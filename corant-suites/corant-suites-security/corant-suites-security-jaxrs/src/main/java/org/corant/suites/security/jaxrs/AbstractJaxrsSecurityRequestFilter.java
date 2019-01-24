@@ -22,7 +22,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import org.corant.shared.util.StringUtils.GlobPatterns;
+import org.corant.shared.util.PathUtils.GlobPatterns;
 import org.corant.suites.security.jaxrs.PathMatcher.CompletePathMatcher;
 import org.corant.suites.security.jaxrs.PathMatcher.GlobPathMatcher;
 import org.corant.suites.security.jaxrs.PathMatcher.RegexPathMatcher;

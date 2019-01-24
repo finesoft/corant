@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.StringUtils.ifBlank;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.isEmpty;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -78,7 +78,7 @@ public class StringZonedDateTimeConverter extends AbstractConverter<String, Zone
       return ZonedDateTime.parse(value);
     } else {
       StringBuilder zone = new StringBuilder("[")
-          .append(ifBlank(zoneId, ZoneId.systemDefault().toString())).append("]");
+          .append(defaultBlank(zoneId, ZoneId.systemDefault().toString())).append("]");
       return ZonedDateTime.parse(value + zone);
     }
   }

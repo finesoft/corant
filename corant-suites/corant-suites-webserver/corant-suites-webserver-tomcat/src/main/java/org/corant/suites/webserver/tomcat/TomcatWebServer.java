@@ -17,7 +17,7 @@ package org.corant.suites.webserver.tomcat;
 
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.ifBlank;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -155,7 +155,7 @@ public class TomcatWebServer extends AbstractWebServer {
       ctx.addServletMappingDecoded("/*", servletName);
     }
     getServletMetaDatas().forEach(sm -> {
-      Wrapper wrapper = Tomcat.addServlet(ctx, ifBlank(sm.getName(), sm.getClazz().getName()),
+      Wrapper wrapper = Tomcat.addServlet(ctx, defaultBlank(sm.getName(), sm.getClazz().getName()),
           sm.getClazz().getName());
       wrapper.setLoadOnStartup(sm.getLoadOnStartup());
       sm.getInitParamsAsMap().forEach(wrapper::addInitParameter);

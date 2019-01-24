@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.corant.shared.util.StringUtils.GlobPatterns;
+import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
  * corant-suites-security-jaxrs

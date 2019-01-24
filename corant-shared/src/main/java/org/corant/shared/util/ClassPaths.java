@@ -61,8 +61,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.StringUtils.GlobMatcher;
-import org.corant.shared.util.StringUtils.GlobPatterns;
+import org.corant.shared.util.PathUtils.GlobMatcher;
+import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
  * corant-shared

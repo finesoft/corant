@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
  *
@@ -36,40 +37,6 @@ public class StringUtils {
 
   private StringUtils() {
     super();
-  }
-
-  /**
-   *
-   * @param seq
-   * @param flags
-   * @param patterns
-   * @return allMatch
-   */
-  public static boolean allMatch(final CharSequence seq, final int flags,
-      final String... patterns) {
-    if (seq == null || patterns.length == 0) {
-      return false;
-    } else {
-      return asStream(patterns).map(ps -> Pattern.compile(ps, 0))
-          .allMatch(p -> p.matcher(seq).find());
-    }
-  }
-
-  /**
-   *
-   * @param seq
-   * @param flags
-   * @param patterns
-   * @return anyMatch
-   */
-  public static boolean anyMatch(final CharSequence seq, final int flags,
-      final String... patterns) {
-    if (seq == null || patterns.length == 0) {
-      return false;
-    } else {
-      return asStream(patterns).map(ps -> Pattern.compile(ps, flags))
-          .anyMatch(p -> p.matcher(seq).find());
-    }
   }
 
   /**
@@ -143,21 +110,6 @@ public class StringUtils {
   }
 
   /**
-   * @param str
-   * @param ignoreCase
-   * @param globExpress
-   * @return globMatch
-   */
-  public static boolean globMatch(final CharSequence str, final boolean ignoreCase,
-      final String globExpress) {
-    if (str == null || isEmpty(globExpress)) {
-      return false;
-    } else {
-      return GlobPatterns.build(globExpress, ignoreCase).matcher(str).matches();
-    }
-  }
-
-  /**
    * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
    *
    * @param iterable
@@ -190,7 +142,7 @@ public class StringUtils {
    * @param dfltStr
    * @return ifBlank
    */
-  public static <T extends CharSequence> T ifBlank(final T str, final T dfltStr) {
+  public static <T extends CharSequence> T defaultBlank(final T str, final T dfltStr) {
     return isBlank(str) ? dfltStr : str;
   }
 
@@ -316,6 +268,70 @@ public class StringUtils {
       return str;
     }
     return str.substring(0, len);
+  }
+
+  /**
+   *
+   * @param seq
+   * @param flags
+   * @param regex
+   * @return matchAllRegex
+   */
+  public static boolean matchAllRegex(final CharSequence seq, final int flags,
+      final String... regex) {
+    if (seq == null || regex.length == 0) {
+      return false;
+    } else {
+      return asStream(regex).map(ps -> Pattern.compile(ps, 0)).allMatch(p -> p.matcher(seq).find());
+    }
+  }
+
+  /**
+   *
+   * @param seq
+   * @param flags
+   * @param regex
+   * @return matchAnyRegex
+   */
+  public static boolean matchAnyRegex(final CharSequence seq, final int flags,
+      final String... regex) {
+    if (seq == null || regex.length == 0) {
+      return false;
+    } else {
+      return asStream(regex).map(ps -> Pattern.compile(ps, flags))
+          .anyMatch(p -> p.matcher(seq).find());
+    }
+  }
+
+  /**
+   * @param str
+   * @param ignoreCase
+   * @param globExpress
+   * @return matchGlob
+   */
+  public static boolean matchGlob(final CharSequence str, final boolean ignoreCase,
+      final String globExpress) {
+    if (str == null || isEmpty(globExpress)) {
+      return false;
+    } else {
+      return GlobPatterns.build(globExpress, ignoreCase).matcher(str).matches();
+    }
+  }
+
+  /**
+   *
+   * @param str
+   * @param ignoreCase
+   * @param globExpress
+   * @return matchWildcard
+   */
+  public static boolean matchWildcard(final String str, final boolean ignoreCase,
+      final String globExpress) {
+    if (str == null || isEmpty(globExpress)) {
+      return false;
+    } else {
+      return WildcardMatcher.of(ignoreCase, globExpress).test(str);
+    }
   }
 
   /**
@@ -541,34 +557,34 @@ public class StringUtils {
   /**
    * corant-shared
    *
-   * Use Glob wildcards for filtering.
+   * Use wildcards for filtering, algorithm from apache.org.
    *
    * @author bingo 下午8:32:50
    *
    */
-  public static class GlobMatcher implements Predicate<String> {
+  public static class WildcardMatcher implements Predicate<String> {
 
     private final boolean ignoreCase;
-    private final String globExpress;
-    private final Pattern pattern;
+    private final String[] tokens;
+    private final String wildcardExpress;
 
     /**
      * @param ignoreCase
-     * @param globExpress
+     * @param wildcardExpress
      */
-    protected GlobMatcher(boolean ignoreCase, String globExpress) {
+    protected WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
       super();
       this.ignoreCase = ignoreCase;
-      this.globExpress = globExpress;
-      pattern = GlobPatterns.build(globExpress, ignoreCase);
+      this.wildcardExpress = wildcardExpress;
+      tokens = splitOnTokens(wildcardExpress);
     }
 
-    public static boolean hasGlobChar(String str) {
-      return str != null && str.chars().anyMatch(GlobPatterns::isGlobChar);
+    public static boolean hasWildcard(String text) {
+      return text.indexOf('?') != -1 || text.indexOf('*') != -1;
     }
 
-    public static GlobMatcher of(boolean ignoreCase, String globExpress) {
-      return new GlobMatcher(ignoreCase, globExpress);
+    public static WildcardMatcher of(boolean ignoreCase, String wildcardExpress) {
+      return new WildcardMatcher(ignoreCase, wildcardExpress);
     }
 
     @Override
@@ -582,34 +598,30 @@ public class StringUtils {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      GlobMatcher other = (GlobMatcher) obj;
-      if (globExpress == null) {
-        if (other.globExpress != null) {
-          return false;
-        }
-      } else if (!globExpress.equals(other.globExpress)) {
+      WildcardMatcher other = (WildcardMatcher) obj;
+      if (ignoreCase != other.ignoreCase) {
         return false;
       }
-      if (ignoreCase != other.ignoreCase) {
+      if (!Arrays.equals(tokens, other.tokens)) {
         return false;
       }
       return true;
     }
 
-    public String getGlobExpress() {
-      return globExpress;
+    public String[] getTokens() {
+      return Arrays.copyOf(tokens, tokens.length);
     }
 
-    public Pattern getPattern() {
-      return pattern;
+    public String getWildcardExpress() {
+      return wildcardExpress;
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (globExpress == null ? 0 : globExpress.hashCode());
       result = prime * result + (ignoreCase ? 1231 : 1237);
+      result = prime * result + Arrays.hashCode(tokens);
       return result;
     }
 
@@ -618,215 +630,103 @@ public class StringUtils {
     }
 
     @Override
-    public boolean test(String t) {
-      return pattern.matcher(t).matches();
-    }
-
-  }
-
-  /**
-   * corant-shared
-   *
-   * @author bingo 下午4:30:24
-   *
-   */
-  public static class GlobPatterns {
-
-    private static final String REG_CHARS = ".^$+{[]|()";
-    private static final String GLO_CHARS = "\\*?[{";
-    private static final char EOL = 0;
-
-    public static Pattern build(String globExpress, boolean ignoreCase) {
-      if (ignoreCase) {
-        return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
-      } else {
-        return Pattern.compile(toUnixRegexPattern(globExpress),
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-      }
-    }
-
-    public static boolean isGlobChar(char c) {
-      return GLO_CHARS.indexOf(c) != -1;
-    }
-
-    public static boolean isGlobChar(int c) {
-      return GLO_CHARS.indexOf(c) != -1;
-    }
-
-    public static boolean isRegexChar(char c) {
-      return REG_CHARS.indexOf(c) != -1;
-    }
-
-    public static boolean isRegexChar(int c) {
-      return REG_CHARS.indexOf(c) != -1;
-    }
-
-    public static String toUnixRegexPattern(String globExpress) {
-      return toRegexPattern(globExpress, false);
-    }
-
-    public static String toWindowsRegexPattern(String globExpress) {
-      return toRegexPattern(globExpress, true);
-    }
-
-    private static char next(String glob, int i) {
-      if (i < glob.length()) {
-        return glob.charAt(i);
-      }
-      return EOL;
-    }
-
-    /**
-     * Creates a regex pattern from the given glob expression.
-     *
-     * @throws PatternSyntaxException
-     */
-    private static String toRegexPattern(String globPattern, boolean isDos) {
-      boolean inGroup = false;
-      StringBuilder regex = new StringBuilder("^");
-
-      int i = 0;
-      while (i < globPattern.length()) {
-        char c = globPattern.charAt(i++);
-        switch (c) {
-          case '\\':
-            // escape special characters
-            if (i == globPattern.length()) {
-              throw new PatternSyntaxException("No character to escape", globPattern, i - 1);
+    public boolean test(final String text) {
+      boolean anyChars = false;
+      int textIdx = 0;
+      int tokenIdx = 0;
+      final Stack<int[]> backtrack = new Stack<>();
+      do {
+        if (backtrack.size() > 0) {
+          final int[] array = backtrack.pop();
+          tokenIdx = array[0];
+          textIdx = array[1];
+          anyChars = true;
+        }
+        while (tokenIdx < tokens.length) {
+          if (tokens[tokenIdx].equals("?")) {
+            textIdx++;
+            if (textIdx > text.length()) {
+              break;
             }
-            char next = globPattern.charAt(i++);
-            if (isGlobChar(next) || isRegexChar(next)) {
-              regex.append('\\');
+            anyChars = false;
+          } else if (tokens[tokenIdx].equals("*")) {
+            anyChars = true;
+            if (tokenIdx == tokens.length - 1) {
+              textIdx = text.length();
             }
-            regex.append(next);
-            break;
-          case '/':
-            if (isDos) {
-              regex.append("\\\\");
-            } else {
-              regex.append(c);
-            }
-            break;
-          case '[':
-            // don't match name separator in class
-            if (isDos) {
-              regex.append("[[^\\\\]&&[");
-            } else {
-              regex.append("[[^/]&&[");
-            }
-            if (next(globPattern, i) == '^') {
-              // escape the regex negation char if it appears
-              regex.append("\\^");
-              i++;
-            } else {
-              // negation
-              if (next(globPattern, i) == '!') {
-                regex.append('^');
-                i++;
-              }
-              // hyphen allowed at start
-              if (next(globPattern, i) == '-') {
-                regex.append('-');
-                i++;
-              }
-            }
-            boolean hasRangeStart = false;
-            char last = 0;
-            while (i < globPattern.length()) {
-              c = globPattern.charAt(i++);
-              if (c == ']') {
+          } else {
+            if (anyChars) {
+              textIdx = checkIndexOf(text, textIdx, tokens[tokenIdx]);
+              if (textIdx == -1) {
                 break;
               }
-              if (c == '/' || isDos && c == '\\') {
-                throw new PatternSyntaxException("Explicit 'name separator' in class", globPattern,
-                    i - 1);
+              final int repeat = checkIndexOf(text, textIdx + 1, tokens[tokenIdx]);
+              if (repeat >= 0) {
+                backtrack.push(new int[] {tokenIdx, repeat});
               }
-              // TBD: how to specify ']' in a class?
-              if (c == '\\' || c == '[' || c == '&' && next(globPattern, i) == '&') {
-                // escape '\', '[' or "&&" for regex class
-                regex.append('\\');
+            } else {
+              if (!checkRegionMatches(text, textIdx, tokens[tokenIdx])) {
+                break;
               }
-              regex.append(c);
+            }
+            textIdx += tokens[tokenIdx].length();
+            anyChars = false;
+          }
+          tokenIdx++;
+        }
+        if (tokenIdx == tokens.length && textIdx == text.length()) {
+          return true;
+        }
+      } while (backtrack.size() > 0);
 
-              if (c == '-') {
-                if (!hasRangeStart) {
-                  throw new PatternSyntaxException("Invalid range", globPattern, i - 1);
-                }
-                if ((c = next(globPattern, i++)) == EOL || c == ']') {
-                  break;
-                }
-                if (c < last) {
-                  throw new PatternSyntaxException("Invalid range", globPattern, i - 3);
-                }
-                regex.append(c);
-                hasRangeStart = false;
-              } else {
-                hasRangeStart = true;
-                last = c;
-              }
-            }
-            if (c != ']') {
-              throw new PatternSyntaxException("Missing ']", globPattern, i - 1);
-            }
-            regex.append("]]");
-            break;
-          case '{':
-            if (inGroup) {
-              throw new PatternSyntaxException("Cannot nest groups", globPattern, i - 1);
-            }
-            regex.append("(?:(?:");
-            inGroup = true;
-            break;
-          case '}':
-            if (inGroup) {
-              regex.append("))");
-              inGroup = false;
-            } else {
-              regex.append('}');
-            }
-            break;
-          case ',':
-            if (inGroup) {
-              regex.append(")|(?:");
-            } else {
-              regex.append(',');
-            }
-            break;
-          case '*':
-            if (next(globPattern, i) == '*') {
-              // crosses directory boundaries
-              regex.append(".*");
-              i++;
-            } else {
-              // within directory boundary
-              if (isDos) {
-                regex.append("[^\\\\]*");
-              } else {
-                regex.append("[^/]*");
-              }
-            }
-            break;
-          case '?':
-            if (isDos) {
-              regex.append("[^\\\\]");
-            } else {
-              regex.append("[^/]");
-            }
-            break;
+      return false;
+    }
 
-          default:
-            if (isRegexChar(c)) {
-              regex.append('\\');
-            }
-            regex.append(c);
+    int checkIndexOf(final String str, final int strStartIndex, final String search) {
+      final int endIndex = str.length() - search.length();
+      if (endIndex >= strStartIndex) {
+        for (int i = strStartIndex; i <= endIndex; i++) {
+          if (checkRegionMatches(str, i, search)) {
+            return i;
+          }
         }
       }
-
-      if (inGroup) {
-        throw new PatternSyntaxException("Missing '}", globPattern, i - 1);
-      }
-
-      return regex.append('$').toString();
+      return -1;
     }
+
+    boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+      return str.regionMatches(ignoreCase, strStartIndex, search, 0, search.length());
+    }
+
+    String[] splitOnTokens(final String wildcardExpress) {
+      if (!hasWildcard(wildcardExpress)) {
+        return new String[] {wildcardExpress};
+      }
+      final char[] array = wildcardExpress.toCharArray();
+      final ArrayList<String> list = new ArrayList<>();
+      final StringBuilder buffer = new StringBuilder();
+      char prevChar = 0;
+      for (final char ch : array) {
+        if (ch == '?' || ch == '*') {
+          if (buffer.length() != 0) {
+            list.add(buffer.toString());
+            buffer.setLength(0);
+          }
+          if (ch == '?') {
+            list.add("?");
+          } else if (prevChar != '*') {
+            list.add("*");
+          }
+        } else {
+          buffer.append(ch);
+        }
+        prevChar = ch;
+      }
+      if (buffer.length() != 0) {
+        list.add(buffer.toString());
+      }
+      return list.toArray(new String[list.size()]);
+    }
+
   }
 }

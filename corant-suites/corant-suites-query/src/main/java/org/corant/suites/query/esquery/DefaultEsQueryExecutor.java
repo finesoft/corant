@@ -18,7 +18,7 @@ import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.MapUtils.isEmpty;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
-import static org.corant.shared.util.StringUtils.ifBlank;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -139,7 +139,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
       throws IOException {
     List<Object> list = new ArrayList<>();
     if (sr != null) {
-      String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), HIT_RS_ETR_PATH);
+      String extractPath = defaultBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), HIT_RS_ETR_PATH);
       Map<String, Object> result = XContentHelper.convertToMap(
           BytesReference.bytes(sr.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
               new ByteArrayOutputStream(), asSet(extractPath)), ToXContent.EMPTY_PARAMS)),

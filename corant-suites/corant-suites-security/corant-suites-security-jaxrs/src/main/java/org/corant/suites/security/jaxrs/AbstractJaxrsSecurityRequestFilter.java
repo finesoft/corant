@@ -22,9 +22,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import org.corant.shared.util.StringUtils.WildcardMatcher;
+import org.corant.shared.util.StringUtils.GlobPatterns;
 import org.corant.suites.security.jaxrs.PathMatcher.CompletePathMatcher;
-import org.corant.suites.security.jaxrs.PathMatcher.WildcardPathMatcher;
+import org.corant.suites.security.jaxrs.PathMatcher.GlobPathMatcher;
+import org.corant.suites.security.jaxrs.PathMatcher.RegexPathMatcher;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -45,9 +46,11 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
   Optional<String> uncoveredUrls;
 
   protected final CompletePathMatcher coveredCompletePathMatcher = new CompletePathMatcher(true);
-  protected final WildcardPathMatcher coveredWildcardPathMatcher = new WildcardPathMatcher(true);
+  protected final GlobPathMatcher coveredGlobPathMatcher = new GlobPathMatcher(true);
+  protected final RegexPathMatcher coveredRegexPathMatcher = new RegexPathMatcher(true);
   protected final CompletePathMatcher uncoveredCompletePathMatcher = new CompletePathMatcher(true);
-  protected final WildcardPathMatcher uncoveredWildcardPathMatcher = new WildcardPathMatcher(true);
+  protected final GlobPathMatcher uncoveredGlobPathMatcher = new GlobPathMatcher(true);
+  protected final RegexPathMatcher uncoveredRegexPathMatcher = new RegexPathMatcher(true);
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -60,8 +63,10 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
     if (covered) {
       for (String url : urls) {
         if (isNotBlank(url)) {
-          if (WildcardMatcher.hasWildcard(url)) {
-            coveredWildcardPathMatcher.addExpresses(url);
+          if (url.chars().anyMatch(GlobPatterns::isRegexChar)) {
+            coveredRegexPathMatcher.addExpresses(url);
+          } else if (url.chars().anyMatch(GlobPatterns::isGlobChar)) {
+            coveredGlobPathMatcher.addExpresses(url);
           } else {
             coveredCompletePathMatcher.addCompareds(url);
           }
@@ -70,8 +75,10 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
     } else {
       for (String url : urls) {
         if (isNotBlank(url)) {
-          if (WildcardMatcher.hasWildcard(url)) {
-            uncoveredWildcardPathMatcher.addExpresses(url);
+          if (url.chars().anyMatch(GlobPatterns::isRegexChar)) {
+            uncoveredRegexPathMatcher.addExpresses(url);
+          } else if (url.chars().anyMatch(GlobPatterns::isGlobChar)) {
+            uncoveredGlobPathMatcher.addExpresses(url);
           } else {
             uncoveredCompletePathMatcher.addCompareds(url);
           }
@@ -86,18 +93,23 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
   protected boolean isCoveredUrl(String url) {
     if (uncoveredCompletePathMatcher.match(url)) {
       return false;
-    } else if (uncoveredWildcardPathMatcher.match(url)) {
+    } else if (uncoveredGlobPathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredRegexPathMatcher.match(url)) {
       return false;
     } else {
-      return coveredCompletePathMatcher.match(url) || coveredWildcardPathMatcher.match(url);
+      return coveredCompletePathMatcher.match(url) || coveredGlobPathMatcher.match(url)
+          || coveredRegexPathMatcher.match(url);
     }
   }
 
   protected void removeUrls(String... urls) {
-    coveredWildcardPathMatcher.removeExpresses(urls);
+    coveredGlobPathMatcher.removeExpresses(urls);
+    coveredRegexPathMatcher.removeExpresses(urls);
     coveredCompletePathMatcher.removeCompareds(urls);
-    uncoveredWildcardPathMatcher.removeExpresses(urls);
+    uncoveredGlobPathMatcher.removeExpresses(urls);
     uncoveredCompletePathMatcher.removeCompareds(urls);
+    uncoveredRegexPathMatcher.removeExpresses(urls);
   }
 
   protected String resolvePath(ContainerRequestContext requestContext) {

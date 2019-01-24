@@ -14,10 +14,13 @@
 package org.corant.suites.security.jaxrs;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
-import org.corant.shared.util.StringUtils.WildcardMatcher;
+import java.util.regex.Pattern;
+import org.corant.shared.util.StringUtils.GlobPatterns;
 
 /**
  * corant-suites-security-jaxrs
@@ -34,9 +37,6 @@ public interface PathMatcher {
     final Set<String> compareds = new HashSet<>();
     final boolean ignoreCase;
 
-    /**
-     * @param ignoreCase
-     */
     public CompletePathMatcher(boolean ignoreCase) {
       super();
       this.ignoreCase = ignoreCase;
@@ -80,21 +80,17 @@ public interface PathMatcher {
     }
   }
 
-  static class WildcardPathMatcher implements PathMatcher {
-
-    final Set<WildcardMatcher> matchers = new HashSet<>();
+  static class GlobPathMatcher implements PathMatcher {
+    final Map<String, Pattern> patterns = new HashMap<>();
     final boolean ignoreCase;
 
-    /**
-     * @param ignoreCase
-     */
-    public WildcardPathMatcher(boolean ignoreCase) {
+    public GlobPathMatcher(boolean ignoreCase) {
       this.ignoreCase = ignoreCase;
     }
 
-    public static WildcardPathMatcher of(boolean ignoreCase, Set<String> wildcardExpresses) {
-      WildcardPathMatcher inst = new WildcardPathMatcher(ignoreCase);
-      for (String wildcardExpress : wildcardExpresses) {
+    public static GlobPathMatcher of(boolean ignoreCase, Set<String> globExpresses) {
+      GlobPathMatcher inst = new GlobPathMatcher(ignoreCase);
+      for (String wildcardExpress : globExpresses) {
         inst.addExpresses(wildcardExpress);
       }
       return inst;
@@ -103,7 +99,7 @@ public interface PathMatcher {
     public void addExpresses(String... strings) {
       for (String s : strings) {
         if (isNotBlank(s)) {
-          matchers.add(WildcardMatcher.of(ignoreCase, s));
+          patterns.put(s, GlobPatterns.build(s, ignoreCase));
         }
       }
     }
@@ -113,8 +109,8 @@ public interface PathMatcher {
       if (path == null) {
         return false;
       }
-      for (WildcardMatcher m : matchers) {
-        if (m.test(path)) {
+      for (Pattern m : patterns.values()) {
+        if (m.matcher(path).matches()) {
           return true;
         }
       }
@@ -123,10 +119,58 @@ public interface PathMatcher {
 
     public void removeExpresses(String... strings) {
       for (String s : strings) {
-        matchers.remove(WildcardMatcher.of(ignoreCase, s));
+        patterns.remove(s);
       }
     }
 
+  }
+
+  static class RegexPathMatcher implements PathMatcher {
+    final Map<String, Pattern> patterns = new HashMap<>();
+    final boolean ignoreCase;
+
+    public RegexPathMatcher(boolean ignoreCase) {
+      this.ignoreCase = ignoreCase;
+    }
+
+    public static RegexPathMatcher of(boolean ignoreCase, Set<String> regexExpresses) {
+      RegexPathMatcher inst = new RegexPathMatcher(ignoreCase);
+      for (String wildcardExpress : regexExpresses) {
+        inst.addExpresses(wildcardExpress);
+      }
+      return inst;
+    }
+
+    public void addExpresses(String... strings) {
+      for (String s : strings) {
+        if (isNotBlank(s)) {
+          if (ignoreCase) {
+            patterns.put(s, Pattern.compile(s));
+          } else {
+            patterns.put(s, Pattern.compile(s, Pattern.CASE_INSENSITIVE));
+          }
+        }
+      }
+    }
+
+    @Override
+    public boolean match(String path) {
+      if (path == null) {
+        return false;
+      }
+      for (Pattern m : patterns.values()) {
+        if (m.matcher(path).matches()) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public void removeExpresses(String... strings) {
+      for (String s : strings) {
+        patterns.remove(s);
+      }
+    }
   }
 
 }

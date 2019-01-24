@@ -61,7 +61,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.StringUtils.WildcardMatcher;
+import org.corant.shared.util.StringUtils.GlobMatcher;
+import org.corant.shared.util.StringUtils.GlobPatterns;
 
 /**
  * corant-shared
@@ -105,6 +106,15 @@ public class ClassPaths {
 
   public static ClassPath anyway(String path) {
     return anyway(defaultClassLoader(), path);
+  }
+
+  public static Scanner buildScanner(String pathExpress, boolean ignoreCase) {
+    if (GlobMatcher.hasGlobChar(pathExpress)) {
+      PathFilter pf = new PathFilter(ignoreCase, pathExpress);
+      return new Scanner(pf.getRoot(), pf);
+    } else {
+      return new Scanner(pathExpress);
+    }
   }
 
   /**
@@ -201,7 +211,7 @@ public class ClassPaths {
    * @throws IOException from
    */
   public static ClassPath from(ClassLoader classLoader, String path) throws IOException {
-    Scanner scanner = PathFilter.buildScanner(defaultString(path), false);
+    Scanner scanner = buildScanner(defaultString(path), false);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
         defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());
@@ -380,38 +390,34 @@ public class ClassPaths {
    * @author bingo 下午8:32:50
    *
    */
-  public static final class PathFilter extends WildcardMatcher {
+  public static final class PathFilter extends GlobMatcher {
 
     protected PathFilter(boolean ignoreCase, String pathExpress) {
       super(ignoreCase, pathExpress);
     }
 
-    public static Scanner buildScanner(String pathExpress, boolean ignoreCase) {
-      if (hasWildcard(pathExpress)) {
-        PathFilter pf = new PathFilter(ignoreCase, pathExpress);
-        return new Scanner(pf.getRoot(), pf);
-      } else {
-        return new Scanner(pathExpress);
-      }
-    }
-
     public String getRoot() {
-      String[] pathTokens = getTokens();
-      if (pathTokens.length == 1) {
-        return pathTokens[0];
-      }
-      for (String path : pathTokens) {
-        if (!hasWildcard(path)) {
-          if (path.indexOf(PATH_SEPARATOR_STRING) != -1) {
-            return path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
-          } else {
-            return path;
-          }
-        } else {
+      String pathExpress = getGlobExpress();
+      int len = pathExpress.length();
+      int idx = -1;
+      for (int i = 0; i < len; i++) {
+        if (GlobPatterns.isGlobChar(pathExpress.charAt(i))) {
+          idx = i;
           break;
         }
       }
-      return StringUtils.EMPTY;
+      if (idx == -1) {
+        return pathExpress;
+      } else if (idx == 0) {
+        return StringUtils.EMPTY;
+      } else {
+        String path = pathExpress.substring(0, idx);
+        if (path.indexOf(PATH_SEPARATOR_STRING) != -1) {
+          return path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
+        } else {
+          return path;
+        }
+      }
     }
   }
 

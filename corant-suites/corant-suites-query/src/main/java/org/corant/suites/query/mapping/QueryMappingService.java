@@ -37,7 +37,7 @@ public class QueryMappingService {
   private volatile boolean initialized = false;
 
   @Inject
-  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/*Query.xml")
+  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
   String mappingFilePaths;
 
   public Query getQuery(String name) {

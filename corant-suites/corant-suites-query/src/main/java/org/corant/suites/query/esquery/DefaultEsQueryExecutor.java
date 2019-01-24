@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DefaultEsQueryExecutor implements EsQueryExecutor {
 
   public static final String HIT_RS_ETR_PATH_NME = "extract-path";
-  public static final String SRC_RS_ETR_PATH = "hits.hits._source";
+  public static final String HIT_RS_ETR_PATH = "hits.hits._source";
   public static final String AGG_RS_ETR_PATH = "aggregations";
   public static final String SUG_RS_ERT_PATH = "suggest";
   public static final String COU_RS_ERT_PATH = "hits.total";
@@ -139,7 +139,7 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
       throws IOException {
     List<Object> list = new ArrayList<>();
     if (sr != null) {
-      String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), SRC_RS_ETR_PATH);
+      String extractPath = ifBlank(getMapString(hints, HIT_RS_ETR_PATH_NME), HIT_RS_ETR_PATH);
       Map<String, Object> result = XContentHelper.convertToMap(
           BytesReference.bytes(sr.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
               new ByteArrayOutputStream(), asSet(extractPath)), ToXContent.EMPTY_PARAMS)),

@@ -166,7 +166,6 @@ public class QueryParseHandler extends DefaultHandler {
     }
   }
 
-
   void handleFetchQueryParameter(boolean start, String qName, Attributes attributes) {
     if (start) {
       FetchQueryParameter fqp = new FetchQueryParameter();
@@ -265,7 +264,7 @@ public class QueryParseHandler extends DefaultHandler {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
         if (SchemaNames.QUE_HIT_ATT_KEY.equalsIgnoreCase(aqn)) {
           hit.setKey(atv);
-        } else if (SchemaNames.QUE_HIT_ATT_KEY.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.QUE_HIT_ATT_VAL.equalsIgnoreCase(aqn)) {
           hit.setValue(atv);
         }
       }

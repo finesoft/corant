@@ -35,53 +35,30 @@ import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
  */
 public class QueryUtils {
 
-  public static void extractResult(Iterable<Object> result, String[] paths, boolean flatList,
+  public static void extractResult(Object result, String paths, boolean flatList,
       List<Object> list) {
-    if (!interruptExtract(result, paths, flatList, list)) {
-      for (Object next : result) {
-        if (next != null) {
-          extractResult(next, paths, flatList, list);
-        }
-      }
-    }
+    extractResult(result, split(paths, ".", true, false), flatList, list);
   }
 
-  public static void extractResult(Map<Object, Object> result, String[] paths, boolean flatList,
-      List<Object> list) {
-    if (!interruptExtract(result, paths, flatList, list)) {
-      String path = paths[0];
-      Object next = result.get(path);
-      if (next != null) {
-        extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
   public static void extractResult(Object result, String[] paths, boolean flatList,
       List<Object> list) {
     if (!interruptExtract(result, paths, flatList, list)) {
       if (result instanceof Map) {
-        extractResult(Map.class.cast(result), paths, flatList, list);
+        String path = paths[0];
+        Object next = Map.class.cast(result).get(path);
+        if (next != null) {
+          extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
+        }
       } else if (result instanceof Iterable) {
-        extractResult(Iterable.class.cast(result), paths, flatList, list);
+        for (Object next : Iterable.class.cast(result)) {
+          if (next != null) {
+            extractResult(next, paths, flatList, list);
+          }
+        }
       } else if (result != null) {
         extractResult(asList((Object[]) result), paths, flatList, list);// may be array
       }
     }
-  }
-
-  public static boolean interruptExtract(Object result, String[] paths, boolean flatList,
-      List<Object> list) {
-    if (isEmpty(paths)) {
-      if (result instanceof Iterable && flatList) {
-        asList((Iterable<?>) result).forEach(list::add);
-      } else {
-        list.add(result);
-      }
-      return true;
-    }
-    return false;
   }
 
   public static Map<String, Object> resolveFetchParam(Object obj, FetchQuery fetchQuery,
@@ -96,7 +73,7 @@ public class QueryUtils {
           String srcName = p.getSourceName();
           if (srcName.indexOf('.') != -1) {
             List<Object> srcVal = new ArrayList<>();
-            extractResult(obj, split(srcName, ".", true, false), true, srcVal);
+            extractResult(obj, srcName, true, srcVal);
             pmToUse.put(paramName,
                 srcVal.isEmpty() ? null : srcVal.size() == 1 ? srcVal.get(0) : srcVal);
           } else {
@@ -122,7 +99,6 @@ public class QueryUtils {
     try {
       if (result instanceof Map) {
         if (injectProName.indexOf('.') != -1) {
-          // use key path
           Map<Object, Object> mapResult = Map.class.cast(result);
           String proName = injectProName;
           String[] keys = split(injectProName, ".", true, false);
@@ -144,6 +120,19 @@ public class QueryUtils {
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new QueryRuntimeException(e);
     }
+  }
+
+  static boolean interruptExtract(Object result, String[] paths, boolean flatList,
+      List<Object> list) {
+    if (isEmpty(paths)) {
+      if (result instanceof Iterable && flatList) {
+        asList((Iterable<?>) result).forEach(list::add);
+      } else {
+        list.add(result);
+      }
+      return true;
+    }
+    return false;
   }
 
 }

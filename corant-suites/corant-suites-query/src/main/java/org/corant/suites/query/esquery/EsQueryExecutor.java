@@ -38,4 +38,5 @@ public interface EsQueryExecutor {
       throws Exception;
 
   <T> Stream<T> stream(String indexName, String script, Map<String, String> hints);
+
 }

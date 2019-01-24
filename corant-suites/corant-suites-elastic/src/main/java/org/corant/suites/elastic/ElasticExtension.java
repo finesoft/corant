@@ -65,7 +65,7 @@ public class ElasticExtension implements Extension {
     if (configs.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {
-      logger.config(() -> String.format("Find elastic cluster names %s",
+      logger.info(() -> String.format("Find elastic cluster names %s",
           String.join(", ", configs.keySet())));
     }
   }

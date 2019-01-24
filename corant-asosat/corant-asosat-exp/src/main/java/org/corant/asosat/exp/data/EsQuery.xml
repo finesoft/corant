@@ -23,5 +23,6 @@
 				
 			]]>
 		</script>
+		<hint key="extract-path" value="hits.hits._source"/>
 	</query>
 </query-mappings>

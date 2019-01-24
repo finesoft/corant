@@ -143,6 +143,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     final Map<String, Object> schema = new HashMap<>(asMap("properties", propertiesSchema));
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping, schema);
     assembly(indexing, mapping);
+    logger.info(() -> String.format("Build elastic index object for %s", docCls.getName()));
   }
 
   protected void buildIndex(Class<?> childDocCls, ElasticMapping parentMapping,

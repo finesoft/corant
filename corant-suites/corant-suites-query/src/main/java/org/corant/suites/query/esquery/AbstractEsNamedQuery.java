@@ -18,6 +18,9 @@ import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.suites.query.sqlquery.SqlHelper.getLimit;
+import static org.corant.suites.query.sqlquery.SqlHelper.getOffset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +28,12 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.suites.query.NamedQuery;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.QueryUtils;
 import org.corant.suites.query.esquery.EsInLineNamedQueryResolver.Querier;
 import org.corant.suites.query.mapping.FetchQuery;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-suites-query
@@ -38,7 +42,7 @@ import org.corant.suites.query.mapping.FetchQuery;
  *
  */
 @ApplicationScoped
-public abstract class AbstractEsNamedQuery implements NamedQuery {
+public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   protected EsQueryExecutor executor;
 
@@ -49,8 +53,40 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
   EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery> resolver;
 
   @Override
+  public Map<String, Object> aggregate(String q, Map<String, Object> param) {
+    Querier<String, FetchQuery> querier = getResolver().resolve(q, param);
+    String script = querier.getScript();
+    try {
+      return getExecutor().searchAggregation(resolveIndexName(q), script, querier.getHints());
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
-    return null;
+    Querier<String, FetchQuery> querier = getResolver().resolve(q, param);
+    Class<T> rcls = querier.getResultClass();
+    List<FetchQuery> fetchQueries = querier.getFetchQueries();
+    String script = querier.getScript();
+    int offset = getOffset(param);
+    int limit = getLimit(param);
+    try {
+      log(q, param, script);
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(q), script, querier.getHints());
+      List<T> result = new ArrayList<>();
+      int total = hits.getKey().intValue();
+      if (!isEmpty(hits.getValue())) {
+        for (Map<String, Object> map : hits.getValue()) {
+          result.add(getObjectMapper().convertValue(map, rcls));
+        }
+        this.fetch(result, fetchQueries, param);
+      }
+      return ForwardList.of(result, total > offset + limit);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
   }
 
   @Override
@@ -61,9 +97,15 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
     String script = querier.getScript();
     try {
       log(q, param, script);
-      T result = getExecutor().get(resolveIndexName(q), script, rcls, querier.getHints());
-      fetch(result, fetchQueries, param);
-      return result;
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(q), script, querier.getHints());
+      if (!isEmpty(hits.getValue())) {
+        Map<String, Object> hit = hits.getRight().get(0);
+        T result = getObjectMapper().convertValue(hit, rcls);
+        fetch(result, fetchQueries, param);
+        return result;
+      }
+      return null;
     } catch (Exception e) {
       throw new QueryRuntimeException(e);
     }
@@ -71,7 +113,39 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
 
   @Override
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
-    return null;
+    Querier<String, FetchQuery> querier = getResolver().resolve(q, param);
+    Class<T> rcls = querier.getResultClass();
+    List<FetchQuery> fetchQueries = querier.getFetchQueries();
+    String script = querier.getScript();
+    int offset = getOffset(param);
+    int limit = getLimit(param);
+    try {
+      log(q, param, script);
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(q), script, querier.getHints());
+      List<T> result = new ArrayList<>();
+      int total = hits.getKey().intValue();
+      if (!isEmpty(hits.getValue())) {
+        for (Map<String, Object> map : hits.getValue()) {
+          result.add(getObjectMapper().convertValue(map, rcls));
+        }
+        this.fetch(result, fetchQueries, param);
+      }
+      return PagedList.of(total, result, offset, limit);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
+  public Map<String, Object> search(String q, Map<String, Object> param) {
+    Querier<String, FetchQuery> querier = getResolver().resolve(q, param);
+    String script = querier.getScript();
+    try {
+      return getExecutor().search(resolveIndexName(q), script, querier.getHints());
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
   }
 
   @Override
@@ -82,8 +156,15 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
     String script = querier.getScript();
     try {
       log(q, param, script);
-      List<T> result = getExecutor().select(resolveIndexName(q), script, rcls, querier.getHints());
-      this.fetch(result, fetchQueries, param);
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(q), script, querier.getHints());
+      List<T> result = new ArrayList<>();
+      if (!isEmpty(hits.getValue())) {
+        for (Map<String, Object> map : hits.getValue()) {
+          result.add(getObjectMapper().convertValue(map, rcls));
+        }
+        this.fetch(result, fetchQueries, param);
+      }
       return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e);
@@ -115,17 +196,23 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     try {
       log("fetch-> " + refQueryName, fetchParam, script);
-      List<?> fetchedList =
-          getExecutor().select(resolveIndexName(refQueryName), script, rcls, querier.getHints());
-      Object fetchedResult = null;
-      if (multiRecords) {
-        fetchedResult = fetchedList;
-      } else if (!isEmpty(fetchedList)) {
-        fetchedResult = fetchedList.get(0);
-        fetchedList = fetchedList.subList(0, 1);
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(refQueryName), script, querier.getHints());
+      if (!isEmpty(hits.getValue())) {
+        List<Object> fetchedList = new ArrayList<>();
+        for (Map<String, Object> map : hits.getValue()) {
+          fetchedList.add(getObjectMapper().convertValue(map, rcls));
+        }
+        Object fetchedResult = null;
+        if (multiRecords) {
+          fetchedResult = fetchedList;
+        } else if (!isEmpty(fetchedList)) {
+          fetchedResult = fetchedList.get(0);
+          fetchedList = fetchedList.subList(0, 1);
+        }
+        QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
+        this.fetch(fetchedList, fetchQueries, param);
       }
-      QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
-      this.fetch(fetchedList, fetchQueries, param);
     } catch (Exception e) {
       throw new QueryRuntimeException(e);
     }
@@ -139,6 +226,10 @@ public abstract class AbstractEsNamedQuery implements NamedQuery {
 
   protected EsQueryExecutor getExecutor() {
     return executor;
+  }
+
+  protected ObjectMapper getObjectMapper() {
+    return QueryUtils.ESJOM;
   }
 
   protected EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery> getResolver() {

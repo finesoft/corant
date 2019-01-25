@@ -13,13 +13,16 @@
  */
 package org.corant.shared.util;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * @author bingo 下午2:51:32
@@ -175,5 +178,149 @@ public class ObjectUtils {
       }
     }
     return supplied;
+  }
+
+  public static class Pair<L, R> implements Map.Entry<L, R>, Serializable {
+    private static final long serialVersionUID = -474294448204498274L;
+    private final L left;
+    private final R right;
+
+    protected Pair(L left, R right) {
+      this.left = left;
+      this.right = right;
+    }
+
+    public static <L, R> Pair<L, R> of(L left, R right) {
+      return new Pair<>(left, right);
+    }
+
+    public String asString(final String format) {
+      return String.format(format, getLeft(), getRight());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj instanceof Map.Entry<?, ?>) {
+        final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
+        return Objects.equals(getKey(), other.getKey())
+            && Objects.equals(getValue(), other.getValue());
+      }
+      return false;
+    }
+
+    @Override
+    public final L getKey() {
+      return getLeft();
+    }
+
+    public L getLeft() {
+      return left;
+    }
+
+    public R getRight() {
+      return right;
+    }
+
+    @Override
+    public R getValue() {
+      return getRight();
+    }
+
+    @Override
+    public int hashCode() {
+      return (getKey() == null ? 0 : getKey().hashCode())
+          ^ (getValue() == null ? 0 : getValue().hashCode());
+    }
+
+    @Override
+    public R setValue(R value) {
+      throw new NotSupportedException();
+    }
+
+    @Override
+    public String toString() {
+      return "{" + getLeft() + ':' + getRight() + '}';
+    }
+
+    public Pair<L, R> withLeft(L left) {
+      return new Pair<>(left, getRight());
+    }
+
+    public Pair<L, R> withRight(R right) {
+      return new Pair<>(getLeft(), right);
+    }
+  }
+
+  public static class Triple<L, M, R> implements Serializable {
+
+    private static final long serialVersionUID = 6441751980847755625L;
+
+    private final L left;
+    private final M middle;
+    private final R right;
+
+    protected Triple(L left, M middle, R right) {
+      this.left = left;
+      this.middle = middle;
+      this.right = right;
+    }
+
+    public String asString(final String format) {
+      return String.format(format, getLeft(), getMiddle(), getRight());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj instanceof Triple<?, ?, ?>) {
+        final Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
+        return Objects.equals(getLeft(), other.getLeft())
+            && Objects.equals(getMiddle(), other.getMiddle())
+            && Objects.equals(getRight(), other.getRight());
+      }
+      return false;
+    }
+
+    public L getLeft() {
+      return left;
+    }
+
+    public M getMiddle() {
+      return middle;
+    }
+
+    public R getRight() {
+      return right;
+    }
+
+    @Override
+    public int hashCode() {
+      return (getLeft() == null ? 0 : getLeft().hashCode())
+          ^ (getMiddle() == null ? 0 : getMiddle().hashCode())
+          ^ (getRight() == null ? 0 : getRight().hashCode());
+    }
+
+    @Override
+    public String toString() {
+      return "[" + getLeft() + "," + getMiddle() + "," + getRight() + "]";
+    }
+
+    public Triple<L, M, R> withLeft(L left) {
+      return new Triple<>(left, getMiddle(), getRight());
+    }
+
+    public Triple<L, M, R> withMiddle(M middle) {
+      return new Triple<>(getLeft(), middle, getRight());
+    }
+
+    public Triple<L, M, R> withRight(R right) {
+      return new Triple<>(getLeft(), getMiddle(), right);
+    }
+
   }
 }

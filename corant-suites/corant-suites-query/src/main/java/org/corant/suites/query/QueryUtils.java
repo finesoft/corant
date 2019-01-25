@@ -14,18 +14,39 @@
 package org.corant.suites.query;
 
 import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapMap;
 import static org.corant.shared.util.StringUtils.split;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.beanutils.BeanUtils;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.elasticsearch.ElasticsearchParseException;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.XContentType;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
 /**
  * corant-suites-query
@@ -34,6 +55,39 @@ import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
  *
  */
 public class QueryUtils {
+
+  public static final ObjectMapper ESJOM = new ObjectMapper().registerModule(new JavaTimeModule())
+      .registerModule(new SimpleModule()
+          .addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_LOCAL_DATE))
+          .addSerializer(new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+          .addSerializer(new LocalTimeSerializer(DateTimeFormatter.ISO_LOCAL_TIME)))
+      .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+      .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+
+  public static final Map<Class<?>, Integer> DATA_TYPE_ID_MAP = new ConcurrentHashMap<>();
+
+  public static <T> T converDataFromJsonStr(String str, Class<T> cls) {
+    if (str == null) {
+      return null;
+    } else {
+      try {
+        return ESJOM.copy().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .readValue(str, cls);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  public static <T> T convertData(Object data, Class<T> cls) {
+    if (data == null) {
+      return null;
+    } else {
+      return ESJOM.copy().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .convertValue(data, cls);
+    }
+  }
 
   public static void extractResult(Object result, String paths, boolean flatList,
       List<Object> list) {
@@ -58,6 +112,19 @@ public class QueryUtils {
       } else if (result != null) {
         extractResult(asList((Object[]) result), paths, flatList, list);// may be array
       }
+    }
+  }
+
+  public static Map<String, Object> of(SearchResponse searchResponse, String... paths)
+      throws ElasticsearchParseException, IOException {
+    if (searchResponse == null) {
+      return new HashMap<>();
+    } else {
+      return XContentHelper.convertToMap(
+          BytesReference
+              .bytes(searchResponse.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
+                  new ByteArrayOutputStream(), asSet(paths)), ToXContent.EMPTY_PARAMS)),
+          false, XContentType.JSON).v2();
     }
   }
 
@@ -134,5 +201,4 @@ public class QueryUtils {
     }
     return false;
   }
-
 }

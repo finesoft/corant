@@ -13,9 +13,15 @@
  */
 package org.corant.suites.query.esquery;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.split;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.query.QueryUtils;
+import org.elasticsearch.action.search.SearchResponse;
 
 /**
  * corant-suites-query
@@ -25,18 +31,53 @@ import java.util.stream.Stream;
  */
 public interface EsQueryExecutor {
 
-  <T> T get(String indexName, String script, Class<T> resultClass, Map<String, String> hints)
+  String HIT_RS_ETR_PATH = "hits.hits._source";
+  String[] HIT_RS_ETR_PATHS = split(HIT_RS_ETR_PATH, ".");
+  String AGG_RS_ETR_PATH = "aggregations";
+  String SUG_RS_ERT_PATH = "suggest";
+
+  SearchResponse execute(String indexName, String script, Map<String, String> queryhints)
       throws Exception;
 
-  Map<String, Object> get(String indexName, String script, Map<String, String> hints)
-      throws Exception;
+  default Map<String, Object> search(String indexName, String script,
+      Map<String, String> queryhints) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script, queryhints);
+    if (searchResponse != null) {
+      Map<String, Object> result = QueryUtils.of(searchResponse);
+      return result;
+    } else {
+      return new HashMap<>();
+    }
+  }
 
-  <T> List<T> select(String indexName, String script, Class<T> resultClass,
-      Map<String, String> hints) throws Exception;
+  default Map<String, Object> searchAggregation(String indexName, String script,
+      Map<String, String> queryhints) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script, queryhints);
+    if (searchResponse != null) {
+      Map<String, Object> result = QueryUtils.of(searchResponse, AGG_RS_ETR_PATH);
+      Object aggregation = result.get(AGG_RS_ETR_PATH);
+      if (aggregation != null) {
+        return forceCast(aggregation);
+      }
+    }
+    return new HashMap<>();
+  }
 
-  List<Map<String, Object>> select(String indexName, String script, Map<String, String> hints)
-      throws Exception;
-
-  <T> Stream<T> stream(String indexName, String script, Map<String, String> hints);
+  default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script,
+      Map<String, String> queryhints) throws Exception {
+    List<Map<String, Object>> list = new ArrayList<>();
+    SearchResponse searchResponse = execute(indexName, script, queryhints);
+    long total = 0;
+    if (searchResponse != null) {
+      total = searchResponse.getHits() != null ? searchResponse.getHits().getTotalHits() : 0;
+      if (total > 0) {
+        Map<String, Object> result = QueryUtils.of(searchResponse, HIT_RS_ETR_PATH);
+        List<Object> extracted = new ArrayList<>();
+        QueryUtils.extractResult(result, HIT_RS_ETR_PATHS, false, extracted);
+        extracted.forEach(obj -> list.add(forceCast(obj)));
+      }
+    }
+    return Pair.of(total, list);
+  }
 
 }

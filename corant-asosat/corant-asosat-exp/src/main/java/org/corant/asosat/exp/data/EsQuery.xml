@@ -23,6 +23,53 @@
 				
 			]]>
 		</script>
-		<hint key="extract-path" value="hits.hits._source"/>
 	</query>
+	
+	
+	<query name="test-pc.parent" result-class="java.util.Map"
+		cache="true" cache-resultset-metadata="false">
+		<script>
+			<![CDATA[
+				{
+				  "query": {
+				    "bool": {
+				      "must": [
+				        {
+				          "term": {
+				            "esId": "${pid}"
+				          }
+				        },
+				        {
+				          "term": {
+				            "relation": "parent"
+				          }
+				        }
+				      ]
+				    }
+				  }
+				}
+			]]>
+		</script>
+		<fetch-query reference-query="test-pc.child"
+			inject-property-name="children">
+			<parameter name="parentId" source="R" source-name="esId" />
+		</fetch-query>
+	</query>
+	
+	<query name="test-pc.child" result-class="java.util.Map"
+		cache="true" cache-resultset-metadata="false">
+		<script>
+			<![CDATA[
+				{
+				  "query": {
+				    "parent_id": {
+				      "type": "child",
+				      "id": "${parentId}"
+				    }
+				  }
+				}
+			]]>
+		</script>
+	</query>
+	
 </query-mappings>

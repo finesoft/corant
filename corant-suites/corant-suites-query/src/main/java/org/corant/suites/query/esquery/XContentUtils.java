@@ -13,19 +13,28 @@
  */
 package org.corant.suites.query.esquery;
 
+import static org.corant.shared.util.CollectionUtils.asSet;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.elasticsearch.ElasticsearchParseException;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.DeprecationHandler;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.join.query.HasChildQueryBuilder;
 import org.elasticsearch.join.query.HasParentQueryBuilder;
@@ -93,6 +102,19 @@ public class XContentUtils {
     return builder.generator().contentType().xContent().createParser(xContentRegistry(),
         DeprecationHandler.THROW_UNSUPPORTED_OPERATION,
         BytesReference.bytes(builder).streamInput());
+  }
+
+  public static Map<String, Object> searchResponseToMap(SearchResponse searchResponse,
+      String... paths) throws ElasticsearchParseException, IOException {
+    if (searchResponse == null) {
+      return new HashMap<>();
+    } else {
+      return XContentHelper.convertToMap(
+          BytesReference
+              .bytes(searchResponse.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
+                  new ByteArrayOutputStream(), asSet(paths)), ToXContent.EMPTY_PARAMS)),
+          false, XContentType.JSON).v2();
+    }
   }
 
   public static NamedWriteableRegistry writableRegistry() {

@@ -61,7 +61,7 @@ public interface EsQueryExecutor {
       Map<String, String> queryhints) throws Exception {
     SearchResponse searchResponse = execute(indexName, script, queryhints);
     if (searchResponse != null) {
-      Map<String, Object> result = QueryUtils.of(searchResponse);
+      Map<String, Object> result = XContentUtils.searchResponseToMap(searchResponse);
       return result;
     } else {
       return new HashMap<>();
@@ -72,7 +72,8 @@ public interface EsQueryExecutor {
       Map<String, String> queryhints) throws Exception {
     SearchResponse searchResponse = execute(indexName, script, queryhints);
     if (searchResponse != null) {
-      Map<String, Object> result = QueryUtils.of(searchResponse, AGG_RS_ETR_PATH);
+      Map<String, Object> result =
+          XContentUtils.searchResponseToMap(searchResponse, AGG_RS_ETR_PATH);
       Object aggregation = result.get(AGG_RS_ETR_PATH);
       if (aggregation != null) {
         return forceCast(aggregation);
@@ -89,7 +90,8 @@ public interface EsQueryExecutor {
     if (searchResponse != null) {
       total = searchResponse.getHits() != null ? searchResponse.getHits().getTotalHits() : 0;
       if (total > 0) {
-        Map<String, Object> result = QueryUtils.of(searchResponse, HIT_RS_ETR_PATH);
+        Map<String, Object> result =
+            XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
         List<Object> extracted = new ArrayList<>();
         QueryUtils.extractResult(result, HIT_RS_ETR_PATHS, false, extracted);
         extracted.forEach(obj -> list.add(forceCast(obj)));

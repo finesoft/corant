@@ -51,7 +51,7 @@
 			]]>
 		</script>
 		<fetch-query reference-query="test-pc.child"
-			inject-property-name="children">
+			inject-property-name="relation.children">
 			<parameter name="parentId" source="R" source-name="esId" />
 		</fetch-query>
 	</query>

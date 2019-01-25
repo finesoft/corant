@@ -14,11 +14,10 @@
 package org.corant.suites.query;
 
 import static org.corant.shared.util.CollectionUtils.asList;
-import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.CollectionUtils.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapMap;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.format.DateTimeFormatter;
@@ -32,13 +31,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
-import org.elasticsearch.ElasticsearchParseException;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.elasticsearch.common.xcontent.XContentType;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -115,19 +107,6 @@ public class QueryUtils {
     }
   }
 
-  public static Map<String, Object> of(SearchResponse searchResponse, String... paths)
-      throws ElasticsearchParseException, IOException {
-    if (searchResponse == null) {
-      return new HashMap<>();
-    } else {
-      return XContentHelper.convertToMap(
-          BytesReference
-              .bytes(searchResponse.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
-                  new ByteArrayOutputStream(), asSet(paths)), ToXContent.EMPTY_PARAMS)),
-          false, XContentType.JSON).v2();
-    }
-  }
-
   public static Map<String, Object> resolveFetchParam(Object obj, FetchQuery fetchQuery,
       Map<String, Object> param) {
     Map<String, Object> pmToUse = new HashMap<>();
@@ -163,29 +142,37 @@ public class QueryUtils {
 
   @SuppressWarnings("unchecked")
   public static void resolveFetchResult(Object result, Object fetchedResult, String injectProName) {
-    try {
-      if (result instanceof Map) {
-        if (injectProName.indexOf('.') != -1) {
-          Map<Object, Object> mapResult = Map.class.cast(result);
-          String proName = injectProName;
-          String[] keys = split(injectProName, ".", true, false);
-          for (String key : keys) {
-            proName = key;
-            if ((mapResult = getMapMap(mapResult, key)) == null) {
+    if (isBlank(injectProName)) {
+      return;
+    }
+    if (result instanceof Map) {
+      if (injectProName.indexOf('.') != -1) {
+        Map<Object, Object> mapResult = Map.class.cast(result);
+        String[] keys = split(injectProName, ".", true, false);
+        int len = keys.length;
+        if (len == 0) {
+          return;
+        } else {
+          len--;
+          String useInjectProName = keys[len];
+          for (int i = 0; i < len; i++) {
+            if ((mapResult = getMapMap(mapResult, keys[i])) == null) {
               break;
             }
           }
           if (mapResult != null) {
-            mapResult.put(proName, fetchedResult);
+            mapResult.put(useInjectProName, fetchedResult);
           }
-        } else {
-          Map.class.cast(result).put(injectProName, fetchedResult);
         }
-      } else if (result != null) {
-        BeanUtils.setProperty(result, injectProName, fetchedResult);
+      } else {
+        Map.class.cast(result).put(injectProName, fetchedResult);
       }
-    } catch (IllegalAccessException | InvocationTargetException e) {
-      throw new QueryRuntimeException(e);
+    } else if (result != null) {
+      try {
+        BeanUtils.setProperty(result, injectProName, fetchedResult);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new QueryRuntimeException(e);
+      }
     }
   }
 

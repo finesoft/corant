@@ -67,7 +67,7 @@ public class MultipartTest {
     List<Map<String, Object>> list = eq.select("test.searchAll", asMap("keyword", "1548145685337"));
     System.out.println(JsonUtils.toJsonStr(list, true));
     System.out.println("\n\n========================================\n\n");
-    Map<String, Object> obj = eq.get("test-pc.parent", asMap("pid", "1"));
+    Map<String, Object> obj = eq.get("test-pc.parent", asMap("pid", "2"));
     System.out.println(JsonUtils.toJsonStr(obj, true));
 
   }

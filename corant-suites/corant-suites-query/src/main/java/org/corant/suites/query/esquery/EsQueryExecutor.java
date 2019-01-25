@@ -15,13 +15,19 @@ package org.corant.suites.query.esquery;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.split;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.QueryUtils;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 /**
  * corant-suites-query
@@ -36,8 +42,20 @@ public interface EsQueryExecutor {
   String AGG_RS_ETR_PATH = "aggregations";
   String SUG_RS_ERT_PATH = "suggest";
 
-  SearchResponse execute(String indexName, String script, Map<String, String> queryhints)
-      throws Exception;
+  default SearchRequest buildSearchRequest(String script, String... indexNames) {
+    try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
+      return new SearchRequest(indexNames).source(SearchSourceBuilder.fromXContent(parser));
+    } catch (IOException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  SearchResponse execute(SearchRequest searchRequest) throws Exception;
+
+  default SearchResponse execute(String indexName, String script, Map<String, String> queryhints)
+      throws Exception {
+    return execute(buildSearchRequest(script, indexName));
+  }
 
   default Map<String, Object> search(String indexName, String script,
       Map<String, String> queryhints) throws Exception {

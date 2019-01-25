@@ -75,7 +75,7 @@ public class DefaultEsNamedQueryTpl
       return new DefaultEsNamedQuerier(
           OM.writer(JsonpCharacterEscapes.instance())
               .writeValueAsString(OM.readValue(sw.toString(), Object.class)),
-          getResultClass(), resolveHints(), getFetchQueries());
+          getResultClass(), resolveHints(), getFetchQueries());// FIXME Do some protection
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
     }

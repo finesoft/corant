@@ -13,19 +13,9 @@
  */
 package org.corant.suites.query.esquery;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import org.corant.suites.query.QueryRuntimeException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.DeprecationHandler;
-import org.elasticsearch.common.xcontent.NamedXContentRegistry;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
-import org.elasticsearch.search.SearchModule;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 /**
  * corant-suites-query
@@ -43,21 +33,8 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   }
 
   @Override
-  public SearchResponse execute(String indexName, String script, Map<String, String> hints)
-      throws Exception {
-    return transportClient.search(buildSearchRequest(script, indexName)).get();
-  }
-
-  protected SearchRequest buildSearchRequest(String script, String... indexNames) {
-    try {
-
-      return new SearchRequest(indexNames).source(SearchSourceBuilder
-          .fromXContent(JsonXContent.jsonXContent.createParser(new NamedXContentRegistry(
-              new SearchModule(Settings.EMPTY, false, Collections.emptyList()).getNamedXContents()),
-              DeprecationHandler.THROW_UNSUPPORTED_OPERATION, script)));
-    } catch (IOException e) {
-      throw new QueryRuntimeException(e);
-    }
+  public SearchResponse execute(SearchRequest searchRequest) throws Exception {
+    return transportClient.search(searchRequest).get();
   }
 
 }

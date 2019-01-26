@@ -69,6 +69,23 @@ public class StringUtils {
 
   /**
    * <pre>
+   * StringUtils.ifBlank(null, "DFLT")  = "DFLT"
+   * StringUtils.ifBlank("", "DFLT")    = "DFLT"
+   * StringUtils.ifBlank(" ", "DFLT")   = "DFLT"
+   * StringUtils.ifBlank("abc", "DFLT") = "abc"
+   * StringUtils.ifBlank("", null)      = null
+   * </pre>
+   *
+   * @param str
+   * @param dfltStr
+   * @return ifBlank
+   */
+  public static <T extends CharSequence> T defaultBlank(final T str, final T dfltStr) {
+    return isBlank(str) ? dfltStr : str;
+  }
+
+  /**
+   * <pre>
    * StringUtils.defaultString(null)  = ""
    * StringUtils.defaultString("")    = ""
    * StringUtils.defaultString("abc") = "abc"
@@ -127,23 +144,6 @@ public class StringUtils {
       });
     }
     return map;
-  }
-
-  /**
-   * <pre>
-   * StringUtils.ifBlank(null, "DFLT")  = "DFLT"
-   * StringUtils.ifBlank("", "DFLT")    = "DFLT"
-   * StringUtils.ifBlank(" ", "DFLT")   = "DFLT"
-   * StringUtils.ifBlank("abc", "DFLT") = "abc"
-   * StringUtils.ifBlank("", null)      = null
-   * </pre>
-   *
-   * @param str
-   * @param dfltStr
-   * @return ifBlank
-   */
-  public static <T extends CharSequence> T defaultBlank(final T str, final T dfltStr) {
-    return isBlank(str) ? dfltStr : str;
   }
 
   /**
@@ -587,42 +587,12 @@ public class StringUtils {
       return new WildcardMatcher(ignoreCase, wildcardExpress);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      WildcardMatcher other = (WildcardMatcher) obj;
-      if (ignoreCase != other.ignoreCase) {
-        return false;
-      }
-      if (!Arrays.equals(tokens, other.tokens)) {
-        return false;
-      }
-      return true;
-    }
-
     public String[] getTokens() {
       return Arrays.copyOf(tokens, tokens.length);
     }
 
     public String getWildcardExpress() {
       return wildcardExpress;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (ignoreCase ? 1231 : 1237);
-      result = prime * result + Arrays.hashCode(tokens);
-      return result;
     }
 
     public boolean isIgnoreCase() {

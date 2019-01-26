@@ -13,7 +13,7 @@
  */
 package org.corant.suites.security.jaxrs;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.util.Optional;
@@ -59,31 +59,46 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
     }
   }
 
-  protected void addUrls(boolean covered, String... urls) {
-    if (covered) {
-      for (String url : urls) {
-        if (isNotBlank(url)) {
-          if (url.chars().anyMatch(GlobPatterns::isRegexChar)) {
-            coveredRegexPathMatcher.addExpresses(url);
-          } else if (url.chars().anyMatch(GlobPatterns::isGlobChar)) {
-            coveredGlobPathMatcher.addExpresses(url);
-          } else {
-            coveredCompletePathMatcher.addCompareds(url);
-          }
-        }
+  protected void addUrl(boolean covered, String url) {
+    if (isBlank(url)) {
+      return;
+    }
+    boolean glob = false;
+    boolean regex = false;
+    int len = url.length();
+    for (int i = 0; i < len; i++) {
+      if (GlobPatterns.isGlobChar(url.charAt(i))) {
+        glob = true;
+        continue;
+      } else if (GlobPatterns.isRegexChar(url.charAt(i))) {
+        regex = true;
+        continue;
+      }
+    }
+    if (regex) {
+      if (covered) {
+        coveredRegexPathMatcher.addExpresses(url);
+      } else {
+        uncoveredRegexPathMatcher.addExpresses(url);
+      }
+    } else if (glob) {
+      if (covered) {
+        coveredGlobPathMatcher.addExpresses(url);
+      } else {
+        uncoveredGlobPathMatcher.addExpresses(url);
       }
     } else {
-      for (String url : urls) {
-        if (isNotBlank(url)) {
-          if (url.chars().anyMatch(GlobPatterns::isRegexChar)) {
-            uncoveredRegexPathMatcher.addExpresses(url);
-          } else if (url.chars().anyMatch(GlobPatterns::isGlobChar)) {
-            uncoveredGlobPathMatcher.addExpresses(url);
-          } else {
-            uncoveredCompletePathMatcher.addCompareds(url);
-          }
-        }
+      if (covered) {
+        coveredCompletePathMatcher.addCompareds(url);
+      } else {
+        uncoveredCompletePathMatcher.addCompareds(url);
       }
+    }
+  }
+
+  protected void addUrls(boolean covered, String... urls) {
+    for (String url : urls) {
+      addUrl(covered, url);
     }
   }
 

@@ -72,46 +72,12 @@ public class PathUtils {
       return new GlobMatcher(ignoreCase, globExpress);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      GlobMatcher other = (GlobMatcher) obj;
-      if (globExpress == null) {
-        if (other.globExpress != null) {
-          return false;
-        }
-      } else if (!globExpress.equals(other.globExpress)) {
-        return false;
-      }
-      if (ignoreCase != other.ignoreCase) {
-        return false;
-      }
-      return true;
-    }
-
     public String getGlobExpress() {
       return globExpress;
     }
 
     public Pattern getPattern() {
       return pattern;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (globExpress == null ? 0 : globExpress.hashCode());
-      result = prime * result + (ignoreCase ? 1231 : 1237);
-      return result;
     }
 
     public boolean isIgnoreCase() {
@@ -133,8 +99,8 @@ public class PathUtils {
    */
   public static class GlobPatterns {
 
-    private static final String REG_CHARS = ".^$+{[]|()";
-    private static final String GLO_CHARS = "\\*?[{";
+    public static final String REG_CHARS = ".^$+{[]|()";
+    public static final String GLO_CHARS = "\\*?[{";
     private static final char EOL = 0;
 
     public static Pattern build(String globExpress, boolean ignoreCase) {

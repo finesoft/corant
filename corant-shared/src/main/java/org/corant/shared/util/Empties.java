@@ -104,7 +104,7 @@ public class Empties {
    * Empties.isNotEmpty("  abc  ") = true
    * </pre>
    *
-   * @param cs
+   * @param object
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final CharSequence object) {

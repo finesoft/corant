@@ -49,7 +49,7 @@ public class Empties {
   }
 
   public static boolean isEmpty(final Enumeration<?> object) {
-    return object == null || object.hasMoreElements();
+    return object == null || !object.hasMoreElements();
   }
 
   public static boolean isEmpty(final Iterable<?> object) {

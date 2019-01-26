@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.dynamic.template;
 
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;

@@ -25,6 +25,10 @@ import java.util.regex.PatternSyntaxException;
  */
 public class PathUtils {
 
+  private PathUtils() {
+    super();
+  }
+
   public static boolean matchClassPath(String path, String globExpress) {
     return matchUnixPath(path, globExpress);
   }

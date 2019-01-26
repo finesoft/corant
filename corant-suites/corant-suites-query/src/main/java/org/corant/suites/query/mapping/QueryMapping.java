@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.mapping;
 
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.ObjectUtils.isNull;
 import static org.corant.shared.util.StringUtils.isBlank;

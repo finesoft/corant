@@ -51,6 +51,10 @@ public class FileUtils {
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());
   static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
 
+  private FileUtils() {
+    super();
+  }
+
   public static Checksum checksum(final File file, final Checksum checksum) throws IOException {
     if (file.isDirectory()) {
       throw new IllegalArgumentException("Checksums can't be computed on directories");

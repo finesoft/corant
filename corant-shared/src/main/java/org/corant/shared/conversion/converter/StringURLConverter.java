@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.StringUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.net.URL;
 import java.util.Map;
 

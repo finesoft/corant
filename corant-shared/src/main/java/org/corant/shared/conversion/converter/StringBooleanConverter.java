@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.StringUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;

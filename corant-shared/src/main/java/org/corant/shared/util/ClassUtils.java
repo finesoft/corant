@@ -13,9 +13,9 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asImmutableMap;
 import static org.corant.shared.util.ObjectUtils.trySupplied;
-import static org.corant.shared.util.StringUtils.isEmpty;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -56,6 +56,10 @@ public class ClassUtils {
   public static final Map<Class<?>, Class<?>> WRAPPER_PRIMITIVE_MAP =
       Collections.unmodifiableMap(PRIMITIVE_WRAPPER_MAP.entrySet().stream()
           .collect(Collectors.toMap(Entry::getValue, Entry::getKey)));
+
+  private ClassUtils() {
+    super();
+  }
 
   public static Class<?> asClass(final ClassLoader classLoader, final String className)
       throws ClassNotFoundException {
@@ -139,7 +143,6 @@ public class ClassUtils {
     }
     return new ArrayList<>(interfaces);
   }
-
 
   public static List<Class<?>> getAllInterfaces(final Object object) {
     return object == null ? new ArrayList<>() : getAllInterfaces(object.getClass());
@@ -397,7 +400,6 @@ public class ClassUtils {
       }
     }
   }
-
 
   public static Class<?> tryAsClass(String className) {
     try {

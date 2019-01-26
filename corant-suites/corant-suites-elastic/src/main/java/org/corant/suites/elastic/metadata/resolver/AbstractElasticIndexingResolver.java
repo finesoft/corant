@@ -14,7 +14,7 @@
 package org.corant.suites.elastic.metadata.resolver;
 
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.shouldBeEquals;

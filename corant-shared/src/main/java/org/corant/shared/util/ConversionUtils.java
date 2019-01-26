@@ -14,8 +14,8 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,6 +40,10 @@ import org.corant.shared.conversion.ConverterHints;
  */
 @SuppressWarnings("unchecked")
 public class ConversionUtils {
+
+  private ConversionUtils() {
+    super();
+  }
 
   public static BigDecimal toBigDecimal(Object obj) {
     return toBigDecimal(obj, null);

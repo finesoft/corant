@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.suites.ddd.repository.JpaQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -82,7 +80,6 @@ public abstract class AbstractJpaRepository implements JpaRepository {
       logger.warning(() -> "There is not cache mechanism!");
     }
   }
-
 
   @Override
   public void evictCache(Entity entity) {

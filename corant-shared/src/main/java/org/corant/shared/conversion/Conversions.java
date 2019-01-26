@@ -16,7 +16,7 @@ package org.corant.shared.conversion;
 import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
 import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
-import static org.corant.shared.util.CollectionUtils.asIterable;
+import static org.corant.shared.util.IterableUtils.asIterable;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.util.ArrayList;

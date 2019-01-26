@@ -14,7 +14,7 @@
 package org.corant.suites.query;
 
 import static org.corant.shared.util.CollectionUtils.asList;
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapMap;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;

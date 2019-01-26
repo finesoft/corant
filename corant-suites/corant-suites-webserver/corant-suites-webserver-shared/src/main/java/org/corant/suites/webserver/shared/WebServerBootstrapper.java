@@ -14,7 +14,7 @@
 package org.corant.suites.webserver.shared;
 
 import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic.service;
 
-import static org.corant.shared.util.CollectionUtils.isEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.ArrayList;

@@ -13,6 +13,7 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isDeepEquals;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.contains;
@@ -29,8 +30,6 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.shared.util.CollectionUtils;
-import org.corant.shared.util.MapUtils;
 import org.corant.shared.util.ValidateUtils;
 
 /**
@@ -353,7 +352,6 @@ public class Preconditions {
     return object;
   }
 
-
   /**
    * 字符串长度必须小于 len
    *
@@ -369,7 +367,6 @@ public class Preconditions {
     }
     return object;
   }
-
 
   /**
    * 字符串长度必须大于 len
@@ -484,7 +481,7 @@ public class Preconditions {
    */
   public static <T> Collection<T> requireNotEmptOrNullEle(Collection<T> collection, Object code,
       Object... parameters) {
-    if (CollectionUtils.isEmpty(collection)) {
+    if (isEmpty(collection)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     for (Object obj : collection) {
@@ -505,7 +502,7 @@ public class Preconditions {
    */
   public static <C extends Collection<T>, T> C requireNotEmpty(C collection, Object code,
       Object... parameters) {
-    if (CollectionUtils.isEmpty(collection)) {
+    if (isEmpty(collection)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return collection;
@@ -520,7 +517,7 @@ public class Preconditions {
    * @throws BaseException if the map is <code>null</code> or has no entries
    */
   public static <K, V> Map<K, V> requireNotEmpty(Map<K, V> map, Object code, Object... parameters) {
-    if (MapUtils.isEmpty(map)) {
+    if (isEmpty(map)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return map;
@@ -535,7 +532,7 @@ public class Preconditions {
    * @throws BaseException if the object array is <code>null</code> or has no elements
    */
   public static <T> T[] requireNotEmpty(T[] array, Object code, Object... parameters) {
-    if (CollectionUtils.isEmpty(array)) {
+    if (isEmpty(array)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return array;
@@ -687,22 +684,22 @@ public class Preconditions {
   }
 
   @FunctionalInterface
-  public static interface BiPrecondition<T> {
+  public interface BiPrecondition<T> {
     T testAndReturn(T obj, T x, Object code, Object... variants);
   }
 
   @FunctionalInterface
-  public static interface BoolPrecondition<T> {
+  public interface BoolPrecondition<T> {
     T testAndReturn(T obj, Predicate<T> p, Object code, Object... variants);
   }
 
   @FunctionalInterface
-  public static interface ComparablePrecondition<T extends Comparable<T>> {
+  public interface ComparablePrecondition<T extends Comparable<T>> {
     T testAndReturn(T obj, T cmprObj, Object code, Object... msgPvariantsarams);
   }
 
   @FunctionalInterface
-  public static interface SinglePrecondition<T> {
+  public interface SinglePrecondition<T> {
     T testAndReturn(T obj, Object code, Object... variants);
   }
 }

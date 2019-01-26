@@ -272,10 +272,6 @@ public class MapUtils {
     return result;
   }
 
-  public static boolean isEmpty(Map<?, ?> map) {
-    return map == null || map.isEmpty();
-  }
-
   public static Map<String, String> toMap(final Properties properties) {
     Map<String, String> map = new HashMap<>();
     if (properties != null) {

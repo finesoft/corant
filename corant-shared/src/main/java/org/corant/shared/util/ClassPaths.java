@@ -88,8 +88,11 @@ public class ClassPaths {
   public static final Set<String> SYS_LIBS =
       asImmutableSet("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
-
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
+
+  private ClassPaths() {
+    super();
+  }
 
   public static ClassPath anyway(ClassLoader classLoader) {
     return anyway(classLoader, StringUtils.EMPTY);

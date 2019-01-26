@@ -13,8 +13,8 @@
  */
 package org.corant.shared.conversion.converter;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
-import static org.corant.shared.util.StringUtils.isEmpty;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.util.ArrayList;
@@ -173,19 +174,6 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.isEmpty(null)      = true
-   * StringUtils.isEmpty("")        = true
-   * StringUtils.isEmpty(" ")       = false
-   * StringUtils.isEmpty("abc")     = false
-   * StringUtils.isEmpty("  abc  ") = false
-   * </pre>
-   */
-  public static boolean isEmpty(final CharSequence cs) {
-    return cs == null || cs.length() == 0;
-  }
-
-  /**
-   * <pre>
    * StringUtils.isNoneBlank((String) null)    = false
    * StringUtils.isNoneBlank((String[]) null)  = true
    * StringUtils.isNoneBlank(null, "abc")      = false
@@ -225,22 +213,6 @@ public class StringUtils {
    */
   public static boolean isNotBlank(final CharSequence cs) {
     return !isBlank(cs);
-  }
-
-  /**
-   * <pre>
-   * StringUtils.isNotEmpty(null)      = false
-   * StringUtils.isNotEmpty("")        = false
-   * StringUtils.isNotEmpty(" ")       = true
-   * StringUtils.isNotEmpty("abc")     = true
-   * StringUtils.isNotEmpty("  abc  ") = true
-   * </pre>
-   *
-   * @param cs
-   * @return isNotEmpty
-   */
-  public static boolean isNotEmpty(final CharSequence cs) {
-    return !isEmpty(cs);
   }
 
   /**

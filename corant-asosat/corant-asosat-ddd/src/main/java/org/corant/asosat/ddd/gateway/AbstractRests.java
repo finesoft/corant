@@ -25,7 +25,7 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
  */
 @ApplicationScoped
 @ApplicationServices
-public abstract class AbstractRestService {
+public abstract class AbstractRests {
 
   /**
    * 202

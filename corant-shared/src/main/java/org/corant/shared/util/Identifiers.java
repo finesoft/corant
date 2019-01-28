@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
@@ -46,6 +47,47 @@ public class Identifiers {
   public static String javaUUID() {
     return JAVA_UUID_GENERATOR.generate(null).toString();
   }
+
+  // public static void main(String... strings) throws InterruptedException {
+  // int tn = 2, n = 9876, size = tn * n;
+  // final long[][] arr = new long[tn][n];
+  // ExecutorService es = Executors.newFixedThreadPool(tn);
+  // final CountDownLatch latch = new CountDownLatch(tn);
+  // for (int d = 0; d < tn; d++) {
+  // final int t = d;
+  // es.submit(() -> {
+  // for (int i = 0; i < n; i++) {
+  // arr[t][i] = Identifiers.snowflakeUUID(3, t, () -> System.currentTimeMillis());
+  // }
+  // latch.countDown();
+  // });
+  // }
+  // latch.await();
+  // Set<Long> set = new HashSet<>(size);
+  // Map<Long, List<Long>> tmp = new LinkedHashMap<>();
+  // for (long[] ar : arr) {
+  // for (long a : ar) {
+  // set.add(a);
+  // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
+  // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
+  // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
+  // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
+  // tmp.computeIfAbsent(time, (k) -> new ArrayList<>()).add(seq);
+  // System.out
+  // .println(a + "\tdcid" + dcid + "\twid:" + woid + "\ttime:" + time + "\tseq:" + seq);
+  // }
+  // }
+  // System.out.println("--------------------------------------------------");
+  // tmp.forEach((k, v) -> {
+  // v.stream().sorted().forEach((seq) -> System.out.println("time:" + k + "\tseq:" + seq));
+  // });
+  // es.shutdown();
+  // if (set.size() != size) {
+  // throw new IllegalStateException();
+  // } else {
+  // System.out.println("finished");
+  // }
+  // }
 
   public static long snowflakeBufferUUID(final int workerId, final boolean useTimeBuff,
       Supplier<Long> timeSupplier) {
@@ -99,7 +141,15 @@ public class Identifiers {
     }
   }
 
-  public static interface IdentifierGenerator {
+  private static int handleSequence(AtomicLong sequence, Long mask, boolean current) {
+    int seq = sequence.intValue();
+    long incredSeq = sequence.incrementAndGet();
+    incredSeq &= mask;
+    sequence.set(incredSeq);
+    return current ? sequence.intValue() : seq;
+  }
+
+  public interface IdentifierGenerator {
     Serializable generate(Supplier<?> suppler);
   }
 
@@ -124,7 +174,7 @@ public class Identifiers {
     private final boolean useTimeBuffer;
 
     private volatile long lastTimestamp = -1L;
-    private volatile long sequence = 0L;
+    private AtomicLong sequence = new AtomicLong(0L);
 
     public SnowflakeBufferUUIDGenerator(long workerId) {
       this(workerId, false);
@@ -195,7 +245,7 @@ public class Identifiers {
       if (useTimeBuffer) {
         return doGenerateWithCache(timeGener);
       } else {
-        return doGenerateWithoutCace(timeGener);
+        return doGenerateWithoutCache(timeGener);
       }
     }
 
@@ -212,28 +262,25 @@ public class Identifiers {
     }
 
     protected synchronized Long doGenerateWithCache(Supplier<?> timeGener) {
-      int cursor = (int) sequence;
-      sequence++;
-      sequence &= SEQUENCE_MASK;
+      int cursor = handleSequence(sequence, SEQUENCE_MASK, false);
       if (cursor == 0) {
         lastTimestamp = tilMillis(timeGener, lastTimestamp, false);
       }
       return nextId(lastTimestamp, cursor);
     }
 
-    protected synchronized Long doGenerateWithoutCace(Supplier<?> timeGener) {
+    protected synchronized Long doGenerateWithoutCache(Supplier<?> timeGener) {
       long timestamp = tilMillis(timeGener, lastTimestamp, true);
       if (lastTimestamp == timestamp) {
-        sequence++;
-        sequence &= SEQUENCE_MASK;
-        if (sequence == 0) {
+        int currentSeq = handleSequence(sequence, SEQUENCE_MASK, true);
+        if (currentSeq == 0) {
           timestamp = tilMillis(timeGener, lastTimestamp, false);
         }
       } else {
-        sequence = 0;
+        sequence.set(0L);
       }
       lastTimestamp = timestamp;
-      return nextId(timestamp, sequence);
+      return nextId(timestamp, sequence.get());
     }
 
     protected long nextId(long timestamp, long seq) {
@@ -268,14 +315,13 @@ public class Identifiers {
         SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
     public static final long SEQUENCE_MASK = -1L ^ -1L << SEQUENCE_BITS;
 
-
     private final long workerId;
     private final long dataCenterId;
     private final long dataCenterSegm;
     private final long workerSegm;
 
     private volatile long lastTimestamp = -1L;
-    private volatile long sequence;
+    private AtomicLong sequence = new AtomicLong(0L);
 
     public SnowflakeUUIDGenerator(long dataCenterId, long workerId) {
       if (workerId < 0 || workerId > MAX_WORKER_ID) {
@@ -293,7 +339,6 @@ public class Identifiers {
       this.workerId = workerId;
       dataCenterSegm = dataCenterId << DATACENTER_ID_SHIFT;
       workerSegm = workerId << WORKER_ID_SHIFT;
-      sequence = 0;
     }
 
     /**
@@ -345,7 +390,6 @@ public class Identifiers {
       return tmp;
     }
 
-
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {
@@ -368,17 +412,16 @@ public class Identifiers {
     public synchronized Long generate(Supplier<?> timeGener) {
       long timestamp = tilMillis(timeGener, lastTimestamp, true);
       if (lastTimestamp == timestamp) {
-        sequence++;
-        sequence &= SEQUENCE_MASK;
-        if (sequence == 0) {
+        int currentSeq = handleSequence(sequence, SEQUENCE_MASK, true);
+        if (currentSeq == 0) {
           timestamp = tilMillis(timeGener, lastTimestamp, false);
         }
       } else {
-        sequence = 0;
+        sequence.set(0L);
       }
       lastTimestamp = timestamp;
       return timestamp - TIME_EPOCH << TIMESTAMP_LEFT_SHIFT | dataCenterSegm | workerSegm
-          | sequence;
+          | sequence.get();
     }
 
     /**
@@ -477,6 +520,5 @@ public class Identifiers {
       return Base64.getUrlEncoder().encodeToString(uuidBytes);
     }
   }
-
 
 }

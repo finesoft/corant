@@ -13,11 +13,18 @@
  */
 package org.corant.suites.elastic.metadata;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.corant.suites.elastic.metadata.resolver.ResolverUtils;
+import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.index.VersionType;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * corant-suites-elastic
@@ -32,22 +39,29 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   private final VersionType versionType;
   private final Set<ElasticMapping> children = new LinkedHashSet<>();
   private final String name;
+  private final String joinFiledName;
+  private final boolean root;
 
   /**
    * @param documentClass
+   * @param root
+   * @param joinFiledName
    * @param name
    * @param versionType
    */
-  public ElasticMapping(Class<?> documentClass, String name, VersionType versionType) {
+  public ElasticMapping(Class<?> documentClass, boolean root, String joinFiledName, String name,
+      VersionType versionType) {
     super();
     this.documentClass = documentClass;
+    this.root = root;
+    this.joinFiledName = joinFiledName;
     this.name = name;
     this.versionType = versionType;
     versioned = versionType != VersionType.INTERNAL;
   }
 
   public <T> T fromMap(Map<String, Object> map) {
-    return null;
+    return ResolverUtils.toDocument(map, new TypeReference<T>() {});
   }
 
   /**
@@ -68,6 +82,14 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
 
   /**
    *
+   * @return the joinFiledName
+   */
+  public String getJoinFiledName() {
+    return joinFiledName;
+  }
+
+  /**
+   *
    * @return the name
    */
   public String getName() {
@@ -84,6 +106,14 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
 
   /**
    *
+   * @return the root
+   */
+  public boolean isRoot() {
+    return root;
+  }
+
+  /**
+   *
    * @return the versioned
    */
   public boolean isVersioned() {
@@ -95,8 +125,19 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
     return children.iterator();
   }
 
-  public Map<String, Object> toMap(Object obj) {
-    return null;
+  public Map<String, Object> toMap(ElasticDocument doc) {
+    Map<String, Object> convertedMap = ResolverUtils.toMap(doc);
+    if (!isEmpty(convertedMap) && getJoinFiledName() != null) {
+      shouldBeFalse(convertedMap.containsKey(getJoinFiledName()),
+          "Join field name and property name conflicts %s", getJoinFiledName());
+      if (isRoot()) {
+        convertedMap.put(getJoinFiledName(), asMap("name", getName()));
+      } else {
+        String parentId = shouldNotNull(doc.getEsPId(), "Parent id can not null");
+        convertedMap.put(getJoinFiledName(), asMap("name", getName(), "parent", parentId));
+      }
+    }
+    return convertedMap;
   }
 
 }

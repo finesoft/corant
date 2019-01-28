@@ -25,7 +25,11 @@ public interface ElasticDocument extends Serializable {
 
   String getEsId();
 
-  default String getEsParentId() {
+  default String getEsPId() {
     return null;
+  }
+
+  default String getEsRId() {
+    return getEsPId();
   }
 }

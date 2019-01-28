@@ -13,9 +13,6 @@
  */
 package org.corant.suites.elastic.metadata.resolver;
 
-import static org.corant.shared.util.ClassUtils.isPrimitiveArray;
-import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
-import static org.corant.shared.util.ClassUtils.isPrimitiveWrapperArray;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asMap;
@@ -23,17 +20,20 @@ import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.Date;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ClassUtils;
 import org.corant.shared.util.TypeUtils;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.annotation.EsAlias;
@@ -56,6 +56,15 @@ import org.corant.suites.elastic.metadata.annotation.EsProperty;
 import org.corant.suites.elastic.metadata.annotation.EsRange;
 import org.corant.suites.elastic.metadata.annotation.EsText;
 import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
 /**
  * corant-suites-elastic
@@ -64,6 +73,39 @@ import org.corant.suites.elastic.metadata.annotation.EsTokenCount;
  *
  */
 public class ResolverUtils {
+
+  public static final Map<Class<?>, Class<?>> SIMPLE_TYPE_WRAPPER_MAP = new HashMap<>();
+
+  static {
+    SIMPLE_TYPE_WRAPPER_MAP.putAll(ClassUtils.PRIMITIVE_WRAPPER_MAP);
+    SIMPLE_TYPE_WRAPPER_MAP.put(String.class, String.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Date.class, Date.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Temporal.class, Temporal.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Currency.class, Currency.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Number.class, Number.class);
+  }
+
+  public static final SimpleModule SIMPLIE_MODEL = new SimpleModule();
+  static {
+    SIMPLIE_MODEL.addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_LOCAL_DATE));
+    SIMPLIE_MODEL.addSerializer(new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    SIMPLIE_MODEL.addSerializer(new LocalTimeSerializer(DateTimeFormatter.ISO_LOCAL_TIME));
+  }
+
+  public static final ObjectMapper ESJOM = new ObjectMapper();
+
+  static {
+    ESJOM.registerModule(new JavaTimeModule());
+    ESJOM.registerModule(SIMPLIE_MODEL);
+    ESJOM.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    ESJOM.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    ESJOM.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    ESJOM.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  public static void deregisterSimpleType(Class<?> type) {
+    SIMPLE_TYPE_WRAPPER_MAP.remove(type);
+  }
 
   public static Map<String, Object> genFieldMapping(EsAlias ann, List<String> path) {
     Map<String, Object> map = new HashMap<>();
@@ -341,11 +383,50 @@ public class ResolverUtils {
     return new Type[0];
   }
 
-  public static boolean isSimpleType(Class<?> ft) {
-    return isPrimitiveOrWrapper(ft) || isPrimitiveArray(ft) || isPrimitiveWrapperArray(ft)
-        || Date.class.isAssignableFrom(ft) || String.class.isAssignableFrom(ft)
-        || Temporal.class.isAssignableFrom(ft) || Locale.class.isAssignableFrom(ft)
-        || Currency.class.isAssignableFrom(ft) || Number.class.isAssignableFrom(ft);
+  public static boolean isSimpleType(Class<?> type) {
+    Class<?> useType = type.isArray() ? type.getComponentType() : type;
+    return SIMPLE_TYPE_WRAPPER_MAP.containsKey(useType)
+        || SIMPLE_TYPE_WRAPPER_MAP.containsValue(useType);
+  }
+
+  public static void registerSimpleType(Class<?> type, Class<?> clazz) {
+    SIMPLE_TYPE_WRAPPER_MAP.put(type, clazz);
+  }
+
+  public static <T> T toDocument(Object data, Class<T> cls) {
+    if (data == null) {
+      return null;
+    } else {
+      return ESJOM.copy().convertValue(data, cls);
+    }
+  }
+
+  public static <T> T toDocument(Object object, TypeReference<T> tr) {
+    if (object == null) {
+      return null;
+    } else {
+      return ESJOM.convertValue(object, tr);
+    }
+  }
+
+  public static <T> T toDocument(String str, Class<T> cls) {
+    if (str == null) {
+      return null;
+    } else {
+      try {
+        return ESJOM.readValue(str, cls);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  public static Map<String, Object> toMap(Object document) {
+    if (document != null) {
+      return ESJOM.convertValue(document, new TypeReference<Map<String, Object>>() {});
+    } else {
+      return new HashMap<>();
+    }
   }
 
   private static void resolveJoinMapping(ElasticMapping mapping,

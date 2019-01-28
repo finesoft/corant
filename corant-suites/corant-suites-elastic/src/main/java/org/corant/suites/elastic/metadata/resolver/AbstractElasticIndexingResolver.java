@@ -19,6 +19,7 @@ import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.shouldBeEquals;
 import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.ObjectUtils.shouldBeNull;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.split;
@@ -131,13 +132,15 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     if (poc != null) {
       Class<?>[] childClses = poc.children();
       shouldBeFalse(isEmpty(childClses));
-      mapping = new ElasticMapping(docCls, shouldNotNull(poc.name()), versionType);
+      String joinFieldName = shouldNotNull(poc.fieldName());
+      mapping =
+          new ElasticMapping(docCls, true, joinFieldName, shouldNotNull(poc.name()), versionType);
       for (Class<?> childCls : childClses) {
         buildIndex(childCls, mapping, propertiesSchema);
       }
-      propertiesSchema.put(shouldNotNull(poc.fieldName()), genJoinMapping(mapping));
+      shouldBeNull(propertiesSchema.put(shouldNotNull(poc.fieldName()), genJoinMapping(mapping)));
     } else {
-      mapping = new ElasticMapping(docCls, null, versionType);
+      mapping = new ElasticMapping(docCls, true, null, null, versionType);
     }
     ElasticSetting setting = ElasticSetting.of(config.getSetting(), doc);
     final Map<String, Object> schema = new HashMap<>(asMap("properties", propertiesSchema));
@@ -150,7 +153,8 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       Map<String, Object> propertiesSchema) {
     EsChildDocument coc = shouldNotNull(findAnnotation(childDocCls, EsChildDocument.class, false));
     VersionType versionType = coc.versionType();
-    ElasticMapping childMapping = new ElasticMapping(childDocCls, coc.name(), versionType);
+    ElasticMapping childMapping = new ElasticMapping(childDocCls, false,
+        parentMapping.getJoinFiledName(), coc.name(), versionType);
     Map<String, Object> childPropertiesSchema = resolveSchema(childDocCls);
     parentMapping.getChildren().add(childMapping);
     childPropertiesSchema.forEach((k, s) -> {

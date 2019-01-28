@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
@@ -56,8 +55,6 @@ public class QueryUtils {
       .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
       .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-
-  public static final Map<Class<?>, Integer> DATA_TYPE_ID_MAP = new ConcurrentHashMap<>();
 
   public static <T> T converDataFromJsonStr(String str, Class<T> cls) {
     if (str == null) {

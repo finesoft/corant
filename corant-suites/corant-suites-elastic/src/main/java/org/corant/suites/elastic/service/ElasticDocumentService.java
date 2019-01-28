@@ -78,25 +78,26 @@ public interface ElasticDocumentService {
 
   default boolean index(ElasticDocument document) {
     shouldNotNull(document);
-    return index(document, document.getEsParentId(), false);
+    return index(document, false);
   }
 
-  default boolean index(ElasticDocument document, String parentId, boolean flush) {
+  default boolean index(ElasticDocument document, boolean flush) {
     Class<?> docCls = shouldNotNull(document.getClass());
     ElasticIndexing indexing = shouldNotNull(resolveIndexing(docCls));
     ElasticMapping mapping = shouldNotNull(resolveMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
-      return index(indexing.getName(), document.getEsId(), parentId, mapping.toMap(verDoc), flush,
-          verDoc.getVn(), mapping.getVersionType());
+      return index(indexing.getName(), document.getEsId(), document.getEsRId(),
+          document.getEsPId(), mapping.toMap(verDoc), flush, verDoc.getVn(),
+          mapping.getVersionType());
     } else {
-      return index(indexing.getName(), document.getEsId(), parentId, mapping.toMap(document), flush,
-          0L, null);
+      return index(indexing.getName(), document.getEsId(), document.getEsRId(),
+          document.getEsPId(), mapping.toMap(document), flush, 0L, null);
     }
   }
 
-  boolean index(String indexName, String id, String parentId, Map<?, ?> obj, boolean flush,
-      long version, VersionType versionType);
+  boolean index(String indexName, String id, String routingId, String parentId, Map<?, ?> obj,
+      boolean flush, long version, VersionType versionType);
 
   ElasticIndexing resolveIndexing(Class<?> docCls);
 

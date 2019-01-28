@@ -77,8 +77,8 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       ElasticMapping mapping = mapGetter.apply(docCls);
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
-        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getEsId(),
-            doc.getEsParentId(), mapping.toMap(doc), false, 0l, null).request();
+        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getEsId(), doc.getEsRId(),
+            doc.getEsPId(), mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
     }
@@ -103,11 +103,11 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
   public abstract TransportClient getTransportClient();
 
   @Override
-  public boolean index(String indexName, String id, String parentId, Map<?, ?> obj, boolean flush,
-      long version, VersionType versionType) {
+  public boolean index(String indexName, String id, String routingId, String parentId,
+      Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
     try {
-      return indexRequestBuilder(indexName, id, parentId, obj, flush, version, versionType).get()
-          .getResult() != Result.NOOP;
+      return indexRequestBuilder(indexName, id, routingId, parentId, obj, flush, version,
+          versionType).get().getResult() != Result.NOOP;
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
@@ -141,12 +141,15 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
     return new ArrayList<>();
   }
 
-  protected IndexRequestBuilder indexRequestBuilder(String indexName, String id, String parentId,
-      Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
+  protected IndexRequestBuilder indexRequestBuilder(String indexName, String id, String routingId,
+      String parentId, Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
     IndexRequestBuilder rb =
         getTransportClient().prepareIndex(indexName, Elastic6Constants.TYP_NME, id)
             .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE)
-            .setSource(obj, XContentType.SMILE);
+            .setSource(XContentType.SMILE, obj);
+    if (isNotBlank(routingId)) {
+      rb.setRouting(routingId);
+    }
     if (isNotBlank(parentId)) {
       rb.setParent(parentId);
     }

@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.shared.util.MapUtils.getMapLong;
 import static org.corant.shared.util.MapUtils.getMapString;
+import static org.corant.shared.util.ObjectUtils.asString;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -39,12 +37,12 @@ public class Participator extends AbstractValueObject {
   static final Participator EMPTY_INST = new Participator();
 
   @Column(name = "participatorId")
-  private Long id;
+  private String id;
 
   @Column(name = "participatorName")
   private String name;
 
-  public Participator(Long id, String name) {
+  public Participator(String id, String name) {
     super();
     setId(id);
     setName(name);
@@ -53,11 +51,11 @@ public class Participator extends AbstractValueObject {
   protected Participator() {}
 
   public static Participator currentOrg() {
-    return new Participator(-2L, "fake org");
+    return new Participator("fake org", "fake org");
   }
 
   public static Participator currentUser() {
-    return new Participator(-1L, "fake user");
+    return new Participator("fake user", "fake user");
   }
 
   public static Participator empty() {
@@ -67,10 +65,10 @@ public class Participator extends AbstractValueObject {
   public static Participator of(Object obj) {
     if (obj instanceof Map) {
       Map<?, ?> mapObj = Map.class.cast(obj);
-      return new Participator(getMapLong(mapObj, "id"), getMapString(mapObj, "name"));
+      return new Participator(getMapString(mapObj, "id"), getMapString(mapObj, "name"));
     } else if (obj instanceof Party) {
       Party party = Party.class.cast(obj);
-      return new Participator(party.getId(), party.getName());
+      return new Participator(asString(party.getId()), party.getName());
     } else if (obj instanceof Participator) {
       Participator other = Participator.class.cast(obj);
       return new Participator(other.getId(), other.getName());
@@ -107,7 +105,7 @@ public class Participator extends AbstractValueObject {
     return true;
   }
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
@@ -124,13 +122,12 @@ public class Participator extends AbstractValueObject {
     return result;
   }
 
-  protected void setId(Long id) {
+  protected void setId(String id) {
     this.id = id;
   }
 
   protected void setName(String name) {
     this.name = name;
   }
-
 
 }

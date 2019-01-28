@@ -61,6 +61,8 @@ public class HibernateSchemaUtils {
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
+    System.setProperty("corant.temp.webserver.auto-start", "false");
+    System.setProperty("corant.temp.flyway.migrate.enable", "false");
     Corant corant = new Corant(HibernateSchemaUtils.class, "-disable_boost_line");
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();

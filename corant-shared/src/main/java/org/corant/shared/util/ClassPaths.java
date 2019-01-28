@@ -94,10 +94,25 @@ public class ClassPaths {
     super();
   }
 
+  /**
+   * Scanner with class loader, don't throw exception.
+   *
+   * @see #from(ClassLoader)
+   * @param classLoader
+   * @return
+   */
   public static ClassPath anyway(ClassLoader classLoader) {
     return anyway(classLoader, StringUtils.EMPTY);
   }
 
+  /**
+   * Scanner with class loader and path, don't throw exception.
+   *
+   * @see #from(ClassLoader, String)
+   * @param classLoader
+   * @param path
+   * @return
+   */
   public static ClassPath anyway(ClassLoader classLoader, String path) {
     try {
       return from(classLoader, path);
@@ -107,6 +122,13 @@ public class ClassPaths {
     }
   }
 
+  /**
+   * Scanner with default class loader and path, don't throw exception.
+   * 
+   * @see #from(String)
+   * @param path
+   * @return anyway
+   */
   public static ClassPath anyway(String path) {
     return anyway(defaultClassLoader(), path);
   }
@@ -196,7 +218,7 @@ public class ClassPaths {
   }
 
   /**
-   * Scan class path resource with path, path separator is '/'
+   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern.
    *
    * <pre>
    * for example:
@@ -204,7 +226,7 @@ public class ClassPaths {
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven" then will scan all resources under the META-INF/maven.
    * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
-   * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filte class name
+   * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
    *
@@ -222,6 +244,15 @@ public class ClassPaths {
     return new ClassPath(scanner.getResources());
   }
 
+  /**
+   * Use default class loader to scanner.
+   *
+   * @see #from(ClassLoader, String)
+   * @see ClassUtils#defaultClassLoader()
+   * @param path
+   * @return
+   * @throws IOException from
+   */
   public static ClassPath from(String path) throws IOException {
     return from(defaultClassLoader(), path);
   }

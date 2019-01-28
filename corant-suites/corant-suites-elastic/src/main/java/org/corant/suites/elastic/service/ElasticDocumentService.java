@@ -88,7 +88,7 @@ public interface ElasticDocumentService {
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
       return index(indexing.getName(), document.getEsId(), document.getEsRId(),
-          document.getEsPId(), mapping.toMap(verDoc), flush, verDoc.getVn(),
+          document.getEsPId(), mapping.toMap(verDoc), flush, verDoc.getEsVn(),
           mapping.getVersionType());
     } else {
       return index(indexing.getName(), document.getEsId(), document.getEsRId(),

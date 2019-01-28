@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.interfaces;
+package org.corant.asosat.ddd.gateway;
 
 import static org.corant.shared.util.MapUtils.asMap;
 import java.util.Locale;

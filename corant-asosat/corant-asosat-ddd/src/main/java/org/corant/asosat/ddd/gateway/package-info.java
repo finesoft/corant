@@ -17,4 +17,4 @@
  * @author bingo 下午4:01:49
  *
  */
-package org.corant.asosat.ddd.interfaces;
+package org.corant.asosat.ddd.gateway;

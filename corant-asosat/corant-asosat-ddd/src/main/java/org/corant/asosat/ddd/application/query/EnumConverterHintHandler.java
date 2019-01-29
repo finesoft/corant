@@ -85,7 +85,7 @@ public class EnumConverterHintHandler implements ResultHintHandler {
   protected void handle(Map<String, Object> map, String keyPath, Class<?> enumCls) {
     Map<String, Object> useMap = map;
     Object orginalVal = getKeyPathMapValue(useMap, keyPath, ".");
-    if (orginalVal != null) {
+    if (orginalVal != null && !orginalVal.getClass().isEnum()) {
       Object enumObj = cs.convert(orginalVal, enumCls);
       putKeyPathMapValue(useMap, keyPath, ".", enumObj);
     }

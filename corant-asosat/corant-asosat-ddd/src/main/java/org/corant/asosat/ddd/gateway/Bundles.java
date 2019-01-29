@@ -77,7 +77,7 @@ public class Bundles extends AbstractRests {
   @GET
   public Response getEnumItemLiteral(@PathParam("enumItem") String enumItem) {
     int pos = -1;
-    if (isNotBlank(enumItem) && enums.isResolvable() && (pos = enumItem.indexOf('.')) > 0) {
+    if (isNotBlank(enumItem) && enums.isResolvable() && (pos = enumItem.lastIndexOf('.')) > 0) {
       int len = enumItem.length();
       if (len - pos > 1) {
         String item = enumItem.substring(pos + 1);

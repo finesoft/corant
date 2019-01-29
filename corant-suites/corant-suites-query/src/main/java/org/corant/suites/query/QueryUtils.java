@@ -15,7 +15,7 @@ package org.corant.suites.query;
 
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapMap;
+import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
@@ -144,23 +144,8 @@ public class QueryUtils {
     }
     if (result instanceof Map) {
       if (injectProName.indexOf('.') != -1) {
-        Map<Object, Object> mapResult = Map.class.cast(result);
-        String[] keys = split(injectProName, ".", true, false);
-        int len = keys.length;
-        if (len == 0) {
-          return;
-        } else {
-          len--;
-          String useInjectProName = keys[len];
-          for (int i = 0; i < len; i++) {
-            if ((mapResult = getMapMap(mapResult, keys[i])) == null) {
-              break;
-            }
-          }
-          if (mapResult != null) {
-            mapResult.put(useInjectProName, fetchedResult);
-          }
-        }
+        Map<String, Object> mapResult = Map.class.cast(result);
+        putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
       } else {
         Map.class.cast(result).put(injectProName, fetchedResult);
       }

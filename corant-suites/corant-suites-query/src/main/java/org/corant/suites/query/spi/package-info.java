@@ -11,21 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.domain.shared;
-
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.MappedSuperclass;
-
-@Embeddable
-@MappedSuperclass
-@AttributeOverrides(
-    value = {@AttributeOverride(column = @Column(name = "buyerOrgId", length = 36), name = "id"),
-        @AttributeOverride(column = @Column(name = "buyerOrgName"), name = "name")})
-public class BuyerOrg extends Participator {
-
-  private static final long serialVersionUID = 2482047799269041296L;
-
-}
+/**
+ * corant-suites-query
+ * 
+ * @author bingo 上午11:08:56
+ *
+ */
+package org.corant.suites.query.spi;

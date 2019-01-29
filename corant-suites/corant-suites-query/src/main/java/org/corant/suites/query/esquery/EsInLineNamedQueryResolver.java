@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.esquery;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * asosat-query
@@ -22,15 +22,17 @@ import java.util.Map;
  * @author bingo 下午3:13:37
  *
  */
-public interface EsInLineNamedQueryResolver<K, P, S, F> {
+public interface EsInLineNamedQueryResolver<K, P, S, F, H> {
 
-  Querier<S, F> resolve(K key, P param);
+  Querier<S, F, H> resolve(K key, P param);
 
-  interface Querier<S, F> {
+  interface Querier<S, F, H> {
 
     List<F> getFetchQueries();
 
-    Map<String, String> getHints();
+    default List<H> getHints() {
+      return Collections.emptyList();
+    }
 
     <T> Class<T> getResultClass();
 

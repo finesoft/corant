@@ -36,7 +36,7 @@ public class Participator extends AbstractValueObject {
 
   static final Participator EMPTY_INST = new Participator();
 
-  @Column(name = "participatorId")
+  @Column(name = "participatorId", length = 36)
   private String id;
 
   @Column(name = "participatorName")

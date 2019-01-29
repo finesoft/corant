@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -108,6 +109,31 @@ public class MapUtils {
     Map<String, String> stringMap = new HashMap<>(stringKeyMap.size());
     stringKeyMap.forEach((k, v) -> stringMap.put(k, asString(v, null)));
     return stringMap;
+  }
+
+  public static Object getKeyPathMapValue(Map<String, Object> map, String key, String splitor) {
+    if (isEmpty(map)) {
+      return null;
+    }
+    String[] keys = split(key, splitor, true, false);
+    if (keys.length == 0) {
+      return null;
+    } else if (keys.length == 1) {
+      return map.get(keys[0]);
+    } else {
+      int len = keys.length - 1;
+      String matchedKey = keys[len];
+      Map<String, Object> useMap = map;
+      for (int i = 0; i < len; i++) {
+        if ((useMap = getMapMap(useMap, keys[i])) == null) {
+          break;
+        }
+      }
+      if (useMap != null) {
+        return useMap.get(matchedKey);
+      }
+      return null;
+    }
   }
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
@@ -270,6 +296,29 @@ public class MapUtils {
       map.forEach((k, v) -> result.put(v, k));
     }
     return result;
+  }
+
+  public static void putKeyPathMapValue(Map<String, Object> map, String key, String keySplitor,
+      Object value) {
+    if (map == null) {
+      return;
+    }
+    Map<String, Object> useMap = map;
+    String[] keys = split(key, keySplitor, true, false);
+    int len = keys.length - 1;
+    if (len == -1) {
+      return;
+    } else {
+      String putKey = keys[len];
+      for (int i = 0; i < len; i++) {
+        if ((useMap = getMapMap(useMap, keys[i])) == null) {
+          break;
+        }
+      }
+      if (useMap != null) {
+        useMap.put(putKey, value);
+      }
+    }
   }
 
   public static Map<String, String> toMap(final Properties properties) {

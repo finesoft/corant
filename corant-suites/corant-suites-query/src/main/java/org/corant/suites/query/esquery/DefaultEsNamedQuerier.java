@@ -13,11 +13,11 @@
  */
 package org.corant.suites.query.esquery;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.corant.suites.query.esquery.EsInLineNamedQueryResolver.Querier;
 import org.corant.suites.query.mapping.FetchQuery;
+import org.corant.suites.query.mapping.QueryHint;
 
 /**
  * asosat-query
@@ -25,12 +25,12 @@ import org.corant.suites.query.mapping.FetchQuery;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultEsNamedQuerier implements Querier<String, FetchQuery> {
+public class DefaultEsNamedQuerier implements Querier<String, FetchQuery, QueryHint> {
 
   protected final String script;
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
-  protected final Map<String, String> hints = new HashMap<>();
+  protected final List<QueryHint> hints = new ArrayList<>();
 
   /**
    * @param script
@@ -38,14 +38,14 @@ public class DefaultEsNamedQuerier implements Querier<String, FetchQuery> {
    * @param hints
    * @param fetchQueries
    */
-  public DefaultEsNamedQuerier(String script, Class<?> resultClass, Map<String, String> hints,
+  public DefaultEsNamedQuerier(String script, Class<?> resultClass, List<QueryHint> hints,
       List<FetchQuery> fetchQueries) {
     super();
     this.script = script;
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
     if (hints != null) {
-      this.hints.putAll(hints);
+      this.hints.addAll(hints);
     }
   }
 
@@ -55,7 +55,7 @@ public class DefaultEsNamedQuerier implements Querier<String, FetchQuery> {
   }
 
   @Override
-  public Map<String, String> getHints() {
+  public List<QueryHint> getHints() {
     return hints;
   }
 

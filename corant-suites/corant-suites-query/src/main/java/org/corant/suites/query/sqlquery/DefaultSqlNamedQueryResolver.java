@@ -1,29 +1,32 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.query.sqlquery;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
+import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.mapping.QueryMappingService;
+import org.corant.suites.query.spi.ParamHintHandler;
 
 /**
  * asosat-query
@@ -32,8 +35,8 @@ import org.corant.suites.query.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-public class DefaultSqlNamedQueryResolver
-    implements SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery> {
+public class DefaultSqlNamedQueryResolver implements
+    SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery, QueryHint> {
 
   final Map<String, DefaultSqlNamedQueryTpl> cachedQueTpls = new ConcurrentHashMap<>();
 
@@ -43,9 +46,15 @@ public class DefaultSqlNamedQueryResolver
   @Inject
   protected ConversionService conversionService;
 
+  @Inject
+  @Any
+  Instance<ParamHintHandler> paramHintHandlers;
+
   @Override
   public DefaultSqlNamedQuerier resolve(String key, Map<String, Object> param) {
-    return cachedQueTpls.computeIfAbsent(key, this::buildQueryTemplate).process(param);
+    DefaultSqlNamedQueryTpl tpl = cachedQueTpls.computeIfAbsent(key, this::buildQueryTemplate);
+    handleParamHints(tpl, param);
+    return tpl.process(param);
   }
 
   protected DefaultSqlNamedQueryTpl buildQueryTemplate(String key) {
@@ -54,6 +63,15 @@ public class DefaultSqlNamedQueryResolver
       throw new QueryRuntimeException("Can not found Query for key %s", key);
     }
     return new DefaultSqlNamedQueryTpl(query, conversionService);
+  }
+
+  protected void handleParamHints(DefaultSqlNamedQueryTpl tpl, Map<String, Object> param) {
+    if (!isEmpty(tpl.getHints()) && !paramHintHandlers.isUnsatisfied()) {
+      tpl.getHints().forEach(hint -> {
+        paramHintHandlers.stream().filter(h -> h.canHandle(hint))
+            .forEach(h -> h.handle(hint, tpl.getQueryName(), param));
+      });
+    }
   }
 
 }

@@ -64,18 +64,6 @@
 			<optional>false</optional>
 		</dependency>
 		<dependency>
-			<groupId>io.agroal</groupId>
-			<artifactId>agroal-narayana</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss</groupId>
-					<artifactId>jboss-transaction-spi</artifactId>
-				</exclusion>
-			</exclusions>
-			<optional>false</optional>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>

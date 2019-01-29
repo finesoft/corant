@@ -35,7 +35,7 @@ public class ModificationInfo implements OperationInfo {
 
   @Embedded
   @AttributeOverrides(
-      value = {@AttributeOverride(column = @Column(name = "modifierId"), name = "id"),
+      value = {@AttributeOverride(column = @Column(name = "modifierId", length = 36), name = "id"),
           @AttributeOverride(column = @Column(name = "modifierName", length = 320), name = "name")})
   private Participator modifier;
 

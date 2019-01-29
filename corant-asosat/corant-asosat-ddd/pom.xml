@@ -68,6 +68,17 @@
 			<artifactId>corant-suites-jta-narayana</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.agroal</groupId>
+			<artifactId>agroal-narayana</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss</groupId>
+					<artifactId>jboss-transaction-spi</artifactId>
+				</exclusion>
+			</exclusions>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jpa-hibernate</artifactId>
 		</dependency>

@@ -11,21 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.domain.shared;
+package org.corant.suites.query.spi;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.MappedSuperclass;
+import javax.enterprise.context.ApplicationScoped;
+import org.corant.suites.query.mapping.QueryHint;
 
-@Embeddable
-@MappedSuperclass
-@AttributeOverrides(
-    value = {@AttributeOverride(column = @Column(name = "buyerOrgId", length = 36), name = "id"),
-        @AttributeOverride(column = @Column(name = "buyerOrgName"), name = "name")})
-public class BuyerOrg extends Participator {
+/**
+ * corant-suites-query
+ *
+ * @author bingo 上午11:10:01
+ *
+ */
+@ApplicationScoped
+@FunctionalInterface
+public interface ParamHintHandler {
 
-  private static final long serialVersionUID = 2482047799269041296L;
+  default boolean canHandle(QueryHint qh) {
+    return false;
+  }
+
+  void handle(QueryHint qh, Object querier, Object param);
 
 }

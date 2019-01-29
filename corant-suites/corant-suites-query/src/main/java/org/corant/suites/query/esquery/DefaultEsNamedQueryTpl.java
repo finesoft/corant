@@ -75,7 +75,8 @@ public class DefaultEsNamedQueryTpl
       return new DefaultEsNamedQuerier(
           OM.writer(JsonpCharacterEscapes.instance())
               .writeValueAsString(OM.readValue(sw.toString(), Object.class)),
-          getResultClass(), resolveHints(), getFetchQueries());// FIXME Do some protection
+          getResultClass(), getHints(), getFetchQueries());// FIXME Do some
+                                                           // protection
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
     }
@@ -85,12 +86,6 @@ public class DefaultEsNamedQueryTpl
   protected DynamicQueryTplMmResolver<Map<String, Object>> getTemplateMethodModel(
       Map<String, Object> param) {
     return null;// We are in line
-  }
-
-  protected Map<String, String> resolveHints() {
-    Map<String, String> map = new HashMap<>();
-    getHints().forEach(hint -> map.put(hint.getKey(), hint.getValue()));
-    return map;
   }
 
 }

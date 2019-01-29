@@ -45,7 +45,7 @@ public class DefaultSqlNamedQueryTpl
     try (StringWriter sw = new StringWriter()) {
       getTemplate().process(param, sw);
       return new DefaultSqlNamedQuerier(sw.toString(), tmm.getParameters(), getResultClass(),
-          getFetchQueries());
+          getFetchQueries(), getHints());
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
     }

@@ -35,7 +35,8 @@ public class CreationInfo implements OperationInfo {
 
   @Embedded
   @AttributeOverrides(value = {
-      @AttributeOverride(column = @Column(name = "creatorId", updatable = false), name = "id"),
+      @AttributeOverride(column = @Column(name = "creatorId", length = 36, updatable = false),
+          name = "id"),
       @AttributeOverride(column = @Column(name = "creatorName", length = 320, updatable = false),
           name = "name")})
   private Participator creator;

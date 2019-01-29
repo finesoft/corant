@@ -13,9 +13,12 @@
  */
 package org.corant.suites.query.sqlquery;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.corant.suites.query.mapping.FetchQuery;
+import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
 
 /**
@@ -24,13 +27,13 @@ import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQuery> {
+public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQuery, QueryHint> {
 
   protected final String script;
   protected Object[] convertedParams;
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
-
+  protected final List<QueryHint> hints = new ArrayList<>();
 
   /**
    * @param script
@@ -45,19 +48,23 @@ public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQu
     this.fetchQueries = fetchQueries;
   }
 
-
   /**
    * @param script
    * @param convertedParams
    * @param resultClass
    * @param fetchQueries
+   * @param hints
    */
   public DefaultSqlNamedQuerier(String script, Object[] convertedParams, Class<?> resultClass,
-      List<FetchQuery> fetchQueries) {
+      List<FetchQuery> fetchQueries, List<QueryHint> hints) {
     this(script, resultClass, fetchQueries);
     setConvertedParams(convertedParams);
+    if (!isEmpty(hints)) {
+      for (QueryHint qh : hints) {
+        this.hints.add(qh);
+      }
+    }
   }
-
 
   @Override
   public Object[] getConvertedParameters() {
@@ -67,6 +74,11 @@ public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQu
   @Override
   public List<FetchQuery> getFetchQueries() {
     return fetchQueries;
+  }
+
+  @Override
+  public List<QueryHint> getHints() {
+    return hints;
   }
 
   /**

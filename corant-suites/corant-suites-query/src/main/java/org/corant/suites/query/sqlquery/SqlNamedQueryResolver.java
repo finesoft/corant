@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.sqlquery;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,15 +22,19 @@ import java.util.List;
  * @author bingo 下午3:13:37
  *
  */
-public interface SqlNamedQueryResolver<K, P, S, CP, F> {
+public interface SqlNamedQueryResolver<K, P, S, CP, F, H> {
 
-  Querier<S, CP, F> resolve(K key, P param);
+  Querier<S, CP, F, H> resolve(K key, P param);
 
-  static interface Querier<S, CP, F> {
+  interface Querier<S, CP, F, H> {
 
     CP getConvertedParameters();
 
     List<F> getFetchQueries();
+
+    default List<H> getHints() {
+      return Collections.emptyList();
+    }
 
     <T> Class<T> getResultClass();
 

@@ -11,21 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.domain.shared;
+package org.corant.asosat.ddd.gateway;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.MappedSuperclass;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Embeddable
-@MappedSuperclass
-@AttributeOverrides(
-    value = {@AttributeOverride(column = @Column(name = "buyerOrgId", length = 36), name = "id"),
-        @AttributeOverride(column = @Column(name = "buyerOrgName"), name = "name")})
-public class BuyerOrg extends Participator {
+/**
+ * corant-asosat-ddd
+ *
+ * @author bingo 下午5:38:53
+ *
+ */
+@FunctionalInterface
+public interface JacksonConfigHandler {
 
-  private static final long serialVersionUID = 2482047799269041296L;
+  void handle(ObjectMapper objectMapper);
 
 }

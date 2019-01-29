@@ -1,25 +1,29 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.util;
 
+import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.suites.bundle.EnumerationBundle;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -41,21 +45,19 @@ import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
  *
  */
 public class JsonUtils {
-  private final static Long BROWSER_SAFE_LONG = 9007199254740991L;
-  private final static BigInteger BROWSER_SAFE_BIGINTEGER =
-      new BigInteger(BROWSER_SAFE_LONG.toString());
-
-  private final static ObjectMapper objectMapper;
+  final static Long BROWSER_SAFE_LONG = 9007199254740991L;
+  final static BigInteger BROWSER_SAFE_BIGINTEGER = new BigInteger(BROWSER_SAFE_LONG.toString());
+  final static ObjectMapper OBJECT_MAPPER;
   static {
-    objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new SimpleModule().addSerializer(new SqlDateSerializer()));
-    objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
-    objectMapper.enable(Feature.ALLOW_COMMENTS);
-    objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-    objectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
-    objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-    objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    OBJECT_MAPPER = new ObjectMapper();
+    OBJECT_MAPPER.registerModule(new SimpleModule().addSerializer(new SqlDateSerializer()));
+    OBJECT_MAPPER.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
+    OBJECT_MAPPER.enable(Feature.ALLOW_COMMENTS);
+    OBJECT_MAPPER.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    OBJECT_MAPPER.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+    OBJECT_MAPPER.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    OBJECT_MAPPER.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
   }
 
   private JsonUtils() {}
@@ -64,17 +66,18 @@ public class JsonUtils {
    * @return The ObjectMapper clone that use in this application
    */
   public static ObjectMapper copyMapper() {
-    return objectMapper.copy();
+    return OBJECT_MAPPER.copy();
   }
 
   /**
-   * @return The ObjectMapper clone that use in this application for java script
-   *         application
+   * @return The ObjectMapper clone that use in this application for java script application
    */
-  public static ObjectMapper copyMapperForUI() {
+  public static ObjectMapper copyMapperForJs() {
     ObjectMapper copy = copyMapper();
-    SimpleModule module = new SimpleModule().addSerializer(new BigIntegerJsonSerializer())
-        .addSerializer(new LongJsonSerializer());
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(new BigIntegerJsonSerializer());
+    module.addSerializer(new LongJsonSerializer());
+    module.addSerializer(new EnumJsonSerializer());
     copy.registerModule(module);
     return copy;
   }
@@ -105,8 +108,8 @@ public class JsonUtils {
       return null;
     }
     try {
-      return objectMapper.readValue(cmd,
-          objectMapper.getTypeFactory().constructParametricType(parametrized, parameterClasses));
+      return OBJECT_MAPPER.readValue(cmd,
+          OBJECT_MAPPER.getTypeFactory().constructParametricType(parametrized, parameterClasses));
     } catch (IOException e) {
       throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd);
     }
@@ -125,8 +128,8 @@ public class JsonUtils {
       return null;
     }
     try {
-      return objectMapper.readValue(cmd,
-          objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
+      return OBJECT_MAPPER.readValue(cmd,
+          OBJECT_MAPPER.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
     } catch (IOException e) {
       throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd);
     }
@@ -142,7 +145,7 @@ public class JsonUtils {
   public static <T> T fromJsonStr(String cmd, Class<T> clazz) {
     if (isNotBlank(cmd)) {
       try {
-        return objectMapper.readValue(cmd, clazz);
+        return OBJECT_MAPPER.readValue(cmd, clazz);
       } catch (IOException e) {
         e.printStackTrace();
         throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd,
@@ -153,7 +156,7 @@ public class JsonUtils {
   }
 
   public static ObjectMapper referenceMapper() {
-    return objectMapper;
+    return OBJECT_MAPPER;
   }
 
   /**
@@ -179,9 +182,9 @@ public class JsonUtils {
     if (obj != null) {
       try {
         if (pretty) {
-          return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+          return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } else {
-          return objectMapper.writeValueAsString(obj);
+          return OBJECT_MAPPER.writeValueAsString(obj);
         }
       } catch (JsonProcessingException e) {
         throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, obj);
@@ -190,7 +193,7 @@ public class JsonUtils {
     return null;
   }
 
-  private final static class BigIntegerJsonSerializer extends JsonSerializer<BigInteger> {
+  final static class BigIntegerJsonSerializer extends JsonSerializer<BigInteger> {
     @Override
     public Class<BigInteger> handledType() {
       return BigInteger.class;
@@ -207,7 +210,52 @@ public class JsonUtils {
     }
   }
 
-  private final static class LongJsonSerializer extends JsonSerializer<Long> {
+  @SuppressWarnings("rawtypes")
+  final static class EnumJsonSerializer extends JsonSerializer<Enum> {
+
+    static final Map<Enum, Map<String, Object>> CACHES = new ConcurrentHashMap<>();
+
+    static volatile EnumerationBundle bundle;
+
+    @Override
+    public Class<Enum> handledType() {
+      return Enum.class;
+    }
+
+    @Override
+    public void serialize(Enum value, JsonGenerator gen, SerializerProvider serializers)
+        throws IOException {
+      gen.writeObject(resolveEnumLiteral(value));
+    }
+
+    EnumerationBundle buncle() {
+      if (bundle == null) {
+        synchronized (this) {
+          if (bundle == null && Corant.cdi().select(EnumerationBundle.class).isResolvable()) {
+            bundle = Corant.cdi().select(EnumerationBundle.class).get();
+          } else {
+            bundle = new EnumerationBundle() {
+              @Override
+              public String getEnumItemLiteral(Enum enumVal, Locale locale) {
+                return enumVal.name();
+              }
+            };
+          }
+        }
+      }
+      return bundle;
+    }
+
+    Map<String, Object> resolveEnumLiteral(Enum value) {
+      return CACHES.computeIfAbsent(value, (v) -> {
+        String literal = buncle().getEnumItemLiteral(value, Locale.getDefault());
+        return asMap("name", value.name(), "literal", defaultObject(literal, value.name()), "class",
+            value.getDeclaringClass().getName(), "ordinal", value.ordinal());
+      });
+    }
+  }
+
+  final static class LongJsonSerializer extends JsonSerializer<Long> {
     @Override
     public Class<Long> handledType() {
       return Long.class;

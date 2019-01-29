@@ -52,14 +52,12 @@ public interface EsQueryExecutor {
 
   SearchResponse execute(SearchRequest searchRequest) throws Exception;
 
-  default SearchResponse execute(String indexName, String script, Map<String, String> queryhints)
-      throws Exception {
+  default SearchResponse execute(String indexName, String script) throws Exception {
     return execute(buildSearchRequest(script, indexName));
   }
 
-  default Map<String, Object> search(String indexName, String script,
-      Map<String, String> queryhints) throws Exception {
-    SearchResponse searchResponse = execute(indexName, script, queryhints);
+  default Map<String, Object> search(String indexName, String script) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script);
     if (searchResponse != null) {
       Map<String, Object> result = XContentUtils.searchResponseToMap(searchResponse);
       return result;
@@ -68,9 +66,8 @@ public interface EsQueryExecutor {
     }
   }
 
-  default Map<String, Object> searchAggregation(String indexName, String script,
-      Map<String, String> queryhints) throws Exception {
-    SearchResponse searchResponse = execute(indexName, script, queryhints);
+  default Map<String, Object> searchAggregation(String indexName, String script) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script);
     if (searchResponse != null) {
       Map<String, Object> result =
           XContentUtils.searchResponseToMap(searchResponse, AGG_RS_ETR_PATH);
@@ -82,10 +79,10 @@ public interface EsQueryExecutor {
     return new HashMap<>();
   }
 
-  default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script,
-      Map<String, String> queryhints) throws Exception {
+  default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script)
+      throws Exception {
     List<Map<String, Object>> list = new ArrayList<>();
-    SearchResponse searchResponse = execute(indexName, script, queryhints);
+    SearchResponse searchResponse = execute(indexName, script);
     long total = 0;
     if (searchResponse != null) {
       total = searchResponse.getHits() != null ? searchResponse.getHits().getTotalHits() : 0;

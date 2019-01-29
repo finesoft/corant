@@ -14,10 +14,16 @@
 package org.corant.asosat.ddd.gateway;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.MapUtils.asLinkedMap;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -28,6 +34,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -60,6 +67,28 @@ public class Bundles extends AbstractRests {
   @Inject
   @Any
   Instance<MessageBundle> messages;
+
+  @SuppressWarnings("rawtypes")
+  @Path("/getAllEnumContents/")
+  @GET
+  public Response getAllEnumContents() {
+    if (enums.isResolvable()) {
+      Map<String, Map<String, Map<String, Object>>> result = new HashMap<>();
+      EnumerationBundle bundle = enums.get();
+      List<Class<Enum>> enumClasses = bundle.getAllEnumClass();
+      Locale locale = resolveLocale();
+      enumClasses.forEach(cls -> {
+        Map<String, Map<String, Object>> items =
+            result.computeIfAbsent(cls.getDeclaringClass().getName(), (k) -> new LinkedHashMap<>());
+        for (Enum e : cls.getEnumConstants()) {
+          items.put(e.name(),
+              asLinkedMap("ordinal", e.ordinal(), "literal", bundle.getEnumItemLiteral(e, locale)));
+        }
+      });
+      return ok(result);
+    }
+    return noContent();
+  }
 
   @Path("/getEnumClassLiteral/{enumCls}/")
   @GET
@@ -99,6 +128,20 @@ public class Bundles extends AbstractRests {
       if (cls != null && cls.isEnum()) {
         return ok(enums.get().getEnumItemLiterals(forceCast(cls), resolveLocale()));
       }
+    }
+    return noContent();
+  }
+
+  @Path("/getMessage")
+  @GET
+  public Response getMessage(@QueryParam("msgCode") String msgCode,
+      @QueryParam("args") List<String> args) {
+    if (isNotBlank(msgCode) && messages.isResolvable()) {
+      Object[] obj = new Object[0];
+      if (!isEmpty(args)) {
+        obj = args.toArray(new String[args.size()]);
+      }
+      return ok(messages.get().getMessage(resolveLocale(), msgCode, obj));
     }
     return noContent();
   }

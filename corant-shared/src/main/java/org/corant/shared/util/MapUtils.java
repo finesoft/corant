@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -53,13 +54,18 @@ public class MapUtils {
     return Collections.unmodifiableMap(asMap(objects));
   }
 
-  public static <K, V> Map<K, V> asMap(Object... objects) {
+  public static <K, V> Map<K, V> asLinkedMap(Object... objects) {
+    return asMap(true, objects);
+  }
+
+  public static <K, V> Map<K, V> asMap(boolean linked, Object... objects) {
     int oLen;
     if (objects == null || (oLen = objects.length) == 0) {
-      return new HashMap<>(0);
+      return linked ? new LinkedHashMap<>(0) : new HashMap<>(0);
     }
     int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
-    Map<K, V> map = new HashMap<>((rLen >> 1) + 1);
+    int size = (rLen >> 1) + 1;
+    Map<K, V> map = linked ? new LinkedHashMap<>(size) : new HashMap<>(size);
     for (int i = 0; i < rLen; i += 2) {
       map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
     }
@@ -67,6 +73,10 @@ public class MapUtils {
       map.put(forceCast(objects[rLen]), null);
     }
     return map;
+  }
+
+  public static <K, V> Map<K, V> asMap(Object... objects) {
+    return asMap(false, objects);
   }
 
   public static Properties asProperties(String... strings) {

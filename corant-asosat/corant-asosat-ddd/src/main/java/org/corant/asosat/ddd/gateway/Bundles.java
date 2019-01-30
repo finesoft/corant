@@ -79,7 +79,7 @@ public class Bundles extends AbstractRests {
       Locale locale = resolveLocale();
       enumClasses.forEach(cls -> {
         Map<String, Map<String, Object>> items =
-            result.computeIfAbsent(cls.getDeclaringClass().getName(), (k) -> new LinkedHashMap<>());
+            result.computeIfAbsent(cls.getName(), (k) -> new LinkedHashMap<>());
         for (Enum e : cls.getEnumConstants()) {
           items.put(e.name(),
               asLinkedMap("ordinal", e.ordinal(), "literal", bundle.getEnumItemLiteral(e, locale)));

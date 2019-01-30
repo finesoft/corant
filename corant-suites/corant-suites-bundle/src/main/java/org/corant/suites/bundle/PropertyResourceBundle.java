@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.corant.shared.normal.Defaults;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 
 /**
  * corant-suites-bundle
@@ -56,7 +56,7 @@ public class PropertyResourceBundle extends ResourceBundle {
   private String baseBundleName;
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public PropertyResourceBundle(ResourceInfo fo) throws IOException {
+  public PropertyResourceBundle(ClassPathResource fo) throws IOException {
     baseBundleName = fo.getResourceName();
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
@@ -68,10 +68,10 @@ public class PropertyResourceBundle extends ResourceBundle {
   }
 
   public static Map<String, PropertyResourceBundle> getBundles(String classPath,
-      Predicate<ResourceInfo> fs) {
+      Predicate<ClassPathResource> fs) {
     Map<String, PropertyResourceBundle> map = new HashMap<>();
     try {
-      ClassPaths.from(classPath).getResources().filter(fs).forEach((fo) -> {
+      Resources.fromClassPath(classPath).filter(fs).forEach((fo) -> {
         try {
           map.putIfAbsent(fo.getResourceName(), new PropertyResourceBundle(fo));
         } catch (IOException e) {

@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.util.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.StreamUtils;
 import org.eclipse.microprofile.config.Config;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -205,7 +205,7 @@ public class ElasticConfig {
   }
 
   protected void initSetting(String path) {
-    ResourceInfo setting = ClassPaths.anyway(path).getResources().findFirst().orElse(null);
+    ClassPathResource setting = Resources.tryFromClassPath(path).findFirst().orElse(null);
     if (setting != null) {
       try (ByteArrayOutputStream os = new ByteArrayOutputStream();
           InputStream is = setting.openStream();) {

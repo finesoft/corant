@@ -300,4 +300,5 @@ public class PathUtils {
       return regex.append('$').toString();
     }
   }
+
 }

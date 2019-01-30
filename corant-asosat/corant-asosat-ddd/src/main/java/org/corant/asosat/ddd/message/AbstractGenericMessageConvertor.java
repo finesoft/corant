@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.message;
@@ -33,8 +31,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ClassInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassResource;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.Message.ExchangedMessage;
 import org.corant.suites.ddd.message.MessageService.MessageConvertor;
@@ -93,21 +91,22 @@ public abstract class AbstractGenericMessageConvertor<P, A> implements MessageCo
     for (String path : pkgs) {
       if (isNotBlank(path)) {
         try {
-          ClassPaths.from(path).getClasses().map(ClassInfo::load).forEach(cls -> {
-            if (cls != null && AbstractGenericMessage.class.isAssignableFrom(cls)
-                && JpaUtils.isPersistenceClass(cls)) {// only support JPA
-              Class<AbstractGenericMessage<P, A>> msgCls =
-                  (Class<AbstractGenericMessage<P, A>>) cls;
-              Constructor<AbstractGenericMessage<P, A>> match = this.findConstructor(msgCls);
-              if (match != null) {
-                requireNotEmpty(MessageUtils.extractMessageQueues(cls),
-                    PkgMsgCds.ERR_MSG_CFG_QUEUE_NULL, cls.getName()).forEach(queue -> {
-                      requireNull(this.constructors.put(queue, match),
-                          PkgMsgCds.ERR_MSG_CFG_QUEUE_DUP, queue);
-                    });
-              }
-            }
-          });
+          Resources.fromClassPath(path).filter(c -> c instanceof ClassResource)
+              .map(c -> (ClassResource) c).map(ClassResource::load).forEach(cls -> {
+                if (cls != null && AbstractGenericMessage.class.isAssignableFrom(cls)
+                    && JpaUtils.isPersistenceClass(cls)) {// only support JPA
+                  Class<AbstractGenericMessage<P, A>> msgCls =
+                      (Class<AbstractGenericMessage<P, A>>) cls;
+                  Constructor<AbstractGenericMessage<P, A>> match = this.findConstructor(msgCls);
+                  if (match != null) {
+                    requireNotEmpty(MessageUtils.extractMessageQueues(cls),
+                        PkgMsgCds.ERR_MSG_CFG_QUEUE_NULL, cls.getName()).forEach(queue -> {
+                          requireNull(this.constructors.put(queue, match),
+                              PkgMsgCds.ERR_MSG_CFG_QUEUE_DUP, queue);
+                        });
+                  }
+                }
+              });
         } catch (Exception e) {
           throw new CorantRuntimeException(e);
         }

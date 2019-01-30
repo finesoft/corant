@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -56,7 +56,7 @@ public class KeycloakConfigResolverImpl implements KeycloakConfigResolver {
   @PostConstruct
   void onPostConstruct() {
     URL kcf;
-    kcf = ClassPaths.anyway(deploymentFilePath).getResources().map(ResourceInfo::getUrl).findFirst()
+    kcf = Resources.tryFromClassPath(deploymentFilePath).map(ClassPathResource::getUrl).findFirst()
         .orElse(null);
     if (kcf != null) {
       try (InputStream is = kcf.openStream()) {

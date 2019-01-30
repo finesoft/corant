@@ -29,8 +29,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
-import org.corant.shared.util.ClassPaths;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.flyway.FlywayConfigProvider.DefaultFlywayConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -108,7 +108,7 @@ public class FlywayMigrator {
 
   protected boolean checkLocation(String location) {
     try {
-      return ClassPaths.from(location).getResources()
+      return Resources.fromClassPath(location)
           .anyMatch(r -> r.getResourceName().toLowerCase(Locale.ROOT).endsWith(".sql"));
     } catch (IOException e) {
       logger.log(Level.WARNING, e,

@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.corant.shared.util.ClassPaths;
+import org.corant.shared.util.Resources;
 import org.corant.suites.jpa.shared.metadata.PersistenceConfigParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceXmlParser;
@@ -97,7 +97,7 @@ public class JpaConfig {
   private static Map<String, PersistenceUnitInfoMetaData> generateFromXml() {
     Map<String, PersistenceUnitInfoMetaData> map = new LinkedHashMap<>();
     try {
-      ClassPaths.from(DFLT_PU_XML_LOCATION).getResources().map(r -> r.getUrl())
+      Resources.fromClassPath(DFLT_PU_XML_LOCATION).map(r -> r.getUrl())
           .map(PersistenceXmlParser::parse).forEach(m -> {
             map.putAll(m);
           });

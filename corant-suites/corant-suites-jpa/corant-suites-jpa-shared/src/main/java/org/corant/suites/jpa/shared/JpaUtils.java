@@ -29,8 +29,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ClassInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassResource;
 
 /**
  *
@@ -47,7 +47,8 @@ public class JpaUtils {
   public static Set<Class<?>> getPersistenceClasses(String packages) {
     Set<Class<?>> clses = new LinkedHashSet<>();
     try {
-      ClassPaths.from(replace(packages, ".", "/")).getClasses().map(ClassInfo::load)
+      Resources.fromClassPath(replace(packages, ".", "/")).filter(c -> c instanceof ClassResource)
+          .map((c) -> (ClassResource) c).map(ClassResource::load)
           .filter(JpaUtils::isPersistenceClass).forEach(clses::add);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
@@ -59,7 +60,7 @@ public class JpaUtils {
     Set<String> paths = new LinkedHashSet<>();
     try {
       for (String pathExpression : pathExpressions) {
-        ClassPaths.from(pathExpression).getResources().filter(r -> !ClassInfo.class.isInstance(r))
+        Resources.fromClassPath(pathExpression).filter(r -> !ClassResource.class.isInstance(r))
             .map(r -> r.getResourceName()).forEach(paths::add);
       }
     } catch (IOException e) {
@@ -91,7 +92,8 @@ public class JpaUtils {
 
   public static void stdoutPersistClasses(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replaceAll("\\.", "/");
-    ClassPaths.from(path).getClasses().map(ClassInfo::load).filter(JpaUtils::isPersistenceClass)
+    Resources.fromClassPath(path).filter(c -> c instanceof ClassResource)
+        .map(c -> (ClassResource) c).map(ClassResource::load).filter(JpaUtils::isPersistenceClass)
         .map(Class::getName).sorted(String::compareTo)
         .map(x -> new StringBuilder("<class>").append(x).append("</class>").toString())
         .forEach(ps::println);
@@ -106,7 +108,7 @@ public class JpaUtils {
 
   public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replaceAll("\\.", "/");
-    ClassPaths.from(path).getResources().filter(r -> r.getResourceName().endsWith("JpaOrm.xml"))
+    Resources.fromClassPath(path).filter(r -> r.getResourceName().endsWith("JpaOrm.xml"))
         .map(r -> r.getResourceName()).map(s -> new StringBuilder().append("<mapping-file>")
             .append(s.substring(s.indexOf(path))).append("</mapping-file>"))
         .forEach(ps::println);

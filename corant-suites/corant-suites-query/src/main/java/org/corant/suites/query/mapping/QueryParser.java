@@ -29,8 +29,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.StringUtils;
 import org.corant.suites.query.QueryRuntimeException;
 import org.xml.sax.ErrorHandler;
@@ -85,7 +85,7 @@ public class QueryParser {
     Map<String, URL> map = new HashMap<>();
     asSet(split(pathExpress, ";")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
       try {
-        ClassPaths.from(path).getResources().forEach(f -> map.put(f.getResourceName(), f.getUrl()));
+        Resources.fromClassPath(path).forEach(f -> map.put(f.getResourceName(), f.getUrl()));
       } catch (Exception e) {
         throw new QueryRuntimeException(e);
       }
@@ -96,7 +96,7 @@ public class QueryParser {
   Schema getSchema() {
     try {
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
-          ClassPaths.from(SCHEMA_URL).getResources().map(ResourceInfo::getUrl).findFirst().get());
+          Resources.fromClassPath(SCHEMA_URL).map(ClassPathResource::getUrl).findFirst().get());
     } catch (SAXException | IOException e) {
       throw new QueryRuntimeException(e);
     }

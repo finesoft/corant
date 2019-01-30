@@ -18,6 +18,7 @@ import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -27,6 +28,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Resources.SourceType;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
 import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
@@ -41,6 +43,8 @@ import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.PathResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -174,8 +178,10 @@ public class UndertowWebServer extends AbstractWebServer {
       deploymentManager.getDeployment().getSessionManager()
           .setDefaultSessionTimeout(config.getSessionTimeout());
       HttpHandler servletHandler = deploymentManager.start();
-      PathHandler path = Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
-      builder.setHandler(path);
+      PathHandler handler =
+          Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
+      resolveStaticContent(handler);
+      builder.setHandler(handler);
       Undertow server = builder.build();
       return server;
     } catch (Exception e) {
@@ -268,6 +274,24 @@ public class UndertowWebServer extends AbstractWebServer {
     if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureSocketOptions(builder::setSocketOption));
+    }
+  }
+
+  protected void resolveStaticContent(PathHandler handler) {
+    if (specConfig.getStaticContentPath().isPresent()
+        && specConfig.getStaticServingPath().isPresent()) {
+      String path = specConfig.getStaticContentPath().get();
+      String servPath = specConfig.getStaticServingPath().get();
+      SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);
+      String usePath = st.resolve(path);
+      if (st == SourceType.FILE_SYSTEM) {
+        handler.addPrefixPath(servPath,
+            new ResourceHandler(new PathResourceManager(Paths.get(usePath))));
+      } else {
+        // TODO FIXME virtual path handler...
+        handler.addPrefixPath(servPath, new ResourceHandler(
+            new ClassPathResourceManager(this.getClass().getClassLoader(), usePath)));
+      }
     }
   }
 

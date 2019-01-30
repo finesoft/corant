@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ClassInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassResource;
 import org.corant.suites.elastic.ElasticConfig;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
@@ -181,7 +181,8 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {
-      ClassPaths.anyway(docPath).getClasses().map(ClassInfo::load)
+      Resources.tryFromClassPath(docPath).filter(c -> c instanceof ClassResource)
+          .map(c -> (ClassResource) c).map(ClassResource::load)
           .filter(dc -> dc.isAnnotationPresent(EsDocument.class)).forEach(docClses::add);
     }
     return docClses;

@@ -15,15 +15,16 @@ package org.corant.asosat.ddd.application.query;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getKeyPathMapValue;
-import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
+import static org.corant.shared.util.MapUtils.replaceKeyPathMapValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.kernel.service.ConversionService;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 import org.corant.suites.query.Query.ForwardList;
 import org.corant.suites.query.Query.PagedList;
@@ -40,6 +41,8 @@ import org.corant.suites.query.spi.ResultHintHandler;
 @ApplicationServices
 public class EnumConverterHintHandler implements ResultHintHandler {
 
+  static final Map<QueryHint, Pair<String, Class<?>>> caches = new ConcurrentHashMap<>();
+
   @Inject
   ConversionService cs;
 
@@ -50,19 +53,14 @@ public class EnumConverterHintHandler implements ResultHintHandler {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handle(QueryHint hint, Object result) {
-    String[] hv = split(hint.getValue(), ":", true, true);
-    if (hv.length != 2) {
-      return;
-    }
-    String path = hv[0];
-    String enumClass = hv[1];
-    Class<?> enumCls = tryAsClass(enumClass);
-    if (enumCls == null) {
+  public void handle(QueryHint qh, Object result) {
+
+    Pair<String, Class<?>> hint = resolveHint(qh);
+    if (hint == null) {
       return;
     }
     if (result instanceof Map) {
-      handle(Map.class.cast(result), path, enumCls);
+      handle(Map.class.cast(result), hint.getLeft(), hint.getRight());
     } else {
       List<?> list = null;
       if (result instanceof ForwardList) {
@@ -75,7 +73,7 @@ public class EnumConverterHintHandler implements ResultHintHandler {
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            handle(Map.class.cast(item), path, enumCls);
+            handle(Map.class.cast(item), hint.getLeft(), hint.getRight());
           }
         }
       }
@@ -83,11 +81,28 @@ public class EnumConverterHintHandler implements ResultHintHandler {
   }
 
   protected void handle(Map<String, Object> map, String keyPath, Class<?> enumCls) {
-    Map<String, Object> useMap = map;
-    Object orginalVal = getKeyPathMapValue(useMap, keyPath, ".");
-    if (orginalVal != null && !orginalVal.getClass().isEnum()) {
-      Object enumObj = cs.convert(orginalVal, enumCls);
-      putKeyPathMapValue(useMap, keyPath, ".", enumObj);
+    replaceKeyPathMapValue(map, keyPath, ".", (orginalVal) -> {
+      if (orginalVal != null && !orginalVal.getClass().isEnum()) {
+        return cs.convert(orginalVal, enumCls);
+      } else {
+        return orginalVal;
+      }
+    });
+  }
+
+  protected Pair<String, Class<?>> resolveHint(QueryHint qh) {
+    if (caches.containsKey(qh)) {
+      return caches.get(qh);
+    } else {
+      String[] hv = split(qh.getValue(), ":", true, true);
+      if (hv.length == 2) {
+        String path = hv[0];
+        Class<?> enumCls = tryAsClass(hv[1]);
+        if (enumCls != null) {
+          return caches.computeIfAbsent(qh, (k) -> Pair.of(path, enumCls));
+        }
+      }
     }
+    return null;
   }
 }

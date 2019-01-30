@@ -331,6 +331,29 @@ public class MapUtils {
     }
   }
 
+  public static void replaceKeyPathMapValue(Map<String, Object> map, String key, String keySplitor,
+      Function<Object, Object> func) {
+    if (map == null) {
+      return;
+    }
+    Map<String, Object> useMap = map;
+    String[] keys = split(key, keySplitor, true, false);
+    int len = keys.length - 1;
+    if (len == -1) {
+      return;
+    } else {
+      String putKey = keys[len];
+      for (int i = 0; i < len; i++) {
+        if ((useMap = getMapMap(useMap, keys[i])) == null) {
+          break;
+        }
+      }
+      if (useMap != null) {
+        useMap.put(putKey, func.apply(useMap.get(putKey)));
+      }
+    }
+  }
+
   public static Map<String, String> toMap(final Properties properties) {
     Map<String, String> map = new HashMap<>();
     if (properties != null) {

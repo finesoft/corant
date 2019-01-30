@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jpa.shared.metadata;
@@ -22,8 +20,8 @@ import javax.xml.XMLConstants;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassPaths;
-import org.corant.shared.util.ClassPaths.ResourceInfo;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.ValidateUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -68,8 +66,8 @@ public enum PersistenceSchema {
     try {
       String xsdUrlPrefix = replace(getClass().getPackage().getName(), ".", "/") + "/persistence_";
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-          .newSchema(ClassPaths.from(xsdUrlPrefix + replace(version, ".", "_") + ".xsd")
-              .getResources().map(ResourceInfo::getUrl).findFirst().get());
+          .newSchema(Resources.fromClassPath(xsdUrlPrefix + replace(version, ".", "_") + ".xsd")
+              .map(ClassPathResource::getUrl).findFirst().get());
     } catch (SAXException | IOException e) {
       throw new CorantRuntimeException(e);
     }

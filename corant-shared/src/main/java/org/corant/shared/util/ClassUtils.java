@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asImmutableMap;
 import static org.corant.shared.util.ObjectUtils.trySupplied;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -402,6 +403,9 @@ public class ClassUtils {
   }
 
   public static Class<?> tryAsClass(String className) {
+    if (isBlank(className)) {
+      return null;
+    }
     try {
       return asClass(className);
     } catch (ClassNotFoundException e) {

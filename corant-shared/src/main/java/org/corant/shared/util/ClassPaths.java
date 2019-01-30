@@ -19,7 +19,6 @@ import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.shouldNotNull;
-import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -27,13 +26,11 @@ import static org.corant.shared.util.StringUtils.replace;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +39,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -57,12 +53,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils.GlobMatcher;
 import org.corant.shared.util.PathUtils.GlobPatterns;
+import org.corant.shared.util.Resources.ClassPathResource;
 
 /**
  * corant-shared
@@ -92,45 +87,6 @@ public class ClassPaths {
 
   private ClassPaths() {
     super();
-  }
-
-  /**
-   * Scanner with class loader, don't throw exception.
-   *
-   * @see #from(ClassLoader)
-   * @param classLoader
-   * @return
-   */
-  public static ClassPath anyway(ClassLoader classLoader) {
-    return anyway(classLoader, StringUtils.EMPTY);
-  }
-
-  /**
-   * Scanner with class loader and path, don't throw exception.
-   *
-   * @see #from(ClassLoader, String)
-   * @param classLoader
-   * @param path
-   * @return
-   */
-  public static ClassPath anyway(ClassLoader classLoader, String path) {
-    try {
-      return from(classLoader, path);
-    } catch (IOException e) {
-      logger.log(Level.WARNING, e.getMessage(), e);
-      return ClassPath.empty();
-    }
-  }
-
-  /**
-   * Scanner with default class loader and path, don't throw exception.
-   * 
-   * @see #from(String)
-   * @param path
-   * @return anyway
-   */
-  public static ClassPath anyway(String path) {
-    return anyway(defaultClassLoader(), path);
   }
 
   public static Scanner buildScanner(String pathExpress, boolean ignoreCase) {
@@ -193,31 +149,6 @@ public class ClassPaths {
   }
 
   /**
-   * Use default classLoader to scan all class path resources.
-   *
-   * @see #from(ClassLoader, String)
-   * @see ClassUtils#defaultClassLoader()
-   * @return
-   * @throws IOException from
-   */
-  public static ClassPath from() throws IOException {
-    return from(defaultClassLoader(), StringUtils.EMPTY);
-  }
-
-  /**
-   * Use specified to scan all class path resources.
-   *
-   * @see #from(ClassLoader, String)
-   *
-   * @param classLoader
-   * @return
-   * @throws IOException from
-   */
-  public static ClassPath from(ClassLoader classLoader) throws IOException {
-    return from(classLoader, StringUtils.EMPTY);
-  }
-
-  /**
    * Scan class path resource with path, path separator is '/', allowed for use glob-pattern.
    *
    * <pre>
@@ -235,26 +166,14 @@ public class ClassPaths {
    * @return
    * @throws IOException from
    */
-  public static ClassPath from(ClassLoader classLoader, String path) throws IOException {
+  public static Set<ClassPathResource> from(ClassLoader classLoader, String path)
+      throws IOException {
     Scanner scanner = buildScanner(defaultString(path), false);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
         defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());
     }
-    return new ClassPath(scanner.getResources());
-  }
-
-  /**
-   * Use default class loader to scanner.
-   *
-   * @see #from(ClassLoader, String)
-   * @see ClassUtils#defaultClassLoader()
-   * @param path
-   * @return
-   * @throws IOException from
-   */
-  public static ClassPath from(String path) throws IOException {
-    return from(defaultClassLoader(), path);
+    return scanner.getResources();
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {
@@ -299,126 +218,6 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Describe class resource, but doesn't load it right away.
-   *
-   * @author bingo 下午8:35:36
-   *
-   */
-  public static final class ClassInfo extends ResourceInfo {
-
-    private final String className;
-
-    public ClassInfo(String resourceName, ClassLoader loader) {
-      super(resourceName, loader);
-      int classNameEnd = resourceName.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
-      className = resourceName.substring(0, classNameEnd).replace(PATH_SEPARATOR,
-          ClassUtils.PACKAGE_SEPARATOR_CHAR);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!super.equals(obj)) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      ClassInfo other = (ClassInfo) obj;
-      if (className == null) {
-        if (other.className != null) {
-          return false;
-        }
-      } else if (!className.equals(other.className)) {
-        return false;
-      }
-      return true;
-    }
-
-    public String getName() {
-      return className;
-    }
-
-    public String getPackageName() {
-      return ClassUtils.getPackageName(className);
-    }
-
-    public String getSimpleName() {
-      return ClassUtils.getShortClassName(className);
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = super.hashCode();
-      result = prime * result + (className == null ? 0 : className.hashCode());
-      return result;
-    }
-
-    public Class<?> load() {
-      try {
-        return loader.loadClass(className);
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException(e);
-      }
-    }
-
-    @Override
-    public String toString() {
-      return className;
-    }
-
-  }
-
-  /**
-   * corant-shared
-   *
-   * Describe class path resources
-   *
-   * @author bingo 下午8:33:44
-   *
-   */
-  public static final class ClassPath {
-
-    static final ClassPath EMPTY_INSTANCE = new ClassPath(Collections.emptySet());
-    final Set<ResourceInfo> resources;
-
-    private ClassPath(Set<ResourceInfo> resources) {
-      this.resources = new LinkedHashSet<>(resources);
-    }
-
-    public static ClassPath empty() {
-      return EMPTY_INSTANCE;
-    }
-
-    public Stream<ClassInfo> getClasses() {
-      return getResources().filter(ClassInfo.class::isInstance).map(ClassInfo.class::cast);
-    }
-
-    public ResourceInfo getResource(Predicate<ResourceInfo> filter) {
-      Predicate<ResourceInfo> usedFilter = filter == null ? (r) -> true : filter;
-      return asStream(resources).filter(usedFilter).findFirst().orElse(null);
-    }
-
-    public Stream<ResourceInfo> getResources() {
-      if (resources == null) {
-        return Stream.empty();
-      } else {
-        return asStream(resources);
-      }
-    }
-
-    public Stream<ClassInfo> getTopLevelClasses() {
-      return getClasses()
-          .filter(ci -> ci.getName().indexOf(ClassUtils.INNER_CLASS_SEPARATOR) == -1);
-    }
-  }
-
-  /**
-   * corant-shared
-   *
    * Use wildcards for filtering, algorithm from apache.org.
    *
    * @author bingo 下午8:32:50
@@ -458,68 +257,6 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Describe class path resource include class resource.
-   *
-   * @author bingo 下午8:37:56
-   *
-   */
-  public static class ResourceInfo {
-
-    final ClassLoader loader;
-    private final String resourceName;
-
-    public ResourceInfo(String resourceName, ClassLoader loader) {
-      this.resourceName = shouldNotNull(resourceName);
-      this.loader = shouldNotNull(loader);
-    }
-
-    static ResourceInfo of(String resourceName, ClassLoader loader) {
-      if (resourceName.endsWith(ClassUtils.CLASS_FILE_NAME_EXTENSION)) {
-        return new ClassInfo(resourceName, loader);
-      } else {
-        return new ResourceInfo(resourceName, loader);
-      }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof ResourceInfo) {
-        ResourceInfo that = (ResourceInfo) obj;
-        return resourceName.equals(that.resourceName) && loader == that.loader;
-      }
-      return false;
-    }
-
-    public final String getResourceName() {
-      return resourceName;
-    }
-
-    public final URL getUrl() {
-      return loader.getResource(resourceName);
-    }
-
-    @Override
-    public int hashCode() {
-      return resourceName.hashCode();
-    }
-
-    public final InputStream openStream() throws IOException {
-      URLConnection conn = getUrl().openConnection();
-      if (System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")) {
-        conn.setUseCaches(false);
-      }
-      return conn.getInputStream();
-    }
-
-    @Override
-    public String toString() {
-      return resourceName;
-    }
-  }
-
-  /**
-   * corant-shared
-   *
    * Scan resource from path, include nested jars.
    *
    * @author bingo 下午8:39:26
@@ -527,7 +264,7 @@ public class ClassPaths {
    */
   public static final class Scanner {
 
-    private final Set<ResourceInfo> resources = new LinkedHashSet<>();
+    private final Set<ClassPathResource> resources = new LinkedHashSet<>();
     private final Set<URI> scannedUris = new HashSet<>();
     private final String root;
     private Predicate<String> filter = s -> true;
@@ -544,7 +281,7 @@ public class ClassPaths {
       }
     }
 
-    public Set<ResourceInfo> getResources() {
+    public Set<ClassPathResource> getResources() {
       return resources;
     }
 
@@ -619,7 +356,7 @@ public class ClassPaths {
         } else {
           String resourceName = packagePrefix + name;
           if (!resourceName.equals(JarFile.MANIFEST_NAME) && filter.test(resourceName)) {
-            resources.add(ResourceInfo.of(resourceName, classloader));
+            resources.add(ClassPathResource.of(resourceName, classloader));
           }
         }
       }
@@ -661,7 +398,7 @@ public class ClassPaths {
               || isNotBlank(root) && !name.startsWith(root) || !filter.test(name)) {
             continue;
           }
-          resources.add(ResourceInfo.of(name, classloader));
+          resources.add(ClassPathResource.of(name, classloader));
         }
       } finally {
         try {
@@ -680,7 +417,7 @@ public class ClassPaths {
         }
         String resourceName = replace(filePath, File.separator, PATH_SEPARATOR_STRING);
         if (filter.test(resourceName)) {
-          resources.add(ResourceInfo.of(resourceName, classloader));
+          resources.add(ClassPathResource.of(resourceName, classloader));
         }
       }
     }

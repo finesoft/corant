@@ -1,22 +1,19 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.shared.util.ObjectUtils.max;
-import java.util.List;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -88,8 +85,20 @@ public class UndertowWebServerConfig {
   private int backLog;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.jsp-file-path", defaultValue = "jsp")
-  private List<String> jspFilePaths;
+  @ConfigProperty(name = "webserver.undertow.jsp-content-path")
+  private Optional<String> jspContentPath;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.jsp-serving-path")
+  private Optional<String> jspServingPath;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.static-content-path")
+  private Optional<String> staticContentPath;
+
+  @Inject
+  @ConfigProperty(name = "webserver.undertow.static-Serving-path")
+  private Optional<String> staticServingPath;
 
   @Inject
   @ConfigProperty(name = "webserver.undertow.persistence-session", defaultValue = "false")
@@ -143,8 +152,16 @@ public class UndertowWebServerConfig {
     return ioThreads.orElse(max(Runtime.getRuntime().availableProcessors(), 2));
   }
 
-  public List<String> getJspFilePaths() {
-    return jspFilePaths;
+  public Optional<String> getJspContentPath() {
+    return jspContentPath;
+  }
+
+  /**
+   * 
+   * @return the jspServingPath
+   */
+  public Optional<String> getJspServingPath() {
+    return jspServingPath;
   }
 
   /**
@@ -161,6 +178,22 @@ public class UndertowWebServerConfig {
    */
   public int getNotRequestTimeout() {
     return notRequestTimeout;
+  }
+
+  /**
+   *
+   * @return the staticContentPaths
+   */
+  public Optional<String> getStaticContentPath() {
+    return staticContentPath;
+  }
+
+  /**
+   * 
+   * @return the staticServingPath
+   */
+  public Optional<String> getStaticServingPath() {
+    return staticServingPath;
   }
 
   /**

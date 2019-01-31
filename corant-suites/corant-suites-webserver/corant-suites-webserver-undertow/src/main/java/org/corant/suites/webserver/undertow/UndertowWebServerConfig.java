@@ -57,19 +57,23 @@ public class UndertowWebServerConfig {
   private boolean cork;
 
   @Inject
+  @ConfigProperty(name = "webserver.undertow.enable-default-servlet", defaultValue = "false")
+  private boolean enableDefaultServlet;
+
+  @Inject
   @ConfigProperty(name = "webserver.undertow.buffer-size", defaultValue = "16364")
   private int bufferSize;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.eager-filter-init", defaultValue = "true")
+  @ConfigProperty(name = "webserver.undertow.eager-filter-init", defaultValue = "false")
   private boolean eagerFilterInit;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.enableHttp2", defaultValue = "false")
+  @ConfigProperty(name = "webserver.undertow.enable-http2", defaultValue = "false")
   private boolean enableHttp2;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.enableAjp", defaultValue = "false")
+  @ConfigProperty(name = "webserver.undertow.enable-ajp", defaultValue = "false")
   private boolean enableAjp;
 
   @Inject
@@ -157,7 +161,7 @@ public class UndertowWebServerConfig {
   }
 
   /**
-   * 
+   *
    * @return the jspServingPath
    */
   public Optional<String> getJspServingPath() {
@@ -189,7 +193,7 @@ public class UndertowWebServerConfig {
   }
 
   /**
-   * 
+   *
    * @return the staticServingPath
    */
   public Optional<String> getStaticServingPath() {
@@ -218,6 +222,14 @@ public class UndertowWebServerConfig {
    */
   public boolean isEnableAjp() {
     return enableAjp;
+  }
+
+  /**
+   *
+   * @return the enableDefaultServlet
+   */
+  public boolean isEnableDefaultServlet() {
+    return enableDefaultServlet;
   }
 
   /**

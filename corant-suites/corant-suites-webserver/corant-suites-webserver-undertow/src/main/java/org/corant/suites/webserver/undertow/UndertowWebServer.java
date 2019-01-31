@@ -56,6 +56,7 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSecurityInfo;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.api.TransportGuaranteeType;
+import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
 /**
@@ -138,6 +139,11 @@ public class UndertowWebServer extends AbstractWebServer {
         fi.setAsyncSupported(wfm.isAsyncSupported());
         wfm.getInitParamsAsMap().forEach(fi::addInitParam);
         di.addFilter(fi);
+        asStream(wfm.getServletNames()).forEach(sn -> {
+          asStream(wfm.getDispatcherTypes()).forEach(dt -> {
+            di.addFilterServletNameMapping(wfm.getFilterName(), sn, dt);
+          });
+        });
         asStream(wfm.getUrlPatterns()).forEach(url -> {
           asStream(wfm.getDispatcherTypes()).forEach(dt -> {
             di.addFilterUrlMapping(wfm.getFilterName(), url, dt);
@@ -232,6 +238,11 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected void resolveServletInfo(DeploymentInfo di) {
+
+    if (specConfig.isEnableDefaultServlet()) {
+      di.addServlet(Servlets.servlet("default", DefaultServlet.class));
+    }
+
     getServletMetaDatas().map(wsm -> {
       if (wsm != null) {
         ServletInfo si = new ServletInfo(wsm.getName(), wsm.getClazz());

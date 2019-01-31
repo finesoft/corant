@@ -140,10 +140,14 @@ public class HibernateSchemaUtils {
   }
 
   public static void stdoutUpdateSchema(String pu, String... integrations) {
+    stdoutUpdateSchema(pu, ";", integrations);
+  }
+
+  public static void stdoutUpdateSchema(String pu, String delimiter, String... integrations) {
     prepare();
     out(false);
-    new SchemaUpdate().setFormat(true).setDelimiter(";").execute(EnumSet.of(TargetType.STDOUT),
-        createMetadataImplementor(pu, integrations));
+    new SchemaUpdate().setFormat(true).setDelimiter(delimiter)
+        .execute(EnumSet.of(TargetType.STDOUT), createMetadataImplementor(pu, integrations));
     out(true);
   }
 

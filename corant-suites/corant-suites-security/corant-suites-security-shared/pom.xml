@@ -7,8 +7,7 @@
 		<artifactId>corant-suites-security</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-suites-security-jaxrs</artifactId>
-
+	<artifactId>corant-suites-security-shared</artifactId>
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>

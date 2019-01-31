@@ -23,12 +23,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import org.corant.suites.security.jaxrs.AbstractJaxrsSecurityRequestFilter;
-import org.corant.suites.security.jaxrs.JaxrsSecurityContext;
+import org.corant.suites.security.shared.AbstractSecurityRequestFilter;
+import org.corant.suites.security.shared.JaxrsSecurityContext;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.AdapterUtils;
@@ -54,7 +55,8 @@ import org.keycloak.adapters.spi.UserSessionManagement;
 @PreMatching
 @Priority(Priorities.AUTHENTICATION)
 @Provider
-public class KeycloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
+public class KeycloakSecurityFilter extends AbstractSecurityRequestFilter
+    implements ContainerRequestFilter {
 
   @Inject
   Logger logger;
@@ -82,6 +84,13 @@ public class KeycloakSecurityFilter extends AbstractJaxrsSecurityRequestFilter {
     KeycloakDeployment resolvedDeployment = kcDeploymentContext.resolveDeployment(facade);
     kcNodesRegistrationManagement.tryRegister(resolvedDeployment);
     bearerAuthentication(facade, crc, resolvedDeployment);
+  }
+
+  @Override
+  public void filter(ContainerRequestContext requestContext) throws IOException {
+    if (isCoveredUrl(resolvePath(requestContext))) {
+      doSecurityFilter(requestContext);
+    }
   }
 
   @PreDestroy

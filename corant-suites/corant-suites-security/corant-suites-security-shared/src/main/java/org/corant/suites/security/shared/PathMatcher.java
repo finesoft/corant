@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.jaxrs;
+package org.corant.suites.security.shared;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;

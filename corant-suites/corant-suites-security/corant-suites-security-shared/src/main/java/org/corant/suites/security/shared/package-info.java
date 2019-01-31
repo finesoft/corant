@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-suites-security-jaxrs
+ * corant-suites-security-shared
  * 
- * @author bingo 下午5:05:07
+ * @author bingo 下午3:35:15
  *
  */
-package org.corant.suites.security.jaxrs;
+package org.corant.suites.security.shared;

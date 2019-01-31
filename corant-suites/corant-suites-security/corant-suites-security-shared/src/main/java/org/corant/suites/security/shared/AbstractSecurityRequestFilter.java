@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.jaxrs;
+package org.corant.suites.security.shared;
 
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
@@ -21,11 +21,10 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import org.corant.shared.util.PathUtils.GlobPatterns;
-import org.corant.suites.security.jaxrs.PathMatcher.CompletePathMatcher;
-import org.corant.suites.security.jaxrs.PathMatcher.GlobPathMatcher;
-import org.corant.suites.security.jaxrs.PathMatcher.RegexPathMatcher;
+import org.corant.suites.security.shared.PathMatcher.CompletePathMatcher;
+import org.corant.suites.security.shared.PathMatcher.GlobPathMatcher;
+import org.corant.suites.security.shared.PathMatcher.RegexPathMatcher;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -35,7 +34,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerRequestFilter {
+public abstract class AbstractSecurityRequestFilter {
 
   @Inject
   @ConfigProperty(name = "security.jarxrs.covered-urls")
@@ -51,13 +50,6 @@ public abstract class AbstractJaxrsSecurityRequestFilter implements ContainerReq
   protected final CompletePathMatcher uncoveredCompletePathMatcher = new CompletePathMatcher(true);
   protected final GlobPathMatcher uncoveredGlobPathMatcher = new GlobPathMatcher(true);
   protected final RegexPathMatcher uncoveredRegexPathMatcher = new RegexPathMatcher(true);
-
-  @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
-    if (isCoveredUrl(resolvePath(requestContext))) {
-      doSecurityFilter(requestContext);
-    }
-  }
 
   protected void addUrl(boolean covered, String url) {
     if (isBlank(url)) {

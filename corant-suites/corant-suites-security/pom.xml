@@ -9,7 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-suites-security-keycloak</module>
-  	<module>corant-suites-security-jaxrs</module>
   	<module>corant-suites-security-shared</module>
   </modules>
 </project>

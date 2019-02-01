@@ -108,7 +108,9 @@ public class QueryUtils {
       Map<String, Object> param) {
     Map<String, Object> pmToUse = new HashMap<>();
     fetchQuery.getParameters().forEach(p -> {
-      if (p.getSource() == FetchQueryParameterSource.P) {
+      if (p.getSource() == FetchQueryParameterSource.C) {
+        pmToUse.put(p.getName(), p.getValue());
+      } else if (p.getSource() == FetchQueryParameterSource.P) {
         pmToUse.put(p.getName(), param.get(p.getSourceName()));
       } else if (obj != null) {
         if (obj instanceof Map) {

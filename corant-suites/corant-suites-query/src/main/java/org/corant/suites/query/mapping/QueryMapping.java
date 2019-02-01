@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
 
 /**
  * asosat-query
@@ -135,6 +136,11 @@ public class QueryMapping {
           if (isNull(fqp.getSource())) {
             brokens.add(String.format(
                 "The 'source' attribute of 'parameter' in fetch query [%s] in query element [%s] in query file [%s] can not null!",
+                fq.getReferenceQuery(), q.getName(), getUrl()));
+          } else if (fqp.getSource() != FetchQueryParameterSource.C
+              && isBlank(fqp.getSourceName())) {
+            brokens.add(String.format(
+                "The 'source-name' attribute of 'parameter' in fetch query [%s] in query element [%s] in query file [%s] can not null!",
                 fq.getReferenceQuery(), q.getName(), getUrl()));
           }
         });

@@ -132,8 +132,9 @@
       <xsd:documentation>The fetch query parameters</xsd:documentation>
     </xsd:annotation>
     <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
-     <xsd:attribute name="source-name" type="xsd:string" use="required"></xsd:attribute>
+    <xsd:attribute name="source-name" type="xsd:string" use="optional"></xsd:attribute>
     <xsd:attribute name="source" type="fetch-query-parameter-source" use="required"></xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string" use="optional"></xsd:attribute>
   </xsd:complexType>
 
   <xsd:simpleType name="fetch-query-parameter-source">
@@ -146,6 +147,11 @@
       <xsd:enumeration value="R">
         <xsd:annotation>
       		<xsd:documentation>Parameter value from parent query result.</xsd:documentation>
+      	</xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="C">
+        <xsd:annotation>
+      		<xsd:documentation>Parameter value is constant.</xsd:documentation>
       	</xsd:annotation>
       </xsd:enumeration>
     </xsd:restriction>

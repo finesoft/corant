@@ -72,7 +72,6 @@ public class FetchQuery implements Serializable {
     return referenceQueryversion;
   }
 
-
   /**
    * @return the resultClass
    */
@@ -120,6 +119,7 @@ public class FetchQuery implements Serializable {
     private String name;
     private String sourceName;
     private FetchQueryParameterSource source;
+    private String value;
 
     /**
      * @return the name
@@ -142,6 +142,10 @@ public class FetchQuery implements Serializable {
       return sourceName;
     }
 
+    public String getValue() {
+      return value;
+    }
+
     void setName(String name) {
       this.name = name;
     }
@@ -154,9 +158,13 @@ public class FetchQuery implements Serializable {
       this.sourceName = sourceName;
     }
 
+    void setValue(String value) {
+      this.value = value;
+    }
+
   }
 
   public enum FetchQueryParameterSource {
-    P, R
+    P, R, C
   }
 }

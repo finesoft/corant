@@ -24,6 +24,7 @@ import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.suites.query.mapping.QueryHint.QueryHintParameter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -79,10 +80,14 @@ public class QueryParseHandler extends DefaultHandler {
       handleQuery(false, qName, null);
     } else if (SchemaNames.QUE_FQE_ELE.equalsIgnoreCase(qName)) {
       handleFetchQuery(false, qName, null);
-    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)
+        && this.currentObject() instanceof FetchQueryParameter) {
       handleFetchQueryParameter(false, qName, null);
-    } else if (SchemaNames.QUE_HIT_ELE.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(false, qName, null);
+    } else if (SchemaNames.HINT_ELE_PARAM.equalsIgnoreCase(qName)
+        && this.currentObject() instanceof QueryHintParameter) {
+      handleQueryHintParameter(false, qName, null);
     } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(false, qName, null);
     } else if (SchemaNames.QUE_DESC_ELE.equalsIgnoreCase(qName)) {
@@ -110,10 +115,14 @@ public class QueryParseHandler extends DefaultHandler {
       handleQuery(true, qName, attributes);
     } else if (SchemaNames.QUE_FQE_ELE.equalsIgnoreCase(qName)) {
       handleFetchQuery(true, qName, attributes);
-    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)
+        && this.currentObject() instanceof FetchQuery) {
       handleFetchQueryParameter(true, qName, attributes);
-    } else if (SchemaNames.QUE_HIT_ELE.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(true, qName, attributes);
+    } else if (SchemaNames.HINT_ELE_PARAM.equalsIgnoreCase(qName)
+        && this.currentObject() instanceof QueryHint) {
+      handleQueryHintParameter(true, qName, attributes);
     } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(true, qName, attributes);
     } else if (SchemaNames.QUE_DESC_ELE.equalsIgnoreCase(qName)) {
@@ -262,10 +271,8 @@ public class QueryParseHandler extends DefaultHandler {
       QueryHint hit = new QueryHint();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.QUE_HIT_ATT_KEY.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.HINT_ATT_KEY.equalsIgnoreCase(aqn)) {
           hit.setKey(atv);
-        } else if (SchemaNames.QUE_HIT_ATT_VAL.equalsIgnoreCase(aqn)) {
-          hit.setValue(atv);
         }
       }
       valueStack.push(hit);
@@ -277,6 +284,35 @@ public class QueryParseHandler extends DefaultHandler {
         throw new QueryRuntimeException("Parse error the query hit must be in query element!");
       }
       q.getHints().add((QueryHint) obj);
+      nameStack.pop();
+    }
+  }
+
+  void handleQueryHintParameter(boolean start, String qName, Attributes attributes) {
+    if (start) {
+      QueryHintParameter qhp = new QueryHintParameter();
+      for (int i = 0; i < attributes.getLength(); i++) {
+        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        if (SchemaNames.HINT_ELE_PARAM_ATT_NME.equalsIgnoreCase(aqn)) {
+          qhp.setName(atv);
+        } else if (SchemaNames.HINT_ELE_PARAM_ATT_VAL.equalsIgnoreCase(aqn)) {
+          qhp.setValue(atv);
+        } else if (SchemaNames.HINT_ELE_PARAM_ATT_TYP.equalsIgnoreCase(aqn)) {
+          qhp.setType(atv);
+        }
+      }
+      valueStack.push(qhp);
+      nameStack.push(qName);
+    } else {
+      Object obj = valueStack.pop();
+      QueryHint qh = this.currentObject();
+      if (qh == null) {
+        throw new QueryRuntimeException(
+            "Parse error the query hint parameter must be in query hint element!");
+      }
+      if (obj instanceof QueryHintParameter) {
+        qh.addParameter(QueryHintParameter.class.cast(obj));
+      }
       nameStack.pop();
     }
   }

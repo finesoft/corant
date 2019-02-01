@@ -15,12 +15,17 @@ package org.corant.asosat.ddd.application.query;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.replaceKeyPathMapValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.kernel.service.ConversionService;
@@ -29,6 +34,7 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 import org.corant.suites.query.Query.ForwardList;
 import org.corant.suites.query.Query.PagedList;
 import org.corant.suites.query.mapping.QueryHint;
+import org.corant.suites.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.suites.query.spi.ResultHintHandler;
 
 /**
@@ -39,24 +45,31 @@ import org.corant.suites.query.spi.ResultHintHandler;
  */
 @ApplicationScoped
 @ApplicationServices
-public class EnumConverterHintHandler implements ResultHintHandler {
+public class ConverterHintHandler implements ResultHintHandler {
+
+  public static final String HINT_NAME = "result-convert";
+  public static final String HNIT_PARA_PRO_NME = "property-name";
+  public static final String HNIT_PARA_PRO_TYP = "property-type";
 
   static final Map<QueryHint, Pair<String, Class<?>>> caches = new ConcurrentHashMap<>();
+  static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
+
+  @Inject
+  Logger logger;
 
   @Inject
   ConversionService cs;
 
   @Override
   public boolean canHandle(QueryHint hint) {
-    return hint != null && isEquals(hint.getKey(), QueryHintNames.ENUM_CVT);
+    return hint != null && isEquals(hint.getKey(), HINT_NAME);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void handle(QueryHint qh, Object result) {
-
-    Pair<String, Class<?>> hint = resolveHint(qh);
-    if (hint == null) {
+    Pair<String, Class<?>> hint = null;
+    if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
@@ -80,10 +93,10 @@ public class EnumConverterHintHandler implements ResultHintHandler {
     }
   }
 
-  protected void handle(Map<String, Object> map, String keyPath, Class<?> enumCls) {
+  protected void handle(Map<String, Object> map, String keyPath, Class<?> targetClass) {
     replaceKeyPathMapValue(map, keyPath, ".", (orginalVal) -> {
-      if (orginalVal != null && !orginalVal.getClass().isEnum()) {
-        return cs.convert(orginalVal, enumCls);
+      if (orginalVal != null) {
+        return cs.convert(orginalVal, targetClass);
       } else {
         return orginalVal;
       }
@@ -94,15 +107,24 @@ public class EnumConverterHintHandler implements ResultHintHandler {
     if (caches.containsKey(qh)) {
       return caches.get(qh);
     } else {
-      String[] hv = split(qh.getValue(), ":", true, true);
-      if (hv.length == 2) {
-        String path = hv[0];
-        Class<?> enumCls = tryAsClass(hv[1]);
-        if (enumCls != null) {
-          return caches.computeIfAbsent(qh, (k) -> Pair.of(path, enumCls));
+      List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_PRO_NME);
+      List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_PRO_TYP);
+      try {
+        if (isNotEmpty(pnPs) && isNotEmpty(ptPs)) {
+          String propertyName = defaultString(pnPs.get(0).getValue());
+          String propertyType = defaultString(ptPs.get(0).getValue());
+          if (isNoneBlank(propertyName, propertyType)) {
+            Class<?> targetClass = tryAsClass(propertyType);
+            if (targetClass != null) {
+              return caches.computeIfAbsent(qh, (k) -> Pair.of(propertyName, targetClass));
+            }
+          }
         }
+      } catch (Exception e) {
+        logger.warning(() -> "The query hint has some error!");
       }
     }
+    brokens.add(qh);
     return null;
   }
 }

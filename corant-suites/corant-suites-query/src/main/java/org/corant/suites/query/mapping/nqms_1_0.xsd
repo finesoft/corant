@@ -4,7 +4,7 @@
 
   <xsd:element name="query-mappings">
     <xsd:annotation>
-    	<xsd:documentation>The root query mapping</xsd:documentation>
+    	<xsd:documentation>The root query mapping with at least one query element.</xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>
       <xsd:sequence>
@@ -15,7 +15,31 @@
     </xsd:complexType>
   </xsd:element>
   
+  <xsd:complexType name="parameters-mapping">
+  	<xsd:annotation>
+    	<xsd:documentation>The query parameter type mappings.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="entry" type="parameter-type-mapping" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="parameter-type-mapping">
+    <xsd:annotation>
+    	<xsd:documentation>
+	    	The query parameter type mapping element, the name is parameter name, 
+	    	the type is parameter's java class path such as 'java.math.BigDecimal'.
+    	</xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
+    <xsd:attribute name="type" type="xsd:string" use="required"></xsd:attribute>
+  </xsd:complexType>
+  
   <xsd:complexType name="query">
+  	<xsd:annotation>
+    	<xsd:documentation>
+    		The query element with at least one script element, may be include fetch query or hints.
+    	</xsd:documentation>
+    </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="description" type="xsd:string" maxOccurs="1" minOccurs="0"></xsd:element>
       <xsd:element name="script" type="xsd:string" maxOccurs="1" minOccurs="1">
@@ -24,59 +48,85 @@
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="fetch-query" type="fetch-query" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="hint" type="hint" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="hint" type="hint" maxOccurs="unbounded" minOccurs="0"/>
     </xsd:sequence>
     <xsd:attribute name="name" type="xsd:string" use="required">
       <xsd:annotation>
         <xsd:documentation>
-          The query name must be uniqueness
+          The query name must be uniqueness, the actual name maybe append version mark.
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
     <xsd:attribute name="result-class" type="xsd:string" use="optional" default="java.util.Map">
       <xsd:annotation>
         <xsd:documentation>
-          The query result class, default is map&lt;String,?&gt;
+          The query result class, default is 'java.util.Map' such as map&lt;String,?&gt;
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
-    <xsd:attribute name="result-set-mapping" type="xsd:string" use="optional"></xsd:attribute>
-    <xsd:attribute name="cache" type="xsd:boolean" use="optional"></xsd:attribute>
-    <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="true"></xsd:attribute>
+    <xsd:attribute name="result-set-mapping" type="xsd:string" use="optional">
+    	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="cache" type="xsd:boolean" use="optional">
+    	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="true">
+    	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
+    </xsd:attribute>
     <xsd:attribute name="version" type="xsd:string" use="optional"></xsd:attribute>
   </xsd:complexType>
 
-  <xsd:complexType name="parameters-mapping">
-    <xsd:sequence>
-      <xsd:element name="entry" type="parameter-type-mapping" minOccurs="0" maxOccurs="unbounded"/>
-    </xsd:sequence>
-  </xsd:complexType>
 
-  <xsd:complexType name="parameter-type-mapping">
-    <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
-    <xsd:attribute name="type" type="xsd:string" use="required"></xsd:attribute>
-  </xsd:complexType>
 
   <xsd:complexType name="fetch-query">
     <xsd:annotation>
-      <xsd:documentation>The other query use assign parent query result and parameters, use for one to many/one.</xsd:documentation>
+      <xsd:documentation>
+        The other query use assign parent query result and parameters, use for one to many/one.
+      </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="parameter" type="fetch-query-parameter" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+      <xsd:element name="parameter" type="fetch-query-parameter" minOccurs="0" maxOccurs="unbounded">
+      </xsd:element>
     </xsd:sequence>
-    <xsd:attribute name="reference-query" type="xsd:string" use="required"></xsd:attribute>
-    <xsd:attribute name="inject-property-name" type="xsd:string" use="required"></xsd:attribute>
-    <xsd:attribute name="max-fetch-size" type="xsd:positiveInteger" use="optional"></xsd:attribute>
-    <xsd:attribute name="reference-query-version" type="xsd:string" use="optional"></xsd:attribute>
+    <xsd:attribute name="reference-query" type="xsd:string" use="required">
+   	  <xsd:annotation>
+   	    <xsd:documentation>
+   	  	  The name of actual execution query for fetch query.
+   	    </xsd:documentation>
+   	  </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="inject-property-name" type="xsd:string" use="required">
+     <xsd:annotation>
+      <xsd:documentation>
+        The property name in parent query result to inject the fetch query result.
+      </xsd:documentation>
+    </xsd:annotation>   
+    </xsd:attribute>
+    <xsd:attribute name="max-fetch-size" type="xsd:positiveInteger" use="optional">
+     <xsd:annotation>
+      <xsd:documentation>
+        The fetch query result size.
+      </xsd:documentation>
+    </xsd:annotation>    
+    </xsd:attribute>
+    <xsd:attribute name="reference-query-version" type="xsd:string" use="optional">
+   	  <xsd:annotation>
+   	    <xsd:documentation>
+   	  	  The version of actual execution query for fetch query.
+   	    </xsd:documentation>
+   	  </xsd:annotation>    
+    </xsd:attribute>
     <xsd:attribute name="result-class" type="xsd:string" use="optional"></xsd:attribute>
-    <xsd:attribute name="multi-records" type="xsd:boolean" use="optional"></xsd:attribute>
+    <xsd:attribute name="multi-records" type="xsd:boolean" use="optional">
+      <xsd:annotation>
+   	    <xsd:documentation>
+   	  	  Specify whether the query result set is multi-record or single-record, 
+   	  	  similar to one to manager or one to one.
+   	    </xsd:documentation>
+   	  </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
-
-  <xsd:complexType name="hint">
-    <xsd:attribute name="key" type="xsd:string"></xsd:attribute>
-    <xsd:attribute name="value" type="xsd:string"></xsd:attribute>
-  </xsd:complexType>
-
+  
   <xsd:complexType name="fetch-query-parameter">
     <xsd:annotation>
       <xsd:documentation>The fetch query parameters</xsd:documentation>
@@ -88,10 +138,33 @@
 
   <xsd:simpleType name="fetch-query-parameter-source">
     <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="P"></xsd:enumeration>
-      <xsd:enumeration value="R"></xsd:enumeration>
+      <xsd:enumeration value="P">
+      	<xsd:annotation>
+      		<xsd:documentation>Parameter value from original query parameter.</xsd:documentation>
+      	</xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="R">
+        <xsd:annotation>
+      		<xsd:documentation>Parameter value from parent query result.</xsd:documentation>
+      	</xsd:annotation>
+      </xsd:enumeration>
     </xsd:restriction>
   </xsd:simpleType>
+
+  <xsd:complexType name="hint">
+  	<xsd:annotation>
+      <xsd:documentation>The query hints for additional query parameter process or result process.</xsd:documentation>
+    </xsd:annotation>  
+  	<xsd:sequence>
+      <xsd:element name="parameter" type="hint-parameter" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="key" type="xsd:string"></xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="hint-parameter">
+    <xsd:attribute name="name" type="xsd:string"></xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string"></xsd:attribute>
+    <xsd:attribute name="type" type="xsd:string" use="optional" default="java.lang.String"></xsd:attribute>
+  </xsd:complexType>
 
   <xsd:simpleType name="common-segment">
   	<xsd:restriction base="xsd:string"></xsd:restriction>

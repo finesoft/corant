@@ -14,6 +14,10 @@
 package org.corant.suites.query.mapping;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * asosat-query
@@ -28,7 +32,7 @@ public class QueryHint implements Serializable {
   private static final long serialVersionUID = 50753651544743202L;
 
   private String key;
-  private String value;
+  private Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
 
   @Override
   public boolean equals(Object obj) {
@@ -49,28 +53,30 @@ public class QueryHint implements Serializable {
     } else if (!key.equals(other.key)) {
       return false;
     }
-    if (value == null) {
-      if (other.value != null) {
+    if (parameters == null) {
+      if (other.parameters != null) {
         return false;
       }
-    } else if (!value.equals(other.value)) {
+    } else if (!parameters.equals(other.parameters)) {
       return false;
     }
     return true;
   }
 
-  /**
-   * @return the key
-   */
   public String getKey() {
     return key;
   }
 
-  /**
-   * @return the value
-   */
-  public String getValue() {
-    return value;
+  public Map<String, List<QueryHintParameter>> getParameters() {
+    return parameters;
+  }
+
+  public List<QueryHintParameter> getParameters(String name) {
+    if (parameters.containsKey(name)) {
+      return parameters.get(name);
+    } else {
+      return new ArrayList<>();
+    }
   }
 
   @Override
@@ -78,16 +84,103 @@ public class QueryHint implements Serializable {
     final int prime = 31;
     int result = 1;
     result = prime * result + (key == null ? 0 : key.hashCode());
-    result = prime * result + (value == null ? 0 : value.hashCode());
+    result = prime * result + (parameters == null ? 0 : parameters.hashCode());
     return result;
+  }
+
+  void addParameter(QueryHintParameter parameter) {
+    parameters.computeIfAbsent(parameter.getName(), (n) -> new ArrayList<>()).add(parameter);
   }
 
   void setKey(String key) {
     this.key = key;
   }
 
-  void setValue(String value) {
-    this.value = value;
-  }
+  public static class QueryHintParameter implements Serializable {
 
+    private static final long serialVersionUID = -875004740413444084L;
+
+    private String name;
+    private String value;
+    private String type;
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      QueryHintParameter other = (QueryHintParameter) obj;
+      if (name == null) {
+        if (other.name != null) {
+          return false;
+        }
+      } else if (!name.equals(other.name)) {
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     *
+     * @return the name
+     */
+    public String getName() {
+      return name;
+    }
+
+    /**
+     *
+     * @return the type
+     */
+    public String getType() {
+      return type;
+    }
+
+    /**
+     *
+     * @return the value
+     */
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (name == null ? 0 : name.hashCode());
+      return result;
+    }
+
+    /**
+     *
+     * @param name the name to set
+     */
+    void setName(String name) {
+      this.name = name;
+    }
+
+    /**
+     *
+     * @param type the type to set
+     */
+    void setType(String type) {
+      this.type = type;
+    }
+
+    /**
+     *
+     * @param value the value to set
+     */
+    void setValue(String value) {
+      this.value = value;
+    }
+
+  }
 }

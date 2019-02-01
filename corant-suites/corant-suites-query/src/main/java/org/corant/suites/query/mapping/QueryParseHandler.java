@@ -186,6 +186,8 @@ public class QueryParseHandler extends DefaultHandler {
           fqp.setSource(ConversionUtils.toEnum(atv, FetchQueryParameterSource.class));
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
           fqp.setSourceName(atv);
+        } else if (SchemaNames.FQE_ELE_PARAM_ATT_VAL.equalsIgnoreCase(aqn)) {
+          fqp.setValue(atv);
         }
       }
       valueStack.push(fqp);

@@ -665,7 +665,7 @@ public class Resources {
     }
 
     public String resolve(String path) {
-      if (path.startsWith(getPrefix())) {
+      if (path != null && path.startsWith(getPrefix())) {
         return path.substring(getPrefixLength());
       }
       return path;

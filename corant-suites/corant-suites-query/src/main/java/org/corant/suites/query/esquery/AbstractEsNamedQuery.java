@@ -73,79 +73,30 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    String script = querier.getScript();
     int offset = getOffset(param);
     int limit = getLimit(param);
-    try {
-      log(q, param, script);
-      Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(q), script);
-      List<T> result = new ArrayList<>();
-      int total = hits.getKey().intValue();
-      if (!isEmpty(hits.getValue())) {
-        for (Map<String, Object> map : hits.getValue()) {
-          result.add(getObjectMapper().convertValue(map, rcls));
-        }
-        this.fetch(result, fetchQueries, param);
-      }
-      handleResultHints(querier.getHints(), result);
-      return ForwardList.of(result, total > offset + limit);
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e);
-    }
+    Pair<Long, List<T>> hits = searchHits(q, param);
+    List<T> result = hits.getValue();
+    return ForwardList.of(result, hits.getLeft() > offset + limit);
   }
 
   @Override
   public <T> T get(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    String script = querier.getScript();
-    try {
-      log(q, param, script);
-      Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(q), script);
-      if (!isEmpty(hits.getValue())) {
-        Map<String, Object> hit = hits.getRight().get(0);
-        T result = getObjectMapper().convertValue(hit, rcls);
-        fetch(result, fetchQueries, param);
-        handleResultHints(querier.getHints(), result);
-        return result;
-      }
-      return null;
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+    Pair<Long, List<T>> hits = searchHits(q, param);
+    List<T> result = hits.getValue();
+    if (!isEmpty(result)) {
+      return result.get(0);
     }
+    return null;
   }
 
   @Override
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    String script = querier.getScript();
     int offset = getOffset(param);
     int limit = getLimit(param);
-    try {
-      log(q, param, script);
-      Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(q), script);
-      List<T> result = new ArrayList<>();
-      int total = hits.getKey().intValue();
-      if (!isEmpty(hits.getValue())) {
-        for (Map<String, Object> map : hits.getValue()) {
-          result.add(getObjectMapper().convertValue(map, rcls));
-        }
-        this.fetch(result, fetchQueries, param);
-      }
-      handleResultHints(querier.getHints(), result);
-      return PagedList.of(total, result, offset, limit);
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e);
-    }
+    Pair<Long, List<T>> hits = searchHits(q, param);
+    List<T> result = hits.getValue();
+    return PagedList.of(hits.getLeft().intValue(), result, offset, limit);
   }
 
   @Override
@@ -161,26 +112,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    String script = querier.getScript();
-    try {
-      log(q, param, script);
-      Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(q), script);
-      List<T> result = new ArrayList<>();
-      if (!isEmpty(hits.getValue())) {
-        for (Map<String, Object> map : hits.getValue()) {
-          result.add(getObjectMapper().convertValue(map, rcls));
-        }
-        this.fetch(result, fetchQueries, param);
-      }
-      handleResultHints(querier.getHints(), result);
-      return result;
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e);
-    }
+    Pair<Long, List<T>> hits = searchHits(q, param);
+    return hits.getValue();
   }
 
   @Override
@@ -266,6 +199,29 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     int pos = 0;
     shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
     return q.substring(0, pos);
+  }
+
+  protected <T> Pair<Long, List<T>> searchHits(String q, Map<String, Object> param) {
+    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    Class<T> rcls = querier.getResultClass();
+    List<FetchQuery> fetchQueries = querier.getFetchQueries();
+    String script = querier.getScript();
+    try {
+      log(q, param, script);
+      Pair<Long, List<Map<String, Object>>> hits =
+          getExecutor().searchHits(resolveIndexName(q), script);
+      List<T> result = new ArrayList<>();
+      if (!isEmpty(hits.getValue())) {
+        for (Map<String, Object> map : hits.getValue()) {
+          result.add(getObjectMapper().convertValue(map, rcls));
+        }
+        this.fetch(result, fetchQueries, param);
+      }
+      handleResultHints(querier.getHints(), result);
+      return Pair.of(hits.getLeft(), result);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
   }
 
   protected void setExecutor(EsQueryExecutor executor) {

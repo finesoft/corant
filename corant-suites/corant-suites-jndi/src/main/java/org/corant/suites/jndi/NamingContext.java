@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.jndi;
@@ -112,8 +110,8 @@ public class NamingContext implements Context {
 
   @Override
   public Name composeName(Name name, Name prefix) throws NamingException {
-    prefix = (Name) prefix.clone();
-    return prefix.addAll(name);
+    Name usePrefix = (Name) prefix.clone();
+    return usePrefix.addAll(name);
   }
 
   @Override
@@ -369,16 +367,15 @@ public class NamingContext implements Context {
   }
 
   /**
-   * Binds a name to an object. All intermediate contexts and the target context
-   * (that named by all but terminal atomic component of the name) must already
-   * exist.
+   * Binds a name to an object. All intermediate contexts and the target context (that named by all
+   * but terminal atomic component of the name) must already exist.
    *
    * @param name the name to bind; may not be empty
    * @param obj the object to bind; possibly null
    * @param rebind if true, then perform a rebind (ie, overwrite)
    * @exception NameAlreadyBoundException if name is already bound
-   * @exception javax.naming.directory.InvalidAttributesException if object did
-   *            not supply all mandatory attributes
+   * @exception javax.naming.directory.InvalidAttributesException if object did not supply all
+   *            mandatory attributes
    * @exception NamingException if a naming exception is encountered
    */
   protected void bind(Name name, Object obj, boolean rebind) throws NamingException {

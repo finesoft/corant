@@ -51,8 +51,11 @@ public class ConverterHintHandler implements ResultHintHandler {
   public static final String HINT_NAME = "result-convert";
   public static final String HNIT_PARA_PRO_NME = "property-name";
   public static final String HNIT_PARA_PRO_TYP = "property-type";
+  public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
+  public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
-  static final Map<QueryHint, Pair<String[], Class<?>>> caches = new ConcurrentHashMap<>();
+  static final Map<QueryHint, Pair<String[], Pair<Class<?>, Object[]>>> caches =
+      new ConcurrentHashMap<>();
   static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
@@ -69,12 +72,13 @@ public class ConverterHintHandler implements ResultHintHandler {
   @SuppressWarnings("unchecked")
   @Override
   public void handle(QueryHint qh, Object result) {
-    Pair<String[], Class<?>> hint = null;
+    Pair<String[], Pair<Class<?>, Object[]>> hint = null;
     if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
-      handle(Map.class.cast(result), hint.getLeft(), hint.getRight());
+      handle(Map.class.cast(result), hint.getLeft(), hint.getRight().getKey(),
+          hint.getRight().getRight());
     } else {
       List<?> list = null;
       if (result instanceof ForwardList) {
@@ -87,29 +91,33 @@ public class ConverterHintHandler implements ResultHintHandler {
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            handle(Map.class.cast(item), hint.getLeft(), hint.getRight());
+            handle(Map.class.cast(item), hint.getLeft(), hint.getRight().getKey(),
+                hint.getRight().getRight());
           }
         }
       }
     }
   }
 
-  protected void handle(Map<String, Object> map, String[] keyPath, Class<?> targetClass) {
+  protected void handle(Map<String, Object> map, String[] keyPath, Class<?> targetClass,
+      Object[] convertHits) {
     replaceKeyPathMapValue(map, keyPath, (orginalVal) -> {
       if (orginalVal != null) {
-        return cs.convert(orginalVal, targetClass);
+        return cs.convert(orginalVal, targetClass, convertHits);
       } else {
         return orginalVal;
       }
     });
   }
 
-  protected Pair<String[], Class<?>> resolveHint(QueryHint qh) {
+  protected Pair<String[], Pair<Class<?>, Object[]>> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh)) {
       return caches.get(qh);
     } else {
       List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_PRO_NME);
       List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_PRO_TYP);
+      List<QueryHintParameter> pthk = qh.getParameters(HNIT_PARA_CVT_HIT_KEY);
+      List<QueryHintParameter> pthv = qh.getParameters(HNIT_PARA_CVT_HIT_VAL);
       try {
         if (isNotEmpty(pnPs) && isNotEmpty(ptPs)) {
           String propertyName = defaultString(pnPs.get(0).getValue());
@@ -117,8 +125,13 @@ public class ConverterHintHandler implements ResultHintHandler {
           if (isNoneBlank(propertyName, propertyType)) {
             Class<?> targetClass = tryAsClass(propertyType);
             if (targetClass != null) {
+              Pair<Class<?>, Object[]> converterParam = Pair.of(targetClass, new Object[0]);
               return caches.computeIfAbsent(qh,
-                  (k) -> Pair.of(split(propertyName, ".", true, true), targetClass));
+                  (k) -> Pair.of(split(propertyName, ".", true, true),
+                      isNotEmpty(pthk) && isNotEmpty(pthv)
+                          ? converterParam.withRight(
+                              new Object[] {pthk.get(0).getValue(), pthv.get(0).getValue()})
+                          : converterParam));
             }
           }
         }

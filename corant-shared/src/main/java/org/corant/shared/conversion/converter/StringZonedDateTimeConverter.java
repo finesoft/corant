@@ -14,7 +14,6 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -71,14 +70,20 @@ public class StringZonedDateTimeConverter extends AbstractConverter<String, Zone
       dtf = DateTimeFormatter
           .ofPattern(ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY));
     }
-    String zoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
+    ZoneId zoneId = ZoneId.systemDefault();
+    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
+    if (hintZoneId instanceof ZoneId) {
+      zoneId = (ZoneId) hintZoneId;
+    } else if (hintZoneId instanceof String) {
+      zoneId = ZoneId.of(hintZoneId.toString());
+    }
+
     if (dtf != null) {
       return ZonedDateTime.parse(value, dtf);
     } else if (value.indexOf('[') != -1 && value.indexOf(']') != -1) {
       return ZonedDateTime.parse(value);
     } else {
-      StringBuilder zone = new StringBuilder("[")
-          .append(defaultBlank(zoneId, ZoneId.systemDefault().toString())).append("]");
+      StringBuilder zone = new StringBuilder("[").append(zoneId.toString()).append("]");
       return ZonedDateTime.parse(value + zone);
     }
   }

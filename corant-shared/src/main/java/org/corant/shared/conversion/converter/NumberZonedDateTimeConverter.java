@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -62,9 +61,11 @@ public class NumberZonedDateTimeConverter extends AbstractConverter<Number, Zone
   @Override
   protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
     ZoneId zoneId = ZoneId.systemDefault();
-    String hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (isNotBlank(hintZoneId)) {
-      zoneId = ZoneId.of(hintZoneId);
+    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
+    if (hintZoneId instanceof ZoneId) {
+      zoneId = (ZoneId) hintZoneId;
+    } else if (hintZoneId instanceof String) {
+      zoneId = ZoneId.of(hintZoneId.toString());
     }
     return ZonedDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()), zoneId);
   }

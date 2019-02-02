@@ -63,7 +63,13 @@ public class TemporalLocalDateTimeConverter extends AbstractConverter<Temporal, 
 
   @Override
   protected LocalDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
-    ZoneId zoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
+    ZoneId zoneId = null;
+    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
+    if (hintZoneId instanceof ZoneId) {
+      zoneId = (ZoneId) hintZoneId;
+    } else if (hintZoneId instanceof String) {
+      zoneId = ZoneId.of(hintZoneId.toString());
+    }
     if (zoneId != null) {
       // violate JSR-310
       if (value instanceof Instant) {

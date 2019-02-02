@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sqlquery;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
@@ -37,23 +37,25 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
 
-  private List<Object> parameters = new ArrayList<>();
+  private Object[] parameters = new Object[0];
 
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
     if (arguments != null && arguments.size() == 1) {
       Object arg = getParamValue(arguments.get(0));
-      if (arg instanceof List) {
-        List ss = List.class.cast(arg);
-        List<String> sphs = new ArrayList<>(ss.size());
-        for (int i = 0; i < ss.size(); i++) {
-          parameters.add(ss.get(i));
-          sphs.add(SQL_PS_PLACE_HOLDER);
+      if (arg instanceof Object[]) {
+        Object[] argList = (Object[]) arg;
+        int argSize = argList.length;
+        parameters = new Object[argSize];
+        String[] placeHolders = new String[argSize];
+        for (int i = 0; i < argSize; i++) {
+          parameters[i] = argList[i];
+          placeHolders[i] = SQL_PS_PLACE_HOLDER;
         }
-        return new SimpleScalar(String.join(",", sphs));
+        return new SimpleScalar(String.join(",", placeHolders));
       } else {
-        parameters.add(arg);
+        parameters[0] = arg;
         return SQL_SS_PLACE_HOLDER;
       }
     }
@@ -62,7 +64,7 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
 
   @Override
   public Object[] getParameters() {
-    return parameters.toArray(new Object[parameters.size()]);
+    return Arrays.copyOf(parameters, parameters.length);
   }
 
   @Override
@@ -80,10 +82,11 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
     } else if (arg instanceof TemplateBooleanModel) {
       return ((TemplateBooleanModel) arg).getAsBoolean();
     } else if (arg instanceof TemplateSequenceModel) {
-      List<Object> list = new ArrayList<>();
-      TemplateSequenceModel ss = (TemplateSequenceModel) arg;
-      for (int i = 0; i < ss.size(); i++) {
-        list.add(getParamValue(ss.get(i)));
+      TemplateSequenceModel tsm = (TemplateSequenceModel) arg;
+      int size = tsm.size();
+      Object[] list = new Object[size];
+      for (int i = 0; i < size; i++) {
+        list[i] = getParamValue(tsm.get(i));
       }
       return list;
     } else if (arg instanceof WrapperTemplateModel) {

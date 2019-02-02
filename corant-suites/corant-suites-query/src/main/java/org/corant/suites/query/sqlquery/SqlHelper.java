@@ -31,8 +31,8 @@ public class SqlHelper {
 
   public static final String OFFSET_PARAM_NME = "_offset";
   public static final String LIMIT_PARAM_NME = "_limit";
-  public static final int OFFSET_PARAM_VAL = 1;
-  public static final int LIMIT_PARAM_VAL = 16;
+  public static final int OFFSET_PARAM_VAL = 0;
+  public static final int LIMIT_PARAM_VAL = 15;
 
   public static final String SELECT = "select";
   public static final String FROM = "from";
@@ -86,7 +86,6 @@ public class SqlHelper {
     return getMapInteger(param, OFFSET_PARAM_NME, OFFSET_PARAM_VAL);
   }
 
-
   public static String getOrderBy(String sql) {
     if (sql != null) {
       int pos = shallowIndexOfPattern(sql, ORDER_BY_PATTERN, 0);
@@ -136,7 +135,6 @@ public class SqlHelper {
       return sql;
     }
   }
-
 
   /**
    *
@@ -267,7 +265,6 @@ public class SqlHelper {
     }
     return false;
   }
-
 
   static final int shallowIndexOf(String sb, String search, int fromIndex) {
     final String lowercase = sb.toLowerCase(Locale.getDefault()); // case-insensitive match

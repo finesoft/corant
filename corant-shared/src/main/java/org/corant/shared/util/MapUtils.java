@@ -333,24 +333,25 @@ public class MapUtils {
 
   public static void replaceKeyPathMapValue(Map<String, Object> map, String key, String keySplitor,
       Function<Object, Object> func) {
-    if (map == null) {
+    replaceKeyPathMapValue(map, split(key, keySplitor, true, false), func);
+
+  }
+
+  public static void replaceKeyPathMapValue(Map<String, Object> map, String[] keyPath,
+      Function<Object, Object> func) {
+    if (map == null || isEmpty(keyPath)) {
       return;
     }
     Map<String, Object> useMap = map;
-    String[] keys = split(key, keySplitor, true, false);
-    int len = keys.length - 1;
-    if (len == -1) {
-      return;
-    } else {
-      String putKey = keys[len];
-      for (int i = 0; i < len; i++) {
-        if ((useMap = getMapMap(useMap, keys[i])) == null) {
-          break;
-        }
+    int len = keyPath.length - 1;
+    String putKey = keyPath[len];
+    for (int i = 0; i < len; i++) {
+      if ((useMap = getMapMap(useMap, keyPath[i])) == null) {
+        break;
       }
-      if (useMap != null) {
-        useMap.put(putKey, func.apply(useMap.get(putKey)));
-      }
+    }
+    if (useMap != null) {
+      useMap.put(putKey, func.apply(useMap.get(putKey)));
     }
   }
 

@@ -27,6 +27,21 @@ import java.util.stream.Stream;
  */
 public interface Query<Q, P> {
 
+  <T> ForwardList<T> forward(Q q, P param);
+
+  default <R, T> ForwardList<T> forward(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
+    ForwardList<R> raw = forward(q, param);
+    if (raw == null) {
+      return ForwardList.inst();
+    } else {
+      ForwardList<T> result = new ForwardList<>();
+      return result
+          .withResults(
+              raw.getResults().stream().map(i -> func.apply(i, this)).collect(Collectors.toList()))
+          .withHasNext(raw.hasNext);
+    }
+  }
+
   <T> T get(Q q, P param);
 
   default <R, T> T get(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
@@ -49,21 +64,6 @@ public interface Query<Q, P> {
     }
   }
 
-  <T> ForwardList<T> forward(Q q, P param);
-
-  default <R, T> ForwardList<T> forward(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
-    ForwardList<R> raw = forward(q, param);
-    if (raw == null) {
-      return ForwardList.inst();
-    } else {
-      ForwardList<T> result = new ForwardList<>();
-      return result
-          .withResults(
-              raw.getResults().stream().map(i -> func.apply(i, this)).collect(Collectors.toList()))
-          .withHasNext(raw.hasNext);
-    }
-  }
-
   <T> List<T> select(Q q, P param);
 
   default <R, T> List<T> select(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
@@ -77,6 +77,55 @@ public interface Query<Q, P> {
 
   <T> Stream<T> stream(Q q, P param);
 
+  public static class ForwardList<T> {
+
+    private boolean hasNext;
+    private final List<T> results = new ArrayList<>();
+
+    ForwardList() {}
+
+    public static <T> ForwardList<T> inst() {
+      return new ForwardList<>();
+    }
+
+    public static <T> ForwardList<T> of(List<T> results, boolean hasNext) {
+      ForwardList<T> il = new ForwardList<>();
+      return il.withResults(results).withHasNext(hasNext);
+    }
+
+    /**
+     * @return the data
+     */
+    public List<T> getResults() {
+      return results;
+    }
+
+    public boolean hasNext() {
+      return false;
+    }
+
+    /**
+     * @return the hasNext
+     */
+    public boolean isHasNext() {
+      return hasNext;
+    }
+
+    public ForwardList<T> withHasNext(boolean hasNext) {
+      this.hasNext = hasNext;
+      return this;
+    }
+
+    public ForwardList<T> withResults(List<T> results) {
+      this.results.clear();
+      if (results != null) {
+        this.results.addAll(results);
+      }
+      return this;
+    }
+
+  }
+
   public static class PagedList<T> {
 
     private int total;
@@ -88,6 +137,11 @@ public interface Query<Q, P> {
 
     public static <T> PagedList<T> inst() {
       return new PagedList<>();
+    }
+
+    public static <T> PagedList<T> of(int offset, int pageSize) {
+      PagedList<T> pl = new PagedList<>();
+      return pl.withOffset(offset).withPageSize(pageSize);
     }
 
     public static <T> PagedList<T> of(int total, List<T> results, int offset, int pageSize) {
@@ -165,55 +219,6 @@ public interface Query<Q, P> {
         int i = offset + 1;
         currentPage = i % pageSize == 0 ? i / pageSize : i / pageSize + 1;
       }
-    }
-
-  }
-
-  public static class ForwardList<T> {
-
-    private boolean hasNext;
-    private final List<T> results = new ArrayList<>();
-
-    ForwardList() {}
-
-    public static <T> ForwardList<T> inst() {
-      return new ForwardList<>();
-    }
-
-    public static <T> ForwardList<T> of(List<T> results, boolean hasNext) {
-      ForwardList<T> il = new ForwardList<>();
-      return il.withResults(results).withHasNext(hasNext);
-    }
-
-    /**
-     * @return the data
-     */
-    public List<T> getResults() {
-      return results;
-    }
-
-    public boolean hasNext() {
-      return false;
-    }
-
-    /**
-     * @return the hasNext
-     */
-    public boolean isHasNext() {
-      return hasNext;
-    }
-
-    public ForwardList<T> withHasNext(boolean hasNext) {
-      this.hasNext = hasNext;
-      return this;
-    }
-
-    public ForwardList<T> withResults(List<T> results) {
-      this.results.clear();
-      if (results != null) {
-        this.results.addAll(results);
-      }
-      return this;
     }
 
   }

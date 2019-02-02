@@ -20,6 +20,7 @@ import static org.corant.shared.util.MapUtils.replaceKeyPathMapValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class ConverterHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_PRO_NME = "property-name";
   public static final String HNIT_PARA_PRO_TYP = "property-type";
 
-  static final Map<QueryHint, Pair<String, Class<?>>> caches = new ConcurrentHashMap<>();
+  static final Map<QueryHint, Pair<String[], Class<?>>> caches = new ConcurrentHashMap<>();
   static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
@@ -68,7 +69,7 @@ public class ConverterHintHandler implements ResultHintHandler {
   @SuppressWarnings("unchecked")
   @Override
   public void handle(QueryHint qh, Object result) {
-    Pair<String, Class<?>> hint = null;
+    Pair<String[], Class<?>> hint = null;
     if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
       return;
     }
@@ -93,8 +94,8 @@ public class ConverterHintHandler implements ResultHintHandler {
     }
   }
 
-  protected void handle(Map<String, Object> map, String keyPath, Class<?> targetClass) {
-    replaceKeyPathMapValue(map, keyPath, ".", (orginalVal) -> {
+  protected void handle(Map<String, Object> map, String[] keyPath, Class<?> targetClass) {
+    replaceKeyPathMapValue(map, keyPath, (orginalVal) -> {
       if (orginalVal != null) {
         return cs.convert(orginalVal, targetClass);
       } else {
@@ -103,7 +104,7 @@ public class ConverterHintHandler implements ResultHintHandler {
     });
   }
 
-  protected Pair<String, Class<?>> resolveHint(QueryHint qh) {
+  protected Pair<String[], Class<?>> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh)) {
       return caches.get(qh);
     } else {
@@ -116,7 +117,8 @@ public class ConverterHintHandler implements ResultHintHandler {
           if (isNoneBlank(propertyName, propertyType)) {
             Class<?> targetClass = tryAsClass(propertyType);
             if (targetClass != null) {
-              return caches.computeIfAbsent(qh, (k) -> Pair.of(propertyName, targetClass));
+              return caches.computeIfAbsent(qh,
+                  (k) -> Pair.of(split(propertyName, ".", true, true), targetClass));
             }
           }
         }

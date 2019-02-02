@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.sqlquery;
 
+import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.asStrings;
@@ -74,7 +75,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
     Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
+    Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
@@ -85,17 +86,19 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
       ForwardList<T> result = ForwardList.inst();
-      List<T> list = getExecutor().select(limitSql, rcls, queryParam);
-      int size = list.size();
-      this.fetch(list, fetchQueries, param);
-      if (size > limit) {
-        list.remove(size - 1);
-        result.withResults(list);
-        result.withHasNext(true);
-      } else {
-        result.withResults(list);
+      List<T> list = getExecutor().select(limitSql, resultClass, queryParam);
+      int size = getSize(list);
+      if (size > 0) {
+        this.fetch(list, fetchQueries, param);
+        if (size > limit) {
+          list.remove(size - 1);
+          result.withResults(list);
+          result.withHasNext(true);
+        } else {
+          result.withResults(list);
+        }
+        handleResultHints(hints, result);
       }
-      handleResultHints(hints, result);
       return result;
     } catch (SQLException e) {
       throw new QueryRuntimeException(e);
@@ -105,14 +108,14 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   @Override
   public <T> T get(String q, Map<String, Object> param) {
     Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
+    Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
     String sql = querier.getScript();
     try {
       log(q, queryParam, sql);
-      T result = getExecutor().get(sql, rcls, queryParam);
+      T result = getExecutor().get(sql, resultClass, queryParam);
       this.fetch(result, fetchQueries, param);
       handleResultHints(hints, result);
       return result;
@@ -124,7 +127,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   @Override
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
     Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
+    Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
@@ -134,21 +137,22 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
-      List<T> list = getExecutor().select(limitSql, rcls, queryParam);
-      PagedList<T> result = PagedList.inst();
-      result.withOffset(offset).withPageSize(limit);
-      int count = list.size();
-      if (count > limit + 1) {
-        result.withTotal(offset + count);
-      } else {
-        String totalSql = getDialect().getCountSql(sql);
-        log("total-> " + q, queryParam, totalSql);
-        result.withTotal(getMapInteger(getExecutor().get(totalSql, Map.class, queryParam),
-            Dialect.COUNT_FIELD_NAME));
+      List<T> list = getExecutor().select(limitSql, resultClass, queryParam);
+      PagedList<T> result = PagedList.of(offset, limit);
+      int size = getSize(list);
+      if (size > 0) {
+        if (size < limit) {
+          result.withTotal(offset + size);
+        } else {
+          String totalSql = getDialect().getCountSql(sql);
+          log("total-> " + q, queryParam, totalSql);
+          result.withTotal(getMapInteger(getExecutor().get(totalSql, Map.class, queryParam),
+              Dialect.COUNT_FIELD_NAME));
+        }
+        this.fetch(list, fetchQueries, param);
+        result.withResults(list);
+        handleResultHints(hints, result);
       }
-      this.fetch(list, fetchQueries, param);
-      result.withResults(list);
-      handleResultHints(hints, result);
       return result;
     } catch (SQLException e) {
       throw new QueryRuntimeException(e);
@@ -166,8 +170,11 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     try {
       log(q, queryParam, sql);
       List<T> result = getExecutor().select(sql, rcls, queryParam);
-      this.fetch(result, fetchQueries, param);
-      handleResultHints(hints, result);
+      int size = getSize(result);
+      if (size > 0) {
+        this.fetch(result, fetchQueries, param);
+        handleResultHints(hints, result);
+      }
       return result;
     } catch (SQLException e) {
       throw new QueryRuntimeException(e);
@@ -197,7 +204,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     Querier<String, Object[], FetchQuery, QueryHint> querier =
         resolver.resolve(refQueryName, fetchParam);
     String sql = querier.getScript();
-    Class<?> rcls = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
+    Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     Object[] params = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     if (maxSize > 0) {
@@ -205,7 +212,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     }
     try {
       log("fetch-> " + refQueryName, params, sql);
-      List<?> fetchedList = getExecutor().select(sql, rcls, params);
+      List<?> fetchedList = getExecutor().select(sql, resultClass, params);
       Object fetchedResult = null;
       if (multiRecords) {
         fetchedResult = fetchedList;
@@ -241,7 +248,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   }
 
   protected void handleResultHints(List<QueryHint> hints, Object result) {
-    if (!isEmpty(hints) && !resultHintHandlers.isUnsatisfied()) {
+    if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
         resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> h.handle(qh, result));
       });

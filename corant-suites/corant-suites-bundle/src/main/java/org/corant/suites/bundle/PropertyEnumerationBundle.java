@@ -71,7 +71,12 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   @Override
   public String getEnumItemLiteral(Enum enumVal, Locale locale) {
     load();
-    return this.getEnumItemLiterals((Class<Enum>) enumVal.getDeclaringClass(), locale).get(enumVal);
+    Map<Enum, String> lLiterals =
+        getEnumItemLiterals((Class<Enum>) enumVal.getDeclaringClass(), locale);
+    if (lLiterals != null) {
+      return lLiterals.get(enumVal);
+    }
+    return null;
   }
 
   @SuppressWarnings("unchecked")
@@ -80,7 +85,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
     load();
     Map<Enum, String> lLiterals =
         holder.get(locale) == null ? null : holder.get(locale).getLiterals(enumClass);
-    return lLiterals == null ? null : new LinkedHashMap(lLiterals);
+    return lLiterals == null ? null : new LinkedHashMap(lLiterals); // FIXME unmodifiable pass javac
   }
 
   public synchronized void reload() {

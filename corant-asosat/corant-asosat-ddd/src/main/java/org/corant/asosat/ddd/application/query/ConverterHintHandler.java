@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -103,10 +104,15 @@ public class ConverterHintHandler implements ResultHintHandler {
       Object[] convertHits) {
     replaceKeyPathMapValue(map, keyPath, (orginalVal) -> {
       if (orginalVal != null) {
-        return cs.convert(orginalVal, targetClass, convertHits);
-      } else {
-        return orginalVal;
+        try {
+          return cs.convert(orginalVal, targetClass, convertHits);
+        } catch (Exception e) {
+          logger.log(Level.WARNING, e,
+              () -> String.format("Hanle result conversion error on property %s with value %s",
+                  String.join(".", keyPath), orginalVal));
+        }
       }
+      return orginalVal;
     });
   }
 

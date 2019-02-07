@@ -471,7 +471,13 @@
 				<artifactId>transport</artifactId>
 				<version>${version.elasticsearch}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.elasticsearch</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>${version.elasticsearch}</version>
+				<scope>provided</scope>
+			</dependency>
+			
 			<!-- ORM -->
 			<dependency>
 				<groupId>org.hibernate</groupId>

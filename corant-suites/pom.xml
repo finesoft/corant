@@ -37,6 +37,7 @@
 		<module>corant-suites-elastic</module>
 		<module>corant-suites-mongodb</module>
 		<module>corant-suites-mp</module>
+		<module>corant-suites-cassandra</module>
 	</modules>
 	<build>
 		<plugins>

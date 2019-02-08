@@ -48,7 +48,7 @@
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="fetch-query" type="fetch-query" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="hint" type="hint" maxOccurs="unbounded" minOccurs="0"/>
+      <xsd:element name="hint" type="hint" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
     <xsd:attribute name="name" type="xsd:string" use="required">
       <xsd:annotation>
@@ -67,10 +67,10 @@
     <xsd:attribute name="result-set-mapping" type="xsd:string" use="optional">
     	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
     </xsd:attribute>
-    <xsd:attribute name="cache" type="xsd:boolean" use="optional">
+    <xsd:attribute name="cache" type="xsd:boolean" use="optional" default="false">
     	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
     </xsd:attribute>
-    <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="true">
+    <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="false">
     	<xsd:annotation><xsd:documentation>Reserve zone</xsd:documentation></xsd:annotation>
     </xsd:attribute>
     <xsd:attribute name="version" type="xsd:string" use="optional"></xsd:attribute>

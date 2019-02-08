@@ -119,8 +119,8 @@ public class JarLauncher {
     log(true,
         "Finished extraction, %d archives were extracted, including %d new ones and %d existing ones,"
             + " take %.2f seconds.",
-        workPath, newJarPaths.size() + existedJarPaths.size(), newJarPaths.size(),
-        existedJarPaths.size(), takeSecs);
+        newJarPaths.size() + existedJarPaths.size(), newJarPaths.size(), existedJarPaths.size(),
+        takeSecs);
   }
 
   void extract(JarFile jar, JarEntry entry, Set<Path> newJarPaths, Set<Path> existedJarPaths)

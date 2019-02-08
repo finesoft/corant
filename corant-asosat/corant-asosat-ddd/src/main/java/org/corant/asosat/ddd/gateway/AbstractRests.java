@@ -13,8 +13,12 @@
  */
 package org.corant.asosat.ddd.gateway;
 
+import java.lang.annotation.Annotation;
 import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
@@ -26,6 +30,8 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 @ApplicationScoped
 @ApplicationServices
 public abstract class AbstractRests {
+
+  protected static final Map<Class<?>, String> cachedPaths = new ConcurrentHashMap<>();
 
   /**
    * 202
@@ -45,6 +51,16 @@ public abstract class AbstractRests {
    */
   protected Response accepted(Object obj) {
     return Response.accepted(obj).type(MediaType.APPLICATION_JSON).build();
+  }
+
+  /**
+   * 201
+   *
+   * @param id
+   * @return created
+   */
+  protected Response created(Object id) {
+    return created(URI.create(resolvePath() + "/get/" + id));
   }
 
   /**
@@ -83,5 +99,18 @@ public abstract class AbstractRests {
    */
   protected Response ok(Object obj) {
     return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+  }
+
+  protected String resolvePath() {
+    return cachedPaths.computeIfAbsent(getClass(), (cls) -> {
+      Annotation[] annotations = cls.getAnnotations();
+      for (Annotation annotation : annotations) {
+        if (annotation instanceof Path) {
+          Path pathAnnotation = (Path) annotation;
+          return pathAnnotation.value();
+        }
+      }
+      return "";
+    });
   }
 }

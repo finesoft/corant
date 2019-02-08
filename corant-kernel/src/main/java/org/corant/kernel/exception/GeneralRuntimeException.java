@@ -46,7 +46,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   private Map<Object, Object> attributes = new HashMap<>();
 
   public GeneralRuntimeException() {
-    this("ERR_UNKNOW");
+    super("An unknown error has occurred!");
   }
 
   public GeneralRuntimeException(Object code) {

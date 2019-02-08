@@ -49,43 +49,44 @@ public class Identifiers {
   }
 
   // public static void main(String... strings) throws InterruptedException {
-  // int tn = 2, n = 9876, size = tn * n;
-  // final long[][] arr = new long[tn][n];
-  // ExecutorService es = Executors.newFixedThreadPool(tn);
-  // final CountDownLatch latch = new CountDownLatch(tn);
-  // for (int d = 0; d < tn; d++) {
-  // final int t = d;
+  // int workers = 16, times = 9876, size = workers * times;
+  // final long[][] arr = new long[workers][times];
+  // ExecutorService es = Executors.newFixedThreadPool(workers);
+  // final CountDownLatch latch = new CountDownLatch(workers);
+  // for (int worker = 0; worker < workers; worker++) {
+  // final int workerId = worker;
   // es.submit(() -> {
-  // for (int i = 0; i < n; i++) {
-  // arr[t][i] = Identifiers.snowflakeUUID(3, t, () -> System.currentTimeMillis());
+  // for (int i = 0; i < times; i++) {
+  // arr[workerId][i] =
+  // Identifiers.snowflakeUUID(0, workerId, () -> System.currentTimeMillis());
   // }
   // latch.countDown();
   // });
   // }
   // latch.await();
-  // Set<Long> set = new HashSet<>(size);
+  // Set<Long> set = new HashSet<>();
   // Map<Long, List<Long>> tmp = new LinkedHashMap<>();
   // for (long[] ar : arr) {
   // for (long a : ar) {
   // set.add(a);
-  // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
-  // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
-  // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
-  // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
-  // tmp.computeIfAbsent(time, (k) -> new ArrayList<>()).add(seq);
-  // System.out
-  // .println(a + "\tdcid" + dcid + "\twid:" + woid + "\ttime:" + time + "\tseq:" + seq);
+  // // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
+  // // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
+  // // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
+  // // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
+  // // tmp.computeIfAbsent(time, (k) -> new ArrayList<>()).add(seq);
+  // // System.out
+  // // .println(a + "\tdcid" + dcid + "\twid:" + woid + "\ttime:" + time + "\tseq:" + seq);
   // }
   // }
   // System.out.println("--------------------------------------------------");
-  // tmp.forEach((k, v) -> {
-  // v.stream().sorted().forEach((seq) -> System.out.println("time:" + k + "\tseq:" + seq));
-  // });
+  // // tmp.forEach((k, v) -> {
+  // // v.stream().sorted().forEach((seq) -> System.out.println("time:" + k + "\tseq:" + seq));
+  // // });
   // es.shutdown();
   // if (set.size() != size) {
   // throw new IllegalStateException();
   // } else {
-  // System.out.println("finished");
+  // System.out.println("finished \t" + set.size());
   // }
   // }
 
@@ -145,7 +146,9 @@ public class Identifiers {
     int seq = sequence.intValue();
     long incredSeq = sequence.incrementAndGet();
     incredSeq &= mask;
-    sequence.set(incredSeq);
+    if (sequence.get() != incredSeq) {
+      sequence.set(incredSeq);
+    }
     return current ? sequence.intValue() : seq;
   }
 

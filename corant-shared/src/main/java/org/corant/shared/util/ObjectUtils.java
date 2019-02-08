@@ -57,11 +57,11 @@ public class ObjectUtils {
   }
 
   public static <T> T defaultObject(T obj, Supplier<T> supplier) {
-    return defaultObject(obj, supplier.get());
+    return obj != null ? obj : supplier.get();
   }
 
   public static <T> T defaultObject(T obj, T altObj) {
-    return obj == null ? altObj : obj;
+    return defaultObject(obj, () -> altObj);
   }
 
   @SuppressWarnings("unchecked")

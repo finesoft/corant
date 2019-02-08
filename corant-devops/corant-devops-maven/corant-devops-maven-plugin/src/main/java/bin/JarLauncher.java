@@ -30,7 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -84,7 +86,7 @@ public class JarLauncher {
 
   void cleanWorkDir() {
     if (Arrays.stream(args).anyMatch(arg -> "-cwd".equalsIgnoreCase(arg))) {
-      log(true, "Clearing archives from work space %s ...", workPath);
+      log(true, "Clearing archives from workspace %s ...", workPath);
       File file = workPath.toFile();
       if (file.exists()) {
         for (File archive : file.listFiles()) {
@@ -95,7 +97,10 @@ public class JarLauncher {
   }
 
   void extract() throws IOException, NoSuchAlgorithmException {
-    log(true, "Extracting archives to work space %s ...", workPath);
+    long ts = System.currentTimeMillis();
+    log(true, "Extracting archives into workspace %s and use CRC32 for checking ...", workPath);
+    Set<Path> newJarPaths = new HashSet<>();
+    Set<Path> existedJarPaths = new HashSet<>();
     URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
     if (location.toExternalForm().endsWith(JAREXT)) {
       try (JarFile jar = new JarFile(new File(location.getPath()))) {
@@ -103,16 +108,23 @@ public class JarLauncher {
         while (entries.hasMoreElements()) {
           JarEntry each = entries.nextElement();
           if (each.getName().endsWith(JAREXT)) {
-            extract(jar, each);
+            extract(jar, each, newJarPaths, existedJarPaths);
           } else if (each.getName().equals(MANIFEST)) {
             loadManifest(jar, each);
           }
         }
       }
     }
+    double takeSecs = (System.currentTimeMillis() - ts) / 1000.00;
+    log(true,
+        "Finished extraction, %d archives were extracted, including %d new ones and %d existing ones,"
+            + " take %.2f seconds.",
+        workPath, newJarPaths.size() + existedJarPaths.size(), newJarPaths.size(),
+        existedJarPaths.size(), takeSecs);
   }
 
-  void extract(JarFile jar, JarEntry entry) throws IOException, NoSuchAlgorithmException {
+  void extract(JarFile jar, JarEntry entry, Set<Path> newJarPaths, Set<Path> existedJarPaths)
+      throws IOException, NoSuchAlgorithmException {
     String entryName = entry.getName();
     int slashLoc = entryName.lastIndexOf("/");
     if (slashLoc > 0) {
@@ -123,9 +135,11 @@ public class JarLauncher {
         .resolve(entryName.substring(0, entryName.length() - JAREXT_LEN) + "-" + checksum + JAREXT);
     if (Files.exists(dest)) {
       classpaths.add(dest);
+      existedJarPaths.add(dest);
       return;
     }
     classpaths.add(dest);
+    newJarPaths.add(dest);
     try (InputStream in = jar.getInputStream(entry)) {
       Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
     }

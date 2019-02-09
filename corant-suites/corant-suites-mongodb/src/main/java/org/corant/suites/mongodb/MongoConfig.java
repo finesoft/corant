@@ -13,14 +13,20 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.shared.util.StringUtils.isBlank;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.microprofile.config.Config;
+
 /**
  * corant-suites-mongodb
  *
  * @author bingo 下午12:10:04
  *
  */
-public class MongoDBConfig {
+public class MongoConfig {
 
+  public static final String PREFIX = "mongodb.";
   public static final int DEFAULT_PORT = 27017;
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
@@ -41,6 +47,18 @@ public class MongoDBConfig {
   private char[] password;
 
   private Class<?> fieldNamingStrategy;
+
+  public static Map<String, MongoConfig> from(Config config) {
+    Map<String, MongoConfig> map = new HashMap<>();
+    return map;
+  }
+
+  public static MongoConfig of(Config config, String name) {
+    final MongoConfig mc = new MongoConfig();
+    if (isBlank(name)) {
+    }
+    return mc;
+  }
 
   /**
    *

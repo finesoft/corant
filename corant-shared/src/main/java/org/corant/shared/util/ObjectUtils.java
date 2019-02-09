@@ -161,8 +161,7 @@ public class ObjectUtils {
       }
       if (obj instanceof Map.Entry<?, ?>) {
         final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
-        return Objects.equals(getKey(), other.getKey())
-            && Objects.equals(getValue(), other.getValue());
+        return isEquals(getKey(), other.getKey()) && isEquals(getValue(), other.getValue());
       }
       return false;
     }
@@ -235,9 +234,8 @@ public class ObjectUtils {
       }
       if (obj instanceof Triple<?, ?, ?>) {
         final Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
-        return Objects.equals(getLeft(), other.getLeft())
-            && Objects.equals(getMiddle(), other.getMiddle())
-            && Objects.equals(getRight(), other.getRight());
+        return isEquals(getLeft(), other.getLeft()) && isEquals(getMiddle(), other.getMiddle())
+            && isEquals(getRight(), other.getRight());
       }
       return false;
     }

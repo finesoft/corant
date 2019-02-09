@@ -76,7 +76,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
     if (lLiterals != null) {
       return lLiterals.get(enumVal);
     }
-    return null;
+    return enumVal.name();
   }
 
   @SuppressWarnings("unchecked")

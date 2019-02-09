@@ -13,10 +13,10 @@
  */
 package org.corant.suites.query.esquery;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.query.sqlquery.SqlHelper.getLimit;
 import static org.corant.suites.query.sqlquery.SqlHelper.getOffset;

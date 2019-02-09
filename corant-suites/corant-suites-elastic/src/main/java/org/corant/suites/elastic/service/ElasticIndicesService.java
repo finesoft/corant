@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic.service;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;

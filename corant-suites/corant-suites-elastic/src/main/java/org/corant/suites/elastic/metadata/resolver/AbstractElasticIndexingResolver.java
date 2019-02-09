@@ -14,13 +14,13 @@
 package org.corant.suites.elastic.metadata.resolver;
 
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
+import static org.corant.shared.util.Assertions.shouldBeEquals;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.ObjectUtils.shouldBeEquals;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldBeNull;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genFieldMapping;

@@ -26,7 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -88,9 +90,11 @@ public class JarLauncher {
     if (Arrays.stream(args).anyMatch(arg -> "-cwd".equalsIgnoreCase(arg))) {
       log(true, "Clearing archives from workspace %s ...", workPath);
       File file = workPath.toFile();
-      if (file.exists()) {
+      if (file != null && file.exists()) {
         for (File archive : file.listFiles()) {
-          archive.delete();
+          if (archive != null) {
+            archive.delete();
+          }
         }
       }
     }
@@ -126,7 +130,7 @@ public class JarLauncher {
   void extract(JarFile jar, JarEntry entry, Set<Path> newJarPaths, Set<Path> existedJarPaths)
       throws IOException, NoSuchAlgorithmException {
     String entryName = entry.getName();
-    int slashLoc = entryName.lastIndexOf("/");
+    int slashLoc = entryName.lastIndexOf('/');
     if (slashLoc > 0) {
       entryName = entryName.substring(slashLoc + 1);
     }
@@ -158,13 +162,15 @@ public class JarLauncher {
   }
 
   ClassLoader getClassLoader() {
-    return new URLClassLoader(classpaths.stream().map(path -> {
-      try {
-        return path.toUri().toURL();
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
-      }
-    }).toArray(URL[]::new));
+    return AccessController
+        .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(
+            classpaths.stream().map(path -> {
+              try {
+                return path.toUri().toURL();
+              } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+              }
+            }).toArray(URL[]::new)));
   }
 
   Method getMainMethod(Class<?> cls) throws NoSuchMethodException {

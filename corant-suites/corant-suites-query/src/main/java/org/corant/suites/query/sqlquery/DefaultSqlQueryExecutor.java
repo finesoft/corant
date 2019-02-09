@@ -14,8 +14,8 @@
 package org.corant.suites.query.sqlquery;
 
 import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;

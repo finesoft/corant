@@ -14,8 +14,8 @@
 package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -57,7 +57,7 @@ public class Corant {
   private static Corant INSTANCE;
   private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
-  private WeldContainer container;
+  private volatile WeldContainer container;
   private final String[] args;
 
   public Corant() {

@@ -13,8 +13,8 @@
  */
 package org.corant.kernel.config;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.toMap;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

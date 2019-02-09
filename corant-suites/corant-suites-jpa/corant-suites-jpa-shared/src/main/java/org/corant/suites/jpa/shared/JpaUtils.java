@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.getAllSuperclassesAndInterfaces;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.replace;
 import java.io.IOException;
 import java.io.PrintStream;

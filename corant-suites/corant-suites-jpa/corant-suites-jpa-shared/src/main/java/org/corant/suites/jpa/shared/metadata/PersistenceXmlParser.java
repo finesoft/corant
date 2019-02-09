@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;

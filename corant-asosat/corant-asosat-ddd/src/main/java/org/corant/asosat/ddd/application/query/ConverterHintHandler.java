@@ -142,7 +142,7 @@ public class ConverterHintHandler implements ResultHintHandler {
           }
         }
       } catch (Exception e) {
-        logger.warning(() -> "The query hint has some error!");
+        logger.log(Level.WARNING, e, () -> "The query hint has some error!");
       }
     }
     brokens.add(qh);

@@ -58,7 +58,7 @@ public class HttpConstraintMetaData {
    * @return the rolesAllowed
    */
   public String[] getRolesAllowed() {
-    return rolesAllowed;
+    return Arrays.copyOf(rolesAllowed, rolesAllowed.length);
   }
 
   /**
@@ -101,6 +101,5 @@ public class HttpConstraintMetaData {
   protected void setValue(EmptyRoleSemantic value) {
     this.value = value == null ? EmptyRoleSemantic.PERMIT : value;
   }
-
 
 }

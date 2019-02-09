@@ -1,22 +1,21 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.servlet.metadata;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Servlet;
@@ -36,7 +35,7 @@ public class WebServletMetaData {
   private String[] value = new String[0];
   private String[] urlPatterns = new String[0];
   private int loadOnStartup = -1;
-  private WebInitParamMetaData[] initParams;
+  private WebInitParamMetaData[] initParams = new WebInitParamMetaData[0];
   private boolean asyncSupported;
   private String smallIcon;
   private String largeIcon;
@@ -92,7 +91,6 @@ public class WebServletMetaData {
 
   protected WebServletMetaData() {}
 
-
   /**
    *
    * @return the clazz
@@ -122,7 +120,7 @@ public class WebServletMetaData {
    * @return the initParams
    */
   public WebInitParamMetaData[] getInitParams() {
-    return initParams;
+    return Arrays.copyOf(initParams, initParams.length);
   }
 
   public Map<String, String> getInitParamsAsMap() {
@@ -182,7 +180,7 @@ public class WebServletMetaData {
    * @return the urlPatterns
    */
   public String[] getUrlPatterns() {
-    return urlPatterns;
+    return Arrays.copyOf(urlPatterns, urlPatterns.length);
   }
 
   /**
@@ -190,7 +188,7 @@ public class WebServletMetaData {
    * @return the value
    */
   public String[] getValue() {
-    return value;
+    return Arrays.copyOf(value, value.length);
   }
 
   /**

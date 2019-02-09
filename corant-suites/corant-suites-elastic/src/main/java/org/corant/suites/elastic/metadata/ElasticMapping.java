@@ -13,10 +13,10 @@
  */
 package org.corant.suites.elastic.metadata;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;

@@ -13,9 +13,9 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.File;

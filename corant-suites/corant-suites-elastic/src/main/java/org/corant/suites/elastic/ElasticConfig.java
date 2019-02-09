@@ -196,14 +196,6 @@ public class ElasticConfig {
     return autoUpdateSchema;
   }
 
-  /**
-   *
-   * @param setting the setting to set
-   */
-  public void setSetting(Map<String, Object> setting) {
-    this.setting = setting;
-  }
-
   protected void initSetting(String path) {
     ClassPathResource setting = Resources.tryFromClassPath(path).findFirst().orElse(null);
     if (setting != null) {

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.dynamic.template;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import java.util.Map;
 import freemarker.template.TemplateMethodModelEx;
 

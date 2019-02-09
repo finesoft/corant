@@ -14,8 +14,8 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asProperties;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import static org.corant.shared.util.StringUtils.replace;
 import java.util.ArrayList;

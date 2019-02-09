@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

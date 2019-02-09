@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jndi;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;

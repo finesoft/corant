@@ -13,12 +13,12 @@
  */
 package org.corant.suites.elastic.metadata.resolver;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -74,7 +74,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
  */
 public class ResolverUtils {
 
-  public static final Map<Class<?>, Class<?>> SIMPLE_TYPE_WRAPPER_MAP = new HashMap<>();
+  static final Map<Class<?>, Class<?>> SIMPLE_TYPE_WRAPPER_MAP = new HashMap<>();
 
   static {
     SIMPLE_TYPE_WRAPPER_MAP.putAll(ClassUtils.PRIMITIVE_WRAPPER_MAP);

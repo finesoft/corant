@@ -1,22 +1,21 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.servlet.metadata;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.DispatcherType;
@@ -43,7 +42,6 @@ public class WebFilterMetaData {
   private boolean asyncSupported;
   private String description;
   private Class<? extends Filter> clazz;
-
 
   /**
    * @param displayName
@@ -78,7 +76,6 @@ public class WebFilterMetaData {
     setClazz(clazz);
   }
 
-
   public WebFilterMetaData(WebFilter anno, Class<? extends Filter> clazz) {
     this(shouldNotNull(anno).displayName(), WebInitParamMetaData.of(anno.initParams()),
         anno.filterName(), anno.smallIcon(), anno.largeIcon(), anno.servletNames(), anno.value(),
@@ -86,10 +83,7 @@ public class WebFilterMetaData {
         clazz);
   }
 
-
   protected WebFilterMetaData() {}
-
-
 
   /**
    *
@@ -112,7 +106,7 @@ public class WebFilterMetaData {
    * @return the dispatcherTypes
    */
   public DispatcherType[] getDispatcherTypes() {
-    return dispatcherTypes;
+    return Arrays.copyOf(dispatcherTypes, dispatcherTypes.length);
   }
 
   /**
@@ -136,7 +130,7 @@ public class WebFilterMetaData {
    * @return the initParams
    */
   public WebInitParamMetaData[] getInitParams() {
-    return initParams;
+    return Arrays.copyOf(initParams, initParams.length);
   }
 
   public Map<String, String> getInitParamsAsMap() {
@@ -160,7 +154,7 @@ public class WebFilterMetaData {
    * @return the servletNames
    */
   public String[] getServletNames() {
-    return servletNames;
+    return Arrays.copyOf(servletNames, servletNames.length);
   }
 
   /**
@@ -176,7 +170,7 @@ public class WebFilterMetaData {
    * @return the urlPatterns
    */
   public String[] getUrlPatterns() {
-    return urlPatterns;
+    return Arrays.copyOf(urlPatterns, urlPatterns.length);
   }
 
   /**
@@ -184,7 +178,7 @@ public class WebFilterMetaData {
    * @return the value
    */
   public String[] getValue() {
-    return value;
+    return Arrays.copyOf(value, value.length);
   }
 
   /**
@@ -195,7 +189,6 @@ public class WebFilterMetaData {
     return asyncSupported;
   }
 
-
   /**
    *
    * @param asyncSupported the asyncSupported to set
@@ -203,7 +196,6 @@ public class WebFilterMetaData {
   protected void setAsyncSupported(boolean asyncSupported) {
     this.asyncSupported = asyncSupported;
   }
-
 
   /**
    *
@@ -213,7 +205,6 @@ public class WebFilterMetaData {
     this.clazz = shouldNotNull(clazz);// FIXME MSG
   }
 
-
   /**
    *
    * @param description the description to set
@@ -221,7 +212,6 @@ public class WebFilterMetaData {
   protected void setDescription(String description) {
     this.description = description;
   }
-
 
   /**
    *
@@ -231,7 +221,6 @@ public class WebFilterMetaData {
     this.dispatcherTypes = dispatcherTypes;
   }
 
-
   /**
    *
    * @param displayName the displayName to set
@@ -239,7 +228,6 @@ public class WebFilterMetaData {
   protected void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
-
 
   /**
    *
@@ -249,7 +237,6 @@ public class WebFilterMetaData {
     this.filterName = filterName;
   }
 
-
   /**
    *
    * @param initParams the initParams to set
@@ -257,7 +244,6 @@ public class WebFilterMetaData {
   protected void setInitParams(WebInitParamMetaData[] initParams) {
     this.initParams = defaultObject(initParams, new WebInitParamMetaData[0]);
   }
-
 
   /**
    *
@@ -267,7 +253,6 @@ public class WebFilterMetaData {
     this.largeIcon = largeIcon;
   }
 
-
   /**
    *
    * @param servletNames the servletNames to set
@@ -275,7 +260,6 @@ public class WebFilterMetaData {
   protected void setServletNames(String[] servletNames) {
     this.servletNames = defaultObject(servletNames, new String[0]);
   }
-
 
   /**
    *
@@ -285,7 +269,6 @@ public class WebFilterMetaData {
     this.smallIcon = smallIcon;
   }
 
-
   /**
    *
    * @param urlPatterns the urlPatterns to set
@@ -293,7 +276,6 @@ public class WebFilterMetaData {
   protected void setUrlPatterns(String[] urlPatterns) {
     this.urlPatterns = defaultObject(urlPatterns, new String[0]);
   }
-
 
   /**
    *

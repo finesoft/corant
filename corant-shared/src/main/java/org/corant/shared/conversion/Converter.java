@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Iterator;
 import java.util.Map;
 

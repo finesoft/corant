@@ -105,64 +105,20 @@ public class ObjectUtils {
     return a.compareTo(b) < 0 ? a : b;
   }
 
+  public static <T> T newInstance(Class<T> cls) {
+    try {
+      return cls != null ? cls.newInstance() : null;
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   public static <T> Optional<T> optional(T obj) {
     return Optional.ofNullable(obj);
   }
 
   public static <T> Optional<T> optionalCast(Object o, Class<T> cls) {
     return Optional.ofNullable(tryCast(o, cls));
-  }
-
-  public static void shouldBeEquals(Object a, Object b) {
-    shouldBeEquals(a, b, "The objects %s %s should be equal!", asString(a), asString(b));
-  }
-
-  public static void shouldBeEquals(Object a, Object b, String messageOrFormat, Object... args) {
-    if (!isEquals(a, b)) {
-      throw new CorantRuntimeException(messageOrFormat, args);
-    }
-  }
-
-  public static void shouldBeFalse(boolean condition) {
-    shouldBeFalse(condition, "This shoud be false");
-  }
-
-  public static void shouldBeFalse(boolean condition, String messageOrFormat, Object... args) {
-    if (condition) {
-      throw new CorantRuntimeException(messageOrFormat, args);
-    }
-  }
-
-  public static <T> T shouldBeNull(T obj) {
-    return shouldBeNull(obj, "The object should be null!");
-  }
-
-  public static <T> T shouldBeNull(T obj, String messageOrFormat, Object... args) {
-    if (obj != null) {
-      throw new CorantRuntimeException(messageOrFormat, args);
-    }
-    return null;
-  }
-
-  public static void shouldBeTrue(boolean condition) {
-    shouldBeTrue(condition, "This shoud be true");
-  }
-
-  public static void shouldBeTrue(boolean condition, String messageOrFormat, Object... args) {
-    if (!condition) {
-      throw new CorantRuntimeException(messageOrFormat, args);
-    }
-  }
-
-  public static <T> T shouldNotNull(T obj) {
-    return shouldNotNull(obj, "The object should not null!");
-  }
-
-  public static <T> T shouldNotNull(T obj, String messageOrFormat, Object... args) {
-    if (obj == null) {
-      throw new CorantRuntimeException(messageOrFormat, args);
-    }
-    return obj;
   }
 
   public static <T> T tryCast(Object o, Class<T> cls) {

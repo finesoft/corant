@@ -13,8 +13,8 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

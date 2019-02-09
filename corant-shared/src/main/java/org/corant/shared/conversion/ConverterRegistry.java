@@ -13,10 +13,10 @@
  */
 package org.corant.shared.conversion;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.reflect.Type;
 import java.util.Collections;

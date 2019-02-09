@@ -14,8 +14,8 @@
 
 package org.corant.shared.util;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -58,7 +58,6 @@ public class TypeUtils {
   public static GenericArrayType arrayOf(Type componentType) {
     return new GenericArrayTypeImpl(componentType);
   }
-
 
   /**
    * Returns a type that is functionally equal but not necessarily equal according to
@@ -547,8 +546,6 @@ public class TypeUtils {
     public static TypeToken<?> getArray(Type componentType) {
       return new TypeToken<>(TypeUtils.arrayOf(componentType));
     }
-
-
 
     /**
      * Gets type literal for the parameterized type represented by applying {@code typeArguments} to

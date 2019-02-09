@@ -13,10 +13,10 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;

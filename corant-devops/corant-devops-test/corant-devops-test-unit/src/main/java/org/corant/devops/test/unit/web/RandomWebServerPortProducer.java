@@ -13,7 +13,7 @@
  */
 package org.corant.devops.test.unit.web;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;

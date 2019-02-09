@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.hikari;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -80,7 +80,6 @@ public class HikariCPDataSourceProducer {
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
     return new HikariDataSource(cfgs);
   }
-
 
   @PostConstruct
   void onPostConstruct() {

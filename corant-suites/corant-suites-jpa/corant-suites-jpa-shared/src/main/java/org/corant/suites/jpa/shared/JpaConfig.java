@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;

@@ -14,9 +14,9 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

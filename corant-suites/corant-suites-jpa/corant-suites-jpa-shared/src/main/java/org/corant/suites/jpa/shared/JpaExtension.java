@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Collections;
 import java.util.HashMap;

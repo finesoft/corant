@@ -62,13 +62,10 @@ public class HttpMethodConstraintMetaData {
 
   protected HttpMethodConstraintMetaData() {}
 
-
   public static HttpMethodConstraintMetaData[] of(HttpMethodConstraint... constraints) {
     return Arrays.stream(constraints).map(HttpMethodConstraintMetaData::new)
         .toArray(HttpMethodConstraintMetaData[]::new);
   }
-
-
 
   /**
    *
@@ -83,7 +80,7 @@ public class HttpMethodConstraintMetaData {
    * @return the rolesAllowed
    */
   public String[] getRolesAllowed() {
-    return rolesAllowed;
+    return Arrays.copyOf(rolesAllowed, rolesAllowed.length);
   }
 
   /**
@@ -135,6 +132,5 @@ public class HttpMethodConstraintMetaData {
   protected void setValue(String value) {
     this.value = value;
   }
-
 
 }

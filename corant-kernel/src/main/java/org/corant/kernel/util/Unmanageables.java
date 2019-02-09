@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.shouldBeFalse;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import org.corant.Corant;
@@ -51,7 +49,6 @@ public class Unmanageables {
     private final WeldManager bm;
     private boolean disposed = false;
 
-
     public UnmanageableInstance(Class<T> clazz) {
       bm = Corant.instance().getBeanManager();
       creationalContext = bm.createCreationalContext(null);
@@ -70,7 +67,6 @@ public class Unmanageables {
       orginalInstance = object;
     }
 
-
     public static <T> UnmanageableInstance<T> of(Class<T> clazz) {
       return new UnmanageableInstance<>(clazz);
     }
@@ -88,10 +84,9 @@ public class Unmanageables {
     /**
      * Dispose of the instance, doing any necessary cleanup
      *
-     * @throws IllegalStateException if dispose() is called before produce() is
-     *         called
-     * @throws IllegalStateException if dispose() is called on an instance that has
-     *         already been disposed
+     * @throws IllegalStateException if dispose() is called before produce() is called
+     * @throws IllegalStateException if dispose() is called on an instance that has already been
+     *         disposed
      * @return self
      */
     public UnmanageableInstance<T> dispose() {
@@ -119,10 +114,9 @@ public class Unmanageables {
     /**
      * Inject the instance
      *
-     * @throws IllegalStateException if inject() is called before produce() is
-     *         called
-     * @throws IllegalStateException if inject() is called on an instance that has
-     *         already been disposed
+     * @throws IllegalStateException if inject() is called before produce() is called
+     * @throws IllegalStateException if inject() is called on an instance that has already been
+     *         disposed
      * @return self
      */
     public UnmanageableInstance<T> inject() {
@@ -139,10 +133,9 @@ public class Unmanageables {
     /**
      * Call the @PostConstruct callback
      *
-     * @throws IllegalStateException if postConstruct() is called before produce()
-     *         is called
-     * @throws IllegalStateException if postConstruct() is called on an instance
-     *         that has already been disposed
+     * @throws IllegalStateException if postConstruct() is called before produce() is called
+     * @throws IllegalStateException if postConstruct() is called on an instance that has already
+     *         been disposed
      * @return self
      */
     public UnmanageableInstance<T> postConstruct() {
@@ -161,10 +154,9 @@ public class Unmanageables {
     /**
      * Call the @PreDestroy callback
      *
-     * @throws IllegalStateException if preDestroy() is called before produce() is
-     *         called
-     * @throws IllegalStateException if preDestroy() is called on an instance that
-     *         has already been disposed
+     * @throws IllegalStateException if preDestroy() is called before produce() is called
+     * @throws IllegalStateException if preDestroy() is called on an instance that has already been
+     *         disposed
      * @return self
      */
     public UnmanageableInstance<T> preDestroy() {
@@ -181,10 +173,9 @@ public class Unmanageables {
     /**
      * Create the instance
      *
-     * @throws IllegalStateException if produce() is called on an already produced
-     *         instance
-     * @throws IllegalStateException if produce() is called on an instance that has
-     *         already been disposed
+     * @throws IllegalStateException if produce() is called on an already produced instance
+     * @throws IllegalStateException if produce() is called on an instance that has already been
+     *         disposed
      * @return self
      */
     public UnmanageableInstance<T> produce() {

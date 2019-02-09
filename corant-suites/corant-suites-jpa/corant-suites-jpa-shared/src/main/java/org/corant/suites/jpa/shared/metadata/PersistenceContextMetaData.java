@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.shouldBeTrue;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

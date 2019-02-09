@@ -30,11 +30,11 @@ import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.plugin.logging.Log;
 import org.corant.devops.maven.plugin.BuildStageException;
 import org.corant.devops.maven.plugin.archive.Archive;
+import org.corant.devops.maven.plugin.archive.Archive.Entry;
 import org.corant.devops.maven.plugin.archive.ClassPathEntry;
 import org.corant.devops.maven.plugin.archive.DefaultArchive;
 import org.corant.devops.maven.plugin.archive.FileEntry;
 import org.corant.devops.maven.plugin.archive.ManifestEntry;
-import org.corant.devops.maven.plugin.archive.Archive.Entry;
 import bin.JarLauncher;
 
 /**

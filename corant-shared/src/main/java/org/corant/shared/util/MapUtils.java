@@ -13,12 +13,12 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
 import static org.corant.shared.util.StringUtils.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.shared;
 
-import static org.corant.shared.util.ObjectUtils.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;

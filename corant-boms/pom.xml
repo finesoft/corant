@@ -79,6 +79,7 @@
 		<version.flyway>5.2.0</version.flyway>
 
 		<version.elasticsearch>6.5.4</version.elasticsearch>
+		<version.mongodb>3.6.3</version.mongodb>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -477,7 +478,13 @@
 				<version>${version.elasticsearch}</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongo-java-driver</artifactId>
+				<version>${version.mongodb}</version>
+			</dependency>
+
 			<!-- ORM -->
 			<dependency>
 				<groupId>org.hibernate</groupId>

@@ -44,9 +44,8 @@ public class ApplicationTempConfigSourceProvider extends ApplicationConfigSource
       }
     });
     list.add(new TempConfigSource(props));
-    list.forEach(cs -> logger
-        .info(() -> String.format("Loaded temp config source priority is %s, name is %s.",
-            cs.getOrdinal(), cs.getName())));
+    list.forEach(cs -> logger.info(
+        () -> String.format("Loaded temp config source[%s] %s.", cs.getOrdinal(), cs.getName())));
     return list;
   }
 

@@ -13,7 +13,9 @@
  */
 /**
  * corant-suites-webserver-tomcat
- * 
+ *
+ * JUST A POC, NOT RECOMMENDED FOR PRODUCTION ENVIRONMENTS!!!
+ *
  * @author bingo 下午7:55:49
  *
  */

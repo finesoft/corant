@@ -46,6 +46,8 @@ import org.jboss.weld.environment.tomcat.TomcatContainer;
 /**
  * corant-suites-webserver-tomcat
  *
+ * JUST A POC, NOT RECOMMENDED FOR PRODUCTION ENVIRONMENTS!!!
+ *
  * @author bingo 下午7:56:08
  *
  */

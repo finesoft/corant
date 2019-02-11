@@ -82,14 +82,15 @@ public class Assertions {
     return obj;
   }
 
-  public static void shouldNotEmpty(Object object) {
-    shouldNotEmpty(object, "This shoud be true");
+  public static <T> T shouldNotEmpty(T object) {
+    return shouldNotEmpty(object, "This shoud be true");
   }
 
-  public static void shouldNotEmpty(Object object, String messageOrFormat, Object... args) {
+  public static <T> T shouldNotEmpty(T object, String messageOrFormat, Object... args) {
     if (isEmpty(object)) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
+    return object;
   }
 
   public static <T> T shouldNotNull(T obj) {

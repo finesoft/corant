@@ -55,6 +55,7 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
         }
         return new SimpleScalar(String.join(",", placeHolders));
       } else {
+        parameters = new Object[1];
         parameters[0] = arg;
         return SQL_SS_PLACE_HOLDER;
       }

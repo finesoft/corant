@@ -101,7 +101,7 @@ public class UndertowWebServerConfig {
   private Optional<String> staticContentPath;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.static-Serving-path")
+  @ConfigProperty(name = "webserver.undertow.static-serving-path")
   private Optional<String> staticServingPath;
 
   @Inject

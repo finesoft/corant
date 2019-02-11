@@ -63,7 +63,7 @@
 		<version.smallrye.opentracing>1.1.0</version.smallrye.opentracing>
 
 		<version.tomcat>9.0.13</version.tomcat>
-		<version.undertow>2.0.16.Final</version.undertow>
+		<version.undertow>2.0.17.Final</version.undertow>
 		<version.resteasy>3.6.2.Final</version.resteasy>
 		<version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
 
@@ -301,6 +301,12 @@
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-websocket</artifactId>
 				<version>${version.tomcat}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>io.undertow</groupId>
+				<artifactId>undertow-core</artifactId>
+				<version>${version.undertow}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>

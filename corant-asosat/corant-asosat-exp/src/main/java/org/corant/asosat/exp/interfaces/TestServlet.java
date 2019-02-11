@@ -43,7 +43,7 @@ import org.corant.suites.ddd.model.Aggregate.Lifecycle;
  *
  */
 @ApplicationScoped
-@WebServlet(urlPatterns = "/test")
+@WebServlet(urlPatterns = "/test", name = "testServlet")
 public class TestServlet extends HttpServlet {
 
   private static final long serialVersionUID = 8174294172579816895L;

@@ -15,7 +15,6 @@ package org.corant.suites.security.shared;
 
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
-import java.io.IOException;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -34,7 +33,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public abstract class AbstractSecurityRequestFilter {
+public abstract class AbstractSecurityRequestUrlHandler {
 
   @Inject
   @ConfigProperty(name = "security.jarxrs.covered-urls")
@@ -50,6 +49,19 @@ public abstract class AbstractSecurityRequestFilter {
   protected final CompletePathMatcher uncoveredCompletePathMatcher = new CompletePathMatcher(true);
   protected final GlobPathMatcher uncoveredGlobPathMatcher = new GlobPathMatcher(true);
   protected final RegexPathMatcher uncoveredRegexPathMatcher = new RegexPathMatcher(true);
+
+  public boolean isCoveredUrl(String url) {
+    if (uncoveredCompletePathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredGlobPathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredRegexPathMatcher.match(url)) {
+      return false;
+    } else {
+      return coveredCompletePathMatcher.match(url) || coveredGlobPathMatcher.match(url)
+          || coveredRegexPathMatcher.match(url);
+    }
+  }
 
   protected void addUrl(boolean covered, String url) {
     if (isBlank(url)) {
@@ -91,22 +103,6 @@ public abstract class AbstractSecurityRequestFilter {
   protected void addUrls(boolean covered, String... urls) {
     for (String url : urls) {
       addUrl(covered, url);
-    }
-  }
-
-  protected abstract void doSecurityFilter(ContainerRequestContext requestContext)
-      throws IOException;
-
-  protected boolean isCoveredUrl(String url) {
-    if (uncoveredCompletePathMatcher.match(url)) {
-      return false;
-    } else if (uncoveredGlobPathMatcher.match(url)) {
-      return false;
-    } else if (uncoveredRegexPathMatcher.match(url)) {
-      return false;
-    } else {
-      return coveredCompletePathMatcher.match(url) || coveredGlobPathMatcher.match(url)
-          || coveredRegexPathMatcher.match(url);
     }
   }
 

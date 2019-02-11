@@ -302,7 +302,7 @@
 				<artifactId>tomcat-embed-websocket</artifactId>
 				<version>${version.tomcat}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
@@ -615,6 +615,11 @@
 			<dependency>
 				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-servlet-filter-adapter</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-jaxrs-oauth-client</artifactId>
 				<version>${version.keycloak}</version>
 			</dependency>
 

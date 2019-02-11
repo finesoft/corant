@@ -13,27 +13,16 @@
  */
 package org.corant.suites.security.keycloak;
 
-import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
-import org.keycloak.adapters.spi.UserSessionManagement;
+import org.corant.suites.security.shared.AbstractSecurityRequestUrlHandler;
 
 /**
  * corant-suites-security-keycloak
  *
- * @author bingo 下午5:10:06
+ * @author bingo 下午6:18:24
  *
  */
 @ApplicationScoped
-public class KeycloakUserSessionManagement implements UserSessionManagement {
-
-  @Override
-  public void logoutAll() {
-
-  }
-
-  @Override
-  public void logoutHttpSessions(List<String> ids) {
-
-  }
+public class KeycloakSecurityRequestUrlHandler extends AbstractSecurityRequestUrlHandler {
 
 }

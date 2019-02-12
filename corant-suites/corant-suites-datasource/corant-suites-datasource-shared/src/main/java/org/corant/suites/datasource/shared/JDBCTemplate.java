@@ -306,9 +306,11 @@ public class JDBCTemplate {
         // FIXME Last Line of Defense, use jdk.internal.ref.Cleaner when using JDK9
         sun.misc.Cleaner.create(stream, () -> release(rsx, stmtx, conn, closeConn));
         return stream;
-      } catch (SQLException e) {
+      } catch (Exception e) {
         release(rs, stmt, conn, closeConn);
-        rethrow(e, sql, params);
+        if (e instanceof SQLException) {
+          rethrow(SQLException.class.cast(e), sql, params);
+        }
       }
       return Stream.empty();
     }

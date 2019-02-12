@@ -17,10 +17,13 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
+import org.apache.commons.dbutils.handlers.MapHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 
 /**
  * corant-suites-datasource-shared
@@ -31,14 +34,29 @@ import org.apache.commons.dbutils.StatementConfiguration;
 public class JDBCTemplate {
 
   public final static QueryRunner SIMPLE_RUNNER = new QueryRunner();
+  public final static MapHandler MAP_HANDLER = new MapHandler();
+  public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
 
   protected final QueryRunner runner;
 
+  public JDBCTemplate(DataSource ds) {
+    this(ds, false, null, 32, null, null, null);
+  }
+
   /**
-   * @param ds
+   *
+   * @param ds the data source
+   * @param pmdKnownBroken
+   * @param fetchDirection The direction for fetching rows from database tables.
+   * @param fetchSize The number of rows that should be fetched from the database when more rows are
+   *        needed.
+   * @param maxFieldSize The maximum number of bytes that can be returned for character and binary
+   *        column values.
+   * @param maxRows The maximum number of rows that a <code>ResultSet</code> can produce.
+   * @param queryTimeout The number of seconds the driver will wait for execution.
    */
-  public JDBCTemplate(DataSource ds, boolean pmdKnownBroken, int fetchDirection, int fetchSize,
-      int maxFieldSize, int maxRows, int queryTimeout) {
+  protected JDBCTemplate(DataSource ds, boolean pmdKnownBroken, Integer fetchDirection,
+      Integer fetchSize, Integer maxFieldSize, Integer maxRows, Integer queryTimeout) {
     super();
     runner = new QueryRunner(shouldNotNull(ds), pmdKnownBroken,
         new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows, queryTimeout));
@@ -57,9 +75,18 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.execute(conn, sql, rsh, params);
   }
 
-  public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh)
+  public static List<Map<String, Object>> executeOf(Connection conn, String sql, Object... params)
       throws SQLException {
-    return SIMPLE_RUNNER.insert(conn, sql, rsh);
+    return SIMPLE_RUNNER.execute(conn, sql, MAP_HANDLER, params);
+  }
+
+  public static JDBCTemplate from(DataSource ds) {
+    return new JDBCTemplate(ds);
+  }
+
+  public static Map<String, Object> insert(Connection conn, String sql, Object... params)
+      throws SQLException {
+    return insert(conn, sql, MAP_HANDLER, params);
   }
 
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
@@ -67,23 +94,24 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.insert(conn, sql, rsh, params);
   }
 
+  public static List<Map<String, Object>> insertBatch(Connection conn, String sql,
+      Object[][] params) throws SQLException {
+    return SIMPLE_RUNNER.insertBatch(conn, sql, MAP_LIST_HANDLER, params);
+  }
+
   public static <T> T insertBatch(Connection conn, String sql, ResultSetHandler<T> rsh,
       Object[][] params) throws SQLException {
     return SIMPLE_RUNNER.insertBatch(conn, sql, rsh, params);
   }
 
-  public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh)
+  public static List<Map<String, Object>> query(Connection conn, String sql, Object... params)
       throws SQLException {
-    return SIMPLE_RUNNER.query(conn, sql, rsh);
+    return query(conn, sql, MAP_LIST_HANDLER);
   }
 
   public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return SIMPLE_RUNNER.query(conn, sql, rsh, params);
-  }
-
-  public static int update(Connection conn, String sql) throws SQLException {
-    return SIMPLE_RUNNER.update(conn, sql);
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
@@ -103,12 +131,20 @@ public class JDBCTemplate {
     return execute(sql, rsh, params);
   }
 
-  public <T> T insert(String sql, ResultSetHandler<T> rsh) throws SQLException {
-    return runner.insert(sql, rsh);
+  public List<Map<String, Object>> executeOf(String sql, Object... params) throws SQLException {
+    return execute(sql, MAP_HANDLER, params);
+  }
+
+  public Map<String, Object> insert(String sql, Object... params) throws SQLException {
+    return runner.insert(sql, MAP_HANDLER, params);
   }
 
   public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
     return runner.insert(sql, rsh, params);
+  }
+
+  public List<Map<String, Object>> insertBatch(String sql, Object[][] params) throws SQLException {
+    return runner.insertBatch(sql, MAP_LIST_HANDLER, params);
   }
 
   public <T> T insertBatch(String sql, ResultSetHandler<T> rsh, Object[][] params)
@@ -116,8 +152,8 @@ public class JDBCTemplate {
     return runner.insertBatch(sql, rsh, params);
   }
 
-  public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
-    return runner.query(sql, rsh);
+  public List<Map<String, Object>> query(String sql, Object... params) throws SQLException {
+    return runner.query(sql, MAP_LIST_HANDLER, params);
   }
 
   public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {

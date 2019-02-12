@@ -146,6 +146,10 @@ public class ObjectUtils {
       this.right = right;
     }
 
+    public static <L, R> Pair<L, R> empty() {
+      return new Pair<>(null, null);
+    }
+
     public static <L, R> Pair<L, R> of(L left, R right) {
       return new Pair<>(left, right);
     }
@@ -190,6 +194,10 @@ public class ObjectUtils {
           ^ (getValue() == null ? 0 : getValue().hashCode());
     }
 
+    public boolean isEmpty() {
+      return left == null && right == null;
+    }
+
     @Override
     public R setValue(R value) {
       throw new NotSupportedException();
@@ -221,6 +229,10 @@ public class ObjectUtils {
       this.left = left;
       this.middle = middle;
       this.right = right;
+    }
+
+    public static <L, M, R> Triple<L, M, R> empty() {
+      return new Triple<>(null, null, null);
     }
 
     public String asString(final String format) {
@@ -259,6 +271,10 @@ public class ObjectUtils {
           ^ (getRight() == null ? 0 : getRight().hashCode());
     }
 
+    public boolean isEmpty() {
+      return left == null && middle == null && right == null;
+    }
+
     @Override
     public String toString() {
       return "[" + getLeft() + "," + getMiddle() + "," + getRight() + "]";
@@ -275,6 +291,5 @@ public class ObjectUtils {
     public Triple<L, M, R> withRight(R right) {
       return new Triple<>(getLeft(), getMiddle(), right);
     }
-
   }
 }

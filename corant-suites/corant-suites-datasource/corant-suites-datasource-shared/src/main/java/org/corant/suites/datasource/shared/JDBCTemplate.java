@@ -172,7 +172,7 @@ public class JDBCTemplate {
 
   public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    return execute(sql, rsh, params);
+    return runner.execute(sql, rsh, params);
   }
 
   public List<Map<String, Object>> executeOf(String sql, Object... params) throws SQLException {

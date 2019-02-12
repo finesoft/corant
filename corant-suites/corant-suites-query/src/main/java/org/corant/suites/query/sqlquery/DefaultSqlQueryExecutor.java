@@ -41,6 +41,9 @@ import org.corant.suites.query.QueryRuntimeException;
  */
 public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
+  public final static MapHandler MAP_HANDLER = new MapHandler();
+  public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+
   protected final QueryRunner runner;
 
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
@@ -116,11 +119,10 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
   protected ResultSetHandler<?> resolveResultSetHandler(Class<?> resultClass, boolean isList) {
     if (isList) {
-      return Map.class.isAssignableFrom(resultClass) ? new MapListHandler()
+      return Map.class.isAssignableFrom(resultClass) ? MAP_LIST_HANDLER
           : new BeanListHandler<>(resultClass);
     } else {
-      return Map.class.isAssignableFrom(resultClass) ? new MapHandler()
-          : new BeanHandler<>(resultClass);
+      return Map.class.isAssignableFrom(resultClass) ? MAP_HANDLER : new BeanHandler<>(resultClass);
     }
   }
 }

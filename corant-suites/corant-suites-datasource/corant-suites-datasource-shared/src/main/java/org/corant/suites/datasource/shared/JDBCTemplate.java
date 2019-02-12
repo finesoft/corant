@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
+import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
@@ -45,12 +46,13 @@ public class JDBCTemplate {
   public final static QueryRunner SIMPLE_RUNNER = new QueryRunner();
   public final static MapHandler MAP_HANDLER = new MapHandler();
   public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+  public final static int DFLT_FETCH_SIZE = 32;
 
   protected final DataSource dataSource;
   protected final QueryRunner runner;
 
   public JDBCTemplate(DataSource ds) {
-    this(ds, false, null, 32, null, null, null);
+    this(ds, false, null, DFLT_FETCH_SIZE, null, null, null);
   }
 
   /**
@@ -125,18 +127,35 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.query(conn, sql, rsh, params);
   }
 
+  public static void release(ResultSet rs, PreparedStatement stmt, Connection conn,
+      boolean closeConn) {
+    try {
+      DbUtils.close(rs);
+    } catch (SQLException e) {
+    } finally {
+      try {
+        DbUtils.close(stmt);
+      } catch (SQLException e) {
+      }
+      if (closeConn) {
+        try {
+          DbUtils.close(conn);
+        } catch (SQLException e) {
+        }
+      }
+    }
+  }
+
   public static Stream<Map<String, Object>> stream(Connection conn, String sql, int fetchSize,
       Object... params) throws SQLException {
-    return new StreamableQueryRunner(
-        new StatementConfiguration(null, max(fetchSize, 1), null, null, null)).stream(conn, false,
-            sql, MAP_HANDLER, params);
+    return stream(conn, sql, fetchSize, MAP_HANDLER, params);
   }
 
   public static <T> Stream<T> stream(Connection conn, String sql, int fetchSize,
       ResultSetHandler<T> rsh, Object... params) throws SQLException {
     return new StreamableQueryRunner(
-        new StatementConfiguration(null, max(fetchSize, 1), null, null, null)).stream(conn, false,
-            sql, rsh, params);
+        new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
+            .stream(conn, false, sql, rsh, params);
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
@@ -201,7 +220,7 @@ public class JDBCTemplate {
   public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return new StreamableQueryRunner(
-        new StatementConfiguration(null, max(fetchSize, 1), null, null, null))
+        new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
             .stream(dataSource.getConnection(), true, sql, rsh, params);
   }
 
@@ -210,13 +229,19 @@ public class JDBCTemplate {
   }
 
   public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
-
     final static int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
+    private final boolean closeConn;
+    private final Connection conn;
+    private final PreparedStatement stmt;
     private final ResultSet rs;
     private final ResultSetHandler<T> rsh;
 
-    public ResultSetSpliterator(ResultSet rs, ResultSetHandler<T> rsh) {
+    public ResultSetSpliterator(Connection conn, PreparedStatement stmt, ResultSet rs,
+        boolean closeConn, ResultSetHandler<T> rsh) {
       super(Long.MAX_VALUE, CHARACTERISTICS);
+      this.conn = conn;
+      this.stmt = stmt;
+      this.closeConn = closeConn;
       this.rs = rs;
       this.rsh = rsh;
     }
@@ -228,6 +253,8 @@ public class JDBCTemplate {
         boolean hasMore = obj != null;
         if (hasMore) {
           action.accept(obj);
+        } else {
+          release(rs, stmt, conn, closeConn);
         }
         return hasMore;
       } catch (SQLException e) {
@@ -246,6 +273,7 @@ public class JDBCTemplate {
       super(stmtConfig);
     }
 
+    @SuppressWarnings("restriction")
     public <T> Stream<T> stream(Connection conn, boolean closeConn, String sql,
         ResultSetHandler<T> rsh, Object... params) throws SQLException {
       if (conn == null) {
@@ -254,53 +282,33 @@ public class JDBCTemplate {
 
       if (sql == null) {
         if (closeConn) {
-          close(conn);
+          DbUtils.close(conn);
         }
         throw new SQLException("Null SQL statement");
       }
 
       if (rsh == null) {
         if (closeConn) {
-          close(conn);
+          DbUtils.close(conn);
         }
         throw new SQLException("Null ResultSetHandler");
       }
 
       PreparedStatement stmt = null;
       ResultSet rs = null;
-
       try {
-        stmt = this.prepareStatement(conn, sql);
+        final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
         fillStatement(stmt, params);
-        rs = wrap(stmt.executeQuery());
-        final ResultSet rsToClose = rs;
-        final PreparedStatement stmtToClose = stmt;
-        Stream<T> stream = StreamSupport.stream(new ResultSetSpliterator<>(rs, rsh), false);
-        return stream.onClose(() -> {
-          try {
-            close(rsToClose);
-          } catch (SQLException e) {
-          } finally {
-            try {
-              close(stmtToClose);
-              if (closeConn) {
-                close(conn);
-              }
-            } catch (SQLException e) {
-            }
-          }
-        });
+        final ResultSet rsx = rs = wrap(stmt.executeQuery());
+        Stream<T> stream =
+            StreamSupport.stream(new ResultSetSpliterator<>(conn, stmtx, rs, closeConn, rsh), false)
+                .onClose(() -> release(rsx, stmtx, conn, closeConn));
+        // FIXME Last Line of Defense, use jdk.internal.ref.Cleaner when using JDK9
+        sun.misc.Cleaner.create(stream, () -> release(rsx, stmtx, conn, closeConn));
+        return stream;
       } catch (SQLException e) {
+        release(rs, stmt, conn, closeConn);
         rethrow(e, sql, params);
-      } finally {
-        try {
-          close(rs);
-        } finally {
-          close(stmt);
-          if (closeConn) {
-            close(conn);
-          }
-        }
       }
       return Stream.empty();
     }

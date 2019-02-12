@@ -160,10 +160,6 @@ public class JDBCTemplate {
     return runner.query(sql, rsh, params);
   }
 
-  public int update(String sql) throws SQLException {
-    return runner.update(sql);
-  }
-
   public int update(String sql, Object... params) throws SQLException {
     return runner.update(sql, params);
   }

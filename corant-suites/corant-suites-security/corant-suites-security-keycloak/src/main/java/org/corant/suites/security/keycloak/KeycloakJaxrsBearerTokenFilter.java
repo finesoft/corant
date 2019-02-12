@@ -48,6 +48,8 @@ import org.keycloak.jaxrs.JaxrsHttpFacade;
 @Provider
 public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
 
+  public static final String AUTH_SCHEMA = "OAUTH_BEARER";
+
   @Inject
   Logger logger;
 
@@ -89,12 +91,12 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
       KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal, boolean isSecure,
       Set<String> roles) {
     if (jscResolver.isResolvable()) {
-      return jscResolver.get().resolve(principal, isSecure, roles);
+      return jscResolver.get().resolve(principal, isSecure, AUTH_SCHEMA, roles);
     } else {
       return new SecurityContext() {
         @Override
         public String getAuthenticationScheme() {
-          return "OAUTH_BEARER";
+          return AUTH_SCHEMA;
         }
 
         @Override

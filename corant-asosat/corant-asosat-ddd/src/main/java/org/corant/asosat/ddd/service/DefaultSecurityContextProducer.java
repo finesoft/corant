@@ -11,22 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.keycloak;
+package org.corant.asosat.ddd.service;
 
-import java.util.Set;
-import javax.ws.rs.core.SecurityContext;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Produces;
+import org.corant.asosat.ddd.security.DefaultSecurityContext;
 
 /**
- * corant-suites-security-keycloak
+ * corant-asosat-ddd
  *
- * @author bingo 上午10:50:35
+ * @author bingo 上午11:34:06
  *
  */
-public interface KeycloakJaxrsSecurityContextResolver {
+@ApplicationScoped
+public class DefaultSecurityContextProducer implements SecurityContextProducer {
 
-  SecurityContext resolve(KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal,
-      boolean isSecure, String authenticationScheme, Set<String> roles);
+  @Produces
+  @RequestScoped
+  @Override
+  public DefaultSecurityContext get() {
+    return null;
+  }
 
 }

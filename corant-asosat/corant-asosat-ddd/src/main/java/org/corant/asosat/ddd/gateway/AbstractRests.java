@@ -19,10 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 
 /**
@@ -34,9 +32,6 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 public abstract class AbstractRests {
 
   protected static final Map<Class<?>, String> cachedPaths = new ConcurrentHashMap<>();
-
-  @Context
-  SecurityContext securityContext;
 
   /**
    * 202

@@ -79,6 +79,10 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.batch(conn, sql, params);
   }
 
+  public static JDBCTemplate build(DataSource ds) {
+    return new JDBCTemplate(ds);
+  }
+
   public static int execute(Connection conn, String sql, Object... params) throws SQLException {
     return SIMPLE_RUNNER.execute(conn, sql, params);
   }
@@ -91,10 +95,6 @@ public class JDBCTemplate {
   public static List<Map<String, Object>> executeOf(Connection conn, String sql, Object... params)
       throws SQLException {
     return SIMPLE_RUNNER.execute(conn, sql, MAP_HANDLER, params);
-  }
-
-  public static JDBCTemplate from(DataSource ds) {
-    return new JDBCTemplate(ds);
   }
 
   public static Map<String, Object> insert(Connection conn, String sql, Object... params)

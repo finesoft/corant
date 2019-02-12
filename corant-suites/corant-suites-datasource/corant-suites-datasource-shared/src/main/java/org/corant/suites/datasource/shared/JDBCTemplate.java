@@ -14,7 +14,7 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.min;
+import static org.corant.shared.util.ObjectUtils.max;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -128,14 +128,14 @@ public class JDBCTemplate {
   public static Stream<Map<String, Object>> stream(Connection conn, String sql, int fetchSize,
       Object... params) throws SQLException {
     return new StreamableQueryRunner(
-        new StatementConfiguration(null, min(fetchSize, 1), null, null, null)).stream(conn, false,
+        new StatementConfiguration(null, max(fetchSize, 1), null, null, null)).stream(conn, false,
             sql, MAP_HANDLER, params);
   }
 
   public static <T> Stream<T> stream(Connection conn, String sql, int fetchSize,
       ResultSetHandler<T> rsh, Object... params) throws SQLException {
     return new StreamableQueryRunner(
-        new StatementConfiguration(null, min(fetchSize, 1), null, null, null)).stream(conn, false,
+        new StatementConfiguration(null, max(fetchSize, 1), null, null, null)).stream(conn, false,
             sql, rsh, params);
   }
 
@@ -201,7 +201,7 @@ public class JDBCTemplate {
   public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return new StreamableQueryRunner(
-        new StatementConfiguration(null, min(fetchSize, 1), null, null, null))
+        new StatementConfiguration(null, max(fetchSize, 1), null, null, null))
             .stream(dataSource.getConnection(), true, sql, rsh, params);
   }
 

@@ -13,16 +13,20 @@
  */
 package org.corant.suites.security.keycloak;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.security.shared.AbstractSecurityRequestUrlHandler;
+import java.util.Set;
+import javax.ws.rs.core.SecurityContext;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 
 /**
  * corant-suites-security-keycloak
  *
- * @author bingo 下午6:18:24
+ * @author bingo 上午10:50:35
  *
  */
-@ApplicationScoped
-public class KeycloakSecurityRequestUrlHandler extends AbstractSecurityRequestUrlHandler {
+public interface KeycloakJaxrsSecurityContextResolver {
+
+  SecurityContext resolve(KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal,
+      boolean isSecure, Set<String> roles);
 
 }

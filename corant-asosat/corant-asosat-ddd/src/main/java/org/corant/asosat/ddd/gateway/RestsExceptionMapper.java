@@ -36,7 +36,7 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 @Provider
 @ApplicationServices
 @ApplicationScoped
-public class BaseRestExceptionMapper implements ExceptionMapper<Exception> {
+public class RestsExceptionMapper implements ExceptionMapper<Exception> {
 
   final static Locale locale = Locale.CHINA;// FIXME locale singleton request??
 
@@ -46,7 +46,7 @@ public class BaseRestExceptionMapper implements ExceptionMapper<Exception> {
   @Inject
   GeneralRuntimeExceptionMessager exceptionMessager;
 
-  public BaseRestExceptionMapper() {}
+  public RestsExceptionMapper() {}
 
   @Override
   public Response toResponse(Exception exception) {

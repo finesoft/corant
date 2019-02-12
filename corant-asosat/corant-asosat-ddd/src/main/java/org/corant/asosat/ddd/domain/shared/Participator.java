@@ -15,6 +15,7 @@ package org.corant.asosat.ddd.domain.shared;
 
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
+import java.security.Principal;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -27,7 +28,7 @@ import org.corant.asosat.ddd.domain.model.AbstractValueObject;
  */
 @Embeddable
 @MappedSuperclass
-public class Participator extends AbstractValueObject {
+public class Participator extends AbstractValueObject implements Principal {
 
   private static final long serialVersionUID = -7820136962102596705L;
 

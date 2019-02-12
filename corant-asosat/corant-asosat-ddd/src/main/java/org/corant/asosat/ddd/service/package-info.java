@@ -17,4 +17,4 @@
  * @author bingo 下午3:45:19
  *
  */
-package org.corant.asosat.ddd.infrastructure;
+package org.corant.asosat.ddd.service;

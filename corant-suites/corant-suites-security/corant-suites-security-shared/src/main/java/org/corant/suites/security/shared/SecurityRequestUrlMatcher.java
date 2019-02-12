@@ -33,7 +33,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public abstract class AbstractSecurityRequestUrlHandler {
+public class SecurityRequestUrlMatcher {
 
   @Inject
   @ConfigProperty(name = "security.jarxrs.covered-urls")
@@ -50,20 +50,7 @@ public abstract class AbstractSecurityRequestUrlHandler {
   protected final GlobPathMatcher uncoveredGlobPathMatcher = new GlobPathMatcher(true);
   protected final RegexPathMatcher uncoveredRegexPathMatcher = new RegexPathMatcher(true);
 
-  public boolean isCoveredUrl(String url) {
-    if (uncoveredCompletePathMatcher.match(url)) {
-      return false;
-    } else if (uncoveredGlobPathMatcher.match(url)) {
-      return false;
-    } else if (uncoveredRegexPathMatcher.match(url)) {
-      return false;
-    } else {
-      return coveredCompletePathMatcher.match(url) || coveredGlobPathMatcher.match(url)
-          || coveredRegexPathMatcher.match(url);
-    }
-  }
-
-  protected void addUrl(boolean covered, String url) {
+  public void addUrl(boolean covered, String url) {
     if (isBlank(url)) {
       return;
     }
@@ -100,13 +87,33 @@ public abstract class AbstractSecurityRequestUrlHandler {
     }
   }
 
-  protected void addUrls(boolean covered, String... urls) {
+  public void addUrls(boolean covered, String... urls) {
     for (String url : urls) {
       addUrl(covered, url);
     }
   }
 
-  protected void removeUrls(String... urls) {
+  public boolean isCoveredUrl(ContainerRequestContext requestContext) {
+    if (requestContext == null) {
+      return false;
+    }
+    return isCoveredUrl(resolvePath(requestContext));
+  }
+
+  public boolean isCoveredUrl(String url) {
+    if (uncoveredCompletePathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredGlobPathMatcher.match(url)) {
+      return false;
+    } else if (uncoveredRegexPathMatcher.match(url)) {
+      return false;
+    } else {
+      return coveredCompletePathMatcher.match(url) || coveredGlobPathMatcher.match(url)
+          || coveredRegexPathMatcher.match(url);
+    }
+  }
+
+  public void removeUrls(String... urls) {
     coveredGlobPathMatcher.removeExpresses(urls);
     coveredRegexPathMatcher.removeExpresses(urls);
     coveredCompletePathMatcher.removeCompareds(urls);
@@ -115,7 +122,7 @@ public abstract class AbstractSecurityRequestUrlHandler {
     uncoveredRegexPathMatcher.removeExpresses(urls);
   }
 
-  protected String resolvePath(ContainerRequestContext requestContext) {
+  public String resolvePath(ContainerRequestContext requestContext) {
     return requestContext.getUriInfo().getPath();
   }
 

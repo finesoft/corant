@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.infrastructure;
+package org.corant.asosat.ddd.service;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;

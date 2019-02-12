@@ -19,13 +19,15 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import org.corant.suites.security.shared.AbstractSecurityRequestUrlHandler;
+import org.corant.suites.security.shared.SecurityRequestUrlMatcher;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.AdapterUtils;
 import org.keycloak.adapters.BearerTokenRequestAuthenticator;
@@ -50,11 +52,15 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
   Logger logger;
 
   @Inject
-  AbstractSecurityRequestUrlHandler urlHandler;
+  SecurityRequestUrlMatcher urlMatcher;
+
+  @Inject
+  @Any
+  Instance<KeycloakJaxrsSecurityContextResolver> jscResolver;
 
   @Override
   public void filter(ContainerRequestContext request) throws IOException {
-    if (urlHandler.isCoveredUrl(request.getUriInfo().getBaseUri().getPath())) {
+    if (urlMatcher.isCoveredUrl(request.getUriInfo().getBaseUri().getPath())) {
       super.filter(request);
     }
   }
@@ -71,34 +77,42 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
 
     facade.setSecurityContext(skSession);
     String principalName = AdapterUtils.getPrincipalName(resolvedDeployment, bearer.getToken());
-    final KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal =
+    KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal =
         new KeycloakPrincipal<>(principalName, skSession);
     SecurityContext anonymousSecurityContext = getRequestSecurityContext(request);
-    final boolean isSecure = anonymousSecurityContext.isSecure();
-    final Set<String> roles = AdapterUtils.getRolesFromSecurityContext(skSession);
-
-    // TODO Use JaxrsSecurityContext
-    SecurityContext ctx = new SecurityContext() {
-      @Override
-      public String getAuthenticationScheme() {
-        return "OAUTH_BEARER";
-      }
-
-      @Override
-      public Principal getUserPrincipal() {
-        return principal;
-      }
-
-      @Override
-      public boolean isSecure() {
-        return isSecure;
-      }
-
-      @Override
-      public boolean isUserInRole(String role) {
-        return roles.contains(role);
-      }
-    };
-    request.setSecurityContext(ctx);
+    boolean isSecure = anonymousSecurityContext.isSecure();
+    Set<String> roles = AdapterUtils.getRolesFromSecurityContext(skSession);
+    request.setSecurityContext(resolveSecurityContext(principal, isSecure, roles));
   }
+
+  protected SecurityContext resolveSecurityContext(
+      KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal, boolean isSecure,
+      Set<String> roles) {
+    if (jscResolver.isResolvable()) {
+      return jscResolver.get().resolve(principal, isSecure, roles);
+    } else {
+      return new SecurityContext() {
+        @Override
+        public String getAuthenticationScheme() {
+          return "OAUTH_BEARER";
+        }
+
+        @Override
+        public Principal getUserPrincipal() {
+          return principal;
+        }
+
+        @Override
+        public boolean isSecure() {
+          return isSecure;
+        }
+
+        @Override
+        public boolean isUserInRole(String role) {
+          return roles.contains(role);
+        }
+      };
+    }
+  }
+
 }

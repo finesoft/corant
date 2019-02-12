@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -231,20 +230,19 @@ public class JDBCTemplate {
 
   public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
     final static int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
-    private final boolean closeConn;
-    private final Connection conn;
-    private final PreparedStatement stmt;
+    private final Runnable releaser;
     private final ResultSet rs;
     private final ResultSetHandler<T> rsh;
 
-    public ResultSetSpliterator(Connection conn, PreparedStatement stmt, ResultSet rs,
-        boolean closeConn, ResultSetHandler<T> rsh) {
+    public ResultSetSpliterator(ResultSet rs, ResultSetHandler<T> rsh, Runnable releaser) {
       super(Long.MAX_VALUE, CHARACTERISTICS);
-      this.conn = conn;
-      this.stmt = stmt;
-      this.closeConn = closeConn;
+      this.releaser = releaser;
       this.rs = rs;
       this.rsh = rsh;
+    }
+
+    ResultSetSpliterator(Gadget obj, ResultSetHandler<T> rsh) {
+      this(obj.rs, rsh, obj);
     }
 
     @Override
@@ -255,10 +253,11 @@ public class JDBCTemplate {
         if (hasMore) {
           action.accept(obj);
         } else {
-          release(rs, stmt, conn, closeConn);
+          releaser.run();
         }
         return hasMore;
-      } catch (SQLException e) {
+      } catch (Exception e) {
+        releaser.run();
         throw new CorantRuntimeException(e);
       }
     }
@@ -280,43 +279,65 @@ public class JDBCTemplate {
       if (conn == null) {
         throw new SQLException("Null connection");
       }
-
       if (sql == null) {
         if (closeConn) {
           DbUtils.close(conn);
         }
         throw new SQLException("Null SQL statement");
       }
-
       if (rsh == null) {
         if (closeConn) {
           DbUtils.close(conn);
         }
         throw new SQLException("Null ResultSetHandler");
       }
-
-      PreparedStatement stmt = null;
-      ResultSet rs = null;
+      Gadget g = null;
       try {
-        final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
-        fillStatement(stmt, params);
-        final ResultSet rsx = rs = wrap(stmt.executeQuery());
-        Stream<T> stream = StreamSupport
-            .stream(new ResultSetSpliterator<>(conn, stmtx, rsx, closeConn, rsh), false)
-            .onClose(() -> release(rsx, stmtx, conn, closeConn));
+        PreparedStatement stmt = fillStatementx(this.prepareStatement(conn, sql), params);
+        ResultSet rs = wrap(stmt.executeQuery());
+        g = new Gadget(conn, stmt, rs, closeConn);
+        Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
         // FIXME Last Line of Defense, use jdk.internal.ref.Cleaner when using JDK9
-        sun.misc.Cleaner.create(stream, () -> release(rsx, stmtx, conn, closeConn));
-        return stream;
+        sun.misc.Cleaner.create(s, g);
+        return s;
       } catch (Exception e) {
-        release(rs, stmt, conn, closeConn);
+        if (g != null) {
+          g.run();
+        }
         if (e instanceof SQLException) {
           rethrow(SQLException.class.cast(e), sql, params);
         } else {
-          throw new CorantRuntimeException(e, "Execute stream query sql: %s param:[%s] error!", sql,
-              Arrays.deepToString(params));
+          rethrow(new SQLException(e), sql, params);
         }
       }
       return Stream.empty();
     }
+
+    private PreparedStatement fillStatementx(PreparedStatement stmt, Object... params)
+        throws SQLException {
+      fillStatement(stmt, params);
+      return stmt;
+    }
+  }
+
+  static class Gadget implements Runnable {
+    final Connection conn;
+    final PreparedStatement stmt;
+    final ResultSet rs;
+    final boolean closeConn;
+
+    Gadget(Connection conn, PreparedStatement stmt, ResultSet rs, boolean closeConn) {
+      super();
+      this.conn = conn;
+      this.stmt = stmt;
+      this.rs = rs;
+      this.closeConn = closeConn;
+    }
+
+    @Override
+    public void run() {
+      release(rs, stmt, conn, closeConn);
+    }
+
   }
 }

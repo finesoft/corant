@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -310,6 +311,9 @@ public class JDBCTemplate {
         release(rs, stmt, conn, closeConn);
         if (e instanceof SQLException) {
           rethrow(SQLException.class.cast(e), sql, params);
+        } else {
+          throw new CorantRuntimeException(e, "Execute stream query sql: %s param:[%s] error!", sql,
+              Arrays.deepToString(params));
         }
       }
       return Stream.empty();

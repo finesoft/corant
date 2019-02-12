@@ -13,7 +13,11 @@
  */
 package org.corant.asosat.ddd.gateway;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
@@ -30,16 +34,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ApplicationScoped
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
-public class JacksonConfig implements ContextResolver<ObjectMapper> {
+public class JsonContextResolver implements ContextResolver<ObjectMapper> {
 
-  private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper = JsonUtils.copyMapperForJs();
 
-  public JacksonConfig() throws Exception {
-    objectMapper = JsonUtils.copyMapperForJs();
-  }
+  @Inject
+  @Any
+  Instance<JsonContextResolverConfigurator> configurator;
 
   @Override
   public ObjectMapper getContext(Class<?> objectType) {
     return objectMapper;
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    if (!configurator.isUnsatisfied()) {
+      configurator.forEach(cfg -> cfg.config(objectMapper));
+    }
   }
 }

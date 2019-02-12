@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @FunctionalInterface
-public interface JacksonConfigHandler {
+public interface JsonContextResolverConfigurator {
 
-  void handle(ObjectMapper objectMapper);
+  void config(ObjectMapper objectMapper);
 
 }

@@ -293,7 +293,7 @@ public class JDBCTemplate {
       }
       Gadget g = null;
       try {
-        PreparedStatement stmt = fillStatementx(this.prepareStatement(conn, sql), params);
+        PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
         ResultSet rs = wrap(stmt.executeQuery());
         g = new Gadget(conn, stmt, rs, closeConn);
         Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
@@ -313,7 +313,7 @@ public class JDBCTemplate {
       return Stream.empty();
     }
 
-    private PreparedStatement fillStatementx(PreparedStatement stmt, Object... params)
+    private PreparedStatement completeStatement(PreparedStatement stmt, Object... params)
         throws SQLException {
       fillStatement(stmt, params);
       return stmt;

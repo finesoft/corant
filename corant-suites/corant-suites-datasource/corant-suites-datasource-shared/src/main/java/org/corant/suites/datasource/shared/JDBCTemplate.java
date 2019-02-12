@@ -38,6 +38,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-suites-datasource-shared
  *
+ * TODO insertBatch/batch support stream parameters.
+ *
  * @author bingo 下午6:52:27
  *
  */
@@ -92,7 +94,7 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.execute(conn, sql, rsh, params);
   }
 
-  public static List<Map<String, Object>> executeOf(Connection conn, String sql, Object... params)
+  public static List<Map<String, Object>> executes(Connection conn, String sql, Object... params)
       throws SQLException {
     return SIMPLE_RUNNER.execute(conn, sql, MAP_HANDLER, params);
   }
@@ -175,7 +177,7 @@ public class JDBCTemplate {
     return runner.execute(sql, rsh, params);
   }
 
-  public List<Map<String, Object>> executeOf(String sql, Object... params) throws SQLException {
+  public List<Map<String, Object>> executes(String sql, Object... params) throws SQLException {
     return execute(sql, MAP_HANDLER, params);
   }
 

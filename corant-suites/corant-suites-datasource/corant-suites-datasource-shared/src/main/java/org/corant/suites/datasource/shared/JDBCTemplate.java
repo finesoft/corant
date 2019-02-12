@@ -300,9 +300,9 @@ public class JDBCTemplate {
         final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
         fillStatement(stmt, params);
         final ResultSet rsx = rs = wrap(stmt.executeQuery());
-        Stream<T> stream =
-            StreamSupport.stream(new ResultSetSpliterator<>(conn, stmtx, rs, closeConn, rsh), false)
-                .onClose(() -> release(rsx, stmtx, conn, closeConn));
+        Stream<T> stream = StreamSupport
+            .stream(new ResultSetSpliterator<>(conn, stmtx, rsx, closeConn, rsh), false)
+            .onClose(() -> release(rsx, stmtx, conn, closeConn));
         // FIXME Last Line of Defense, use jdk.internal.ref.Cleaner when using JDK9
         sun.misc.Cleaner.create(stream, () -> release(rsx, stmtx, conn, closeConn));
         return stream;

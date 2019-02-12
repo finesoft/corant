@@ -14,16 +14,25 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.min;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-datasource-shared
@@ -37,6 +46,7 @@ public class JDBCTemplate {
   public final static MapHandler MAP_HANDLER = new MapHandler();
   public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
 
+  protected final DataSource dataSource;
   protected final QueryRunner runner;
 
   public JDBCTemplate(DataSource ds) {
@@ -45,7 +55,7 @@ public class JDBCTemplate {
 
   /**
    *
-   * @param ds the data source
+   * @param dataSource the data source
    * @param pmdKnownBroken
    * @param fetchDirection The direction for fetching rows from database tables.
    * @param fetchSize The number of rows that should be fetched from the database when more rows are
@@ -55,10 +65,11 @@ public class JDBCTemplate {
    * @param maxRows The maximum number of rows that a <code>ResultSet</code> can produce.
    * @param queryTimeout The number of seconds the driver will wait for execution.
    */
-  public JDBCTemplate(DataSource ds, boolean pmdKnownBroken, Integer fetchDirection,
+  public JDBCTemplate(DataSource dataSource, boolean pmdKnownBroken, Integer fetchDirection,
       Integer fetchSize, Integer maxFieldSize, Integer maxRows, Integer queryTimeout) {
     super();
-    runner = new QueryRunner(shouldNotNull(ds), pmdKnownBroken,
+    this.dataSource = shouldNotNull(dataSource);
+    runner = new QueryRunner(dataSource, pmdKnownBroken,
         new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows, queryTimeout));
   }
 
@@ -114,6 +125,20 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.query(conn, sql, rsh, params);
   }
 
+  public static Stream<Map<String, Object>> stream(Connection conn, String sql, int fetchSize,
+      Object... params) throws SQLException {
+    return new StreamableQueryRunner(
+        new StatementConfiguration(null, min(fetchSize, 1), null, null, null)).stream(conn, false,
+            sql, MAP_HANDLER, params);
+  }
+
+  public static <T> Stream<T> stream(Connection conn, String sql, int fetchSize,
+      ResultSetHandler<T> rsh, Object... params) throws SQLException {
+    return new StreamableQueryRunner(
+        new StatementConfiguration(null, min(fetchSize, 1), null, null, null)).stream(conn, false,
+            sql, rsh, params);
+  }
+
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
     return SIMPLE_RUNNER.update(conn, sql, params);
   }
@@ -133,6 +158,14 @@ public class JDBCTemplate {
 
   public List<Map<String, Object>> executeOf(String sql, Object... params) throws SQLException {
     return execute(sql, MAP_HANDLER, params);
+  }
+
+  public DataSource getDataSource() {
+    return dataSource;
+  }
+
+  public QueryRunner getRunner() {
+    return runner;
   }
 
   public Map<String, Object> insert(String sql, Object... params) throws SQLException {
@@ -160,7 +193,116 @@ public class JDBCTemplate {
     return runner.query(sql, rsh, params);
   }
 
+  public Stream<Map<String, Object>> stream(String sql, int fetchSize, Object... params)
+      throws SQLException {
+    return stream(sql, fetchSize, MAP_HANDLER, params);
+  }
+
+  public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
+      throws SQLException {
+    return new StreamableQueryRunner(
+        new StatementConfiguration(null, min(fetchSize, 1), null, null, null))
+            .stream(dataSource.getConnection(), true, sql, rsh, params);
+  }
+
   public int update(String sql, Object... params) throws SQLException {
     return runner.update(sql, params);
+  }
+
+  public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
+
+    final static int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
+    private final ResultSet rs;
+    private final ResultSetHandler<T> rsh;
+
+    public ResultSetSpliterator(ResultSet rs, ResultSetHandler<T> rsh) {
+      super(Long.MAX_VALUE, CHARACTERISTICS);
+      this.rs = rs;
+      this.rsh = rsh;
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super T> action) {
+      try {
+        T obj = rsh.handle(rs);
+        boolean hasMore = obj != null;
+        if (hasMore) {
+          action.accept(obj);
+        }
+        return hasMore;
+      } catch (SQLException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  public static class StreamableQueryRunner extends QueryRunner {
+
+    public StreamableQueryRunner() {
+      super();
+    }
+
+    public StreamableQueryRunner(StatementConfiguration stmtConfig) {
+      super(stmtConfig);
+    }
+
+    public <T> Stream<T> stream(Connection conn, boolean closeConn, String sql,
+        ResultSetHandler<T> rsh, Object... params) throws SQLException {
+      if (conn == null) {
+        throw new SQLException("Null connection");
+      }
+
+      if (sql == null) {
+        if (closeConn) {
+          close(conn);
+        }
+        throw new SQLException("Null SQL statement");
+      }
+
+      if (rsh == null) {
+        if (closeConn) {
+          close(conn);
+        }
+        throw new SQLException("Null ResultSetHandler");
+      }
+
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+
+      try {
+        stmt = this.prepareStatement(conn, sql);
+        fillStatement(stmt, params);
+        rs = wrap(stmt.executeQuery());
+        final ResultSet rsToClose = rs;
+        final PreparedStatement stmtToClose = stmt;
+        Stream<T> stream = StreamSupport.stream(new ResultSetSpliterator<>(rs, rsh), false);
+        return stream.onClose(() -> {
+          try {
+            close(rsToClose);
+          } catch (SQLException e) {
+          } finally {
+            try {
+              close(stmtToClose);
+              if (closeConn) {
+                close(conn);
+              }
+            } catch (SQLException e) {
+            }
+          }
+        });
+      } catch (SQLException e) {
+        rethrow(e, sql, params);
+      } finally {
+        try {
+          close(rs);
+        } finally {
+          close(stmt);
+          if (closeConn) {
+            close(conn);
+          }
+        }
+      }
+      return Stream.empty();
+    }
   }
 }

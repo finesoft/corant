@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -27,7 +28,10 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+import org.corant.shared.util.Resources.SourceType;
+import org.corant.suites.security.shared.SecurityContextHolder;
 import org.corant.suites.security.shared.SecurityRequestUrlMatcher;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.AdapterUtils;
 import org.keycloak.adapters.BearerTokenRequestAuthenticator;
@@ -60,11 +64,27 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
   @Any
   Instance<KeycloakJaxrsSecurityContextResolver> jscResolver;
 
+  @Inject
+  SecurityContextHolder jscHolder;
+
+  @Inject
+  @ConfigProperty(name = "security.keycloak.config-file-path",
+      defaultValue = "META-INF/keycloak.json")
+  String configFilePath;
+
+  @Inject
+  @ConfigProperty(name = "security.keycloak.enable", defaultValue = "true")
+  boolean enabled;
+
   @Override
   public void filter(ContainerRequestContext request) throws IOException {
-    if (urlMatcher.isCoveredUrl(request.getUriInfo().getBaseUri().getPath())) {
+    if (urlMatcher.isCoveredUrl(request.getUriInfo().getBaseUri().getPath()) && isEnabled()) {
       super.filter(request);
     }
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
   @Override
@@ -84,7 +104,8 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
     SecurityContext anonymousSecurityContext = getRequestSecurityContext(request);
     boolean isSecure = anonymousSecurityContext.isSecure();
     Set<String> roles = AdapterUtils.getRolesFromSecurityContext(skSession);
-    request.setSecurityContext(resolveSecurityContext(principal, isSecure, roles));
+    SecurityContext sc = resolveSecurityContext(principal, isSecure, roles);
+    request.setSecurityContext(jscHolder.put(sc));
   }
 
   protected SecurityContext resolveSecurityContext(
@@ -117,4 +138,15 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
     }
   }
 
+  @PostConstruct
+  void onPostConstruct() {
+    if (isEnabled()) {
+      setKeycloakConfigFile(SourceType.CLASS_PATH.regulate(configFilePath));// FIXME
+      logger.info(() -> String.format(
+          "Enabled keycloak jaxrs bearer token filter, the keycloak config file is %s",
+          configFilePath));
+    } else {
+      logger.info(() -> "Keycloak jaxrs bearer token filter doesn't enable!");
+    }
+  }
 }

@@ -13,6 +13,8 @@
  */
 package org.corant.asosat.ddd.security;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.ws.rs.core.SecurityContext;
 import org.corant.asosat.ddd.domain.shared.Participator;
 
@@ -24,32 +26,53 @@ import org.corant.asosat.ddd.domain.shared.Participator;
  */
 public class DefaultSecurityContext implements SecurityContext {
 
-  public static DefaultSecurityContext of(SecurityContext orginal) {
-    return null;
+  private final Participator userPrincipal;
+  private final Participator orgPrincipal;
+  private final boolean secure;
+  private final Set<String> userRoles = new HashSet<>();
+  private final String authenticationScheme;
+
+  /**
+   * @param userPrincipal
+   * @param orgPrincipal
+   * @param secure
+   * @param authenticationScheme
+   * @param userRoles
+   */
+  public DefaultSecurityContext(Participator userPrincipal, Participator orgPrincipal,
+      boolean secure, String authenticationScheme, Set<String> userRoles) {
+    super();
+    this.userPrincipal = userPrincipal;
+    this.orgPrincipal = orgPrincipal;
+    this.secure = secure;
+    this.authenticationScheme = authenticationScheme;
+    if (userRoles != null) {
+      this.userRoles.addAll(userRoles);
+    }
   }
 
   @Override
   public String getAuthenticationScheme() {
-    return null;
+    return authenticationScheme;
   }
 
   public Participator getOrgPrincipal() {
-    return null;
+    return orgPrincipal;
   }
 
   @Override
   public Participator getUserPrincipal() {
-    return null;
+    return userPrincipal;
   }
 
   @Override
   public boolean isSecure() {
-    return false;
+    return secure;
   }
 
   @Override
   public boolean isUserInRole(String role) {
-    return false;
+    return userRoles.contains(role);
   }
 
 }

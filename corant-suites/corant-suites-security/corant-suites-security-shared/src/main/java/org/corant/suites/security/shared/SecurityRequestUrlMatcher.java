@@ -36,11 +36,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class SecurityRequestUrlMatcher {
 
   @Inject
-  @ConfigProperty(name = "security.jarxrs.covered-urls")
+  @ConfigProperty(name = "security.covered-urls")
   Optional<String> coveredUrls;
 
   @Inject
-  @ConfigProperty(name = "security.jarxrs.uncovered-urls")
+  @ConfigProperty(name = "security.uncovered-urls")
   Optional<String> uncoveredUrls;
 
   protected final CompletePathMatcher coveredCompletePathMatcher = new CompletePathMatcher(true);

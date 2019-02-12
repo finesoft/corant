@@ -20,7 +20,9 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.MappedSuperclass;
+import org.corant.Corant;
 import org.corant.asosat.ddd.domain.model.AbstractValueObject;
+import org.corant.asosat.ddd.security.DefaultSecurityContextHolder;
 
 /**
  * @author bingo 上午10:11:36
@@ -52,11 +54,17 @@ public class Participator extends AbstractValueObject implements Principal {
   protected Participator() {}
 
   public static Participator currentOrg() {
-    return new Participator("fake org", "fake org");
+    if (Corant.cdi().select(DefaultSecurityContextHolder.class).isResolvable()) {
+      return Corant.cdi().select(DefaultSecurityContextHolder.class).get().getCurrentOrg();
+    }
+    return empty();
   }
 
   public static Participator currentUser() {
-    return new Participator("fake user", "fake user");
+    if (Corant.cdi().select(DefaultSecurityContextHolder.class).isResolvable()) {
+      return Corant.cdi().select(DefaultSecurityContextHolder.class).get().getCurrentUser();
+    }
+    return empty();
   }
 
   public static Participator empty() {
@@ -110,6 +118,7 @@ public class Participator extends AbstractValueObject implements Principal {
     return id;
   }
 
+  @Override
   public String getName() {
     return name;
   }

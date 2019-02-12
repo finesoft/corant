@@ -664,6 +664,13 @@ public class Resources {
       return path.startsWith(prefix);
     }
 
+    public String regulate(String path) {
+      if (path != null && !path.startsWith(getPrefix())) {
+        return getPrefix() + path;
+      }
+      return path;
+    }
+
     public String resolve(String path) {
       if (path != null && path.startsWith(getPrefix())) {
         return path.substring(getPrefixLength());

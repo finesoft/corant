@@ -11,30 +11,31 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.security;
+package org.corant.asosat.exp.provider;
 
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.security.keycloak.KeycloakJaxrsSecurityContextResolver;
+import org.corant.asosat.ddd.domain.shared.Participator;
+import org.corant.asosat.ddd.security.AbstractSecurityContextResolver;
+import org.corant.asosat.ddd.security.DefaultSecurityContext;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 
 /**
- * corant-asosat-ddd
+ * corant-asosat-exp
  *
- * @author bingo 上午11:31:22
+ * @author bingo 下午2:27:26
  *
  */
 @ApplicationScoped
-@InfrastructureServices
-public class DefaultSecurityContextResolver implements KeycloakJaxrsSecurityContextResolver {
+public class TestSecurityContextResolver extends AbstractSecurityContextResolver {
 
   @Override
-  public DefaultSecurityContext resolve(
+  public DefaultSecurityContext doResolve(
       KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal, boolean isSecure,
       String authenticationScheme, Set<String> roles) {
-    return null;
+    return new DefaultSecurityContext(Participator.empty(), Participator.empty(), isSecure,
+        authenticationScheme, roles);
   }
 
 }

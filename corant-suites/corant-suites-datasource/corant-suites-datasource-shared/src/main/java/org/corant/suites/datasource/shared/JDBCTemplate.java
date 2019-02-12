@@ -55,7 +55,7 @@ public class JDBCTemplate {
    * @param maxRows The maximum number of rows that a <code>ResultSet</code> can produce.
    * @param queryTimeout The number of seconds the driver will wait for execution.
    */
-  protected JDBCTemplate(DataSource ds, boolean pmdKnownBroken, Integer fetchDirection,
+  public JDBCTemplate(DataSource ds, boolean pmdKnownBroken, Integer fetchDirection,
       Integer fetchSize, Integer maxFieldSize, Integer maxRows, Integer queryTimeout) {
     super();
     runner = new QueryRunner(shouldNotNull(ds), pmdKnownBroken,

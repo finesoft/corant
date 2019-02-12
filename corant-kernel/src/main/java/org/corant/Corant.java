@@ -161,7 +161,7 @@ public class Corant {
 
   public synchronized Corant start() {
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = new StopWatch(CORANT).start("Handle before corant start");
+    StopWatch stopWatch = StopWatch.press(CORANT, "Handle before corant start");
     doBeforeStart(classLoader);
     final Logger logger = Logger.getLogger(Corant.class.getName());
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))

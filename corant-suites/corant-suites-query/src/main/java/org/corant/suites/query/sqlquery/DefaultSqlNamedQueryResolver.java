@@ -27,6 +27,7 @@ import org.corant.suites.query.mapping.Query;
 import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.mapping.QueryMappingService;
 import org.corant.suites.query.spi.ParamHintHandler;
+import org.corant.suites.query.spi.ParamReviser;
 
 /**
  * asosat-query
@@ -50,6 +51,10 @@ public class DefaultSqlNamedQueryResolver implements
   @Any
   Instance<ParamHintHandler> paramHintHandlers;
 
+  @Inject
+  @Any
+  Instance<ParamReviser> paramRevisers;
+
   @Override
   public DefaultSqlNamedQuerier resolve(String key, Map<String, Object> param) {
     DefaultSqlNamedQueryTpl tpl = cachedQueTpls.computeIfAbsent(key, this::buildQueryTemplate);
@@ -66,6 +71,9 @@ public class DefaultSqlNamedQueryResolver implements
   }
 
   protected void handleParamHints(DefaultSqlNamedQueryTpl tpl, Map<String, Object> param) {
+    if (!paramRevisers.isUnsatisfied()) {
+      paramRevisers.forEach(pr -> pr.accept(tpl.getQueryName(), param));
+    }
     if (!isEmpty(tpl.getHints()) && !paramHintHandlers.isUnsatisfied()) {
       tpl.getHints().forEach(hint -> {
         paramHintHandlers.stream().filter(h -> h.canHandle(hint))

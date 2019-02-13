@@ -36,6 +36,8 @@ public class Participator extends AbstractValueObject implements Principal {
 
   public static final String CURRENT_USER_KEY = "_currentUser";
   public static final String CURRENT_ORG_KEY = "_currentOrg";
+  public static final String CURRENT_USER_ID_KEY = "_currentUserId";
+  public static final String CURRENT_ORG_ID_KEY = "_currentOrgId";
 
   static final Participator EMPTY_INST = new Participator();
 

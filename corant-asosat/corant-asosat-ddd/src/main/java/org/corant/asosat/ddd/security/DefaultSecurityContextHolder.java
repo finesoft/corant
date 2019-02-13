@@ -29,23 +29,23 @@ import org.corant.suites.security.shared.SecurityContextHolder;
 @InfrastructureServices
 public class DefaultSecurityContextHolder implements SecurityContextHolder {
 
-  static final ThreadLocal<DefaultSecurityContext> securityContextHolder = new ThreadLocal<>();
+  static final ThreadLocal<DefaultSecurityContext> holder = new ThreadLocal<>();
 
   @Override
   public DefaultSecurityContext get() {
-    return securityContextHolder.get();
+    return holder.get();
   }
 
   public Participator getCurrentOrg() {
-    if (securityContextHolder.get() != null) {
-      return securityContextHolder.get().getOrgPrincipal();
+    if (holder.get() != null) {
+      return holder.get().getOrgPrincipal();
     }
     return Participator.empty();
   }
 
   public Participator getCurrentUser() {
-    if (securityContextHolder.get() != null) {
-      return securityContextHolder.get().getUserPrincipal();
+    if (holder.get() != null) {
+      return holder.get().getUserPrincipal();
     }
     return Participator.empty();
   }
@@ -54,7 +54,7 @@ public class DefaultSecurityContextHolder implements SecurityContextHolder {
   public DefaultSecurityContext put(SecurityContext securityContext) {
     if (securityContext instanceof DefaultSecurityContext) {
       DefaultSecurityContext sc = DefaultSecurityContext.class.cast(securityContext);
-      securityContextHolder.set(sc);
+      holder.set(sc);
       return sc;
     }
     return null;
@@ -62,7 +62,7 @@ public class DefaultSecurityContextHolder implements SecurityContextHolder {
 
   @Override
   public void remove() {
-    securityContextHolder.remove();
+    holder.remove();
   }
 
 }

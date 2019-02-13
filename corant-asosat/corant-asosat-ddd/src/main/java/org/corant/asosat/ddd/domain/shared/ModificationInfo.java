@@ -20,6 +20,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
+import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
 /**
  * @author bingo 下午7:51:43
@@ -27,7 +28,7 @@ import javax.persistence.MappedSuperclass;
  */
 @Embeddable
 @MappedSuperclass
-public class ModificationInfo implements OperationInfo {
+public class ModificationInfo extends AbstractValueObject implements OperationInfo {
 
   private static final long serialVersionUID = -5680557426023292137L;
 

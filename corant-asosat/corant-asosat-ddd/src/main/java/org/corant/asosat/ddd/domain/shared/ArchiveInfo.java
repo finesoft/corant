@@ -26,6 +26,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.FetchType;
 import javax.persistence.MappedSuperclass;
+import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
 /**
  * @author bingo 上午11:14:48
@@ -33,7 +34,7 @@ import javax.persistence.MappedSuperclass;
  */
 @MappedSuperclass
 @Embeddable
-public class ArchiveInfo implements OperationInfo {
+public class ArchiveInfo extends AbstractValueObject implements OperationInfo {
 
   public static final String KEY_LOG = "archivedLog";
   public static final String KEY_ARVSTID = "archivistId";

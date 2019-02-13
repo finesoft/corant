@@ -25,6 +25,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.MappedSuperclass;
+import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 import org.corant.asosat.ddd.domain.shared.Confirmable.ConfirmationStatus;
 import org.corant.suites.bundle.GlobalMessageCodes;
 
@@ -34,7 +35,7 @@ import org.corant.suites.bundle.GlobalMessageCodes;
  */
 @MappedSuperclass
 @Embeddable
-public class ConfirmationInfo implements OperationInfo {
+public class ConfirmationInfo extends AbstractValueObject implements OperationInfo {
 
   static final ConfirmationInfo EMPTY_INST = new ConfirmationInfo();
   public static final String KEY_CFM_TIME = "confirmedTime";

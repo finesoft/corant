@@ -99,6 +99,11 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.execute(conn, sql, MAP_HANDLER, params);
   }
 
+  public static Map<String, Object> get(Connection conn, String sql, Object... params)
+      throws SQLException {
+    return query(conn, sql, MAP_HANDLER);
+  }
+
   public static Map<String, Object> insert(Connection conn, String sql, Object... params)
       throws SQLException {
     return insert(conn, sql, MAP_HANDLER, params);
@@ -179,6 +184,10 @@ public class JDBCTemplate {
 
   public List<Map<String, Object>> executes(String sql, Object... params) throws SQLException {
     return execute(sql, MAP_HANDLER, params);
+  }
+
+  public Map<String, Object> get(String sql, Object... params) throws SQLException {
+    return runner.query(sql, MAP_HANDLER, params);
   }
 
   public DataSource getDataSource() {

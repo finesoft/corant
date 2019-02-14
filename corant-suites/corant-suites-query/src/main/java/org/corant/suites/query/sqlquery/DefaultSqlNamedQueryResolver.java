@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.sqlquery;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,7 +25,6 @@ import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
 import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.mapping.QueryMappingService;
-import org.corant.suites.query.spi.ParamHintHandler;
 import org.corant.suites.query.spi.ParamReviser;
 
 /**
@@ -49,10 +47,6 @@ public class DefaultSqlNamedQueryResolver implements
 
   @Inject
   @Any
-  Instance<ParamHintHandler> paramHintHandlers;
-
-  @Inject
-  @Any
   Instance<ParamReviser> paramRevisers;
 
   @Override
@@ -72,13 +66,7 @@ public class DefaultSqlNamedQueryResolver implements
 
   protected void handleParamHints(DefaultSqlNamedQueryTpl tpl, Map<String, Object> param) {
     if (!paramRevisers.isUnsatisfied()) {
-      paramRevisers.forEach(pr -> pr.accept(tpl.getQueryName(), param));
-    }
-    if (!isEmpty(tpl.getHints()) && !paramHintHandlers.isUnsatisfied()) {
-      tpl.getHints().forEach(hint -> {
-        paramHintHandlers.stream().filter(h -> h.canHandle(hint))
-            .forEach(h -> h.handle(hint, tpl.getQueryName(), param));
-      });
+      paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
     }
   }
 

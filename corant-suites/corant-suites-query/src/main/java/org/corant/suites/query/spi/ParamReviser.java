@@ -22,4 +22,7 @@ import java.util.function.BiConsumer;
  *
  */
 public interface ParamReviser extends BiConsumer<Object, Object> {
+  default int getPriority() {
+    return 0;
+  }
 }

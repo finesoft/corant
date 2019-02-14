@@ -14,15 +14,18 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators.AbstractSpliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -45,13 +48,16 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class JDBCTemplate {
 
-  public final static QueryRunner SIMPLE_RUNNER = new QueryRunner();
-  public final static MapHandler MAP_HANDLER = new MapHandler();
-  public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
-  public final static int DFLT_FETCH_SIZE = 32;
+  public static final QueryRunner SIMPLE_RUNNER = new QueryRunner();
+  public static final MapHandler MAP_HANDLER = new MapHandler();
+  public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+  public static final int DFLT_FETCH_SIZE = 32;
+  protected static final StreamableQueryRunner SIMPLE_STREAM_RUNNER = new StreamableQueryRunner();
 
   protected final DataSource dataSource;
+  protected final StatementConfiguration stmtConfig;
   protected final QueryRunner runner;
+  protected final StreamableQueryRunner streamRunner;
 
   public JDBCTemplate(DataSource ds) {
     this(ds, false, null, DFLT_FETCH_SIZE, null, null, null);
@@ -73,12 +79,24 @@ public class JDBCTemplate {
       Integer fetchSize, Integer maxFieldSize, Integer maxRows, Integer queryTimeout) {
     super();
     this.dataSource = shouldNotNull(dataSource);
-    runner = new QueryRunner(dataSource, pmdKnownBroken,
-        new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows, queryTimeout));
+    stmtConfig =
+        new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows, queryTimeout);
+    runner = new QueryRunner(dataSource, pmdKnownBroken, stmtConfig);
+    streamRunner = new StreamableQueryRunner(stmtConfig);
+  }
+
+  public static void batch(Connection conn, String sql, int batchSubmitSize,
+      Stream<Iterable<?>> params, Consumer<int[]> consumer) throws SQLException {
+    SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, batchSubmitSize, params, consumer);
   }
 
   public static int[] batch(Connection conn, String sql, Object[][] params) throws SQLException {
     return SIMPLE_RUNNER.batch(conn, sql, params);
+  }
+
+  public static int[] batch(Connection conn, String sql, Stream<Iterable<?>> params)
+      throws SQLException {
+    return SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, params);
   }
 
   public static JDBCTemplate build(DataSource ds) {
@@ -112,6 +130,13 @@ public class JDBCTemplate {
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return SIMPLE_RUNNER.insert(conn, sql, rsh, params);
+  }
+
+  public static void insertBatch(Connection conn, String sql, int batchSubmitSize,
+      Stream<Iterable<?>> params, Consumer<List<Map<String, Object>>> consumer)
+      throws SQLException {
+    SIMPLE_STREAM_RUNNER.streamInsertBatch(conn, false, sql, batchSubmitSize, MAP_LIST_HANDLER,
+        params, consumer);
   }
 
   public static List<Map<String, Object>> insertBatch(Connection conn, String sql,
@@ -162,7 +187,7 @@ public class JDBCTemplate {
       ResultSetHandler<T> rsh, Object... params) throws SQLException {
     return new StreamableQueryRunner(
         new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
-            .stream(conn, false, sql, rsh, params);
+            .streamQuery(conn, false, sql, rsh, params);
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
@@ -171,6 +196,10 @@ public class JDBCTemplate {
 
   public int[] batch(String sql, Object[][] params) throws SQLException {
     return runner.batch(sql, params);
+  }
+
+  public int[] batch(String sql, Stream<Iterable<?>> params) throws SQLException {
+    return streamRunner.streamBatch(dataSource.getConnection(), true, sql, params);
   }
 
   public int execute(String sql, Object... params) throws SQLException {
@@ -198,12 +227,22 @@ public class JDBCTemplate {
     return runner;
   }
 
+  public StatementConfiguration getStmtConfig() {
+    return stmtConfig;
+  }
+
   public Map<String, Object> insert(String sql, Object... params) throws SQLException {
     return runner.insert(sql, MAP_HANDLER, params);
   }
 
   public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
     return runner.insert(sql, rsh, params);
+  }
+
+  public void insertBatch(String sql, int batchSubmitSize, Stream<Iterable<?>> params,
+      Consumer<List<Map<String, Object>>> consumer) throws SQLException {
+    streamRunner.streamInsertBatch(dataSource.getConnection(), true, sql, batchSubmitSize,
+        MAP_LIST_HANDLER, params, consumer);
   }
 
   public List<Map<String, Object>> insertBatch(String sql, Object[][] params) throws SQLException {
@@ -232,7 +271,7 @@ public class JDBCTemplate {
       throws SQLException {
     return new StreamableQueryRunner(
         new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
-            .stream(dataSource.getConnection(), true, sql, rsh, params);
+            .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
   }
 
   public int update(String sql, Object... params) throws SQLException {
@@ -274,63 +313,6 @@ public class JDBCTemplate {
     }
   }
 
-  public static class StreamableQueryRunner extends QueryRunner {
-
-    public StreamableQueryRunner() {
-      super();
-    }
-
-    public StreamableQueryRunner(StatementConfiguration stmtConfig) {
-      super(stmtConfig);
-    }
-
-    @SuppressWarnings("restriction")
-    public <T> Stream<T> stream(Connection conn, boolean closeConn, String sql,
-        ResultSetHandler<T> rsh, Object... params) throws SQLException {
-      if (conn == null) {
-        throw new SQLException("Null connection");
-      }
-      if (sql == null) {
-        if (closeConn) {
-          DbUtils.close(conn);
-        }
-        throw new SQLException("Null SQL statement");
-      }
-      if (rsh == null) {
-        if (closeConn) {
-          DbUtils.close(conn);
-        }
-        throw new SQLException("Null ResultSetHandler");
-      }
-      Gadget g = null;
-      try {
-        PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
-        ResultSet rs = wrap(stmt.executeQuery());
-        g = new Gadget(conn, stmt, rs, closeConn);
-        Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
-        // FIXME Last Line of Defense, use jdk.internal.ref.Cleaner when using JDK9
-        sun.misc.Cleaner.create(s, g);
-        return s;
-      } catch (Exception e) {
-        if (g != null) {
-          g.run();
-        }
-        if (e instanceof SQLException) {
-          rethrow(SQLException.class.cast(e), sql, params);
-        } else {
-          rethrow(new SQLException(e), sql, params);
-        }
-      }
-      return Stream.empty();
-    }
-
-    private PreparedStatement completeStatement(PreparedStatement stmt, Object... params)
-        throws SQLException {
-      fillStatement(stmt, params);
-      return stmt;
-    }
-  }
-
   static class Gadget implements Runnable {
     final Connection conn;
     final PreparedStatement stmt;
@@ -350,5 +332,188 @@ public class JDBCTemplate {
       release(rs, stmt, conn, closeConn);
     }
 
+  }
+
+  static class StreamableQueryRunner extends QueryRunner {
+
+    public StreamableQueryRunner() {
+      super();
+    }
+
+    public StreamableQueryRunner(StatementConfiguration stmtConfig) {
+      super(stmtConfig);
+    }
+
+    void streamBatch(Connection conn, boolean closeConn, String sql, int batchSubmitSize,
+        Stream<Iterable<?>> params, Consumer<int[]> consumer) throws SQLException {
+      preCondition(conn, closeConn, sql);
+      if (params == null) {
+        if (closeConn) {
+          close(conn);
+        }
+        throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
+      }
+      PreparedStatement stmt = null;
+      final Consumer<int[]> useConsumer = consumer != null ? consumer : (ia) -> {
+      };
+      try {
+        final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
+        final AtomicInteger counter = new AtomicInteger();
+        final AtomicInteger batchCounter = new AtomicInteger();
+        final int submitSize = max(batchSubmitSize, DFLT_FETCH_SIZE);
+        params.forEach(it -> {
+          try {
+            completeStatement(stmtx, it).addBatch();
+            if (counter.incrementAndGet() % submitSize == 0) {
+              useConsumer.accept(stmtx.executeBatch());
+              batchCounter.set(counter.get());
+            }
+          } catch (SQLException e) {
+            throw new CorantRuntimeException(e);
+          }
+        });
+        if (counter.get() > batchCounter.get()) {
+          useConsumer.accept(stmt.executeBatch());
+        }
+      } catch (SQLException e) {
+        rethrow(e, sql, params);
+      } finally {
+        release(null, stmt, conn, closeConn);
+      }
+    }
+
+    int[] streamBatch(Connection conn, boolean closeConn, String sql, Stream<Iterable<?>> params)
+        throws SQLException {
+      preCondition(conn, closeConn, sql);
+      if (params == null) {
+        if (closeConn) {
+          close(conn);
+        }
+        throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
+      }
+      PreparedStatement stmt = null;
+      int[] rows = null;
+      try {
+        final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
+        params.forEach(it -> {
+          try {
+            completeStatement(stmtx, it).addBatch();
+          } catch (SQLException e) {
+            throw new CorantRuntimeException(e);
+          }
+        });
+        rows = stmt.executeBatch();
+      } catch (SQLException e) {
+        rethrow(e, sql, params);
+      } finally {
+        release(null, stmt, conn, closeConn);
+      }
+      return rows;
+    }
+
+    <T> void streamInsertBatch(Connection conn, boolean closeConn, String sql, int batchSubmitSize,
+        ResultSetHandler<T> rsh, Stream<Iterable<?>> params, Consumer<T> consumer)
+        throws SQLException {
+      preCondition(conn, closeConn, sql);
+      if (params == null) {
+        if (closeConn) {
+          close(conn);
+        }
+        throw new SQLException("Null parameters. If parameters aren't need, pass an empty array.");
+      }
+      PreparedStatement stmt = null;
+      final Consumer<T> useConsumer = consumer == null ? (t) -> {
+      } : consumer;
+      try {
+        final PreparedStatement stmtx =
+            stmt = this.prepareStatement(conn, sql, Statement.RETURN_GENERATED_KEYS);
+        final AtomicInteger counter = new AtomicInteger();
+        final AtomicInteger batchCounter = new AtomicInteger();
+        final int submitSize = max(batchSubmitSize, DFLT_FETCH_SIZE);
+        params.forEach(it -> {
+          try {
+            completeStatement(stmtx, it).addBatch();
+            if (counter.incrementAndGet() % submitSize == 0) {
+              stmtx.executeBatch();
+              ResultSet rs = stmtx.getGeneratedKeys();
+              useConsumer.accept(rsh.handle(rs));
+              batchCounter.set(counter.get());
+            }
+          } catch (SQLException e) {
+            throw new CorantRuntimeException(e);
+          }
+        });
+        if (counter.get() > batchCounter.get()) {
+          stmt.executeBatch();
+          ResultSet rs = stmt.getGeneratedKeys();
+          useConsumer.accept(rsh.handle(rs));
+        }
+      } catch (Exception e) {
+        rethrow(e, sql);
+      } finally {
+        release(null, stmt, conn, closeConn);
+      }
+    }
+
+    @SuppressWarnings("restriction")
+    <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
+        ResultSetHandler<T> rsh, Object... params) throws SQLException {
+      preCondition(conn, closeConn, sql);
+      if (rsh == null) {
+        if (closeConn) {
+          DbUtils.close(conn);
+        }
+        throw new SQLException("Null ResultSetHandler");
+      }
+      Gadget g = null;
+      try {
+        PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
+        ResultSet rs = wrap(stmt.executeQuery());
+        g = new Gadget(conn, stmt, rs, closeConn);
+        Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
+        // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
+        sun.misc.Cleaner.create(s, g);
+        return s;
+      } catch (Exception e) {
+        if (g != null) {
+          g.run();
+        }
+        rethrow(e, sql, params);
+      }
+      return Stream.empty();
+    }
+
+    private PreparedStatement completeStatement(PreparedStatement stmt, Iterable<?> params)
+        throws SQLException {
+      List<?> list = asList(params);
+      fillStatement(stmt, list.toArray(new Object[list.size()]));
+      return stmt;
+    }
+
+    private PreparedStatement completeStatement(PreparedStatement stmt, Object... params)
+        throws SQLException {
+      fillStatement(stmt, params);
+      return stmt;
+    }
+
+    private void preCondition(Connection conn, boolean closeConn, String sql) throws SQLException {
+      if (conn == null) {
+        throw new SQLException("Null connection");
+      }
+      if (sql == null) {
+        if (closeConn) {
+          DbUtils.close(conn);
+        }
+        throw new SQLException("Null SQL statement");
+      }
+    }
+
+    private void rethrow(Exception e, String sql, Object... params) throws SQLException {
+      if (e instanceof SQLException) {
+        super.rethrow(SQLException.class.cast(e), sql, params);
+      } else {
+        super.rethrow(new SQLException(e), sql, params);
+      }
+    }
   }
 }

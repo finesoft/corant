@@ -14,6 +14,8 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
@@ -104,11 +106,7 @@ public class MongoClientConfig {
       } else if (pn.endsWith(MC_DATABASES)) {
         config.getOptionalValue(pn, String.class).ifPresent(dbns -> {
           for (String dn : split(dbns, ";", true, true)) {
-            MongodbConfig dbc = new MongodbConfig();
-            dbc.client = mc;
-            dbc.setClientName(client);
-            dbc.setName(dn);
-            mc.databases.put(dn, dbc);
+            mc.databases.put(dn, new MongodbConfig(mc, dn));
           }
         });
       } else if (pn.endsWith(MC_APP_NAME)) {
@@ -350,7 +348,18 @@ public class MongoClientConfig {
 
     private String clientName;
 
-    private MongoClientConfig client;
+    private final MongoClientConfig client;
+
+    public MongodbConfig(MongoClientConfig client) {
+      this.client = shouldNotNull(client);
+      clientName = client.name;
+    }
+
+    public MongodbConfig(MongoClientConfig client, String name) {
+      this.client = shouldNotNull(client);
+      clientName = client.name;
+      this.name = shouldNotBlank(name);
+    }
 
     /**
      *
@@ -381,22 +390,6 @@ public class MongoClientConfig {
 
     public String getNameSpace() {
       return getClientName() + Names.NAME_SPACE_SEPARATOR + getName();
-    }
-
-    /**
-     *
-     * @param clientName the clientName to set
-     */
-    protected void setClientName(String clientName) {
-      this.clientName = clientName;
-    }
-
-    /**
-     *
-     * @param name the database to set
-     */
-    protected void setName(String name) {
-      this.name = name;
     }
 
   }

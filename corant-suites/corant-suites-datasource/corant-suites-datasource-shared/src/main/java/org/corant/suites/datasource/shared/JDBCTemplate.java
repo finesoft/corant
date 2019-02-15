@@ -419,7 +419,7 @@ public class JDBCTemplate {
         if (closeConn) {
           close(conn);
         }
-        throw new SQLException("Null parameters. If parameters aren't need, pass an empty array.");
+        throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
       }
       PreparedStatement stmt = null;
       final Consumer<T> useConsumer = consumer == null ? (t) -> {

@@ -60,17 +60,16 @@ public class MongoClientConfig {
   public static final String MC_URI = ".uri";
   public static final String MC_OPTS = ".option";
   public static final String MC_AUTH_DB = ".auth-database";
-  public static final String MC_USER_NAME = ".user-name";
+  public static final String MC_USER_NAME = ".username";
   public static final String MC_PASSWORD = ".password";
 
-  public static final String MCDB_DATABASE = ".database";
   public static final String MCDB_CLIENT = ".client";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
   private String applicationName;
 
-  private String client;
+  private String name;
 
   private String uri;
 
@@ -86,6 +85,7 @@ public class MongoClientConfig {
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
+
     // handle client
     Map<String, List<String>> clientCfgs =
         ConfigUtils.getGroupConfigNames(config, CLIENT_PREFIX, 1);
@@ -95,7 +95,7 @@ public class MongoClientConfig {
     });
 
     // handle database
-    if (isEmpty(clients)) {
+    if (!isEmpty(clients)) {
       Map<String, List<String>> dbCfgs =
           ConfigUtils.getGroupConfigNames(config, DATABASE_PREFIX, 1);
       dbCfgs.forEach((k, v) -> {
@@ -108,17 +108,16 @@ public class MongoClientConfig {
   static void assembly(Map<String, MongoClientConfig> clients, Config config, String database,
       Collection<String> propertieNames) {
     MongodbConfig mdc = new MongodbConfig();
+    mdc.setName(database);
     for (String pn : propertieNames) {
       if (pn.endsWith(MCDB_CLIENT)) {
         config.getOptionalValue(pn, String.class).ifPresent(mdc::setClientName);
-      } else if (pn.endsWith(MCDB_DATABASE)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mdc::setDatabase);
       }
     }
-    shouldBeTrue(isNoneBlank(mdc.clientName, mdc.database) && clients.containsKey(mdc.clientName));
+    shouldBeTrue(isNoneBlank(mdc.clientName, mdc.name) && clients.containsKey(mdc.clientName));
     MongoClientConfig mcc = clients.get(mdc.clientName);
     mdc.client = mcc;
-    mcc.databases.put(mdc.getDatabase(), mdc);
+    mcc.databases.put(mdc.getName(), mdc);
   }
 
   static Map<String, List<String>> getGroupConfigNames(Config config) {
@@ -134,6 +133,7 @@ public class MongoClientConfig {
 
   static MongoClientConfig of(Config config, String client, Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
+    mc.setName(client);
     final String opPrefix = CLIENT_PREFIX + client + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
@@ -155,7 +155,7 @@ public class MongoClientConfig {
               set.add(Pair.of(arr[0], DEFAULT_PORT));
             }
           }
-          set.forEach(hp -> mc.getHostAndPorts().add(hp));
+          set.forEach(hp -> mc.hostAndPorts.add(hp));
         });
       } else if (pn.endsWith(MC_URI)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUri);
@@ -198,14 +198,6 @@ public class MongoClientConfig {
 
   /**
    *
-   * @return the client
-   */
-  public String getClient() {
-    return client;
-  }
-
-  /**
-   *
    * @return the databases
    */
   public Map<String, MongodbConfig> getDatabases() {
@@ -221,6 +213,14 @@ public class MongoClientConfig {
       return Collections.unmodifiableList(asList(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
     }
     return Collections.unmodifiableList(hostAndPorts);
+  }
+
+  /**
+   *
+   * @return the clientName
+   */
+  public String getName() {
+    return name;
   }
 
   /**
@@ -327,18 +327,18 @@ public class MongoClientConfig {
 
   /**
    *
-   * @param client the client to set
-   */
-  protected void setClient(String client) {
-    this.client = client;
-  }
-
-  /**
-   *
    * @param hostAndPorts the hostAndPorts to set
    */
   protected void setHostAndPorts(List<Pair<String, Integer>> hostAndPorts) {
     this.hostAndPorts = hostAndPorts;
+  }
+
+  /**
+   *
+   * @param name the client name to set
+   */
+  protected void setName(String name) {
+    this.name = name;
   }
 
   /**
@@ -377,7 +377,7 @@ public class MongoClientConfig {
    */
   public static class MongodbConfig {
 
-    private String database;
+    private String name;
 
     private String clientName;
 
@@ -403,9 +403,9 @@ public class MongoClientConfig {
      *
      * @return the database
      */
-    public String getDatabase() {
-      if (database != null) {
-        return database;
+    public String getName() {
+      if (name != null) {
+        return name;
       }
       return new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase();
     }
@@ -420,10 +420,10 @@ public class MongoClientConfig {
 
     /**
      *
-     * @param database the database to set
+     * @param name the database to set
      */
-    protected void setDatabase(String database) {
-      this.database = database;
+    protected void setName(String name) {
+      this.name = name;
     }
 
   }

@@ -160,7 +160,7 @@ public class MongoClientExtension implements Extension {
             : null;
     if (jndi != null) {
       try {
-        jndi.bind(JndiNames.JNDI_COMP_NME + "/mongodb/" + cfg.getClient(), mc);
+        jndi.bind(JndiNames.JNDI_MONG_NME + "/" + cfg.getName(), mc);
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
@@ -170,6 +170,6 @@ public class MongoClientExtension implements Extension {
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
     MongoClient mc = beans.select(MongoClient.class, NamedLiteral.of(cfg.getClientName())).get();
-    return mc.getDatabase(cfg.getDatabase());
+    return mc.getDatabase(cfg.getName());
   }
 }

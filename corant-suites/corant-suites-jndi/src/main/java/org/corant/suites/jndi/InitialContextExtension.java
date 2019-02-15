@@ -36,8 +36,9 @@ import org.corant.shared.normal.Names.JndiNames;
  */
 public class InitialContextExtension implements Extension {
 
-  static final String[] DFLT_SUB_CTX = new String[] {JndiNames.JNDI_ROOT_NME,
-      JndiNames.JNDI_COMP_NME, JndiNames.JNDI_APPS_NME, JndiNames.JNDI_DATS_NME};
+  static final String[] DFLT_SUB_CTX =
+      new String[] {JndiNames.JNDI_ROOT_NME, JndiNames.JNDI_COMP_NME, JndiNames.JNDI_APPS_NME,
+          JndiNames.JNDI_DATS_NME, JndiNames.JNDI_MONG_NME};
   private final Logger logger = Logger.getLogger(this.getClass().getName());
   private boolean useCorantContext = false;
   private InitialContext context;

@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asProperties;
 import static org.corant.shared.util.ObjectUtils.tryCast;
@@ -29,6 +28,7 @@ import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
+import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.JpaUtils;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -73,9 +73,9 @@ public class HibernateSchemaUtils {
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource((dsn) -> {
       try {
-        return tryCast(
-            jndi.lookup(
-                shouldNotNull(dsn).startsWith(JNDI_DATS_NME) ? dsn : JNDI_DATS_NME + "/" + dsn),
+        return tryCast(jndi.lookup(
+            shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
+                : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn),
             DataSource.class);
       } catch (NamingException e1) {
         throw new CorantRuntimeException(e1);

@@ -35,9 +35,6 @@ public interface Names {
     String JNDI_ROOT_NME = "java:";
     String JNDI_COMP_NME = "java:comp";
     String JNDI_APPS_NME = "java:app";
-    String JNDI_DATS_NME = "java:comp/Datasources";
-    String JNDI_MONG_NME = "java:comp/MongoClients";
-    String JNDI_JTAM_NME = "java:comp/TransactionManager";
   }
 
   interface PersistenceNames {

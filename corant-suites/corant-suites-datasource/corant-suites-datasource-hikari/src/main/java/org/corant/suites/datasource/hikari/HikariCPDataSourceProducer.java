@@ -30,7 +30,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.eclipse.microprofile.config.Config;
 import com.zaxxer.hikari.HikariConfig;
@@ -98,7 +97,8 @@ public class HikariCPDataSourceProducer {
           DataSourceConfig cfg = configs.get(dataSourceName);
           if (cfg != null) {
             dataSource = doProduce(cfg);
-            jndi.bind(JndiNames.JNDI_DATS_NME + "/" + dataSourceName, dataSource);
+            jndi.bind(DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dataSourceName,
+                dataSource);
             break;
           }
         }

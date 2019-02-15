@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.kernel.util.ConfigUtils;
+import org.corant.shared.normal.Names.JndiNames;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -39,6 +40,7 @@ import org.eclipse.microprofile.config.Config;
  */
 public class DataSourceConfig {
 
+  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/Datasources";
   public static final String PREFIX = "datasource.";
   public static final String DS_VALIDATE_CONNECTION = ".validate-connection";
   public static final String DS_ACQUISITION_TIMEOUT = ".acquisition-timeout";
@@ -56,7 +58,6 @@ public class DataSourceConfig {
   public static final String DS_USER_NAME = ".username";
   public static final String DS_DRIVER = ".driver";
   public static final String DS_METRICS = ".enable-metrics";
-
 
   private Class<?> driver;
   private String name;
@@ -258,7 +259,6 @@ public class DataSourceConfig {
     return enableMetrics;
   }
 
-
   /**
    *
    * @return the jta
@@ -318,7 +318,6 @@ public class DataSourceConfig {
   protected void setMaxSize(int maxSize) {
     this.maxSize = maxSize;
   }
-
 
   protected void setMinSize(int minSize) {
     this.minSize = minSize;

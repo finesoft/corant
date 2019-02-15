@@ -24,9 +24,12 @@ import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.Corant;
 import org.corant.kernel.event.PostContainerStartedEvent;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -41,6 +44,8 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
+
+  protected volatile boolean initedJndiSubCtx = false;
 
   public DataSource getDataSource(String name) {
     return getDataSources().get(name);
@@ -77,8 +82,22 @@ public abstract class AbstractDataSourceExtension implements Extension {
     }
   }
 
-  protected synchronized void registerDataSource(String name, DataSource dataSrouce) {
-    dataSources.put(name, dataSrouce);
+  protected synchronized void registerDataSource(String name, DataSource dataSource) {
+    dataSources.put(name, dataSource);
+  }
+
+  protected void registerJndi(InitialContext jndi, String name, DataSource dataSource) {
+    if (jndi != null) {
+      try {
+        if (!initedJndiSubCtx) {
+          jndi.createSubcontext(DataSourceConfig.JNDI_SUBCTX_NAME);
+          initedJndiSubCtx = true;
+        }
+        jndi.bind(DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name, dataSource);
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
   }
 
   // touch for direct lookup data source from jndi. TODO FIXME

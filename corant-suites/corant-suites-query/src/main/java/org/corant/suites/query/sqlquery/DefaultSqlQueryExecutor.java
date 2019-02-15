@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.sqlquery;
 
-import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.sql.SQLException;
@@ -62,8 +61,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   public static DefaultSqlQueryExecutor of(String jndiDsName) {
-    String useJndiDsName = shouldNotNull(jndiDsName).startsWith(JNDI_DATS_NME) ? jndiDsName
-        : JNDI_DATS_NME + "/" + jndiDsName;
+    String useJndiDsName = shouldNotNull(jndiDsName);
     try {
       InitialContext jndi = new InitialContext();
       DataSource ds = shouldNotNull(forceCast(jndi.lookup(useJndiDsName)));

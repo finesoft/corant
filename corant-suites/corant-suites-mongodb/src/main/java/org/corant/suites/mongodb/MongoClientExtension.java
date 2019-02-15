@@ -31,9 +31,7 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import org.corant.kernel.util.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -58,6 +56,8 @@ public class MongoClientExtension implements Extension {
   protected final Map<String, MongoClientConfig> clientConfigs = new HashMap<>();
   protected final Map<String, MongodbConfig> databaseConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
+
+  volatile boolean initedJndiSubCtx = false;
 
   public MongoClient getClient(String clientName) {
     return clients.get(clientName);
@@ -137,11 +137,8 @@ public class MongoClientExtension implements Extension {
     clientConfigs.clear();
     clientConfigs.putAll(MongoClientConfig.from(ConfigProvider.getConfig()));
     clientNames.addAll(clientConfigs.keySet());
-    clientConfigs.forEach((cn, dbs) -> {
-      dbs.getDatabases().forEach((dn, db) -> {
-        databaseConfigs.put(String.join(ConfigUtils.SEPARATOR, cn, dn), db);
-      });
-    });
+    clientConfigs.values().stream().flatMap(mc -> mc.getDatabases().values().stream())
+        .forEach(db -> databaseConfigs.put(db.getNameSpace(), db));
     databaseNames.addAll(databaseConfigs.keySet());
   }
 
@@ -160,7 +157,11 @@ public class MongoClientExtension implements Extension {
             : null;
     if (jndi != null) {
       try {
-        jndi.bind(JndiNames.JNDI_MONG_NME + "/" + cfg.getName(), mc);
+        if (!initedJndiSubCtx) {
+          jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
+          initedJndiSubCtx = true;
+        }
+        jndi.bind(MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cfg.getName(), mc);
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

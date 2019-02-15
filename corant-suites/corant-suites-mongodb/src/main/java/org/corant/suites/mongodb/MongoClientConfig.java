@@ -14,14 +14,10 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldBeNull;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.group;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.util.ConfigUtils;
+import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.eclipse.microprofile.config.Config;
@@ -48,10 +46,9 @@ import com.mongodb.MongoCredential;
  *
  */
 public class MongoClientConfig {
-
+  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/MongoClient";
   public static final int DEFAULT_PORT = 27017;
-  public static final String CLIENT_PREFIX = "mongodb-client.";
-  public static final String DATABASE_PREFIX = "mongodb.";
+  public static final String PREFIX = "mongodb.";
   public static final String DEFAULT_HOST = "localhost";
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
@@ -62,8 +59,7 @@ public class MongoClientConfig {
   public static final String MC_AUTH_DB = ".auth-database";
   public static final String MC_USER_NAME = ".username";
   public static final String MC_PASSWORD = ".password";
-
-  public static final String MCDB_CLIENT = ".client";
+  public static final String MC_DATABASES = ".databases";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
@@ -85,62 +81,36 @@ public class MongoClientConfig {
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
-
     // handle client
-    Map<String, List<String>> clientCfgs =
-        ConfigUtils.getGroupConfigNames(config, CLIENT_PREFIX, 1);
+    Map<String, List<String>> clientCfgs = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
     });
 
-    // handle database
-    if (!isEmpty(clients)) {
-      Map<String, List<String>> dbCfgs =
-          ConfigUtils.getGroupConfigNames(config, DATABASE_PREFIX, 1);
-      dbCfgs.forEach((k, v) -> {
-        assembly(clients, config, k, v);
-      });
-    }
     return clients;
-  }
-
-  static void assembly(Map<String, MongoClientConfig> clients, Config config, String database,
-      Collection<String> propertieNames) {
-    MongodbConfig mdc = new MongodbConfig();
-    mdc.setName(database);
-    for (String pn : propertieNames) {
-      if (pn.endsWith(MCDB_CLIENT)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mdc::setClientName);
-      }
-    }
-    shouldBeTrue(isNoneBlank(mdc.clientName, mdc.name) && clients.containsKey(mdc.clientName));
-    MongoClientConfig mcc = clients.get(mdc.clientName);
-    mdc.client = mcc;
-    mcc.databases.put(mdc.getName(), mdc);
-  }
-
-  static Map<String, List<String>> getGroupConfigNames(Config config) {
-    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(DATABASE_PREFIX),
-        (s) -> {
-          String[] arr = split(s, ConfigUtils.SEPARATOR, true, true);
-          if (arr.length > 2) {
-            return new String[] {String.join(ConfigUtils.SEPARATOR, arr[1], arr[2]), s};
-          }
-          return new String[0];
-        });
   }
 
   static MongoClientConfig of(Config config, String client, Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
     mc.setName(client);
-    final String opPrefix = CLIENT_PREFIX + client + MC_OPTS;
+    final String opPrefix = PREFIX + client + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
     propertieNames.forEach(pn -> {
       if (pn.startsWith(opPrefix) && pn.length() > opPrefixLen) {
         // handle options
         opCfgNmes.add(pn);
+      } else if (pn.endsWith(MC_DATABASES)) {
+        config.getOptionalValue(pn, String.class).ifPresent(dbns -> {
+          for (String dn : split(dbns, ";", true, true)) {
+            MongodbConfig dbc = new MongodbConfig();
+            dbc.client = mc;
+            dbc.setClientName(client);
+            dbc.setName(dn);
+            mc.databases.put(dn, dbc);
+          }
+        });
       } else if (pn.endsWith(MC_APP_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setApplicationName);
       } else if (pn.endsWith(MC_HOST_PORTS)) {
@@ -159,8 +129,7 @@ public class MongoClientConfig {
         });
       } else if (pn.endsWith(MC_URI)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUri);
-      }
-      if (pn.endsWith(MC_AUTH_DB)) {
+      } else if (pn.endsWith(MC_AUTH_DB)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setAuthenticationDatabase);
       } else if (pn.endsWith(MC_PASSWORD)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setPassword);
@@ -408,6 +377,10 @@ public class MongoClientConfig {
         return name;
       }
       return new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase();
+    }
+
+    public String getNameSpace() {
+      return getClientName() + Names.NAME_SPACE_SEPARATOR + getName();
     }
 
     /**

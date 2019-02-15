@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.normal.Names.JndiNames.JNDI_DATS_NME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -23,6 +22,7 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
 import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -50,7 +50,8 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
     puimd.configDataSource((dsn) -> {
       try {
         return forceCast(jndi.lookup(
-            shouldNotNull(dsn).startsWith(JNDI_DATS_NME) ? dsn : JNDI_DATS_NME + "/" + dsn));
+            shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
+                : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

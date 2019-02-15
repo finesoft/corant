@@ -23,7 +23,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.eclipse.microprofile.config.Config;
@@ -60,9 +59,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
         ? instance.select(InitialContext.class).get()
         : null;
     registerDataSource(name, datasource);
-    if (jndi != null) {
-      jndi.bind(JndiNames.JNDI_DATS_NME + "/" + name, datasource);
-    }
+    registerJndi(jndi, name, datasource);
     return datasource;
   }
 

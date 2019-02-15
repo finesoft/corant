@@ -27,7 +27,5 @@ public class JndiCorantBootHandler implements CorantBootHandler {
   public void handleAfterStarted(Corant corant, String... args) {}
 
   @Override
-  public void handleBeforeStart(ClassLoader classLoader, String... args) {
-
-  }
+  public void handleBeforeStart(ClassLoader classLoader, String... args) {}
 }

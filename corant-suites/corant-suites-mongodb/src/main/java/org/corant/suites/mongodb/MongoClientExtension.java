@@ -140,6 +140,8 @@ public class MongoClientExtension implements Extension {
     clientConfigs.values().stream().flatMap(mc -> mc.getDatabases().values().stream())
         .forEach(db -> databaseConfigs.put(db.getNameSpace(), db));
     databaseNames.addAll(databaseConfigs.keySet());
+    logger
+        .info(() -> String.format("Find mongodb databases [%s]!", String.join(",", databaseNames)));
   }
 
   protected MongoClient produceClient(Instance<Object> beans, MongoClientConfig cfg) {
@@ -161,7 +163,9 @@ public class MongoClientExtension implements Extension {
           jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
           initedJndiSubCtx = true;
         }
-        jndi.bind(MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cfg.getName(), mc);
+        String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cfg.getName();
+        jndi.bind(jndiName, mc);
+        logger.info(() -> String.format("Bind mongo client %s to jndi!", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

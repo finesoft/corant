@@ -93,7 +93,9 @@ public abstract class AbstractDataSourceExtension implements Extension {
           jndi.createSubcontext(DataSourceConfig.JNDI_SUBCTX_NAME);
           initedJndiSubCtx = true;
         }
-        jndi.bind(DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name, dataSource);
+        String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
+        jndi.bind(jndiName, dataSource);
+        logger.info(() -> String.format("Bind data source %s to jndi!", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

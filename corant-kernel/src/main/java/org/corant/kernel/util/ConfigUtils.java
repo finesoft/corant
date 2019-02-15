@@ -19,6 +19,7 @@ import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
+import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -29,11 +30,18 @@ import org.eclipse.microprofile.config.Config;
  */
 public class ConfigUtils {
 
+  public static final String SEPARATOR = String.valueOf(Names.NAME_SPACE_SEPARATOR);
+
   public static Map<String, List<String>> getGroupConfigNames(Config config, String prefix,
       int keyIndex) {
+    return getGroupConfigNames(config.getPropertyNames(), prefix, keyIndex);
+  }
+
+  public static Map<String, List<String>> getGroupConfigNames(Iterable<String> configs,
+      String prefix, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(prefix), (s) -> {
-      String[] arr = split(s, ".", true, true);
+    return group(configs, (s) -> defaultString(s).startsWith(prefix), (s) -> {
+      String[] arr = split(s, SEPARATOR, true, true);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};
       }

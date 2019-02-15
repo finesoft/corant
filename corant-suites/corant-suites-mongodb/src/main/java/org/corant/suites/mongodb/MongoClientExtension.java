@@ -16,18 +16,25 @@ package org.corant.suites.mongodb;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 
 /**
  * corant-suites-mongodb
@@ -37,10 +44,14 @@ import com.mongodb.MongoClient;
  */
 public class MongoClientExtension implements Extension {
 
-  protected final Set<String> mongoAppNames = new LinkedHashSet<>();
+  protected final Set<String> databaseNames = new LinkedHashSet<>();
   protected final Map<String, MongoClient> clients = new ConcurrentHashMap<>();
   protected final Map<String, MongoClientConfig> clientConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
+
+  public MongoClient getClient(String databaseName) {
+    return clients.get(databaseName);
+  }
 
   /**
    * @return the clientConfigs
@@ -59,32 +70,39 @@ public class MongoClientExtension implements Extension {
   /**
    * @return the mongoAppNames
    */
-  public Set<String> getMongoAppNames() {
-    return Collections.unmodifiableSet(mongoAppNames);
+  public Set<String> getDatabaseNames() {
+    return Collections.unmodifiableSet(databaseNames);
   }
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      for (final String appName : getMongoAppNames()) {
-        event.<MongoClient>addBean().addQualifier(NamedLiteral.of(appName))
+      for (final String dbn : getDatabaseNames()) {
+        event.<MongoClient>addBean().addQualifier(NamedLiteral.of(dbn))
             .addTransitiveTypeClosure(MongoClient.class).beanClass(MongoClient.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
-              return null;
+              return produce(beans, getClientConfigs().get(dbn));
             }).disposeWith((mc, beans) -> mc.close());
       }
     }
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    mongoAppNames.clear();
+    databaseNames.clear();
     clients.clear();
     clientConfigs.clear();
     clientConfigs.putAll(MongoClientConfig.from(ConfigProvider.getConfig()));
-    mongoAppNames.addAll(clientConfigs.keySet());
+    databaseNames.addAll(clientConfigs.keySet());
   }
 
-  protected MongoClient produce(MongoClientConfig cfg) {
-    MongoClient mc = new MongoClient();
-    return mc;
+  protected MongoClient produce(Instance<Object> beans, MongoClientConfig cfg) {
+    List<ServerAddress> seeds = cfg.getHostAndPorts().stream()
+        .map(hnp -> new ServerAddress(hnp.getLeft(), hnp.getRight())).collect(Collectors.toList());
+    MongoCredential credential = cfg.produceCredential();
+    Builder builder = cfg.produceBuiler();
+    if (!beans.select(MongoClientConfigurator.class).isUnsatisfied()) {
+      beans.select(MongoClientConfigurator.class).forEach(h -> h.configure(builder));
+    }
+    MongoClientOptions clientOptions = builder.build();
+    return new MongoClient(seeds, credential, clientOptions);
   }
 }

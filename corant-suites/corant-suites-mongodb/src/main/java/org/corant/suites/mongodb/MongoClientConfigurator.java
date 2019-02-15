@@ -23,5 +23,5 @@ import com.mongodb.MongoClientOptions.Builder;
  */
 public interface MongoClientConfigurator {
 
-  void configure(Builder clientSettingsBuilder);
+  void configure(Builder optionsBuilder);
 }

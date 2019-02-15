@@ -13,9 +13,12 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
@@ -29,10 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.util.ConfigUtils;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.eclipse.microprofile.config.Config;
 import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.MongoClientURI;
+import com.mongodb.MongoCredential;
 
 /**
  * corant-suites-mongodb
@@ -44,21 +49,24 @@ public class MongoClientConfig {
 
   public static final String PREFIX = "mongodb.";
   public static final int DEFAULT_PORT = 27017;
+  public static final String DEFAULT_HOST = "localhost";
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
+  public static final String MC_APP_NAME = ".applicationName";
   public static final String MC_HOST_PORTS = ".host-ports";
   public static final String MC_URI = ".uri";
-  public static final String MC_DB = ".database";
   public static final String MC_AUTH_DB = ".auth-database";
-  public static final String MC_GRIDFS_DB = ".gridfs-database";
   public static final String MC_USER_NAME = ".user-name";
   public static final String MC_PASSWORD = ".password";
-  public static final String MC_FIELD_NME_STRATEGY = ".field-naming-strategy";
   public static final String MC_OPTS = ".option";
+  public static final String MC_DATABASE = ".database";
+  public static final String MC_CLIENT = ".client";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
   private String applicationName;
+
+  private String client;
 
   private String uri;
 
@@ -66,45 +74,42 @@ public class MongoClientConfig {
 
   private String authenticationDatabase;
 
-  private String gridFsDatabase;
-
   private String username;
 
   private char[] password = new char[0];
-
-  private Class<?> fieldNamingStrategy;
 
   private Map<String, String> options = new HashMap<>();
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> map = new HashMap<>();
-    Map<String, List<String>> cfgNmes = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
+    Map<String, List<String>> cfgNmes = getGroupConfigNames(config);
     cfgNmes.forEach((k, v) -> {
-      final MongoClientConfig cfg = of(config, k, v);
-      if (isNoneBlank(cfg.uri)) {
-        map.put(k, cfg);
-      }
+      String client = k.split(ConfigUtils.SEPARATOR)[0];
+      ConfigUtils.getGroupConfigNames(v, PREFIX + ConfigUtils.SEPARATOR + client, 2)
+          .forEach((k1, v1) -> {
+            final MongoClientConfig cfg = of(config, client, k1, v1);
+            if (isNoneBlank(cfg.uri)) {
+              map.put(k, cfg);
+            }
+          });
     });
     return map;
   }
 
-  public static MongoClientConfig of(Config config, String name,
+  public static MongoClientConfig of(Config config, String client, String database,
       Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
-    final String opPrefix = PREFIX + name + MC_OPTS;
+    final String opPrefix = PREFIX + database + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
-    mc.setApplicationName(name);
+    mc.setDatabase(database);
     propertieNames.forEach(pn -> {
       if (pn.endsWith(MC_AUTH_DB)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setAuthenticationDatabase);
-      } else if (pn.endsWith(MC_DB)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setDatabase);
-      } else if (pn.endsWith(MC_FIELD_NME_STRATEGY)) {
-        config.getOptionalValue(pn, String.class)
-            .ifPresent(cls -> mc.setFieldNamingStrategy(tryAsClass(cls)));
-      } else if (pn.endsWith(MC_GRIDFS_DB)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setGridFsDatabase);
+      } else if (pn.endsWith(MC_CLIENT)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mc::setClient);
+      } else if (pn.endsWith(MC_APP_NAME)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mc::setApplicationName);
       } else if (pn.endsWith(MC_HOST_PORTS)) {
         config.getOptionalValue(pn, String.class).ifPresent(hps -> {
           String[] hpArr = split(hps, ";", true, true);
@@ -142,6 +147,16 @@ public class MongoClientConfig {
     return mc;
   }
 
+  static Map<String, List<String>> getGroupConfigNames(Config config) {
+    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(PREFIX), (s) -> {
+      String[] arr = split(s, ConfigUtils.SEPARATOR, true, true);
+      if (arr.length > 2) {
+        return new String[] {String.join(ConfigUtils.SEPARATOR, arr[1], arr[2]), s};
+      }
+      return new String[0];
+    });
+  }
+
   /**
    *
    * @return the applicationName
@@ -160,26 +175,21 @@ public class MongoClientConfig {
 
   /**
    *
+   * @return the client
+   */
+  public String getClient() {
+    return client;
+  }
+
+  /**
+   *
    * @return the database
    */
   public String getDatabase() {
-    return database;
-  }
-
-  /**
-   *
-   * @return the fieldNamingStrategy
-   */
-  public Class<?> getFieldNamingStrategy() {
-    return fieldNamingStrategy;
-  }
-
-  /**
-   *
-   * @return the gridFsDatabase
-   */
-  public String getGridFsDatabase() {
-    return gridFsDatabase;
+    if (database != null) {
+      return database;
+    }
+    return new MongoClientURI(defaultObject(uri, DEFAULT_URI)).getDatabase();
   }
 
   /**
@@ -187,6 +197,9 @@ public class MongoClientConfig {
    * @return the hostAndPorts
    */
   public List<Pair<String, Integer>> getHostAndPorts() {
+    if (isEmpty(hostAndPorts)) {
+      return Collections.unmodifiableList(asList(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
+    }
     return Collections.unmodifiableList(hostAndPorts);
   }
 
@@ -225,8 +238,56 @@ public class MongoClientConfig {
   public Builder produceBuiler() {
     Builder builder = new Builder();
     builder.applicationName(applicationName);
-    getOptMapObject(options, "description", ObjectUtils::asString).ifPresent(builder::description);
+    getOptMapObject(options, "alwaysUseMBeans", ConversionUtils::toBoolean)
+        .ifPresent(builder::alwaysUseMBeans);
+    getOptMapObject(options, "description", ConversionUtils::toString)
+        .ifPresent(builder::description);
+    getOptMapObject(options, "connectionsPerHost", ConversionUtils::toInteger)
+        .ifPresent(builder::connectionsPerHost);
+    getOptMapObject(options, "connectTimeout", ConversionUtils::toInteger)
+        .ifPresent(builder::connectTimeout);
+    getOptMapObject(options, "cursorFinalizerEnabled", ConversionUtils::toBoolean)
+        .ifPresent(builder::cursorFinalizerEnabled);
+    getOptMapObject(options, "heartbeatConnectTimeout", ConversionUtils::toInteger)
+        .ifPresent(builder::heartbeatConnectTimeout);
+    getOptMapObject(options, "heartbeatFrequency", ConversionUtils::toInteger)
+        .ifPresent(builder::heartbeatFrequency);
+    getOptMapObject(options, "heartbeatSocketTimeout", ConversionUtils::toInteger)
+        .ifPresent(builder::heartbeatSocketTimeout);
+    getOptMapObject(options, "localThreshold", ConversionUtils::toInteger)
+        .ifPresent(builder::localThreshold);
+    getOptMapObject(options, "maxConnectionIdleTime", ConversionUtils::toInteger)
+        .ifPresent(builder::maxConnectionIdleTime);
+    getOptMapObject(options, "maxConnectionLifeTime", ConversionUtils::toInteger)
+        .ifPresent(builder::maxConnectionLifeTime);
+    getOptMapObject(options, "maxWaitTime", ConversionUtils::toInteger)
+        .ifPresent(builder::maxWaitTime);
+    getOptMapObject(options, "minConnectionsPerHost", ConversionUtils::toInteger)
+        .ifPresent(builder::minConnectionsPerHost);
+    getOptMapObject(options, "minHeartbeatFrequency", ConversionUtils::toInteger)
+        .ifPresent(builder::minHeartbeatFrequency);
+    getOptMapObject(options, "requiredReplicaSetName", ConversionUtils::toString)
+        .ifPresent(builder::requiredReplicaSetName);
+    getOptMapObject(options, "retryWrites", ConversionUtils::toBoolean)
+        .ifPresent(builder::retryWrites);
+    getOptMapObject(options, "serverSelectionTimeout", ConversionUtils::toInteger)
+        .ifPresent(builder::serverSelectionTimeout);
+    getOptMapObject(options, "socketTimeout", ConversionUtils::toInteger)
+        .ifPresent(builder::socketTimeout);
+    getOptMapObject(options, "sslEnabled", ConversionUtils::toBoolean)
+        .ifPresent(builder::sslEnabled);
+    getOptMapObject(options, "sslInvalidHostNameAllowed", ConversionUtils::toBoolean)
+        .ifPresent(builder::sslInvalidHostNameAllowed);
+    getOptMapObject(options, "threadsAllowedToBlockForConnectionMultiplier",
+        ConversionUtils::toInteger)
+            .ifPresent(builder::threadsAllowedToBlockForConnectionMultiplier);
     return builder;
+  }
+
+  public MongoCredential produceCredential() {
+    String database =
+        getAuthenticationDatabase() == null ? getDatabase() : getAuthenticationDatabase();
+    return MongoCredential.createCredential(getUsername(), database, getPassword());
   }
 
   /**
@@ -247,26 +308,18 @@ public class MongoClientConfig {
 
   /**
    *
+   * @param client the client to set
+   */
+  protected void setClient(String client) {
+    this.client = client;
+  }
+
+  /**
+   *
    * @param database the database to set
    */
   protected void setDatabase(String database) {
     this.database = database;
-  }
-
-  /**
-   *
-   * @param fieldNamingStrategy the fieldNamingStrategy to set
-   */
-  protected void setFieldNamingStrategy(Class<?> fieldNamingStrategy) {
-    this.fieldNamingStrategy = fieldNamingStrategy;
-  }
-
-  /**
-   *
-   * @param gridFsDatabase the gridFsDatabase to set
-   */
-  protected void setGridFsDatabase(String gridFsDatabase) {
-    this.gridFsDatabase = gridFsDatabase;
   }
 
   /**
@@ -304,5 +357,4 @@ public class MongoClientConfig {
   protected void setUsername(String username) {
     this.username = username;
   }
-
 }

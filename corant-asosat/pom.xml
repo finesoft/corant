@@ -23,7 +23,6 @@
 		<module>corant-asosat-ddd</module>
 		<module>corant-asosat-tsd</module>
 		<module>corant-asosat-cqs</module>
-		<module>corant-asosat-exp</module>
 	</modules>
 	<build>
 		<plugins>

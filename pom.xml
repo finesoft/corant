@@ -38,6 +38,7 @@
 		<module>corant-shared</module>
 		<module>corant-suites</module>
 		<module>corant-asosat</module>
+		<module>corant-demo</module>
 	</modules>
 	<build>
 		<resources>

@@ -29,12 +29,19 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import org.corant.kernel.util.ConfigUtils;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.JndiNames;
+import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoDatabase;
 
 /**
  * corant-suites-mongodb
@@ -45,12 +52,15 @@ import com.mongodb.ServerAddress;
 public class MongoClientExtension implements Extension {
 
   protected final Set<String> databaseNames = new LinkedHashSet<>();
+  protected final Set<String> clientNames = new LinkedHashSet<>();
   protected final Map<String, MongoClient> clients = new ConcurrentHashMap<>();
+  protected final Map<String, MongoDatabase> databases = new ConcurrentHashMap<>();
   protected final Map<String, MongoClientConfig> clientConfigs = new HashMap<>();
+  protected final Map<String, MongodbConfig> databaseConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-  public MongoClient getClient(String databaseName) {
-    return clients.get(databaseName);
+  public MongoClient getClient(String clientName) {
+    return clients.get(clientName);
   }
 
   /**
@@ -61,6 +71,13 @@ public class MongoClientExtension implements Extension {
   }
 
   /**
+   * @return the clientNames
+   */
+  public Set<String> getClientNames() {
+    return Collections.unmodifiableSet(clientNames);
+  }
+
+  /**
    * @return the clients
    */
   public Map<String, MongoClient> getClients() {
@@ -68,33 +85,67 @@ public class MongoClientExtension implements Extension {
   }
 
   /**
-   * @return the mongoAppNames
+   *
+   * @return the databaseConfigs
+   */
+  public Map<String, MongodbConfig> getDatabaseConfigs() {
+    return Collections.unmodifiableMap(databaseConfigs);
+  }
+
+  /**
+   *
+   * @return the databaseNames
    */
   public Set<String> getDatabaseNames() {
     return Collections.unmodifiableSet(databaseNames);
   }
 
+  /**
+   *
+   * @return the databases
+   */
+  public Map<String, MongoDatabase> getDatabases() {
+    return Collections.unmodifiableMap(databases);
+  }
+
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      for (final String dbn : getDatabaseNames()) {
-        event.<MongoClient>addBean().addQualifier(NamedLiteral.of(dbn))
+      for (final String cn : getClientNames()) {
+        event.<MongoClient>addBean().addQualifier(NamedLiteral.of(cn))
             .addTransitiveTypeClosure(MongoClient.class).beanClass(MongoClient.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
-              return produce(beans, getClientConfigs().get(dbn));
+              return produceClient(beans, getClientConfigs().get(cn));
             }).disposeWith((mc, beans) -> mc.close());
+      }
+
+      for (final String dn : getDatabaseNames()) {
+        event.<MongoDatabase>addBean().addQualifier(NamedLiteral.of(dn))
+            .addTransitiveTypeClosure(MongoDatabase.class).beanClass(MongoDatabase.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
+              return produceDatabase(beans, getDatabaseConfigs().get(dn));
+            });
       }
     }
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
+    databases.clear();
     databaseNames.clear();
+    databaseConfigs.clear();
     clients.clear();
+    clientNames.clear();
     clientConfigs.clear();
     clientConfigs.putAll(MongoClientConfig.from(ConfigProvider.getConfig()));
-    databaseNames.addAll(clientConfigs.keySet());
+    clientNames.addAll(clientConfigs.keySet());
+    clientConfigs.forEach((cn, dbs) -> {
+      dbs.getDatabases().forEach((dn, db) -> {
+        databaseConfigs.put(String.join(ConfigUtils.SEPARATOR, cn, dn), db);
+      });
+    });
+    databaseNames.addAll(databaseConfigs.keySet());
   }
 
-  protected MongoClient produce(Instance<Object> beans, MongoClientConfig cfg) {
+  protected MongoClient produceClient(Instance<Object> beans, MongoClientConfig cfg) {
     List<ServerAddress> seeds = cfg.getHostAndPorts().stream()
         .map(hnp -> new ServerAddress(hnp.getLeft(), hnp.getRight())).collect(Collectors.toList());
     MongoCredential credential = cfg.produceCredential();
@@ -103,6 +154,22 @@ public class MongoClientExtension implements Extension {
       beans.select(MongoClientConfigurator.class).forEach(h -> h.configure(builder));
     }
     MongoClientOptions clientOptions = builder.build();
-    return new MongoClient(seeds, credential, clientOptions);
+    MongoClient mc = new MongoClient(seeds, credential, clientOptions);
+    InitialContext jndi =
+        beans.select(InitialContext.class).isResolvable() ? beans.select(InitialContext.class).get()
+            : null;
+    if (jndi != null) {
+      try {
+        jndi.bind(JndiNames.JNDI_COMP_NME + "/mongodb/" + cfg.getClient(), mc);
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return mc;
+  }
+
+  protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
+    MongoClient mc = beans.select(MongoClient.class, NamedLiteral.of(cfg.getClientName())).get();
+    return mc.getDatabase(cfg.getDatabase());
   }
 }

@@ -13,6 +13,8 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
@@ -47,20 +49,22 @@ import com.mongodb.MongoCredential;
  */
 public class MongoClientConfig {
 
-  public static final String PREFIX = "mongodb.";
   public static final int DEFAULT_PORT = 27017;
+  public static final String CLIENT_PREFIX = "mongodb-client.";
+  public static final String DATABASE_PREFIX = "mongodb.";
   public static final String DEFAULT_HOST = "localhost";
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
   public static final String MC_APP_NAME = ".applicationName";
   public static final String MC_HOST_PORTS = ".host-ports";
   public static final String MC_URI = ".uri";
+  public static final String MC_OPTS = ".option";
   public static final String MC_AUTH_DB = ".auth-database";
   public static final String MC_USER_NAME = ".user-name";
   public static final String MC_PASSWORD = ".password";
-  public static final String MC_OPTS = ".option";
-  public static final String MC_DATABASE = ".database";
-  public static final String MC_CLIENT = ".client";
+
+  public static final String MCDB_DATABASE = ".database";
+  public static final String MCDB_CLIENT = ".client";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
@@ -70,7 +74,9 @@ public class MongoClientConfig {
 
   private String uri;
 
-  private String database;
+  private Map<String, MongodbConfig> databases = new HashMap<>();
+
+  private Map<String, String> options = new HashMap<>();
 
   private String authenticationDatabase;
 
@@ -78,36 +84,63 @@ public class MongoClientConfig {
 
   private char[] password = new char[0];
 
-  private Map<String, String> options = new HashMap<>();
-
   public static Map<String, MongoClientConfig> from(Config config) {
-    Map<String, MongoClientConfig> map = new HashMap<>();
-    Map<String, List<String>> cfgNmes = getGroupConfigNames(config);
-    cfgNmes.forEach((k, v) -> {
-      String client = k.split(ConfigUtils.SEPARATOR)[0];
-      ConfigUtils.getGroupConfigNames(v, PREFIX + ConfigUtils.SEPARATOR + client, 2)
-          .forEach((k1, v1) -> {
-            final MongoClientConfig cfg = of(config, client, k1, v1);
-            if (isNoneBlank(cfg.uri)) {
-              map.put(k, cfg);
-            }
-          });
+    Map<String, MongoClientConfig> clients = new HashMap<>();
+    // handle client
+    Map<String, List<String>> clientCfgs =
+        ConfigUtils.getGroupConfigNames(config, CLIENT_PREFIX, 1);
+    clientCfgs.forEach((k, v) -> {
+      MongoClientConfig client = of(config, k, v);
+      shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
     });
-    return map;
+
+    // handle database
+    if (isEmpty(clients)) {
+      Map<String, List<String>> dbCfgs =
+          ConfigUtils.getGroupConfigNames(config, DATABASE_PREFIX, 1);
+      dbCfgs.forEach((k, v) -> {
+        assembly(clients, config, k, v);
+      });
+    }
+    return clients;
   }
 
-  public static MongoClientConfig of(Config config, String client, String database,
+  static void assembly(Map<String, MongoClientConfig> clients, Config config, String database,
       Collection<String> propertieNames) {
+    MongodbConfig mdc = new MongodbConfig();
+    for (String pn : propertieNames) {
+      if (pn.endsWith(MCDB_CLIENT)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mdc::setClientName);
+      } else if (pn.endsWith(MCDB_DATABASE)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mdc::setDatabase);
+      }
+    }
+    shouldBeTrue(isNoneBlank(mdc.clientName, mdc.database) && clients.containsKey(mdc.clientName));
+    MongoClientConfig mcc = clients.get(mdc.clientName);
+    mdc.client = mcc;
+    mcc.databases.put(mdc.getDatabase(), mdc);
+  }
+
+  static Map<String, List<String>> getGroupConfigNames(Config config) {
+    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(DATABASE_PREFIX),
+        (s) -> {
+          String[] arr = split(s, ConfigUtils.SEPARATOR, true, true);
+          if (arr.length > 2) {
+            return new String[] {String.join(ConfigUtils.SEPARATOR, arr[1], arr[2]), s};
+          }
+          return new String[0];
+        });
+  }
+
+  static MongoClientConfig of(Config config, String client, Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
-    final String opPrefix = PREFIX + database + MC_OPTS;
+    final String opPrefix = CLIENT_PREFIX + client + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
-    mc.setDatabase(database);
     propertieNames.forEach(pn -> {
-      if (pn.endsWith(MC_AUTH_DB)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setAuthenticationDatabase);
-      } else if (pn.endsWith(MC_CLIENT)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setClient);
+      if (pn.startsWith(opPrefix) && pn.length() > opPrefixLen) {
+        // handle options
+        opCfgNmes.add(pn);
       } else if (pn.endsWith(MC_APP_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setApplicationName);
       } else if (pn.endsWith(MC_HOST_PORTS)) {
@@ -124,15 +157,15 @@ public class MongoClientConfig {
           }
           set.forEach(hp -> mc.getHostAndPorts().add(hp));
         });
-      } else if (pn.endsWith(MC_PASSWORD)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setPassword);
       } else if (pn.endsWith(MC_URI)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUri);
+      }
+      if (pn.endsWith(MC_AUTH_DB)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mc::setAuthenticationDatabase);
+      } else if (pn.endsWith(MC_PASSWORD)) {
+        config.getOptionalValue(pn, String.class).ifPresent(mc::setPassword);
       } else if (pn.endsWith(MC_USER_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUsername);
-      } else if (pn.startsWith(opPrefix) && pn.length() > opPrefixLen) {
-        // handle options
-        opCfgNmes.add(pn);
       }
     });
     if (!isEmpty(opCfgNmes)) {
@@ -145,16 +178,6 @@ public class MongoClientConfig {
       }
     }
     return mc;
-  }
-
-  static Map<String, List<String>> getGroupConfigNames(Config config) {
-    return group(config.getPropertyNames(), (s) -> defaultString(s).startsWith(PREFIX), (s) -> {
-      String[] arr = split(s, ConfigUtils.SEPARATOR, true, true);
-      if (arr.length > 2) {
-        return new String[] {String.join(ConfigUtils.SEPARATOR, arr[1], arr[2]), s};
-      }
-      return new String[0];
-    });
   }
 
   /**
@@ -183,13 +206,10 @@ public class MongoClientConfig {
 
   /**
    *
-   * @return the database
+   * @return the databases
    */
-  public String getDatabase() {
-    if (database != null) {
-      return database;
-    }
-    return new MongoClientURI(defaultObject(uri, DEFAULT_URI)).getDatabase();
+  public Map<String, MongodbConfig> getDatabases() {
+    return Collections.unmodifiableMap(databases);
   }
 
   /**
@@ -285,9 +305,8 @@ public class MongoClientConfig {
   }
 
   public MongoCredential produceCredential() {
-    String database =
-        getAuthenticationDatabase() == null ? getDatabase() : getAuthenticationDatabase();
-    return MongoCredential.createCredential(getUsername(), database, getPassword());
+    return MongoCredential.createCredential(getUsername(), getAuthenticationDatabase(),
+        getPassword());
   }
 
   /**
@@ -312,14 +331,6 @@ public class MongoClientConfig {
    */
   protected void setClient(String client) {
     this.client = client;
-  }
-
-  /**
-   *
-   * @param database the database to set
-   */
-  protected void setDatabase(String database) {
-    this.database = database;
   }
 
   /**
@@ -356,5 +367,64 @@ public class MongoClientConfig {
    */
   protected void setUsername(String username) {
     this.username = username;
+  }
+
+  /**
+   * corant-suites-mongodb
+   *
+   * @author bingo 下午7:25:05
+   *
+   */
+  public static class MongodbConfig {
+
+    private String database;
+
+    private String clientName;
+
+    private MongoClientConfig client;
+
+    /**
+     *
+     * @return the client
+     */
+    public MongoClientConfig getClient() {
+      return client;
+    }
+
+    /**
+     *
+     * @return the clientName
+     */
+    public String getClientName() {
+      return clientName;
+    }
+
+    /**
+     *
+     * @return the database
+     */
+    public String getDatabase() {
+      if (database != null) {
+        return database;
+      }
+      return new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase();
+    }
+
+    /**
+     *
+     * @param clientName the clientName to set
+     */
+    protected void setClientName(String clientName) {
+      this.clientName = clientName;
+    }
+
+    /**
+     *
+     * @param database the database to set
+     */
+    protected void setDatabase(String database) {
+      this.database = database;
+    }
+
   }
 }

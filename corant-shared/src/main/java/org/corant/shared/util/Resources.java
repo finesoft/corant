@@ -111,6 +111,17 @@ public class Resources {
   }
 
   /**
+   * Use file create file system resource.
+   *
+   * @param path
+   * @return
+   * @throws IOException fromFileSystem
+   */
+  public static FileSystemResource fromFileSystem(File file) throws IOException {
+    return new FileSystemResource(shouldNotNull(file));
+  }
+
+  /**
    * Use Path to find file system resource.
    *
    * @param path

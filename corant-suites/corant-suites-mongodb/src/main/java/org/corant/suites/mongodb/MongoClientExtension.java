@@ -15,9 +15,12 @@ package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.getMapInstant;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -44,6 +47,7 @@ import org.bson.BsonInt32;
 import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
+import org.bson.Document;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
@@ -121,6 +125,12 @@ public class MongoClientExtension implements Extension {
    */
   public Map<String, MongodbConfig> getDatabaseConfigs() {
     return Collections.unmodifiableMap(databaseConfigs);
+  }
+
+  public Instant getDatabaseLocalTime(MongoDatabase db) {
+    return getMapInstant(
+        db.runCommand(new Document(asMap("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0))),
+        "localTime");
   }
 
   /**

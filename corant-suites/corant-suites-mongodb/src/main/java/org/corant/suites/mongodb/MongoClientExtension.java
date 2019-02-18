@@ -13,6 +13,11 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.StringUtils.split;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -27,11 +32,20 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.ProcessInjectionPoint;
+import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import org.bson.BsonInt32;
+import org.bson.BsonInt64;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -40,6 +54,8 @@ import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.GridFSBuckets;
 
 /**
  * corant-suites-mongodb
@@ -51,13 +67,28 @@ public class MongoClientExtension implements Extension {
 
   protected final Set<String> databaseNames = new LinkedHashSet<>();
   protected final Set<String> clientNames = new LinkedHashSet<>();
+  protected final Set<String> gridFSBucketNames = new LinkedHashSet<>();
   protected final Map<String, MongoClient> clients = new ConcurrentHashMap<>();
   protected final Map<String, MongoDatabase> databases = new ConcurrentHashMap<>();
+  protected final Map<String, GridFSBucket> gridFSBuckets = new ConcurrentHashMap<>();
   protected final Map<String, MongoClientConfig> clientConfigs = new HashMap<>();
   protected final Map<String, MongodbConfig> databaseConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   volatile boolean initedJndiSubCtx = false;
+
+  public static BsonValue bsonId(Serializable id) {
+    if (id == null) {
+      return null;
+    }
+    if (id instanceof Long || Long.TYPE.equals(id.getClass())) {
+      return new BsonInt64(Long.class.cast(id));
+    } else if (id instanceof Integer || Integer.TYPE.equals(id.getClass())) {
+      return new BsonInt32(Integer.class.cast(id));
+    } else {
+      return new BsonString(asString(id));
+    }
+  }
 
   public MongoClient getClient(String clientName) {
     return clients.get(clientName);
@@ -108,6 +139,22 @@ public class MongoClientExtension implements Extension {
     return Collections.unmodifiableMap(databases);
   }
 
+  /**
+   *
+   * @return the gridFSBucketNames
+   */
+  public Set<String> getGridFSBucketNames() {
+    return Collections.unmodifiableSet(gridFSBucketNames);
+  }
+
+  /**
+   *
+   * @return the gridFSBuckets
+   */
+  public Map<String, GridFSBucket> getGridFSBuckets() {
+    return Collections.unmodifiableMap(gridFSBuckets);
+  }
+
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String cn : getClientNames()) {
@@ -125,10 +172,20 @@ public class MongoClientExtension implements Extension {
               return produceDatabase(beans, getDatabaseConfigs().get(dn));
             });
       }
+
+      for (final String gfn : getGridFSBucketNames()) {
+        event.<GridFSBucket>addBean().addQualifier(NamedLiteral.of(gfn))
+            .addTransitiveTypeClosure(GridFSBucket.class).beanClass(GridFSBucket.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
+              return produceGridFSBucket(beans, gfn);
+            });
+      }
     }
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
+    gridFSBuckets.clear();
+    gridFSBucketNames.clear();
     databases.clear();
     databaseNames.clear();
     databaseConfigs.clear();
@@ -176,5 +233,25 @@ public class MongoClientExtension implements Extension {
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
     MongoClient mc = beans.select(MongoClient.class, NamedLiteral.of(cfg.getClientName())).get();
     return mc.getDatabase(cfg.getName());
+  }
+
+  protected GridFSBucket produceGridFSBucket(Instance<Object> beans, String bucketNamespace) {
+    String[] names = split(bucketNamespace, Names.NAME_SPACE_SEPARATORS, true, true);
+    shouldBeTrue(!isEmpty(names) && names.length == 3);
+    MongoDatabase md = beans.select(MongoDatabase.class,
+        NamedLiteral.of(names[0] + Names.NAME_SPACE_SEPARATORS + names[1])).get();
+    return gridFSBuckets.computeIfAbsent(bucketNamespace,
+        (k) -> GridFSBuckets.create(md, names[2]));
+  }
+
+  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
+    final InjectionPoint ip = pip.getInjectionPoint();
+    if (GridFSBucket.class.equals(ip.getType())) {
+      Named named = ip.getAnnotated().getAnnotation(Named.class);
+      String[] names = split(named.value(), Names.NAME_SPACE_SEPARATORS, true, true);
+      if (!isEmpty(names) && names.length == 3) {
+        gridFSBucketNames.add(named.value());
+      }
+    }
   }
 }

@@ -14,14 +14,12 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.asMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.FileSystemResource;
 import org.corant.shared.util.Resources.Resource;
 import com.mongodb.MongoGridFSException;
@@ -52,19 +50,10 @@ public abstract class AbstractGridFSBucketProvider {
 
   protected void putFile(Serializable id, Resource r) {
     try (InputStream is = r.openStream()) {
-      if (r instanceof ClassPathResource) {
-        ClassPathResource cpr = ClassPathResource.class.cast(r);
-        putFile(id, cpr.getResourceName(), DFLT_CHUNK_SIZE_BYTES, is,
-            asMap("sourceType", cpr.getSourceType(), "location", cpr.getLocation()));
-      } else if (r instanceof FileSystemResource) {
-        FileSystemResource fsr = FileSystemResource.class.cast(r);
-        putFile(id, fsr.getFile().getName(), DFLT_CHUNK_SIZE_BYTES, is,
-            asMap("sourceType", fsr.getSourceType(), "length", fsr.getFile().length(),
-                "lastModified", fsr.getFile().lastModified(), "path", fsr.getFile().getPath()));
-      } else {
-        putFile(id, r.getLocation(), DFLT_CHUNK_SIZE_BYTES, is,
-            asMap("sourceType", r.getSourceType(), "location", r.getLocation()));
-      }
+      putFile(id,
+          r instanceof FileSystemResource ? FileSystemResource.class.cast(r).getFile().getName()
+              : r.getLocation(),
+          DFLT_CHUNK_SIZE_BYTES, is, r.getMetadatas());
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

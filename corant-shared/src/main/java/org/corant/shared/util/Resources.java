@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.MapUtils.asImmutableMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -28,6 +29,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -562,6 +564,13 @@ public class Resources {
     }
 
     @Override
+    public Map<String, Object> getMetadatas() {
+      return asImmutableMap("location", getLocation(), "sourceType", getSourceType(), "path",
+          getFile().getPath(), "fileName", getFile().getName(), "lastModified",
+          getFile().lastModified(), "length", getFile().length());
+    }
+
+    @Override
     public SourceType getSourceType() {
       return sourceType;
     }
@@ -618,10 +627,13 @@ public class Resources {
 
     String getLocation();
 
+    default Map<String, Object> getMetadatas() {
+      return asImmutableMap("location", getLocation(), "sourceType", getSourceType());
+    }
+
     SourceType getSourceType();
 
     InputStream openStream() throws IOException;
-
   }
 
   public enum SourceType {
@@ -697,6 +709,12 @@ public class Resources {
     @Override
     public String getLocation() {
       return location;
+    }
+
+    @Override
+    public Map<String, Object> getMetadatas() {
+      return asImmutableMap("location", getLocation(), "sourceType", getSourceType(), "url",
+          url.toExternalForm());
     }
 
     @Override

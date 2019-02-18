@@ -196,7 +196,7 @@ public class JsonUtils {
     return null;
   }
 
-  final static class BigIntegerJsonSerializer extends JsonSerializer<BigInteger> {
+  static final class BigIntegerJsonSerializer extends JsonSerializer<BigInteger> {
     @Override
     public Class<BigInteger> handledType() {
       return BigInteger.class;
@@ -214,7 +214,7 @@ public class JsonUtils {
   }
 
   @SuppressWarnings("rawtypes")
-  final static class EnumJsonSerializer extends JsonSerializer<Enum> {
+  static final class EnumJsonSerializer extends JsonSerializer<Enum> {
 
     static final Map<Enum, Map<String, Object>> CACHES = new ConcurrentHashMap<>();
 
@@ -261,7 +261,7 @@ public class JsonUtils {
     }
   }
 
-  final static class LongJsonSerializer extends JsonSerializer<Long> {
+  static final class LongJsonSerializer extends JsonSerializer<Long> {
     @Override
     public Class<Long> handledType() {
       return Long.class;

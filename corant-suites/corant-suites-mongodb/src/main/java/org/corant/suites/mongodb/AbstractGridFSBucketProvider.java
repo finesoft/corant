@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -39,11 +38,11 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 @ApplicationScoped
 public abstract class AbstractGridFSBucketProvider {
 
-  protected static final Map<String, GridFSBucket> gridFsBuckets = new ConcurrentHashMap<>();
-
   public static final int DFLT_CHUNK_SIZE_BYTES = 256;
 
-  public GridFSDownloadStream getFile(Serializable id) {
+  protected abstract GridFSBucket getBucket();
+
+  protected GridFSDownloadStream getFile(Serializable id) {
     try {
       return getBucket().openDownloadStream(MongoClientExtension.bsonId(id));
     } catch (MongoGridFSException e) {
@@ -51,7 +50,7 @@ public abstract class AbstractGridFSBucketProvider {
     }
   }
 
-  public void putFile(Serializable id, Resource r) {
+  protected void putFile(Serializable id, Resource r) {
     try (InputStream is = r.openStream()) {
       if (r instanceof ClassPathResource) {
         ClassPathResource cpr = ClassPathResource.class.cast(r);
@@ -71,15 +70,13 @@ public abstract class AbstractGridFSBucketProvider {
     }
   }
 
-  public void putFile(Serializable id, String filename, int chunkSizeBytes, InputStream is,
+  protected void putFile(Serializable id, String filename, int chunkSizeBytes, InputStream is,
       Map<String, Object> metadata) {
     getBucket().uploadFromStream(MongoClientExtension.bsonId(id), filename, shouldNotNull(is),
         new GridFSUploadOptions().chunkSizeBytes(chunkSizeBytes));
   }
 
-  public void removeFile(Serializable id) {
+  protected void removeFile(Serializable id) {
     getBucket().delete(MongoClientExtension.bsonId(id));
   }
-
-  protected abstract GridFSBucket getBucket();
 }

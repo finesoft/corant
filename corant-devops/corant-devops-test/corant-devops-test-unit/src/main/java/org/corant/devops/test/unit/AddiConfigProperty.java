@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  */
 @Target({})
 @Retention(RUNTIME)
-public @interface AdditionalConfigProperty {
+public @interface AddiConfigProperty {
 
   /** The name of the property */
   String name();

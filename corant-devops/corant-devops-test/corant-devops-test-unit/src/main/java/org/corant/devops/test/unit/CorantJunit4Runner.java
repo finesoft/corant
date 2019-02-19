@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.devops.test.unit;
@@ -50,9 +48,9 @@ public interface CorantJunit4Runner {
       public void evaluate() throws Throwable {
         try {
           if (corants.get() == null) {
-            configTestClass(testClass);
+            Class<?> configClass = configTestClass(testClass);
             logger.fine(() -> "Create corant instance for junit test.");
-            corants.set(new Corant(testClass));
+            corants.set(new Corant(configClass));
             corants.get().start();
           }
           classBlock.get().evaluate();
@@ -87,22 +85,23 @@ public interface CorantJunit4Runner {
     };
   }
 
-  default void configTestClass(final Class<?> testClass) {
+  default Class<?> configTestClass(final Class<?> testClass) {
     RunConfig rc = null;
     if (isEmbedded() || (rc = testClass.getAnnotation(RunConfig.class)) == null) {
-      return;
+      return testClass;
     }
-    enableRdmWebPorts.set(rc.enableRandomWebPort());
+    enableRdmWebPorts.set(rc.randomWebPort());
     if (isNotBlank(rc.profile())) {
       profiles.set(rc.profile());
       System.setProperty(CFG_PF_KEY, rc.profile());
     }
-    if (rc.additionalConfigProperties().length > 0) {
-      for (AdditionalConfigProperty acp : rc.additionalConfigProperties()) {
+    if (rc.addiConfigProperties().length > 0) {
+      for (AddiConfigProperty acp : rc.addiConfigProperties()) {
         addCfgPros.get().put(acp.name(), acp.value());
       }
     }
     autoDisposes.set(rc.autoDispose());
+    return rc.configClass() == null ? testClass : rc.configClass();
   }
 
   default Object createTestWithCorant(Class<?> clazz) throws Exception {

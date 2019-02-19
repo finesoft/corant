@@ -127,8 +127,8 @@ public class Corant {
     return null;
   }
 
-  public synchronized static void run(Class<?> configClass, String... args) {
-    new Corant(configClass, args).start();
+  public synchronized static Corant run(Class<?> configClass, String... args) {
+    return new Corant(configClass, args).start();
   }
 
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {

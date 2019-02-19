@@ -25,7 +25,7 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
  * @author bingo 上午11:32:33
  *
  */
-public class AdditionalConfigPropertyProvider implements ConfigSourceProvider {
+public class AddiConfigPropertyProvider implements ConfigSourceProvider {
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader forClassLoader) {

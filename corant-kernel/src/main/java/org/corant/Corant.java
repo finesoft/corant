@@ -127,6 +127,10 @@ public class Corant {
     return null;
   }
 
+  public synchronized static void run(Class<?> configClass, String... args) {
+    new Corant(configClass, args).start();
+  }
+
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
     return Unmanageables.accpet(object);
   }
@@ -170,7 +174,7 @@ public class Corant {
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
     if (configClass != null) {
-      weld.addPackages(true, configClass);
+      weld.addPackages(configClass);
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 

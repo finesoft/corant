@@ -40,7 +40,7 @@ public class ConverterRegistry {
 
   static final Map<ConverterType<?, ?>, Converter<?, ?>> SUPPORT_CONVERTERS =
       new ConcurrentHashMap<>();
-  static final Map<Class<?>, ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
+  static final Map<Type, ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
       new ConcurrentHashMap<>();
   static final Map<ConverterType<?, ?>, Set<ConverterType<?, ?>>> SUPPORT_CONVERTER_PIPE_TYPES =
       new ConcurrentHashMap<>();
@@ -75,7 +75,7 @@ public class ConverterRegistry {
         ConverterFactory.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class,
         "The converter %s parametered type must be actual type!", converter.toString());
-    SUPPORT_CONVERTER_FACTORIES.put((Class) types[0], converter);
+    SUPPORT_CONVERTER_FACTORIES.put(types[1], converter);
   }
 
   public synchronized static void registerNotSupportType(Class<?> sourceClass,
@@ -99,7 +99,7 @@ public class ConverterRegistry {
     return SUPPORT_CONVERTERS.get(converterType);
   }
 
-  static Map<Class<?>, ConverterFactory<?, ?>> getConverterFactories() {
+  static Map<Type, ConverterFactory<?, ?>> getConverterFactories() {
     return SUPPORT_CONVERTER_FACTORIES;
   }
 

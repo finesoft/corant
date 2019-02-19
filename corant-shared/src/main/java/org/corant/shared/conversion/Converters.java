@@ -15,7 +15,6 @@ package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.ObjectUtils.optional;
@@ -39,8 +38,11 @@ import org.corant.shared.conversion.converter.IdentityConverter;
  * <pre>
  * Lookup condition:
  * 1.The parameter source class must be equals or extends the source class of converter supported.
- * 2.The target class of converter supported must be equals or extends the parameter target class.
- * 3.In converter pipe, the pre converted value (as next converter parameter) must be equals or
+ * 2.For converter the target class of converter supported must be equals or extends the parameter
+ * target class.
+ * 3.For converter factory the target class of parameter must be equals or extends the target class
+ * of converter factory supported.
+ * 4.In converter pipe, the pre converted value (as next converter parameter) must be equals or
  * extends the source class of the next converter.
  * </pre>
  *
@@ -118,15 +120,10 @@ public class Converters {
   }
 
   static Converter getMatchedConverterFromFactory(Class<?> sourceClass, Class<?> targetClass) {
-    ConverterFactory factory = defaultObject(
-        asStream(ConverterRegistry.getConverterFactories())
-            .filter(e -> e.getKey().equals(sourceClass)
-                && e.getValue().isSupportTargetClass(targetClass))
-            .map(Entry::getValue).findFirst().orElse(null),
-        asStream(ConverterRegistry.getConverterFactories())
-            .filter(e -> e.getKey().isAssignableFrom(sourceClass)
-                && e.getValue().isSupportTargetClass(targetClass))
-            .map(Entry::getValue).findFirst().orElse(null));
+    ConverterFactory factory = ConverterRegistry.getConverterFactories().values().stream()
+        .filter(f -> f.isSupportSourceClass(sourceClass) && f.isSupportTargetClass(targetClass))
+        .findFirst().orElse(null);
+
     if (factory != null) {
       // FIXME initialize parameter
       return factory.create(targetClass, null, true);

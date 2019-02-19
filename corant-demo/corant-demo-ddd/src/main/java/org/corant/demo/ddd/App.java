@@ -13,9 +13,8 @@
  */
 package org.corant.demo.ddd;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.ApplicationPath;
-import org.corant.kernel.boot.Main;
+import org.corant.Corant;
 
 /**
  * corant-demo-ddd
@@ -23,10 +22,9 @@ import org.corant.kernel.boot.Main;
  * @author bingo 上午9:52:35
  *
  */
-@ApplicationScoped
 @ApplicationPath("/demo")
 public class App {
   public static void main(String... strings) {
-    Main.main(strings);
+    Corant.run(App.class, strings);
   }
 }

@@ -13,9 +13,11 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -48,6 +50,8 @@ import org.corant.suites.jpa.shared.JpaUtils;
 public class IdentifierEntityConverterFactory implements ConverterFactory<Object, Entity> {
 
   static final Map<Class<?>, Boolean> cached = new ConcurrentHashMap<>();
+  final Set<Class<?>> supportedSourceClass =
+      asImmutableSet(Long.class, Long.TYPE, String.class, Entity.class);
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -71,6 +75,12 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
       }
       return defaultObject(result, defaultValue);
     };
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return supportedSourceClass.contains(sourceClass)
+        || supportedSourceClass.stream().anyMatch(c -> c.isAssignableFrom(sourceClass));
   }
 
   @Override

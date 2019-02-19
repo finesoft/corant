@@ -27,5 +27,9 @@ public interface ConverterFactory<S, T> {
     return 0;
   }
 
+  default boolean isSupportSourceClass(Class<?> sourceClass) {
+    return true;
+  }
+
   boolean isSupportTargetClass(Class<?> targetClass);
 }

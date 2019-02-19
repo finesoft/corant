@@ -13,10 +13,12 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
+import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
@@ -31,6 +33,8 @@ import org.corant.shared.conversion.ConverterFactory;
 public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum<?>> {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
+  final Set<Class<?>> supportedSourceClass = asImmutableSet(Enum.class, Number.class,
+      CharSequence.class, Integer.TYPE, Long.TYPE, Short.TYPE, Byte.TYPE);
 
   @Override
   public Converter<Object, Enum<?>> create(Class<Enum<?>> targetClass, Enum<?> defaultValue,
@@ -51,6 +55,12 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
   }
 
   @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return supportedSourceClass.contains(sourceClass)
+        || supportedSourceClass.stream().anyMatch(c -> c.isAssignableFrom(sourceClass));
+  }
+
+  @Override
   public boolean isSupportTargetClass(Class<?> targetClass) {
     return Enum.class.isAssignableFrom(targetClass);
   }
@@ -59,8 +69,8 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       throws Exception {
     if (value instanceof Enum<?> && value.getClass().isAssignableFrom(targetClass)) {
       return targetClass.cast(value);
-    } else if (value instanceof Integer) {
-      return targetClass.getEnumConstants()[Integer.class.cast(value)];
+    } else if (value instanceof Number) {
+      return targetClass.getEnumConstants()[Number.class.cast(value).intValue()];
     } else {
       String[] values = split(value.toString(), ".", true, true);
       String name = values[values.length - 1];

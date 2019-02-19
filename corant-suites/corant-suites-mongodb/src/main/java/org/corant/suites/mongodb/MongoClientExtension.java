@@ -27,7 +27,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
@@ -48,6 +47,7 @@ import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
@@ -72,9 +72,6 @@ public class MongoClientExtension implements Extension {
   protected final Set<String> databaseNames = new LinkedHashSet<>();
   protected final Set<String> clientNames = new LinkedHashSet<>();
   protected final Set<String> gridFSBucketNames = new LinkedHashSet<>();
-  protected final Map<String, MongoClient> clients = new ConcurrentHashMap<>();
-  protected final Map<String, MongoDatabase> databases = new ConcurrentHashMap<>();
-  protected final Map<String, GridFSBucket> gridFSBuckets = new ConcurrentHashMap<>();
   protected final Map<String, MongoClientConfig> clientConfigs = new HashMap<>();
   protected final Map<String, MongodbConfig> databaseConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
@@ -95,7 +92,9 @@ public class MongoClientExtension implements Extension {
   }
 
   public MongoClient getClient(String clientName) {
-    return clients.get(clientName);
+    Instance<MongoClient> inst =
+        Corant.cdi().select(MongoClient.class, NamedLiteral.of(clientName));
+    return inst.isResolvable() ? inst.get() : null;
   }
 
   /**
@@ -116,7 +115,20 @@ public class MongoClientExtension implements Extension {
    * @return the clients
    */
   public Map<String, MongoClient> getClients() {
-    return Collections.unmodifiableMap(clients);
+    Map<String, MongoClient> map = new HashMap<>();
+    for (String clientName : clientNames) {
+      MongoClient mc = getClient(clientName);
+      if (mc != null) {
+        map.put(clientName, mc);
+      }
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  public MongoDatabase getDatabase(String namespace) {
+    Instance<MongoDatabase> inst =
+        Corant.cdi().select(MongoDatabase.class, NamedLiteral.of(namespace));
+    return inst.isResolvable() ? inst.get() : null;
   }
 
   /**
@@ -146,7 +158,20 @@ public class MongoClientExtension implements Extension {
    * @return the databases
    */
   public Map<String, MongoDatabase> getDatabases() {
-    return Collections.unmodifiableMap(databases);
+    Map<String, MongoDatabase> map = new HashMap<>();
+    for (String dbName : databaseNames) {
+      MongoDatabase mc = getDatabase(dbName);
+      if (mc != null) {
+        map.put(dbName, mc);
+      }
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  public GridFSBucket getGridFSBucket(String namespace) {
+    Instance<GridFSBucket> inst =
+        Corant.cdi().select(GridFSBucket.class, NamedLiteral.of(namespace));
+    return inst.isResolvable() ? inst.get() : null;
   }
 
   /**
@@ -162,7 +187,14 @@ public class MongoClientExtension implements Extension {
    * @return the gridFSBuckets
    */
   public Map<String, GridFSBucket> getGridFSBuckets() {
-    return Collections.unmodifiableMap(gridFSBuckets);
+    Map<String, GridFSBucket> map = new HashMap<>();
+    for (String dbName : gridFSBucketNames) {
+      GridFSBucket mc = getGridFSBucket(dbName);
+      if (mc != null) {
+        map.put(dbName, mc);
+      }
+    }
+    return Collections.unmodifiableMap(map);
   }
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
@@ -194,12 +226,9 @@ public class MongoClientExtension implements Extension {
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    gridFSBuckets.clear();
     gridFSBucketNames.clear();
-    databases.clear();
     databaseNames.clear();
     databaseConfigs.clear();
-    clients.clear();
     clientNames.clear();
     clientConfigs.clear();
     clientConfigs.putAll(MongoClientConfig.from(ConfigProvider.getConfig()));
@@ -250,8 +279,7 @@ public class MongoClientExtension implements Extension {
     shouldBeTrue(!isEmpty(names) && names.length == 3);
     MongoDatabase md = beans.select(MongoDatabase.class,
         NamedLiteral.of(names[0] + Names.NAME_SPACE_SEPARATORS + names[1])).get();
-    return gridFSBuckets.computeIfAbsent(bucketNamespace,
-        (k) -> GridFSBuckets.create(md, names[2]));
+    return GridFSBuckets.create(md, names[2]);
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {

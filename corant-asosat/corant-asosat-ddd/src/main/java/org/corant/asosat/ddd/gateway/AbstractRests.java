@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.gateway;
 
+import static org.corant.shared.util.StringUtils.split;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 
@@ -99,6 +101,17 @@ public abstract class AbstractRests {
    */
   protected Response ok(Object obj) {
     return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+  }
+
+  protected String parseMpFileName(MultivaluedMap<String, String> headers) {
+    for (String name : split(headers.getFirst("Content-Disposition"), ";", true, true)) {
+      if (name.startsWith("filename")) {
+        String[] tmp = split(name, "=", true, true);
+        String fileName = tmp[1].replaceAll("\"", "");
+        return fileName;
+      }
+    }
+    return "unnamed-" + System.currentTimeMillis();
   }
 
   protected String resolvePath() {

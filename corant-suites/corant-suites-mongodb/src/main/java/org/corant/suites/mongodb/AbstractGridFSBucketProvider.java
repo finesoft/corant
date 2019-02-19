@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.Resources.FileSystemResource;
 import org.corant.shared.util.Resources.Resource;
 import com.mongodb.MongoGridFSException;
@@ -36,7 +37,7 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 @ApplicationScoped
 public abstract class AbstractGridFSBucketProvider {
 
-  public static final int DFLT_CHUNK_SIZE_BYTES = 256;
+  public static final int DFLT_CHUNK_SIZE_BYTES = Defaults.SIXTEEN_KBS * 16;
 
   protected abstract GridFSBucket getBucket();
 

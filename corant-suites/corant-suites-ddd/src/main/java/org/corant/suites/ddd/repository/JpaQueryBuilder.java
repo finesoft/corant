@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.repository;
 
+import static org.corant.shared.util.ObjectUtils.asString;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -41,7 +42,7 @@ public abstract class JpaQueryBuilder {
       }
 
       @Override
-      protected Query makeQueryObject(EntityManager entityManager) {
+      protected Query createQuery(EntityManager entityManager) {
         return entityManager.createNamedQuery(namedQuery);
       }
     };
@@ -58,7 +59,7 @@ public abstract class JpaQueryBuilder {
       }
 
       @Override
-      protected Query makeQueryObject(EntityManager entityManager) {
+      protected Query createQuery(EntityManager entityManager) {
         return entityManager.createNativeQuery(nativeQuery);
       }
     };
@@ -71,11 +72,11 @@ public abstract class JpaQueryBuilder {
     return new JpaQueryBuilder() {
       @Override
       public String toString() {
-        return "Query: " + query + " params: " + getParameterDescription();
+        return "Query: " + query + getParameterDescription();
       }
 
       @Override
-      protected Query makeQueryObject(EntityManager entityManager) {
+      protected Query createQuery(EntityManager entityManager) {
         return entityManager.createQuery(query);
       }
     };
@@ -84,8 +85,8 @@ public abstract class JpaQueryBuilder {
   /**
    * Build JPA query object
    */
-  public Query createQuery(EntityManager entityManager) {
-    Query query = makeQueryObject(entityManager);
+  public Query build(EntityManager entityManager) {
+    Query query = createQuery(entityManager);
     populateQuery(entityManager, query);
     return query;
   }
@@ -104,11 +105,10 @@ public abstract class JpaQueryBuilder {
     checkNoParametersConfigured();
     parameterBuilder = new ParameterBuilder() {
       @Override
-      @SuppressWarnings("rawtypes")
       public void populateQuery(EntityManager entityManager, Query query) {
         if (parameterMap != null) {
-          for (Entry entry : parameterMap.entrySet()) {
-            query.setParameter(entry.getKey().toString(), entry.getValue());
+          for (Entry<?, ?> entry : parameterMap.entrySet()) {
+            query.setParameter(asString(entry.getKey()), entry.getValue());
           }
         }
       }
@@ -148,9 +148,11 @@ public abstract class JpaQueryBuilder {
   protected void checkNoParametersConfigured() {
     if (parameterBuilder != null) {
       throw new IllegalArgumentException(
-          "Cannot add parameters to a QueryBuilder which already has parameters configured");
+          "Cannot add parameters to a JpaQueryBuilder which already has parameters configured");
     }
   }
+
+  protected abstract Query createQuery(EntityManager entityManager);
 
   protected String getParameterDescription() {
     if (parameterBuilder == null) {
@@ -159,8 +161,6 @@ public abstract class JpaQueryBuilder {
       return " " + parameterBuilder.toString();
     }
   }
-
-  protected abstract Query makeQueryObject(EntityManager entityManager);
 
   protected void populateQuery(EntityManager entityManager, Query query) {
     if (parameterBuilder != null) {

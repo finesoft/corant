@@ -140,12 +140,12 @@ public abstract class AbstractJpaRepository implements JpaRepository {
 
   @Override
   public <T> T get(String queryName, Map<?, ?> param) {
-    return this.get(namedQuery(queryName).parameters(param).createQuery(getEntityManager()));
+    return this.get(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
   @Override
   public <T> T get(String queryName, Object... param) {
-    return this.get(namedQuery(queryName).parameters(param).createQuery(getEntityManager()));
+    return this.get(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
   /**
@@ -212,12 +212,12 @@ public abstract class AbstractJpaRepository implements JpaRepository {
 
   @Override
   public <T> List<T> select(String queryName, Map<?, ?> param) {
-    return this.select(namedQuery(queryName).parameters(param).createQuery(getEntityManager()));
+    return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
   @Override
   public <T> List<T> select(String queryName, Object... param) {
-    return this.select(namedQuery(queryName).parameters(param).createQuery(getEntityManager()));
+    return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
 }

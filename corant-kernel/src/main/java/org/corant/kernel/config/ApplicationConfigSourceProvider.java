@@ -13,14 +13,18 @@
  */
 package org.corant.kernel.config;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.matchGlob;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.ConfigNames;
@@ -43,6 +47,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String sysPro = System.getProperty(ConfigNames.CFG_LOCATION_KEY);
   static String sysEnv = System.getenv(ConfigNames.CFG_LOCATION_KEY);
   static String fileDir = defaultString(defaultBlank(sysPro, sysEnv));
+  static String cfgUrlExPattern = System.getProperty(ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN);
 
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
@@ -50,14 +55,23 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] filePaths = isBlank(fileDir) ? new String[0]
       : Arrays.stream(appExtName).map(e -> fileDir + File.separator + appBaseName + e)
           .toArray(String[]::new);
+  static Predicate<URL> filter = (u) -> {
+    if (isBlank(cfgUrlExPattern)) {
+      return true;
+    } else {
+      return !matchGlob(u.toExternalForm(), true, cfgUrlExPattern);
+    }
+  };
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
     try {
-      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filePaths));
-      list.addAll(
-          ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL, classPaths));
+      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filter, filePaths));
+      if (isEmpty(filePaths)) {
+        list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL,
+            filter, classPaths));
+      }
       list.forEach(cs -> logger.info(
           () -> String.format("Loaded config source[%s] %s.", cs.getOrdinal(), cs.getName())));
     } catch (IOException e) {

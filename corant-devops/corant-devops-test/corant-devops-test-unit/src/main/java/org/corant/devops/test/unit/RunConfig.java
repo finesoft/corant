@@ -56,12 +56,9 @@ public @interface RunConfig {
   Class<?> configClass();
 
   /**
-   * Use random web port for test, usually use with web server environment testing. If use in test
-   * suite, the children of suite not affected.
-   *
-   * @return randomWebPort
+   * Which config path to exclude, use glob pattern.
    */
-  boolean randomWebPort() default false;
+  String excludeConfigUrlPattern() default "**/target/classes/META-INF/*";
 
   /**
    * Assign particularly profile configuration for test environment. If use in test suite, the
@@ -70,4 +67,12 @@ public @interface RunConfig {
    * @return profile
    */
   String profile() default "";
+
+  /**
+   * Use random web port for test, usually use with web server environment testing. If use in test
+   * suite, the children of suite not affected.
+   *
+   * @return randomWebPort
+   */
+  boolean randomWebPort() default false;
 }

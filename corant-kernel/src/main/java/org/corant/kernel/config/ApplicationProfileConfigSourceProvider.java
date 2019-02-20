@@ -14,16 +14,21 @@
 package org.corant.kernel.config;
 
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.matchGlob;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.normal.Priorities.ConfigPriorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -38,6 +43,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   static String sysPfPro = System.getProperty(CFG_PF_KEY);
   static String sysPfEvn = System.getenv(CFG_PF_KEY);
   static String[] profiles = split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
+  static String cfgUrlExPattern = System.getProperty(ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN);
 
   static String[] pfClassPaths = Arrays.stream(profiles)
       .flatMap(p -> Arrays.stream(appExtName).map(e -> metaInf + appBaseName + "-" + p + e))
@@ -49,14 +55,24 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
               .map(e -> fileDir + File.separator + appBaseName + "-" + p + e))
           .toArray(String[]::new);
 
+  static Predicate<URL> filter = (u) -> {
+    if (isBlank(cfgUrlExPattern)) {
+      return true;
+    } else {
+      return !matchGlob(u.toExternalForm(), true, cfgUrlExPattern);
+    }
+  };
+
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
     try {
-      list.addAll(
-          ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, pfFilePaths));
-      list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_PROFILE_ORDINAL,
-          pfClassPaths));
+      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter,
+          pfFilePaths));
+      if (isEmpty(pfFilePaths)) {
+        list.addAll(ConfigSourceLoader.load(classLoader,
+            ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter, pfClassPaths));
+      }
       list.forEach(cs -> logger.info(() -> String.format("Loaded profile config source[%s] %s.",
           cs.getOrdinal(), cs.getName())));
     } catch (IOException e) {

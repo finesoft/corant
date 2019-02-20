@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 
 /**
@@ -42,7 +43,8 @@ public class ElasticSchemaUtils {
 
   static void prepare(String clusterName) {
     LoggerFactory.disableLogger();
-    System.setProperty("corant.temp.webserver.auto-start", "false");
-    System.setProperty("corant.temp.elastic." + clusterName + ".auto-update-schame", "false");
+    System.setProperty(ConfigNames.CFG_AD_PREFIX + "webserver.auto-start", "false");
+    System.setProperty(ConfigNames.CFG_AD_PREFIX + "elastic." + clusterName + ".auto-update-schame",
+        "false");
   }
 }

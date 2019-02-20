@@ -16,6 +16,7 @@ package org.corant.devops.test.unit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.corant.shared.normal.Priorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
@@ -44,6 +45,11 @@ public class AddiConfigPropertyProvider implements ConfigSourceProvider {
     @Override
     public String getName() {
       return "CorantJunit4Runner_Additional_Config";
+    }
+
+    @Override
+    public int getOrdinal() {
+      return Priorities.ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
     }
 
     @Override

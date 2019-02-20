@@ -16,11 +16,14 @@ package org.corant.kernel.config;
 import static org.corant.shared.util.MapUtils.toMap;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.normal.Priorities.ConfigPriorities;
+import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -29,24 +32,29 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 上午10:49:14
  *
  */
-public class ApplicationTempConfigSourceProvider extends ApplicationConfigSourceProvider {
+public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSourceProvider {
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
-    List<ConfigSource> list = new ArrayList<>();
     final Properties props = new Properties();
     System.getProperties().forEach((k, v) -> {
       String key = asDefaultString(k);
       String value = asDefaultString(v);
-      if (key.startsWith(ConfigNames.CFG_TMP_PREFIX)) {
-        key = key.substring(ConfigNames.CFG_TMP_PREFIX.length());
+      if (key.startsWith(ConfigNames.CFG_AD_PREFIX)) {
+        key = key.substring(ConfigNames.CFG_AD_PREFIX.length());
         props.put(key, value);
       }
     });
-    list.add(new TempConfigSource(props));
-    list.forEach(cs -> logger.info(
-        () -> String.format("Loaded temp config source[%s] %s.", cs.getOrdinal(), cs.getName())));
-    return list;
+    if (!props.isEmpty()) {
+      List<ConfigSource> list = new ArrayList<>();
+      List<String> keys =
+          props.keySet().stream().map(ObjectUtils::asString).collect(Collectors.toList());
+      list.add(new AdjustConfigSource(props));
+      list.forEach(cs -> logger.info(() -> String.format("Loaded adjust config source[%s] %s.",
+          cs.getOrdinal(), String.join(",", keys))));
+      return list;
+    }
+    return Collections.emptyList();
   }
 
   /**
@@ -55,24 +63,24 @@ public class ApplicationTempConfigSourceProvider extends ApplicationConfigSource
    * @author bingo 下午8:56:38
    *
    */
-  private static final class TempConfigSource implements ConfigSource {
+  private static final class AdjustConfigSource implements ConfigSource {
     private final Properties props;
 
     /**
      * @param props
      */
-    private TempConfigSource(Properties props) {
+    private AdjustConfigSource(Properties props) {
       this.props = props;
     }
 
     @Override
     public String getName() {
-      return ConfigNames.CFG_TMP_PREFIX;
+      return ConfigNames.CFG_AD_PREFIX;
     }
 
     @Override
     public int getOrdinal() {
-      return ConfigPriorities.APPLICATION_TMP_ORDINAL;
+      return ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
     }
 
     @Override

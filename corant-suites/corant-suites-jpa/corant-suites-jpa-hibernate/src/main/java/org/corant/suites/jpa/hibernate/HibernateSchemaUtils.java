@@ -27,6 +27,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.JpaExtension;
@@ -61,8 +62,8 @@ public class HibernateSchemaUtils {
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
-    System.setProperty("corant.temp.webserver.auto-start", "false");
-    System.setProperty("corant.temp.flyway.migrate.enable", "false");
+    System.setProperty(ConfigNames.CFG_AD_PREFIX + "webserver.auto-start", "false");
+    System.setProperty(ConfigNames.CFG_AD_PREFIX + "flyway.migrate.enable", "false");
     Corant corant = new Corant(HibernateSchemaUtils.class, "-disable_boost_line");
     corant.start();
     InitialContext jndi = Corant.cdi().select(InitialContext.class).get();
@@ -73,8 +74,8 @@ public class HibernateSchemaUtils {
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource((dsn) -> {
       try {
-        return tryCast(jndi.lookup(
-            shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
+        return tryCast(
+            jndi.lookup(shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
                 : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn),
             DataSource.class);
       } catch (NamingException e1) {
@@ -177,6 +178,6 @@ public class HibernateSchemaUtils {
 
   static void prepare() {
     LoggerFactory.disableLogger();
-    System.setProperty("corant.temp.webserver.auto-start", "false");
+    System.setProperty(ConfigNames.CFG_AD_PREFIX + "webserver.auto-start", "false");
   }
 }

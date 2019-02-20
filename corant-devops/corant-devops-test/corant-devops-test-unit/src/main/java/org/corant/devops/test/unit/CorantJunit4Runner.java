@@ -13,12 +13,12 @@
  */
 package org.corant.devops.test.unit;
 
+import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Unmanaged;
 import javax.enterprise.inject.spi.Unmanaged.UnmanagedInstance;
 import org.corant.Corant;
@@ -32,10 +32,12 @@ import org.junit.runners.model.Statement;
  */
 public interface CorantJunit4Runner {
 
-  Logger logger = Logger.getLogger(CorantJunit4Runner.class.getName());
+  // Logger logger = Logger.getLogger(CorantJunit4Runner.class.getName());
   ThreadLocal<Corant> corants = new ThreadLocal<>();
   ThreadLocal<Boolean> enableRdmWebPorts = ThreadLocal.withInitial(() -> Boolean.FALSE);
   ThreadLocal<String> profiles = new ThreadLocal<>();
+  ThreadLocal<String> excludeConfigUrlPattern =
+      ThreadLocal.withInitial(() -> "**/target/classes/META-INF/*");
   ThreadLocal<Boolean> autoDisposes = ThreadLocal.withInitial(() -> Boolean.TRUE);
   ThreadLocal<Map<String, String>> addCfgPros = ThreadLocal.withInitial(HashMap::new);
   ThreadLocal<Map<Class<?>, UnmanagedInstance<?>>> testObjects =
@@ -49,8 +51,8 @@ public interface CorantJunit4Runner {
         try {
           if (corants.get() == null) {
             Class<?> configClass = configTestClass(testClass);
-            logger.fine(() -> "Create corant instance for junit test.");
-            corants.set(new Corant(configClass));
+            // logger.fine(() -> "Create corant instance for junit test.");
+            corants.set(new Corant(configClass, testClass.getClassLoader()));
             corants.get().start();
           }
           classBlock.get().evaluate();
@@ -62,14 +64,17 @@ public interface CorantJunit4Runner {
             if (isNotBlank(profiles.get())) {
               System.clearProperty(CFG_PF_KEY);
             }
+            if (isNotBlank(excludeConfigUrlPattern.get())) {
+              System.clearProperty(CFG_LOCATION_EXCLUDE_PATTERN);
+            }
             if (autoDisposes.get()) {
-              logger.fine(() -> "Clean unmanaged test instance from junit test.");
+              // logger.fine(() -> "Clean unmanaged test instance from junit test.");
               if (testObjects.get() != null) {
                 testObjects.get().values().forEach(umi -> umi.preDestroy().dispose());
                 testObjects.get().clear();
                 testObjects.remove();
               }
-              logger.fine(() -> "Clean corant instance from junit test.");
+              // logger.fine(() -> "Clean corant instance from junit test.");
               if (corants.get() != null) {
                 corants.get().stop();
                 corants.remove();
@@ -79,6 +84,7 @@ public interface CorantJunit4Runner {
             addCfgPros.remove();
             profiles.remove();
             enableRdmWebPorts.remove();
+            excludeConfigUrlPattern.remove();
           }
         }
       }
@@ -94,6 +100,12 @@ public interface CorantJunit4Runner {
     if (isNotBlank(rc.profile())) {
       profiles.set(rc.profile());
       System.setProperty(CFG_PF_KEY, rc.profile());
+    }
+    if (isNotBlank(rc.excludeConfigUrlPattern())) {
+      excludeConfigUrlPattern.set(rc.excludeConfigUrlPattern());
+    }
+    if (isNotBlank(excludeConfigUrlPattern.get())) {
+      System.setProperty(CFG_LOCATION_EXCLUDE_PATTERN, excludeConfigUrlPattern.get());
     }
     if (rc.addiConfigProperties().length > 0) {
       for (AddiConfigProperty acp : rc.addiConfigProperties()) {

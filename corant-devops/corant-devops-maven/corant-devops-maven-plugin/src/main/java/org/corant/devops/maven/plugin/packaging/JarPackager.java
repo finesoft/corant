@@ -66,7 +66,7 @@ public class JarPackager implements Packager {
 
   @Override
   public void pack() throws Exception {
-    log.debug("(corant) ctart packaging process...");
+    log.debug("(corant) start packaging process...");
     doPack(buildArchive(), mojo.getDestination());
     if (mojo.isAttach()) {
       doPackAttach();

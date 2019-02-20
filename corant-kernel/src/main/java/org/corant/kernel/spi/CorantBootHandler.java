@@ -21,11 +21,10 @@ import org.corant.Corant;
  * @author bingo 下午2:30:23
  *
  */
-public interface CorantBootHandler extends Comparable<CorantBootHandler> {
+public interface CorantBootHandler {
 
-  @Override
-  default int compareTo(CorantBootHandler o) {
-    return Integer.compare(getOrdinal(), o.getOrdinal());
+  static int compare(CorantBootHandler h1, CorantBootHandler h2) {
+    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
   }
 
   default int getOrdinal() {
@@ -35,4 +34,5 @@ public interface CorantBootHandler extends Comparable<CorantBootHandler> {
   void handleAfterStarted(Corant corant, String... args);
 
   void handleBeforeStart(ClassLoader classLoader, String... args);
+
 }

@@ -244,7 +244,7 @@ public class Corant {
 
   void doAfterStarted(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compareTo)
+        .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostCorantReadyEvent(args));
@@ -252,7 +252,7 @@ public class Corant {
 
   void doBeforeStart(ClassLoader classLoader) {
     asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compareTo)
+        .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
   }
 

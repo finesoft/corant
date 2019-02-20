@@ -21,11 +21,10 @@ package org.corant.kernel.config;
  * @author bingo 上午10:44:33
  *
  */
-public interface ComparableConfigurator extends Comparable<ComparableConfigurator> {
+public interface ComparableConfigurator {
 
-  @Override
-  default int compareTo(ComparableConfigurator o) {
-    return Integer.compare(getOrdinal(), o.getOrdinal());
+  static int compare(ComparableConfigurator ccf1,ComparableConfigurator ccf2) {
+    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal());
   }
 
   default int getOrdinal() {

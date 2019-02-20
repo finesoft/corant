@@ -64,6 +64,16 @@ public class Corant {
     this(null, null, new String[0]);
   }
 
+  /**
+   * Use given config class and args construct Corant instance. If the given config class is not
+   * null then the class loader of the current thread context and the CDI container will be set with
+   * the given config class class loader. The given args will be propagate to all CorantBootHandler
+   * and all CorantLifecycleEvents.
+   *
+   * @see #Corant(Class, ClassLoader, String...)
+   * @param configClass
+   * @param args
+   */
   public Corant(Class<?> configClass, String... args) {
     this(configClass, configClass != null ? configClass.getClassLoader() : null, args);
   }
@@ -76,6 +86,18 @@ public class Corant {
     this(null, null, args);
   }
 
+  /**
+   * Construct Coarnt instance with given config class and class loader and args. If the given
+   * config class is not null then it will be added to the set of bean classes for the synthetic
+   * bean archive. If the given class loader is not null then it will be set to the context
+   * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
+   * class loader. The given args will be propagate to all CorantBootHandler and all
+   * CorantLifecycleEvents.
+   *
+   * @param configClass
+   * @param classLoader
+   * @param args
+   */
   Corant(Class<?> configClass, ClassLoader classLoader, String... args) {
     this.configClass = configClass;
     if (classLoader != null) {
@@ -129,6 +151,13 @@ public class Corant {
 
   public synchronized static Corant run(Class<?> configClass, String... args) {
     return new Corant(configClass, args).start();
+  }
+
+  public synchronized static CDI<Object> tryCdi() {
+    if (INSTANCE == null || INSTANCE.container == null) {
+      return null;
+    }
+    return INSTANCE.container;
   }
 
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
@@ -202,7 +231,7 @@ public class Corant {
   public synchronized void stop() {
     if (isRuning()) {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-      emitter.fire(new PreContainerStopEvent());
+      emitter.fire(new PreContainerStopEvent(args));
       ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
       container.close();
     }

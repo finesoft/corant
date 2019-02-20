@@ -21,26 +21,49 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
+ * corant-shared
+ *
+ * The annotation utility class.
+ *
  * @author bingo 下午10:06:13
  *
  */
 public class AnnotationUtils {
 
-  public static <A extends Annotation> A findAnnotation(AnnotatedElement ae, Class<A> at) {
-    Annotation[] anns = ae.getDeclaredAnnotations();
-    for (Annotation ann : anns) {
-      if (ann.annotationType() == at) {
-        return forceCast(ann);
+  /**
+   * Find the annotation object from given annotatedElement with given annotation type class, this
+   * is base method.
+   *
+   * @param annEle
+   * @param annTyp
+   * @return the annotation, if not found will return null.
+   */
+  public static <A extends Annotation> A findAnnotation(AnnotatedElement annEle, Class<A> annTyp) {
+    if (annEle != null) {
+      Annotation[] anns = annEle.getDeclaredAnnotations();
+      for (Annotation ann : anns) {
+        if (ann.annotationType() == annTyp) {
+          return forceCast(ann);
+        }
       }
     }
     return null;
   }
 
-  public static <A extends Annotation> A findAnnotation(Class<?> cls, Class<A> at,
+  /**
+   * Find the annotation object from given class with given annotation type class or optionally find
+   * from the super classes of the given class.
+   *
+   * @param cls the class with annotated to be find
+   * @param annTyp the annotation class which to be find
+   * @param searchSupers If true, all super classes or interfaces are looked up.
+   * @return the annotation, if not found will return null.
+   */
+  public static <A extends Annotation> A findAnnotation(Class<?> cls, Class<A> annTyp,
       boolean searchSupers) {
     Annotation[] anns = cls.getDeclaredAnnotations();
     for (Annotation ann : anns) {
-      if (ann.annotationType() == at) {
+      if (ann.annotationType() == annTyp) {
         return forceCast(ann);
       }
     }
@@ -49,11 +72,22 @@ public class AnnotationUtils {
       if (superCls == null || Object.class == superCls) {
         return null;
       }
-      return findAnnotation(superCls, at);
+      return findAnnotation(superCls, annTyp, searchSupers);
     }
     return null;
   }
 
+  /**
+   * Find the annotation object with the given annotation type that is present on the given method
+   * or optionally on any equivalent method in super classes and interfaces. Returns null if the
+   * annotation type was not present.
+   *
+   * @param method the class with annotated to be find
+   * @param annotationCls the annotation class which to be find
+   * @param searchSupers If true, all super classes or interfaces are looked up.
+   * @param ignoreAccess determines if underlying method has to be accessible
+   * @return the annotation if not found will return null.
+   */
   public static <A extends Annotation> A findAnnotation(final Method method,
       final Class<A> annotationCls, final boolean searchSupers, final boolean ignoreAccess) {
     if (method == null || annotationCls == null) {

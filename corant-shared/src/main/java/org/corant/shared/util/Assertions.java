@@ -22,6 +22,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-shared
  *
+ * Contract assertions
+ *
  * @author bingo 下午11:26:29
  *
  */
@@ -29,10 +31,26 @@ public class Assertions {
 
   private Assertions() {}
 
+  /**
+   * Throw CorantRuntimeException if given two objects is not equals.
+   *
+   * @see ObjectUtils#isEquals(Object, Object)
+   * @param a
+   * @param b shouldBeEquals
+   */
   public static void shouldBeEquals(Object a, Object b) {
     shouldBeEquals(a, b, "The objects %s %s should be equal!", asString(a), asString(b));
   }
 
+  /**
+   * Throw CorantRuntimeException if given two objects is not equals with given message and message
+   * parameters.
+   *
+   * @param a
+   * @param b
+   * @param messageOrFormat
+   * @param args
+   */
   public static void shouldBeEquals(Object a, Object b, String messageOrFormat, Object... args) {
     if (!isEquals(a, b)) {
       throw new CorantRuntimeException(messageOrFormat, args);

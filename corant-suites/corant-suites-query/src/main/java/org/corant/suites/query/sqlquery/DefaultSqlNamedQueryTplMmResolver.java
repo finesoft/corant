@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sqlquery;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
@@ -37,7 +37,7 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
 
-  private Object[] parameters = new Object[0];
+  private List<Object> parameters = new ArrayList<>();
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -47,16 +47,14 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
       if (arg instanceof Object[]) {
         Object[] argList = (Object[]) arg;
         int argSize = argList.length;
-        parameters = new Object[argSize];
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
-          parameters[i] = argList[i];
+          parameters.add(argList[i]);
           placeHolders[i] = SQL_PS_PLACE_HOLDER;
         }
         return new SimpleScalar(String.join(",", placeHolders));
       } else {
-        parameters = new Object[1];
-        parameters[0] = arg;
+        parameters.add(arg);
         return SQL_SS_PLACE_HOLDER;
       }
     }
@@ -65,7 +63,7 @@ public class DefaultSqlNamedQueryTplMmResolver implements DynamicQueryTplMmResol
 
   @Override
   public Object[] getParameters() {
-    return Arrays.copyOf(parameters, parameters.length);
+    return parameters.toArray(new Object[parameters.size()]);
   }
 
   @Override

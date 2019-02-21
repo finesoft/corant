@@ -43,10 +43,10 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
 
   @Override
   protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitMetaData metaData) {
-    JpaExtension extension = Corant.cdi().select(JpaExtension.class).get();
+    JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
     PersistenceUnitInfoMetaData puimd =
         extension.getPersistenceUnitInfoMetaData(metaData.getMixedName());
-    InitialContext jndi = Corant.cdi().select(InitialContext.class).get();
+    InitialContext jndi = Corant.instance().select(InitialContext.class).get();
     puimd.configDataSource((dsn) -> {
       try {
         return forceCast(jndi.lookup(

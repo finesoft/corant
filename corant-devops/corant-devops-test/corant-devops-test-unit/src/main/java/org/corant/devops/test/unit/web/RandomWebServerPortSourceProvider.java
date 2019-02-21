@@ -56,7 +56,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
     @Override
     public int getOrdinal() {
-      if (CorantJunit4Runner.enableRdmWebPorts.get()) {
+      if (CorantJunit4Runner.ENA_RDM_WEB_PORTS.get()) {
         return Integer.MAX_VALUE;
       } else {
         return Integer.MIN_VALUE;

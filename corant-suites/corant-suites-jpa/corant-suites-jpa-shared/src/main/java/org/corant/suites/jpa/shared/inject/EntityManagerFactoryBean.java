@@ -61,8 +61,8 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
-    AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
+    shouldBeTrue(Corant.instance().select(AbstractJpaProvider.class).isResolvable());
+    AbstractJpaProvider provider = Corant.instance().select(AbstractJpaProvider.class).get();
     LOGGER.fine(() -> String.format(
         "Create an entity manager factory with persistence unit name %s scope is ApplicationScoped.",
         persistenceUnitMetaData.getMixedName(), getScope().getSimpleName()));

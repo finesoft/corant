@@ -16,6 +16,7 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.reflect.Type;
@@ -64,14 +65,14 @@ public class ConverterRegistry {
 
   public synchronized static <S, T> void register(Converter<S, T> converter) {
     Type[] types =
-        TypeUtils.getParameterizedTypes(shouldNotNull(converter).getClass(), Converter.class);
+        TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
         "The converter %s parametered type must be actual type!", converter.toString());
     register((Class) types[0], (Class) types[1], converter);
   }
 
   public synchronized static <S, T> void register(ConverterFactory<S, T> converter) {
-    Type[] types = TypeUtils.getParameterizedTypes(shouldNotNull(converter).getClass(),
+    Type[] types = TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)),
         ConverterFactory.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class,
         "The converter %s parametered type must be actual type!", converter.toString());

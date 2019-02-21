@@ -24,7 +24,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import javax.transaction.Transactional;
+import org.corant.Corant;
 import org.corant.asosat.ddd.domain.shared.BaseAggregateIdentifier;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.shared.conversion.ConversionException;
@@ -54,10 +55,6 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
       asImmutableSet(Long.class, Long.TYPE, String.class, Entity.class);
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
-
-  @Inject
-  @JPA
-  protected JpaRepository repo;
 
   @Override
   public Converter<Object, Entity> create(Class<Entity> targetClass, Entity defaultValue,
@@ -89,6 +86,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
         t -> Entity.class.isAssignableFrom(t) && JpaUtils.isPersistenceClass(t));
   }
 
+  @Transactional
   protected <T extends Entity> T convert(Object value, Class<T> targetClass, Map<String, ?> hints) {
     if (value == null) {
       return null;
@@ -101,8 +99,8 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     } else if (value instanceof BaseAggregateIdentifier) {
       id = BaseAggregateIdentifier.class.cast(value).getId();
     }
-    if (id != null && repo != null) {
-      return repo.get(targetClass, id);
+    if (id != null && Corant.instance().select(JpaRepository.class, JPA.INST).isResolvable()) {
+      return Corant.instance().select(JpaRepository.class, JPA.INST).get().get(targetClass, id);
     } else {
       throw new ConversionException("Can't not convert %s to %s!", value.toString(),
           targetClass.getSimpleName());

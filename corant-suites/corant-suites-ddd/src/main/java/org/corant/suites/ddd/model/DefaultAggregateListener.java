@@ -117,10 +117,10 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(AbstractAggregate o) {
-    if (Corant.cdi().select(UnitOfWorksManager.class, o.lifecycleServiceQualifier())
+    if (Corant.instance().select(UnitOfWorksManager.class, o.lifecycleServiceQualifier())
         .isResolvable()) {
       UnitOfWorksManager uow =
-          Corant.cdi().select(UnitOfWorksManager.class, o.lifecycleServiceQualifier()).get();
+          Corant.instance().select(UnitOfWorksManager.class, o.lifecycleServiceQualifier()).get();
       uow.getCurrentUnitOfWorks().register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");

@@ -50,7 +50,7 @@ public class Unmanageables {
     private boolean disposed = false;
 
     public UnmanageableInstance(Class<T> clazz) {
-      bm = Corant.instance().getBeanManager();
+      bm = Corant.me().getBeanManager();
       creationalContext = bm.createCreationalContext(null);
       annotatedType = bm.createAnnotatedType(clazz);
       injectionTarget = bm.getInjectionTargetFactory(annotatedType).createInjectionTarget(null);
@@ -59,7 +59,7 @@ public class Unmanageables {
 
     public UnmanageableInstance(T object) {
       shouldBeFalse(Manageables.isManagedBean(object));
-      bm = Corant.instance().getBeanManager();
+      bm = Corant.me().getBeanManager();
       creationalContext = bm.createCreationalContext(null);
       annotatedType = bm.createAnnotatedType(forceCast(object.getClass()));
       injectionTarget =

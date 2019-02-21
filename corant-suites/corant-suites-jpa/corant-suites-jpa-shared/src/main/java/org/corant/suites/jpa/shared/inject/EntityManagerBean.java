@@ -67,8 +67,8 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
     LOGGER.info(
         () -> String.format("Create an entity manager with persistence unit name %s scope is %s",
             persistenceContextMetaData.getUnit().getMixedName(), getScope().getSimpleName()));
-    shouldBeTrue(Corant.cdi().select(AbstractJpaProvider.class).isResolvable());
-    AbstractJpaProvider provider = Corant.cdi().select(AbstractJpaProvider.class).get();
+    shouldBeTrue(Corant.instance().select(AbstractJpaProvider.class).isResolvable());
+    AbstractJpaProvider provider = Corant.instance().select(AbstractJpaProvider.class).get();
     return provider.getEntityManager(persistenceContextMetaData);
   }
 

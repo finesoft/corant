@@ -53,7 +53,7 @@ public abstract class JtaJpaUnitOfWorksManager extends AbstractUnitOfWorksManage
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
   public static JtaJpaUnitOfWork currentUnitOfWork() {
-    return Corant.cdi().select(JtaJpaUnitOfWorksManager.class, JPA.INST).get()
+    return Corant.instance().select(JtaJpaUnitOfWorksManager.class, JPA.INST).get()
         .getCurrentUnitOfWorks();
   }
 

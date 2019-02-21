@@ -41,7 +41,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
   protected static final Annotation[] EMPTY_REPO_QLFS = new Annotation[0];
 
   protected static JpaRepository obtainRepo(Annotation... qualifiers) {
-    return Corant.cdi().select(JpaRepository.class, qualifiers).get();
+    return Corant.instance().select(JpaRepository.class, qualifiers).get();
   }
 
   protected static <T> T retrieve(Serializable id, Class<T> cls, Annotation... qualifiers) {

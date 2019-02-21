@@ -33,6 +33,7 @@ public class DirectRunner implements Runner {
     this.configClass = configClass;
   }
 
+  @SuppressWarnings("resource")
   @Override
   public void run(String... args) throws Exception {
     new Corant(configClass, args).start();

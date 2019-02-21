@@ -28,14 +28,15 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.kernel.util.Manageables;
 import org.corant.kernel.util.Unmanageables;
 import org.corant.kernel.util.Unmanageables.UnmanageableInstance;
 import org.corant.shared.util.LaunchUtils;
@@ -52,9 +53,9 @@ import org.jboss.weld.manager.api.WeldManager;
  * @author bingo 上午11:52:09
  *
  */
-public class Corant {
+public class Corant implements AutoCloseable {
 
-  private static Corant INSTANCE;
+  private static volatile Corant me;
   private final Class<?> configClass;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private volatile WeldContainer container;
@@ -82,7 +83,7 @@ public class Corant {
       this.classLoader = classLoader;
     }
     this.args = args;
-    INSTANCE = this;
+    me = this;
   }
 
   /**
@@ -107,18 +108,13 @@ public class Corant {
     this(null, null, args);
   }
 
-  public synchronized static CDI<Object> cdi() {
-    validateRunning();
-    return INSTANCE.container;
-  }
-
   public static void fireAsyncEvent(Object event, Annotation... qualifiers) {
     validateRunning();
     if (event != null) {
       if (qualifiers.length > 0) {
-        INSTANCE.getBeanManager().getEvent().select(qualifiers).fireAsync(event);
+        me.getBeanManager().getEvent().select(qualifiers).fireAsync(event);
       } else {
-        INSTANCE.getBeanManager().getEvent().fireAsync(event);
+        me.getBeanManager().getEvent().fireAsync(event);
       }
     }
   }
@@ -127,15 +123,20 @@ public class Corant {
     validateRunning();
     if (event != null) {
       if (qualifiers.length > 0) {
-        INSTANCE.getBeanManager().getEvent().select(qualifiers).fire(event);
+        me.getBeanManager().getEvent().select(qualifiers).fire(event);
       } else {
-        INSTANCE.getBeanManager().getEvent().fire(event);
+        me.getBeanManager().getEvent().fire(event);
       }
     }
   }
 
-  public static Corant instance() {
-    return INSTANCE;
+  public synchronized static Instance<Object> instance() {
+    validateRunning();
+    return me.container;
+  }
+
+  public static Corant me() {
+    return me;
   }
 
   public static <T> UnmanageableInstance<T> produceUnmanageableBean(Class<T> clazz) {
@@ -143,21 +144,35 @@ public class Corant {
   }
 
   public static <T> T resolveManageable(Class<T> manageableBeanClass, Annotation... qualifiers) {
-    if (cdi().select(manageableBeanClass, qualifiers).isResolvable()) {
-      return cdi().select(manageableBeanClass, qualifiers).get();
+    if (instance().select(manageableBeanClass, qualifiers).isResolvable()) {
+      return instance().select(manageableBeanClass, qualifiers).get();
     }
     return null;
   }
 
+  @SuppressWarnings("resource")
   public synchronized static Corant run(Class<?> configClass, String... args) {
     return new Corant(configClass, args).start();
   }
 
-  public synchronized static CDI<Object> tryCdi() {
-    if (INSTANCE == null || INSTANCE.container == null) {
+  @SuppressWarnings("resource")
+  public synchronized static Corant run(Object configObject, String... args) {
+    if (configObject == null) {
+      return new Corant(args);
+    }
+    Corant inst = new Corant(configObject.getClass(), args).start();
+    if (!Manageables.isManagedBean(configObject)
+        && Corant.instance().select(configObject.getClass()).isUnsatisfied()) {
+      Corant.wrapUnmanageableBean(configObject);
+    }
+    return inst;
+  }
+
+  public synchronized static Instance<Object> tryInstance() {
+    if (me == null || me.container == null) {
       return null;
     }
-    return INSTANCE.container;
+    return me.container;
   }
 
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
@@ -165,8 +180,7 @@ public class Corant {
   }
 
   private static void validateRunning() {
-    shouldBeTrue(INSTANCE != null && INSTANCE.isRuning(),
-        "The corant instance is null or is not in running");
+    shouldBeTrue(me != null && me.isRuning(), "The corant instance is null or is not in running");
   }
 
   public Corant accept(Consumer<Corant> consumer) {
@@ -181,6 +195,11 @@ public class Corant {
       return function.apply(this);
     }
     return null;
+  }
+
+  @Override
+  public void close() throws Exception {
+    stop();
   }
 
   public synchronized WeldManager getBeanManager() {

@@ -234,8 +234,8 @@ public class JsonUtils {
     EnumerationBundle resolveBundle() {
       if (bundle == null) {
         synchronized (this) {
-          if (bundle == null && Corant.cdi().select(EnumerationBundle.class).isResolvable()) {
-            bundle = Corant.cdi().select(EnumerationBundle.class).get();
+          if (bundle == null && Corant.instance().select(EnumerationBundle.class).isResolvable()) {
+            bundle = Corant.instance().select(EnumerationBundle.class).get();
           } else {
             bundle = new EnumJsonSerializerBundle();
           }

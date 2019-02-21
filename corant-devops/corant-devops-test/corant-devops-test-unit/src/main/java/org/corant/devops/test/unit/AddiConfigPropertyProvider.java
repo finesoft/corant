@@ -40,7 +40,7 @@ public class AddiConfigPropertyProvider implements ConfigSourceProvider {
    *
    */
   private static final class TestConfigSource implements ConfigSource {
-    Map<String, String> map = new HashMap<>(CorantJunit4Runner.addCfgPros.get());
+    Map<String, String> map = new HashMap<>(CorantJunit4Runner.ADDI_CFG_PROS.get());
 
     @Override
     public String getName() {

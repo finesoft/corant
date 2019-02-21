@@ -89,6 +89,8 @@
 		<version.rest-assured>3.0.6</version.rest-assured>
 		<version.org.openjdk.jmh>1.21</version.org.openjdk.jmh>
 
+		<version.groovy>2.5.6</version.groovy>
+
 	</properties>
 
 	<dependencyManagement>
@@ -535,6 +537,14 @@
 				<artifactId>poi-contrib</artifactId>
 				<version>${version.apache-poi}</version>
 			</dependency>
+
+			<!-- LANG -->
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy</artifactId>
+				<version>${version.groovy}</version>
+			</dependency>
+
 
 			<!-- CDI -->
 			<dependency>

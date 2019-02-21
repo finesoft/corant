@@ -55,9 +55,8 @@ public class QueryParseHandler extends DefaultHandler {
   @Override
   public void characters(char[] ch, int start, int length) throws SAXException {
     String cqn = currentQName();
-    if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(cqn)
-        || SchemaNames.QUE_DESC_ELE.equalsIgnoreCase(cqn)
-        || SchemaNames.QUE_SCPT_ELE.equalsIgnoreCase(cqn)) {
+    if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(cqn) || SchemaNames.X_DESC.equalsIgnoreCase(cqn)
+        || SchemaNames.X_SCRIPT.equalsIgnoreCase(cqn)) {
       charStack.append(ch, start, length);
     }
   }
@@ -74,26 +73,32 @@ public class QueryParseHandler extends DefaultHandler {
 
   @Override
   public void endElement(String uri, String localName, String qName) throws SAXException {
-    if (SchemaNames.PARAM_ENTRY_ELE.equalsIgnoreCase(qName)) {
+    if (SchemaNames.X_ENTRY.equalsIgnoreCase(qName)) {
       handleParamEntry(false, qName, null);
     } else if (SchemaNames.QUE_ELE.equalsIgnoreCase(qName)) {
       handleQuery(false, qName, null);
     } else if (SchemaNames.QUE_FQE_ELE.equalsIgnoreCase(qName)) {
       handleFetchQuery(false, qName, null);
-    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)
-        && this.currentObject() instanceof FetchQueryParameter) {
-      handleFetchQueryParameter(false, qName, null);
+    } else if (SchemaNames.X_PARAM.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof FetchQueryParameter) {
+        handleFetchQueryParameter(false, qName, null);
+      } else if (currentObject() instanceof QueryHintParameter) {
+        handleQueryHintParameter(false, qName, null);
+      }
     } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(false, qName, null);
-    } else if (SchemaNames.HINT_ELE_PARAM.equalsIgnoreCase(qName)
-        && this.currentObject() instanceof QueryHintParameter) {
-      handleQueryHintParameter(false, qName, null);
     } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(false, qName, null);
-    } else if (SchemaNames.QUE_DESC_ELE.equalsIgnoreCase(qName)) {
-      handleQueryDesc(false, qName, null);
-    } else if (SchemaNames.QUE_SCPT_ELE.equalsIgnoreCase(qName)) {
-      handleQueryScript(false, qName, null);
+    } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Query) {
+        handleQueryDesc(false, qName, null);
+      }
+    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Query) {
+        handleQueryScript(false, qName, null);
+      } else if (currentObject() instanceof QueryHint) {
+        handleQueryHintScript(false, qName, null);
+      }
     }
   }
 
@@ -109,26 +114,32 @@ public class QueryParseHandler extends DefaultHandler {
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes)
       throws SAXException {
-    if (SchemaNames.PARAM_ENTRY_ELE.equalsIgnoreCase(qName)) {
+    if (SchemaNames.X_ENTRY.equalsIgnoreCase(qName)) {
       handleParamEntry(true, qName, attributes);
     } else if (SchemaNames.QUE_ELE.equalsIgnoreCase(qName)) {
       handleQuery(true, qName, attributes);
     } else if (SchemaNames.QUE_FQE_ELE.equalsIgnoreCase(qName)) {
       handleFetchQuery(true, qName, attributes);
-    } else if (SchemaNames.FQE_ELE_PARAM.equalsIgnoreCase(qName)
-        && this.currentObject() instanceof FetchQuery) {
-      handleFetchQueryParameter(true, qName, attributes);
+    } else if (SchemaNames.X_PARAM.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof FetchQuery) {
+        handleFetchQueryParameter(true, qName, attributes);
+      } else if (currentObject() instanceof QueryHint) {
+        handleQueryHintParameter(true, qName, attributes);
+      }
     } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(true, qName, attributes);
-    } else if (SchemaNames.HINT_ELE_PARAM.equalsIgnoreCase(qName)
-        && this.currentObject() instanceof QueryHint) {
-      handleQueryHintParameter(true, qName, attributes);
     } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(true, qName, attributes);
-    } else if (SchemaNames.QUE_DESC_ELE.equalsIgnoreCase(qName)) {
-      handleQueryDesc(true, qName, attributes);
-    } else if (SchemaNames.QUE_SCPT_ELE.equalsIgnoreCase(qName)) {
-      handleQueryScript(true, qName, attributes);
+    } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Query) {
+        handleQueryDesc(true, qName, attributes);
+      }
+    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Query) {
+        handleQueryScript(true, qName, attributes);
+      } else if (currentObject() instanceof QueryHint) {
+        handleQueryHintScript(true, qName, attributes);
+      }
     }
   }
 
@@ -180,13 +191,13 @@ public class QueryParseHandler extends DefaultHandler {
       FetchQueryParameter fqp = new FetchQueryParameter();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.FQE_ELE_PARAM_ATT_NME.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           fqp.setName(atv);
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
           fqp.setSource(ConversionUtils.toEnum(atv, FetchQueryParameterSource.class));
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
           fqp.setSourceName(atv);
-        } else if (SchemaNames.FQE_ELE_PARAM_ATT_VAL.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
           fqp.setValue(atv);
         }
       }
@@ -209,9 +220,9 @@ public class QueryParseHandler extends DefaultHandler {
       ParameterMapping pm = new ParameterMapping();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.PARAM_ENTRY_ATT_NME.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
-        } else if (SchemaNames.PARAM_ENTRY_ATT_TYP.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
           pm.setType(tryAsClass(atv));
         }
       }
@@ -229,7 +240,7 @@ public class QueryParseHandler extends DefaultHandler {
       Query q = new Query();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.QUE_ATT_NAME.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           q.setName(atv);
         } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {
           q.setCache(ConversionUtils.toBoolean(atv));
@@ -273,7 +284,7 @@ public class QueryParseHandler extends DefaultHandler {
       QueryHint hit = new QueryHint();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.HINT_ATT_KEY.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.X_KEY.equalsIgnoreCase(aqn)) {
           hit.setKey(atv);
         }
       }
@@ -295,11 +306,11 @@ public class QueryParseHandler extends DefaultHandler {
       QueryHintParameter qhp = new QueryHintParameter();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.HINT_ELE_PARAM_ATT_NME.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           qhp.setName(atv);
-        } else if (SchemaNames.HINT_ELE_PARAM_ATT_VAL.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
           qhp.setValue(atv);
-        } else if (SchemaNames.HINT_ELE_PARAM_ATT_TYP.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
           qhp.setType(atv);
         }
       }
@@ -315,6 +326,22 @@ public class QueryParseHandler extends DefaultHandler {
       if (obj instanceof QueryHintParameter) {
         qh.addParameter(QueryHintParameter.class.cast(obj));
       }
+      nameStack.pop();
+    }
+  }
+
+  void handleQueryHintScript(boolean start, String qName, Attributes attributes) {
+    if (start) {
+      nameStack.push(qName);
+    } else {
+      String script = charStack.toString();
+      charStack.delete(0, charStack.length());
+      QueryHint q = this.currentObject();
+      if (q == null || isBlank(script)) {
+        throw new QueryRuntimeException(
+            "Parse error the query hit script must be in query element and script can't null!");
+      }
+      q.setScript(script.trim());
       nameStack.pop();
     }
   }

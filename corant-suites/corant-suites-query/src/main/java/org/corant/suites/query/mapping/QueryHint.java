@@ -33,6 +33,7 @@ public class QueryHint implements Serializable {
 
   private String key;
   private Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
+  private String script;
 
   @Override
   public boolean equals(Object obj) {
@@ -79,6 +80,10 @@ public class QueryHint implements Serializable {
     }
   }
 
+  public String getScript() {
+    return script;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -94,6 +99,10 @@ public class QueryHint implements Serializable {
 
   void setKey(String key) {
     this.key = key;
+  }
+
+  void setScript(String script) {
+    this.script = script;
   }
 
   public static class QueryHintParameter implements Serializable {

@@ -35,6 +35,8 @@ public class QueryHint implements Serializable {
   private Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
   private String script;
 
+  private volatile Integer hash = null;
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -59,6 +61,13 @@ public class QueryHint implements Serializable {
         return false;
       }
     } else if (!parameters.equals(other.parameters)) {
+      return false;
+    }
+    if (script == null) {
+      if (other.script != null) {
+        return false;
+      }
+    } else if (!script.equals(other.script)) {
       return false;
     }
     return true;
@@ -86,11 +95,19 @@ public class QueryHint implements Serializable {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (key == null ? 0 : key.hashCode());
-    result = prime * result + (parameters == null ? 0 : parameters.hashCode());
-    return result;
+    if (hash != null) {
+      synchronized (this) {
+        if (hash != null) {
+          final int prime = 31;
+          int result = 1;
+          result = prime * result + (key == null ? 0 : key.hashCode());
+          result = prime * result + (parameters == null ? 0 : parameters.hashCode());
+          result = prime * result + (script == null ? 0 : script.hashCode());
+          hash = Integer.valueOf(result);
+        }
+      }
+    }
+    return hash.intValue();
   }
 
   void addParameter(QueryHintParameter parameter) {

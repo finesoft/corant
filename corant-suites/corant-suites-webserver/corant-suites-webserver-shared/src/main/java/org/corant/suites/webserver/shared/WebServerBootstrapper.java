@@ -50,6 +50,12 @@ public class WebServerBootstrapper {
 
   WebServer server = null;
 
+  volatile boolean running;
+
+  public boolean isRunning() {
+    return running;
+  }
+
   @PostConstruct
   protected void onPostConstruct() {
     Set<Bean<?>> beans = beanManager.getBeans(WebServer.class);
@@ -71,14 +77,16 @@ public class WebServerBootstrapper {
       logger
           .info(() -> String.format("Start web server %s ", getUserClass(server).getSimpleName()));
       server.start();
+      running = true;
     }
   }
 
   @PreDestroy
   protected void onPreDestroy() {
-    if (server != null) {
+    if (server != null && running) {
       logger.info(() -> String.format("Stop web server %s ", getUserClass(server).getSimpleName()));
       server.stop();
+      running = false;
     }
   }
 }

@@ -31,6 +31,9 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import org.corant.kernel.config.ApplicationAdjustConfigSourceProvider;
+import org.corant.kernel.config.ApplicationConfigSourceProvider;
+import org.corant.kernel.config.ApplicationProfileConfigSourceProvider;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -50,6 +53,56 @@ import org.jboss.weld.manager.api.WeldManager;
 /**
  * corant-kernel
  *
+ * <p>
+ * Class that can be used to bootstrap and launch a Corant application from a Java main method. By
+ * default class will perform the following steps to bootstrap your application:
+ * <ul>
+ * <li>Execute the boot preprocessor to handle some works before CDI container start, the works like
+ * set some appropriate configuration properties to intervene system running.</li>
+ * <li>Configure appropriate class loader to the current thread context class loader and CDI
+ * container class loader and add configuration class to the set of bean classes for the synthetic
+ * bean archive if necessary.</li>
+ * <li>Construct the CDI container and initialize it, after the CDI container initialized then fire
+ * PostContainerStartedEvent to listeners, those listeners may be use to configure some components
+ * after CDI initialized such as web server.</li>
+ * <li>After the above execution was completed, fire PostCorantReadyEvent to listeners.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * In most circumstances the static {@link #run(Class, String[])} method can be called directly from
+ * your {@literal main} method to bootstrap your application:
+ *
+ * <pre>
+ * public class MyApplication {
+ *   // ... Bean definitions
+ *   public static void main(String[] args) throws Exception {
+ *     try(Corant corant = Corant.run(MyApplication.class, args)){
+ *      //... some works in CDI
+ *   }
+ * }
+ * </pre>
+ *
+ * OR
+ *
+ * <pre>
+ * public class MyApplication {
+ *   // ... Bean definitions
+ *   public static void main(String[] args) throws Exception {
+ *    Corant corant = Corant.run(MyApplication.class, args)
+ *   }
+ * }
+ * </pre>
+ * <p>
+ *
+ * @see #Corant(Class, ClassLoader, String...)
+ * @see #Corant(Class, String...)
+ * @see #Corant(ClassLoader, String...)
+ * @see CorantBootHandler
+ * @see ApplicationConfigSourceProvider
+ * @see ApplicationAdjustConfigSourceProvider
+ * @see ApplicationProfileConfigSourceProvider
+ *
  * @author bingo 上午11:52:09
  *
  */
@@ -57,10 +110,14 @@ public class Corant implements AutoCloseable {
 
   private static volatile Corant me;
   private final Class<?> configClass;
+  private final String[] args;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private volatile WeldContainer container;
-  private final String[] args;
 
+  /**
+   * Use the class loader of Corant.class as current thread context and the CDI container class
+   * loader.
+   */
   public Corant() {
     this(null, null, new String[0]);
   }
@@ -71,7 +128,7 @@ public class Corant implements AutoCloseable {
    * bean archive. If the given class loader is not null then it will be set to the context
    * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
    * class loader. The given args will be propagate to all CorantBootHandler and all
-   * CorantLifecycleEvents.
+   * CorantLifecycleEvent listeners.
    *
    * @param configClass
    * @param classLoader
@@ -90,7 +147,7 @@ public class Corant implements AutoCloseable {
    * Use given config class and args construct Corant instance. If the given config class is not
    * null then the class loader of the current thread context and the CDI container will be set with
    * the given config class class loader. The given args will be propagate to all CorantBootHandler
-   * and all CorantLifecycleEvents.
+   * and all CorantLifecycleEvent listeners.
    *
    * @see #Corant(Class, ClassLoader, String...)
    * @param configClass
@@ -100,10 +157,25 @@ public class Corant implements AutoCloseable {
     this(configClass, configClass != null ? configClass.getClassLoader() : null, args);
   }
 
+  /**
+   * Use given class loader and args to construct Corant instance. If the given class loader is not
+   * null then the class loader of the current thread context and the CDI container will be set with
+   * the given class loader.The given args will be propagate to all CorantBootHandler and all
+   * CorantLifecycleEvent listeners.
+   *
+   * @param classLoader
+   * @param args
+   */
   public Corant(ClassLoader classLoader, String... args) {
     this(null, classLoader, args);
   }
 
+  /**
+   * Use given args and the class loader of Corant.class to construct Corant instance.The given args
+   * will be propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
+   *
+   * @param args
+   */
   public Corant(String... args) {
     this(null, null, args);
   }

@@ -52,8 +52,8 @@ public class NashornResultMapperResolver implements ResultMapperResolver {
         && (isEmpty(qh.getParameters())
             || isEmpty(qh.getParameters(ResultMapperHintHandler.HNIT_SCRIPT_ENGINE))
             || defaultString(
-                qh.getParameters(ResultMapperHintHandler.HNIT_SCRIPT_ENGINE).get(0).getValue())
-                    .equals(DFLT_SCRIPT_ENGINE));
+                qh.getParameters(ResultMapperHintHandler.HNIT_SCRIPT_ENGINE).get(0).getValue(),
+                DFLT_SCRIPT_ENGINE).equals(DFLT_SCRIPT_ENGINE));
   }
 
   @Override

@@ -31,17 +31,24 @@ public class DefaultSecurityContext implements SecurityContext {
   private final boolean secure;
   private final Set<String> userRoles = new HashSet<>();
   private final String authenticationScheme;
+  private final String accessToken;
+  private final String refreshToken;
 
   /**
+   * @param accessToken
+   * @param refreshToken
    * @param userPrincipal
    * @param orgPrincipal
    * @param secure
    * @param authenticationScheme
    * @param userRoles
    */
-  public DefaultSecurityContext(Participator userPrincipal, Participator orgPrincipal,
-      boolean secure, String authenticationScheme, Set<String> userRoles) {
+  public DefaultSecurityContext(String accessToken, String refreshToken, Participator userPrincipal,
+      Participator orgPrincipal, boolean secure, String authenticationScheme,
+      Set<String> userRoles) {
     super();
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
     this.userPrincipal = userPrincipal;
     this.orgPrincipal = orgPrincipal;
     this.secure = secure;
@@ -51,6 +58,10 @@ public class DefaultSecurityContext implements SecurityContext {
     }
   }
 
+  public String getAccessToken() {
+    return accessToken;
+  }
+
   @Override
   public String getAuthenticationScheme() {
     return authenticationScheme;
@@ -58,6 +69,10 @@ public class DefaultSecurityContext implements SecurityContext {
 
   public Participator getOrgPrincipal() {
     return orgPrincipal;
+  }
+
+  public String getRefreshToken() {
+    return refreshToken;
   }
 
   @Override

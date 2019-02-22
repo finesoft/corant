@@ -30,6 +30,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.QueryUtils;
@@ -182,9 +183,15 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
   }
 
   protected void handleResultHints(List<QueryHint> hints, Object result) {
-    if (!isEmpty(hints) && !resultHintHandlers.isUnsatisfied()) {
+    if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
-        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> h.handle(qh, result));
+        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> {
+          try {
+            h.handle(qh, result);
+          } catch (Exception e) {
+            throw new CorantRuntimeException(e);
+          }
+        });
       });
     }
   }

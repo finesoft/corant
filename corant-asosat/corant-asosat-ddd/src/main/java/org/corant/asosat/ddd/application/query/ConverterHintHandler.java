@@ -72,7 +72,7 @@ public class ConverterHintHandler implements ResultHintHandler {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handle(QueryHint qh, Object result) {
+  public void handle(QueryHint qh, Object result) throws Exception {
     Pair<String[], Pair<Class<?>, Object[]>> hint = null;
     if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
       return;

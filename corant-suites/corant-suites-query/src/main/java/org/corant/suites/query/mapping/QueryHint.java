@@ -95,9 +95,9 @@ public class QueryHint implements Serializable {
 
   @Override
   public int hashCode() {
-    if (hash != null) {
+    if (hash == null) {
       synchronized (this) {
-        if (hash != null) {
+        if (hash == null) {
           final int prime = 31;
           int result = 1;
           result = prime * result + (key == null ? 0 : key.hashCode());

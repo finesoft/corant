@@ -112,9 +112,9 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.execute(conn, sql, rsh, params);
   }
 
-  public static List<Map<String, Object>> executes(Connection conn, String sql, Object... params)
-      throws SQLException {
-    return SIMPLE_RUNNER.execute(conn, sql, MAP_HANDLER, params);
+  public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
+      Object... params) throws SQLException {
+    return SIMPLE_RUNNER.execute(conn, sql, MAP_LIST_HANDLER, params);
   }
 
   public static Map<String, Object> get(Connection conn, String sql, Object... params)

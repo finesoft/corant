@@ -11,25 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.spi;
-
-import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.query.mapping.QueryHint;
-
 /**
  * corant-suites-query
- *
- * @author bingo 上午11:09:08
+ * 
+ * @author bingo 上午10:29:23
  *
  */
-@ApplicationScoped
-@FunctionalInterface
-public interface ResultHintHandler {
-
-  default boolean canHandle(QueryHint qh) {
-    return false;
-  }
-
-  void handle(QueryHint qh, Object result) throws Exception;
-
-}
+package org.corant.suites.query.sqlquery.processor;

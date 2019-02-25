@@ -309,10 +309,9 @@ public class Corant implements AutoCloseable {
     doAfterStarted(classLoader);
 
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
-        .destroy(sw -> log(logger,
-            "Finished all initialization in %s seconds, it's been a long way, but we're here.",
+        .destroy(sw -> log(logger, "Finished all initialization in %s seconds.",
             sw.getTotalTimeSeconds()));
-    log(logger, "Finished at: %s.", Instant.now());
+    log(logger, "Finished at: %s. And it's been a long way, but we're here.", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
     printBoostLine();

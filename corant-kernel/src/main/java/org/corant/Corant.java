@@ -288,7 +288,7 @@ public class Corant implements AutoCloseable {
     StopWatch stopWatch = StopWatch.press(CORANT, "Handle before corant start");
     doBeforeStart(classLoader);
     final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
@@ -298,7 +298,7 @@ public class Corant implements AutoCloseable {
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
 
     doAfterContainerInitialized();
@@ -308,13 +308,13 @@ public class Corant implements AutoCloseable {
 
     doAfterStarted(classLoader);
 
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .destroy(sw -> log(logger,
             "Finished all initialization in %s seconds, ready to receive the service.",
             sw.getTotalTimeSeconds()));
-    log(logger, "Finished at: %s", Instant.now());
-    log(logger, "Final memory: %sM/%sM/%sM", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb());
+    log(logger, "Finished at: %s.", Instant.now());
+    log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
     printBoostLine();
     return this;
   }

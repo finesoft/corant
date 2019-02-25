@@ -89,6 +89,15 @@ public class LaunchUtils {
     return Runtime.getRuntime().maxMemory() / ONE_MB;
   }
 
+  public static String getPid() {
+    try {
+      String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+      return jvmName.split("@")[0];
+    } catch (Throwable ex) {
+      return null;
+    }
+  }
+
   public static Long getTotalMemoryMb() {
     return Runtime.getRuntime().totalMemory() / ONE_MB;
   }

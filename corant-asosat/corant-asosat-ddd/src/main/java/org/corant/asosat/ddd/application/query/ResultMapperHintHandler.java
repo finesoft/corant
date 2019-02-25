@@ -97,6 +97,7 @@ public class ResultMapperHintHandler implements ResultHintHandler {
           try {
             return op.get().resolve(qh);
           } catch (Exception e) {
+            brokens.add(qh);
             throw new CorantRuntimeException(e);
           }
         }

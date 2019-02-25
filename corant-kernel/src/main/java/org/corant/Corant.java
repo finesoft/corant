@@ -310,7 +310,7 @@ public class Corant implements AutoCloseable {
 
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .destroy(sw -> log(logger,
-            "Finished all initialization in %s seconds, ready to receive the service.",
+            "Finished all initialization in %s seconds, it's been a long way, but we're here.",
             sw.getTotalTimeSeconds()));
     log(logger, "Finished at: %s.", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),

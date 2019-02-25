@@ -352,12 +352,12 @@ public class MongoClientConfig {
 
     public MongodbConfig(MongoClientConfig client) {
       this.client = shouldNotNull(client);
-      clientName = client.name;
+      clientName = client.getName();
     }
 
     public MongodbConfig(MongoClientConfig client, String name) {
       this.client = shouldNotNull(client);
-      clientName = client.name;
+      clientName = client.getName();
       this.name = shouldNotBlank(name);
     }
 

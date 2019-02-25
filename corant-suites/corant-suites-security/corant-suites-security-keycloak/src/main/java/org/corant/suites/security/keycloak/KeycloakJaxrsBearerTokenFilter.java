@@ -114,27 +114,7 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
     if (jscResolver.isResolvable()) {
       return jscResolver.get().resolve(principal, isSecure, AUTH_SCHEMA, roles);
     } else {
-      return new SecurityContext() {
-        @Override
-        public String getAuthenticationScheme() {
-          return AUTH_SCHEMA;
-        }
-
-        @Override
-        public Principal getUserPrincipal() {
-          return principal;
-        }
-
-        @Override
-        public boolean isSecure() {
-          return isSecure;
-        }
-
-        @Override
-        public boolean isUserInRole(String role) {
-          return roles.contains(role);
-        }
-      };
+      return new KeycloakSecurityContext(isSecure, principal, roles);
     }
   }
 
@@ -147,6 +127,50 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
           configFilePath));
     } else {
       logger.info(() -> "Keycloak jaxrs bearer token filter doesn't enable!");
+    }
+  }
+
+  /**
+   * corant-suites-security-keycloak
+   *
+   * @author bingo 下午3:01:37
+   *
+   */
+  public static final class KeycloakSecurityContext implements SecurityContext {
+    private final boolean isSecure;
+    private final KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
+    private final Set<String> roles;
+
+    /**
+     * @param isSecure
+     * @param principal
+     * @param roles
+     */
+    public KeycloakSecurityContext(boolean isSecure,
+        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal, Set<String> roles) {
+      this.isSecure = isSecure;
+      this.principal = principal;
+      this.roles = roles;
+    }
+
+    @Override
+    public String getAuthenticationScheme() {
+      return AUTH_SCHEMA;
+    }
+
+    @Override
+    public Principal getUserPrincipal() {
+      return principal;
+    }
+
+    @Override
+    public boolean isSecure() {
+      return isSecure;
+    }
+
+    @Override
+    public boolean isUserInRole(String role) {
+      return roles.contains(role);
     }
   }
 }

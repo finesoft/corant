@@ -30,7 +30,6 @@ import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.corant.suites.jndi.InitialContextExtension;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
@@ -50,7 +49,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   /**
    * When go into this method, the data source configuration have been collected,
    * {@link #onBeforeBeanDiscovery(javax.enterprise.inject.spi.BeforeBeanDiscovery)}. The jndi
-   * naming context has been initalized, {@linkplain InitialContextExtension.beforeBeanDiscovery}
+   * naming context has been initialized,
+   * {@linkplain org.corant.suites.jndi.InitialContextExtension.beforeBeanDiscovery}
    *
    * @param event afterBeanDiscovery
    */

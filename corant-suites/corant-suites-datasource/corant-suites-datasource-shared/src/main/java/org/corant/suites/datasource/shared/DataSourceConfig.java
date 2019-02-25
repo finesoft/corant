@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.kernel.util.ConfigUtils;
+import org.corant.kernel.util.Configurations;
 import org.corant.shared.normal.Names.JndiNames;
 import org.eclipse.microprofile.config.Config;
 
@@ -84,7 +84,7 @@ public class DataSourceConfig {
 
   public static Map<String, DataSourceConfig> from(Config config) {
     Map<String, DataSourceConfig> map = new LinkedHashMap<>();
-    Map<String, List<String>> cfgNmes = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
+    Map<String, List<String>> cfgNmes = Configurations.getGroupConfigNames(config, PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
       final DataSourceConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.name, cfg.connectionUrl)) {

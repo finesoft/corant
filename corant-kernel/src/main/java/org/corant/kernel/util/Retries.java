@@ -30,16 +30,16 @@ import org.corant.kernel.exception.GeneralRuntimeException;
  * @author bingo 下午5:17:23
  *
  */
-public class RetryUtils {
+public class Retries {
 
-  protected static final Logger LOGGER = Logger.getLogger(RetryUtils.class.toString());
+  protected static final Logger LOGGER = Logger.getLogger(Retries.class.toString());
 
   static final String RTY_LOG =
       "An exception occurred during execution, enter the retry phase, the retry times is %s, interval is %s.";
 
   static final String RTY_ERR_LOG = "An exception occurred during supplier.";
 
-  private RetryUtils() {
+  private Retries() {
     super();
   }
 

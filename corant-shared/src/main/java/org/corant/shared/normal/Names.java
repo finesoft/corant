@@ -28,9 +28,10 @@ public interface Names {
   String NAME_SPACE_SEPARATORS = ".";
 
   interface ConfigNames {
-    String CFG_PF_KEY = CORANT + ".config.profile";
     String CFG_LOCATION_KEY = CORANT + ".config.location";
-    String CFG_AD_PREFIX = CORANT + ".config.adjust.";
+    String CFG_PROFILE_KEY = CORANT + ".config.profile";
+    String CFG_ADJUST_KEY = CORANT + ".config.adjust";
+    String CFG_ADJUST_PREFIX = CFG_ADJUST_KEY + ".";
     String CFG_LOCATION_EXCLUDE_PATTERN = CORANT + ".config.location.exclude.pattern";
   }
 

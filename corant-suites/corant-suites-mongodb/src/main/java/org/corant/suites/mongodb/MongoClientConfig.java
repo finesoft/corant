@@ -31,7 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.corant.kernel.util.ConfigUtils;
+import org.corant.kernel.util.Configurations;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.ConversionUtils;
@@ -84,7 +84,7 @@ public class MongoClientConfig {
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
     // handle client
-    Map<String, List<String>> clientCfgs = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
+    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config, PREFIX, 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);

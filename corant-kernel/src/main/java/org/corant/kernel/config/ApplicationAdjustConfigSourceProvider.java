@@ -37,11 +37,13 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     final Properties props = new Properties();
+    final String prefix = ConfigNames.CFG_ADJUST_PREFIX;
+    final int prefixLen = prefix.length();
     System.getProperties().forEach((k, v) -> {
       String key = asDefaultString(k);
       String value = asDefaultString(v);
-      if (key.startsWith(ConfigNames.CFG_AD_PREFIX)) {
-        key = key.substring(ConfigNames.CFG_AD_PREFIX.length());
+      if (key.startsWith(prefix)) {
+        key = key.substring(prefixLen);
         props.put(key, value);
       }
     });
@@ -75,7 +77,7 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
 
     @Override
     public String getName() {
-      return ConfigNames.CFG_AD_PREFIX;
+      return ConfigNames.CFG_ADJUST_PREFIX;
     }
 
     @Override

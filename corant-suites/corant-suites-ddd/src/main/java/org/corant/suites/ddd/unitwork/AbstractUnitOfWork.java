@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -36,12 +37,11 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
   protected final MessageConvertor messageConvertor;
   protected volatile boolean activated = false;
 
-
   protected AbstractUnitOfWork(AbstractUnitOfWorksManager manager) {
     this.manager = manager;
-    messageService = manager.getMessageService();
+    messageService = defaultObject(manager.getMessageService(), MessageService.empty());
     messageConvertor = manager.getMessageService().getConvertor();
-    sagaService = manager.getSagaService();
+    sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
     activated = true;
   }
 
@@ -85,4 +85,5 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
       }
     });
   }
+
 }

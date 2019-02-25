@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.corant.kernel.util.ConfigUtils;
+import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -62,7 +62,7 @@ public class ElasticConfig {
 
   public static Map<String, ElasticConfig> from(Config config) {
     Map<String, ElasticConfig> map = new HashMap<>();
-    Map<String, List<String>> cfgNmes = ConfigUtils.getGroupConfigNames(config, PREFIX, 1);
+    Map<String, List<String>> cfgNmes = Configurations.getGroupConfigNames(config, PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
       final ElasticConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.clusterName, cfg.clusterNodes)) {

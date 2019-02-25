@@ -27,7 +27,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.kernel.util.RetryUtils;
+import org.corant.kernel.util.Retries;
 import org.corant.shared.util.MethodUtils.MethodSignature;
 
 /**
@@ -54,7 +54,7 @@ public class RetryInterceptor implements Serializable {
     final Map<Class<?>, String> throwingMap = THROWINGS
         .computeIfAbsent(new MethodSignature(ctx.getMethod()), (m) -> Arrays.stream(ann.throwing())
             .collect(Collectors.toMap(RetryThrowing::exception, RetryThrowing::code)));
-    return RetryUtils
+    return Retries
         .retry(ctx, ann.times(), Duration.ofMillis(ann.intervalMs()),
             ec -> new GeneralRuntimeException(ec,
                 throwingMap.getOrDefault(ec.getClass(), PkgMsgCds.ERR_RETRY_DFLT)),

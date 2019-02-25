@@ -14,12 +14,14 @@
 package org.corant.kernel.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
 import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Names.ConfigNames;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -28,9 +30,14 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:23:28
  *
  */
-public class ConfigUtils {
+public class Configurations {
 
   public static final String SEPARATOR = String.valueOf(Names.NAME_SPACE_SEPARATOR);
+
+  public static void adjust(Object... props) {
+    Map<String, String> map = asMap(props);
+    map.forEach((k, v) -> System.setProperty(ConfigNames.CFG_ADJUST_PREFIX + defaultString(k), v));
+  }
 
   public static Map<String, List<String>> getGroupConfigNames(Config config, String prefix,
       int keyIndex) {
@@ -48,4 +55,5 @@ public class ConfigUtils {
       return new String[0];
     });
   }
+
 }

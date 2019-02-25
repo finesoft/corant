@@ -15,6 +15,7 @@ package org.corant.suites.ddd.saga;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -26,13 +27,44 @@ import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
  *
  */
 public interface SagaService {
+
+  static SagaService empty() {
+    return EmptySagaService.INSTANCE;
+  }
+
   Stream<SagaManager> getManagers(Annotation... annotations);
 
   void persist(Saga saga);
 
   void trigger(Message message);
 
-  public static interface SagaManager {
+  static class EmptySagaService implements SagaService {
+
+    public static final SagaService INSTANCE = new EmptySagaService();
+
+    protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+
+    @Override
+    public Stream<SagaManager> getManagers(Annotation... annotations) {
+      logger.warning(
+          () -> "The saga service is an empty implementation that does not really implement persistence");
+      return Stream.empty();
+    }
+
+    @Override
+    public void persist(Saga saga) {
+      logger.warning(
+          () -> "The saga service is an empty implementation that does not really implement persistence");
+    }
+
+    @Override
+    public void trigger(Message message) {
+      logger.warning(
+          () -> "The saga service is an empty implementation that does not really implement trigger");
+    }
+  }
+
+  public interface SagaManager {
 
     Saga begin(Message message);
 

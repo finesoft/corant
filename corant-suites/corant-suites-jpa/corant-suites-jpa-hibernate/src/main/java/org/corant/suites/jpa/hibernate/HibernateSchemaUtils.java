@@ -26,8 +26,8 @@ import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.JpaExtension;
@@ -194,8 +194,7 @@ public class HibernateSchemaUtils {
 
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
-    System.setProperty(ConfigNames.CFG_AD_PREFIX + "webserver.auto-start", "false");
-    System.setProperty(ConfigNames.CFG_AD_PREFIX + "flyway.migrate.enable", "false");
+    Configurations.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
     return Corant.run(HibernateSchemaUtils.class, "-disable_boost_line");
   }
 }

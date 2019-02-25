@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import org.corant.kernel.util.ConfigUtils;
+import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.JpaConfig;
 import org.corant.suites.jpa.shared.JpaUtils;
@@ -45,7 +45,7 @@ public class PersistenceConfigParser {
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     Map<String, List<String>> cfgNmes =
-        ConfigUtils.getGroupConfigNames(config, JpaConfig.PREFIX, 1);
+        Configurations.getGroupConfigNames(config, JpaConfig.PREFIX, 1);
     cfgNmes.forEach((k, v) -> {
       doParse(config, k, v, map);
       logger.info(() -> String.format("Parsed persistence unit %s from config file.", k));

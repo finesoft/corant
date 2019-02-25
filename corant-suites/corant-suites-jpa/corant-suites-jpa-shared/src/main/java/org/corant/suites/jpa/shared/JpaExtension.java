@@ -34,7 +34,7 @@ import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.util.CdiUtils;
+import org.corant.kernel.util.Cdis;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
@@ -97,11 +97,11 @@ public class JpaExtension implements Extension {
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();
-    PersistenceUnit pu = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
+    PersistenceUnit pu = Cdis.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
       PUMDS.add(PersistenceUnitMetaData.of(pu));
     }
-    PersistenceContext pc = CdiUtils.getAnnotated(ip).getAnnotation(PersistenceContext.class);
+    PersistenceContext pc = Cdis.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {
       PersistenceContextMetaData pcmd = PersistenceContextMetaData.of(pc);
       if (pcmd.getType() != PersistenceContextType.TRANSACTION) {

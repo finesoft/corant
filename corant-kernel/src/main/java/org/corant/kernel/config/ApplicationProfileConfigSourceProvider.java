@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.config;
 
-import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -40,8 +40,8 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  */
 public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSourceProvider {
 
-  static String sysPfPro = System.getProperty(CFG_PF_KEY);
-  static String sysPfEvn = System.getenv(CFG_PF_KEY);
+  static String sysPfPro = System.getProperty(CFG_PROFILE_KEY);
+  static String sysPfEvn = System.getenv(CFG_PROFILE_KEY);
   static String[] profiles = split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
   static String cfgUrlExPattern = System.getProperty(ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN);
 

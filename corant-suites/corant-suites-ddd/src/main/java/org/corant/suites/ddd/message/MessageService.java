@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.message;
 
+import java.util.logging.Logger;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.Message.ExchangedMessage;
 
@@ -24,6 +25,10 @@ import org.corant.suites.ddd.message.Message.ExchangedMessage;
  */
 public interface MessageService {
 
+  static MessageService empty() {
+    return EmptyMessageService.INSTANCE;
+  }
+
   MessageConvertor getConvertor();
 
   void receive(ExchangedMessage message);
@@ -32,12 +37,66 @@ public interface MessageService {
 
   Message store(Message message);
 
+  static class EmptyMessageConvertor implements MessageConvertor {
+
+    public static final MessageConvertor INSTANCE = new EmptyMessageConvertor();
+
+    protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+
+    @Override
+    public Message from(ExchangedMessage message) {
+      logger.warning(
+          () -> "The message convertor is an empty implementation that does not really implement from");
+      return null;
+    }
+
+    @Override
+    public ExchangedMessage to(Message message) {
+      logger.warning(
+          () -> "The message convertor is an empty implementation that does not really implement to");
+      return null;
+    }
+
+  }
+
+  static class EmptyMessageService implements MessageService {
+
+    public static final MessageService INSTANCE = new EmptyMessageService();
+
+    protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+
+    @Override
+    public MessageConvertor getConvertor() {
+      return EmptyMessageConvertor.INSTANCE;
+    }
+
+    @Override
+    public void receive(ExchangedMessage message) {
+      logger.warning(
+          () -> "The message service is an empty implementation that does not really implement receive");
+    }
+
+    @Override
+    public void send(ExchangedMessage messages) {
+      logger.warning(
+          () -> "The message service is an empty implementation that does not really implement send");
+    }
+
+    @Override
+    public Message store(Message message) {
+      logger.warning(
+          () -> "The message service is an empty implementation that does not really implement store");
+      return message;
+    }
+
+  }
+
   /**
    * @author bingo 下午12:27:57
    *
    */
   @InfrastructureServices
-  public static interface MessageConvertor {
+  public interface MessageConvertor {
 
     Message from(ExchangedMessage message);
 
@@ -50,7 +109,7 @@ public interface MessageService {
    * @author bingo 下午10:26:09
    *
    */
-  public static interface MessageStroage {
+  public interface MessageStroage {
 
     void store(Message message);
   }

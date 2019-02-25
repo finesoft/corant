@@ -14,7 +14,7 @@
 package org.corant.devops.test.unit;
 
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
-import static org.corant.shared.normal.Names.ConfigNames.CFG_PF_KEY;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public interface CorantJunit4Runner {
         } finally {
           if (!isEmbedded()) {
             if (isNotBlank(PROFILES.get())) {
-              System.clearProperty(CFG_PF_KEY);
+              System.clearProperty(CFG_PROFILE_KEY);
             }
             System.clearProperty(CFG_LOCATION_EXCLUDE_PATTERN);
             if (AUTO_DISPOSES.get()) {
@@ -91,7 +91,7 @@ public interface CorantJunit4Runner {
     ENA_RDM_WEB_PORTS.set(rc.randomWebPort());
     if (isNotBlank(rc.profile())) {
       PROFILES.set(rc.profile());
-      System.setProperty(CFG_PF_KEY, rc.profile());
+      System.setProperty(CFG_PROFILE_KEY, rc.profile());
     }
     if (isNotBlank(rc.excludeConfigUrlPattern())) {
       System.setProperty(CFG_LOCATION_EXCLUDE_PATTERN, rc.excludeConfigUrlPattern());

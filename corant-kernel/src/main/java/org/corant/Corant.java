@@ -113,6 +113,7 @@ public class Corant implements AutoCloseable {
   private final String[] args;
   private ClassLoader classLoader = Corant.class.getClassLoader();
   private volatile WeldContainer container;
+  private volatile Object id;
 
   /**
    * Use the class loader of Corant.class as current thread context and the CDI container class
@@ -140,7 +141,7 @@ public class Corant implements AutoCloseable {
       this.classLoader = classLoader;
     }
     this.args = args;
-    me = this;
+    setMe(this);
   }
 
   /**
@@ -251,6 +252,13 @@ public class Corant implements AutoCloseable {
     return Unmanageables.accpet(object);
   }
 
+  private static synchronized void setMe(Corant me) {
+    if (me != null) {
+      shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
+    }
+    Corant.me = me;
+  }
+
   private static void validateRunning() {
     shouldBeTrue(me != null && me.isRuning(), "The corant instance is null or is not in running");
   }
@@ -279,6 +287,10 @@ public class Corant implements AutoCloseable {
     return (WeldManager) container.getBeanManager();
   }
 
+  public Object getId() {
+    return id;
+  }
+
   public synchronized boolean isRuning() {
     return container != null && container.isRunning();
   }
@@ -287,9 +299,11 @@ public class Corant implements AutoCloseable {
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(CORANT, "Handle before corant start");
     doBeforeStart(classLoader);
+
     final Logger logger = Logger.getLogger(Corant.class.getName());
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
+
     Weld weld = new Weld();
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
@@ -297,6 +311,7 @@ public class Corant implements AutoCloseable {
       weld.addPackages(configClass);
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+    id = container.getId();
 
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
@@ -311,6 +326,7 @@ public class Corant implements AutoCloseable {
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .destroy(sw -> log(logger, "Finished all initialization in %s seconds.",
             sw.getTotalTimeSeconds()));
+
     log(logger, "Finished at: %s. And it's been a long way, but we're here.", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
@@ -324,6 +340,7 @@ public class Corant implements AutoCloseable {
       emitter.fire(new PreContainerStopEvent(args));
       ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
       container.close();
+      setMe(null);
     }
   }
 
@@ -352,7 +369,6 @@ public class Corant implements AutoCloseable {
     } else {
       logger.info(() -> msgOrFmt);
     }
-
   }
 
   private void printBoostLine() {

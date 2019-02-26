@@ -54,6 +54,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-script-mapper";
   public static final String HNIT_SCRIPT_ENGINE = "script-engine";
+  public static final String HINT_SCRIPT_PARA_NME = "dat";
 
   static final ScriptEngineManager sm = new ScriptEngineManager();
   static final Map<QueryHint, Consumer<Map<?, ?>>> mappers = new ConcurrentHashMap<>();
@@ -140,7 +141,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       final CompiledScript compiled = ((Compilable) scriptEngine).compile(qh.getScript());
       return (m) -> {
         Bindings bindings = new SimpleBindings();
-        bindings.put("parameter", m);
+        bindings.put(HINT_SCRIPT_PARA_NME, m);
         try {
           compiled.eval(bindings);
         } catch (ScriptException e) {

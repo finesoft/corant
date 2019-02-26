@@ -13,7 +13,9 @@
  */
 /**
  * corant-suites-query
- * 
+ *
+ * Elastic search dynamic query
+ *
  * @author bingo 下午8:17:39
  *
  */

@@ -12,11 +12,11 @@
  * the License.
  */
 /**
- * asosat-query
+ * corant-suites-query
  *
- * RDBMS dynamic sql query
+ * Cassandra dynamic query
  *
- * @author bingo 上午9:31:09
+ * @author bingo 上午10:07:01
  *
  */
-package org.corant.suites.query.sqlquery;
+package org.corant.suites.query.cqlquery;

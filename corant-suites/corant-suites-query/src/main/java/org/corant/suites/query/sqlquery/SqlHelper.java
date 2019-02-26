@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午11:04:34
  *

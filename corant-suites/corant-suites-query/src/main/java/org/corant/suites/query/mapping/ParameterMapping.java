@@ -16,7 +16,7 @@ package org.corant.suites.query.mapping;
 import java.io.Serializable;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午10:36:16
  *
@@ -27,6 +27,20 @@ public class ParameterMapping implements Serializable {
 
   private String name;
   private Class<?> type;
+
+  public ParameterMapping() {
+    super();
+  }
+
+  /**
+   * @param name
+   * @param type
+   */
+  public ParameterMapping(String name, Class<?> type) {
+    super();
+    this.name = name;
+    this.type = type;
+  }
 
   /**
    * @return the name
@@ -49,7 +63,5 @@ public class ParameterMapping implements Serializable {
   void setType(Class<?> type) {
     this.type = type;
   }
-
-
 
 }

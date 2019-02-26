@@ -20,12 +20,15 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.suites.query.QueryRuntimeException;
+import org.corant.suites.query.spi.QueryProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午12:59:22
  *
@@ -33,12 +36,16 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class QueryMappingService {
 
-  private Map<String, Query> queries = new HashMap<>();
+  private final Map<String, Query> queries = new HashMap<>();
   private volatile boolean initialized = false;
 
   @Inject
   @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
   String mappingFilePaths;
+
+  @Inject
+  @Any
+  Instance<QueryProvider> queryProvider;
 
   public Query getQuery(String name) {
     return queries.get(name);
@@ -85,6 +92,9 @@ public class QueryMappingService {
       }
       refs.clear();
     });
+    if (!queryProvider.isUnsatisfied()) {
+      queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
+    }
     initialized = true;
   }
 

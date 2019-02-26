@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午4:24:51
  *

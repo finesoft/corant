@@ -18,7 +18,7 @@ import java.util.Map;
 import org.corant.suites.query.mapping.FetchQuery;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:51:20
  *

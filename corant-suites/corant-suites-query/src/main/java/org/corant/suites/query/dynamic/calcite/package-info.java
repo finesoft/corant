@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:11:27
  *

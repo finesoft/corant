@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午10:26:45
  *
@@ -36,6 +36,32 @@ public class FetchQuery implements Serializable {
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private String referenceQueryversion = "";
   private boolean multiRecords = true;
+
+  public FetchQuery() {
+    super();
+  }
+
+  /**
+   * @param referenceQuery
+   * @param injectPropertyName
+   * @param resultClass
+   * @param maxSize
+   * @param parameters
+   * @param referenceQueryversion
+   * @param multiRecords
+   */
+  public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
+      int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
+      boolean multiRecords) {
+    super();
+    this.referenceQuery = referenceQuery;
+    this.injectPropertyName = injectPropertyName;
+    this.resultClass = resultClass;
+    this.maxSize = maxSize;
+    this.parameters = parameters;
+    this.referenceQueryversion = referenceQueryversion;
+    this.multiRecords = multiRecords;
+  }
 
   /**
    * @return the injectPropertyName
@@ -120,6 +146,25 @@ public class FetchQuery implements Serializable {
     private String sourceName;
     private FetchQueryParameterSource source;
     private String value;
+
+    public FetchQueryParameter() {
+      super();
+    }
+
+    /**
+     * @param name
+     * @param sourceName
+     * @param source
+     * @param value
+     */
+    public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
+        String value) {
+      super();
+      this.name = name;
+      this.sourceName = sourceName;
+      this.source = source;
+      this.value = value;
+    }
 
     /**
      * @return the name

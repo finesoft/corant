@@ -18,7 +18,7 @@ import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.sqlquery.dialect.Dialect;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:56:03
  *

@@ -27,7 +27,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午7:56:57
  *

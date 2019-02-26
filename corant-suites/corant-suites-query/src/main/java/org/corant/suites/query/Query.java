@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * corant-asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午10:33:30
  *

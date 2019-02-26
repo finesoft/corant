@@ -18,7 +18,7 @@ import java.util.Map;
 import freemarker.template.TemplateMethodModelEx;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:40:20
  *

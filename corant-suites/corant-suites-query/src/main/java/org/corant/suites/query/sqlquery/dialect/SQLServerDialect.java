@@ -14,7 +14,7 @@
 package org.corant.suites.query.sqlquery.dialect;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午7:09:20
  *

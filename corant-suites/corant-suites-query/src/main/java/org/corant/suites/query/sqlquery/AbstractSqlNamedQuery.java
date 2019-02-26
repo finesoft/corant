@@ -41,7 +41,7 @@ import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
 import org.corant.suites.query.sqlquery.dialect.Dialect;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:33:21
  *
@@ -98,7 +98,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         } else {
           result.withResults(list);
         }
-        handleResultHints(hints, result);
+        handleResultHints(hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -118,7 +118,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       log(q, queryParam, sql);
       T result = getExecutor().get(sql, resultClass, queryParam);
       this.fetch(result, fetchQueries, param);
-      handleResultHints(hints, result);
+      handleResultHints(hints, param, result);
       return result;
     } catch (SQLException e) {
       throw new QueryRuntimeException(e);
@@ -152,7 +152,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         }
         this.fetch(list, fetchQueries, param);
         result.withResults(list);
-        handleResultHints(hints, result);
+        handleResultHints(hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -174,7 +174,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       int size = getSize(result);
       if (size > 0) {
         this.fetch(result, fetchQueries, param);
-        handleResultHints(hints, result);
+        handleResultHints(hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -248,12 +248,12 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     return resolver;
   }
 
-  protected void handleResultHints(List<QueryHint> hints, Object result) {
+  protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
         resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> {
           try {
-            h.handle(qh, result);
+            h.handle(qh, param, result);
           } catch (Exception e) {
             throw new CorantRuntimeException(e);
           }

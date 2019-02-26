@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午10:22:33
  *
@@ -43,6 +43,41 @@ public class Query implements Serializable {
   private List<QueryHint> hints = new ArrayList<>();
   private String version = "";
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
+
+  public Query() {
+    super();
+  }
+
+  /**
+   * @param name
+   * @param resultClass
+   * @param resultSetMapping
+   * @param cache
+   * @param cacheResultSetMetadata
+   * @param description
+   * @param script
+   * @param fetchQueries
+   * @param hints
+   * @param version
+   * @param paramMappings
+   */
+  public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
+      boolean cacheResultSetMetadata, String description, String script,
+      List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
+      Map<String, ParameterMapping> paramMappings) {
+    super();
+    this.name = name;
+    this.resultClass = resultClass;
+    this.resultSetMapping = resultSetMapping;
+    this.cache = cache;
+    this.cacheResultSetMetadata = cacheResultSetMetadata;
+    this.description = description;
+    this.script = script;
+    this.fetchQueries = fetchQueries;
+    this.hints = hints;
+    this.version = version;
+    this.paramMappings = paramMappings;
+  }
 
   /**
    * @return the description

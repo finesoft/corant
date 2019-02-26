@@ -25,7 +25,7 @@ import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午8:49:44
  *

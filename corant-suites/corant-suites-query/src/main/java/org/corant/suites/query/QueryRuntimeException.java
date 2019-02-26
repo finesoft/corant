@@ -16,7 +16,7 @@ package org.corant.suites.query;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:47:42
  *

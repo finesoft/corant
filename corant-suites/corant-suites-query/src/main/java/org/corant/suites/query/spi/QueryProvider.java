@@ -11,12 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.query.spi;
+
+import java.util.List;
+import org.corant.suites.query.mapping.Query;
+
 /**
  * corant-suites-query
  *
- * RDBMS dynamic sql query
- *
- * @author bingo 上午9:31:09
+ * @author bingo 下午1:37:48
  *
  */
-package org.corant.suites.query.sqlquery;
+public interface QueryProvider {
+
+  List<Query> provide();
+
+}

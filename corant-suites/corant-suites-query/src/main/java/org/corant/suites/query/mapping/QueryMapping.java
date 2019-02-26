@@ -26,7 +26,7 @@ import java.util.Set;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:41:30
  *
@@ -37,6 +37,20 @@ public class QueryMapping {
   final List<Query> queries = new ArrayList<>();
   final Map<String, ParameterMapping> paraMapping = new HashMap<>();
   String commonSegment;
+
+  public QueryMapping() {
+    super();
+  }
+
+  /**
+   * @param url
+   * @param commonSegment
+   */
+  public QueryMapping(String url, String commonSegment) {
+    super();
+    this.url = url;
+    this.commonSegment = commonSegment;
+  }
 
   /**
    * @return the commonSegment

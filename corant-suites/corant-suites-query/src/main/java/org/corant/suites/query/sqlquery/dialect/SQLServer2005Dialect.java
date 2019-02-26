@@ -18,7 +18,7 @@ import java.util.Locale;
 import org.corant.suites.query.sqlquery.SqlHelper;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午11:03:33
  *

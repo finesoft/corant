@@ -33,7 +33,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.suites.query.QueryRuntimeException;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:31:55
  *

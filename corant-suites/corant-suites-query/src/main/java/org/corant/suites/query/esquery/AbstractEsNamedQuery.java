@@ -182,12 +182,12 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     return resolver;
   }
 
-  protected void handleResultHints(List<QueryHint> hints, Object result) {
+  protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
         resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> {
           try {
-            h.handle(qh, result);
+            h.handle(qh, param, result);
           } catch (Exception e) {
             throw new CorantRuntimeException(e);
           }
@@ -224,7 +224,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
         }
         this.fetch(result, fetchQueries, param);
       }
-      handleResultHints(querier.getHints(), result);
+      handleResultHints(querier.getHints(), param, result);
       return Pair.of(hits.getLeft(), result);
     } catch (Exception e) {
       throw new QueryRuntimeException(e);

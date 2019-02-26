@@ -24,7 +24,7 @@ import org.corant.suites.query.mapping.Query;
 import freemarker.template.TemplateException;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午7:46:22
  *

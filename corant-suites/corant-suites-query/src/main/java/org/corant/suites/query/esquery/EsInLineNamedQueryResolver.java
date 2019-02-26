@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:13:37
  *

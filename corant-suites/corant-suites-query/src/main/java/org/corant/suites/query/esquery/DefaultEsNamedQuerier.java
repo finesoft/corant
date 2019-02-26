@@ -20,7 +20,7 @@ import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.QueryHint;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午4:35:55
  *

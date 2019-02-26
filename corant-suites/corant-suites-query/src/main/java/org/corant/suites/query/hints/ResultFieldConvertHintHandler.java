@@ -39,8 +39,38 @@ import org.corant.suites.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.suites.query.spi.ResultHintHandler;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-query
  *
+ * <p>
+ * The result field conversion hints.
+ * <li>The key is 'result-field-convert'</li>
+ * <li>The value of the parameter that named 'field-name' is the field name that will be
+ * convert.</li>
+ * <li>The value of the parameter that named 'target-type' is the target class name that the field
+ * value will be convert to.</li>
+ * <li>The values of the parameter that named 'convert-hint-key' and 'convert-hint-value' are the
+ * conversion service hints, use for intervene conversion process.</li>
+ * </p>
+ * <p>
+ * Use case:
+ *
+ * <pre>
+ * &lt;query name="Query.get" result-class="java.util.Map"&gt;
+ *       &lt;script&gt;
+ *           &lt;![CDATA[
+ *               SELECT id,enum FROM Table
+ *           ]]&gt;
+ *       &lt;/script&gt;
+ *       &lt;hint key="result-field-convert"&gt;
+ *           &lt;parameter name="field-name" value="enum" /&gt;
+ *           &lt;parameter name="target-type" value="xxx.xxx.TargetEnum" /&gt;
+ *       &lt;/hint&gt;
+ * &lt;/query&gt;
+ * </pre>
+ * </p>
+ *
+ * @see ConversionService
+ * @see org.corant.shared.conversion.Conversions
  * @author bingo 下午12:02:08
  *
  */
@@ -70,7 +100,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handle(QueryHint qh, Object result) throws Exception {
+  public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Pair<String[], Pair<Class<?>, Object[]>> hint = null;
     if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
       return;

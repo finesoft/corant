@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * TODO Define the hint entry to receive parameter name and value
  *
@@ -36,6 +36,25 @@ public class QueryHint implements Serializable {
   private String script;
 
   private volatile Integer hash = null;
+
+  public QueryHint() {
+    super();
+  }
+
+  /**
+   * @param key
+   * @param parameters
+   * @param script
+   * @param hash
+   */
+  public QueryHint(String key, Map<String, List<QueryHintParameter>> parameters, String script,
+      Integer hash) {
+    super();
+    this.key = key;
+    this.parameters = parameters;
+    this.script = script;
+    this.hash = hash;
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -129,6 +148,22 @@ public class QueryHint implements Serializable {
     private String name;
     private String value;
     private String type;
+
+    public QueryHintParameter() {
+      super();
+    }
+
+    /**
+     * @param name
+     * @param value
+     * @param type
+     */
+    public QueryHintParameter(String name, String value, String type) {
+      super();
+      this.name = name;
+      this.value = value;
+      this.type = type;
+    }
 
     @Override
     public boolean equals(Object obj) {

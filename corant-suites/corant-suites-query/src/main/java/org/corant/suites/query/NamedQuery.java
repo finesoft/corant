@@ -16,7 +16,7 @@ package org.corant.suites.query;
 import java.util.Map;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午9:54:08
  *

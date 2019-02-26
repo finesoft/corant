@@ -31,7 +31,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:50:40
  *

@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午5:20:01
  *

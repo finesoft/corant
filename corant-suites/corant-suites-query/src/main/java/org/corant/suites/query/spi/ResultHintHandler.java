@@ -30,6 +30,6 @@ public interface ResultHintHandler {
     return false;
   }
 
-  void handle(QueryHint qh, Object result) throws Exception;
+  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
 
 }

@@ -14,7 +14,7 @@
 package org.corant.suites.query.mapping;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午6:24:18
  *

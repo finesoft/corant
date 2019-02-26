@@ -28,7 +28,7 @@ import org.corant.suites.query.mapping.QueryMappingService;
 import org.corant.suites.query.spi.ParamReviser;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午3:16:56
  *

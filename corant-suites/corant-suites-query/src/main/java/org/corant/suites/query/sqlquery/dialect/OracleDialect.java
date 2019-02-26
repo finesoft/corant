@@ -16,7 +16,7 @@ package org.corant.suites.query.sqlquery.dialect;
 import java.util.Locale;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 上午11:45:24
  *

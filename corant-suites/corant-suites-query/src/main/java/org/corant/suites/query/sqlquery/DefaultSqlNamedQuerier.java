@@ -22,7 +22,7 @@ import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.sqlquery.SqlNamedQueryResolver.Querier;
 
 /**
- * asosat-query
+ * corant-suites-query
  *
  * @author bingo 下午4:35:55
  *

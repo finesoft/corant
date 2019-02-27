@@ -17,6 +17,8 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.getAllSuperclassesAndInterfaces;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.replace;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -28,7 +30,9 @@ import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PersistenceUnit;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
 
@@ -43,6 +47,12 @@ public class JpaUtils {
 
   static final Set<Class<? extends Annotation>> PERSIS_ANN =
       asSet(Entity.class, Embeddable.class, MappedSuperclass.class, Converter.class);
+
+  public static String getMixedPuName(PersistenceUnit pu) {
+    String usePuName = defaultString(pu.unitName(), PersistenceNames.PU_DFLT_NME);
+    usePuName = isEmpty(pu.name()) ? usePuName : usePuName + "." + pu.name();
+    return usePuName;
+  }
 
   public static Set<Class<?>> getPersistenceClasses(String packages) {
     Set<Class<?>> clses = new LinkedHashSet<>();

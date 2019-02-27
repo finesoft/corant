@@ -101,6 +101,7 @@ public class PersistenceConfigParser {
         proCfgNmes.add(pn);
       }
     });
+    puimd.resolvePersistenceProvider();
     doParseProperties(config, proPrefix, proCfgNmes, puimd);
     map.put(name, puimd);
   }

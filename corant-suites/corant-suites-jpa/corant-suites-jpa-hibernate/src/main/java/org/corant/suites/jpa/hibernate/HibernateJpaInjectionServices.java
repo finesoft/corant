@@ -24,9 +24,7 @@ import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
-import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
@@ -42,21 +40,18 @@ public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices 
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Override
-  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitMetaData metaData) {
-    JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
-    PersistenceUnitInfoMetaData puimd =
-        extension.getPersistenceUnitInfoMetaData(metaData.getMixedName());
+  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
     InitialContext jndi = Corant.instance().select(InitialContext.class).get();
-    puimd.configDataSource((dsn) -> {
+    shouldNotNull(metaData).configDataSource((dsn) -> {
       try {
-        return forceCast(jndi.lookup(
-            shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
+        return forceCast(
+            jndi.lookup(shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
                 : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     });
-    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(puimd,
+    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         PROPERTIES);
   }
 

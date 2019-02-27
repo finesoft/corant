@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Collections;
@@ -41,9 +42,8 @@ import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
 import org.corant.suites.jpa.shared.inject.PersistenceContextInjectionPoint;
 import org.corant.suites.jpa.shared.inject.TransactionPersistenceContextType;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -54,11 +54,11 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class JpaExtension implements Extension {
 
-  static final Set<PersistenceUnitMetaData> PUMDS =
-      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnitMetaData, Boolean>());
+  static final Set<PersistenceUnitInfoMetaData> PUMDS =
+      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnitInfoMetaData, Boolean>());
 
-  static final Set<PersistenceContextMetaData> PCMDS =
-      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContextMetaData, Boolean>());
+  static final Set<PersistenceContextInfoMetaData> PCMDS =
+      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContextInfoMetaData, Boolean>());
 
   protected final Map<String, PersistenceUnitInfoMetaData> persistenceUnitInfoMetaDatas =
       new HashMap<>();
@@ -99,11 +99,13 @@ public class JpaExtension implements Extension {
     final InjectionPoint ip = pip.getInjectionPoint();
     PersistenceUnit pu = Cdis.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
-      PUMDS.add(PersistenceUnitMetaData.of(pu));
+      PUMDS.add(getPersistenceUnitInfoMetaData(JpaUtils.getMixedPuName(pu)));
     }
     PersistenceContext pc = Cdis.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {
-      PersistenceContextMetaData pcmd = PersistenceContextMetaData.of(pc);
+      PersistenceUnitInfoMetaData pumd =
+          shouldNotNull(getPersistenceUnitInfoMetaData(pc.unitName()));
+      PersistenceContextInfoMetaData pcmd = PersistenceContextInfoMetaData.of(pc, pumd);
       if (pcmd.getType() != PersistenceContextType.TRANSACTION) {
         shouldBeFalse(ip.getBean().getScope().equals(ApplicationScoped.class));
         pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
@@ -112,7 +114,7 @@ public class JpaExtension implements Extension {
         pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
             TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
       }
-      PUMDS.add(pcmd.getUnit());
+      PUMDS.add(pumd);
       PCMDS.add(pcmd);
     }
   }

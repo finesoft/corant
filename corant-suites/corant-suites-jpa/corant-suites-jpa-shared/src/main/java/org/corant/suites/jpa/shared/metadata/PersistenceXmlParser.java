@@ -106,6 +106,7 @@ public class PersistenceXmlParser {
         }
       }
     }
+    puimd.resolvePersistenceProvider();
   }
 
   static void doParse(URL url, Map<String, PersistenceUnitInfoMetaData> map) {

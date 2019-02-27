@@ -14,7 +14,9 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,9 +27,12 @@ import java.util.function.Function;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
+import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jpa.shared.JpaConfig;
 
 public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
@@ -98,6 +103,28 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
       transformers.add(ctf);
     }
     return this;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    PersistenceUnitInfoMetaData other = (PersistenceUnitInfoMetaData) obj;
+    if (persistenceUnitName == null) {
+      if (other.persistenceUnitName != null) {
+        return false;
+      }
+    } else if (!persistenceUnitName.equals(other.persistenceUnitName)) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -200,6 +227,14 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   public String getVersion() {
     return version;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (persistenceUnitName == null ? 0 : persistenceUnitName.hashCode());
+    return result;
   }
 
   public boolean isExcludeUnlistedClasses() {
@@ -346,6 +381,14 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   protected void setVersion(String version) {
     this.version = version;
+  }
+
+  void resolvePersistenceProvider() {
+    if (isBlank(persistenceProviderClassName)) {
+      PersistenceProvider pp = JpaConfig.resolvePersistenceProvider()
+          .orElseThrow(() -> new CorantRuntimeException("Can not find jpa provider"));
+      setPersistenceProviderClassName(getUserClass(pp.getClass()).getName());
+    }
   }
 
 }

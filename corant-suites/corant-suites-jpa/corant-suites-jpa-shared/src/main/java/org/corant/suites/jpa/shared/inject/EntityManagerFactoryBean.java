@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -24,6 +25,8 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -31,7 +34,7 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
  * corant-suites-jpa-shared
@@ -46,37 +49,43 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
       Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE));
   static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
   final BeanManager beanManager;
-  final PersistenceUnitMetaData persistenceUnitMetaData;
+  final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
 
   /**
    * @param beanManager
    * @param persistenceContext
    */
   public EntityManagerFactoryBean(BeanManager beanManager,
-      PersistenceUnitMetaData persistenceUnitMetaData) {
+      PersistenceUnitInfoMetaData persistenceUnitInfoMetaData) {
     super();
     this.beanManager = beanManager;
-    this.persistenceUnitMetaData = persistenceUnitMetaData;
+    this.persistenceUnitInfoMetaData = persistenceUnitInfoMetaData;
   }
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    shouldBeTrue(Corant.instance().select(AbstractJpaProvider.class).isResolvable());
-    AbstractJpaProvider provider = Corant.instance().select(AbstractJpaProvider.class).get();
-    LOGGER.fine(() -> String.format(
-        "Create an entity manager factory with persistence unit name %s scope is ApplicationScoped.",
-        persistenceUnitMetaData.getMixedName(), getScope().getSimpleName()));
-    return shouldNotNull(provider.getEntityManagerFactory(persistenceUnitMetaData));
+    NamedLiteral proNme =
+        NamedLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
+    Instance<AbstractJpaProvider> provider =
+        Corant.instance().select(AbstractJpaProvider.class, proNme);
+    shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
+    final EntityManagerFactory emf =
+        shouldNotNull(provider.get().getEntityManagerFactory(persistenceUnitInfoMetaData));
+    LOGGER.info(() -> String.format(
+        "Created an entity manager factory that persistence unit named %s, provider is %s.",
+        persistenceUnitInfoMetaData.getPersistenceUnitName(),
+        tryAsClass(proNme.value()).getSimpleName()));
+    return emf;
   }
 
   @Override
   public void destroy(EntityManagerFactory instance,
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
-      LOGGER.fine(() -> String.format(
-          "Destroy an entity manager factory with persistence unit name %s scope is ApplicationScoped.",
-          persistenceUnitMetaData.getMixedName(), getScope().getSimpleName()));
       instance.close();
+      LOGGER.info(
+          () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
+              persistenceUnitInfoMetaData.getPersistenceUnitName()));
     }
   }
 

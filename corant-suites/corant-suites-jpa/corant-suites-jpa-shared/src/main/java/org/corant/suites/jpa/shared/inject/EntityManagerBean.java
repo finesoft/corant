@@ -32,7 +32,7 @@ import javax.persistence.PersistenceContextType;
 import javax.transaction.TransactionScoped;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
 
 /**
  * corant-suites-jpa-shared
@@ -49,36 +49,39 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
       Collections.unmodifiableSet(asSet(ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
   static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManager.class));
   final BeanManager beanManager;
-  final PersistenceContextMetaData persistenceContextMetaData;
+  final PersistenceContextInfoMetaData persistenceContextInfoMetaData;
 
   /**
    * @param beanManager
    * @param persistenceContext
    */
   public EntityManagerBean(BeanManager beanManager,
-      PersistenceContextMetaData persistenceContextMetaData) {
+      PersistenceContextInfoMetaData persistenceContextInfoMetaData) {
     super();
     this.beanManager = beanManager;
-    this.persistenceContextMetaData = persistenceContextMetaData;
+    this.persistenceContextInfoMetaData = persistenceContextInfoMetaData;
   }
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
-    LOGGER.info(
-        () -> String.format("Create an entity manager with persistence unit name %s scope is %s",
-            persistenceContextMetaData.getUnit().getMixedName(), getScope().getSimpleName()));
     shouldBeTrue(Corant.instance().select(AbstractJpaProvider.class).isResolvable());
     AbstractJpaProvider provider = Corant.instance().select(AbstractJpaProvider.class).get();
-    return provider.getEntityManager(persistenceContextMetaData);
+    final EntityManager em = provider.getEntityManager(persistenceContextInfoMetaData);
+    LOGGER.fine(
+        () -> String.format("Created an entity manager that persistence unit named %s, scope is %s",
+            persistenceContextInfoMetaData.getUnit().getPersistenceUnitName(),
+            getScope().getSimpleName()));
+    return em;
   }
 
   @Override
   public void destroy(EntityManager instance, CreationalContext<EntityManager> creationalContext) {
     if (instance != null && instance.isOpen()) {
-      LOGGER.info(
-          () -> String.format("Destroy an entity manager with persistence unit name %s scope is %s",
-              persistenceContextMetaData.getUnit().getMixedName(), getScope().getSimpleName()));
       instance.close();
+      LOGGER.fine(
+          () -> String.format("Destroyed entity manager that persistence unit named %s scope is %s",
+              persistenceContextInfoMetaData.getUnit().getPersistenceUnitName(),
+              getScope().getSimpleName()));
     }
   }
 
@@ -90,7 +93,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
   @Override
   public String getId() {
     return EntityManagerBean.class.getName() + "."
-        + persistenceContextMetaData.getUnit().getMixedName();
+        + persistenceContextInfoMetaData.getUnit().getPersistenceUnitName();
   }
 
   @Override
@@ -105,14 +108,15 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public Set<Annotation> getQualifiers() {
-    return persistenceContextMetaData.getType() == PersistenceContextType.EXTENDED
+    return persistenceContextInfoMetaData.getType() == PersistenceContextType.EXTENDED
         ? EXTEN_QUALIFIERS
         : TRANS_QUALIFIERS;
   }
 
   @Override
   public Class<? extends Annotation> getScope() {
-    return persistenceContextMetaData.getType() == PersistenceContextType.EXTENDED ? Dependent.class
+    return persistenceContextInfoMetaData.getType() == PersistenceContextType.EXTENDED
+        ? Dependent.class
         : TransactionScoped.class;
   }
 

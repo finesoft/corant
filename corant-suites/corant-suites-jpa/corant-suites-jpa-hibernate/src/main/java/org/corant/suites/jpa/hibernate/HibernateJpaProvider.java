@@ -19,7 +19,7 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.naming.InitialContext;
+import javax.inject.Named;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -27,7 +27,6 @@ import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
 import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
@@ -38,6 +37,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  *
  */
 @ApplicationScoped
+@Named("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJpaProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =
@@ -46,24 +46,18 @@ public class HibernateJpaProvider extends AbstractJpaProvider {
   @Inject
   JpaExtension extension;
 
-  @Inject
-  InitialContext jndi;
-
   @Override
-  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitMetaData metaData) {
-    String name = metaData.getMixedName();
-    PersistenceUnitInfoMetaData puimd =
-        shouldNotNull(extension.getPersistenceUnitInfoMetaData(name));
-    puimd.configDataSource(dsn -> {
+  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
+    shouldNotNull(metaData).configDataSource(dsn -> {
       try {
-        return forceCast(jndi.lookup(
-            shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
+        return forceCast(
+            getJndi().lookup(shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
                 : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     });
-    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(puimd,
+    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         PROPERTIES);
   }
 

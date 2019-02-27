@@ -29,19 +29,19 @@ import javax.persistence.SynchronizationType;
  * @author bingo 上午10:49:31
  *
  */
-public class PersistenceContextMetaData {
+public class PersistenceContextInfoMetaData {
 
   private final PersistenceContextType type;
   private final SynchronizationType synchronization;
   private final Map<String, String> properties;
-  private final PersistenceUnitMetaData unit;
+  private final PersistenceUnitInfoMetaData unit;
 
-  private PersistenceContextMetaData(PersistenceContext pc) {
+  private PersistenceContextInfoMetaData(PersistenceContext pc, PersistenceUnitInfoMetaData unit) {
     shouldBeTrue(pc.synchronization() == SynchronizationType.SYNCHRONIZED,
         "Only support SYNCHRONIZED persistence context!");
     type = pc.type();
     synchronization = pc.synchronization();
-    unit = new PersistenceUnitMetaData(pc.name(), pc.unitName());
+    this.unit = unit;
     Map<String, String> map = new HashMap<>();
     if (!isEmpty(pc.properties())) {
       for (PersistenceProperty pp : pc.properties()) {
@@ -51,47 +51,9 @@ public class PersistenceContextMetaData {
     properties = Collections.unmodifiableMap(map);
   }
 
-  public static PersistenceContextMetaData of(PersistenceContext pc) {
-    return new PersistenceContextMetaData(pc);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    PersistenceContextMetaData other = (PersistenceContextMetaData) obj;
-    if (properties == null) {
-      if (other.properties != null) {
-        return false;
-      }
-    } else if (!properties.equals(other.properties)) {
-      return false;
-    }
-    if (synchronization != other.synchronization) {
-      return false;
-    }
-    if (type != other.type) {
-      return false;
-    }
-    if (unit == null) {
-      if (other.unit != null) {
-        return false;
-      }
-    } else if (!unit.equals(other.unit)) {
-      return false;
-    }
-    return true;
-  }
-
-  public String getName() {
-    return unit.getName();
+  public static PersistenceContextInfoMetaData of(PersistenceContext pc,
+      PersistenceUnitInfoMetaData unit) {
+    return new PersistenceContextInfoMetaData(pc, unit);
   }
 
   public Map<String, String> getProperties() {
@@ -106,23 +68,8 @@ public class PersistenceContextMetaData {
     return type;
   }
 
-  public PersistenceUnitMetaData getUnit() {
+  public PersistenceUnitInfoMetaData getUnit() {
     return unit;
-  }
-
-  public String getUnitName() {
-    return unit.getUnitName();
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (properties == null ? 0 : properties.hashCode());
-    result = prime * result + (synchronization == null ? 0 : synchronization.hashCode());
-    result = prime * result + (type == null ? 0 : type.hashCode());
-    result = prime * result + (unit == null ? 0 : unit.hashCode());
-    return result;
   }
 
 }

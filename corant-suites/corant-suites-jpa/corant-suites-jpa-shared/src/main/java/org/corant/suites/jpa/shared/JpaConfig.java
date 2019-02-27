@@ -19,7 +19,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
+import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceProviderResolverHolder;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
 import org.corant.suites.jpa.shared.metadata.PersistenceConfigParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -34,6 +38,7 @@ import org.eclipse.microprofile.config.Config;
  */
 public class JpaConfig {
 
+  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/EntityManagerFactories";
   public static final String PREFIX = "jpa.";
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
   public static final String DFLT_ORM_XML_LOCATION = "META-INF/*JpaOrm.xml";
@@ -88,6 +93,11 @@ public class JpaConfig {
         String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
         String.join(",", fromXmlPums.keySet())));
     return cfg;
+  }
+
+  public static Optional<? extends PersistenceProvider> resolvePersistenceProvider() {
+    return PersistenceProviderResolverHolder.getPersistenceProviderResolver()
+        .getPersistenceProviders().stream().findFirst();
   }
 
   private static Map<String, PersistenceUnitInfoMetaData> generateFromConfig(Config config) {

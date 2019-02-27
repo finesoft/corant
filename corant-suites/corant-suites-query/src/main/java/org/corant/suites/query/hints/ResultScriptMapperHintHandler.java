@@ -66,7 +66,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
  * Use case:
  *
  * <pre>
- * .
  * &lt;query name="GeneralCriterias.get" result-class="java.util.Map"&gt;
  *       &lt;script&gt;
  *           &lt;![CDATA[

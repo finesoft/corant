@@ -160,10 +160,6 @@ public class PackagingLayout extends AbstractValueObject {
       setWidthQty(widthQty);
       setHeightQty(heightQty);
       setUnit(unit);
-      if (lengthQty != null || widthQty != null && heightQty != null) {
-        setQty(defaultObject(lengthQty, ONE).multiply(defaultObject(widthQty, ONE))
-            .multiply(defaultObject(heightQty, ONE)));
-      }
     }
 
     /**
@@ -236,6 +232,7 @@ public class PackagingLayout extends AbstractValueObject {
      */
     protected void setHeightQty(BigDecimal heightQty) {
       this.heightQty = heightQty;
+      initQty();
     }
 
     /**
@@ -244,6 +241,7 @@ public class PackagingLayout extends AbstractValueObject {
      */
     protected void setLengthQty(BigDecimal lengthQty) {
       this.lengthQty = lengthQty;
+      initQty();
     }
 
     /**
@@ -252,8 +250,15 @@ public class PackagingLayout extends AbstractValueObject {
      */
     protected void setWidthQty(BigDecimal widthQty) {
       this.widthQty = widthQty;
+      initQty();
     }
 
+    void initQty() {
+      if (lengthQty != null || widthQty != null || heightQty != null) {
+        setQty(defaultObject(lengthQty, ONE).multiply(defaultObject(widthQty, ONE))
+            .multiply(defaultObject(heightQty, ONE)));
+      }
+    }
   }
 
 }

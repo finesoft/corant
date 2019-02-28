@@ -76,7 +76,8 @@
 		<version.narayana-jta>5.9.2.Final</version.narayana-jta>
 		<version.mssql-jdbc>7.0.0.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.47</version.mysql>
-		<version.hibernate>5.4.0.Final</version.hibernate>
+		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
+		<version.hibernate-ogm-mongodb>5.4.1.Final</version.hibernate-ogm-mongodb>
 		<version.flyway>5.2.0</version.flyway>
 
 		<version.elasticsearch>6.5.4</version.elasticsearch>
@@ -498,9 +499,15 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>${version.hibernate}</version>
+				<version>${version.hibernate-orm-core}</version>
 			</dependency>
-
+			<!-- OGM -->
+			<dependency>
+				<groupId>org.hibernate.ogm</groupId>
+				<artifactId>hibernate-ogm-mongodb</artifactId>
+				<version>${version.hibernate-ogm-mongodb}</version>
+			</dependency>
+			
 			<!-- POI -->
 			<dependency>
 				<groupId>org.apache.poi</groupId>

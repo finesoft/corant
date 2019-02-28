@@ -87,8 +87,12 @@ public class PersistencePropertiesParser {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS_PKG)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> JpaUtils.getPersistenceClasses(s)
-            .stream().map(Class::getName).forEach(puimd::addManagedClassName));
+        config.getOptionalValue(pn, String.class).ifPresent(s -> {
+          asStream(split(s, ",", true, true)).forEach(p -> {
+            JpaUtils.getPersistenceClasses(p).stream().map(Class::getName)
+                .forEach(puimd::addManagedClassName);
+          });
+        });
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_PATH)) {
         JpaUtils.getPersistenceMappingFiles(
             split(config.getOptionalValue(pn, String.class).orElse(JpaConfig.DFLT_ORM_XML_LOCATION),

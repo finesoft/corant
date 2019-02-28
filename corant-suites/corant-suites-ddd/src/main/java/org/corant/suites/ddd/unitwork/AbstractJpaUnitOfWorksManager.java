@@ -28,7 +28,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
+import org.corant.suites.ddd.annotation.qualifier.RDBS;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
@@ -38,13 +38,12 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  * @author bingo 下午2:14:21
  *
  */
-@JPA
 @ApplicationScoped
 @InfrastructureServices
-public abstract class JtaJpaUnitOfWorksManager extends AbstractUnitOfWorksManager
+public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksManager
     implements EntityManagerProvider {
 
-  protected final Map<Object, JtaJpaUnitOfWork> UOWS = new ConcurrentHashMap<>();
+  protected final Map<Object, JpaUnitOfWork> UOWS = new ConcurrentHashMap<>();
 
   @Inject
   TransactionManager transactionManager;
@@ -52,18 +51,18 @@ public abstract class JtaJpaUnitOfWorksManager extends AbstractUnitOfWorksManage
   @Inject
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
-  public static JtaJpaUnitOfWork currentUnitOfWork() {
-    return Corant.instance().select(JtaJpaUnitOfWorksManager.class, JPA.INST).get()
+  public static JpaUnitOfWork currentUnitOfWork() {
+    return Corant.instance().select(AbstractJpaUnitOfWorksManager.class, RDBS.INST).get()
         .getCurrentUnitOfWorks();
   }
 
   @Override
-  public JtaJpaUnitOfWork getCurrentUnitOfWorks() {
+  public JpaUnitOfWork getCurrentUnitOfWorks() {
     try {
       final Transaction curtx = getTransactionManager().getTransaction();
       return UOWS.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> {
         logger.fine(() -> "Register an new unit of work with the current transacion context.");
-        JtaJpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(), unwrapUnifOfWorksKey(key));
+        JpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(), unwrapUnifOfWorksKey(key));
         getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
         return uow;
       });
@@ -85,8 +84,8 @@ public abstract class JtaJpaUnitOfWorksManager extends AbstractUnitOfWorksManage
     return transactionSynchronizationRegistry;
   }
 
-  protected JtaJpaUnitOfWork buildUnitOfWork(EntityManager entityManager, Transaction transaction) {
-    return new JtaJpaUnitOfWork(this, entityManager, transaction);
+  protected JpaUnitOfWork buildUnitOfWork(EntityManager entityManager, Transaction transaction) {
+    return new JpaUnitOfWork(this, entityManager, transaction);
   }
 
   protected abstract EntityManagerFactory getEntityManagerFactory();

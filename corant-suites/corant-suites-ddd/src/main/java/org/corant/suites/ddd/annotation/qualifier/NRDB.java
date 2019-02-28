@@ -34,11 +34,11 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface JPA {
+public @interface NRDB {
 
-  final static JPALiteral INST = new JPALiteral();
+  final static NRDBLiteral INST = new NRDBLiteral();
 
-  public static class JPALiteral extends AnnotationLiteral<JPA> {
+  public static class NRDBLiteral extends AnnotationLiteral<NRDB> {
 
     private static final long serialVersionUID = 1195618002058271385L;
   }

@@ -45,9 +45,8 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, PassivationCapable {
 
   static final Logger LOGGER = Logger.getLogger(EntityManagerFactoryBean.class.getName());
-  static final Set<Annotation> QUALIFIERS =
-      Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE));
   static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
+  final Set<Annotation> qualifiers;
   final BeanManager beanManager;
   final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
 
@@ -60,6 +59,8 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
     super();
     this.beanManager = beanManager;
     this.persistenceUnitInfoMetaData = persistenceUnitInfoMetaData;
+    qualifiers = Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE,
+        NamedLiteral.of(persistenceUnitInfoMetaData.getPersistenceUnitName())));
   }
 
   @Override
@@ -111,7 +112,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public Set<Annotation> getQualifiers() {
-    return QUALIFIERS;
+    return qualifiers;
   }
 
   @Override

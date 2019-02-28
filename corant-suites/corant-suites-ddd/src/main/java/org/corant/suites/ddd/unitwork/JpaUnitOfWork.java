@@ -44,14 +44,14 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  * @author bingo 上午11:38:39
  *
  */
-public class JtaJpaUnitOfWork extends AbstractUnitOfWork
+public class JpaUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
 
   final transient Transaction transaction;
   final transient EntityManager entityManager;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
-  protected JtaJpaUnitOfWork(JtaJpaUnitOfWorksManager manager, EntityManager entityManager,
+  protected JpaUnitOfWork(AbstractJpaUnitOfWorksManager manager, EntityManager entityManager,
       Transaction transaction) {
     super(manager);
     this.transaction = transaction;
@@ -175,8 +175,8 @@ public class JtaJpaUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  protected JtaJpaUnitOfWorksManager getManager() {
-    return (JtaJpaUnitOfWorksManager) super.getManager();
+  protected AbstractJpaUnitOfWorksManager getManager() {
+    return (AbstractJpaUnitOfWorksManager) super.getManager();
   }
 
   protected void handleMessage() {

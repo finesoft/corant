@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
+import org.corant.suites.ddd.annotation.qualifier.RDBS;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageService.MessageStroage;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -34,7 +34,7 @@ import org.corant.suites.jpa.shared.JpaUtils;
 public class DefaultJpaMessageStroage implements MessageStroage {
 
   @Inject
-  @JPA
+  @RDBS
   protected JpaRepository repo;
 
   protected final Map<Class<?>, Boolean> persistMessageClasses =

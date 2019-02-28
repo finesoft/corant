@@ -30,7 +30,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
+import org.corant.suites.ddd.annotation.qualifier.RDBS;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
@@ -171,7 +171,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   protected Annotation lifecycleServiceQualifier() {
-    return JPA.INST;
+    return RDBS.INST;
   }
 
   protected synchronized void setVn(long vn) {

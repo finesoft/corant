@@ -52,7 +52,7 @@ import io.agroal.pool.DataSource;
  * @author bingo 下午2:15:40
  *
  */
-public class HibernateSchemaUtils {
+public class HibernateOrmSchemaUtils {
 
   public static final String JPA_ORM_XML_NAME_END_WITH = "JpaOrm.xml";
 
@@ -195,6 +195,6 @@ public class HibernateSchemaUtils {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     Configurations.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(HibernateSchemaUtils.class, "-disable_boost_line");
+    return Corant.run(HibernateOrmSchemaUtils.class, "-disable_boost_line");
   }
 }

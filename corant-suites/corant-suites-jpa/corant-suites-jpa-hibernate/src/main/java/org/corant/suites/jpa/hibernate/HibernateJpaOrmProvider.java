@@ -38,7 +38,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  */
 @ApplicationScoped
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")
-public class HibernateJpaProvider extends AbstractJpaProvider {
+public class HibernateJpaOrmProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());

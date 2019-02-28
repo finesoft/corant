@@ -21,7 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
+import org.corant.suites.ddd.annotation.qualifier.RDBS;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.repository.JpaRepository;
 import org.corant.suites.ddd.saga.Saga;
@@ -38,7 +38,7 @@ import org.corant.suites.jpa.shared.JpaUtils;
 public class DefaultJpaSagaService extends AbstractSagaService {
 
   @Inject
-  @JPA
+  @RDBS
   protected JpaRepository repo;
 
   protected final Map<Class<?>, Boolean> persistSagaClasses =

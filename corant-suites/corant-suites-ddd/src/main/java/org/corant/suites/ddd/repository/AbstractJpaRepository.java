@@ -27,7 +27,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -40,13 +39,8 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  * @author bingo 下午9:54:26
  *
  */
-@JPA
 @Repositories
 public abstract class AbstractJpaRepository implements JpaRepository {
-
-  @Inject
-  @JPA
-  EntityManagerProvider entityManagerProvider;
 
   @Inject
   protected Logger logger;
@@ -153,7 +147,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
    */
   @Override
   public EntityManager getEntityManager() {
-    return entityManagerProvider.getEntityManager();
+    return getEntityManagerProvider().getEntityManager();
   }
 
   public EntityManagerFactory getEntityManagerFactory() {
@@ -219,5 +213,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   public <T> List<T> select(String queryName, Object... param) {
     return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
+
+  protected abstract EntityManagerProvider getEntityManagerProvider();
 
 }

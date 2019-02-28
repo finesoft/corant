@@ -97,6 +97,11 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return this;
   }
 
+  public PersistenceUnitInfoMetaData configProperties(Object key, Object value) {
+    properties.put(key, value);
+    return this;
+  }
+
   public PersistenceUnitInfoMetaData configTransformers(ClassTransformer... classTransformers) {
     transformers.clear();
     for (ClassTransformer ctf : classTransformers) {

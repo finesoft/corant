@@ -77,7 +77,7 @@
 		<version.mssql-jdbc>7.0.0.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.47</version.mysql>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
-		<version.hibernate-ogm-mongodb>5.4.1.Final</version.hibernate-ogm-mongodb>
+		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.flyway>5.2.0</version.flyway>
 
 		<version.elasticsearch>6.5.4</version.elasticsearch>
@@ -504,10 +504,29 @@
 			<!-- OGM -->
 			<dependency>
 				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-mongodb</artifactId>
-				<version>${version.hibernate-ogm-mongodb}</version>
+				<artifactId>hibernate-ogm-core</artifactId>
+				<version>${version.hibernate-ogm-core}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.hibernate.ogm</groupId>
+				<artifactId>hibernate-ogm-mongodb</artifactId>
+				<version>${version.hibernate-ogm-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.ogm</groupId>
+				<artifactId>hibernate-ogm-neo4j</artifactId>
+				<version>${version.hibernate-ogm-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.ogm</groupId>
+				<artifactId>hibernate-ogm-infinispan</artifactId>
+				<version>${version.hibernate-ogm-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.ogm</groupId>
+				<artifactId>hibernate-ogm-infinispan</artifactId>
+				<version>${version.hibernate-ogm-core}</version>
+			</dependency>
 			<!-- POI -->
 			<dependency>
 				<groupId>org.apache.poi</groupId>

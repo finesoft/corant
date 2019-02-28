@@ -33,7 +33,7 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.suites.ddd.annotation.qualifier.JPA;
+import org.corant.suites.ddd.annotation.qualifier.RDBS;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -45,7 +45,7 @@ import org.corant.suites.jpa.shared.JpaUtils;
  * @author bingo 上午12:36:03
  *
  */
-@JPA
+@RDBS
 @ApplicationScoped
 @InfrastructureServices
 public class IdentifierEntityConverterFactory implements ConverterFactory<Object, Entity> {
@@ -99,8 +99,8 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     } else if (value instanceof BaseAggregateIdentifier) {
       id = BaseAggregateIdentifier.class.cast(value).getId();
     }
-    if (id != null && Corant.instance().select(JpaRepository.class, JPA.INST).isResolvable()) {
-      return Corant.instance().select(JpaRepository.class, JPA.INST).get().get(targetClass, id);
+    if (id != null && Corant.instance().select(JpaRepository.class, RDBS.INST).isResolvable()) {
+      return Corant.instance().select(JpaRepository.class, RDBS.INST).get().get(targetClass, id);
     } else {
       throw new ConversionException("Can't not convert %s to %s!", value.toString(),
           targetClass.getSimpleName());

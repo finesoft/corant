@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.service;
+package org.corant.suites.ddd.unitwork;
 
 import org.corant.suites.ddd.event.LifecycleEvent;
 

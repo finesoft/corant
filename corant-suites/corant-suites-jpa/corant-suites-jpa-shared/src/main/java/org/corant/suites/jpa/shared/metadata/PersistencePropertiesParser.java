@@ -38,9 +38,9 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午4:06:33
  *
  */
-public class PersistenceConfigParser {
+public class PersistencePropertiesParser {
 
-  private static Logger logger = Logger.getLogger(PersistenceConfigParser.class.getName());
+  private static Logger logger = Logger.getLogger(PersistencePropertiesParser.class.getName());
 
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
@@ -77,7 +77,7 @@ public class PersistenceConfigParser {
             .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addMappingFileName));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> asStream(split(s, ","))
-            .map(PersistenceConfigParser::toUrl).forEach(puimd::addJarFileUrl));
+            .map(PersistencePropertiesParser::toUrl).forEach(puimd::addJarFileUrl));
       } else if (pn.endsWith(JpaConfig.DOT_PUN_EX_UL_CLS)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setExcludeUnlistedClasses);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_VAL_MOD)) {

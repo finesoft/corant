@@ -25,7 +25,7 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
-import org.corant.suites.jpa.shared.metadata.PersistenceConfigParser;
+import org.corant.suites.jpa.shared.metadata.PersistencePropertiesParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceXmlParser;
 import org.eclipse.microprofile.config.Config;
@@ -101,7 +101,7 @@ public class JpaConfig {
   }
 
   private static Map<String, PersistenceUnitInfoMetaData> generateFromConfig(Config config) {
-    return PersistenceConfigParser.parse(config);
+    return PersistencePropertiesParser.parse(config);
   }
 
   private static Map<String, PersistenceUnitInfoMetaData> generateFromXml() {

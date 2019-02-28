@@ -52,6 +52,31 @@ public interface Party extends Nameable, Entity {
       boolean includeHierarchy);
 
   /**
+   *
+   * @author bingo 下午7:23:43
+   *
+   */
+  public interface AccountabilityType extends Nameable {
+
+    /**
+     * 是否含有该类型的委托责任关系
+     *
+     * @param entrustingParty
+     * @param responsibleParty
+     * @return
+     */
+    boolean hasConnection(final Party entrustingParty, final Party responsibleParty);
+
+    /**
+     * 检查是否可以建立委托责任关系
+     *
+     * @param entrustingParty
+     * @param responsibleParty
+     */
+    void verifyConnection(final Party entrustingParty, final Party responsibleParty);
+  }
+
+  /**
    * 法人
    *
    * @author bingo 2016年9月21日
@@ -74,6 +99,31 @@ public interface Party extends Nameable, Entity {
    * @since
    */
   public interface Individual extends Party {
+  }
+
+  public interface PartyAccountability {
+
+    /**
+     * 委托方
+     *
+     * @return getEntrustingParty
+     */
+    Party getEntrustingParty();
+
+    /**
+     * 责任方
+     *
+     * @return
+     */
+    Party getResponsibleParty();
+
+    /**
+     * 责任类型
+     *
+     * @return getType
+     */
+    AccountabilityType getType();
+
   }
 
   /**

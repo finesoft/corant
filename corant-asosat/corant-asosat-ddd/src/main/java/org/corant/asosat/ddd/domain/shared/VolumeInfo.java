@@ -22,40 +22,40 @@ import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
 @Embeddable
 @MappedSuperclass
-public class WeightInfo extends AbstractValueObject implements Comparable<WeightInfo> {
+public class VolumeInfo extends AbstractValueObject implements Comparable<VolumeInfo> {
 
   private static final long serialVersionUID = 6145301734319644562L;
 
-  static final WeightInfo WI0 = new WeightInfo(BigDecimal.ZERO, MeasureUnit.KG);
+  static final VolumeInfo VI0 = new VolumeInfo(BigDecimal.ZERO, MeasureUnit.KG);
 
   @Column
-  private BigDecimal weight;
+  private BigDecimal volume;
 
   @Column
   private MeasureUnit unit;
 
   /**
-   * @param weight
+   * @param volume
    * @param unit
    */
-  public WeightInfo(BigDecimal weight, MeasureUnit unit) {
+  public VolumeInfo(BigDecimal volume, MeasureUnit unit) {
     super();
-    this.weight = weight;
+    this.volume = volume;
     this.unit = unit;
   }
 
-  protected WeightInfo() {
+  protected VolumeInfo() {
     super();
   }
 
-  public static WeightInfo of(BigDecimal weight, MeasureUnit unit) {
-    return new WeightInfo(weight, unit);
+  public static VolumeInfo of(BigDecimal volume, MeasureUnit unit) {
+    return new VolumeInfo(volume, unit);
   }
 
   @Override
-  public int compareTo(WeightInfo o) {
-    return defaultObject(weight, BigDecimal.ZERO)
-        .compareTo(defaultObject(o.weight, BigDecimal.ZERO));
+  public int compareTo(VolumeInfo o) {
+    return defaultObject(volume, BigDecimal.ZERO)
+        .compareTo(defaultObject(o.volume, BigDecimal.ZERO));
   }
 
   @Override
@@ -69,15 +69,15 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
     if (getClass() != obj.getClass()) {
       return false;
     }
-    WeightInfo other = (WeightInfo) obj;
+    VolumeInfo other = (VolumeInfo) obj;
     if (unit != other.unit) {
       return false;
     }
-    if (weight == null) {
-      if (other.weight != null) {
+    if (volume == null) {
+      if (other.volume != null) {
         return false;
       }
-    } else if (!weight.equals(other.weight)) {
+    } else if (!volume.equals(other.volume)) {
       return false;
     }
     return true;
@@ -87,8 +87,8 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
     return unit;
   }
 
-  public BigDecimal getWeight() {
-    return weight;
+  public BigDecimal getVolume() {
+    return volume;
   }
 
   @Override
@@ -96,7 +96,7 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
     final int prime = 31;
     int result = 1;
     result = prime * result + (unit == null ? 0 : unit.hashCode());
-    result = prime * result + (weight == null ? 0 : weight.hashCode());
+    result = prime * result + (volume == null ? 0 : volume.hashCode());
     return result;
   }
 
@@ -104,8 +104,8 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
     this.unit = unit;
   }
 
-  protected void setWeight(BigDecimal weight) {
-    this.weight = weight;
+  protected void setVolume(BigDecimal volume) {
+    this.volume = volume;
   }
 
 }

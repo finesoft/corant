@@ -19,4 +19,4 @@
  * @author bingo 上午10:07:01
  *
  */
-package org.corant.suites.query.cqlquery;
+package org.corant.suites.query.jpqlquery;

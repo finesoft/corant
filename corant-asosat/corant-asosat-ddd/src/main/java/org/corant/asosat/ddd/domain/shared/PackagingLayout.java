@@ -141,9 +141,6 @@ public class PackagingLayout extends AbstractValueObject {
     @Column
     private BigDecimal heightQty;
 
-    /**
-     *
-     */
     public RegularPackagingLayout() {
       super();
     }
@@ -170,6 +167,10 @@ public class PackagingLayout extends AbstractValueObject {
       super(qty, unit);
     }
 
+    public static RegularPackagingLayout single(String unit) {
+      return new RegularPackagingLayout(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, unit);
+    }
+
     public String asDescription() {
       return asDescription(0, "%s x %s x %s %s");
     }
@@ -188,6 +189,7 @@ public class PackagingLayout extends AbstractValueObject {
           defaultString(getUnit()));
     }
 
+    @javax.persistence.Transient
     @Transient
     public BigDecimal get2DQty() {
       if (getLengthQty() != null && getWidthQty() != null) {
@@ -220,6 +222,7 @@ public class PackagingLayout extends AbstractValueObject {
       return widthQty;
     }
 
+    @javax.persistence.Transient
     @Transient
     public boolean isConsistency() {
       return getLengthQty() != null && getWidthQty() != null && getHeightQty() != null

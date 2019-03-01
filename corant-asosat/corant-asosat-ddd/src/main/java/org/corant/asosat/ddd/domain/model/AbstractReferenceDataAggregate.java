@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.domain.model;
@@ -47,7 +45,7 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   private String number;
 
   @Column
-  private String description;
+  private String remark;
 
   @Embedded
   private ArchiveInfo archiveInfo = ArchiveInfo.empty();
@@ -73,7 +71,7 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   public AbstractReferenceDataAggregate(Participator creator, String name, String number,
       String description) {
     this(creator, name, number);
-    this.setDescription(description);
+    this.setRemark(description);
   }
 
   @SuppressWarnings("unchecked")
@@ -92,10 +90,6 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
     throw new NotSupportedException();
   }
 
-  public String getDescription() {
-    return this.description;
-  }
-
   @Override
   public String getName() {
     return this.name;
@@ -104,6 +98,10 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   @Override
   public String getNumber() {
     return this.number;
+  }
+
+  public String getRemark() {
+    return this.remark;
   }
 
   @Override
@@ -125,7 +123,7 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   }
 
   protected void changeDescription(String description) {
-    this.setDescription(description);
+    this.setRemark(description);
   }
 
   protected boolean changeName(String name) {
@@ -148,16 +146,16 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
     this.archiveInfo = archiveInfo;
   }
 
-  protected void setDescription(String description) {
-    this.description = description;
-  }
-
   protected void setName(String name) {
     this.name = trim(name);
   }
 
   protected void setNumber(String number) {
     this.number = trim(number);
+  }
+
+  protected void setRemark(String remark) {
+    this.remark = remark;
   }
 
 }

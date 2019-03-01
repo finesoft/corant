@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.message;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.corant.asosat.ddd.pattern.interceptor.Asynchronous;
@@ -46,7 +46,8 @@ public class DefaultMessageService implements MessageService {
   protected ExchangedMessageHandler exchangeMessageHandler;
 
   @Inject
-  protected MessageSender sender;
+  @Any
+  protected Instance<MessageSender> sender;
 
   public DefaultMessageService() {}
 
@@ -68,9 +69,9 @@ public class DefaultMessageService implements MessageService {
   @Asynchronous(fair = false) // FIXME ordered
   @Override
   public void send(ExchangedMessage msg) {
-    if (msg != null) {
+    if (msg != null && sender.isResolvable()) {
       try {
-        sender.send(msg);
+        sender.get().send(msg);
       } catch (Exception e) {
         throw new GeneralRuntimeException(e, "");// FIXME MSG
       }

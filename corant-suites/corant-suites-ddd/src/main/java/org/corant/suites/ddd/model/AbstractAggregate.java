@@ -168,10 +168,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   protected Annotation lifecycleServiceQualifier() {
-    if (this.getClass().isAnnotationPresent(NoSql.class)) {
-      return NoSql.INST;
-    }
-    return Sql.INST;
+    return this.getClass().isAnnotationPresent(NoSql.class) ? NoSql.INST : Sql.INST;
   }
 
   protected synchronized void setVn(long vn) {

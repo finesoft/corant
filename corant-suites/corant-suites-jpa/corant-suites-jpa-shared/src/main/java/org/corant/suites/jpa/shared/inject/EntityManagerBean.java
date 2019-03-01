@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -32,6 +33,7 @@ import javax.persistence.PersistenceContextType;
 import javax.transaction.TransactionScoped;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
+import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
 
 /**
@@ -64,9 +66,12 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
-    shouldBeTrue(Corant.instance().select(AbstractJpaProvider.class).isResolvable());
-    AbstractJpaProvider provider = Corant.instance().select(AbstractJpaProvider.class).get();
-    final EntityManager em = provider.getEntityManager(persistenceContextInfoMetaData);
+    final JpaProviderLiteral proNme = JpaProviderLiteral
+        .of(persistenceContextInfoMetaData.getUnit().getPersistenceProviderClassName());
+    Instance<AbstractJpaProvider> provider =
+        Corant.instance().select(AbstractJpaProvider.class, proNme);
+    shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
+    final EntityManager em = provider.get().getEntityManager(persistenceContextInfoMetaData);
     LOGGER.fine(
         () -> String.format("Created an entity manager that persistence unit named %s, scope is %s",
             persistenceContextInfoMetaData.getUnit().getPersistenceUnitName(),

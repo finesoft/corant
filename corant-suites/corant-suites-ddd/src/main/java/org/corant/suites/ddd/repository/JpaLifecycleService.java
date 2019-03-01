@@ -13,8 +13,18 @@
  */
 package org.corant.suites.ddd.repository;
 
+import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import org.corant.suites.ddd.annotation.qualifier.NoSql;
+import org.corant.suites.ddd.annotation.qualifier.Sql;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
+import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
 import org.corant.suites.ddd.model.Entity;
 
@@ -26,10 +36,31 @@ import org.corant.suites.ddd.model.Entity;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractJpaLifecycleService implements LifecycleService {
+public class JpaLifecycleService implements LifecycleService {
+
+  @Inject
+  @Any
+  Instance<JpaRepository> repoInst;
+
+  @Transactional
+  public void onDefault(@Observes(during = TransactionPhase.IN_PROGRESS) @Sql LifecycleEvent e) {
+    if (e != null && e.getSource() instanceof Entity) {
+      Entity entity = e.getSource();
+      handle(entity, e.getPhase(), e.isEffectImmediately(), Sql.INST);
+    }
+  }
+
+  @Transactional
+  public void onNoSql(@Observes(during = TransactionPhase.IN_PROGRESS) @NoSql LifecycleEvent e) {
+    if (e != null && e.getSource() instanceof Entity) {
+      Entity entity = e.getSource();
+      handle(entity, e.getPhase(), e.isEffectImmediately(), NoSql.INST);
+    }
+  }
 
   protected void handle(Entity entity, LifcyclePhase lifcyclePhase, boolean effectImmediately,
-      JpaRepository repo) {
+      Annotation repoQf) {
+    JpaRepository repo = repoInst.select(repoQf).get();
     if (lifcyclePhase == LifcyclePhase.ENABLE) {
       if (entity.getId() == null) {
         repo.persist(entity);

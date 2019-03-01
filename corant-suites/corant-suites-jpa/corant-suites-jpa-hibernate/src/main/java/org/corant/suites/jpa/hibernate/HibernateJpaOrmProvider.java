@@ -19,13 +19,13 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
 import org.corant.suites.jpa.shared.JpaExtension;
+import org.corant.suites.jpa.shared.inject.JpaProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -37,7 +37,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  *
  */
 @ApplicationScoped
-@Named("org.hibernate.jpa.HibernatePersistenceProvider")
+@JpaProvider("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJpaOrmProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =

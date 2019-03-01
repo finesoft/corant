@@ -13,9 +13,11 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +26,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.transaction.Transactional;
 import org.corant.Corant;
 import org.corant.asosat.ddd.domain.shared.BaseAggregateIdentifier;
@@ -33,7 +36,8 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.suites.ddd.annotation.qualifier.RDBS;
+import org.corant.suites.ddd.annotation.qualifier.NoSql;
+import org.corant.suites.ddd.annotation.qualifier.Sql;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -45,7 +49,6 @@ import org.corant.suites.jpa.shared.JpaUtils;
  * @author bingo 上午12:36:03
  *
  */
-@RDBS
 @ApplicationScoped
 @InfrastructureServices
 public class IdentifierEntityConverterFactory implements ConverterFactory<Object, Entity> {
@@ -99,12 +102,16 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     } else if (value instanceof BaseAggregateIdentifier) {
       id = BaseAggregateIdentifier.class.cast(value).getId();
     }
-    if (id != null && Corant.instance().select(JpaRepository.class, RDBS.INST).isResolvable()) {
-      return Corant.instance().select(JpaRepository.class, RDBS.INST).get().get(targetClass, id);
-    } else {
-      throw new ConversionException("Can't not convert %s to %s!", value.toString(),
-          targetClass.getSimpleName());
+    T entity = null;
+    if (id != null) {
+      final Annotation q = targetClass.isAnnotationPresent(NoSql.class) ? NoSql.INST : Sql.INST;
+      Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class, q);
+      if (repos.isResolvable()) {
+        entity = repos.get().get(targetClass, id);
+      }
     }
+    return shouldNotNull(entity, "Can't not convert %s to %s!", value.toString(),
+        targetClass.getSimpleName());
   }
 
   @PostConstruct

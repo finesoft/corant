@@ -34,6 +34,7 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
+import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
@@ -65,8 +66,8 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    NamedLiteral proNme =
-        NamedLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
+    final JpaProviderLiteral proNme =
+        JpaProviderLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
     Instance<AbstractJpaProvider> provider =
         Corant.instance().select(AbstractJpaProvider.class, proNme);
     shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());

@@ -13,6 +13,8 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,11 +28,11 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.ddd.annotation.qualifier.RDBS;
+import org.corant.suites.ddd.annotation.qualifier.Sql;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
+import org.corant.suites.ddd.message.MessageService;
+import org.corant.suites.ddd.saga.SagaService;
 
 /**
  * corant-suites-ddd
@@ -40,10 +42,9 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksManager
-    implements EntityManagerProvider {
+public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
-  protected final Map<Object, JpaUnitOfWork> UOWS = new ConcurrentHashMap<>();
+  protected final Map<Object, Map<Annotation, JpaUnitOfWork>> UOWS = new ConcurrentHashMap<>();
 
   @Inject
   TransactionManager transactionManager;
@@ -51,29 +52,31 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
   @Inject
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
-  public static JpaUnitOfWork currentUnitOfWork() {
-    return Corant.instance().select(AbstractJpaUnitOfWorksManager.class, RDBS.INST).get()
-        .getCurrentUnitOfWorks();
-  }
-
   @Override
-  public JpaUnitOfWork getCurrentUnitOfWorks() {
+  public JpaUnitOfWork getCurrentUnitOfWork(Annotation qualifier) {
     try {
+      final Annotation qf = defaultObject(qualifier, defaultQualifier());
       final Transaction curtx = getTransactionManager().getTransaction();
-      return UOWS.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> {
-        logger.fine(() -> "Register an new unit of work with the current transacion context.");
-        JpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(), unwrapUnifOfWorksKey(key));
-        getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
-        return uow;
-      });
+      return UOWS.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> new ConcurrentHashMap<>())
+          .computeIfAbsent(qf, (q) -> {
+            logger.fine(() -> "Register an new unit of work with the current transacion context.");
+            JpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(q), unwrapUnifOfWorksKey(curtx));
+            getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
+            return uow;
+          });
     } catch (SystemException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
   }
 
   @Override
-  public EntityManager getEntityManager() {
-    return getCurrentUnitOfWorks().getEntityManager();
+  public MessageService getMessageService() {
+    return MessageService.empty();
+  }
+
+  @Override
+  public SagaService getSagaService() {
+    return SagaService.empty();
   }
 
   public TransactionManager getTransactionManager() {
@@ -88,7 +91,11 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
     return new JpaUnitOfWork(this, entityManager, transaction);
   }
 
-  protected abstract EntityManagerFactory getEntityManagerFactory();
+  protected Annotation defaultQualifier() {
+    return Sql.INST;
+  }
+
+  protected abstract EntityManagerFactory getEntityManagerFactory(Annotation qualifier);
 
   protected Map<?, ?> getEntityManagerProperties() {
     return Collections.emptyMap();
@@ -112,9 +119,9 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
     UOWS.clear();
   }
 
-  private EntityManager buildEntityManager() {
-    return getEntityManagerFactory().createEntityManager(SynchronizationType.SYNCHRONIZED,
+  private EntityManager buildEntityManager(Annotation qualifier) {
+    final Annotation qf = defaultObject(qualifier, defaultQualifier());
+    return getEntityManagerFactory(qf).createEntityManager(SynchronizationType.SYNCHRONIZED,
         getEntityManagerProperties());
   }
-
 }

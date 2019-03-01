@@ -34,12 +34,13 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface RDBS {
+public @interface NoSql {
 
-  final static RDBSLiteral INST = new RDBSLiteral();
+  final static NoSqlLiteral INST = new NoSqlLiteral();
 
-  public static class RDBSLiteral extends AnnotationLiteral<RDBS> {
+  public static class NoSqlLiteral extends AnnotationLiteral<NoSql> {
 
-    private static final long serialVersionUID = 1195618002058271385L;
+    private static final long serialVersionUID = 5942591381134811296L;
+
   }
 }

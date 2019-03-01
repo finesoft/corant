@@ -18,7 +18,7 @@ package org.corant.asosat.ddd.message;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.corant.suites.ddd.annotation.qualifier.MQ;
+import org.corant.suites.ddd.annotation.qualifier.MsgQue;
 import org.corant.suites.ddd.annotation.stereotype.Messages;
 
 /**
@@ -28,7 +28,7 @@ import org.corant.suites.ddd.annotation.stereotype.Messages;
 public abstract class MessageUtils {
 
   public static String extractMessageQueue(Class<?> cls) {
-    MQ mt = cls.getAnnotation(MQ.class);
+    MsgQue mt = cls.getAnnotation(MsgQue.class);
     if (mt != null) {
       return mt.value();
     }

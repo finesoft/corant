@@ -19,10 +19,10 @@ import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
 import org.corant.suites.jpa.shared.JpaExtension;
+import org.corant.suites.jpa.shared.inject.JpaProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
@@ -34,7 +34,7 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  *
  */
 @ApplicationScoped
-@Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
+@JpaProvider("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJpaOgmProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =

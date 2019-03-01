@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.annotation.qualifier;
+package org.corant.suites.jpa.shared.inject;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -33,26 +33,27 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface MQ {
+public @interface JpaProvider {
 
-  String value() default "DFLT";
+  String value() default "org.hibernate.jpa.HibernatePersistenceProvider";
 
-  public static class MQLiteral extends AnnotationLiteral<MQ> implements MQ {
+  public static class JpaProviderLiteral extends AnnotationLiteral<JpaProvider>
+      implements JpaProvider {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
     private final String value;
 
-    private MQLiteral(String value) {
+    private JpaProviderLiteral(String value) {
       this.value = value;
     }
 
-    public static MQLiteral[] from(String... values) {
-      return Arrays.stream(values).map(MQLiteral::of).toArray(MQLiteral[]::new);
+    public static JpaProviderLiteral[] from(String... values) {
+      return Arrays.stream(values).map(JpaProviderLiteral::of).toArray(JpaProviderLiteral[]::new);
     }
 
-    public static MQLiteral of(String value) {
-      return new MQLiteral(value);
+    public static JpaProviderLiteral of(String value) {
+      return new JpaProviderLiteral(value);
     }
 
     @Override
@@ -66,7 +67,7 @@ public @interface MQ {
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      MQLiteral other = (MQLiteral) obj;
+      JpaProviderLiteral other = (JpaProviderLiteral) obj;
       if (value == null) {
         if (other.value != null) {
           return false;

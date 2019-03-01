@@ -20,7 +20,7 @@ import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import org.corant.Corant;
-import org.corant.suites.ddd.annotation.qualifier.MQ.MQLiteral;
+import org.corant.suites.ddd.annotation.qualifier.MsgQue.MsgQueLiteral;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.Message.ExchangedMessage;
@@ -49,7 +49,7 @@ public class DefaultExchangeMessageHandler implements ExchangedMessageHandler {
     if (null == message || null == message.queueName()) {
       return;
     }
-    MQLiteral qualifier = MQLiteral.of(message.queueName());
+    MsgQueLiteral qualifier = MsgQueLiteral.of(message.queueName());
     Message persistMessage = convertor.from(message);
     if (persistMessage != null) {
       stroage.store(persistMessage);

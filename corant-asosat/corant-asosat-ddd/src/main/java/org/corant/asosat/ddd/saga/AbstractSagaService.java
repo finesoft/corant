@@ -21,7 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.MQ.MQLiteral;
+import org.corant.suites.ddd.annotation.qualifier.MsgQue.MsgQueLiteral;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.saga.Saga;
@@ -54,7 +54,7 @@ public abstract class AbstractSagaService implements SagaService {
   @Transactional
   @Override
   public void trigger(Message message) {
-    getManagers(MQLiteral.of(message.queueName())).forEach(sm -> {
+    getManagers(MsgQueLiteral.of(message.queueName())).forEach(sm -> {
       Saga saga = sm.begin(message);
       persist(saga);
     });

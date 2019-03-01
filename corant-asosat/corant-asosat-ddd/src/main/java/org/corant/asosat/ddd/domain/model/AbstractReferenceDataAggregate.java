@@ -44,7 +44,7 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   @Column
   private String number;
 
-  @Column
+  @Column(length = 2048)
   private String remark;
 
   @Embedded

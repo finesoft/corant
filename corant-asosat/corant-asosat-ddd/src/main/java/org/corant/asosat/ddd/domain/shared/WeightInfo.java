@@ -17,6 +17,8 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
@@ -31,7 +33,8 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
   @Column
   private BigDecimal weight;
 
-  @Column
+  @Column(length = 8)
+  @Enumerated(EnumType.STRING)
   private MeasureUnit unit;
 
   /**

@@ -39,7 +39,7 @@ public class PackagingLayout extends AbstractValueObject {
   @Column
   private BigDecimal qty;
 
-  @Column
+  @Column(length = 8)
   private String unit;
 
   public PackagingLayout() {

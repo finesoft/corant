@@ -128,7 +128,7 @@ public class SecurityRequestUrlMatcher {
 
   @PostConstruct
   void onPostConstruct() {
-    coveredUrls.ifPresent(u -> addUrls(true, split(u, ";")));
-    uncoveredUrls.ifPresent(u -> addUrls(false, split(u, ";")));
+    coveredUrls.ifPresent(u -> addUrls(true, split(u, ",")));
+    uncoveredUrls.ifPresent(u -> addUrls(false, split(u, ",")));
   }
 }

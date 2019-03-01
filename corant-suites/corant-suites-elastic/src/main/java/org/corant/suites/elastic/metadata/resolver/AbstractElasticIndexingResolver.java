@@ -177,7 +177,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected abstract ElasticConfig getConfig();
 
   protected Set<Class<?>> getDocumentClasses() {
-    Set<String> docPaths = asStream(split(getConfig().getDocumentPaths(), ";", true, true))
+    Set<String> docPaths = asStream(split(getConfig().getDocumentPaths(), ",", true, true))
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {

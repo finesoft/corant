@@ -94,7 +94,7 @@ public class FlywayMigrator {
     });
     if (!locationsToUse.isEmpty()) {
       logger.info(() -> String.format("Build flyway instance from locations [%s]",
-          String.join(";", locationsToUse)));
+          String.join(",", locationsToUse)));
       FluentConfiguration fc = Flyway.configure().dataSource(ds)
           .locations(locationsToUse.toArray(new String[locationsToUse.size()]));
       if (!callbacks.isUnsatisfied()) {

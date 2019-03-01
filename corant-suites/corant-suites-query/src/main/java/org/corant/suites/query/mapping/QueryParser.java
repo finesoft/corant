@@ -83,7 +83,7 @@ public class QueryParser {
 
   Map<String, URL> getQueryMappingFiles(String pathExpress) {
     Map<String, URL> map = new HashMap<>();
-    asSet(split(pathExpress, ";")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
+    asSet(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
       try {
         Resources.fromClassPath(path).forEach(f -> map.put(f.getResourceName(), f.getUrl()));
       } catch (Exception e) {

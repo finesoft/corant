@@ -96,7 +96,7 @@ public class PersistencePropertiesParser {
       } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_PATH)) {
         JpaUtils.getPersistenceMappingFiles(
             split(config.getOptionalValue(pn, String.class).orElse(JpaConfig.DFLT_ORM_XML_LOCATION),
-                ";", true, true))
+                ",", true, true))
             .forEach(puimd::addMappingFileName);
       } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));

@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.webserver.shared;
@@ -95,7 +93,6 @@ public class WebServerConfig {
   @ConfigProperty(name = "webserver.session-timeout", defaultValue = "30")
   private Integer sessionTimeout;
 
-
   public String getContextPath() {
     return contextPath;
   }
@@ -156,7 +153,7 @@ public class WebServerConfig {
   public Map<String, String> getLocaleCharsetMap() {
     Map<String, String> map = new HashMap<>();
     if (getLocaleCharsetMappings().isPresent()) {
-      asStream(split(getLocaleCharsetMappings().get(), ";")).forEach(lcm -> {
+      asStream(split(getLocaleCharsetMappings().get(), ",")).forEach(lcm -> {
         String[] lc = split(lcm, ":", true, true);
         if (lc.length == 2) {
           map.put(lc[0], lc[1]);

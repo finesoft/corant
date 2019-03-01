@@ -108,7 +108,7 @@ public class PropertyMessageBundle implements MessageBundle {
         if (!isInitialized()) {
           try {
             onPreDestroy();
-            Set<String> paths = asSet(split(bundleFilePaths, ";"));
+            Set<String> paths = asSet(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, (r) -> true).forEach((s, res) -> {
                 logger.info(() -> String.format("Find message resource, the path is %s", s));

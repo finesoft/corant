@@ -104,7 +104,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
         if (!isInitialized()) {
           try {
             onPreDestroy();
-            Set<String> paths = asSet(split(bundleFilePaths, ";"));
+            Set<String> paths = asSet(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
               PropertyResourceBundle.getBundles(path, (r) -> true).forEach((s, res) -> {
                 logger.info(() -> String.format("Find enumeration resource, the path is %s", s));

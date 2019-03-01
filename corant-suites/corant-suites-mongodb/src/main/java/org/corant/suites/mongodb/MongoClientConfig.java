@@ -105,7 +105,7 @@ public class MongoClientConfig {
         opCfgNmes.add(pn);
       } else if (pn.endsWith(MC_DATABASES)) {
         config.getOptionalValue(pn, String.class).ifPresent(dbns -> {
-          for (String dn : split(dbns, ";", true, true)) {
+          for (String dn : split(dbns, ",", true, true)) {
             mc.databases.put(dn, new MongodbConfig(mc, dn));
           }
         });
@@ -113,7 +113,7 @@ public class MongoClientConfig {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setApplicationName);
       } else if (pn.endsWith(MC_HOST_PORTS)) {
         config.getOptionalValue(pn, String.class).ifPresent(hps -> {
-          String[] hpArr = split(hps, ";", true, true);
+          String[] hpArr = split(hps, ",", true, true);
           Set<Pair<String, Integer>> set = new LinkedHashSet<>(hpArr.length);
           for (String hp : hpArr) {
             String[] arr = split(hp, ":", true, true);

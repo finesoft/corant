@@ -38,6 +38,8 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 /**
  * corant-suites-elastic
  *
+ * TODO Support unnamed elastic config
+ *
  * @author bingo 上午11:56:19
  *
  */

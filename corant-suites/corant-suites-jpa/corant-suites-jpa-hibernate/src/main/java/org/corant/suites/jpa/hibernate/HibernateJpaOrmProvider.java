@@ -33,6 +33,8 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 /**
  * corant-suites-jpa-hibernate
  *
+ * TODO Support unnamed persistence unit
+ * 
  * @author bingo 上午11:44:00
  *
  */

@@ -56,12 +56,12 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
    */
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      for (final String dataSourceName : getDataSourceNames()) {
-        event.<DataSource>addBean().addQualifier(NamedLiteral.of(dataSourceName))
+      for (final DataSourceConfig dsc : getDataSourceConfigs().values()) {
+        event.<DataSource>addBean().addQualifier(NamedLiteral.of(dsc.getName()))
             .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
               try {
-                return produce(beans, dataSourceName);
+                return produce(beans, dsc);
               } catch (NamingException | SQLException e) {
                 throw new CorantRuntimeException(e);
               }
@@ -70,7 +70,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
-  private AgroalDataSource produce(Instance<Object> instance, String name)
+  private AgroalDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
     TransactionManager tm = instance.select(TransactionManager.class).isResolvable()
         ? instance.select(TransactionManager.class).get()
@@ -79,7 +79,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         instance.select(TransactionSynchronizationRegistry.class).isResolvable()
             ? instance.select(TransactionSynchronizationRegistry.class).get()
             : null;
-    DataSourceConfig cfg = getDataSourceConfigs().get(name);
     if (cfg.isXa()) {
       shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
     }
@@ -119,8 +118,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     InitialContext jndi = instance.select(InitialContext.class).isResolvable()
         ? instance.select(InitialContext.class).get()
         : null;
-    registerDataSource(name, datasource);
-    registerJndi(jndi, name, datasource);
+    registerDataSource(cfg.getName(), datasource);
+    registerJndi(jndi, cfg.getName(), datasource);
     return datasource;
   }
 

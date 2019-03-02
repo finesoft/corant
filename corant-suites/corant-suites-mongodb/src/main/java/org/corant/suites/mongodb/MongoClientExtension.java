@@ -64,6 +64,8 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 /**
  * corant-suites-mongodb
  *
+ * TODO Support unnamed mongo client config
+ *
  * @author bingo 下午4:55:16
  *
  */

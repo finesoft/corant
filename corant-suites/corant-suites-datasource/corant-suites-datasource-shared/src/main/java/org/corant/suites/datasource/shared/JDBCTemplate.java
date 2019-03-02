@@ -41,8 +41,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-suites-datasource-shared
  *
- * TODO insertBatch/batch support stream parameters.
- *
  * @author bingo 下午6:52:27
  *
  */

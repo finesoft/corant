@@ -49,6 +49,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 /**
  * corant-suites-jpa-shared
  *
+ * TODO Support unnamed persistence unit
+ *
  * @author bingo 上午11:32:56
  *
  */

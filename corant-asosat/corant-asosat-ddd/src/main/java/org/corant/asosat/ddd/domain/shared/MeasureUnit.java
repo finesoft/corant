@@ -15,6 +15,8 @@ package org.corant.asosat.ddd.domain.shared;
 
 import static java.math.BigDecimal.ONE;
 import java.math.BigDecimal;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
  * corant-asosat-ddd
@@ -67,6 +69,19 @@ public enum MeasureUnit {
 
   public boolean isWeight() {
     return MeasureUnitType.WEIGHT.equals(getType());
+  }
+
+  @Converter
+  public static class MeasureUnitJpaConverter implements AttributeConverter<MeasureUnit, String> {
+    @Override
+    public String convertToDatabaseColumn(MeasureUnit attribute) {
+      return attribute.name();
+    }
+
+    @Override
+    public MeasureUnit convertToEntityAttribute(String dbData) {
+      return MeasureUnit.valueOf(dbData);
+    }
   }
 
   public static enum MeasureUnitType {

@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -38,7 +38,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
   HikariDataSource doProduce(Instance<Object> instance, String name) throws NamingException {
-    DataSourceConfig cfg = DataSourceConfig.of(instance.select(Config.class).get(), name);
+    DataSourceConfig cfg = DataSourceConfig.of(ConfigProvider.getConfig(), name);
     shouldBeFalse(cfg.isJta() || cfg.isXa());
     HikariConfig cfgs = new HikariConfig();
     cfgs.setJdbcUrl(cfg.getConnectionUrl());

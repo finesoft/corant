@@ -16,6 +16,7 @@ package org.corant.suites.jpa.shared.metadata;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.net.URL;
@@ -63,7 +64,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
    */
   public PersistenceUnitInfoMetaData(String persistenceUnitName) {
     super();
-    this.persistenceUnitName = persistenceUnitName;
+    this.persistenceUnitName = defaultTrim(persistenceUnitName);
   }
 
   public void addManagedClassName(String managedClassName) {

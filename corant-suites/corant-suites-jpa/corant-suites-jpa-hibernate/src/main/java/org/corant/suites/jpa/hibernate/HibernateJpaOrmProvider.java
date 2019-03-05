@@ -13,18 +13,23 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.inject.JpaProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
@@ -34,7 +39,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  * corant-suites-jpa-hibernate
  *
  * TODO Support unnamed persistence unit
- * 
+ *
  * @author bingo 上午11:44:00
  *
  */
@@ -46,21 +51,35 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Inject
-  JpaExtension extension;
+  Instance<DataSource> datasources;
 
   @Override
   protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
-    shouldNotNull(metaData).configDataSource(dsn -> {
-      try {
-        return forceCast(
-            getJndi().lookup(shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
-                : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
+    shouldNotNull(metaData).configDataSource(this::resolveDataSource);
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         PROPERTIES);
   }
 
+  protected DataSource resolveDataSource(String dataSourceName) {
+    if (isBlank(dataSourceName)) {
+      if (datasources.isResolvable()) {
+        return datasources.get();
+      } else {
+        return datasources.select(NamedLiteral.INSTANCE).get();
+      }
+    } else if (dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
+      try {
+        return forceCast(getJndi().lookup(dataSourceName));
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    } else {
+      return datasources.select(NamedLiteral.of(dataSourceName)).get();
+    }
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    shouldBeFalse(datasources.isUnsatisfied(), "Can not find any data sources");
+  }
 }

@@ -13,10 +13,16 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
+import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,70 +50,78 @@ public class PersistencePropertiesParser {
 
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
-    Map<String, List<String>> cfgNmes =
-        Configurations.getGroupConfigNames(config, JpaConfig.PREFIX, 1);
-    cfgNmes.forEach((k, v) -> {
+    Set<String> dfltProNmes = JpaConfig.defaultPropertyNames();
+    String dfltPuNme = config.getOptionalValue(JpaConfig.JC_PU_NME, String.class).orElse(null);
+    doParse(config, dfltPuNme, dfltProNmes, map);// defaults
+    Map<String, List<String>> namedKeys = Configurations.getGroupConfigNames(config,
+        s -> defaultString(s).startsWith(JpaConfig.JC_PREFIX) && !dfltProNmes.contains(s), 1);
+    namedKeys.forEach((k, v) -> {
       doParse(config, k, v, map);
       logger.info(() -> String.format("Parsed persistence unit %s from config file.", k));
     });
     return map;
   }
 
-  protected static void doParse(Config config, String name, List<String> cfgNmes,
+  protected static void doParse(Config config, String key, Collection<String> cfgNmes,
       Map<String, PersistenceUnitInfoMetaData> map) {
+    final String name = defaultTrim(key);
     PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(name);
-    final String proPrefix = JpaConfig.PREFIX + name + JpaConfig.DOT_PUN_PRO;
+    final String proPrefix = isNotBlank(name) ? JpaConfig.JC_PREFIX + name + JpaConfig.JC_PRO
+        : JpaConfig.JC_PREFIX + JpaConfig.JC_PRO.substring(1);
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
     cfgNmes.forEach(pn -> {
-      if (pn.endsWith(JpaConfig.DOT_PUN_TRANS_TYP)) {
+      if (pn.endsWith(JpaConfig.JC_TRANS_TYP)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd
             .setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_NON_JTA_DS)) {
+      } else if (pn.endsWith(JpaConfig.JC_NON_JTA_DS)) {
         config.getOptionalValue(pn, String.class).ifPresent(puimd::setNonJtaDataSourceName);
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_JTA_DS)) {
+      } else if (pn.endsWith(JpaConfig.JC_JTA_DS)) {
         config.getOptionalValue(pn, String.class).ifPresent(puimd::setJtaDataSourceName);
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_PROVIDER)) {
+      } else if (pn.endsWith(JpaConfig.JC_PROVIDER)) {
         config.getOptionalValue(pn, String.class).ifPresent(puimd::setPersistenceProviderClassName);
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS)) {
+      } else if (pn.endsWith(JpaConfig.JC_CLS)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addManagedClassName));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE)) {
+      } else if (pn.endsWith(JpaConfig.JC_MAP_FILE)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addMappingFileName));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
+      } else if (pn.endsWith(JpaConfig.JC_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> asStream(split(s, ","))
             .map(PersistencePropertiesParser::toUrl).forEach(puimd::addJarFileUrl));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_EX_UL_CLS)) {
+      } else if (pn.endsWith(JpaConfig.JC_EX_UL_CLS)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setExcludeUnlistedClasses);
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_VAL_MOD)) {
+      } else if (pn.endsWith(JpaConfig.JC_VAL_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setValidationMode(ValidationMode.valueOf(s)));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_SHARE_CACHE_MOD)) {
+      } else if (pn.endsWith(JpaConfig.JC_SHARE_CACHE_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_CLS_PKG)) {
+      } else if (pn.endsWith(JpaConfig.JC_CLS_PKG)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> {
           asStream(split(s, ",", true, true)).forEach(p -> {
             JpaUtils.getPersistenceClasses(p).stream().map(Class::getName)
                 .forEach(puimd::addManagedClassName);
           });
         });
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_MAP_FILE_PATH)) {
+      } else if (pn.endsWith(JpaConfig.JC_MAP_FILE_PATH)) {
         JpaUtils.getPersistenceMappingFiles(
             split(config.getOptionalValue(pn, String.class).orElse(JpaConfig.DFLT_ORM_XML_LOCATION),
                 ",", true, true))
             .forEach(puimd::addMappingFileName);
-      } else if (pn.endsWith(JpaConfig.DOT_PUN_JAR_FILE)) {
+      } else if (pn.endsWith(JpaConfig.JC_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
         // handle properties
         proCfgNmes.add(pn);
       }
     });
-    puimd.resolvePersistenceProvider();
-    doParseProperties(config, proPrefix, proCfgNmes, puimd);
-    map.put(name, puimd);
+    if (isNotEmpty(puimd.getManagedClassNames())) {
+      puimd.resolvePersistenceProvider();
+      doParseProperties(config, proPrefix, proCfgNmes, puimd);
+      shouldBeNull(map.put(name, puimd),
+          "The jpa configuration error persistence unit name %s dup!", name);
+    }
   }
 
   private static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,

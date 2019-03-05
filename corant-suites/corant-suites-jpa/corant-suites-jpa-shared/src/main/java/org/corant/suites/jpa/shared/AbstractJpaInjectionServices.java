@@ -23,7 +23,7 @@ import javax.persistence.PersistenceUnit;
 import org.corant.Corant;
 import org.corant.kernel.util.Cdis;
 import org.corant.kernel.util.ResourceReferences;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
@@ -55,11 +55,9 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   @Override
   public ResourceReferenceFactory<EntityManager> registerPersistenceContextInjectionPoint(
       InjectionPoint injectionPoint) {
-    JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
     PersistenceContext pc =
         Cdis.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
-    PersistenceContextInfoMetaData pcmd = PersistenceContextInfoMetaData.of(pc,
-        extension.getPersistenceUnitInfoMetaData(pc.unitName()));
+    PersistenceContextMetaData pcmd = new PersistenceContextMetaData(pc);
     return ResourceReferences.refac(() -> getEntityManagerFactory(pcmd.getUnit())
         .createEntityManager(pcmd.getSynchronization(), pcmd.getProperties()));
   }

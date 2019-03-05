@@ -20,13 +20,13 @@ import static org.corant.shared.util.CollectionUtils.asSet;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -45,23 +45,23 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
  */
 public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, PassivationCapable {
 
-  static final Logger LOGGER = Logger.getLogger(EntityManagerFactoryBean.class.getName());
-  static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
-  final Set<Annotation> qualifiers;
+  static final Logger logger = Logger.getLogger(EntityManagerFactoryBean.class.getName());
+  static final Set<Type> types = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
+  final Set<Annotation> qualifiers = new HashSet<>();
   final BeanManager beanManager;
   final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
 
   /**
    * @param beanManager
-   * @param persistenceContext
+   * @param persistenceUnitInfoMetaData
+   * @param qualifiers
    */
   public EntityManagerFactoryBean(BeanManager beanManager,
-      PersistenceUnitInfoMetaData persistenceUnitInfoMetaData) {
-    super();
+      PersistenceUnitInfoMetaData persistenceUnitInfoMetaData, Annotation... qualifiers) {
     this.beanManager = beanManager;
-    this.persistenceUnitInfoMetaData = persistenceUnitInfoMetaData;
-    qualifiers = Collections.unmodifiableSet(asSet(Default.Literal.INSTANCE,
-        NamedLiteral.of(persistenceUnitInfoMetaData.getPersistenceUnitName())));
+    this.persistenceUnitInfoMetaData = shouldNotNull(persistenceUnitInfoMetaData);
+    this.qualifiers.addAll(asSet(qualifiers));
+    this.qualifiers.add(Any.Literal.INSTANCE);
   }
 
   @Override
@@ -73,7 +73,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
     shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
     final EntityManagerFactory emf =
         shouldNotNull(provider.get().getEntityManagerFactory(persistenceUnitInfoMetaData));
-    LOGGER.info(() -> String.format(
+    logger.info(() -> String.format(
         "Created an entity manager factory that persistence unit named %s, provider is %s.",
         persistenceUnitInfoMetaData.getPersistenceUnitName(),
         tryAsClass(proNme.value()).getSimpleName()));
@@ -85,7 +85,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      LOGGER.info(
+      logger.info(
           () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
               persistenceUnitInfoMetaData.getPersistenceUnitName()));
     }
@@ -98,7 +98,8 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public String getId() {
-    return EntityManagerFactoryBean.class.getName();
+    return EntityManagerFactoryBean.class.getName() + "."
+        + persistenceUnitInfoMetaData.getPersistenceUnitName();
   }
 
   @Override
@@ -108,7 +109,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public String getName() {
-    return null;
+    return "EntityManagerFactoryBean." + persistenceUnitInfoMetaData.getPersistenceUnitName();
   }
 
   @Override
@@ -128,7 +129,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public Set<Type> getTypes() {
-    return TYPES;
+    return types;
   }
 
   @Override

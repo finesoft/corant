@@ -52,10 +52,10 @@ import com.mongodb.MongoCredential;
 public class MongoClientConfig {
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/MongoClient";
   public static final int DEFAULT_PORT = 27017;
-  public static final String PREFIX = "mongodb.";
   public static final String DEFAULT_HOST = "localhost";
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
+  public static final String MC_PREFIX = "mongodb.";
   public static final String MC_APP_NAME = ".applicationName";
   public static final String MC_HOST_PORTS = ".host-ports";
   public static final String MC_URI = ".uri";
@@ -86,7 +86,7 @@ public class MongoClientConfig {
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
     // handle client
-    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config, PREFIX, 1);
+    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config, MC_PREFIX, 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
@@ -98,7 +98,7 @@ public class MongoClientConfig {
   static MongoClientConfig of(Config config, String client, Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
     mc.setName(client);
-    final String opPrefix = PREFIX + client + MC_OPTS;
+    final String opPrefix = MC_PREFIX + client + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
     propertieNames.forEach(pn -> {

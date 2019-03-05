@@ -11,36 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.annotation.qualifier;
+package org.corant.kernel.util;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
 /**
- * corant-asosat-ddd
+ * corant-kernel
  *
- * @author bingo 下午3:58:44
+ * @author bingo 上午11:29:39
  *
  */
-@Documented
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface Sql {
+public @interface Unnamed {
 
-  final static SqlLiteral INST = new SqlLiteral();
+  final static UnnamedLiteral INST = new UnnamedLiteral();
 
-  public static class SqlLiteral extends AnnotationLiteral<Sql> {
+  public static class UnnamedLiteral extends AnnotationLiteral<Unnamed> {
 
-    private static final long serialVersionUID = 5942591381134811296L;
+    private static final long serialVersionUID = 1401984266283097479L;
 
   }
 }

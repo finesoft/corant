@@ -162,8 +162,7 @@ public class HibernateOrmSchemaUtils {
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
     InitialContext jndi = Corant.instance().select(InitialContext.class).get();
     JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
-    PersistenceUnitInfoMetaData pum =
-        shouldNotNull(extension.getPersistenceUnitInfoMetaDatas().get(pu));
+    PersistenceUnitInfoMetaData pum = shouldNotNull(extension.getPersistenceUnitInfoMetaData(pu));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource((dsn) -> {

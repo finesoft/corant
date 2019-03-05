@@ -15,10 +15,7 @@ package org.corant.asosat.ddd.message;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.Sql;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageService.MessageStroage;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -28,12 +25,7 @@ import org.corant.suites.jpa.shared.JpaUtils;
  * @author bingo 下午10:24:18
  *
  */
-@ApplicationScoped
-public class DefaultJpaMessageStroage implements MessageStroage {
-
-  @Inject
-  @Sql
-  protected JpaRepository repo;
+public abstract class AbstractMessageStroage implements MessageStroage {
 
   protected final Map<Class<?>, Boolean> persistMessageClasses =
       new ConcurrentHashMap<>(256, 0.75f, 256);
@@ -43,9 +35,11 @@ public class DefaultJpaMessageStroage implements MessageStroage {
   public void store(Message message) {
     if (persistMessageClasses.computeIfAbsent(message.getClass(),
         JpaUtils::isPersistenceEntityClass)) {
-      repo.persist(message);
-      repo.getEntityManager().flush();
+      getRepo().persist(message);
+      getRepo().getEntityManager().flush();
     }
   }
+
+  protected abstract JpaRepository getRepo();
 
 }

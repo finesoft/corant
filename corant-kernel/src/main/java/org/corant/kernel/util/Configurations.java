@@ -20,6 +20,7 @@ import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.eclipse.microprofile.config.Config;
@@ -39,21 +40,31 @@ public class Configurations {
     map.forEach((k, v) -> System.setProperty(ConfigNames.CFG_ADJUST_PREFIX + defaultString(k), v));
   }
 
+  public static Map<String, List<String>> getGroupConfigNames(Config config,
+      Predicate<String> filter, int keyIndex) {
+    return getGroupConfigNames(config.getPropertyNames(), filter, keyIndex);
+  }
+
   public static Map<String, List<String>> getGroupConfigNames(Config config, String prefix,
       int keyIndex) {
     return getGroupConfigNames(config.getPropertyNames(), prefix, keyIndex);
   }
 
   public static Map<String, List<String>> getGroupConfigNames(Iterable<String> configs,
-      String prefix, int keyIndex) {
+      Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return group(configs, (s) -> defaultString(s).startsWith(prefix), (s) -> {
+    return group(configs, s -> filter.test(s), s -> {
       String[] arr = split(s, SEPARATOR, true, true);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};
       }
       return new String[0];
     });
+  }
+
+  public static Map<String, List<String>> getGroupConfigNames(Iterable<String> configs,
+      String prefix, int keyIndex) {
+    return getGroupConfigNames(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
 }

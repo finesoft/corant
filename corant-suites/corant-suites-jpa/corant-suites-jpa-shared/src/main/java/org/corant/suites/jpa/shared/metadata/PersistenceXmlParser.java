@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -62,41 +63,41 @@ public class PersistenceXmlParser {
 
   static void doParse(Element element, PersistenceUnitInfoMetaData puimd) {
     puimd.setPersistenceUnitTransactionType(
-        parseTransactionType(element.getAttribute(JpaConfig.PUN_TRANS_TYP)));
+        parseTransactionType(element.getAttribute(JpaConfig.JCX_TRANS_TYP)));
     NodeList children = element.getChildNodes();
     int len = children.getLength();
     for (int i = 0; i < len; i++) {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         Element subEle = (Element) children.item(i);
         String tag = subEle.getTagName();
-        if (tag.equals(JpaConfig.PUN_NON_JTA_DS)) {
+        if (tag.equals(JpaConfig.JCX_NON_JTA_DS)) {
           puimd.setNonJtaDataSourceName(extractContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_JTA_DS)) {
+        } else if (tag.equals(JpaConfig.JCX_JTA_DS)) {
           puimd.setJtaDataSourceName(extractContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_PROVIDER)) {
+        } else if (tag.equals(JpaConfig.JCX_PROVIDER)) {
           puimd.setPersistenceProviderClassName(extractContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_CLS)) {
+        } else if (tag.equals(JpaConfig.JCX_CLS)) {
           puimd.addManagedClassName(extractContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_MAP_FILE)) {
+        } else if (tag.equals(JpaConfig.JCX_MAP_FILE)) {
           puimd.addMappingFileName(extractContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_JAR_FILE)) {
+        } else if (tag.equals(JpaConfig.JCX_JAR_FILE)) {
           puimd.getJarFileUrls().add(extractUrlContent(subEle));
-        } else if (tag.equals(JpaConfig.PUN_EX_UL_CLS)) {
+        } else if (tag.equals(JpaConfig.JCX_EX_UL_CLS)) {
           puimd.setExcludeUnlistedClasses(extractBooleanContent(subEle, true));
-        } else if (tag.equals(JpaConfig.PUN_VAL_MOD)) {
+        } else if (tag.equals(JpaConfig.JCX_VAL_MOD)) {
           puimd.setValidationMode(ValidationMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(JpaConfig.PUN_SHARE_CACHE_MOD)) {
+        } else if (tag.equals(JpaConfig.JCX_SHARE_CACHE_MOD)) {
           puimd.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(JpaConfig.PUN_PROS)) {
+        } else if (tag.equals(JpaConfig.JCX_PROS)) {
           NodeList props = subEle.getChildNodes();
           for (int j = 0; j < props.getLength(); j++) {
             if (props.item(j).getNodeType() == Node.ELEMENT_NODE) {
               Element propElement = (Element) props.item(j);
-              if (!JpaConfig.PUN_PRO.equals(propElement.getTagName())) {
+              if (!JpaConfig.JCX_PRO.equals(propElement.getTagName())) {
                 continue;
               }
-              String propName = propElement.getAttribute(JpaConfig.PUN_PRO_NME).trim();
-              String propValue = propElement.getAttribute(JpaConfig.PUN_PRO_VAL).trim();
+              String propName = propElement.getAttribute(JpaConfig.JCX_PRO_NME).trim();
+              String propValue = propElement.getAttribute(JpaConfig.JCX_PRO_VAL).trim();
               if (isEmpty(propValue)) {
                 propValue = extractContent(propElement, "");
               }
@@ -119,14 +120,16 @@ public class PersistenceXmlParser {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         final Element element = (Element) children.item(i);
         final String tag = element.getTagName();
-        if (tag.equals(JpaConfig.PUN_TAG)) {
-          final String puName = element.getAttribute(JpaConfig.PUN_NME);
+        if (tag.equals(JpaConfig.JCX_TAG)) {
+          final String puName = element.getAttribute(JpaConfig.JCX_NME);
           shouldBeFalse(map.containsKey(puName), "Persistence unit name %s dup!", tag);
           PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(puName);
           puimd.setVersion(version);
           puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
           doParse(element, puimd);
-          map.put(puName, puimd);
+          if (isNotEmpty(puimd.getManagedClassNames())) {
+            map.put(puName, puimd);
+          }
         }
       }
     }
@@ -189,7 +192,6 @@ public class PersistenceXmlParser {
     if (element == null) {
       return defaultStr;
     }
-
     NodeList children = element.getChildNodes();
     StringBuilder result = new StringBuilder("");
     for (int i = 0; i < children.getLength(); i++) {

@@ -13,7 +13,9 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
@@ -36,8 +38,7 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.suites.ddd.annotation.qualifier.NoSql;
-import org.corant.suites.ddd.annotation.qualifier.Sql;
+import org.corant.suites.ddd.annotation.qualifier.PuName;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -104,7 +105,8 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     }
     T entity = null;
     if (id != null) {
-      final Annotation q = targetClass.isAnnotationPresent(NoSql.class) ? NoSql.INST : Sql.INST;
+      final Annotation q =
+          defaultObject(findAnnotation(getUserClass(targetClass), PuName.class), PuName.EMPTY_INST);
       Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class, q);
       if (repos.isResolvable()) {
         entity = repos.get().get(targetClass, id);

@@ -15,6 +15,7 @@ package org.corant.suites.ddd.model;
 
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -118,7 +119,8 @@ public class DefaultAggregateListener {
   protected void registerToUnitOfWork(AbstractAggregate o) {
     Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
     if (um.isResolvable()) {
-      um.get().getCurrentUnitOfWork(o.lifecycleServiceQualifier()).register(o);
+      um.get().getCurrentUnitOfWork(NamedLiteral.of(o.lifecycleServiceQualifier().value()))
+          .register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
     }

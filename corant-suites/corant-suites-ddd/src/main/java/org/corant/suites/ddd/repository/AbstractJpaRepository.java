@@ -13,25 +13,32 @@
  */
 package org.corant.suites.ddd.repository;
 
+import static org.corant.shared.util.AnnotationUtils.findAnnotation;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.EMPTY;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.suites.ddd.repository.JpaQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import org.corant.suites.ddd.annotation.qualifier.PuName;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
+import org.corant.suites.ddd.unitwork.AbstractJpaUnitOfWorksManager;
 
 /**
  * corant-asosat-ddd
@@ -44,6 +51,9 @@ public abstract class AbstractJpaRepository implements JpaRepository {
 
   @Inject
   protected Logger logger;
+
+  @Inject
+  AbstractJpaUnitOfWorksManager unitOfWorkManager;
 
   @Override
   public void clear() {
@@ -214,6 +224,10 @@ public abstract class AbstractJpaRepository implements JpaRepository {
     return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
-  protected abstract EntityManagerProvider getEntityManagerProvider();
+  protected EntityManagerProvider getEntityManagerProvider() {
+    PuName rn = findAnnotation(getUserClass(this.getClass()), PuName.class);
+    String name = rn != null ? defaultTrim(rn.value()) : EMPTY;
+    return unitOfWorkManager.getCurrentUnitOfWork(NamedLiteral.of(name));
+  }
 
 }

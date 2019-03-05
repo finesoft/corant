@@ -13,15 +13,11 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.inject.JpaProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
@@ -31,7 +27,7 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  * corant-suites-jpa-hibernate
  *
  * TODO Support unnamed persistence unit
- * 
+ *
  * @author bingo 上午11:44:00
  *
  */
@@ -42,15 +38,8 @@ public class HibernateJpaOgmProvider extends AbstractJpaProvider {
   static final Map<String, Object> PROPERTIES =
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
-  @Inject
-  JpaExtension extension;
-
   @Override
   protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
-    String dsNme = metaData.getJtaDataSourceName();
-    String[] noSqls = split(dsNme, ":", true, true);
-    shouldNotNull(metaData).configProperties("hibernate.ogm.datastore.provider", noSqls[0]);
-    shouldNotNull(metaData).configProperties("hibernate.ogm.datastore.database", noSqls[1]);
     return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, PROPERTIES);
   }
 

@@ -13,8 +13,11 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
+import static org.corant.shared.util.Assertions.shouldBeEquals;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,19 +32,20 @@ import javax.persistence.SynchronizationType;
  * @author bingo 上午10:49:31
  *
  */
-public class PersistenceContextInfoMetaData {
+public class PersistenceContextMetaData {
 
   private final PersistenceContextType type;
   private final SynchronizationType synchronization;
   private final Map<String, String> properties;
-  private final PersistenceUnitInfoMetaData unit;
+  private final String unitName;
+  private PersistenceUnitInfoMetaData unit;
 
-  private PersistenceContextInfoMetaData(PersistenceContext pc, PersistenceUnitInfoMetaData unit) {
+  public PersistenceContextMetaData(PersistenceContext pc) {
     shouldBeTrue(pc.synchronization() == SynchronizationType.SYNCHRONIZED,
         "Only support SYNCHRONIZED persistence context!");
     type = pc.type();
     synchronization = pc.synchronization();
-    this.unit = unit;
+    unitName = defaultTrim(pc.unitName());
     Map<String, String> map = new HashMap<>();
     if (!isEmpty(pc.properties())) {
       for (PersistenceProperty pp : pc.properties()) {
@@ -51,9 +55,39 @@ public class PersistenceContextInfoMetaData {
     properties = Collections.unmodifiableMap(map);
   }
 
-  public static PersistenceContextInfoMetaData of(PersistenceContext pc,
-      PersistenceUnitInfoMetaData unit) {
-    return new PersistenceContextInfoMetaData(pc, unit);
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    PersistenceContextMetaData other = (PersistenceContextMetaData) obj;
+    if (properties == null) {
+      if (other.properties != null) {
+        return false;
+      }
+    } else if (!properties.equals(other.properties)) {
+      return false;
+    }
+    if (synchronization != other.synchronization) {
+      return false;
+    }
+    if (type != other.type) {
+      return false;
+    }
+    if (unitName == null) {
+      if (other.unitName != null) {
+        return false;
+      }
+    } else if (!unitName.equals(other.unitName)) {
+      return false;
+    }
+    return true;
   }
 
   public Map<String, String> getProperties() {
@@ -70,6 +104,26 @@ public class PersistenceContextInfoMetaData {
 
   public PersistenceUnitInfoMetaData getUnit() {
     return unit;
+  }
+
+  public String getUnitName() {
+    return unitName;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (properties == null ? 0 : properties.hashCode());
+    result = prime * result + (synchronization == null ? 0 : synchronization.hashCode());
+    result = prime * result + (type == null ? 0 : type.hashCode());
+    result = prime * result + (unitName == null ? 0 : unitName.hashCode());
+    return result;
+  }
+
+  public void setUnit(PersistenceUnitInfoMetaData unit) {
+    shouldBeEquals(shouldNotNull(unit).getPersistenceUnitName(), unitName);
+    this.unit = unit;
   }
 
 }

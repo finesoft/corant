@@ -13,18 +13,19 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeNull;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.StringUtils;
 import org.corant.suites.jpa.shared.metadata.PersistencePropertiesParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceXmlParser;
@@ -40,61 +41,72 @@ import org.eclipse.microprofile.config.Config;
  */
 public class JpaConfig {
 
-  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/EntityManagerFactories";
-  public static final String PREFIX = "jpa.";
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
   public static final String DFLT_ORM_XML_LOCATION = "META-INF/*JpaOrm.xml";
+  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/EntityManagerFactories";
+  public static final String EMPTY_PU_NAME = StringUtils.EMPTY;
 
-  public static final String PUN_TAG = "persistence-unit";
-  public static final String PUN_NME = "name";
-  public static final String PUN_TRANS_TYP = "transaction-type";
-  public static final String PUN_NON_JTA_DS = "non-jta-data-source";
-  public static final String PUN_JTA_DS = "jta-data-source";
-  public static final String PUN_PROVIDER = "provider";
-  public static final String PUN_CLS = "class";
-  public static final String PUN_MAP_FILE = "mapping-file";
-  public static final String PUN_JAR_FILE = "jar-file";
-  public static final String PUN_EX_UL_CLS = "exclude-unlisted-classes";
-  public static final String PUN_VAL_MOD = "validation-mode";
-  public static final String PUN_SHARE_CACHE_MOD = "shared-cache-mode";
-  public static final String PUN_PROS = "properties";
-  public static final String PUN_PRO = "property";
-  public static final String PUN_PRO_NME = "name";
-  public static final String PUN_PRO_VAL = "value";
+  public static final String JC_PREFIX = "jpa.";
 
-  public static final String DOT_PUN_NME = "." + PUN_NME;
-  public static final String DOT_PUN_TRANS_TYP = "." + PUN_TRANS_TYP;
-  public static final String DOT_PUN_NON_JTA_DS = "." + PUN_NON_JTA_DS;
-  public static final String DOT_PUN_JTA_DS = "." + PUN_JTA_DS;
-  public static final String DOT_PUN_PROVIDER = "." + PUN_PROVIDER;
-  public static final String DOT_PUN_CLS = "." + PUN_CLS;
-  public static final String DOT_PUN_CLS_PKG = DOT_PUN_CLS + "-packages";
-  public static final String DOT_PUN_MAP_FILE = "." + PUN_MAP_FILE;
-  public static final String DOT_PUN_MAP_FILE_PATH = "." + PUN_MAP_FILE + ".paths";
-  public static final String DOT_PUN_JAR_FILE = "." + PUN_JAR_FILE;
-  public static final String DOT_PUN_EX_UL_CLS = "." + PUN_EX_UL_CLS;
-  public static final String DOT_PUN_VAL_MOD = "." + PUN_VAL_MOD;
-  public static final String DOT_PUN_SHARE_CACHE_MOD = "." + PUN_SHARE_CACHE_MOD;
-  public static final String DOT_PUN_PRO = "." + "property";
+  public static final String JCX_TAG = "persistence-unit";
+  public static final String JCX_NME = "name";
+  public static final String JCX_TRANS_TYP = "transaction-type";
+  public static final String JCX_NON_JTA_DS = "non-jta-data-source";
+  public static final String JCX_JTA_DS = "jta-data-source";
+  public static final String JCX_PROVIDER = "provider";
+  public static final String JCX_CLS = "class";
+  public static final String JCX_MAP_FILE = "mapping-file";
+  public static final String JCX_JAR_FILE = "jar-file";
+  public static final String JCX_EX_UL_CLS = "exclude-unlisted-classes";
+  public static final String JCX_VAL_MOD = "validation-mode";
+  public static final String JCX_SHARE_CACHE_MOD = "shared-cache-mode";
+  public static final String JCX_PROS = "properties";
+  public static final String JCX_PRO = "property";
+  public static final String JCX_PRO_NME = "name";
+  public static final String JCX_PRO_VAL = "value";
+
+  public static final String JC_PU_NME = "." + JCX_TAG + "." + JCX_NME;// persistence-unit.name
+  public static final String JC_TRANS_TYP = "." + JCX_TRANS_TYP;
+  public static final String JC_NON_JTA_DS = "." + JCX_NON_JTA_DS;
+  public static final String JC_JTA_DS = "." + JCX_JTA_DS;
+  public static final String JC_PROVIDER = "." + JCX_PROVIDER;
+  public static final String JC_CLS = "." + JCX_CLS;
+  public static final String JC_CLS_PKG = JC_CLS + "-packages";
+  public static final String JC_MAP_FILE = "." + JCX_MAP_FILE;
+  public static final String JC_MAP_FILE_PATH = "." + JCX_MAP_FILE + ".paths";
+  public static final String JC_JAR_FILE = "." + JCX_JAR_FILE;
+  public static final String JC_EX_UL_CLS = "." + JCX_EX_UL_CLS;
+  public static final String JC_VAL_MOD = "." + JCX_VAL_MOD;
+  public static final String JC_SHARE_CACHE_MOD = "." + JCX_SHARE_CACHE_MOD;
+  public static final String JC_PRO = "." + "property";
 
   protected static final Logger logger = Logger.getLogger(JpaConfig.class.getName());
-  private final Map<String, PersistenceUnitInfoMetaData> metaDatas = new HashMap<>();
 
-  public static JpaConfig from(Config config) {
-    JpaConfig cfg = new JpaConfig();
-    Map<String, PersistenceUnitInfoMetaData> fromCfgPums = generateFromConfig(config);
-    cfg.metaDatas.putAll(fromCfgPums);
-    Map<String, PersistenceUnitInfoMetaData> fromXmlPums = generateFromXml();
-    if (!fromXmlPums.isEmpty()) {
-      for (String pun : fromXmlPums.keySet()) {
-        shouldBeFalse(cfg.metaDatas.containsKey(pun), "The persistence unit name %s is dup!", pun);
-      }
-    }
-    cfg.metaDatas.putAll(fromXmlPums);
-    logger.info(() -> String.format("Find persistence unit metadatas from config file %s and %s %s",
-        String.join(",", fromCfgPums.keySet()), DFLT_PU_XML_LOCATION,
-        String.join(",", fromXmlPums.keySet())));
-    return cfg;
+  public static Set<String> defaultPropertyNames() {
+    String dfltPrefix = JC_PREFIX.substring(0, JC_PREFIX.length() - 1);
+    Set<String> names = new LinkedHashSet<>();
+    names.add(dfltPrefix + JC_CLS);
+    names.add(dfltPrefix + JC_CLS_PKG);
+    names.add(dfltPrefix + JC_EX_UL_CLS);
+    names.add(dfltPrefix + JC_JAR_FILE);
+    names.add(dfltPrefix + JC_JTA_DS);
+    names.add(dfltPrefix + JC_MAP_FILE);
+    names.add(dfltPrefix + JC_MAP_FILE_PATH);
+    names.add(dfltPrefix + JC_NON_JTA_DS);
+    names.add(dfltPrefix + JC_PRO);
+    names.add(dfltPrefix + JC_PROVIDER);
+    names.add(dfltPrefix + JC_SHARE_CACHE_MOD);
+    names.add(dfltPrefix + JC_TRANS_TYP);
+    names.add(dfltPrefix + JC_VAL_MOD);
+    return names;
+  }
+
+  public static Map<String, PersistenceUnitInfoMetaData> from(Config config) {
+    Map<String, PersistenceUnitInfoMetaData> metaDatas = new LinkedHashMap<>();
+    generateFromXml().forEach(metaDatas::put);
+    generateFromConfig(config).forEach(
+        (n, u) -> shouldBeNull(metaDatas.put(n, u), "The persistence unit name %s is dup!", n));
+    return metaDatas;
   }
 
   public static Optional<? extends PersistenceProvider> resolvePersistenceProvider() {
@@ -118,10 +130,6 @@ public class JpaConfig {
           DFLT_PU_XML_LOCATION, e.getMessage()));
     }
     return map;
-  }
-
-  public Map<String, PersistenceUnitInfoMetaData> getMetaDatas() {
-    return Collections.unmodifiableMap(metaDatas);
   }
 
 }

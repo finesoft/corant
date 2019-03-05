@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,7 +30,6 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.ddd.annotation.qualifier.Sql;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageService;
 import org.corant.suites.ddd.saga.SagaService;
@@ -55,7 +55,7 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
   @Override
   public JpaUnitOfWork getCurrentUnitOfWork(Annotation qualifier) {
     try {
-      final Annotation qf = defaultObject(qualifier, defaultQualifier());
+      final Annotation qf = defaultObject(qualifier, Default.Literal.INSTANCE);
       final Transaction curtx = getTransactionManager().getTransaction();
       return UOWS.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> new ConcurrentHashMap<>())
           .computeIfAbsent(qf, (q) -> {
@@ -87,12 +87,14 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
     return transactionSynchronizationRegistry;
   }
 
-  protected JpaUnitOfWork buildUnitOfWork(EntityManager entityManager, Transaction transaction) {
-    return new JpaUnitOfWork(this, entityManager, transaction);
+  protected EntityManager buildEntityManager(Annotation qualifier) {
+    final Annotation qf = defaultObject(qualifier, Default.Literal.INSTANCE);
+    return getEntityManagerFactory(qf).createEntityManager(SynchronizationType.SYNCHRONIZED,
+        getEntityManagerProperties());
   }
 
-  protected Annotation defaultQualifier() {
-    return Sql.INST;
+  protected JpaUnitOfWork buildUnitOfWork(EntityManager entityManager, Transaction transaction) {
+    return new JpaUnitOfWork(this, entityManager, transaction);
   }
 
   protected abstract EntityManagerFactory getEntityManagerFactory(Annotation qualifier);
@@ -111,17 +113,11 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
 
   void clearCurrentUnitOfWorks(Object key) {
     logger.fine(() -> "Deregister the unit of work with the current transacion context.");
-    UOWS.remove(key);
+    UOWS.remove(key).clear();
   }
 
   @PreDestroy
   void destroy() {
     UOWS.clear();
-  }
-
-  private EntityManager buildEntityManager(Annotation qualifier) {
-    final Annotation qf = defaultObject(qualifier, defaultQualifier());
-    return getEntityManagerFactory(qf).createEntityManager(SynchronizationType.SYNCHRONIZED,
-        getEntityManagerProperties());
   }
 }

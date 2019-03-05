@@ -14,18 +14,20 @@
 package org.corant.suites.datasource.hikari;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.StringUtils.isBlank;
+import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.eclipse.microprofile.config.ConfigProvider;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -37,8 +39,25 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
-  HikariDataSource doProduce(Instance<Object> instance, String name) throws NamingException {
-    DataSourceConfig cfg = DataSourceConfig.of(ConfigProvider.getConfig(), name);
+  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    if (event != null) {
+      getDataSourceConfigs().forEach((dsn, dsc) -> {
+        final Annotation ann = isBlank(dsn) ? NamedLiteral.INSTANCE : NamedLiteral.of(dsn);
+        event.<DataSource>addBean().addQualifier(ann)
+            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
+              try {
+                return produce(beans, ann, dsc);
+              } catch (NamingException e) {
+                throw new CorantRuntimeException(e);
+              }
+            }).disposeWith((dataSource, beans) -> dataSource.close());
+      });
+    }
+  }
+
+  HikariDataSource produce(Instance<Object> instance, Annotation annotation, DataSourceConfig cfg)
+      throws NamingException {
     shouldBeFalse(cfg.isJta() || cfg.isXa());
     HikariConfig cfgs = new HikariConfig();
     cfgs.setJdbcUrl(cfg.getConnectionUrl());
@@ -54,28 +73,11 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.setPoolName(cfg.getName());
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
     HikariDataSource datasource = new HikariDataSource(cfgs);
-    registerDataSource(name, datasource);
-    InitialContext jndi = instance.select(InitialContext.class).isResolvable()
-        ? instance.select(InitialContext.class).get()
-        : null;
-    registerDataSource(name, datasource);
-    registerJndi(jndi, name, datasource);
-    return datasource;
-  }
-
-  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    if (event != null) {
-      for (final String dataSourceName : getDataSourceNames()) {
-        event.<DataSource>addBean().addQualifier(NamedLiteral.of(dataSourceName))
-            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              try {
-                return doProduce(beans, dataSourceName);
-              } catch (NamingException e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((dataSource, beans) -> dataSource.close());
-      }
+    registerDataSource(annotation, datasource);
+    if (instance.select(InitialContext.class).isResolvable() && annotation instanceof Named) {
+      InitialContext jndi = instance.select(InitialContext.class).get();
+      registerJndi(jndi, cfg.getName(), datasource);
     }
+    return datasource;
   }
 }

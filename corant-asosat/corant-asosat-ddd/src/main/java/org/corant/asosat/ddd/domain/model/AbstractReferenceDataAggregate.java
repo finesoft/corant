@@ -122,10 +122,6 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
     return me;
   }
 
-  protected void changeDescription(String description) {
-    this.setRemark(description);
-  }
-
   protected boolean changeName(String name) {
     if (isEquals(trim(name), this.name)) {
       return false;
@@ -140,6 +136,10 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
     }
     this.setNumber(number);
     return true;
+  }
+
+  protected void changeRemark(String remark) {
+    this.setRemark(remark);
   }
 
   protected void setArchiveInfo(ArchiveInfo archiveInfo) {

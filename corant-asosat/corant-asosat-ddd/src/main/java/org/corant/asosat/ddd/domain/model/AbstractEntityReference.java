@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.suites.ddd.annotation.qualifier.Sql;
+import org.corant.suites.ddd.annotation.qualifier.PuName;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityReference;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -39,7 +39,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   private static final long serialVersionUID = 1261945123532200005L;
 
-  protected static final Annotation[] DEFAULT_REPO_QLFS = new Annotation[] {Sql.INST};
+  protected static final Annotation[] DEFAULT_REPO_QLFS = new Annotation[] {PuName.EMPTY_INST};
 
   protected static JpaRepository obtainRepo(Annotation... qualifiers) {
     return Corant.instance().select(JpaRepository.class, qualifiers).get();

@@ -13,7 +13,10 @@
  */
 package org.corant.suites.datasource.shared;
 
+import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -42,22 +45,22 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public abstract class AbstractDataSourceExtension implements Extension {
 
-  protected final Set<String> dataSourceNames = new LinkedHashSet<>();
-  protected final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
+  protected final Set<String> dataSourceNames = new LinkedHashSet<>();
+  protected final Map<Annotation, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   protected volatile boolean initedJndiSubCtx = false;
 
-  public DataSource getDataSource(String name) {
-    return getDataSources().get(name);
+  public DataSource getDataSource(Annotation annotation) {
+    return getDataSources().get(annotation);
   }
 
   public Set<String> getDataSourceNames() {
     return Collections.unmodifiableSet(dataSourceNames);
   }
 
-  public Map<String, DataSource> getDataSources() {
+  public Map<Annotation, DataSource> getDataSources() {
     return Collections.unmodifiableMap(dataSources);
   }
 
@@ -73,23 +76,24 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     dataSourceConfigs.clear();
     dataSourceNames.clear();
-    Map<String, DataSourceConfig> curCfgs = DataSourceConfig.from(ConfigProvider.getConfig());
-    dataSourceConfigs.putAll(curCfgs);
-    dataSourceNames.addAll(curCfgs.keySet());
-    if (dataSourceNames.isEmpty()) {
+    dataSources.clear();
+    DataSourceConfig.from(ConfigProvider.getConfig()).forEach(dataSourceConfigs::put);
+    dataSourceNames.addAll(dataSourceConfigs.keySet());
+    if (dataSourceConfigs.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.info(
-          () -> String.format("Find data source names %s", String.join(", ", dataSourceNames)));
+      logger.info(() -> String.format("Find %s data source names %s", dataSourceNames.size(),
+          String.join(", ", dataSourceNames)));
     }
   }
 
-  protected synchronized void registerDataSource(String name, DataSource dataSource) {
-    dataSources.put(name, dataSource);
+  protected synchronized void registerDataSource(Annotation annotation, DataSource dataSource) {
+    shouldBeNull(dataSources.put(annotation, dataSource), "The data source annotated %s dup!",
+        annotation.toString());
   }
 
   protected void registerJndi(InitialContext jndi, String name, DataSource dataSource) {
-    if (jndi != null) {
+    if (jndi != null && isNotBlank(name)) {
       try {
         if (!initedJndiSubCtx) {
           jndi.createSubcontext(DataSourceConfig.JNDI_SUBCTX_NAME);

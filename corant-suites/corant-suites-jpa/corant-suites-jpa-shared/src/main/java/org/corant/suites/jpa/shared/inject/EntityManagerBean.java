@@ -14,10 +14,13 @@
 package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
@@ -34,7 +37,8 @@ import javax.transaction.TransactionScoped;
 import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
 import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
  * corant-suites-jpa-shared
@@ -44,38 +48,44 @@ import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
  */
 public class EntityManagerBean implements Bean<EntityManager>, PassivationCapable {
 
-  static final Logger LOGGER = Logger.getLogger(EntityManagerBean.class.getName());
-  static final Set<Annotation> TRANS_QUALIFIERS = Collections
-      .unmodifiableSet(asSet(TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
-  static final Set<Annotation> EXTEN_QUALIFIERS =
-      Collections.unmodifiableSet(asSet(ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
-  static final Set<Type> TYPES = Collections.unmodifiableSet(asSet(EntityManager.class));
+  static final Logger logger = Logger.getLogger(EntityManagerBean.class.getName());
+  static final Set<Type> types = Collections.unmodifiableSet(asSet(EntityManager.class));
+  final Set<Annotation> extenQualifiers = new HashSet<>();
+  final Set<Annotation> transQualifiers = new HashSet<>();
   final BeanManager beanManager;
-  final PersistenceContextInfoMetaData persistenceContextInfoMetaData;
+  final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
+  final PersistenceContextMetaData persistenceContextMetaData;
 
   /**
    * @param beanManager
-   * @param persistenceContext
+   * @param persistenceContextMetaData
+   * @param qualifiers
    */
   public EntityManagerBean(BeanManager beanManager,
-      PersistenceContextInfoMetaData persistenceContextInfoMetaData) {
+      PersistenceContextMetaData persistenceContextMetaData, Annotation... qualifiers) {
     super();
     this.beanManager = beanManager;
-    this.persistenceContextInfoMetaData = persistenceContextInfoMetaData;
+    this.persistenceContextMetaData = shouldNotNull(persistenceContextMetaData);
+    persistenceUnitInfoMetaData = shouldNotNull(persistenceContextMetaData.getUnit());
+    shouldBeTrue(isEquals(persistenceUnitInfoMetaData.getPersistenceUnitName(),
+        persistenceContextMetaData.getUnitName()));
+    transQualifiers.addAll(asSet(qualifiers));
+    transQualifiers.addAll(asSet(TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
+    extenQualifiers.addAll(asSet(qualifiers));
+    extenQualifiers.addAll(asSet(ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
   }
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
-    final JpaProviderLiteral proNme = JpaProviderLiteral
-        .of(persistenceContextInfoMetaData.getUnit().getPersistenceProviderClassName());
+    final JpaProviderLiteral proNme =
+        JpaProviderLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
     Instance<AbstractJpaProvider> provider =
         Corant.instance().select(AbstractJpaProvider.class, proNme);
     shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
-    final EntityManager em = provider.get().getEntityManager(persistenceContextInfoMetaData);
-    LOGGER.fine(
+    final EntityManager em = provider.get().getEntityManager(persistenceContextMetaData);
+    logger.fine(
         () -> String.format("Created an entity manager that persistence unit named %s, scope is %s",
-            persistenceContextInfoMetaData.getUnit().getPersistenceUnitName(),
-            getScope().getSimpleName()));
+            persistenceUnitInfoMetaData.getPersistenceUnitName(), getScope().getSimpleName()));
     return em;
   }
 
@@ -83,10 +93,9 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
   public void destroy(EntityManager instance, CreationalContext<EntityManager> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      LOGGER.fine(
+      logger.fine(
           () -> String.format("Destroyed entity manager that persistence unit named %s scope is %s",
-              persistenceContextInfoMetaData.getUnit().getPersistenceUnitName(),
-              getScope().getSimpleName()));
+              persistenceUnitInfoMetaData.getPersistenceUnitName(), getScope().getSimpleName()));
     }
   }
 
@@ -98,7 +107,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
   @Override
   public String getId() {
     return EntityManagerBean.class.getName() + "."
-        + persistenceContextInfoMetaData.getUnit().getPersistenceUnitName();
+        + persistenceUnitInfoMetaData.getPersistenceUnitName();
   }
 
   @Override
@@ -108,20 +117,18 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public String getName() {
-    return null;
+    return "EntityManagerBean." + persistenceContextMetaData.getUnitName();
   }
 
   @Override
   public Set<Annotation> getQualifiers() {
-    return persistenceContextInfoMetaData.getType() == PersistenceContextType.EXTENDED
-        ? EXTEN_QUALIFIERS
-        : TRANS_QUALIFIERS;
+    return persistenceContextMetaData.getType() == PersistenceContextType.EXTENDED ? extenQualifiers
+        : transQualifiers;
   }
 
   @Override
   public Class<? extends Annotation> getScope() {
-    return persistenceContextInfoMetaData.getType() == PersistenceContextType.EXTENDED
-        ? Dependent.class
+    return persistenceContextMetaData.getType() == PersistenceContextType.EXTENDED ? Dependent.class
         : TransactionScoped.class;
   }
 
@@ -132,7 +139,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public Set<Type> getTypes() {
-    return TYPES;
+    return types;
   }
 
   @Override

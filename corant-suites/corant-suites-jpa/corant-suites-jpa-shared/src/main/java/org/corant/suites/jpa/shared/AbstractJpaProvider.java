@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -23,7 +24,7 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextInfoMetaData;
+import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
@@ -51,7 +52,7 @@ public abstract class AbstractJpaProvider {
    * @param metaData
    * @return buildEntityManager
    */
-  public EntityManager getEntityManager(PersistenceContextInfoMetaData metaData) {
+  public EntityManager getEntityManager(PersistenceContextMetaData metaData) {
     return buildEntityManager(metaData);
   }
 
@@ -67,7 +68,7 @@ public abstract class AbstractJpaProvider {
     return EMFS.computeIfAbsent(puMetaData, this::createEntityManagerFactory);
   }
 
-  protected EntityManager buildEntityManager(PersistenceContextInfoMetaData metaData) {
+  protected EntityManager buildEntityManager(PersistenceContextMetaData metaData) {
     return getEntityManagerFactory(metaData.getUnit())
         .createEntityManager(metaData.getSynchronization(), metaData.getProperties());
   }
@@ -77,7 +78,7 @@ public abstract class AbstractJpaProvider {
 
   protected EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
     final EntityManagerFactory emf = buildEntityManagerFactory(metaData);
-    if (getJndi() != null) {
+    if (getJndi() != null && isNotBlank(metaData.getPersistenceUnitName())) {
       try {
         if (!initedJndiSubCtx) {
           getJndi().createSubcontext(JpaConfig.JNDI_SUBCTX_NAME);

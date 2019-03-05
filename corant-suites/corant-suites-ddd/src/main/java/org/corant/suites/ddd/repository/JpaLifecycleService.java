@@ -13,16 +13,17 @@
  */
 package org.corant.suites.ddd.repository;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.NoSql;
-import org.corant.suites.ddd.annotation.qualifier.Sql;
+import org.corant.suites.ddd.annotation.qualifier.PuName;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
@@ -40,27 +41,22 @@ public class JpaLifecycleService implements LifecycleService {
 
   @Inject
   @Any
-  Instance<JpaRepository> repoInst;
+  Instance<JpaRepository> repos;
 
   @Transactional
-  public void onDefault(@Observes(during = TransactionPhase.IN_PROGRESS) @Sql LifecycleEvent e) {
-    if (e != null && e.getSource() instanceof Entity) {
+  public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
+    if (e.getSource() != null) {
       Entity entity = e.getSource();
-      handle(entity, e.getPhase(), e.isEffectImmediately(), Sql.INST);
-    }
-  }
-
-  @Transactional
-  public void onNoSql(@Observes(during = TransactionPhase.IN_PROGRESS) @NoSql LifecycleEvent e) {
-    if (e != null && e.getSource() instanceof Entity) {
-      Entity entity = e.getSource();
-      handle(entity, e.getPhase(), e.isEffectImmediately(), NoSql.INST);
+      String puname = defaultObject(e.getPuName(), PuName.EMPTY_INST).value();
+      LifcyclePhase phase = e.getPhase();
+      boolean effectImmediately = e.isEffectImmediately();
+      handle(entity, phase, effectImmediately, NamedLiteral.of(puname));
     }
   }
 
   protected void handle(Entity entity, LifcyclePhase lifcyclePhase, boolean effectImmediately,
       Annotation repoQf) {
-    JpaRepository repo = repoInst.select(repoQf).get();
+    JpaRepository repo = repos.select(repoQf).get();
     if (lifcyclePhase == LifcyclePhase.ENABLE) {
       if (entity.getId() == null) {
         repo.persist(entity);

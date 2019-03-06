@@ -13,13 +13,10 @@
  */
 package org.corant.asosat.ddd.service;
 
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,10 +35,10 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
+import org.corant.suites.ddd.repository.LifecycleService;
 import org.corant.suites.jpa.shared.JpaUtils;
 
 /**
@@ -105,11 +102,13 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     }
     T entity = null;
     if (id != null) {
-      final Annotation q =
-          defaultObject(findAnnotation(getUserClass(targetClass), PU.class), PU.EMPTY_INST);
-      Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class, q);
-      if (repos.isResolvable()) {
-        entity = repos.get().get(targetClass, id);
+      Instance<LifecycleService> ls = Corant.instance().select(LifecycleService.class);
+      if (ls.isResolvable()) {
+        Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class,
+            ls.get().resolvePersistenceUnitName(targetClass));
+        if (repos.isResolvable()) {
+          entity = repos.get().get(targetClass, id);
+        }
       }
     }
     return shouldNotNull(entity, "Can't not convert %s to %s!", value.toString(),

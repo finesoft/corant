@@ -14,17 +14,13 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
@@ -36,42 +32,11 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 @ApplicationScoped
 public abstract class AbstractJpaProvider {
 
-  protected static final Map<PersistenceUnitInfoMetaData, EntityManagerFactory> emfs =
-      new ConcurrentHashMap<>();
-
   protected volatile boolean initedJndiSubCtx = false;
+  protected Logger logger = Logger.getLogger(getClass().getName());
 
   @Inject
   InitialContext jndi;
-
-  protected Logger logger = Logger.getLogger(getClass().getName());
-
-  /**
-   * Be careful when PersistenceContextType is EXTENDED
-   *
-   * @param metaData
-   * @return buildEntityManager
-   */
-  public EntityManager getEntityManager(PersistenceContextMetaData metaData) {
-    return buildEntityManager(metaData);
-  }
-
-  /**
-   * A persistence unit is associated with an entity manager factory, like singleton and that is
-   * thread safe.
-   *
-   * @param puMetaData
-   * @return getEntityManagerFactory
-   */
-  public EntityManagerFactory getEntityManagerFactory(
-      final PersistenceUnitInfoMetaData puMetaData) {
-    return emfs.computeIfAbsent(puMetaData, this::createEntityManagerFactory);
-  }
-
-  protected EntityManager buildEntityManager(PersistenceContextMetaData metaData) {
-    return getEntityManagerFactory(metaData.getUnit())
-        .createEntityManager(metaData.getSynchronization(), metaData.getProperties());
-  }
 
   protected abstract EntityManagerFactory buildEntityManagerFactory(
       PersistenceUnitInfoMetaData metaData);

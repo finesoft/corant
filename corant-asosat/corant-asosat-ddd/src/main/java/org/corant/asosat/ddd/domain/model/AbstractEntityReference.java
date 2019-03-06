@@ -21,12 +21,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
+import javax.enterprise.inject.literal.NamedLiteral;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityReference;
 import org.corant.suites.ddd.repository.JpaRepository;
+import org.corant.suites.ddd.repository.LifecycleService;
 
 /**
  * corant-asosat-ddd
@@ -39,7 +40,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   private static final long serialVersionUID = 1261945123532200005L;
 
-  protected static final Annotation[] DEFAULT_REPO_QLFS = new Annotation[] {PU.EMPTY_INST};
+  protected static final Annotation[] DEFAULT_REPO_QLFS = new Annotation[] {NamedLiteral.INSTANCE};
 
   protected static JpaRepository obtainRepo(Annotation... qualifiers) {
     return Corant.instance().select(JpaRepository.class, qualifiers).get();
@@ -86,20 +87,26 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public T retrieve() {
+    return retrieve(getId(), resolveClass(), this.obtainRepoQualifiers());
+  }
+
+  protected Annotation[] obtainRepoQualifiers() {
+    Annotation qf = Corant.instance().select(LifecycleService.class).get()
+        .resolvePersistenceUnitName(resolveClass());
+    return new Annotation[] {qf};
+  }
+
+  @SuppressWarnings("unchecked")
+  protected Class<T> resolveClass() {
     Class<?> t = this.getClass();
     do {
       if (t.getGenericSuperclass() instanceof ParameterizedType) {
         Class<T> clz =
             (Class<T>) ((ParameterizedType) t.getGenericSuperclass()).getActualTypeArguments()[0];
-        return retrieve(getId(), clz, this.obtainRepoQualifiers());
+        return clz;
       }
     } while ((t = t.getSuperclass()) != null);
     return null;
-  }
-
-  protected Annotation[] obtainRepoQualifiers() {
-    return DEFAULT_REPO_QLFS;
   }
 }

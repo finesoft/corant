@@ -13,21 +13,19 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultString;
 import java.lang.annotation.Annotation;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleEvent;
-import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
+import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
 import org.corant.suites.ddd.model.Entity;
 
 /**
@@ -38,27 +36,31 @@ import org.corant.suites.ddd.model.Entity;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class JpaLifecycleService implements LifecycleService {
+public abstract class AbstractJpaLifecycleService implements LifecycleService {
+
+  protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Inject
   @Any
   Instance<JpaRepository> repos;
 
+  @Override
   @Transactional
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
     if (e.getSource() != null) {
       Entity entity = e.getSource();
-      String pu = defaultString(defaultObject(e.getPu(), PU.EMPTY_INST).value());
-      LifcyclePhase phase = e.getPhase();
+      Named named = resolvePersistenceUnitName(entity.getClass());
+      LifecyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, phase, effectImmediately, NamedLiteral.of(pu));
+      handle(entity, phase, effectImmediately, named);
+      logger.fine(() -> String.format("Listen %s %s", entity.getClass().getName(), phase.name()));
     }
   }
 
-  protected void handle(Entity entity, LifcyclePhase lifcyclePhase, boolean effectImmediately,
+  protected void handle(Entity entity, LifecyclePhase lifcyclePhase, boolean effectImmediately,
       Annotation repoQf) {
     JpaRepository repo = repos.select(repoQf).get();
-    if (lifcyclePhase == LifcyclePhase.ENABLE) {
+    if (lifcyclePhase == LifecyclePhase.ENABLE) {
       if (entity.getId() == null) {
         repo.persist(entity);
         if (effectImmediately) {
@@ -70,11 +72,12 @@ public class JpaLifecycleService implements LifecycleService {
           repo.getEntityManager().flush();
         }
       }
-    } else if (lifcyclePhase == LifcyclePhase.DESTROY && entity.getId() != null) {
+    } else if (lifcyclePhase == LifecyclePhase.DESTROY && entity.getId() != null) {
       repo.remove(entity);
       if (effectImmediately) {
         repo.getEntityManager().flush();
       }
     }
   }
+
 }

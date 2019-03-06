@@ -13,6 +13,9 @@
  */
 package org.corant.suites.ddd.repository;
 
+import javax.inject.Named;
+import org.corant.suites.ddd.event.LifecycleEvent;
+
 /**
  * corant-asosat-ddd
  *
@@ -21,4 +24,7 @@ package org.corant.suites.ddd.repository;
  */
 public interface LifecycleService {
 
+  void on(LifecycleEvent e);
+
+  Named resolvePersistenceUnitName(Class<?> entityClass);
 }

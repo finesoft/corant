@@ -15,9 +15,6 @@ package org.corant.suites.ddd.model;
 
 import static org.corant.kernel.util.Preconditions.requireFalse;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,7 +28,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
@@ -40,7 +36,6 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午3:25:51
  *
  */
-@PU
 @MappedSuperclass
 @EntityListeners(value = {DefaultAggregateListener.class})
 public abstract class AbstractAggregate extends AbstractEntity implements Aggregate {
@@ -148,9 +143,9 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * destroyed
    */
   protected synchronized void destroy(boolean immediately) {
-    this.raise(
-        new LifecycleEvent(this, LifcyclePhase.DESTROY, immediately, lifecycleServiceQualifier()));
-    this.raise(new LifecycleEvent(this, LifcyclePhase.DESTROYED, lifecycleServiceQualifier()));
+    this.raise(new LifecycleEvent(this, LifecyclePhase.DESTROY, immediately),
+        lifecycleServiceQualifier());
+    this.raise(new LifecycleEvent(this, LifecyclePhase.DESTROYED), lifecycleServiceQualifier());
   }
 
   /**
@@ -158,9 +153,9 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   protected synchronized AbstractAggregate enable(boolean immediately) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.raise(
-        new LifecycleEvent(this, LifcyclePhase.ENABLE, immediately, lifecycleServiceQualifier()));
-    this.raise(new LifecycleEvent(this, LifcyclePhase.ENABLED, lifecycleServiceQualifier()));
+    this.raise(new LifecycleEvent(this, LifecyclePhase.ENABLE, immediately),
+        lifecycleServiceQualifier());
+    this.raise(new LifecycleEvent(this, LifecyclePhase.ENABLED), lifecycleServiceQualifier());
     return this;
   }
 
@@ -170,9 +165,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return getId() != null;
   }
 
-  protected PU lifecycleServiceQualifier() {
-    PU rn = findAnnotation(getUserClass(this.getClass()), PU.class);
-    return defaultObject(rn, PU.EMPTY_INST);
+  protected Annotation[] lifecycleServiceQualifier() {
+    return new Annotation[0];
   }
 
   protected synchronized void setVn(long vn) {

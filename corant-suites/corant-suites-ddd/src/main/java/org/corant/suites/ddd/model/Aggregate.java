@@ -107,7 +107,7 @@ public interface Aggregate extends Entity {
     void preEnable(P param, T enabling);
   }
 
-  public enum LifcyclePhase {
+  public enum LifecyclePhase {
     ENABLE, ENABLED, DESTROY, DESTROYED
   }
 

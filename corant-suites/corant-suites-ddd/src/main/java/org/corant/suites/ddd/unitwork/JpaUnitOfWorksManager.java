@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -45,7 +46,7 @@ import org.corant.suites.ddd.saga.SagaService;
 @InfrastructureServices
 public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
-  protected final Map<Object, Map<Annotation, JpaUnitOfWork>> UOWS = new ConcurrentHashMap<>();
+  protected final Map<Object, Map<Annotation, JpaUnitOfWork>> uows = new ConcurrentHashMap<>();
 
   @Inject
   TransactionManager transactionManager;
@@ -54,6 +55,7 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
   @Inject
+  @Any
   Instance<EntityManagerFactory> entityManagerFactories;
 
   @Override
@@ -61,7 +63,7 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
     try {
       final Annotation qf = defaultObject(qualifier, Default.Literal.INSTANCE);
       final Transaction curtx = getTransactionManager().getTransaction();
-      return UOWS.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> new ConcurrentHashMap<>())
+      return uows.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> new ConcurrentHashMap<>())
           .computeIfAbsent(qf, (q) -> {
             logger.fine(() -> "Register an new unit of work with the current transacion context.");
             JpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(q), unwrapUnifOfWorksKey(curtx));
@@ -126,11 +128,12 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   void clearCurrentUnitOfWorks(Object key) {
     logger.fine(() -> "Deregister the unit of work with the current transacion context.");
-    UOWS.remove(key).clear();
+    uows.remove(key).clear();
   }
 
   @PreDestroy
   void destroy() {
-    UOWS.clear();
+    uows.clear();
   }
+
 }

@@ -17,8 +17,7 @@ import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.ddd.repository.JpaQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,12 +26,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -46,7 +45,6 @@ import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
  * @author bingo 下午9:54:26
  *
  */
-@PU
 @Repositories
 public abstract class AbstractJpaRepository implements JpaRepository {
 
@@ -226,9 +224,8 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   }
 
   protected EntityManagerProvider getEntityManagerProvider() {
-    PU rn = findAnnotation(getUserClass(this.getClass()), PU.class);
-    String name = rn != null ? defaultTrim(rn.value()) : EMPTY;
-    return unitOfWorkManager.getCurrentUnitOfWork(NamedLiteral.of(name));
+    return unitOfWorkManager.getCurrentUnitOfWork(defaultObject(
+        findAnnotation(getUserClass(this.getClass()), Named.class), NamedLiteral.INSTANCE));
   }
 
 }

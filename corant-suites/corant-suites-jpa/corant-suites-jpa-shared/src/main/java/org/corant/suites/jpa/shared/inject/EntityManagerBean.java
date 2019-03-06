@@ -16,7 +16,6 @@ package org.corant.suites.jpa.shared.inject;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -35,10 +34,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContextType;
 import javax.transaction.TransactionScoped;
 import org.corant.Corant;
-import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
+import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
  * corant-suites-jpa-shared
@@ -53,8 +50,8 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
   final Set<Annotation> extenQualifiers = new HashSet<>();
   final Set<Annotation> transQualifiers = new HashSet<>();
   final BeanManager beanManager;
-  final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
   final PersistenceContextMetaData persistenceContextMetaData;
+  final String unitName;
 
   /**
    * @param beanManager
@@ -66,9 +63,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
     super();
     this.beanManager = beanManager;
     this.persistenceContextMetaData = shouldNotNull(persistenceContextMetaData);
-    persistenceUnitInfoMetaData = shouldNotNull(persistenceContextMetaData.getUnit());
-    shouldBeTrue(isEquals(persistenceUnitInfoMetaData.getPersistenceUnitName(),
-        persistenceContextMetaData.getUnitName()));
+    unitName = persistenceContextMetaData.getUnitName();
     transQualifiers.addAll(asSet(qualifiers));
     transQualifiers.addAll(asSet(TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
     extenQualifiers.addAll(asSet(qualifiers));
@@ -77,15 +72,14 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
-    final JpaProviderLiteral proNme =
-        JpaProviderLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
-    Instance<AbstractJpaProvider> provider =
-        Corant.instance().select(AbstractJpaProvider.class, proNme);
-    shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
-    final EntityManager em = provider.get().getEntityManager(persistenceContextMetaData);
+    Instance<JpaExtension> ext = Corant.instance().select(JpaExtension.class);
+    shouldBeTrue(ext.isResolvable(), "Can not find jpa extension.");
+    final EntityManager em = ext.get().getEntityManagerFactory(unitName).createEntityManager(
+        persistenceContextMetaData.getSynchronization(),
+        persistenceContextMetaData.getProperties());
     logger.fine(
         () -> String.format("Created an entity manager that persistence unit named %s, scope is %s",
-            persistenceUnitInfoMetaData.getPersistenceUnitName(), getScope().getSimpleName()));
+            unitName, getScope().getSimpleName()));
     return em;
   }
 
@@ -95,7 +89,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
       instance.close();
       logger.fine(
           () -> String.format("Destroyed entity manager that persistence unit named %s scope is %s",
-              persistenceUnitInfoMetaData.getPersistenceUnitName(), getScope().getSimpleName()));
+              unitName, getScope().getSimpleName()));
     }
   }
 
@@ -106,8 +100,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public String getId() {
-    return EntityManagerBean.class.getName() + "."
-        + persistenceUnitInfoMetaData.getPersistenceUnitName();
+    return EntityManagerBean.class.getName() + "." + unitName;
   }
 
   @Override

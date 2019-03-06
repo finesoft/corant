@@ -15,7 +15,6 @@ package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -27,15 +26,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
-import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.suites.jpa.shared.JpaExtension;
 
 /**
  * corant-suites-jpa-shared
@@ -49,35 +47,25 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
   static final Set<Type> types = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
   final Set<Annotation> qualifiers = new HashSet<>();
   final BeanManager beanManager;
-  final PersistenceUnitInfoMetaData persistenceUnitInfoMetaData;
+  final String unitName;
 
   /**
    * @param beanManager
-   * @param persistenceUnitInfoMetaData
+   * @param unitName
    * @param qualifiers
    */
-  public EntityManagerFactoryBean(BeanManager beanManager,
-      PersistenceUnitInfoMetaData persistenceUnitInfoMetaData, Annotation... qualifiers) {
+  public EntityManagerFactoryBean(BeanManager beanManager, String unitName) {
     this.beanManager = beanManager;
-    this.persistenceUnitInfoMetaData = shouldNotNull(persistenceUnitInfoMetaData);
-    this.qualifiers.addAll(asSet(qualifiers));
-    this.qualifiers.add(Any.Literal.INSTANCE);
+    this.unitName = shouldNotNull(unitName);
+    qualifiers.add(Any.Literal.INSTANCE);
+    qualifiers.add(NamedLiteral.of(unitName));
   }
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    final JpaProviderLiteral proNme =
-        JpaProviderLiteral.of(persistenceUnitInfoMetaData.getPersistenceProviderClassName());
-    Instance<AbstractJpaProvider> provider =
-        Corant.instance().select(AbstractJpaProvider.class, proNme);
-    shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", proNme.value());
-    final EntityManagerFactory emf =
-        shouldNotNull(provider.get().getEntityManagerFactory(persistenceUnitInfoMetaData));
-    logger.info(() -> String.format(
-        "Created an entity manager factory that persistence unit named %s, provider is %s.",
-        persistenceUnitInfoMetaData.getPersistenceUnitName(),
-        tryAsClass(proNme.value()).getSimpleName()));
-    return emf;
+    Instance<JpaExtension> ext = Corant.instance().select(JpaExtension.class);
+    shouldBeTrue(ext.isResolvable(), "Can not find jpa extension.");
+    return ext.get().getEntityManagerFactory(unitName);
   }
 
   @Override
@@ -85,9 +73,8 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      logger.info(
-          () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
-              persistenceUnitInfoMetaData.getPersistenceUnitName()));
+      logger.info(() -> String
+          .format("Destroyed entity manager factory that persistence unit named %s.", unitName));
     }
   }
 
@@ -98,8 +85,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public String getId() {
-    return EntityManagerFactoryBean.class.getName() + "."
-        + persistenceUnitInfoMetaData.getPersistenceUnitName();
+    return EntityManagerFactoryBean.class.getName() + "." + unitName;
   }
 
   @Override
@@ -109,7 +95,7 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
 
   @Override
   public String getName() {
-    return "EntityManagerFactoryBean." + persistenceUnitInfoMetaData.getPersistenceUnitName();
+    return "EntityManagerFactoryBean." + unitName;
   }
 
   @Override

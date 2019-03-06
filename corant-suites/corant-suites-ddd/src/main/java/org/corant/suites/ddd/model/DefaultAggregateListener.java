@@ -13,10 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -26,6 +24,7 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.Corant;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
+import org.corant.suites.ddd.repository.LifecycleService;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
@@ -118,10 +117,10 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(AbstractAggregate o) {
+    Instance<LifecycleService> ls = Corant.instance().select(LifecycleService.class);
     Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
-    if (um.isResolvable()) {
-      final Annotation qualifier = NamedLiteral.of(o.lifecycleServiceQualifier().value());
-      um.get().getCurrentUnitOfWork(qualifier).register(o);
+    if (ls.isResolvable() && um.isResolvable()) {
+      um.get().getCurrentUnitOfWork(ls.get().resolvePersistenceUnitName(o.getClass())).register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
     }

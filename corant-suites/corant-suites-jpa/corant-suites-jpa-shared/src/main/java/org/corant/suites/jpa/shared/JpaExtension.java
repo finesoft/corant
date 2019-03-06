@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
@@ -37,13 +38,18 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
+import javax.inject.Named;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
+import org.corant.Corant;
 import org.corant.kernel.util.Cdis;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
+import org.corant.suites.jpa.shared.inject.JpaProvider;
+import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
 import org.corant.suites.jpa.shared.inject.PersistenceContextInjectionPoint;
 import org.corant.suites.jpa.shared.inject.TransactionPersistenceContextType;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
@@ -67,18 +73,42 @@ public class JpaExtension implements Extension {
       Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContextMetaData, Boolean>());
   protected final Map<String, PersistenceUnitInfoMetaData> persistenceUnitInfoMetaDatas =
       new ConcurrentHashMap<>();
-
+  protected final Map<Named, EntityManagerFactory> entityManagerFactories =
+      new ConcurrentHashMap<>();
   protected Logger logger = Logger.getLogger(getClass().getName());
+
+  public Map<Named, EntityManagerFactory> getEntityManagerFactories() {
+    return Collections.unmodifiableMap(entityManagerFactories);
+  }
+
+  /**
+   * This method can only be called after initialization
+   *
+   * @param unitName
+   * @return getEntityManagerFactory
+   */
+  public EntityManagerFactory getEntityManagerFactory(Named unitName) {
+    return entityManagerFactories.computeIfAbsent(unitName, (un) -> {
+      PersistenceUnitInfoMetaData puim = getPersistenceUnitInfoMetaData(unitName.value());
+      String providerName = puim.getPersistenceProviderClassName();
+      JpaProvider jp = JpaProviderLiteral.of(providerName);
+      Instance<AbstractJpaProvider> provider =
+          Corant.instance().select(AbstractJpaProvider.class, jp);
+      shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
+      final EntityManagerFactory emf = provider.get().buildEntityManagerFactory(puim);
+      return emf;
+    });
+  }
+
+  public EntityManagerFactory getEntityManagerFactory(String unitName) {
+    return getEntityManagerFactory(resolvePersistenceUnitQualifier(unitName));
+  }
 
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(String name) {
     return persistenceUnitInfoMetaDatas.get(defaultTrim(name));
   }
 
-  public Map<String, PersistenceUnitInfoMetaData> getPersistenceUnitInfoMetaDatas() {
-    return Collections.unmodifiableMap(persistenceUnitInfoMetaDatas);
-  }
-
-  public Annotation resolvePersistenceUnitQualifier(String name) {
+  public Named resolvePersistenceUnitQualifier(String name) {
     return isBlank(name) ? NamedLiteral.INSTANCE : NamedLiteral.of(name);
   }
 
@@ -94,12 +124,11 @@ public class JpaExtension implements Extension {
     // some injections
     persistenceUnits.forEach(pumd -> {
       final String unitName = pumd.getUnitName();
-      PersistenceUnitInfoMetaData puim = shouldNotNull(copy.remove(unitName));
-      Annotation qualifier = resolvePersistenceUnitQualifier(unitName);
-      abd.addBean(new EntityManagerFactoryBean(beanManager, puim, qualifier));
+      copy.remove(unitName);
+      abd.addBean(new EntityManagerFactoryBean(beanManager, unitName));
     });
     persistenceContexts.forEach(pcmd -> {
-      pcmd.setUnit(getPersistenceUnitInfoMetaData(pcmd.getUnitName()));
+      copy.remove(pcmd.getUnitName());
       Annotation qualifier = resolvePersistenceUnitQualifier(pcmd.getUnitName());
       abd.addBean(new EntityManagerBean(beanManager, pcmd, qualifier));
     });
@@ -107,8 +136,7 @@ public class JpaExtension implements Extension {
     for (Iterator<Entry<String, PersistenceUnitInfoMetaData>> it = copy.entrySet().iterator(); it
         .hasNext();) {
       Entry<String, PersistenceUnitInfoMetaData> entry = it.next();
-      Annotation qualifier = resolvePersistenceUnitQualifier(entry.getKey());
-      abd.addBean(new EntityManagerFactoryBean(beanManager, entry.getValue(), qualifier));
+      abd.addBean(new EntityManagerFactoryBean(beanManager, entry.getKey()));
       it.remove();
     }
   }

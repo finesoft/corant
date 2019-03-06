@@ -13,10 +13,9 @@
  */
 package org.corant.suites.ddd.event;
 
-import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
+import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
 
 /**
  * Every aggregate that extends AbstractAggregate when life cycle change then will fire
@@ -30,30 +29,22 @@ public class LifecycleEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
-  private final LifcyclePhase phase;
+  private final LifecyclePhase phase;
 
   private final boolean effectImmediately;
 
-  private final PU pu;
+  public LifecycleEvent(Aggregate source, LifecyclePhase lifcyclehase) {
+    this(source, lifcyclehase, false);
+  }
 
-  public LifecycleEvent(Aggregate source, LifcyclePhase lifcyclehase, boolean effectImmediately,
-      PU pu) {
+  public LifecycleEvent(Aggregate source, LifecyclePhase lifcyclehase, boolean effectImmediately) {
     super(source);
     phase = lifcyclehase;
     this.effectImmediately = effectImmediately;
-    this.pu = pu;
   }
 
-  public LifecycleEvent(Aggregate source, LifcyclePhase lifcyclehase, PU pu) {
-    this(source, lifcyclehase, false, pu);
-  }
-
-  public LifcyclePhase getPhase() {
+  public LifecyclePhase getPhase() {
     return phase;
-  }
-
-  public PU getPu() {
-    return pu;
   }
 
   public boolean isEffectImmediately() {
@@ -62,8 +53,7 @@ public class LifecycleEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "LifecycleEvent [phase=" + phase + ", effectImmediately=" + effectImmediately
-        + ", puName=" + pu + "]";
+    return "LifecycleEvent [phase=" + phase + ", effectImmediately=" + effectImmediately + "]";
   }
 
 }

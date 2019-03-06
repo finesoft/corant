@@ -13,13 +13,16 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import javax.persistence.EntityManager;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -46,16 +49,16 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  */
 public class JpaUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
-
+  final Map<Annotation, EntityManager> entityManagers = new HashMap<>();
+  final Function<Annotation, EntityManager> entityManagerProvider;
   final transient Transaction transaction;
-  final transient EntityManager entityManager;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
-  protected JpaUnitOfWork(JpaUnitOfWorksManager manager, EntityManager entityManager,
-      Transaction transaction) {
+  protected JpaUnitOfWork(JpaUnitOfWorksManager manager, Transaction transaction,
+      Function<Annotation, EntityManager> entityManagerProvider) {
     super(manager);
     this.transaction = transaction;
-    this.entityManager = entityManager;
+    this.entityManagerProvider = entityManagerProvider;
     Arrays.stream(Lifecycle.values()).forEach(e -> registration.put(e, new LinkedHashSet<>()));
     logger.fine(() -> String.format("Begin unit of work [%s]", transaction.toString()));
   }
@@ -78,7 +81,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   public void beforeCompletion() {
     handlePreComplete();
     handleMessage();
-    entityManager.flush();// FIXME
+    entityManagers.values().forEach(EntityManager::flush);// FIXME
   }
 
   @Override
@@ -100,8 +103,8 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public EntityManager getEntityManager() {
-    return entityManager;
+  public EntityManager getEntityManager(Annotation qualifier) {
+    return entityManagers.computeIfAbsent(qualifier, entityManagerProvider);
   }
 
   @Override
@@ -164,10 +167,12 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   protected void clear() {
     try {
-      if (entityManager.isOpen()) {
-        entityManager.close();
-      }
-      registration.clear();
+      entityManagers.values().forEach(em -> {
+        if (em.isOpen()) {
+          em.close();
+        }
+        registration.clear();
+      });
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
       super.clear();

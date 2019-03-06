@@ -38,7 +38,7 @@ import org.corant.shared.conversion.ConverterType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
-import org.corant.suites.ddd.repository.LifecycleService;
+import org.corant.suites.ddd.unitwork.PersistenceService;
 import org.corant.suites.jpa.shared.JpaUtils;
 
 /**
@@ -102,10 +102,10 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     }
     T entity = null;
     if (id != null) {
-      Instance<LifecycleService> ls = Corant.instance().select(LifecycleService.class);
+      Instance<PersistenceService> ls = Corant.instance().select(PersistenceService.class);
       if (ls.isResolvable()) {
         Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class,
-            ls.get().resolvePersistenceUnitName(targetClass));
+            ls.get().resolvePuQualifier(targetClass));
         if (repos.isResolvable()) {
           entity = repos.get().get(targetClass, id);
         }

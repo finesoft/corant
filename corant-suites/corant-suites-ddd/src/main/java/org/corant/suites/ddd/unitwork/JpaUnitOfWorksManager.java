@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
@@ -21,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -46,7 +44,7 @@ import org.corant.suites.ddd.saga.SagaService;
 @InfrastructureServices
 public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
-  protected final Map<Object, Map<Annotation, JpaUnitOfWork>> uows = new ConcurrentHashMap<>();
+  protected final Map<Object, JpaUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
   TransactionManager transactionManager;
@@ -59,17 +57,15 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   Instance<EntityManagerFactory> entityManagerFactories;
 
   @Override
-  public JpaUnitOfWork getCurrentUnitOfWork(Annotation qualifier) {
+  public JpaUnitOfWork getCurrentUnitOfWork() {
     try {
-      final Annotation qf = defaultObject(qualifier, Default.Literal.INSTANCE);
       final Transaction curtx = getTransactionManager().getTransaction();
-      return uows.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> new ConcurrentHashMap<>())
-          .computeIfAbsent(qf, (q) -> {
-            logger.fine(() -> "Register an new unit of work with the current transacion context.");
-            JpaUnitOfWork uow = buildUnitOfWork(buildEntityManager(q), unwrapUnifOfWorksKey(curtx));
-            getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
-            return uow;
-          });
+      return uows.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> {
+        logger.fine(() -> "Register an new unit of work with the current transacion context.");
+        JpaUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
+        getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
+        return uow;
+      });
     } catch (SystemException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
@@ -102,8 +98,8 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
         getEntityManagerProperties());
   }
 
-  protected JpaUnitOfWork buildUnitOfWork(EntityManager entityManager, Transaction transaction) {
-    return new JpaUnitOfWork(this, entityManager, transaction);
+  protected JpaUnitOfWork buildUnitOfWork(Transaction transaction) {
+    return new JpaUnitOfWork(this, transaction, this::buildEntityManager);
   }
 
   protected EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {

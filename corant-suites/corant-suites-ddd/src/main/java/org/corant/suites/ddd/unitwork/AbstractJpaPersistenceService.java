@@ -11,17 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.repository;
+package org.corant.suites.ddd.unitwork;
 
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleEvent;
@@ -36,20 +35,19 @@ import org.corant.suites.ddd.model.Entity;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractJpaLifecycleService implements LifecycleService {
+public abstract class AbstractJpaPersistenceService implements PersistenceService {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Inject
-  @Any
-  Instance<JpaRepository> repos;
+  JpaUnitOfWorksManager unitOfWorksManager;
 
   @Override
   @Transactional
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
     if (e.getSource() != null) {
       Entity entity = e.getSource();
-      Named named = resolvePersistenceUnitName(entity.getClass());
+      Named named = resolvePuQualifier(entity.getClass());
       LifecyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();
       handle(entity, phase, effectImmediately, named);
@@ -58,24 +56,24 @@ public abstract class AbstractJpaLifecycleService implements LifecycleService {
   }
 
   protected void handle(Entity entity, LifecyclePhase lifcyclePhase, boolean effectImmediately,
-      Annotation repoQf) {
-    JpaRepository repo = repos.select(repoQf).get();
+      Annotation qualifier) {
+    EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(qualifier);
     if (lifcyclePhase == LifecyclePhase.ENABLE) {
       if (entity.getId() == null) {
-        repo.persist(entity);
+        em.persist(entity);
         if (effectImmediately) {
-          repo.getEntityManager().flush();
+          em.flush();
         }
       } else {
-        repo.merge(entity);
+        em.merge(entity);
         if (effectImmediately) {
-          repo.getEntityManager().flush();
+          em.flush();
         }
       }
     } else if (lifcyclePhase == LifecyclePhase.DESTROY && entity.getId() != null) {
-      repo.remove(entity);
+      em.remove(entity);
       if (effectImmediately) {
-        repo.getEntityManager().flush();
+        em.flush();
       }
     }
   }

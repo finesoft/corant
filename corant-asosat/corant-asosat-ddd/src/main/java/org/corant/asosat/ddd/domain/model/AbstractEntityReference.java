@@ -27,7 +27,7 @@ import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityReference;
 import org.corant.suites.ddd.repository.JpaRepository;
-import org.corant.suites.ddd.repository.LifecycleService;
+import org.corant.suites.ddd.unitwork.PersistenceService;
 
 /**
  * corant-asosat-ddd
@@ -92,8 +92,8 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
   }
 
   protected Annotation[] obtainRepoQualifiers() {
-    Annotation qf = Corant.instance().select(LifecycleService.class).get()
-        .resolvePersistenceUnitName(resolveClass());
+    Annotation qf = Corant.instance().select(PersistenceService.class).get()
+        .resolvePuQualifier(resolveClass());
     return new Annotation[] {qf};
   }
 

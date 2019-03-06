@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.repository;
+package org.corant.suites.ddd.unitwork;
 
 import javax.inject.Named;
 import org.corant.suites.ddd.event.LifecycleEvent;
@@ -22,9 +22,9 @@ import org.corant.suites.ddd.event.LifecycleEvent;
  * @author bingo 下午2:16:37
  *
  */
-public interface LifecycleService {
+public interface PersistenceService {
 
   void on(LifecycleEvent e);
 
-  Named resolvePersistenceUnitName(Class<?> entityClass);
+  Named resolvePuQualifier(Class<?> entityClass);
 }

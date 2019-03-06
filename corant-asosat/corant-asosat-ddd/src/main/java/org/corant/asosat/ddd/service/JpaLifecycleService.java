@@ -24,7 +24,7 @@ import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.repository.AbstractJpaLifecycleService;
+import org.corant.suites.ddd.unitwork.AbstractJpaPersistenceService;
 import org.corant.suites.jpa.shared.JpaExtension;
 
 /**
@@ -35,7 +35,7 @@ import org.corant.suites.jpa.shared.JpaExtension;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class JpaLifecycleService extends AbstractJpaLifecycleService {
+public class JpaLifecycleService extends AbstractJpaPersistenceService {
 
   protected static final Map<Class<?>, Named> clsUns = new ConcurrentHashMap<>();
 
@@ -47,7 +47,7 @@ public class JpaLifecycleService extends AbstractJpaLifecycleService {
   JpaExtension ext;
 
   @Override
-  public Named resolvePersistenceUnitName(Class<?> entityClass) {
+  public Named resolvePuQualifier(Class<?> entityClass) {
     return clsUns.get(entityClass);
   }
 

@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 import org.corant.suites.ddd.message.MessageService;
 import org.corant.suites.ddd.saga.SagaService;
@@ -25,7 +24,7 @@ import org.corant.suites.ddd.saga.SagaService;
  */
 public interface UnitOfWorksManager {
 
-  UnitOfWork getCurrentUnitOfWork(Annotation qualifier);
+  UnitOfWork getCurrentUnitOfWork();
 
   Stream<UnitOfWorksHandler> getHandlers();
 

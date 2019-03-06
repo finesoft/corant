@@ -36,7 +36,6 @@ import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
-import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
 
 /**
@@ -156,7 +155,8 @@ public abstract class AbstractJpaRepository implements JpaRepository {
    */
   @Override
   public EntityManager getEntityManager() {
-    return getEntityManagerProvider().getEntityManager();
+    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(defaultObject(
+        findAnnotation(getUserClass(this.getClass()), Named.class), NamedLiteral.INSTANCE));
   }
 
   public EntityManagerFactory getEntityManagerFactory() {
@@ -221,11 +221,6 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   @Override
   public <T> List<T> select(String queryName, Object... param) {
     return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
-  }
-
-  protected EntityManagerProvider getEntityManagerProvider() {
-    return unitOfWorkManager.getCurrentUnitOfWork(defaultObject(
-        findAnnotation(getUserClass(this.getClass()), Named.class), NamedLiteral.INSTANCE));
   }
 
 }

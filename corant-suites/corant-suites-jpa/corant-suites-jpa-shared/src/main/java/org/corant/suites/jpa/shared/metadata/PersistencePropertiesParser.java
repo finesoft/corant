@@ -73,7 +73,10 @@ public class PersistencePropertiesParser {
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
     cfgNmes.forEach(pn -> {
-      if (pn.endsWith(JpaConfig.JC_TRANS_TYP)) {
+      if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
+        // handle properties
+        proCfgNmes.add(pn);
+      } else if (pn.endsWith(JpaConfig.JC_TRANS_TYP)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd
             .setPersistenceUnitTransactionType(PersistenceUnitTransactionType.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.JC_NON_JTA_DS)) {
@@ -113,9 +116,6 @@ public class PersistencePropertiesParser {
             .forEach(puimd::addMappingFileName);
       } else if (pn.endsWith(JpaConfig.JC_JAR_FILE)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
-      } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
-        // handle properties
-        proCfgNmes.add(pn);
       }
     });
     if (isNotEmpty(puimd.getManagedClassNames())) {

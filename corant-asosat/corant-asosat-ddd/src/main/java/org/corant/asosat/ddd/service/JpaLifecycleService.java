@@ -53,6 +53,7 @@ public class JpaLifecycleService extends AbstractJpaLifecycleService {
 
   @PostConstruct
   void onPostConstruct() {
+    // FIXME ugly implemention
     emfs.forEach(Object::toString);
     ext.getEntityManagerFactories().forEach((n, emf) -> {
       emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {

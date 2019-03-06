@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
-import org.corant.Corant;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.repository.AbstractJpaLifecycleService;
 import org.corant.suites.jpa.shared.JpaExtension;
@@ -37,6 +39,13 @@ public class JpaLifecycleService extends AbstractJpaLifecycleService {
 
   protected static final Map<Class<?>, Named> clsUns = new ConcurrentHashMap<>();
 
+  @Inject
+  @Any
+  Instance<EntityManagerFactory> emfs;
+
+  @Inject
+  JpaExtension ext;
+
   @Override
   public Named resolvePersistenceUnitName(Class<?> entityClass) {
     return clsUns.get(entityClass);
@@ -44,13 +53,12 @@ public class JpaLifecycleService extends AbstractJpaLifecycleService {
 
   @PostConstruct
   void onPostConstruct() {
-    Corant.instance().select(EntityManagerFactory.class).forEach(Object::toString);
-    Corant.instance().select(JpaExtension.class).get().getEntityManagerFactories()
-        .forEach((n, emf) -> {
-          emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
-            clsUns.put(cls, n);
-          });
-        });
+    emfs.forEach(Object::toString);
+    ext.getEntityManagerFactories().forEach((n, emf) -> {
+      emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
+        clsUns.put(cls, n);
+      });
+    });
     logger.info(() -> "initialized JpaLifecycleService.");
   }
 

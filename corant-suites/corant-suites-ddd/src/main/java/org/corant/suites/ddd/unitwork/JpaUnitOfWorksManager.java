@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,7 +43,7 @@ import org.corant.suites.ddd.saga.SagaService;
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
+public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   protected final Map<Object, Map<Annotation, JpaUnitOfWork>> UOWS = new ConcurrentHashMap<>();
 
@@ -51,6 +52,9 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
 
   @Inject
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+
+  @Inject
+  Instance<EntityManagerFactory> entityManagerFactories;
 
   @Override
   public JpaUnitOfWork getCurrentUnitOfWork(Annotation qualifier) {
@@ -67,6 +71,10 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
     } catch (SystemException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
+  }
+
+  public Instance<EntityManagerFactory> getEntityManagerFactories() {
+    return entityManagerFactories;
   }
 
   @Override
@@ -88,8 +96,7 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
   }
 
   protected EntityManager buildEntityManager(Annotation qualifier) {
-    final Annotation qf = defaultObject(qualifier, Default.Literal.INSTANCE);
-    return getEntityManagerFactory(qf).createEntityManager(SynchronizationType.SYNCHRONIZED,
+    return getEntityManagerFactory(qualifier).createEntityManager(SynchronizationType.SYNCHRONIZED,
         getEntityManagerProperties());
   }
 
@@ -97,7 +104,13 @@ public abstract class AbstractJpaUnitOfWorksManager extends AbstractUnitOfWorksM
     return new JpaUnitOfWork(this, entityManager, transaction);
   }
 
-  protected abstract EntityManagerFactory getEntityManagerFactory(Annotation qualifier);
+  protected EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
+    if (qualifier == null) {
+      return entityManagerFactories.get();
+    } else {
+      return entityManagerFactories.select(qualifier).get();
+    }
+  }
 
   protected Map<?, ?> getEntityManagerProperties() {
     return Collections.emptyMap();

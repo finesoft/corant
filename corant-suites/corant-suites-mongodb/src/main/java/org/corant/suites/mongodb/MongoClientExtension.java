@@ -13,11 +13,13 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.MapUtils.getMapInstant;
 import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.Serializable;
 import java.time.Instant;
@@ -236,7 +238,8 @@ public class MongoClientExtension implements Extension {
     clientConfigs.putAll(MongoClientConfig.from(ConfigProvider.getConfig()));
     clientNames.addAll(clientConfigs.keySet());
     clientConfigs.values().stream().flatMap(mc -> mc.getDatabases().values().stream())
-        .forEach(db -> databaseConfigs.put(db.getNameSpace(), db));
+        .forEach(db -> shouldBeNull(databaseConfigs.put(db.getNameSpace(), db),
+            "The mongodb data base named %s dup!", db.getNameSpace()));
     databaseNames.addAll(databaseConfigs.keySet());
     logger
         .info(() -> String.format("Find mongodb databases [%s]!", String.join(",", databaseNames)));
@@ -255,7 +258,7 @@ public class MongoClientExtension implements Extension {
     InitialContext jndi =
         beans.select(InitialContext.class).isResolvable() ? beans.select(InitialContext.class).get()
             : null;
-    if (jndi != null) {
+    if (jndi != null && isNotBlank(cfg.getName())) {
       try {
         if (!initedJndiSubCtx) {
           jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
@@ -278,10 +281,15 @@ public class MongoClientExtension implements Extension {
 
   protected GridFSBucket produceGridFSBucket(Instance<Object> beans, String bucketNamespace) {
     String[] names = split(bucketNamespace, Names.NAME_SPACE_SEPARATORS, true, true);
-    shouldBeTrue(!isEmpty(names) && names.length == 3);
-    MongoDatabase md = beans.select(MongoDatabase.class,
-        NamedLiteral.of(names[0] + Names.NAME_SPACE_SEPARATORS + names[1])).get();
-    return GridFSBuckets.create(md, names[2]);
+    shouldBeTrue(!isEmpty(names) && names.length > 1);
+    if (names.length == 2) {
+      MongoDatabase md = beans.select(MongoDatabase.class, NamedLiteral.of(names[0])).get();
+      return GridFSBuckets.create(md, names[1]);
+    } else {
+      MongoDatabase md = beans.select(MongoDatabase.class,
+          NamedLiteral.of(names[0] + Names.NAME_SPACE_SEPARATORS + names[1])).get();
+      return GridFSBuckets.create(md, names[2]);
+    }
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
@@ -289,7 +297,7 @@ public class MongoClientExtension implements Extension {
     if (GridFSBucket.class.equals(ip.getType())) {
       Named named = ip.getAnnotated().getAnnotation(Named.class);
       String[] names = split(named.value(), Names.NAME_SPACE_SEPARATORS, true, true);
-      if (!isEmpty(names) && names.length == 3) {
+      if (!isEmpty(names) && names.length > 1) {
         gridFSBucketNames.add(named.value());
       }
     }

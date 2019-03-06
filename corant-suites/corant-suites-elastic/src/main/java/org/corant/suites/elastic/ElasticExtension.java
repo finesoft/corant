@@ -23,7 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.PreContainerStopEvent;
@@ -47,7 +50,7 @@ public class ElasticExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
-  protected final Map<String, TransportClient> clients = new ConcurrentHashMap<>();
+  protected final Map<String, PreBuiltTransportClient> clients = new ConcurrentHashMap<>();
 
   public ElasticConfig getConfig(String clusterName) {
     return configs.get(clusterName);
@@ -57,7 +60,7 @@ public class ElasticExtension implements Extension {
     return Collections.unmodifiableMap(configs);
   }
 
-  public TransportClient getTransportClient(String clusterName) {
+  public PreBuiltTransportClient getTransportClient(String clusterName) {
     return clients.computeIfAbsent(clusterName, this::produce);
   }
 
@@ -76,13 +79,26 @@ public class ElasticExtension implements Extension {
     clients.values().forEach(TransportClient::close);
   }
 
+  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    if (event != null) {
+      for (final String clusterName : configs.keySet()) {
+        event.<PreBuiltTransportClient>addBean().addQualifier(NamedLiteral.of(clusterName))
+            .addTransitiveTypeClosure(TransportClient.class)
+            .beanClass(PreBuiltTransportClient.class).scope(ApplicationScoped.class)
+            .produceWith(beans -> {
+              return getTransportClient(clusterName);
+            }).disposeWith((tc, beans) -> tc.close());
+      }
+    }
+  }
+
   @SuppressWarnings("resource")
-  TransportClient produce(String clusterName) {
+  PreBuiltTransportClient produce(String clusterName) {
     ElasticConfig cfg = shouldNotNull(configs.get(clusterName));
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());
-    TransportClient tc = new PreBuiltTransportClient(builder.build());
+    PreBuiltTransportClient tc = new PreBuiltTransportClient(builder.build());
     for (String clusterNode : split(cfg.getClusterNodes(), ",", true, true)) {
       final String[] hostPort = split(clusterNode, ":", true, true);
       shouldBeTrue(hostPort.length == 2, "Cluster %s node property error", clusterName);

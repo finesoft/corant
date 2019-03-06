@@ -13,13 +13,12 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
@@ -61,25 +60,25 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
   }
 
   protected DataSource resolveDataSource(String dataSourceName) {
-    if (isBlank(dataSourceName)) {
-      if (datasources.isResolvable()) {
-        return datasources.get();
-      } else {
-        return datasources.select(NamedLiteral.INSTANCE).get();
-      }
-    } else if (dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
+    if (isNotBlank(dataSourceName)
+        && dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
       try {
         return forceCast(getJndi().lookup(dataSourceName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
-    } else {
-      return datasources.select(NamedLiteral.of(dataSourceName)).get();
+    } else if (!datasources.isUnsatisfied()) {
+      if (isBlank(dataSourceName)) {
+        if (datasources.isResolvable()) {
+          return datasources.get();
+        } else {
+          return datasources.select(NamedLiteral.INSTANCE).get();
+        }
+      } else {
+        return datasources.select(NamedLiteral.of(dataSourceName)).get();
+      }
     }
+    throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }
 
-  @PostConstruct
-  void onPostConstruct() {
-    shouldBeFalse(datasources.isUnsatisfied(), "Can not find any data sources");
-  }
 }

@@ -36,7 +36,7 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 @ApplicationScoped
 public abstract class AbstractJpaProvider {
 
-  protected static final Map<PersistenceUnitInfoMetaData, EntityManagerFactory> EMFS =
+  protected static final Map<PersistenceUnitInfoMetaData, EntityManagerFactory> emfs =
       new ConcurrentHashMap<>();
 
   protected volatile boolean initedJndiSubCtx = false;
@@ -65,7 +65,7 @@ public abstract class AbstractJpaProvider {
    */
   public EntityManagerFactory getEntityManagerFactory(
       final PersistenceUnitInfoMetaData puMetaData) {
-    return EMFS.computeIfAbsent(puMetaData, this::createEntityManagerFactory);
+    return emfs.computeIfAbsent(puMetaData, this::createEntityManagerFactory);
   }
 
   protected EntityManager buildEntityManager(PersistenceContextMetaData metaData) {

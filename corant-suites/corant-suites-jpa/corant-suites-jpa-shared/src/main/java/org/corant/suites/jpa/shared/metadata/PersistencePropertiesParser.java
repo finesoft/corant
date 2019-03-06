@@ -51,7 +51,9 @@ public class PersistencePropertiesParser {
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     Set<String> dfltProNmes = JpaConfig.defaultPropertyNames();
-    String dfltPuNme = config.getOptionalValue(JpaConfig.JC_PU_NME, String.class).orElse(null);
+    String dfltPuNme = config
+        .getOptionalValue(JpaConfig.JC_PREFIX + JpaConfig.JC_PU_NME.substring(1), String.class)
+        .orElse(null);
     doParse(config, dfltPuNme, dfltProNmes, map);// defaults
     Map<String, List<String>> namedKeys = Configurations.getGroupConfigNames(config,
         s -> defaultString(s).startsWith(JpaConfig.JC_PREFIX) && !dfltProNmes.contains(s), 1);

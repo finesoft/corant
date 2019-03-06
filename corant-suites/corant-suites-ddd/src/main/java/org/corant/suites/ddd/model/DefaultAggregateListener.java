@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
@@ -119,8 +120,8 @@ public class DefaultAggregateListener {
   protected void registerToUnitOfWork(AbstractAggregate o) {
     Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
     if (um.isResolvable()) {
-      um.get().getCurrentUnitOfWork(NamedLiteral.of(o.lifecycleServiceQualifier().value()))
-          .register(o);
+      final Annotation qualifier = NamedLiteral.of(o.lifecycleServiceQualifier().value());
+      um.get().getCurrentUnitOfWork(qualifier).register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
     }

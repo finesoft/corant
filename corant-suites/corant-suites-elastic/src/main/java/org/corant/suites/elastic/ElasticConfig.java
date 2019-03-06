@@ -13,7 +13,13 @@
  */
 package org.corant.suites.elastic;
 
+import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.StringUtils.EMPTY;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,13 +52,14 @@ import org.elasticsearch.common.xcontent.XContentType;
  */
 public class ElasticConfig {
 
-  public static final String PREFIX = "elastic.";
-  public static final String ES_CLU_NOD = ".cluster-nodes";
-  public static final String ES_DOC_PATHS = ".document-paths";
-  public static final String ES_SETTING_PATH = ".setting-path";
-  public static final String ES_ADD_PRO = ".property";
-  public static final String ES_IDX_VER = ".index-version";
-  public static final String ES_AUTO_UPDATE_SCHEMA = ".auto-update-schame";
+  public static final String EC_PREFIX = "elastic.";
+  public static final String EC_CLU_NME = ".cluster-name";
+  public static final String EC_CLU_NOD = ".cluster-nodes";
+  public static final String EC_DOC_PATHS = ".document-paths";
+  public static final String EC_SETTING_PATH = ".setting-path";
+  public static final String EC_ADD_PRO = ".property";
+  public static final String EC_IDX_VER = ".index-version";
+  public static final String EC_AUTO_UPDATE_SCHEMA = ".auto-update-schame";
 
   private String clusterName;
   private String clusterNodes;
@@ -64,32 +72,41 @@ public class ElasticConfig {
 
   public static Map<String, ElasticConfig> from(Config config) {
     Map<String, ElasticConfig> map = new HashMap<>();
-    Map<String, List<String>> cfgNmes = Configurations.getGroupConfigNames(config, PREFIX, 1);
+    Set<String> dfltProNames = defaultPropertyNames();
+    Map<String, List<String>> cfgNmes = Configurations.getGroupConfigNames(config,
+        (s) -> defaultString(s).startsWith(EC_PREFIX) && !dfltProNames.contains(s), 1);
     cfgNmes.forEach((k, v) -> {
       final ElasticConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.clusterName, cfg.clusterNodes)) {
-        map.put(k, cfg);
+        shouldBeNull(map.put(k, cfg), "The elastic cluster name %s dup!", k);
       }
     });
+    String dfltClusterName =
+        config.getOptionalValue(EC_PREFIX + EC_CLU_NME.substring(1), String.class).orElse(EMPTY);
+    ElasticConfig dfltCfg = of(config, dfltClusterName, dfltProNames);
+    if (isNotBlank(dfltCfg.getClusterNodes())) {
+      map.put(dfltClusterName, dfltCfg);
+    }
     return map;
   }
 
   public static ElasticConfig of(Config config, String name, Collection<String> propertieNames) {
     final ElasticConfig cfg = new ElasticConfig();
-    final String proPrefix = PREFIX + name + ES_ADD_PRO;
+    final String proPrefix =
+        isBlank(name) ? EC_PREFIX + EC_ADD_PRO.substring(1) : EC_PREFIX + name + EC_ADD_PRO;
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
     cfg.setClusterName(name);
     propertieNames.forEach(pn -> {
-      if (pn.endsWith(ES_CLU_NOD)) {
+      if (pn.endsWith(EC_CLU_NOD)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setClusterNodes);
-      } else if (pn.endsWith(ES_DOC_PATHS)) {
+      } else if (pn.endsWith(EC_DOC_PATHS)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setDocumentPaths);
-      } else if (pn.endsWith(ES_SETTING_PATH)) {
+      } else if (pn.endsWith(EC_SETTING_PATH)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::initSetting);
-      } else if (pn.endsWith(ES_IDX_VER)) {
+      } else if (pn.endsWith(EC_IDX_VER)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setIndexVersion);
-      } else if (pn.endsWith(ES_AUTO_UPDATE_SCHEMA)) {
+      } else if (pn.endsWith(EC_AUTO_UPDATE_SCHEMA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setAutoUpdateSchema);
       } else if (pn.startsWith(proPrefix) && pn.length() > proPrefixLen) {
         proCfgNmes.add(pn);// handle properties
@@ -97,6 +114,19 @@ public class ElasticConfig {
     });
     doParseProperties(config, proPrefix, proCfgNmes, cfg);
     return cfg;
+  }
+
+  static Set<String> defaultPropertyNames() {
+    String dfltPrefix = EC_PREFIX.substring(0, EC_PREFIX.length() - 1);
+    Set<String> names = new LinkedHashSet<>();
+    names.add(dfltPrefix + EC_ADD_PRO);
+    names.add(dfltPrefix + EC_AUTO_UPDATE_SCHEMA);
+    names.add(dfltPrefix + EC_CLU_NME);
+    names.add(dfltPrefix + EC_CLU_NOD);
+    names.add(dfltPrefix + EC_DOC_PATHS);
+    names.add(dfltPrefix + EC_IDX_VER);
+    names.add(dfltPrefix + EC_SETTING_PATH);
+    return names;
   }
 
   static void doParseProperties(Config config, String proPrefix, Set<String> proCfgNmes,
@@ -229,7 +259,7 @@ public class ElasticConfig {
    * @param clusterName the clusterName to set
    */
   protected void setClusterName(String clusterName) {
-    this.clusterName = clusterName;
+    this.clusterName = defaultTrim(clusterName);
   }
 
   /**

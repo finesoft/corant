@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -23,7 +24,7 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.corant.suites.ddd.annotation.qualifier.PuName;
+import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
@@ -47,10 +48,10 @@ public class JpaLifecycleService implements LifecycleService {
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
     if (e.getSource() != null) {
       Entity entity = e.getSource();
-      String puname = defaultObject(e.getPuName(), PuName.EMPTY_INST).value();
+      String pu = defaultString(defaultObject(e.getPu(), PU.EMPTY_INST).value());
       LifcyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, phase, effectImmediately, NamedLiteral.of(puname));
+      handle(entity, phase, effectImmediately, NamedLiteral.of(pu));
     }
   }
 

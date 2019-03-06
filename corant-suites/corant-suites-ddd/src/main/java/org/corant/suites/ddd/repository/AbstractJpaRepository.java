@@ -32,13 +32,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import org.corant.suites.ddd.annotation.qualifier.PuName;
+import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
-import org.corant.suites.ddd.unitwork.AbstractJpaUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
 
 /**
  * corant-asosat-ddd
@@ -46,6 +46,7 @@ import org.corant.suites.ddd.unitwork.AbstractJpaUnitOfWorksManager;
  * @author bingo 下午9:54:26
  *
  */
+@PU
 @Repositories
 public abstract class AbstractJpaRepository implements JpaRepository {
 
@@ -53,7 +54,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   protected Logger logger;
 
   @Inject
-  AbstractJpaUnitOfWorksManager unitOfWorkManager;
+  JpaUnitOfWorksManager unitOfWorkManager;
 
   @Override
   public void clear() {
@@ -225,7 +226,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   }
 
   protected EntityManagerProvider getEntityManagerProvider() {
-    PuName rn = findAnnotation(getUserClass(this.getClass()), PuName.class);
+    PU rn = findAnnotation(getUserClass(this.getClass()), PU.class);
     String name = rn != null ? defaultTrim(rn.value()) : EMPTY;
     return unitOfWorkManager.getCurrentUnitOfWork(NamedLiteral.of(name));
   }

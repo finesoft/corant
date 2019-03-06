@@ -31,7 +31,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.annotation.qualifier.PuName;
+import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
@@ -40,6 +40,7 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午3:25:51
  *
  */
+@PU
 @MappedSuperclass
 @EntityListeners(value = {DefaultAggregateListener.class})
 public abstract class AbstractAggregate extends AbstractEntity implements Aggregate {
@@ -169,9 +170,9 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return getId() != null;
   }
 
-  protected PuName lifecycleServiceQualifier() {
-    PuName rn = findAnnotation(getUserClass(this.getClass()), PuName.class);
-    return defaultObject(rn, PuName.EMPTY_INST);
+  protected PU lifecycleServiceQualifier() {
+    PU rn = findAnnotation(getUserClass(this.getClass()), PU.class);
+    return defaultObject(rn, PU.EMPTY_INST);
   }
 
   protected synchronized void setVn(long vn) {

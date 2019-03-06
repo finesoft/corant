@@ -51,7 +51,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   final transient EntityManager entityManager;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
-  protected JpaUnitOfWork(AbstractJpaUnitOfWorksManager manager, EntityManager entityManager,
+  protected JpaUnitOfWork(JpaUnitOfWorksManager manager, EntityManager entityManager,
       Transaction transaction) {
     super(manager);
     this.transaction = transaction;
@@ -175,8 +175,8 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  protected AbstractJpaUnitOfWorksManager getManager() {
-    return (AbstractJpaUnitOfWorksManager) super.getManager();
+  protected JpaUnitOfWorksManager getManager() {
+    return (JpaUnitOfWorksManager) super.getManager();
   }
 
   protected void handleMessage() {

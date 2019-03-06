@@ -65,6 +65,7 @@ public class DataSourceConfig {
   public static final String DSC_XA = ".xa";
   public static final String DSC_JTA = ".jta";
   public static final String DSC_METRICS = ".enable-metrics";
+  public static final String DSC_NAME = ".name";
 
   private Class<?> driver;
   private String name;
@@ -185,12 +186,6 @@ public class DataSourceConfig {
   public static Map<String, DataSourceConfig> from(Config config) {
     Map<String, DataSourceConfig> dataSources = new LinkedHashMap<>();
     Set<String> dfltProNames = defaultPropertyNames();
-    String defaultName = config.getOptionalValue(DSC_PREFIX + "name", String.class).orElse(null);
-    // find default configuration
-    DataSourceConfig dfltCfg = of(config, defaultName, dfltProNames);
-    if (dfltCfg != null) {
-      dataSources.put(defaultTrim(dfltCfg.getName()), dfltCfg);
-    }
     // find named data source configuration
     Map<String, List<String>> namedNames = Configurations.getGroupConfigNames(config,
         (s) -> defaultString(s).startsWith(DSC_PREFIX) && !dfltProNames.contains(s), 1);
@@ -201,6 +196,14 @@ public class DataSourceConfig {
             "The data source named %s configuration dup!", cfg.getName());
       }
     });
+    String defaultName =
+        config.getOptionalValue(DSC_PREFIX + DSC_NAME.substring(1), String.class).orElse(null);
+    // find default configuration
+    DataSourceConfig dfltCfg = of(config, defaultName, dfltProNames);
+    if (dfltCfg != null) {
+      shouldBeNull(dataSources.put(defaultTrim(dfltCfg.getName()), dfltCfg),
+          "The data source named %s configuration dup!", defaultName);
+    }
     return dataSources;
   }
 
@@ -234,6 +237,7 @@ public class DataSourceConfig {
     names.add(dfltPrefix + DSC_VALIDATE_CONNECTION);
     names.add(dfltPrefix + DSC_VALIDATION_TIMEOUT);
     names.add(dfltPrefix + DSC_XA);
+    names.add(dfltPrefix + DSC_NAME);
     return names;
   }
 

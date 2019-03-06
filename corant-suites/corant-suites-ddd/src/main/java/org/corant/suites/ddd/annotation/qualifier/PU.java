@@ -33,13 +33,13 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface PuName {
+public @interface PU {
 
   public static final PuLiteral EMPTY_INST = PuLiteral.of("");
 
   String value() default "";
 
-  public static class PuLiteral extends AnnotationLiteral<PuName> implements PuName {
+  public static class PuLiteral extends AnnotationLiteral<PU> implements PU {
 
     private static final long serialVersionUID = -5552841006073177750L;
 

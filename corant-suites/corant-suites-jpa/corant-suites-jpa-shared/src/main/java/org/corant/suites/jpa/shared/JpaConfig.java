@@ -98,6 +98,7 @@ public class JpaConfig {
     names.add(dfltPrefix + JC_SHARE_CACHE_MOD);
     names.add(dfltPrefix + JC_TRANS_TYP);
     names.add(dfltPrefix + JC_VAL_MOD);
+    names.add(dfltPrefix + JC_PU_NME);
     return names;
   }
 

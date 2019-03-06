@@ -13,6 +13,7 @@
  */
 package org.corant.suites.elastic.service;
 
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import javax.ejb.ApplicationException;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -41,7 +42,7 @@ public class ElasticTransportClientService {
 
   public TransportClient get(String clusterName) {
     if (!instance.isUnsatisfied()) {
-      return instance.select(NamedLiteral.of(clusterName)).get();
+      return instance.select(NamedLiteral.of(defaultTrim(clusterName))).get();
     }
     return null;
   }

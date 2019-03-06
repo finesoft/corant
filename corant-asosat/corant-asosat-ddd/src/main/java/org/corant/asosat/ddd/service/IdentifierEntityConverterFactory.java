@@ -38,7 +38,7 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.suites.ddd.annotation.qualifier.PuName;
+import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
@@ -106,7 +106,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     T entity = null;
     if (id != null) {
       final Annotation q =
-          defaultObject(findAnnotation(getUserClass(targetClass), PuName.class), PuName.EMPTY_INST);
+          defaultObject(findAnnotation(getUserClass(targetClass), PU.class), PU.EMPTY_INST);
       Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class, q);
       if (repos.isResolvable()) {
         entity = repos.get().get(targetClass, id);

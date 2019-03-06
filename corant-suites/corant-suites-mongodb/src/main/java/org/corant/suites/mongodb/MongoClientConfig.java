@@ -20,6 +20,9 @@ import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,8 +88,16 @@ public class MongoClientConfig {
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
-    // handle client
-    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config, MC_PREFIX, 1);
+    Set<String> dfltProNames = defaultPropertyNames();
+    String defaultName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
+    // find default configuration
+    MongoClientConfig dfltCfg = of(config, defaultName, dfltProNames);
+    if (dfltCfg != null) {
+      clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
+    }
+    // handle named client
+    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config,
+        (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltProNames.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
@@ -95,10 +106,25 @@ public class MongoClientConfig {
     return clients;
   }
 
+  static Set<String> defaultPropertyNames() {
+    String dfltPrefix = MC_PREFIX.substring(0, MC_PREFIX.length() - 1);
+    Set<String> names = new LinkedHashSet<>();
+    names.add(dfltPrefix + MC_APP_NAME);
+    names.add(dfltPrefix + MC_AUTH_DB);
+    names.add(dfltPrefix + MC_DATABASES);
+    names.add(dfltPrefix + MC_HOST_PORTS);
+    names.add(dfltPrefix + MC_OPTS);
+    names.add(dfltPrefix + MC_PASSWORD);
+    names.add(dfltPrefix + MC_URI);
+    names.add(dfltPrefix + MC_USER_NAME);
+    return names;
+  }
+
   static MongoClientConfig of(Config config, String client, Collection<String> propertieNames) {
     final MongoClientConfig mc = new MongoClientConfig();
     mc.setName(client);
-    final String opPrefix = MC_PREFIX + client + MC_OPTS;
+    final String opPrefix =
+        isBlank(client) ? MC_PREFIX + MC_OPTS.substring(1) : MC_PREFIX + client + MC_OPTS;
     final int opPrefixLen = opPrefix.length();
     Set<String> opCfgNmes = new HashSet<>();
     propertieNames.forEach(pn -> {
@@ -307,7 +333,7 @@ public class MongoClientConfig {
    * @param name the client name to set
    */
   protected void setName(String name) {
-    this.name = name;
+    this.name = defaultTrim(name);
   }
 
   /**
@@ -391,7 +417,8 @@ public class MongoClientConfig {
     }
 
     public String getNameSpace() {
-      return getClientName() + Names.NAME_SPACE_SEPARATOR + getName();
+      return isBlank(getClientName()) ? getName()
+          : getClientName() + Names.NAME_SPACE_SEPARATOR + getName();
     }
 
   }

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.event;
 
-import org.corant.suites.ddd.annotation.qualifier.PuName;
+import org.corant.suites.ddd.annotation.qualifier.PU;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.LifcyclePhase;
@@ -34,26 +34,26 @@ public class LifecycleEvent extends AbstractEvent {
 
   private final boolean effectImmediately;
 
-  private final PuName puName;
+  private final PU pu;
 
   public LifecycleEvent(Aggregate source, LifcyclePhase lifcyclehase, boolean effectImmediately,
-      PuName puName) {
+      PU pu) {
     super(source);
     phase = lifcyclehase;
     this.effectImmediately = effectImmediately;
-    this.puName = puName;
+    this.pu = pu;
   }
 
-  public LifecycleEvent(Aggregate source, LifcyclePhase lifcyclehase, PuName puName) {
-    this(source, lifcyclehase, false, puName);
+  public LifecycleEvent(Aggregate source, LifcyclePhase lifcyclehase, PU pu) {
+    this(source, lifcyclehase, false, pu);
   }
 
   public LifcyclePhase getPhase() {
     return phase;
   }
 
-  public PuName getPuName() {
-    return puName;
+  public PU getPu() {
+    return pu;
   }
 
   public boolean isEffectImmediately() {
@@ -63,7 +63,7 @@ public class LifecycleEvent extends AbstractEvent {
   @Override
   public String toString() {
     return "LifecycleEvent [phase=" + phase + ", effectImmediately=" + effectImmediately
-        + ", puName=" + puName + "]";
+        + ", puName=" + pu + "]";
   }
 
 }

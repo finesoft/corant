@@ -38,7 +38,7 @@ public abstract class AbstractJpaProvider {
   @Inject
   InitialContext jndi;
 
-  protected abstract EntityManagerFactory buildEntityManagerFactory(
+  public abstract EntityManagerFactory buildEntityManagerFactory(
       PersistenceUnitInfoMetaData metaData);
 
   protected EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {

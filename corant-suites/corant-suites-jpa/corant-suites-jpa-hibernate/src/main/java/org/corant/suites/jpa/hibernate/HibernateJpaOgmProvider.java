@@ -39,7 +39,7 @@ public class HibernateJpaOgmProvider extends AbstractJpaProvider {
       asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Override
-  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
+  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
     return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, PROPERTIES);
   }
 

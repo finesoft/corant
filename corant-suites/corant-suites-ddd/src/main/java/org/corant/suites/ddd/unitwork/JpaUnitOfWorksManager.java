@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -53,8 +51,7 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
   @Inject
-  @Any
-  Instance<EntityManagerFactory> entityManagerFactories;
+  JpaPersistenceService persistenceService;
 
   @Override
   public JpaUnitOfWork getCurrentUnitOfWork() {
@@ -69,10 +66,6 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
     } catch (SystemException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
-  }
-
-  public Instance<EntityManagerFactory> getEntityManagerFactories() {
-    return entityManagerFactories;
   }
 
   @Override
@@ -103,11 +96,7 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   protected EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
-    if (qualifier == null) {
-      return entityManagerFactories.get();
-    } else {
-      return entityManagerFactories.select(qualifier).get();
-    }
+    return persistenceService.getEntityManagerFactory(qualifier);
   }
 
   protected Map<?, ?> getEntityManagerProperties() {
@@ -124,7 +113,7 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   void clearCurrentUnitOfWorks(Object key) {
     logger.fine(() -> "Deregister the unit of work with the current transacion context.");
-    uows.remove(key).clear();
+    uows.remove(key);
   }
 
   @PreDestroy

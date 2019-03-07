@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.shared.inject;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import java.lang.annotation.Annotation;
@@ -25,15 +24,11 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
-import javax.persistence.EntityManagerFactory;
-import org.corant.Corant;
-import org.corant.suites.jpa.shared.JpaExtension;
 
 /**
  * corant-suites-jpa-shared
@@ -41,10 +36,12 @@ import org.corant.suites.jpa.shared.JpaExtension;
  * @author bingo 上午10:34:41
  *
  */
-public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, PassivationCapable {
+public class EntityManagerFactoryBean
+    implements Bean<ExtendedEntityManagerFactory>, PassivationCapable {
 
   static final Logger logger = Logger.getLogger(EntityManagerFactoryBean.class.getName());
-  static final Set<Type> types = Collections.unmodifiableSet(asSet(EntityManagerFactory.class));
+  static final Set<Type> types =
+      Collections.unmodifiableSet(asSet(ExtendedEntityManagerFactory.class));
   final Set<Annotation> qualifiers = new HashSet<>();
   final BeanManager beanManager;
   final String unitName;
@@ -62,15 +59,14 @@ public class EntityManagerFactoryBean implements Bean<EntityManagerFactory>, Pas
   }
 
   @Override
-  public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    Instance<JpaExtension> ext = Corant.instance().select(JpaExtension.class);
-    shouldBeTrue(ext.isResolvable(), "Can not find jpa extension.");
-    return ext.get().getEntityManagerFactory(unitName);
+  public ExtendedEntityManagerFactory create(
+      CreationalContext<ExtendedEntityManagerFactory> creationalContext) {
+    return ExtendedEntityManagerFactory.of(unitName);
   }
 
   @Override
-  public void destroy(EntityManagerFactory instance,
-      CreationalContext<EntityManagerFactory> creationalContext) {
+  public void destroy(ExtendedEntityManagerFactory instance,
+      CreationalContext<ExtendedEntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
       logger.info(() -> String

@@ -13,19 +13,23 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.unitwork.AbstractJpaPersistenceService;
-import org.corant.suites.jpa.shared.JpaExtension;
+import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
 
 /**
  * corant-asosat-ddd
@@ -35,32 +39,36 @@ import org.corant.suites.jpa.shared.JpaExtension;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class JpaLifecycleService extends AbstractJpaPersistenceService {
+public class DefaultJpaPersistenceService implements JpaPersistenceService {
 
   protected static final Map<Class<?>, Named> clsUns = new ConcurrentHashMap<>();
 
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
+
   @Inject
   @Any
-  Instance<EntityManagerFactory> emfs;
-
-  @Inject
-  JpaExtension ext;
+  Instance<ExtendedEntityManagerFactory> emfs;
 
   @Override
-  public Named resolvePuQualifier(Class<?> entityClass) {
-    return clsUns.get(entityClass);
+  public EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
+    return emfs.select(qualifier).get();
+  }
+
+  @Override
+  public Annotation getPersistenceUnitQualifier(Class<?> entityClass) {
+    return entityClass == null ? null : clsUns.get(entityClass);
   }
 
   @PostConstruct
   void onPostConstruct() {
-    // FIXME ugly implemention
-    emfs.forEach(Object::toString);
-    ext.getEntityManagerFactories().forEach((n, emf) -> {
+    emfs.forEach(emf -> {
+      Named named =
+          NamedLiteral.of(defaultTrim(emf.getPersistenceUnitInfo().getPersistenceUnitName()));
       emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
-        clsUns.put(cls, n);
+        clsUns.put(cls, named);
       });
     });
-    logger.info(() -> "initialized JpaLifecycleService.");
+    logger.info(() -> "Initialized JpaPersistenceService.");
   }
 
 }

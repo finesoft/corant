@@ -53,7 +53,7 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
   Instance<DataSource> datasources;
 
   @Override
-  protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
+  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
     shouldNotNull(metaData).configDataSource(this::resolveDataSource);
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         PROPERTIES);

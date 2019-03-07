@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.unitwork;
+package org.corant.asosat.ddd.service;
 
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
@@ -19,35 +19,40 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
+import org.corant.suites.ddd.model.AggregateLifecycleManager;
 import org.corant.suites.ddd.model.Entity;
+import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
 
 /**
  * corant-asosat-ddd
  *
- * @author bingo 下午2:17:04
+ * @author bingo 上午10:44:19
  *
  */
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractJpaPersistenceService implements PersistenceService {
+public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
 
-  protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+  final Logger logger = Logger.getLogger(this.getClass().getName());
 
   @Inject
   JpaUnitOfWorksManager unitOfWorksManager;
+
+  @Inject
+  JpaPersistenceService persistenceService;
 
   @Override
   @Transactional
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
     if (e.getSource() != null) {
       Entity entity = e.getSource();
-      Named named = resolvePuQualifier(entity.getClass());
+      Annotation named = persistenceService.getPersistenceUnitQualifier(entity.getClass());
       LifecyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();
       handle(entity, phase, effectImmediately, named);
@@ -77,5 +82,4 @@ public abstract class AbstractJpaPersistenceService implements PersistenceServic
       }
     }
   }
-
 }

@@ -24,7 +24,6 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.Corant;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
-import org.corant.suites.ddd.unitwork.PersistenceService;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
@@ -117,9 +116,8 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(AbstractAggregate o) {
-    Instance<PersistenceService> ls = Corant.instance().select(PersistenceService.class);
     Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
-    if (ls.isResolvable() && um.isResolvable()) {
+    if (um.isResolvable()) {
       um.get().getCurrentUnitOfWork().register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");

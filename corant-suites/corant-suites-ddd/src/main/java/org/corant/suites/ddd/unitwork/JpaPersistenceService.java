@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import javax.inject.Named;
-import org.corant.suites.ddd.event.LifecycleEvent;
+import java.lang.annotation.Annotation;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * corant-asosat-ddd
@@ -22,9 +22,10 @@ import org.corant.suites.ddd.event.LifecycleEvent;
  * @author bingo 下午2:16:37
  *
  */
-public interface PersistenceService {
+public interface JpaPersistenceService {
 
-  void on(LifecycleEvent e);
+  EntityManagerFactory getEntityManagerFactory(Annotation qualifier);
 
-  Named resolvePuQualifier(Class<?> entityClass);
+  Annotation getPersistenceUnitQualifier(Class<?> entityClass);
+
 }

@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.shared.inject;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
 import java.lang.annotation.Annotation;
@@ -25,7 +24,6 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -33,8 +31,6 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContextType;
 import javax.transaction.TransactionScoped;
-import org.corant.Corant;
-import org.corant.suites.jpa.shared.JpaExtension;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 
 /**
@@ -72,9 +68,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
 
   @Override
   public EntityManager create(CreationalContext<EntityManager> creationalContext) {
-    Instance<JpaExtension> ext = Corant.instance().select(JpaExtension.class);
-    shouldBeTrue(ext.isResolvable(), "Can not find jpa extension.");
-    final EntityManager em = ext.get().getEntityManagerFactory(unitName).createEntityManager(
+    final EntityManager em = ExtendedEntityManagerFactory.of(unitName).createEntityManager(
         persistenceContextMetaData.getSynchronization(),
         persistenceContextMetaData.getProperties());
     logger.fine(

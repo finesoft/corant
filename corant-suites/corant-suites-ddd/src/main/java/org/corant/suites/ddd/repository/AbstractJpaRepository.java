@@ -54,6 +54,8 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   @Inject
   JpaUnitOfWorksManager unitOfWorkManager;
 
+  protected volatile Annotation emfQualifier;
+
   @Override
   public void clear() {
     getEntityManager().clear();
@@ -156,14 +158,20 @@ public abstract class AbstractJpaRepository implements JpaRepository {
    */
   @Override
   public EntityManager getEntityManager() {
-    Annotation ann = findAnnotation(getUserClass(this.getClass()), Named.class);
-    if (ann == null) {
-      ann = findAnnotation(getUserClass(this.getClass()), Unnamed.class);
-      if (ann == null) {
-        ann = Default.Literal.INSTANCE;
+    // FIXME TODO CHECK THE REPO NAMES AND EMF NAMES
+    if (emfQualifier == null) {
+      synchronized (this) {
+        if (emfQualifier == null) {
+          final Class<?> repoCls = getUserClass(this.getClass());
+          if ((emfQualifier = findAnnotation(repoCls, Named.class)) == null) {
+            if ((emfQualifier = findAnnotation(repoCls, Unnamed.class)) == null) {
+              emfQualifier = Default.Literal.INSTANCE;
+            }
+          }
+        }
       }
     }
-    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(ann);
+    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(emfQualifier);
   }
 
   public EntityManagerFactory getEntityManagerFactory() {

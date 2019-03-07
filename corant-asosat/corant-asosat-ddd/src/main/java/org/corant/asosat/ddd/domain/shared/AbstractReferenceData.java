@@ -16,15 +16,13 @@ package org.corant.asosat.ddd.domain.shared;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import static org.corant.shared.util.MapUtils.getMapLong;
 import static org.corant.shared.util.MapUtils.getMapString;
-import java.io.Serializable;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
 @MappedSuperclass
-public abstract class AbstractReferenceData extends AbstractValueObject
-    implements Nameable, Serializable {
+public abstract class AbstractReferenceData extends AbstractValueObject implements Nameable {
 
   private static final long serialVersionUID = -8160589662074054451L;
 
@@ -38,7 +36,6 @@ public abstract class AbstractReferenceData extends AbstractValueObject
   private String name;
 
   public AbstractReferenceData(Long id, long vn, String name) {
-    super();
     setId(id);
     setVn(vn);
     setName(name);

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -92,7 +93,7 @@ public class MongoClientConfig {
     String defaultName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
     // find default configuration
     MongoClientConfig dfltCfg = of(config, defaultName, dfltProNames);
-    if (dfltCfg != null) {
+    if (isNotEmpty(dfltCfg.getHostAndPorts())) {
       clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
     }
     // handle named client

@@ -189,6 +189,42 @@ public class PackagingLayout extends AbstractValueObject {
           defaultString(getUnit()));
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      RegularPackagingLayout other = (RegularPackagingLayout) obj;
+      if (heightQty == null) {
+        if (other.heightQty != null) {
+          return false;
+        }
+      } else if (!heightQty.equals(other.heightQty)) {
+        return false;
+      }
+      if (lengthQty == null) {
+        if (other.lengthQty != null) {
+          return false;
+        }
+      } else if (!lengthQty.equals(other.lengthQty)) {
+        return false;
+      }
+      if (widthQty == null) {
+        if (other.widthQty != null) {
+          return false;
+        }
+      } else if (!widthQty.equals(other.widthQty)) {
+        return false;
+      }
+      return true;
+    }
+
     @javax.persistence.Transient
     @Transient
     public BigDecimal get2DQty() {
@@ -220,6 +256,16 @@ public class PackagingLayout extends AbstractValueObject {
      */
     public BigDecimal getWidthQty() {
       return widthQty;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (heightQty == null ? 0 : heightQty.hashCode());
+      result = prime * result + (lengthQty == null ? 0 : lengthQty.hashCode());
+      result = prime * result + (widthQty == null ? 0 : widthQty.hashCode());
+      return result;
     }
 
     @javax.persistence.Transient
@@ -262,6 +308,7 @@ public class PackagingLayout extends AbstractValueObject {
             .multiply(defaultObject(heightQty, ONE)));
       }
     }
+
   }
 
 }

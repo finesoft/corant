@@ -151,14 +151,6 @@ public class ExtendedEntityManagerFactory implements EntityManagerFactory {
     return delegate.isOpen();
   }
 
-  public void setDelegate(EntityManagerFactory delegate) {
-    this.delegate = delegate;
-  }
-
-  public void setPersistenceUnitInfo(PersistenceUnitInfo persistenceUnitInfo) {
-    this.persistenceUnitInfo = persistenceUnitInfo;
-  }
-
   @Override
   public <T> T unwrap(Class<T> cls) {
     if (cls.isAssignableFrom(getClass())) {

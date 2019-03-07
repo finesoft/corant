@@ -38,7 +38,7 @@ public enum PersistenceSchema {
 
   private final String version;
 
-  private final Schema schema;
+  private final transient Schema schema;
 
   private PersistenceSchema(String version) {
     this.version = version;

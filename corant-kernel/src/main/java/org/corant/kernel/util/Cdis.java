@@ -13,6 +13,10 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.trim;
+import java.lang.annotation.Annotation;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -35,6 +39,10 @@ public abstract class Cdis {
     return injectionPoint.getAnnotated();
   }
 
+  public static final Annotation resolveNamed(String name) {
+    return isBlank(name) ? Unnamed.INST : NamedLiteral.of(trim(name));
+  }
+
   public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {
     String methodName = method.getJavaMember().getName();
     String[] parameterTypes = new String[method.getParameters().size()];
@@ -44,5 +52,4 @@ public abstract class Cdis {
     }
     return MethodSignature.of(methodName, parameterTypes);
   }
-
 }

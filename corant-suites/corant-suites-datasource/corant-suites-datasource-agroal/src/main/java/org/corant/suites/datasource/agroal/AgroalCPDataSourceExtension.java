@@ -15,13 +15,12 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.inject.Named;
 import javax.naming.InitialContext;
@@ -30,6 +29,7 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
+import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -60,8 +60,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation ann = isBlank(dsn) ? NamedLiteral.INSTANCE : NamedLiteral.of(dsn);
-        event.<DataSource>addBean().addQualifier(ann)
+        final Annotation ann = Cdis.resolveNamed(dsn);
+        event.<DataSource>addBean().addQualifier(ann).addQualifier(Default.Literal.INSTANCE)
             .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
               try {

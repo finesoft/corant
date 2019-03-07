@@ -47,9 +47,9 @@ public class ExtendedEntityManagerFactory implements EntityManagerFactory {
   private EntityManagerFactory delegate;
   private PersistenceUnitInfo persistenceUnitInfo;
 
-  public ExtendedEntityManagerFactory() {}
+  protected ExtendedEntityManagerFactory() {}
 
-  public ExtendedEntityManagerFactory(EntityManagerFactory delegate,
+  protected ExtendedEntityManagerFactory(EntityManagerFactory delegate,
       PersistenceUnitInfo persistenceUnitInfo) {
     this.delegate = delegate;
     this.persistenceUnitInfo = persistenceUnitInfo;

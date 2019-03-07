@@ -35,11 +35,14 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
   static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
   static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
+  static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
   static Identifiers.IdentifierGenerator GENERATOR;
   static volatile boolean ENABLED = false;
   static volatile String TSSQL = null;
   static volatile int DATA_CENTER_ID;
   static volatile int WORKER_ID;
+  static volatile boolean usePersistenceTime =
+      ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
   static {
     DATA_CENTER_ID =
         ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
@@ -63,6 +66,9 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   }
 
   long timeSeq(SharedSessionContractImplementor session) {
+    if (!usePersistenceTime) {
+      return System.currentTimeMillis();
+    }
     if (TSSQL == null) {
       synchronized (HibernateSnowflakeIdGenerator.class) {
         if (TSSQL == null) {

@@ -16,7 +16,6 @@ package org.corant.suites.jpa.shared;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,14 +28,12 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
-import javax.inject.Named;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
@@ -73,10 +70,6 @@ public class JpaExtension implements Extension {
     return persistenceUnitInfoMetaDatas.get(defaultTrim(name));
   }
 
-  public Named resolvePersistenceUnitQualifier(String name) {
-    return isBlank(name) ? NamedLiteral.INSTANCE : NamedLiteral.of(name);
-  }
-
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
     // assembly
     persistenceContexts.forEach(pc -> {
@@ -94,7 +87,7 @@ public class JpaExtension implements Extension {
     });
     persistenceContexts.forEach(pcmd -> {
       copy.remove(pcmd.getUnitName());
-      Annotation qualifier = resolvePersistenceUnitQualifier(pcmd.getUnitName());
+      Annotation qualifier = Cdis.resolveNamed(pcmd.getUnitName());
       abd.addBean(new EntityManagerBean(beanManager, pcmd, qualifier));
     });
     // not injection but has been configurated
@@ -115,7 +108,7 @@ public class JpaExtension implements Extension {
     final PersistenceUnit pu = Cdis.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
       persistenceUnits.add(new PersistenceUnitMetaData(pu));
-      pip.configureInjectionPoint().addQualifier(resolvePersistenceUnitQualifier(pu.unitName()));
+      pip.configureInjectionPoint().addQualifier(Cdis.resolveNamed(pu.unitName()));
     }
     final PersistenceContext pc = Cdis.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {

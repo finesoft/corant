@@ -24,11 +24,13 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
+import javax.persistence.EntityManagerFactory;
+import org.corant.kernel.util.Cdis;
 
 /**
  * corant-suites-jpa-shared
@@ -40,8 +42,8 @@ public class EntityManagerFactoryBean
     implements Bean<ExtendedEntityManagerFactory>, PassivationCapable {
 
   static final Logger logger = Logger.getLogger(EntityManagerFactoryBean.class.getName());
-  static final Set<Type> types =
-      Collections.unmodifiableSet(asSet(ExtendedEntityManagerFactory.class));
+  static final Set<Type> types = Collections
+      .unmodifiableSet(asSet(ExtendedEntityManagerFactory.class, EntityManagerFactory.class));
   final Set<Annotation> qualifiers = new HashSet<>();
   final BeanManager beanManager;
   final String unitName;
@@ -55,7 +57,8 @@ public class EntityManagerFactoryBean
     this.beanManager = beanManager;
     this.unitName = shouldNotNull(unitName);
     qualifiers.add(Any.Literal.INSTANCE);
-    qualifiers.add(NamedLiteral.of(unitName));
+    qualifiers.add(Default.Literal.INSTANCE);
+    qualifiers.add(Cdis.resolveNamed(unitName));
   }
 
   @Override

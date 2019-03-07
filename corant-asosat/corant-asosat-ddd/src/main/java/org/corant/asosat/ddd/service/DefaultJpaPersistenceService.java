@@ -13,7 +13,6 @@
  */
 package org.corant.asosat.ddd.service;
 
-import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +21,10 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
+import org.corant.kernel.util.Cdis;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.unitwork.JpaPersistenceService;
 import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
@@ -41,7 +39,7 @@ import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
 @InfrastructureServices
 public class DefaultJpaPersistenceService implements JpaPersistenceService {
 
-  protected static final Map<Class<?>, Named> clsUns = new ConcurrentHashMap<>();
+  protected static final Map<Class<?>, Annotation> clsUns = new ConcurrentHashMap<>();
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -62,10 +60,9 @@ public class DefaultJpaPersistenceService implements JpaPersistenceService {
   @PostConstruct
   void onPostConstruct() {
     emfs.forEach(emf -> {
-      Named named =
-          NamedLiteral.of(defaultTrim(emf.getPersistenceUnitInfo().getPersistenceUnitName()));
+      Annotation ann = Cdis.resolveNamed(emf.getPersistenceUnitInfo().getPersistenceUnitName());
       emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
-        clsUns.put(cls, named);
+        clsUns.put(cls, ann);
       });
     });
     logger.info(() -> "Initialized JpaPersistenceService.");

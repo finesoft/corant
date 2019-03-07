@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -50,6 +51,7 @@ import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.corant.Corant;
+import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
@@ -204,7 +206,8 @@ public class MongoClientExtension implements Extension {
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String cn : getClientNames()) {
-        event.<MongoClient>addBean().addQualifier(NamedLiteral.of(cn))
+        event.<MongoClient>addBean().addQualifier(Cdis.resolveNamed(cn))
+            .addQualifier(Default.Literal.INSTANCE).addQualifier(Default.Literal.INSTANCE)
             .addTransitiveTypeClosure(MongoClient.class).beanClass(MongoClient.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
               return produceClient(beans, getClientConfigs().get(cn));

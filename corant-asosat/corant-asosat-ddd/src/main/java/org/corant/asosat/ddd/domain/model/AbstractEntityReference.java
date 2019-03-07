@@ -46,9 +46,10 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
     return Corant.instance().select(JpaRepository.class, qualifiers).get();
   }
 
-  protected static <T> T retrieve(Serializable id, Class<T> cls, Annotation... qualifiers) {
+  protected static <T> T retrieve(Serializable id, Class<T> cls) {
     if (id != null && cls != null) {
-      T persistObj = obtainRepo(qualifiers).get(cls, id);
+      T persistObj = obtainRepo(Corant.instance().select(JpaPersistenceService.class).get()
+          .getPersistenceUnitQualifier(cls)).get(cls, id);
       return persistObj;
     }
     return null;
@@ -88,7 +89,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   @Override
   public T retrieve() {
-    return retrieve(getId(), resolveClass(), this.obtainRepoQualifiers());
+    return retrieve(getId(), resolveClass());
   }
 
   protected Annotation[] obtainRepoQualifiers() {

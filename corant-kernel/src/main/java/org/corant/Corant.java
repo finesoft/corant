@@ -297,7 +297,7 @@ public class Corant implements AutoCloseable {
 
   public synchronized Corant start() {
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = StopWatch.press(CORANT, "Handle before corant start");
+    StopWatch stopWatch = StopWatch.press(CORANT, "Execute the handler before corant starting");
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
@@ -319,15 +319,23 @@ public class Corant implements AutoCloseable {
     doAfterContainerInitialized();
 
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
-        .start("Handle after corant initialized");
+        .start("Execute the handler after corant startup");
 
     doAfterStarted(classLoader);
 
     stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
-        .destroy(sw -> log(logger, "Finished all initialization in %s seconds.",
-            sw.getTotalTimeSeconds()));
+        .destroy(sw -> {
+          double tt = sw.getTotalTimeSeconds();
+          if (tt > 8) {
+            log(logger,
+                "Finished all initialization in %s seconds. And it's been a long way, but we're here.",
+                tt);
+          } else {
+            log(logger, "Finished all initialization in %s seconds.", tt);
+          }
+        });
 
-    log(logger, "Finished at: %s. And it's been a long way, but we're here.", Instant.now());
+    log(logger, "Finished at: %s.", Instant.now());
     log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
     printBoostLine();

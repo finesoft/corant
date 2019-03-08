@@ -16,7 +16,6 @@ package org.corant.suites.datasource.shared;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -47,20 +46,20 @@ public abstract class AbstractDataSourceExtension implements Extension {
 
   protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
   protected final Set<String> dataSourceNames = new LinkedHashSet<>();
-  protected final Map<Annotation, DataSource> dataSources = new ConcurrentHashMap<>();
+  protected final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   protected volatile boolean initedJndiSubCtx = false;
 
-  public DataSource getDataSource(Annotation annotation) {
-    return getDataSources().get(annotation);
+  public DataSource getDataSource(String name) {
+    return getDataSources().get(name);
   }
 
   public Set<String> getDataSourceNames() {
     return Collections.unmodifiableSet(dataSourceNames);
   }
 
-  public Map<Annotation, DataSource> getDataSources() {
+  public Map<String, DataSource> getDataSources() {
     return Collections.unmodifiableMap(dataSources);
   }
 
@@ -87,9 +86,8 @@ public abstract class AbstractDataSourceExtension implements Extension {
     }
   }
 
-  protected synchronized void registerDataSource(Annotation annotation, DataSource dataSource) {
-    shouldBeNull(dataSources.put(annotation, dataSource), "The data source annotated %s dup!",
-        annotation.toString());
+  protected synchronized void registerDataSource(String name, DataSource dataSource) {
+    shouldBeNull(dataSources.put(name, dataSource), "The data source annotated %s dup!", name);
   }
 
   protected void registerJndi(InitialContext jndi, String name, DataSource dataSource) {

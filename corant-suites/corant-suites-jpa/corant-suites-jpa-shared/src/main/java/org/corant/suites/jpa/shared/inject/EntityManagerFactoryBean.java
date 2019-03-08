@@ -52,7 +52,6 @@ public class EntityManagerFactoryBean
   /**
    * @param beanManager
    * @param unitName
-   * @param qualifiers
    */
   public EntityManagerFactoryBean(BeanManager beanManager, String unitName) {
     this.beanManager = beanManager;

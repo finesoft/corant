@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.bson.Document;
 import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
+import org.corant.kernel.util.Unnamed;
 import org.corant.suites.mongodb.MongoClientExtension;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,16 +42,25 @@ import com.mongodb.client.gridfs.GridFSBucket;
 public class TestMongodb {
 
   @Inject
-  @Named("182")
+  @Unnamed
   MongoClient client;
 
   @Inject
-  @Named("182.GADB-APSCM")
+  @Named("12")
+  MongoClient client1;
+
+  @Inject
+  @Named("CADB-DATA")
   MongoDatabase db;
 
   @Inject
-  @Named("182.GADB-APSCM-IMG.fs")
+  @Named("CADB-FILE.fs")
   GridFSBucket bucket;
+
+  @Test
+  public void fake() {
+
+  }
 
   // @Test
   public void test() {

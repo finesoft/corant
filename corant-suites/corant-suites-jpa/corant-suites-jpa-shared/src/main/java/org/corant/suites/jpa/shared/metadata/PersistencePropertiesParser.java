@@ -50,14 +50,14 @@ public class PersistencePropertiesParser {
 
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
-    Set<String> dfltProNmes = JpaConfig.defaultPropertyNames(config);
+    Set<String> dfltCfgKeys = JpaConfig.defaultPropertyNames(config);
     String dfltPuNme = config
         .getOptionalValue(JpaConfig.JC_PREFIX + JpaConfig.JC_PU_NME.substring(1), String.class)
         .orElse(null);
-    doParse(config, dfltPuNme, dfltProNmes, map);// defaults
-    Map<String, List<String>> namedKeys = Configurations.getGroupConfigNames(config,
-        s -> defaultString(s).startsWith(JpaConfig.JC_PREFIX) && !dfltProNmes.contains(s), 1);
-    namedKeys.forEach((k, v) -> {
+    doParse(config, dfltPuNme, dfltCfgKeys, map);// defaults
+    Map<String, List<String>> namedCfgKeys = Configurations.getGroupConfigNames(config,
+        s -> defaultString(s).startsWith(JpaConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+    namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, map);
       logger.info(() -> String.format("Parsed persistence unit %s from config file.", k));
     });

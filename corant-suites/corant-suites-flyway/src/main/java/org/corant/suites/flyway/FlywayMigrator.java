@@ -14,7 +14,6 @@
 package org.corant.suites.flyway;
 
 import static org.corant.shared.util.StreamUtils.asStream;
-import static org.corant.shared.util.StringUtils.EMPTY;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -28,7 +27,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.sql.DataSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.util.ObjectUtils;
@@ -133,12 +131,8 @@ public class FlywayMigrator {
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
         return asStream(dse.getDataSources()).map((e) -> {
-          if (e.getKey() instanceof Named) {
-            String name = ((Named) e.getKey()).value();
-            return DefaultFlywayConfigProvider.of(defaultLocation(name), e.getValue());
-          } else {
-            return DefaultFlywayConfigProvider.of(defaultLocation(EMPTY), e.getValue());
-          }
+          String name = e.getKey();
+          return DefaultFlywayConfigProvider.of(defaultLocation(name), e.getValue());
         });
       });
     } else {

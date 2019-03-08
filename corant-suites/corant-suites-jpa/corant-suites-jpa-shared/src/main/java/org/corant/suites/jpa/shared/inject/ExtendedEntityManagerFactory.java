@@ -41,9 +41,8 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
  */
 public class ExtendedEntityManagerFactory implements EntityManagerFactory {
 
-  public static final Map<PersistenceUnitInfoMetaData, ExtendedEntityManagerFactory> emfs =
+  static final Map<PersistenceUnitInfoMetaData, ExtendedEntityManagerFactory> emfs =
       new ConcurrentHashMap<>();
-
   private EntityManagerFactory delegate;
   private PersistenceUnitInfo persistenceUnitInfo;
 

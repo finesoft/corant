@@ -15,14 +15,13 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import java.lang.annotation.Annotation;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -60,12 +59,11 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation ann = Cdis.resolveNamed(dsn);
-        event.<DataSource>addBean().addQualifier(ann).addQualifier(Default.Literal.INSTANCE)
-            .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
+        event.<DataSource>addBean().addQualifier(Cdis.resolveNamed(dsn))
+            .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(AgroalDataSource.class)
+            .beanClass(AgroalDataSource.class).scope(ApplicationScoped.class).produceWith(beans -> {
               try {
-                return produce(beans, ann, dsc);
+                return produce(beans, dsc);
               } catch (NamingException | SQLException e) {
                 throw new CorantRuntimeException(e);
               }
@@ -74,7 +72,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
-  AgroalDataSource produce(Instance<Object> instance, Annotation annotation, DataSourceConfig cfg)
+  AgroalDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
     TransactionManager tm = instance.select(TransactionManager.class).isResolvable()
         ? instance.select(TransactionManager.class).get()
@@ -119,8 +117,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
           AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
     }
     AgroalDataSource datasource = AgroalDataSource.from(cfgs);
-    registerDataSource(annotation, datasource);
-    if (instance.select(InitialContext.class).isResolvable() && annotation instanceof Named) {
+    registerDataSource(cfg.getName(), datasource);
+    if (instance.select(InitialContext.class).isResolvable() && isNotBlank(cfg.getName())) {
       InitialContext jndi = instance.select(InitialContext.class).get();
       registerJndi(jndi, cfg.getName(), datasource);
     }

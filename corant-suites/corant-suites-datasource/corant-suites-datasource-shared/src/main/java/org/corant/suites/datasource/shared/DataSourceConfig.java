@@ -13,12 +13,12 @@
  */
 package org.corant.suites.datasource.shared;
 
+import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.trim;
 import java.time.Duration;
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.kernel.util.Configurations;
 import org.corant.kernel.util.Unnamed;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.StringUtils;
@@ -185,24 +184,24 @@ public class DataSourceConfig {
    */
   public static Map<String, DataSourceConfig> from(Config config) {
     Map<String, DataSourceConfig> dataSources = new LinkedHashMap<>();
-    Set<String> dfltProNames = defaultPropertyNames();
-    // find named data source configuration
-    Map<String, List<String>> namedNames = Configurations.getGroupConfigNames(config,
-        (s) -> defaultString(s).startsWith(DSC_PREFIX) && !dfltProNames.contains(s), 1);
-    namedNames.forEach((k, v) -> {
+    Set<String> dfltCfgKeys = defaultPropertyNames();
+    // handle named data source configuration
+    Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
+        s -> defaultString(s).startsWith(DSC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+    namedCfgKeys.forEach((k, v) -> {
       final DataSourceConfig cfg = of(config, k, v);
-      if (isNoneBlank(cfg.getName(), cfg.getConnectionUrl())) {
+      if (cfg != null) {
         shouldBeNull(dataSources.put(defaultTrim(cfg.getName()), cfg),
             "The data source named %s configuration dup!", cfg.getName());
       }
     });
-    String defaultName =
+    // handle default configuration
+    String dfltName =
         config.getOptionalValue(DSC_PREFIX + DSC_NAME.substring(1), String.class).orElse(null);
-    // find default configuration
-    DataSourceConfig dfltCfg = of(config, defaultName, dfltProNames);
+    DataSourceConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (dfltCfg != null) {
       shouldBeNull(dataSources.put(defaultTrim(dfltCfg.getName()), dfltCfg),
-          "The data source named %s configuration dup!", defaultName);
+          "The data source named %s configuration dup!", dfltName);
     }
     return dataSources;
   }
@@ -281,7 +280,7 @@ public class DataSourceConfig {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setEnableMetrics);
       }
     });
-    if (isNoneBlank(cfg.getConnectionUrl())) {
+    if (isNotBlank(cfg.getConnectionUrl())) {
       return cfg;
     }
     return null;

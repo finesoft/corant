@@ -13,6 +13,7 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -35,7 +36,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.corant.kernel.util.Configurations;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.ConversionUtils;
@@ -89,17 +89,17 @@ public class MongoClientConfig {
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
-    Set<String> dfltProNames = defaultPropertyNames(config);
+    Set<String> dfltCfgKeys = defaultPropertyNames(config);
     // handle named client
-    Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config,
-        (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltProNames.contains(s), 1);
+    Map<String, List<String>> clientCfgs = getGroupConfigNames(config,
+        (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
     });
     // find default configuration
-    String defaultName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
-    MongoClientConfig dfltCfg = of(config, defaultName, dfltProNames);
+    String dfltName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
+    MongoClientConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (isNotEmpty(dfltCfg.getHostAndPorts())) {
       clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
     }

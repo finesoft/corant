@@ -13,6 +13,7 @@
  */
 package org.corant.suites.elastic;
 
+import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -32,8 +33,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.StreamUtils;
@@ -72,10 +73,10 @@ public class ElasticConfig {
 
   public static Map<String, ElasticConfig> from(Config config) {
     Map<String, ElasticConfig> map = new HashMap<>();
-    Set<String> dfltProNames = defaultPropertyNames();
-    Map<String, List<String>> cfgNmes = Configurations.getGroupConfigNames(config,
-        (s) -> defaultString(s).startsWith(EC_PREFIX) && !dfltProNames.contains(s), 1);
-    cfgNmes.forEach((k, v) -> {
+    Set<String> dfltCfgKeys = defaultPropertyNames(config);
+    Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
+        (s) -> defaultString(s).startsWith(EC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+    namedCfgKeys.forEach((k, v) -> {
       final ElasticConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.clusterName, cfg.clusterNodes)) {
         shouldBeNull(map.put(k, cfg), "The elastic cluster name %s dup!", k);
@@ -83,7 +84,7 @@ public class ElasticConfig {
     });
     String dfltClusterName =
         config.getOptionalValue(EC_PREFIX + EC_CLU_NME.substring(1), String.class).orElse(EMPTY);
-    ElasticConfig dfltCfg = of(config, dfltClusterName, dfltProNames);
+    ElasticConfig dfltCfg = of(config, dfltClusterName, dfltCfgKeys);
     if (isNotBlank(dfltCfg.getClusterNodes())) {
       map.put(dfltClusterName, dfltCfg);
     }
@@ -116,16 +117,21 @@ public class ElasticConfig {
     return cfg;
   }
 
-  static Set<String> defaultPropertyNames() {
+  static Set<String> defaultPropertyNames(Config config) {
     String dfltPrefix = EC_PREFIX.substring(0, EC_PREFIX.length() - 1);
+    String dfltPropertyPrefix = dfltPrefix + EC_ADD_PRO + Names.NAME_SPACE_SEPARATORS;
     Set<String> names = new LinkedHashSet<>();
-    names.add(dfltPrefix + EC_ADD_PRO);
     names.add(dfltPrefix + EC_AUTO_UPDATE_SCHEMA);
     names.add(dfltPrefix + EC_CLU_NME);
     names.add(dfltPrefix + EC_CLU_NOD);
     names.add(dfltPrefix + EC_DOC_PATHS);
     names.add(dfltPrefix + EC_IDX_VER);
     names.add(dfltPrefix + EC_SETTING_PATH);
+    for (String proNme : config.getPropertyNames()) {
+      if (proNme.startsWith(dfltPropertyPrefix)) {
+        names.add(proNme);
+      }
+    }
     return names;
   }
 

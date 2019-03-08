@@ -14,13 +14,12 @@
 package org.corant.suites.datasource.hikari;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
-import java.lang.annotation.Annotation;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -42,12 +41,11 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation ann = Cdis.resolveNamed(dsn);
-        event.<DataSource>addBean().addQualifier(ann).addQualifier(Default.Literal.INSTANCE)
-            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
+        event.<DataSource>addBean().addQualifier(Cdis.resolveNamed(dsn))
+            .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(HikariDataSource.class)
+            .beanClass(HikariDataSource.class).scope(ApplicationScoped.class).produceWith(beans -> {
               try {
-                return produce(beans, ann, dsc);
+                return produce(beans, dsc);
               } catch (NamingException e) {
                 throw new CorantRuntimeException(e);
               }
@@ -56,8 +54,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
-  HikariDataSource produce(Instance<Object> instance, Annotation annotation, DataSourceConfig cfg)
-      throws NamingException {
+  HikariDataSource produce(Instance<Object> instance, DataSourceConfig cfg) throws NamingException {
     shouldBeFalse(cfg.isJta() || cfg.isXa());
     HikariConfig cfgs = new HikariConfig();
     cfgs.setJdbcUrl(cfg.getConnectionUrl());
@@ -73,8 +70,8 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.setPoolName(cfg.getName());
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
     HikariDataSource datasource = new HikariDataSource(cfgs);
-    registerDataSource(annotation, datasource);
-    if (instance.select(InitialContext.class).isResolvable() && annotation instanceof Named) {
+    registerDataSource(cfg.getName(), datasource);
+    if (instance.select(InitialContext.class).isResolvable() && isNotBlank(cfg.getName())) {
       InitialContext jndi = instance.select(InitialContext.class).get();
       registerJndi(jndi, cfg.getName(), datasource);
     }

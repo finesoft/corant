@@ -84,8 +84,11 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   }
 
   public PersistenceUnitInfoMetaData configDataSource(Function<String, DataSource> dsSupplier) {
-    setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
-    setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
+    if (getPersistenceUnitTransactionType() == PersistenceUnitTransactionType.JTA) {
+      setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
+    } else {
+      setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
+    }
     return this;
   }
 

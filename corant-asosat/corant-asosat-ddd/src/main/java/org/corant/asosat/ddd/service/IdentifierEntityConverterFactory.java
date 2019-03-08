@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asImmutableSet;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +53,7 @@ import org.corant.suites.jpa.shared.JpaUtils;
 public class IdentifierEntityConverterFactory implements ConverterFactory<Object, Entity> {
 
   static final Map<Class<?>, Boolean> cached = new ConcurrentHashMap<>();
+  static final Map<Class<?>, Annotation> puqCached = new ConcurrentHashMap<>();
   final Set<Class<?>> supportedSourceClass =
       asImmutableSet(Long.class, Long.TYPE, String.class, Entity.class);
 
@@ -102,16 +104,13 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     }
     T entity = null;
     if (id != null) {
-      Instance<JpaPersistenceService> ls = Corant.instance().select(JpaPersistenceService.class);
-      if (ls.isResolvable()) {
-        Instance<JpaRepository> repos = Corant.instance().select(JpaRepository.class,
-            ls.get().getPersistenceUnitQualifier(targetClass));
-        if (repos.isResolvable()) {
-          entity = repos.get().get(targetClass, id);
-        }
+      Instance<JpaRepository> repos =
+          Corant.instance().select(JpaRepository.class, resolveQualifier(targetClass));
+      if (repos.isResolvable()) {
+        entity = repos.get().get(targetClass, id);
       }
     }
-    return shouldNotNull(entity, "Can't not convert %s to %s!", value.toString(),
+    return shouldNotNull(entity, "Can not convert %s to %s!", value.toString(),
         targetClass.getSimpleName());
   }
 
@@ -128,5 +127,13 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
   @PreDestroy
   void onPreDestroy() {
     cached.keySet().forEach(c -> ConverterRegistry.deregister(ConverterType.of(Object.class, c)));
+  }
+
+  Annotation resolveQualifier(Class<?> cls) {
+    return puqCached.computeIfAbsent(cls, (c) -> {
+      Instance<JpaPersistenceService> jps = Corant.instance().select(JpaPersistenceService.class);
+      return shouldNotNull(jps.isResolvable() ? jps.get().getPersistenceUnitQualifier(c) : null,
+          "Can not convert, the persistence unit qualifier for %s not found!", c);
+    });
   }
 }

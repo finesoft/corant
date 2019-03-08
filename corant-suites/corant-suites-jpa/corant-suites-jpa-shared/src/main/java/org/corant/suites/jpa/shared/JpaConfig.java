@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
+import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.StringUtils;
@@ -82,8 +83,9 @@ public class JpaConfig {
 
   protected static final Logger logger = Logger.getLogger(JpaConfig.class.getName());
 
-  public static Set<String> defaultPropertyNames() {
+  public static Set<String> defaultPropertyNames(Config config) {
     String dfltPrefix = JC_PREFIX.substring(0, JC_PREFIX.length() - 1);
+    String dfltJpaPropertyPrefix = dfltPrefix + JC_PRO + Names.NAME_SPACE_SEPARATORS;
     Set<String> names = new LinkedHashSet<>();
     names.add(dfltPrefix + JC_CLS);
     names.add(dfltPrefix + JC_CLS_PKG);
@@ -93,7 +95,12 @@ public class JpaConfig {
     names.add(dfltPrefix + JC_MAP_FILE);
     names.add(dfltPrefix + JC_MAP_FILE_PATH);
     names.add(dfltPrefix + JC_NON_JTA_DS);
-    names.add(dfltPrefix + JC_PRO);
+    // jpa property
+    for (String proNme : config.getPropertyNames()) {
+      if (proNme.startsWith(dfltJpaPropertyPrefix)) {
+        names.add(proNme);
+      }
+    }
     names.add(dfltPrefix + JC_PROVIDER);
     names.add(dfltPrefix + JC_SHARE_CACHE_MOD);
     names.add(dfltPrefix + JC_TRANS_TYP);

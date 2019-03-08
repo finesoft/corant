@@ -50,7 +50,7 @@ public class PersistencePropertiesParser {
 
   public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
-    Set<String> dfltProNmes = JpaConfig.defaultPropertyNames();
+    Set<String> dfltProNmes = JpaConfig.defaultPropertyNames(config);
     String dfltPuNme = config
         .getOptionalValue(JpaConfig.JC_PREFIX + JpaConfig.JC_PU_NME.substring(1), String.class)
         .orElse(null);

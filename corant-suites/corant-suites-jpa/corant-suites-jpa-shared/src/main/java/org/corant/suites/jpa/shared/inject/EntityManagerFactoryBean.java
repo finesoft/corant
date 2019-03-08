@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -72,8 +73,9 @@ public class EntityManagerFactoryBean
       CreationalContext<ExtendedEntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      logger.info(() -> String
-          .format("Destroyed entity manager factory that persistence unit named %s.", unitName));
+      logger.info(
+          () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
+              defaultBlank(unitName, "unnamed")));
     }
   }
 

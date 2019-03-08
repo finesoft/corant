@@ -84,12 +84,8 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   }
 
   public PersistenceUnitInfoMetaData configDataSource(Function<String, DataSource> dsSupplier) {
-    if (isNotBlank(getJtaDataSourceName())) {
-      setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
-    }
-    if (isNotBlank(getNonJtaDataSourceName())) {
-      setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
-    }
+    setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
+    setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
     return this;
   }
 
@@ -245,6 +241,12 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   public boolean isExcludeUnlistedClasses() {
     return excludeUnlistedClasses;
+  }
+
+  @Override
+  public String toString() {
+    return "PersistenceUnitInfoMetaData [persistenceUnitName=" + persistenceUnitName
+        + ", persistenceProviderClassName=" + persistenceProviderClassName + "]";
   }
 
   public PersistenceUnitInfoMetaData with(Properties properties,

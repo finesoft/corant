@@ -88,4 +88,9 @@ public class PersistenceUnitMetaData {
     return result;
   }
 
+  @Override
+  public String toString() {
+    return "PersistenceUnitMetaData [unitName=" + unitName + "]";
+  }
+
 }

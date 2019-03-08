@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
 import org.corant.kernel.util.Cdis;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.unitwork.JpaPersistenceService;
 import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
@@ -49,7 +50,11 @@ public class DefaultJpaPersistenceService implements JpaPersistenceService {
 
   @Override
   public EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
-    return emfs.select(qualifier).get();
+    if (emfs.select(qualifier).isResolvable()) {
+      return emfs.select(qualifier).get();
+    }
+    throw new CorantRuntimeException("Can not find appropriate entity manager factory %s",
+        qualifier);
   }
 
   @Override

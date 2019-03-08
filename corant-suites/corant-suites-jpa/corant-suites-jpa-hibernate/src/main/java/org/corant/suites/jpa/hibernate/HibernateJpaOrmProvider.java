@@ -16,16 +16,15 @@ package org.corant.suites.jpa.hibernate;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.AbstractJpaProvider;
@@ -68,15 +67,7 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
         throw new CorantRuntimeException(e);
       }
     } else if (!datasources.isUnsatisfied()) {
-      if (isBlank(dataSourceName)) {
-        if (datasources.isResolvable()) {
-          return datasources.get();
-        } else {
-          return datasources.select(NamedLiteral.INSTANCE).get();
-        }
-      } else {
-        return datasources.select(NamedLiteral.of(dataSourceName)).get();
-      }
+      return datasources.select(Cdis.resolveNamed(dataSourceName)).get();
     }
     throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }

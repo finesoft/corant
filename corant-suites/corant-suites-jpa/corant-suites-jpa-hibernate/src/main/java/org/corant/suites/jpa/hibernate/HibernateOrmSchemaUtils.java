@@ -15,17 +15,21 @@ package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.asProperties;
-import static org.corant.shared.util.ObjectUtils.tryCast;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.replace;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.function.Consumer;
+import javax.enterprise.inject.Instance;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
 import org.corant.Corant;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.util.Cdis;
 import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
@@ -44,7 +48,6 @@ import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.hbm2ddl.SchemaValidator;
 import org.hibernate.tool.hbm2ddl.UniqueConstraintSchemaUpdateStrategy;
 import org.hibernate.tool.schema.TargetType;
-import io.agroal.pool.DataSource;
 
 /**
  * corant-suites-jpa-hibernate
@@ -162,19 +165,11 @@ public class HibernateOrmSchemaUtils {
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
     InitialContext jndi = Corant.instance().select(InitialContext.class).get();
     JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
+    Instance<DataSource> datasources = Corant.instance().select(DataSource.class);
     PersistenceUnitInfoMetaData pum = shouldNotNull(extension.getPersistenceUnitInfoMetaData(pu));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource((dsn) -> {
-      try {
-        return tryCast(
-            jndi.lookup(shouldNotNull(dsn).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME) ? dsn
-                : DataSourceConfig.JNDI_SUBCTX_NAME + "/" + dsn),
-            DataSource.class);
-      } catch (NamingException e1) {
-        throw new CorantRuntimeException(e1);
-      }
-    });
+    usePum.configDataSource((dsn) -> resolveDataSource(jndi, datasources, dsn));
     props.putAll(usePum.getProperties());
     EntityManagerFactoryBuilderImpl emfb = EntityManagerFactoryBuilderImpl.class
         .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
@@ -195,5 +190,20 @@ public class HibernateOrmSchemaUtils {
     LoggerFactory.disableLogger();
     Configurations.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
     return Corant.run(HibernateOrmSchemaUtils.class, "-disable_boost_line");
+  }
+
+  private static DataSource resolveDataSource(InitialContext jndi, Instance<DataSource> datasources,
+      String dataSourceName) {
+    if (isNotBlank(dataSourceName)
+        && dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
+      try {
+        return forceCast(jndi.lookup(dataSourceName));
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    } else if (!datasources.isUnsatisfied()) {
+      return datasources.select(Cdis.resolveNamed(dataSourceName)).get();
+    }
+    throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }
 }

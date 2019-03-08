@@ -89,13 +89,7 @@ public class MongoClientConfig {
 
   public static Map<String, MongoClientConfig> from(Config config) {
     Map<String, MongoClientConfig> clients = new HashMap<>();
-    Set<String> dfltProNames = defaultPropertyNames();
-    String defaultName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
-    // find default configuration
-    MongoClientConfig dfltCfg = of(config, defaultName, dfltProNames);
-    if (isNotEmpty(dfltCfg.getHostAndPorts())) {
-      clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
-    }
+    Set<String> dfltProNames = defaultPropertyNames(config);
     // handle named client
     Map<String, List<String>> clientCfgs = Configurations.getGroupConfigNames(config,
         (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltProNames.contains(s), 1);
@@ -103,21 +97,32 @@ public class MongoClientConfig {
       MongoClientConfig client = of(config, k, v);
       shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
     });
-
+    // find default configuration
+    String defaultName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
+    MongoClientConfig dfltCfg = of(config, defaultName, dfltProNames);
+    if (isNotEmpty(dfltCfg.getHostAndPorts())) {
+      clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
+    }
     return clients;
   }
 
-  static Set<String> defaultPropertyNames() {
+  static Set<String> defaultPropertyNames(Config config) {
     String dfltPrefix = MC_PREFIX.substring(0, MC_PREFIX.length() - 1);
+    String dfltOptPrefix = dfltPrefix + MC_OPTS + Names.NAME_SPACE_SEPARATORS;
     Set<String> names = new LinkedHashSet<>();
     names.add(dfltPrefix + MC_APP_NAME);
     names.add(dfltPrefix + MC_AUTH_DB);
     names.add(dfltPrefix + MC_DATABASES);
     names.add(dfltPrefix + MC_HOST_PORTS);
-    names.add(dfltPrefix + MC_OPTS);
     names.add(dfltPrefix + MC_PASSWORD);
     names.add(dfltPrefix + MC_URI);
     names.add(dfltPrefix + MC_USER_NAME);
+    // opt property
+    for (String proNme : config.getPropertyNames()) {
+      if (proNme.startsWith(dfltOptPrefix)) {
+        names.add(proNme);
+      }
+    }
     return names;
   }
 

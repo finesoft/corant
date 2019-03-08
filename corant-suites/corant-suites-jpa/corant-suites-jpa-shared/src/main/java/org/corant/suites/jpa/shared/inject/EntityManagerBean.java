@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
         persistenceContextMetaData.getProperties());
     logger.fine(
         () -> String.format("Created an entity manager that persistence unit named %s, scope is %s",
-            unitName, getScope().getSimpleName()));
+            defaultBlank(unitName, "unnamed"), getScope().getSimpleName()));
     return em;
   }
 
@@ -83,7 +84,7 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
       instance.close();
       logger.fine(
           () -> String.format("Destroyed entity manager that persistence unit named %s scope is %s",
-              unitName, getScope().getSimpleName()));
+              defaultBlank(unitName, "unnamed"), getScope().getSimpleName()));
     }
   }
 

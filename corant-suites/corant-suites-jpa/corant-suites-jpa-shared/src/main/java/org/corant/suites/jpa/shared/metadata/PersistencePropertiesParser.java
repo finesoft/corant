@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
+import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
@@ -32,7 +33,6 @@ import java.util.logging.Logger;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.JpaConfig;
 import org.corant.suites.jpa.shared.JpaUtils;
@@ -55,7 +55,7 @@ public class PersistencePropertiesParser {
         .getOptionalValue(JpaConfig.JC_PREFIX + JpaConfig.JC_PU_NME.substring(1), String.class)
         .orElse(null);
     doParse(config, dfltPuNme, dfltCfgKeys, map);// defaults
-    Map<String, List<String>> namedCfgKeys = Configurations.getGroupConfigNames(config,
+    Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
         s -> defaultString(s).startsWith(JpaConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, map);

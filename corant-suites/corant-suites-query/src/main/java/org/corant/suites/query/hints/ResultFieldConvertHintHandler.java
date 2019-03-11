@@ -108,6 +108,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       if (pathVal instanceof Map) {
         useMap = Map.class.cast(pathVal);
       } else {
+        useMap = null;
         if (pathVal instanceof Iterable) {
           String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
           for (Object ele : Iterable.class.cast(pathVal)) {
@@ -122,10 +123,10 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
               convertMapValue(Map.class.cast(ele), subKeyPath, func);
             }
           }
-        } else {
-          useMap = null;
-          break;
         }
+      }
+      if (useMap == null) {
+        break;
       }
     }
     if (useMap != null) {

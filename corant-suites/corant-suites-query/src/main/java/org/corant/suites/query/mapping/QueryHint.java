@@ -22,8 +22,6 @@ import java.util.Map;
 /**
  * corant-suites-query
  *
- * TODO Define the hint entry to receive parameter name and value
- *
  * @author bingo 下午7:35:54
  *
  */

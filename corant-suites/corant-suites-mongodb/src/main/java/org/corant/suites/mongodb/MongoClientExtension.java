@@ -68,7 +68,8 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 /**
  * corant-suites-mongodb
  *
- * TODO Support unnamed mongo client config
+ * Initialize the named qualifier Mongo Client bean/Mongo Database bean for injection, use Unnamed
+ * qualifier for injection while the configurations do not assign a name.
  *
  * @author bingo 下午4:55:16
  *

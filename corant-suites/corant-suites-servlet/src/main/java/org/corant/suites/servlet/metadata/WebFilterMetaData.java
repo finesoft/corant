@@ -202,7 +202,7 @@ public class WebFilterMetaData {
    * @param clazz the clazz to set
    */
   protected void setClazz(Class<? extends Filter> clazz) {
-    this.clazz = shouldNotNull(clazz);// FIXME MSG
+    this.clazz = shouldNotNull(clazz, "The filter class can not null");
   }
 
   /**

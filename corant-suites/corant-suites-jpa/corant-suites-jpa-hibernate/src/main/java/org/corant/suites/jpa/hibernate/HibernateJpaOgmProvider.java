@@ -26,8 +26,6 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 /**
  * corant-suites-jpa-hibernate
  *
- * TODO Support unnamed persistence unit
- *
  * @author bingo 上午11:44:00
  *
  */

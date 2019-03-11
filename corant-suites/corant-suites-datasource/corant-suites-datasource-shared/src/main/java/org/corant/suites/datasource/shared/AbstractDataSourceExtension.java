@@ -37,7 +37,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 /**
  * corant-suites-datasource-shared
  *
- * TODO Support unnamed data source config
+ * Initialize the named qualifier data source bean for injection, use Unnamed qualifier for
+ * injection while the configurations do not assign a name.
  *
  * @author bingo 上午12:18:32
  *

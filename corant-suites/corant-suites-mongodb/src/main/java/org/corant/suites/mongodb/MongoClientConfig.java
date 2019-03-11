@@ -48,8 +48,6 @@ import com.mongodb.MongoCredential;
 /**
  * corant-suites-mongodb
  *
- * TODO Support unnamed mongo client config
- *
  * @author bingo 下午12:10:04
  *
  */

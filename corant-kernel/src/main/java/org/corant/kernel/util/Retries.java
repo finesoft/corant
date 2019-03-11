@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.interceptor.InvocationContext;
-import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * @author bingo 下午5:17:23
@@ -86,8 +86,7 @@ public class Retries {
 
     private int times = 8;
     private Duration interval = Duration.ofMillis(1000L);
-    private Function<Exception, RuntimeException> transfer =
-        e -> new GeneralRuntimeException(e, "");// FIXME message code
+    private Function<Exception, RuntimeException> transfer = e -> new CorantRuntimeException(e);
     private Set<Class<? extends Exception>> on = new LinkedHashSet<>();
 
     public T execute() {

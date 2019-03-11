@@ -51,7 +51,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 /**
  * corant-suites-jpa-shared
  *
- * TODO Support unnamed persistence unit
+ * Initialize the named qualifier Entity Manager Factory bean for injection, use Unnamed qualifier
+ * for injection while the configurations do not assign a name.
  *
  * @author bingo 上午11:32:56
  *

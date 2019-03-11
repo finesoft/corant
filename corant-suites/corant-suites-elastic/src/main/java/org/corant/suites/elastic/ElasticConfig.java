@@ -46,8 +46,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 /**
  * corant-suites-elastic
  *
- * TODO Support unnamed elastic config
- *
  * @author bingo 上午11:54:10
  *
  */

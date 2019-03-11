@@ -18,6 +18,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-suites-elastic
  *
+ * Initialize the named qualifier Transport Client bean for injection, use Unnamed qualifier for
+ * injection while the configurations do not assign a name.
+ *
  * @author bingo 下午4:45:54
  *
  */

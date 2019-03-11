@@ -16,16 +16,17 @@ package org.corant.suites.query.hints;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.replaceKeyPathMapValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -93,6 +94,45 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   @Inject
   ConversionService conversionService;
 
+  @SuppressWarnings("unchecked")
+  public static void convertMapValue(Map<Object, Object> map, String[] keyPath,
+      Function<Object, Object> func) {
+    if (map == null || isEmpty(keyPath)) {
+      return;
+    }
+    Map<Object, Object> useMap = map;
+    int len = keyPath.length - 1;
+    String putKey = keyPath[len];
+    for (int i = 0; i < len; i++) {
+      Object pathVal = useMap.get(keyPath[i]);
+      if (pathVal instanceof Map) {
+        useMap = Map.class.cast(pathVal);
+      } else {
+        if (pathVal instanceof Iterable) {
+          String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
+          for (Object ele : Iterable.class.cast(pathVal)) {
+            if (ele instanceof Map) {
+              convertMapValue(Map.class.cast(ele), subKeyPath, func);
+            }
+          }
+        } else if (pathVal instanceof Object[]) {
+          String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
+          for (Object ele : (Object[]) pathVal) {
+            if (ele instanceof Map) {
+              convertMapValue(Map.class.cast(ele), subKeyPath, func);
+            }
+          }
+        } else {
+          useMap = null;
+          break;
+        }
+      }
+    }
+    if (useMap != null) {
+      useMap.put(putKey, func.apply(useMap.get(putKey)));
+    }
+  }
+
   @Override
   public boolean canHandle(QueryHint hint) {
     return conversionService != null && hint != null && isEquals(hint.getKey(), HINT_NAME);
@@ -128,9 +168,9 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
   }
 
-  protected void handle(Map<String, Object> map, String[] keyPath, Class<?> targetClass,
+  protected void handle(Map<Object, Object> map, String[] keyPath, Class<?> targetClass,
       Object[] convertHits) {
-    replaceKeyPathMapValue(map, keyPath, (orginalVal) -> {
+    convertMapValue(map, keyPath, (orginalVal) -> {
       if (orginalVal != null) {
         try {
           return conversionService.convert(orginalVal, targetClass, convertHits);
@@ -176,5 +216,4 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     brokens.add(qh);
     return null;
   }
-
 }

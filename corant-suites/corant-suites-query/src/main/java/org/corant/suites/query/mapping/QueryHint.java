@@ -182,6 +182,20 @@ public class QueryHint implements Serializable {
       } else if (!name.equals(other.name)) {
         return false;
       }
+      if (type == null) {
+        if (other.type != null) {
+          return false;
+        }
+      } else if (!type.equals(other.type)) {
+        return false;
+      }
+      if (value == null) {
+        if (other.value != null) {
+          return false;
+        }
+      } else if (!value.equals(other.value)) {
+        return false;
+      }
       return true;
     }
 
@@ -214,6 +228,8 @@ public class QueryHint implements Serializable {
       final int prime = 31;
       int result = 1;
       result = prime * result + (name == null ? 0 : name.hashCode());
+      result = prime * result + (type == null ? 0 : type.hashCode());
+      result = prime * result + (value == null ? 0 : value.hashCode());
       return result;
     }
 

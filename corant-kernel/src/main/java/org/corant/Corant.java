@@ -93,6 +93,18 @@ import org.jboss.weld.manager.api.WeldManager;
  *   }
  * }
  * </pre>
+ *
+ * OR
+ *
+ * <pre>
+ * public class MyApplication {
+ *   // ... Bean definitions
+ *   public static void main(String[] args) throws Exception {
+ *    try(Corant corant = new Corant(args).start(MyApplication.class,MyAnother.class....){
+ *    }
+ *   }
+ * }
+ * </pre>
  * <p>
  *
  * @see #Corant(Class, ClassLoader, String...)
@@ -295,7 +307,7 @@ public class Corant implements AutoCloseable {
     return container != null && container.isRunning();
   }
 
-  public synchronized Corant start() {
+  public synchronized Corant start(Class<?>... beanClasses) {
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(CORANT, "Execute the handler before corant starting");
     doBeforeStart(classLoader);
@@ -308,7 +320,10 @@ public class Corant implements AutoCloseable {
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
     if (configClass != null) {
-      weld.addPackages(configClass);
+      weld.addBeanClass(configClass);
+    }
+    for (Class<?> beanClass : beanClasses) {
+      weld.addBeanClass(beanClass);
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
     id = container.getId();

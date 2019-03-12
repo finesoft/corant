@@ -49,7 +49,7 @@ public interface CorantJunit4Runner {
           if (CORANTS.get() == null) {
             Class<?> configClass = configTestClass(testClass);
             CORANTS.set(new Corant(configClass, testClass.getClassLoader()));
-            CORANTS.get().start();
+            CORANTS.get().start(new Class[0]);
           }
           classBlock.get().evaluate();
         } catch (Throwable t) {

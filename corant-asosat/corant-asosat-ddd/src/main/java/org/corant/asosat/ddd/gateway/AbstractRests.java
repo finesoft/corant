@@ -211,7 +211,11 @@ public abstract class AbstractRests {
     public Response build() {
       ResponseBuilder rb =
           Response.ok((StreamingOutput) output -> StreamUtils.copy(is, output), contentType);
-      rb.header(HttpHeaders.CONTENT_TYPE, contentType);
+      if (inline) {
+        rb.header(HttpHeaders.CONTENT_TYPE, contentType);
+      } else {
+        rb.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+      }
       if (size != null) {
         rb.header(HttpHeaders.CONTENT_LENGTH, size);
       }
@@ -242,7 +246,7 @@ public abstract class AbstractRests {
 
     public StreamOutputBuilder fileName(String fileName) {
       this.fileName = fileName;
-      contentType = inline && isNotBlank(fileName)
+      contentType = isNotBlank(fileName)
           ? defaultObject(FileUtils.getContentType(fileName), MediaType.APPLICATION_OCTET_STREAM)
           : MediaType.APPLICATION_OCTET_STREAM;
       return this;

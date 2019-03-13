@@ -211,6 +211,7 @@ public abstract class AbstractRests {
     public Response build() {
       ResponseBuilder rb =
           Response.ok((StreamingOutput) output -> StreamUtils.copy(is, output), contentType);
+      rb.header(HttpHeaders.CONTENT_TYPE, contentType);
       if (size != null) {
         rb.header(HttpHeaders.CONTENT_LENGTH, size);
       }

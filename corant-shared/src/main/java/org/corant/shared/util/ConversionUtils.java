@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -176,6 +177,10 @@ public class ConversionUtils {
     }
   }
 
+  public static LocalDate toLocalDate(Object obj, ZoneId zoneId) {
+    return Conversions.convert(obj, LocalDate.class, asMap(ConverterHints.CVT_ZONE_ID_KEY, zoneId));
+  }
+
   public static List<LocalDate> toLocalDateList(Object obj, String pattern) {
     if (pattern != null) {
       return Conversions.convert(obj, List.class, LocalDate.class,
@@ -244,6 +249,11 @@ public class ConversionUtils {
 
   public static ZonedDateTime toZonedDateTime(Object obj, ZonedDateTime altVal) {
     return toZonedDateTime(obj, null, altVal);
+  }
+
+  public static ZonedDateTime toZonedDateTime(Object obj, ZoneId zoneId) {
+    return defaultObject(Conversions.convert(obj, ZonedDateTime.class,
+        asMap(ConverterHints.CVT_ZONE_ID_KEY, zoneId)), null);
   }
 
   public static List<ZonedDateTime> toZonedDateTimeList(Object obj, String pattern) {

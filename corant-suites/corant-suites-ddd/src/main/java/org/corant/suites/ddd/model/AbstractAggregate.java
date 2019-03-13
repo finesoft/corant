@@ -169,6 +169,15 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return new Annotation[0];
   }
 
+  /**
+   * enable preconditions, validate the aggregate consistency
+   *
+   * preEnable
+   */
+  protected void preEnable() {
+
+  }
+
   protected synchronized void setVn(long vn) {
     this.vn = vn;
   }

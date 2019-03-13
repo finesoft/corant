@@ -18,7 +18,7 @@ import org.corant.suites.ddd.message.Message.MessageIdentifier;
 import org.corant.suites.ddd.model.Entity;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:48:37
  *

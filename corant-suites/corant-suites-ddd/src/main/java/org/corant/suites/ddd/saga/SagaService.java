@@ -21,7 +21,7 @@ import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:48:30
  *

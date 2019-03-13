@@ -22,7 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午9:43:04
  *

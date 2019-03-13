@@ -17,7 +17,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午9:39:03
  *

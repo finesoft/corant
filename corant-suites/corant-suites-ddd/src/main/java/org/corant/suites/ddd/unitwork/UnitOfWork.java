@@ -14,7 +14,7 @@
 package org.corant.suites.ddd.unitwork;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:02:04
  *
@@ -51,6 +51,5 @@ public interface UnitOfWork {
    * @param obj
    */
   void register(Object obj);
-
 
 }

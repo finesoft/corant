@@ -12,8 +12,8 @@
  * the License.
  */
 /**
- * corant-asosat-ddd
- * 
+ * corant-suites-ddd
+ *
  * @author bingo 下午4:00:47
  *
  */

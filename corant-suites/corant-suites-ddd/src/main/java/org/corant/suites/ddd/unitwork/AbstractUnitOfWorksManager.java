@@ -21,7 +21,7 @@ import javax.inject.Inject;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 上午11:39:15
  *

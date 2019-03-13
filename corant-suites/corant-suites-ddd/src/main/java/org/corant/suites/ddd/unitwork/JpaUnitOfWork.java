@@ -37,7 +37,7 @@ import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * <pre>
  * All entityManager from this unit of work are SynchronizationType.SYNCHRONIZED,

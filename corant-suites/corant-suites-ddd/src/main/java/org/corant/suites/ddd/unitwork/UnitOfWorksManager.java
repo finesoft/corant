@@ -18,7 +18,7 @@ import org.corant.suites.ddd.message.MessageService;
 import org.corant.suites.ddd.saga.SagaService;
 
 /**
- * asosat-domain <br/>
+ * corant-suites-ddd
  *
  * @author bingo 上午11:51:01
  */

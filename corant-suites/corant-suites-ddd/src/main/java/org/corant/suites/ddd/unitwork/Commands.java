@@ -16,18 +16,18 @@ package org.corant.suites.ddd.unitwork;
 import java.lang.annotation.Annotation;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:26:37
  *
  */
 public interface Commands {
 
-  public static <C> void accept(C command, Annotation... annotations) {
+  static <C> void accept(C command, Annotation... annotations) {
     return;
   }
 
-  public static <C, R> R apply(C command, Annotation... annotations) {
+  static <C, R> R apply(C command, Annotation... annotations) {
     return null;
   }
 

@@ -40,7 +40,7 @@ import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午9:54:26
  *

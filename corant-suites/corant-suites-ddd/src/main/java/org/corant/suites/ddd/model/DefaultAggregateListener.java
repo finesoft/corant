@@ -27,7 +27,7 @@ import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:35:44
  *
@@ -55,6 +55,7 @@ public class DefaultAggregateListener {
   }
 
   protected void handlePrePersist(AbstractAggregate o) {
+    o.preEnable();
     return;
   }
 
@@ -63,6 +64,7 @@ public class DefaultAggregateListener {
   }
 
   protected void handlePreUpdate(AbstractAggregate o) {
+    o.preEnable();
     registerToUnitOfWork(o.withLifecycle(Lifecycle.ENABLED));
   }
 

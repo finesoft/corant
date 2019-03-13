@@ -17,7 +17,7 @@ import java.lang.annotation.Annotation;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午2:16:37
  *

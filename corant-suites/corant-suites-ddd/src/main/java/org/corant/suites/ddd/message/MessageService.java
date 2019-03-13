@@ -18,7 +18,7 @@ import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.Message.ExchangedMessage;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:45:49
  *
@@ -104,7 +104,7 @@ public interface MessageService {
   }
 
   /**
-   * asosat-kernel
+   * corant-suites-ddd
    *
    * @author bingo 下午10:26:09
    *

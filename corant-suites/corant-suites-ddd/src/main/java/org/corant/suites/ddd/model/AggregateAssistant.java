@@ -19,7 +19,7 @@ import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
  *
  * @author bingo 下午3:11:06
  *

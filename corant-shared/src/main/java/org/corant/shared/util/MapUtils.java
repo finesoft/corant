@@ -260,6 +260,10 @@ public class MapUtils {
     return getMapObject(map, key, (o) -> o instanceof Map ? Map.class.cast(o) : null, null);
   }
 
+  public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
+    return getMapList(map, key, ObjectUtils::forceCast);
+  }
+
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
     return ConversionUtils.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }

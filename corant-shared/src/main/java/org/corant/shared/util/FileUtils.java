@@ -29,6 +29,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -174,6 +175,14 @@ public class FileUtils {
     } else {
       return null;
     }
+  }
+
+  public static String getContentType(String fileName) {
+    try {
+      return Files.probeContentType(Paths.get(fileName));
+    } catch (IOException e) {
+    }
+    return null;
   }
 
 }

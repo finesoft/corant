@@ -153,7 +153,7 @@ public abstract class AbstractRests {
     private boolean inline;
     private String name;
     private String fileName;
-    private Charset charset;
+    private Charset charset = UTF_8;
     private Long size;
     private ZonedDateTime creationDate;
     private ZonedDateTime modificationDate;

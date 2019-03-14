@@ -171,8 +171,8 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
         if (em.isOpen()) {
           em.close();
         }
-        registration.clear();
       });
+      registration.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
       super.clear();

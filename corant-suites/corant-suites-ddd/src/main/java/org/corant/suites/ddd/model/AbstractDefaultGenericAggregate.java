@@ -67,4 +67,17 @@ public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefau
     }
     return (T) this.enable(false);
   }
+
+  /**
+   * Changed the aggregate's property value and return self for lambda use case, Example:
+   *
+   * <pre>
+   * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)
+   * </pre>
+   */
+  @SuppressWarnings("unchecked")
+  public <PT> T with(PT newValue, Consumer<PT> setter) {
+    setter.accept(newValue);
+    return (T) this;
+  }
 }

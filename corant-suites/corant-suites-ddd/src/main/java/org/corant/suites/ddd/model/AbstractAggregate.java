@@ -22,7 +22,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.function.Consumer;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
@@ -118,19 +117,6 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Override
   public String toString() {
     return this.getClass().getSimpleName() + " [id=" + getId() + ",vn = " + getVn() + "]";
-  }
-
-  /**
-   * Changed the aggregate's property value and return self for lambda use case, Example:
-   *
-   * <pre>
-   * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)
-   * </pre>
-   */
-  @SuppressWarnings("unchecked")
-  public <T extends AbstractAggregate, PT> T with(PT newValue, Consumer<PT> setter) {
-    setter.accept(newValue);
-    return (T) this;
   }
 
   /**

@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
@@ -251,12 +252,19 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
+        AtomicBoolean exclusive = new AtomicBoolean(false);
         resultHintHandlers.stream().filter(h -> h.canHandle(qh)).sorted(ResultHintHandler::compare)
             .forEachOrdered(h -> {
-              try {
-                h.handle(qh, param, result);
-              } catch (Exception e) {
-                throw new CorantRuntimeException(e);
+              if (!exclusive.get()) {
+                try {
+                  h.handle(qh, param, result);
+                } catch (Exception e) {
+                  throw new CorantRuntimeException(e);
+                } finally {
+                  if (h.exclusive()) {
+                    exclusive.set(true);
+                  }
+                }
               }
             });
       });

@@ -34,6 +34,10 @@ public interface ResultHintHandler {
     return false;
   }
 
+  default boolean exclusive() {
+    return true;
+  }
+
   default int getOrdinal() {
     return 0;
   }

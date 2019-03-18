@@ -26,8 +26,16 @@ import org.corant.suites.query.mapping.QueryHint;
 @FunctionalInterface
 public interface ResultHintHandler {
 
+  static int compare(ResultHintHandler h1, ResultHintHandler h2) {
+    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
+  }
+
   default boolean canHandle(QueryHint qh) {
     return false;
+  }
+
+  default int getOrdinal() {
+    return 0;
   }
 
   void handle(QueryHint qh, Object parameter, Object result) throws Exception;

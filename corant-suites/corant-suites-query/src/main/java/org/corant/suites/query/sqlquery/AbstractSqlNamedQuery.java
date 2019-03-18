@@ -251,13 +251,14 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
-        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).forEach(h -> {
-          try {
-            h.handle(qh, param, result);
-          } catch (Exception e) {
-            throw new CorantRuntimeException(e);
-          }
-        });
+        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).sorted(ResultHintHandler::compare)
+            .forEachOrdered(h -> {
+              try {
+                h.handle(qh, param, result);
+              } catch (Exception e) {
+                throw new CorantRuntimeException(e);
+              }
+            });
       });
     }
   }

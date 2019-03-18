@@ -29,7 +29,7 @@ import javax.persistence.MappedSuperclass;
 @Embeddable
 @MappedSuperclass
 public class AbstractReferenceDataAggregateReference<T extends AbstractReferenceDataAggregate>
-    extends AbstractBaseAggregateReference<T> {
+    extends AbstractVersionedAggregateReference<T> {
 
   private static final long serialVersionUID = -7976294790832075954L;
 

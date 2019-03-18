@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.asosat.ddd.domain.model;
@@ -24,7 +22,6 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -34,16 +31,15 @@ import org.corant.shared.util.ConversionUtils;
 /**
  * corant-asosat-ddd
  *
- * @author bingo 下午1:50:53
+ * @author bingo 下午1:56:49
  *
  */
 @SuppressWarnings("rawtypes")
-@Embeddable
 @MappedSuperclass
 public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGenericAggregate>
-    extends AbstractAggregateReference<T> {
+    extends AbstractEntityReference<T> {
 
-  private static final long serialVersionUID = -3880835071968870788L;
+  private static final long serialVersionUID = -2281612710734427143L;
 
   @Transient
   protected transient volatile T referred;
@@ -54,14 +50,10 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
   @Column(name = "refId")
   private Long id;
 
-  @Column(name = "refVn")
-  private long vn;
-
   protected AbstractBaseAggregateReference() {}
 
   protected AbstractBaseAggregateReference(T agg) {
     this.setId(requireNotNull(agg, ERR_OBJ_NON_FUD, "").getId());
-    this.setVn(agg.getVn());
     if (this.holdReferred) {
       this.referred = agg;
     }
@@ -82,7 +74,7 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
           return ConstructorUtils.invokeExactConstructor(cls, new Object[] {id},
               new Class<?>[] {Long.class});
         }
-      } else if (param instanceof AbstractBaseAggregateReference
+      } else if (param instanceof AbstractVersionedAggregateReference
           || param instanceof AbstractBaseGenericAggregate) {
         return ConstructorUtils.invokeExactConstructor(cls, new Object[] {param},
             new Class<?>[] {param.getClass()});
@@ -121,10 +113,6 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
     return this.id;
   }
 
-  public long getVn() {
-    return this.vn;
-  }
-
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -155,10 +143,6 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
 
   protected void setId(Long id) {
     this.id = requireNotNull(id, ERR_SYS, id);
-  }
-
-  protected void setVn(long vn) {
-    this.vn = vn;
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

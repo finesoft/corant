@@ -169,12 +169,21 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void handle(Map<Object, Object> map, String[] keyPath, Class<?> targetClass,
       Object[] convertHits) {
     convertMapValue(map, keyPath, (orginalVal) -> {
       if (orginalVal != null) {
         try {
-          return conversionService.convert(orginalVal, targetClass, convertHits);
+          if (orginalVal instanceof List) {
+            return conversionService.convert(orginalVal, List.class, targetClass, convertHits);
+          } else if (orginalVal instanceof Set) {
+            return conversionService.convert(orginalVal, Set.class, targetClass, convertHits);
+          } else if (orginalVal instanceof Object[]) {
+            return conversionService.convert(orginalVal, Set.class, targetClass, convertHits);
+          } else {
+            return conversionService.convert(orginalVal, targetClass, convertHits);
+          }
         } catch (Exception e) {
           logger.log(Level.WARNING, e,
               () -> String.format("Hanle result conversion error on property %s with value %s",

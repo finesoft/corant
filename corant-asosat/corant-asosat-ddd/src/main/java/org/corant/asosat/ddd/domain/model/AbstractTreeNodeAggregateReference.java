@@ -28,7 +28,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 @SuppressWarnings("rawtypes")
 public abstract class AbstractTreeNodeAggregateReference<T extends AbstractTreeNodeAggregate>
-    extends AbstractBaseAggregateReference<T> {
+    extends AbstractVersionedAggregateReference<T> {
 
   private static final long serialVersionUID = -2947751238888458455L;
 

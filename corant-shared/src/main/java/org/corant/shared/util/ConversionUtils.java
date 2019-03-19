@@ -54,6 +54,17 @@ public class ConversionUtils {
     return defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
   }
 
+  public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal, int scale,
+      int roundingMode) {
+    BigDecimal d = defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
+    return d == null ? null : d.setScale(scale, roundingMode);
+  }
+
+  public static BigDecimal toBigDecimal(Object obj, int scale) {
+    BigDecimal d = toBigDecimal(obj, null);
+    return d == null ? null : d.setScale(scale, BigDecimal.ROUND_HALF_UP);
+  }
+
   public static List<BigDecimal> toBigDecimalList(Object obj) {
     return Conversions.convert(obj, List.class, BigDecimal.class, null);
   }

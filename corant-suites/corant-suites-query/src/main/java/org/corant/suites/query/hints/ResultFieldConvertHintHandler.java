@@ -180,7 +180,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
           } else if (orginalVal instanceof Set) {
             return conversionService.convert(orginalVal, Set.class, targetClass, convertHits);
           } else if (orginalVal instanceof Object[]) {
-            return conversionService.convert(orginalVal, Set.class, targetClass, convertHits);
+            return conversionService.convert(orginalVal, List.class, targetClass, convertHits);
           } else {
             return conversionService.convert(orginalVal, targetClass, convertHits);
           }

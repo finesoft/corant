@@ -264,6 +264,10 @@ public class MapUtils {
     return getMapList(map, key, ObjectUtils::forceCast);
   }
 
+  public static Object getMapObject(final Map<?, ?> map, final Object key) {
+    return map == null ? null : map.get(key);
+  }
+
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
     return ConversionUtils.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }

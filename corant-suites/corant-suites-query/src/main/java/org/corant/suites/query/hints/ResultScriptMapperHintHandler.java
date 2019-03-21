@@ -58,8 +58,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
  * writing scripts, preferably stateless functions, that can be problematic in multi-threaded
  * conditions if global variables are involved.</li>
  * <li>If need another script engine, then implement the ResultMapperResolver interface, and assign
- * an engine name, use this name as the value of the parameter that named 'script-value' of the hint
- * .</li>
+ * an engine name, use this name as the value of the parameter that named 'script-engine' of the
+ * hint .</li>
  * </p>
  *
  * <p>

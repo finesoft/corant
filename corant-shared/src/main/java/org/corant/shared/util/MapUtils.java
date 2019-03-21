@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -285,6 +286,19 @@ public class MapUtils {
   public static <T> List<T> getMapObjectList(final Map<?, ?> map, final Object key,
       final Function<Object, List<T>> extractor) {
     return map != null ? extractor.apply(map.get(key)) : null;
+  }
+
+  public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
+    return new HashSet<>(getMapList(map, key, o -> forceCast(o)));
+  }
+
+  public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key, final Class<T> clazz) {
+    return new HashSet<>(getMapObjectList(map, key, (o) -> ConversionUtils.toList(o, clazz)));
+  }
+
+  public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
+      final Function<Object, T> objFunc) {
+    return new HashSet<>(getMapObjectList(map, key, (v) -> ConversionUtils.toList(v, objFunc)));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {

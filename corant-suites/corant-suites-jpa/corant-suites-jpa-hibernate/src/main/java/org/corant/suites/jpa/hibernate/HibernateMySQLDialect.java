@@ -34,7 +34,7 @@ public class HibernateMySQLDialect extends MySQL57Dialect {
     this.registerColumnType(Types.CLOB, "longtext");
     this.registerColumnType(Types.NCLOB, "longtext");
     this.registerColumnType(Types.LONGNVARCHAR, "longtext");
-    this.registerColumnType(Types.NUMERIC, "DECIMAL(19,6)");
+    this.registerColumnType(Types.NUMERIC, "decimal(19,6)");
     this.registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
     this.registerHibernateType(Types.NCLOB, StandardBasicTypes.STRING.getName());
     this.registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.STRING.getName());

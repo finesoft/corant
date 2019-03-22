@@ -343,7 +343,7 @@ public class Corant implements AutoCloseable {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {
             log(logger,
-                "Finished all initialization in %s seconds. And it's been a long way, but we're here.",
+                "Finished all initialization in %s seconds. It's been a long way, but we're here.",
                 tt);
           } else {
             log(logger, "Finished all initialization in %s seconds.", tt);

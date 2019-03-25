@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
+import org.corant.kernel.config.ComparableConfigurator;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
@@ -83,7 +84,7 @@ public class NarayanaTransactionProducers {
     final RecoveryEnvironmentBean recoveryEnvironmentBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     if (!configurators.isUnsatisfied()) {
-      configurators.stream().sorted().forEachOrdered(cfgr -> {
+      configurators.stream().sorted(ComparableConfigurator::compare).forEachOrdered(cfgr -> {
         cfgr.configCoreEnvironment(coreEnvironmentBean);
         cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);
         cfgr.configRecoveryEnvironment(recoveryEnvironmentBean);

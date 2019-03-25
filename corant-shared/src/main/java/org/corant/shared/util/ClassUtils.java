@@ -32,6 +32,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
+ * corant-shared
+ *
+ * The class utility class.
+ *
  * @author bingo 下午10:31:37
  *
  */
@@ -62,11 +66,28 @@ public class ClassUtils {
     super();
   }
 
+  /**
+   * Convert the class name string to Class using {@code classLoader}
+   *
+   * @param classLoader
+   * @param className
+   * @return
+   * @throws ClassNotFoundException asClass
+   */
   public static Class<?> asClass(final ClassLoader classLoader, final String className)
       throws ClassNotFoundException {
     return asClass(classLoader, className, true);
   }
 
+  /**
+   * Convert the class name string to Class using {@code classLoader}
+   *
+   * @param classLoader
+   * @param className
+   * @param initialize whether the class must be initialized
+   * @return
+   * @throws ClassNotFoundException asClass
+   */
   public static Class<?> asClass(final ClassLoader classLoader, final String className,
       final boolean initialize) throws ClassNotFoundException {
     try {
@@ -77,6 +98,14 @@ public class ClassUtils {
     }
   }
 
+  /**
+   * Return Class from string class name.
+   *
+   * @param className
+   * @return
+   * @throws ClassNotFoundException asClass
+   * @see #defaultClassLoader()
+   */
   public static Class<?> asClass(String className) throws ClassNotFoundException {
     return asClass(defaultClassLoader(), className, true);
   }
@@ -115,6 +144,13 @@ public class ClassUtils {
     }
   }
 
+  /**
+   * Return the appropriate class loader. if the current thread has context class loader then return
+   * it else return the ClassUtils class loader, finally if class loader not found then return the
+   * system class loader.
+   *
+   * @return defaultClassLoader
+   */
   public static ClassLoader defaultClassLoader() {
     ClassLoader classLoader = trySupplied(Thread.currentThread()::getContextClassLoader);
     if (classLoader == null) {
@@ -126,6 +162,12 @@ public class ClassUtils {
     return classLoader;
   }
 
+  /**
+   * Return all the interfaces implemented by this {@code clazz}
+   *
+   * @param clazz
+   * @return getAllInterfaces
+   */
   public static List<Class<?>> getAllInterfaces(final Class<?> clazz) {
     Set<Class<?>> interfaces = new LinkedHashSet<>();
     if (clazz != null) {
@@ -145,10 +187,22 @@ public class ClassUtils {
     return new ArrayList<>(interfaces);
   }
 
+  /**
+   * Return all the interfaces represented by this {@code object}
+   *
+   * @param object
+   * @return getAllInterfaces
+   */
   public static List<Class<?>> getAllInterfaces(final Object object) {
     return object == null ? new ArrayList<>() : getAllInterfaces(object.getClass());
   }
 
+  /**
+   * Return all the super classes extended by this {@code clazz}
+   *
+   * @param clazz
+   * @return getAllSuperClasses
+   */
   public static List<Class<?>> getAllSuperClasses(final Class<?> clazz) {
     List<Class<?>> superClasses = new ArrayList<>();
     if (clazz != null) {
@@ -164,6 +218,12 @@ public class ClassUtils {
     return superClasses;
   }
 
+  /**
+   * Return all the super classes represented by this {@code object}
+   *
+   * @param object
+   * @return getAllSuperClasses
+   */
   public static List<Class<?>> getAllSuperClasses(final Object object) {
     return object == null ? new ArrayList<>() : getAllSuperClasses(object.getClass());
   }

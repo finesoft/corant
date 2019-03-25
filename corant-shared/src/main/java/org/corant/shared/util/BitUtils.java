@@ -17,6 +17,8 @@ import java.util.Arrays;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
+ * Convert byte array to bit array.
+ *
  * @author bingo 2015年3月23日
  */
 public class BitUtils {
@@ -27,7 +29,7 @@ public class BitUtils {
 
   public static BitArray asBitArray(byte[] bytes) {
     return new BitArray(bytes);
-  } 
+  }
 
   public static BitArray asBitArray(int size, boolean in) {
     return new BitArray(size, in);

@@ -85,22 +85,6 @@ public abstract class AbstractVersionedAggregateReference<T extends AbstractBase
     return Optional.ofNullable(this.retrieve());
   }
 
-  @Override
-  public T retrieve() {
-    if (holdReferred) {
-      if (referred == null) {
-        synchronized (this) {
-          if (referred == null) {
-            referred = super.retrieve();
-          }
-        }
-      }
-      return referred;
-    } else {
-      return super.retrieve();
-    }
-  }
-
   protected void setVn(long vn) {
     this.vn = vn;
   }

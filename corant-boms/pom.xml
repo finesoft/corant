@@ -68,7 +68,7 @@
 		<version.resteasy>3.6.2.Final</version.resteasy>
 		<version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
 
-		<version.artemis-cdi-client>2.6.3</version.artemis-cdi-client>
+		<version.artemis-cdi-client>2.7.0</version.artemis-cdi-client>
 		<version.keycloak>4.8.2.Final</version.keycloak>
 
 		<version.HikariCP>3.2.0</version.HikariCP>

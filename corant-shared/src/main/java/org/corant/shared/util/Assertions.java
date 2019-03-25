@@ -32,7 +32,7 @@ public class Assertions {
   private Assertions() {}
 
   /**
-   * Throw CorantRuntimeException if given two objects is not equals.
+   * Throw CorantRuntimeException if given two arguments are not equals.
    *
    * @see ObjectUtils#isEquals(Object, Object)
    * @param a
@@ -43,8 +43,8 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if given two objects is not equals with given message and message
-   * parameters.
+   * Throw CorantRuntimeException if given two arguments are not equals with given message and
+   * message parameters.
    *
    * @param a
    * @param b
@@ -57,20 +57,47 @@ public class Assertions {
     }
   }
 
+  /**
+   * Throw CorantRuntimeException if argument or expression is true
+   *
+   * @param condition shouldBeFalse
+   */
   public static void shouldBeFalse(boolean condition) {
     shouldBeFalse(condition, "This shoud be false");
   }
 
+  /**
+   * Throw CorantRuntimeException with message and message parameter if argument or expression is
+   * true
+   *
+   * @param condition
+   * @param messageOrFormat
+   * @param args shouldBeFalse
+   */
   public static void shouldBeFalse(boolean condition, String messageOrFormat, Object... args) {
     if (condition) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
   }
 
+  /**
+   * Throw CorantRuntimeException if argument is not null
+   *
+   * @param obj
+   * @return shouldBeNull
+   */
   public static <T> T shouldBeNull(T obj) {
     return shouldBeNull(obj, "The object should be null!");
   }
 
+  /**
+   * Throw CorantRuntimeException if argument is not null
+   *
+   * @param obj the argument that must be null
+   * @param messageOrFormat the exception message or message formatter
+   * @param args the exception message parameter
+   * @return shouldBeNull
+   */
   public static <T> T shouldBeNull(T obj, String messageOrFormat, Object... args) {
     if (obj != null) {
       throw new CorantRuntimeException(messageOrFormat, args);
@@ -78,20 +105,48 @@ public class Assertions {
     return null;
   }
 
+  /**
+   * Throw CorantRuntimeException if argument is not null
+   *
+   * @param condition shouldBeTrue
+   */
   public static void shouldBeTrue(boolean condition) {
     shouldBeTrue(condition, "This shoud be true");
   }
 
+  /**
+   * Throw CorantRuntimeException with message and message parameter if argument or expression is
+   * false
+   *
+   * @param condition the argument or expression
+   * @param messageOrFormat the exception message or message formatter
+   * @param args the exception message parameter
+   */
   public static void shouldBeTrue(boolean condition, String messageOrFormat, Object... args) {
     if (!condition) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
   }
 
+  /**
+   * Throw CorantRuntimeException if argument is blank.
+   *
+   * @param obj
+   * @see StringUtils#isNotBlank(CharSequence)
+   * @return shouldNotBlank
+   */
   public static <T extends CharSequence> T shouldNotBlank(T obj) {
     return shouldNotBlank(obj, "The object should not blank!");
   }
 
+  /**
+   * Throw CorantRuntimeException with message if argument is blank.
+   *
+   * @param obj the argument
+   * @param messageOrFormat the exception message or message formatter
+   * @param args the exception message parameters
+   * @return shouldNotBlank
+   */
   public static <T extends CharSequence> T shouldNotBlank(T obj, String messageOrFormat,
       Object... args) {
     if (isBlank(obj)) {
@@ -100,21 +155,51 @@ public class Assertions {
     return obj;
   }
 
-  public static <T> T shouldNotEmpty(T object) {
-    return shouldNotEmpty(object, "This shoud be true");
+  /**
+   * Throw CorantRuntimeException if argument is empty, usually the argument type is
+   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   *
+   * @param obj the argument
+   * @return shouldNotEmpty
+   */
+  public static <T> T shouldNotEmpty(T obj) {
+    return shouldNotEmpty(obj, "This shoud be true");
   }
 
-  public static <T> T shouldNotEmpty(T object, String messageOrFormat, Object... args) {
-    if (isEmpty(object)) {
+  /**
+   * Throw CorantRuntimeException with message if argument is empty, usually the argument type is
+   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   *
+   * @param obj the argument
+   * @param messageOrFormat the exception message or message formatter
+   * @param args the exception message parameters
+   * @return shouldNotEmpty
+   */
+  public static <T> T shouldNotEmpty(T obj, String messageOrFormat, Object... args) {
+    if (isEmpty(obj)) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
-    return object;
+    return obj;
   }
 
+  /**
+   * Throw CorantRuntimeException if argument is null
+   *
+   * @param obj the argument
+   * @return shouldNotNull
+   */
   public static <T> T shouldNotNull(T obj) {
     return shouldNotNull(obj, "The object should not null!");
   }
 
+  /**
+   * Throw CorantRuntimeException with message if argument is null
+   *
+   * @param obj the argument
+   * @param messageOrFormat the exception message or message formatter
+   * @param args the exception message parameter
+   * @return shouldNotNull
+   */
   public static <T> T shouldNotNull(T obj, String messageOrFormat, Object... args) {
     if (obj == null) {
       throw new CorantRuntimeException(messageOrFormat, args);

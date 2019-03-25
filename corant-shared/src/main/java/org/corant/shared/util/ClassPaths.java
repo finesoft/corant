@@ -62,6 +62,8 @@ import org.corant.shared.util.Resources.ClassPathResource;
 /**
  * corant-shared
  *
+ * Utility class for scanning/extracting resources from the classpath.
+ *
  * @author bingo 上午11:21:01
  *
  */
@@ -89,21 +91,30 @@ public class ClassPaths {
     super();
   }
 
-  public static Scanner buildScanner(String pathExpress, boolean ignoreCase) {
-    if (GlobMatcher.hasGlobChar(pathExpress)) {
-      PathFilter pf = new PathFilter(ignoreCase, pathExpress);
+  /**
+   * Build a class path resource scanner with path expression
+   *
+   * @param pathExpression the class path expression, may be glob expression.
+   * @param ignoreCase
+   * @return buildScanner
+   */
+  public static Scanner buildScanner(String pathExpression, boolean ignoreCase) {
+    if (GlobMatcher.hasGlobChar(pathExpression)) {
+      PathFilter pf = new PathFilter(ignoreCase, pathExpression);
       return new Scanner(pf.getRoot(), pf);
     } else {
-      return new Scanner(pathExpress);
+      return new Scanner(pathExpression);
     }
   }
 
   /**
-   * Careful use may result in leakage
+   * Build an war class loader, Careful use may result in leakage. We only extract WEB-INF folder to
+   * default temporary-file directory.
    *
    * @param path
    * @param parentClassLoader
-   * @return
+   * @see Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute...)
+   * @return The war class loader
    * @throws IOException buildWarClassLoader
    */
   public static synchronized URLClassLoader buildWarClassLoader(Path path,
@@ -257,7 +268,7 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Scan resource from path, include nested jars.
+   * Scan resources from class path, include nested jars.
    *
    * @author bingo 下午8:39:26
    *

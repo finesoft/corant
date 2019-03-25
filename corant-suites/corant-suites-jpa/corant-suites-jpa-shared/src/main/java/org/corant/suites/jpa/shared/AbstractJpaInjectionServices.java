@@ -72,16 +72,6 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
     return ResourceReferences.refac(() -> getEntityManagerFactory(pumd));
   }
 
-  @Override
-  public EntityManager resolvePersistenceContext(InjectionPoint injectionPoint) {
-    return registerPersistenceContextInjectionPoint(injectionPoint).createResource().getInstance();
-  }
-
-  @Override
-  public EntityManagerFactory resolvePersistenceUnit(InjectionPoint injectionPoint) {
-    return registerPersistenceUnitInjectionPoint(injectionPoint).createResource().getInstance();
-  }
-
   protected abstract EntityManagerFactory buildEntityManagerFactory(
       PersistenceUnitInfoMetaData metaData);
 

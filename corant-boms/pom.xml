@@ -64,8 +64,8 @@
 		<version.smallrye.opentracing>1.1.0</version.smallrye.opentracing>
 
 		<version.tomcat>9.0.13</version.tomcat>
-		<version.undertow>2.0.17.Final</version.undertow>
-		<version.resteasy>3.6.2.Final</version.resteasy>
+		<version.undertow>2.0.19.Final</version.undertow>
+		<version.resteasy>3.6.3.Final</version.resteasy>
 		<version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
 
 		<version.artemis-cdi-client>2.7.0</version.artemis-cdi-client>

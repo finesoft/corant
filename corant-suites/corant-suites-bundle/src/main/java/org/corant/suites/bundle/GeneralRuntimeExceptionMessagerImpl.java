@@ -13,8 +13,6 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.enterprise.context.ApplicationScoped;
@@ -39,14 +37,6 @@ public class GeneralRuntimeExceptionMessagerImpl implements GeneralRuntimeExcept
   @Inject
   private EnumerationBundle enumBundle;
 
-  public String genMessageKey(String code, String subCode) {
-    StringBuilder sb = new StringBuilder(MessageSeverity.ERR.name()).append(".").append(code);
-    if (!isEmpty(subCode)) {
-      sb.append(".").append(subCode);
-    }
-    return sb.toString();
-  }
-
   public Object[] genParameters(Locale locale, Object[] parameters) {
     if (parameters.length > 0) {
       return Arrays.stream(parameters).map(p -> handleParameter(locale, p)).toArray();
@@ -59,8 +49,7 @@ public class GeneralRuntimeExceptionMessagerImpl implements GeneralRuntimeExcept
     if (exception == null) {
       return null;
     }
-    String key = genMessageKey(asDefaultString(exception.getCode()),
-        asDefaultString(exception.getSubCode()));
+    String key = GlobalMessageCodes.genMessageCode(exception);
     Locale localeToUse = locale == null ? Locale.getDefault() : locale;
     Object[] parameters = genParameters(localeToUse, exception.getParameters());
     return messageBundle.getMessage(localeToUse, key, parameters, (l) -> getUnknowErrorMessage(l));
@@ -68,7 +57,8 @@ public class GeneralRuntimeExceptionMessagerImpl implements GeneralRuntimeExcept
 
   @Override
   public String getUnknowErrorMessage(Locale locale) {
-    return messageBundle.getMessage(locale, genMessageKey(GlobalMessageCodes.ERR_UNKNOW, null),
+    return messageBundle.getMessage(locale,
+        GlobalMessageCodes.genMessageCode(MessageSeverity.ERR, GlobalMessageCodes.ERR_UNKNOW),
         EMPTY_ARGS);
   }
 

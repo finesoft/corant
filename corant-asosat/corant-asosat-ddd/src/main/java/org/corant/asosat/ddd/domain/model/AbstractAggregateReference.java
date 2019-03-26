@@ -36,7 +36,7 @@ import org.corant.shared.util.ConversionUtils;
  */
 @SuppressWarnings("rawtypes")
 @MappedSuperclass
-public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGenericAggregate>
+public abstract class AbstractAggregateReference<T extends AbstractGenericAggregate>
     extends AbstractEntityReference<T> {
 
   private static final long serialVersionUID = -2281612710734427143L;
@@ -50,16 +50,16 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
   @Column(name = "refId")
   private Long id;
 
-  protected AbstractBaseAggregateReference() {}
+  protected AbstractAggregateReference() {}
 
-  protected AbstractBaseAggregateReference(T agg) {
+  protected AbstractAggregateReference(T agg) {
     this.setId(requireNotNull(agg, ERR_OBJ_NON_FUD, "").getId());
     if (this.holdReferred) {
       this.referred = agg;
     }
   }
 
-  protected static <A extends AbstractBaseGenericAggregate, T extends AbstractBaseAggregateReference<A>> T of(
+  protected static <A extends AbstractGenericAggregate, T extends AbstractAggregateReference<A>> T of(
       Object param, Class<T> cls) {
     if (param == null) {
       return null; // FIXME like c++ reference
@@ -75,7 +75,7 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
               new Class<?>[] {Long.class});
         }
       } else if (param instanceof AbstractVersionedAggregateReference
-          || param instanceof AbstractBaseGenericAggregate) {
+          || param instanceof AbstractGenericAggregate) {
         return ConstructorUtils.invokeExactConstructor(cls, new Object[] {param},
             new Class<?>[] {param.getClass()});
       }
@@ -97,7 +97,7 @@ public abstract class AbstractBaseAggregateReference<T extends AbstractBaseGener
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    AbstractBaseAggregateReference other = (AbstractBaseAggregateReference) obj;
+    AbstractAggregateReference other = (AbstractAggregateReference) obj;
     if (this.id == null) {
       if (other.id != null) {
         return false;

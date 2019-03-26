@@ -31,7 +31,7 @@ import org.corant.asosat.ddd.domain.shared.Participator;
 @MappedSuperclass
 @EntityListeners(value = {MannedAggregateEntityListener.class})
 public abstract class AbstractMannedAggregate<P, T extends AbstractMannedAggregate<P, T>>
-    extends AbstractBaseGenericAggregate<P, T> implements Manned {
+    extends AbstractGenericAggregate<P, T> implements Manned {
 
   private static final long serialVersionUID = 4296767808160742486L;
 

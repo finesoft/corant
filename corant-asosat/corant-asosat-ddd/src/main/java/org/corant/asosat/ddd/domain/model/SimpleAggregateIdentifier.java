@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.domain.shared;
+package org.corant.asosat.ddd.domain.model;
 
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import javax.persistence.Embeddable;
@@ -28,7 +28,7 @@ import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
  */
 @MappedSuperclass
 @Embeddable
-public class BaseAggregateIdentifier implements AggregateIdentifier {
+public class SimpleAggregateIdentifier implements AggregateIdentifier {
 
   private static final long serialVersionUID = -370892872702435387L;
 
@@ -36,25 +36,25 @@ public class BaseAggregateIdentifier implements AggregateIdentifier {
 
   private Long id;
 
-  protected BaseAggregateIdentifier() {}
+  protected SimpleAggregateIdentifier() {}
 
-  protected BaseAggregateIdentifier(Aggregate aggregate) {
+  protected SimpleAggregateIdentifier(Aggregate aggregate) {
     type = requireNotNull(aggregate.getClass().getName(), GlobalMessageCodes.ERR_PARAM);
     id = (Long) requireNotNull(aggregate.getId(), GlobalMessageCodes.ERR_PARAM);
   }
 
-  protected BaseAggregateIdentifier(String type, Long id) {
+  protected SimpleAggregateIdentifier(String type, Long id) {
     super();
     this.type = requireNotNull(type, GlobalMessageCodes.ERR_PARAM);
     this.id = requireNotNull(id, GlobalMessageCodes.ERR_PARAM);
   }
 
-  public static BaseAggregateIdentifier of(Aggregate aggregate) {
-    return new BaseAggregateIdentifier(aggregate);
+  public static SimpleAggregateIdentifier of(Aggregate aggregate) {
+    return new SimpleAggregateIdentifier(aggregate);
   }
 
-  public static BaseAggregateIdentifier of(String type, Long id) {
-    return new BaseAggregateIdentifier(type, id);
+  public static SimpleAggregateIdentifier of(String type, Long id) {
+    return new SimpleAggregateIdentifier(type, id);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class BaseAggregateIdentifier implements AggregateIdentifier {
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    BaseAggregateIdentifier other = (BaseAggregateIdentifier) obj;
+    SimpleAggregateIdentifier other = (SimpleAggregateIdentifier) obj;
     if (id == null) {
       if (other.id != null) {
         return false;

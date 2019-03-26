@@ -31,7 +31,7 @@ import org.hibernate.annotations.GenericGenerator;
  *
  */
 @MappedSuperclass
-public abstract class AbstractBaseGenericAggregate<P, T extends AbstractBaseGenericAggregate<P, T>>
+public abstract class AbstractGenericAggregate<P, T extends AbstractGenericAggregate<P, T>>
     extends AbstractDefaultGenericAggregate<P, T> {
 
   private static final long serialVersionUID = -4395445831789674052L;
@@ -42,7 +42,7 @@ public abstract class AbstractBaseGenericAggregate<P, T extends AbstractBaseGene
       strategy = "org.corant.suites.jpa.hibernate.HibernateSnowflakeIdGenerator")
   private Long id;
 
-  public AbstractBaseGenericAggregate() {}
+  public AbstractGenericAggregate() {}
 
   @Override
   public Long getId() {

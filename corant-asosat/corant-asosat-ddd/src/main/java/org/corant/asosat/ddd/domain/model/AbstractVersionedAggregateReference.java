@@ -32,8 +32,8 @@ import javax.persistence.MappedSuperclass;
 @SuppressWarnings("rawtypes")
 @Embeddable
 @MappedSuperclass
-public abstract class AbstractVersionedAggregateReference<T extends AbstractBaseGenericAggregate>
-    extends AbstractBaseAggregateReference<T> {
+public abstract class AbstractVersionedAggregateReference<T extends AbstractGenericAggregate>
+    extends AbstractAggregateReference<T> {
 
   private static final long serialVersionUID = -3880835071968870788L;
 

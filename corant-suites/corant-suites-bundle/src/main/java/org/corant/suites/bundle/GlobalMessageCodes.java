@@ -1,19 +1,21 @@
 /*
  * Copyright (c) 2013-2018. BIN.CHEN
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.suites.bundle;
+
+import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import org.corant.kernel.exception.GeneralRuntimeException;
 
 /**
  * @author bingo 下午2:29:36
@@ -32,4 +34,22 @@ public interface GlobalMessageCodes {
   String INF_OP_SUS = "global.operation_success";
   String INF_OP_FAL = "global.operation_failure";
 
+  static String genMessageCode(GeneralRuntimeException e) {
+    if (e == null) {
+      return null;
+    } else {
+      return genMessageCode(MessageSeverity.ERR, asDefaultString(e.getCode()),
+          asDefaultString(e.getSubCode()));
+    }
+  }
+
+  static String genMessageCode(MessageSeverity severity, String... codeSeq) {
+    StringBuilder sb = new StringBuilder(severity == null ? "" : severity.name());
+    for (String code : codeSeq) {
+      if (isNotBlank(code)) {
+        sb.append(".").append(code);
+      }
+    }
+    return sb.toString();
+  }
 }

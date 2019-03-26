@@ -14,7 +14,7 @@
 /**
  * corant-demo-ddd
  * 
- * @author bingo 上午9:53:01
+ * @author bingo 下午4:42:40
  *
  */
-package org.corant.demo.ddd.gateway;
+package org.corant.demo.ddd.shared.provider;

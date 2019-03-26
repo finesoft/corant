@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.demo.ddd.domain;
+package org.corant.demo.ddd.shared.domain;
 
 import java.math.BigDecimal;
 import javax.persistence.Column;

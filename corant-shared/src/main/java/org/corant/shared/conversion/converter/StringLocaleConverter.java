@@ -27,7 +27,7 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
 
   public final static char IETF_SEPARATOR = '-';
   public final static String EMPTY_STRING = "";
-  public final static Locale defaultLocale = Locale.getDefault();
+  public final static Locale DEFAULT_LOCALE = Locale.getDefault();
 
   public StringLocaleConverter() {
     super();
@@ -78,17 +78,17 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
       }
     }
     if (language.length() == 2) {
-      language = language.toLowerCase(defaultLocale);
+      language = language.toLowerCase(DEFAULT_LOCALE);
     } else {
       language = EMPTY_STRING;
     }
     if (country.length() == 2) {
-      country = country.toUpperCase(defaultLocale);
+      country = country.toUpperCase(DEFAULT_LOCALE);
     } else {
       country = EMPTY_STRING;
     }
     if (variant.length() > 0 && (language.length() == 2 || country.length() == 2)) {
-      variant = variant.toUpperCase(defaultLocale);
+      variant = variant.toUpperCase(DEFAULT_LOCALE);
     } else {
       variant = EMPTY_STRING;
     }

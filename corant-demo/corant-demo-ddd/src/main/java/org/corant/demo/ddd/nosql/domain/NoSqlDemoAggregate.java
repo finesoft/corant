@@ -19,8 +19,8 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
-import org.corant.demo.ddd.domain.AbstractDemoAggregate;
-import org.corant.demo.ddd.domain.DemoValue;
+import org.corant.demo.ddd.shared.domain.AbstractDemoAggregate;
+import org.corant.demo.ddd.shared.domain.DemoValue;
 
 /**
  * corant-demo-ddd

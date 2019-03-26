@@ -22,8 +22,8 @@ import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
-import org.corant.demo.ddd.domain.AbstractDemoAggregate;
-import org.corant.demo.ddd.domain.DemoValue;
+import org.corant.demo.ddd.shared.domain.AbstractDemoAggregate;
+import org.corant.demo.ddd.shared.domain.DemoValue;
 
 /**
  * corant-demo-ddd

@@ -49,8 +49,7 @@ public class Throwables {
 
       @Override
       public Throwable next() {
-        cause = cause.getCause();
-        if (cause == null) {
+        if (cause == null || (cause = cause.getCause()) == null) {
           throw new NoSuchElementException();
         }
         return cause;

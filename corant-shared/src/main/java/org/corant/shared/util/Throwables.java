@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * corant-kernel
+ * corant-shared
  *
  * @author bingo 下午6:01:18
  *

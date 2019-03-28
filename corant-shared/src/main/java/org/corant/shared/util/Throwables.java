@@ -13,12 +13,15 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -30,6 +33,10 @@ import java.util.stream.Stream;
 public class Throwables {
 
   private Throwables() {}
+
+  public static <S> Attempt<S> attempt(Supplier<S> supplier) {
+    return new Attempt<>(supplier);
+  }
 
   public static Stream<Throwable> causes(final Throwable throwable) {
     return asStream(() -> new Iterator<Throwable>() {
@@ -66,5 +73,39 @@ public class Throwables {
   public static Stream<Throwable> suppresses(final Throwable throwable) {
     return throwable == null || isEmpty(throwable.getSuppressed()) ? Stream.empty()
         : asStream(throwable.getSuppressed());
+  }
+
+  public static class Attempt<S> {
+
+    final Supplier<S> supplier;
+    Predicate<Throwable> ifThrow;
+    Supplier<RuntimeException> then;
+
+    private Attempt(Supplier<S> supplier) {
+      this.supplier = shouldNotNull(supplier);
+    }
+
+    public S attempt() {
+      try {
+        return supplier.get();
+      } catch (Exception e) {
+        if (ifThrow != null && causes(e).anyMatch(ifThrow)) {
+          if (then != null) {
+            throw then.get();
+          }
+        }
+        throw new RuntimeException(e);
+      }
+    }
+
+    public Attempt<S> ifThrow(Predicate<Throwable> p) {
+      ifThrow = p;
+      return this;
+    }
+
+    public Attempt<S> then(Supplier<RuntimeException> then) {
+      this.then = then;
+      return this;
+    }
   }
 }

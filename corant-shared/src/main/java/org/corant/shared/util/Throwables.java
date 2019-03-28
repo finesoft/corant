@@ -79,7 +79,7 @@ public class Throwables {
 
     final Supplier<S> supplier;
     Predicate<Throwable> ifThrow;
-    Supplier<RuntimeException> then;
+    Supplier<RuntimeException> thenRethrow;
 
     private Attempt(Supplier<S> supplier) {
       this.supplier = shouldNotNull(supplier);
@@ -90,21 +90,31 @@ public class Throwables {
         return supplier.get();
       } catch (Exception e) {
         if (ifThrow != null && causes(e).anyMatch(ifThrow)) {
-          if (then != null) {
-            throw then.get();
+          if (thenRethrow != null) {
+            throw thenRethrow.get();
           }
         }
         throw new RuntimeException(e);
       }
     }
 
-    public Attempt<S> ifThrow(Predicate<Throwable> p) {
+    public Attempt<S> ifThrow(final Class<? extends Throwable> causeClass) {
+      ifThrow = (t) -> causeClass.isInstance(t);
+      return this;
+    }
+
+    public Attempt<S> ifThrow(final Predicate<Throwable> p) {
       ifThrow = p;
       return this;
     }
 
-    public Attempt<S> then(Supplier<RuntimeException> then) {
-      this.then = then;
+    public Attempt<S> thenRethrow(final RuntimeException thenRethrow) {
+      this.thenRethrow = () -> thenRethrow;
+      return this;
+    }
+
+    public Attempt<S> thenRethrow(final Supplier<RuntimeException> thenRethrow) {
+      this.thenRethrow = thenRethrow;
       return this;
     }
   }

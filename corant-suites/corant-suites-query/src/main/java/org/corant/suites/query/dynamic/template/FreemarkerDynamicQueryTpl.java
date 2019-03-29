@@ -68,7 +68,8 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
     try {
       this.template = new Template(this.queryName, query.getScript(), FM_CFG);
     } catch (IOException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the query template [%s].", this.queryName);
     }
   }
 

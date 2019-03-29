@@ -78,7 +78,7 @@ public class DefaultEsNamedQueryTpl
           getResultClass(), getHints(), getFetchQueries());// FIXME Do some
                                                            // protection
     } catch (TemplateException | IOException | NullPointerException e) {
-      throw new QueryRuntimeException("Freemarker process stringTemplate is error", e);
+      throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }
   }
 

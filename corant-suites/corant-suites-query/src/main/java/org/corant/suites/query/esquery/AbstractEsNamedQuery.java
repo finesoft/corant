@@ -69,7 +69,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     try {
       return getExecutor().searchAggregation(resolveIndexName(q), script);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the aggregate query [%s].", q);
     }
   }
 
@@ -108,7 +109,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     try {
       return getExecutor().search(resolveIndexName(q), script);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the search query [%s].",
+          q);
     }
   }
 
@@ -161,7 +163,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
         this.fetch(fetchedList, fetchQueries, param);
       }
     } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
+          fetchQuery.getReferenceQuery());
     }
   }
 
@@ -236,7 +239,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
       handleResultHints(querier.getHints(), param, result);
       return Pair.of(hits.getLeft(), result);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the search hits query [%s].", q);
     }
   }
 

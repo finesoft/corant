@@ -103,7 +103,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       }
       return result;
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the forward query [%s].", q);
     }
   }
 
@@ -122,7 +123,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       handleResultHints(hints, param, result);
       return result;
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
+          q);
     }
   }
 
@@ -157,7 +159,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       }
       return result;
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
+          q);
     }
   }
 
@@ -179,7 +182,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       }
       return result;
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
+          q);
     }
   }
 
@@ -225,7 +229,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
       this.fetch(fetchedList, fetchQueries, param);
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
+          fetchQuery.getReferenceQuery());
     }
   }
 

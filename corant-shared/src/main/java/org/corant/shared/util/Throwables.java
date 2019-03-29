@@ -19,6 +19,7 @@ import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -77,8 +78,7 @@ public class Throwables {
   public static class Attempt<S> {
 
     final Supplier<S> supplier;
-    Predicate<Throwable> ifThrow;
-    Supplier<RuntimeException> thenRethrow;
+    final LinkedList<Case<S>> cases = new LinkedList<>();
 
     private Attempt(Supplier<S> supplier) {
       this.supplier = shouldNotNull(supplier);
@@ -88,33 +88,53 @@ public class Throwables {
       try {
         return supplier.get();
       } catch (Exception e) {
-        if (ifThrow != null && causes(e).anyMatch(ifThrow)) {
-          if (thenRethrow != null) {
-            throw thenRethrow.get();
+        Iterator<Case<S>> it = cases.iterator();
+        for (; it.hasNext();) {
+          Case<S> cas = it.next();
+          if (cas.ifThrow != null && causes(e).anyMatch(cas.ifThrow)) {
+            if (cas.rethrow != null) {
+              throw cas.rethrow.get();
+            }
           }
         }
-        throw new RuntimeException(e);
+        if (e instanceof RuntimeException) {
+          throw (RuntimeException) e;
+        } else {
+          throw new RuntimeException(e);
+        }
+      } finally {
+        cases.clear();
       }
     }
 
-    public Attempt<S> ifThrow(final Class<? extends Throwable> causeClass) {
-      ifThrow = (t) -> causeClass.isInstance(t);
-      return this;
+    public Case<S> ifThrow(final Class<? extends Throwable> causeClass) {
+      return ifThrow((t) -> causeClass.isInstance(t));
     }
 
-    public Attempt<S> ifThrow(final Predicate<Throwable> p) {
-      ifThrow = p;
-      return this;
+    public Case<S> ifThrow(final Predicate<Throwable> p) {
+      Case<S> cas = new Case<>(this);
+      cas.ifThrow = p;
+      cases.add(cas);
+      return cas;
+    }
+  }
+
+  public static class Case<S> {
+    final Attempt<S> attempt;
+    Predicate<Throwable> ifThrow;
+    Supplier<RuntimeException> rethrow;
+
+    private Case(Attempt<S> attempt) {
+      this.attempt = attempt;
     }
 
-    public Attempt<S> thenRethrow(final RuntimeException thenRethrow) {
-      this.thenRethrow = () -> thenRethrow;
-      return this;
+    public Attempt<S> rethrow(final RuntimeException rethrow) {
+      return rethrow(() -> rethrow);
     }
 
-    public Attempt<S> thenRethrow(final Supplier<RuntimeException> thenRethrow) {
-      this.thenRethrow = thenRethrow;
-      return this;
+    public Attempt<S> rethrow(final Supplier<RuntimeException> rethrow) {
+      this.rethrow = rethrow;
+      return attempt;
     }
   }
 }

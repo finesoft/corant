@@ -583,6 +583,12 @@
 				<artifactId>weld-servlet-core</artifactId>
 				<version>${version.weld}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld.module</groupId>
+				<artifactId>weld-jta</artifactId>
+				<version>${version.weld}</version>
+			</dependency>
+
 
 			<!-- Java & Javax -->
 			<dependency>
@@ -755,7 +761,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-jta</artifactId>
+				<artifactId>corant-suites-jta-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

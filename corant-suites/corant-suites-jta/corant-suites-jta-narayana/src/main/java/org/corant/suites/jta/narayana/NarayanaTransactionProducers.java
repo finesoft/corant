@@ -15,6 +15,7 @@ package org.corant.suites.jta.narayana;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -121,7 +122,7 @@ public class NarayanaTransactionProducers {
   }
 
   @Produces
-  @ApplicationScoped
+  @Dependent
   UserTransaction userTransaction() {
     return com.arjuna.ats.jta.UserTransaction.userTransaction();
   }

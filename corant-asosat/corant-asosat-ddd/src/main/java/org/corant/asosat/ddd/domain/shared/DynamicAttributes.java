@@ -119,16 +119,9 @@ public interface DynamicAttributes {
     }
 
     public DynamicAttributeMap unmodifiable() {
-      return new DynamicAttributeMap() {
-
+      final Map<String, Object> unmodifiable = Collections.unmodifiableMap(map);
+      return new DynamicAttributeMap(unmodifiable) {
         private static final long serialVersionUID = 4947260095982487700L;
-
-        final transient Map<String, Object> unmodifiable = Collections.unmodifiableMap(map);
-
-        @Override
-        public Map<String, Object> unwrap() {
-          return unmodifiable;
-        }
 
         private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {

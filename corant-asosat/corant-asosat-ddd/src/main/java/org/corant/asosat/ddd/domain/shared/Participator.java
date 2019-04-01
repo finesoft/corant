@@ -56,14 +56,16 @@ public class Participator extends AbstractValueObject implements Principal {
   protected Participator() {}
 
   public static Participator currentOrg() {
-    if (Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
+    if (Corant.me() != null
+        && Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
       return Corant.instance().select(DefaultSecurityContextHolder.class).get().getCurrentOrg();
     }
     return empty();
   }
 
   public static Participator currentUser() {
-    if (Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
+    if (Corant.me() != null
+        && Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
       return Corant.instance().select(DefaultSecurityContextHolder.class).get().getCurrentUser();
     }
     return empty();

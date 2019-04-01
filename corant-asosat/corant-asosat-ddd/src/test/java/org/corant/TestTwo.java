@@ -13,6 +13,8 @@
  */
 package org.corant;
 
+import static org.corant.shared.util.MapUtils.asMap;
+import org.corant.asosat.ddd.domain.shared.Param;
 import org.corant.devops.test.unit.CorantJunit4Suite;
 import org.corant.devops.test.unit.RunConfig;
 import org.junit.runner.RunWith;
@@ -29,4 +31,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({CorantJunit4ClassRunnerTest1.class, CorantJunit4ClassRunnerTest2.class})
 public class TestTwo {
 
+  public static void main(String... strings) throws Exception {
+    Param p = Param.empty().withAttribute(asMap("a", true, "b", "1234"));
+    System.out.println(p.getAttributes().getString("b"));
+  }
 }

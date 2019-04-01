@@ -99,6 +99,9 @@ public class MongoClientExtension implements Extension {
   }
 
   public MongoClient getClient(String clientName) {
+    if (Corant.me() == null) {
+      return null;
+    }
     Instance<MongoClient> inst =
         Corant.instance().select(MongoClient.class, NamedLiteral.of(clientName));
     return inst.isResolvable() ? inst.get() : null;
@@ -133,6 +136,9 @@ public class MongoClientExtension implements Extension {
   }
 
   public MongoDatabase getDatabase(String namespace) {
+    if (Corant.me() == null) {
+      return null;
+    }
     Instance<MongoDatabase> inst =
         Corant.instance().select(MongoDatabase.class, NamedLiteral.of(namespace));
     return inst.isResolvable() ? inst.get() : null;
@@ -176,6 +182,9 @@ public class MongoClientExtension implements Extension {
   }
 
   public GridFSBucket getGridFSBucket(String namespace) {
+    if (Corant.me() == null) {
+      return null;
+    }
     Instance<GridFSBucket> inst =
         Corant.instance().select(GridFSBucket.class, NamedLiteral.of(namespace));
     return inst.isResolvable() ? inst.get() : null;

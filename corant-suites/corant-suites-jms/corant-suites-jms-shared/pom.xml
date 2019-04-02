@@ -7,7 +7,7 @@
 		<artifactId>corant-suites-jms</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-suites-jms-artemis</artifactId>
+	<artifactId>corant-suites-jms-shared</artifactId>
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
@@ -23,7 +23,7 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-boms</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -32,15 +32,22 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-jms-shared</artifactId>
+			<artifactId>corant-kernel</artifactId>
+		</dependency>
+		<!-- Standard JEE -->
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-cdi-client</artifactId>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.microprofile.config</groupId>
-			<artifactId>microprofile-config-api</artifactId>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

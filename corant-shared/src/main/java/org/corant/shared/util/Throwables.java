@@ -88,15 +88,17 @@ public class Throwables {
       try {
         return supplier.get();
       } catch (Exception e) {
-        Iterator<Case<S>> it = cases.iterator();
-        for (; it.hasNext();) {
-          Case<S> cas = it.next();
-          if (cas.ifThrow != null && causes(e).anyMatch(cas.ifThrow)) {
-            if (cas.rethrow != null) {
-              throw cas.rethrow.get();
+        causes(e).forEach(ce -> {
+          Iterator<Case<S>> it = cases.iterator();
+          for (; it.hasNext();) {
+            Case<S> cas = it.next();
+            if (cas.ifThrow != null && cas.ifThrow.test(ce)) {
+              if (cas.rethrow != null) {
+                throw cas.rethrow.get();
+              }
             }
           }
-        }
+        });
         if (e instanceof RuntimeException) {
           throw (RuntimeException) e;
         } else {

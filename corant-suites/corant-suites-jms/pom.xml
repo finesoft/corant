@@ -21,5 +21,6 @@
 	</licenses>
 	<modules>
 		<module>corant-suites-jms-artemis</module>
+		<module>corant-suites-jms-shared</module>
 	</modules>
 </project>

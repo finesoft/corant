@@ -27,7 +27,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public class JmsArtemisConfig implements ArtemisClientConfiguration {
+public class ArtemisJmsConfig implements ArtemisClientConfiguration {
 
   @Inject
   @ConfigProperty(name = "jms.artemis.username", defaultValue = "")

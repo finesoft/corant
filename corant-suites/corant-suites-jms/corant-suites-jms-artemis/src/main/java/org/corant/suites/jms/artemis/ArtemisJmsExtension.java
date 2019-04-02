@@ -65,7 +65,6 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
 
   void onBeforeShutdown(@Observes BeforeShutdown e) {
     consumers.values().forEach(JMSConsumer::close);
-    instance().select(JMSContext.class).get().close();
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {

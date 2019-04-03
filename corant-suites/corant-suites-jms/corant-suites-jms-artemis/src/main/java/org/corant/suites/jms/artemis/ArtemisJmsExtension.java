@@ -54,6 +54,10 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
   protected final Map<String, Queue> queues = new ConcurrentHashMap<>();
   protected final Map<Queue, JMSConsumer> consumers = new ConcurrentHashMap<>();
 
+  public Queue getQueue(String queueName) {
+    return queues.get(queueName);
+  }
+
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       event.<JMSProducer>addBean().addQualifier(Default.Literal.INSTANCE)

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Target({})
 @Retention(RUNTIME)
-public @interface MessageConsumerProperty {
+public @interface MessageConfigProperty {
   /** The name of the property */
   String name();
 

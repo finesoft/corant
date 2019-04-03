@@ -20,6 +20,7 @@ import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -253,11 +254,11 @@ public class Corant implements AutoCloseable {
     return inst;
   }
 
-  public synchronized static Instance<Object> tryInstance() {
+  public synchronized static Optional<Instance<Object>> tryInstance() {
     if (me == null || me.container == null) {
-      return null;
+      return Optional.empty();
     }
-    return me.container;
+    return Optional.of(me.container);
   }
 
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {

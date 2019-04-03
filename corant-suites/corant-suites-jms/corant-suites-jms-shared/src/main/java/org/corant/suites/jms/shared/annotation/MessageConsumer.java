@@ -32,9 +32,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface MessageConsumer {
 
-  MessageConsumerProperty[] properties() default {};
+  MessageConfigProperty[] properties() default {};
 
-  String[] queues();
+  String[] queues() default {};
 
   String selector() default "";
 

@@ -16,6 +16,7 @@ package org.corant.suites.jms.artemis;
 import static org.corant.Corant.instance;
 import static org.corant.Corant.me;
 import static org.corant.Corant.tryInstance;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
@@ -30,7 +31,6 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
@@ -38,6 +38,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJmsExtension;
 import org.corant.suites.jms.shared.annotation.MessageConsumer;
@@ -63,22 +64,20 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
     }
   }
 
-  void onBeforeShutdown(@Observes BeforeShutdown e) {
-    consumers.values().forEach(JMSConsumer::close);
-  }
-
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    if (me() != null && !tryInstance().select(JMSContext.class).isResolvable()) {
+    if (instance().select(JMSContext.class).isResolvable()) {
       logger.warning(() -> "Can not found jms context!");
       return;
     }
-    final JMSContext jmsc = tryInstance().select(JMSContext.class).get();
+    final JMSContext jmsc = instance().select(JMSContext.class).get();
     consumerMethods.forEach(cm -> {
       shouldBeTrue(cm.getJavaMember().getParameterCount() == 1);
       shouldBeTrue(cm.getJavaMember().getParameters()[0].getType().equals(Message.class));
       final MessageConsumer msn = cm.getAnnotation(MessageConsumer.class);
       for (String qn : msn.queues()) {
         if (isNotBlank(qn)) {
+          shouldBeFalse(queues.containsKey(qn), "The queue name %s on %s.%s has been used!", qn,
+              cm.getJavaMember().getDeclaringClass().getName(), cm.getJavaMember().getName());
           Queue queue = queues.computeIfAbsent(qn, q -> jmsc.createQueue(q));
           final JMSConsumer consumer = consumers.computeIfAbsent(queue,
               q -> isNotBlank(msn.selector()) ? jmsc.createConsumer(q, msn.selector())
@@ -87,6 +86,11 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
         }
       }
     });
+  }
+
+  void onPreCorantStop(@Observes PreContainerStopEvent e) {
+    consumers.values().forEach(JMSConsumer::close);
+    tryInstance().ifPresent(i -> i.select(JMSContext.class).get().close());
   }
 
   private MessageListener createMessageListener(AnnotatedMethod<?> method,

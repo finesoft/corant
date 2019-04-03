@@ -58,7 +58,7 @@ public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext
   }
 
   public JMSContext get() {
-    if (pooled) {
+    if (!pooled) {
       return globalContext;
     }
     try {

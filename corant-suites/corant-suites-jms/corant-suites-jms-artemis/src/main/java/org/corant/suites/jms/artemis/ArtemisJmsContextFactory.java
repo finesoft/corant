@@ -24,6 +24,7 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-jms-artemis
@@ -36,6 +37,13 @@ public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext
 
   @Inject
   ActiveMQConnectionFactory activeMQConnectionFactory;
+
+  @Inject
+  JMSContext globalContext;
+
+  @Inject
+  @ConfigProperty(name = "jms.artemis.context-pooled", defaultValue = "true")
+  Boolean pooled;
 
   volatile GenericObjectPool<JMSContext> pool;
 
@@ -50,6 +58,9 @@ public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext
   }
 
   public JMSContext get() {
+    if (pooled) {
+      return globalContext;
+    }
     try {
       return pool.borrowObject();
     } catch (Exception e) {
@@ -58,7 +69,9 @@ public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext
   }
 
   public void release(JMSContext jmsContext) {
-    pool.returnObject(jmsContext);
+    if (pooled) {
+      pool.returnObject(jmsContext);
+    }
   }
 
   @Override
@@ -73,8 +86,10 @@ public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext
 
   @PreDestroy
   void onPreDestroy() {
-    if (pool != null) {
-      pool.close();
+    if (pooled) {
+      if (pool != null) {
+        pool.close();
+      }
     }
   }
 }

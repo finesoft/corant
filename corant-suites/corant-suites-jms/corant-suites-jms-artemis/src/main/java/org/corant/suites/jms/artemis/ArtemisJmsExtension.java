@@ -59,6 +59,7 @@ import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLite
 public class ArtemisJmsExtension extends AbstractJmsExtension {
 
   protected final Map<String, Destination> destinations = new ConcurrentHashMap<>();
+  protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();
   protected final Map<Destination, JMSConsumer> consumers = new ConcurrentHashMap<>();
   protected final Map<MessageProducerLiteral, ArtemisMessageSender> senders =
       new ConcurrentHashMap<>();
@@ -82,7 +83,7 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
       logger.warning(() -> "Can not found jms context!");
       return;
     }
-    final JMSContext jmsc = instance().select(JMSContext.class).get();
+    final JMSContext globalJmsc = instance().select(JMSContext.class).get();
     receiverMethods.forEach(rm -> {
       shouldBeTrue(rm.getJavaMember().getParameterCount() == 1);
       shouldBeTrue(rm.getJavaMember().getParameters()[0].getType().equals(Message.class));
@@ -92,6 +93,8 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
           shouldBeFalse(destinations.containsKey(qn),
               "The destination name %s on %s.%s has been used!", qn,
               rm.getJavaMember().getDeclaringClass().getName(), rm.getJavaMember().getName());
+          JMSContext jmsc = globalJmsc.createContext(JMSContext.AUTO_ACKNOWLEDGE);
+          consumerJmsContexts.put(qn, jmsc);
           Destination destination = destinations.computeIfAbsent(qn,
               q -> msn.multicast() ? jmsc.createTopic(q) : jmsc.createQueue(q));
           final JMSConsumer consumer = consumers.computeIfAbsent(destination,
@@ -105,6 +108,7 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
 
   void onPreCorantStop(@Observes PreContainerStopEvent e) {
     consumers.values().forEach(JMSConsumer::close);
+    consumerJmsContexts.values().forEach(JMSContext::close);
     tryInstance().ifPresent(i -> i.select(JMSContext.class).get().close());
   }
 

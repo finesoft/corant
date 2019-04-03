@@ -13,13 +13,17 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.trim;
 import java.lang.annotation.Annotation;
+import java.util.Set;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 import org.corant.shared.util.MethodUtils.MethodSignature;
 import org.corant.shared.util.TypeUtils;
 import org.jboss.weld.injection.ParameterInjectionPoint;
@@ -51,5 +55,48 @@ public abstract class Cdis {
           TypeUtils.getRawType(method.getParameters().get(i).getBaseType()).getName();
     }
     return MethodSignature.of(methodName, parameterTypes);
+  }
+
+  public static class InjectionTargetWrapper<X> implements InjectionTarget<X> {
+
+    private final InjectionTarget<X> delegate;
+
+    /**
+     * @param delegate
+     */
+    public InjectionTargetWrapper(InjectionTarget<X> delegate) {
+      super();
+      this.delegate = shouldNotNull(delegate);
+    }
+
+    @Override
+    public void dispose(X instance) {
+      delegate.dispose(instance);
+    }
+
+    @Override
+    public Set<InjectionPoint> getInjectionPoints() {
+      return delegate.getInjectionPoints();
+    }
+
+    @Override
+    public void inject(X instance, CreationalContext<X> ctx) {
+      delegate.inject(instance, ctx);
+    }
+
+    @Override
+    public void postConstruct(X instance) {
+      delegate.postConstruct(instance);
+    }
+
+    @Override
+    public void preDestroy(X instance) {
+      delegate.preDestroy(instance);
+    }
+
+    @Override
+    public X produce(CreationalContext<X> ctx) {
+      return delegate.produce(ctx);
+    }
   }
 }

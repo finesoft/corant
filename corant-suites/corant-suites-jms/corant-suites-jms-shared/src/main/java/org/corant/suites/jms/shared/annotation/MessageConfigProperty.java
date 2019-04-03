@@ -14,8 +14,10 @@
 package org.corant.suites.jms.shared.annotation;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.StreamUtils.asStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * corant-suites-jms-shared
@@ -26,9 +28,86 @@ import java.lang.annotation.Target;
 @Target({})
 @Retention(RUNTIME)
 public @interface MessageConfigProperty {
+
   /** The name of the property */
   String name();
 
   /** The value of the property */
   String value();
+
+  public static class MessageConfigPropertyLiteral extends AnnotationLiteral<MessageConfigProperty>
+      implements MessageConfigProperty {
+
+    private static final long serialVersionUID = 7660764550683179095L;
+
+    final String name;
+    final String value;
+
+    private MessageConfigPropertyLiteral(String name, String value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    public static MessageConfigPropertyLiteral[] from(MessageConfigProperty... properties) {
+      return asStream(properties).map(MessageConfigPropertyLiteral::of)
+          .toArray(MessageConfigPropertyLiteral[]::new);
+    }
+
+    public static MessageConfigPropertyLiteral of(MessageConfigProperty p) {
+      return new MessageConfigPropertyLiteral(p.name(), p.value());
+    }
+
+    public static MessageConfigPropertyLiteral of(String name, String value) {
+      return new MessageConfigPropertyLiteral(name, value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      MessageConfigPropertyLiteral other = (MessageConfigPropertyLiteral) obj;
+      if (name == null) {
+        if (other.name != null) {
+          return false;
+        }
+      } else if (!name.equals(other.name)) {
+        return false;
+      }
+      if (value == null) {
+        if (other.value != null) {
+          return false;
+        }
+      } else if (!value.equals(other.value)) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (name == null ? 0 : name.hashCode());
+      result = prime * result + (value == null ? 0 : value.hashCode());
+      return result;
+    }
+
+    @Override
+    public String name() {
+      return name;
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+
+  }
 }

@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.corant.suites.jms.artemis;
+
+import static org.corant.Corant.instance;
+import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.copy;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.jms.Destination;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
+import javax.jms.Message;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLiteral;
+
+/**
+ * corant-suites-jms-artemis
+ *
+ * @author bingo 下午4:29:24
+ *
+ */
+public class ArtemisMessageSender {
+
+  protected final boolean multicast;
+
+  protected final String destinationName;
+
+  protected final List<Pair<String, String>> properties = new ArrayList<>();
+
+  protected ArtemisMessageSender(MessageProducerLiteral mpl) {
+    multicast = mpl.multicast();
+    destinationName = mpl.destination();
+    asStream(mpl.properties()).map(p -> Pair.of(p.name(), p.value())).forEach(properties::add);
+  }
+
+  public void send(byte[] message) {
+    doSend(message);
+  }
+
+  public void send(InputStream message) throws IOException {
+    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+      copy(message, buffer);
+      byte[] bytes = buffer.toByteArray();
+      send(bytes);
+    }
+  }
+
+  public void send(Map<String, Object> message) {
+    doSend(message);
+  }
+
+  public void send(Message message) {
+    doSend(message);
+  }
+
+  public void send(Serializable message) {
+    doSend(message);
+  }
+
+  public void send(String message) {
+    doSend(message);
+  }
+
+  @SuppressWarnings("unchecked")
+  void doSend(Object message) {
+    JMSContext jmsc = null;
+    final ArtemisJmsContextFactory fac = instance().select(ArtemisJmsContextFactory.class).get();
+    try {
+      jmsc = fac.get();
+      Destination d = multicast ? jmsc.createTopic(destinationName) : jmsc.createQueue(destinationName);
+      JMSProducer p = jmsc.createProducer();
+      if (message instanceof String) {
+        p.send(d, (String) message);
+      } else if (message instanceof Message) {
+        p.send(d, (Message) message);
+      } else if (message instanceof Map) {
+        p.send(d, (Map<String, Object>) message);
+      } else if (message instanceof byte[]) {
+        p.send(d, (byte[]) message);
+      } else if (message instanceof Serializable) {
+        p.send(d, (Serializable) message);
+      }
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    } finally {
+      fac.release(jmsc);
+    }
+  }
+
+}

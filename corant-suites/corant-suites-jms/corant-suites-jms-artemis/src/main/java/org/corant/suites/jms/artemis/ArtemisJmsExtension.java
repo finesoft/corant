@@ -18,6 +18,7 @@ import static org.corant.Corant.me;
 import static org.corant.Corant.tryInstance;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -29,19 +30,25 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ProcessInjectionTarget;
+import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
+import org.corant.kernel.util.Cdis.InjectionTargetWrapper;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJmsExtension;
-import org.corant.suites.jms.shared.annotation.MessageConsumer;
+import org.corant.suites.jms.shared.annotation.MessageReceiver;
+import org.corant.suites.jms.shared.annotation.MessageSender;
+import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLiteral;
 
 /**
  * corant-suites-jms-artemis
@@ -51,11 +58,13 @@ import org.corant.suites.jms.shared.annotation.MessageConsumer;
  */
 public class ArtemisJmsExtension extends AbstractJmsExtension {
 
-  protected final Map<String, Queue> queues = new ConcurrentHashMap<>();
-  protected final Map<Queue, JMSConsumer> consumers = new ConcurrentHashMap<>();
+  protected final Map<String, Destination> destinations = new ConcurrentHashMap<>();
+  protected final Map<Destination, JMSConsumer> consumers = new ConcurrentHashMap<>();
+  protected final Map<MessageProducerLiteral, ArtemisMessageSender> senders =
+      new ConcurrentHashMap<>();
 
-  public Queue getQueue(String queueName) {
-    return queues.get(queueName);
+  public Destination getDestination(String name) {
+    return destinations.get(name);
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
@@ -74,19 +83,21 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
       return;
     }
     final JMSContext jmsc = instance().select(JMSContext.class).get();
-    consumerMethods.forEach(cm -> {
-      shouldBeTrue(cm.getJavaMember().getParameterCount() == 1);
-      shouldBeTrue(cm.getJavaMember().getParameters()[0].getType().equals(Message.class));
-      final MessageConsumer msn = cm.getAnnotation(MessageConsumer.class);
-      for (String qn : msn.queues()) {
+    receiverMethods.forEach(rm -> {
+      shouldBeTrue(rm.getJavaMember().getParameterCount() == 1);
+      shouldBeTrue(rm.getJavaMember().getParameters()[0].getType().equals(Message.class));
+      final MessageReceiver msn = rm.getAnnotation(MessageReceiver.class);
+      for (String qn : msn.destinations()) {
         if (isNotBlank(qn)) {
-          shouldBeFalse(queues.containsKey(qn), "The queue name %s on %s.%s has been used!", qn,
-              cm.getJavaMember().getDeclaringClass().getName(), cm.getJavaMember().getName());
-          Queue queue = queues.computeIfAbsent(qn, q -> jmsc.createQueue(q));
-          final JMSConsumer consumer = consumers.computeIfAbsent(queue,
+          shouldBeFalse(destinations.containsKey(qn),
+              "The destination name %s on %s.%s has been used!", qn,
+              rm.getJavaMember().getDeclaringClass().getName(), rm.getJavaMember().getName());
+          Destination destination = destinations.computeIfAbsent(qn,
+              q -> msn.multicast() ? jmsc.createTopic(q) : jmsc.createQueue(q));
+          final JMSConsumer consumer = consumers.computeIfAbsent(destination,
               q -> isNotBlank(msn.selector()) ? jmsc.createConsumer(q, msn.selector())
                   : jmsc.createConsumer(q));
-          consumer.setMessageListener(createMessageListener(cm, me().getBeanManager()));
+          consumer.setMessageListener(createMessageListener(rm, me().getBeanManager()));
         }
       }
     });
@@ -95,6 +106,31 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
   void onPreCorantStop(@Observes PreContainerStopEvent e) {
     consumers.values().forEach(JMSConsumer::close);
     tryInstance().ifPresent(i -> i.select(JMSContext.class).get().close());
+  }
+
+  <X> void onProcessInjectionTarget(@Observes ProcessInjectionTarget<X> pit) {
+    final InjectionTarget<X> it = pit.getInjectionTarget();
+    final AnnotatedType<X> at = pit.getAnnotatedType();
+    pit.setInjectionTarget(new InjectionTargetWrapper<X>(it) {
+      @Override
+      public void inject(X instance, CreationalContext<X> ctx) {
+        it.inject(instance, ctx);
+        asStream(at.getJavaClass().getDeclaredFields()).forEach(field -> {
+          final MessageSender mp = field.getAnnotation(MessageSender.class);
+          if (mp != null && field.getType().isAssignableFrom(ArtemisMessageSender.class)) {
+            field.setAccessible(Boolean.TRUE);
+            final MessageProducerLiteral mpInst = MessageProducerLiteral.of(mp);
+            try {
+              field.set(instance,
+                  senders.computeIfAbsent(mpInst, (p) -> new ArtemisMessageSender(mpInst)));
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+              throw new CorantRuntimeException(e, "Can not inject ArtemisMessageSender to %s.%s",
+                  at.getJavaClass().getName(), field.getName());
+            }
+          }
+        });
+      }
+    });
   }
 
   private MessageListener createMessageListener(AnnotatedMethod<?> method,
@@ -106,13 +142,20 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
     Object inst = beanManager.getReference(propertyResolverBean,
         method.getJavaMember().getDeclaringClass(), creationalContext);
     method.getJavaMember().setAccessible(true);
-    return (msg) -> {
+    return new ArtemisMessageReceiver((msg) -> {
       try {
         method.getJavaMember().invoke(inst, msg);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         throw new CorantRuntimeException(e);
       }
-    };
+    });
+    // return (msg) -> {
+    // try {
+    // method.getJavaMember().invoke(inst, msg);
+    // } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    // throw new CorantRuntimeException(e);
+    // }
+    // };
   }
 
 }

@@ -11,25 +11,33 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared.annotation;
+package org.corant.suites.jms.artemis;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.util.function.Consumer;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 
 /**
- * corant-suites-jms-shared
+ * corant-suites-jms-artemis
  *
- * @author bingo 下午3:49:53
+ * @author bingo 下午4:26:21
  *
  */
-@Documented
-@Retention(RUNTIME)
-@Target(FIELD)
-public @interface MessageProducer {
+public class ArtemisMessageReceiver implements MessageListener {
 
-  MessageConfigProperty[] properties() default {};
+  private final Consumer<Message> consumer;
+
+  /**
+   * @param consumer
+   */
+  protected ArtemisMessageReceiver(Consumer<Message> consumer) {
+    super();
+    this.consumer = consumer;
+  }
+
+  @Override
+  public void onMessage(Message message) {
+    consumer.accept(message);
+  }
 
 }

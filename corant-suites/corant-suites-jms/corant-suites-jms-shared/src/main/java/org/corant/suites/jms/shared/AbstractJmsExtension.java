@@ -23,7 +23,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.suites.jms.shared.annotation.MessageConsumer;
+import org.corant.suites.jms.shared.annotation.MessageReceiver;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
 /**
@@ -35,20 +35,20 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJmsExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
-  protected final Set<AnnotatedMethod<?>> consumerMethods =
+  protected final Set<AnnotatedMethod<?>> receiverMethods =
       newSetFromMap(new ConcurrentHashMap<>());
   protected final Set<AnnotatedMethod<?>> streamProcessorMethods =
       newSetFromMap(new ConcurrentHashMap<>());
 
-  void onProcessAnnotatedType(@Observes @WithAnnotations({MessageConsumer.class,
+  void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceiver.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
     logger.info(() -> String.format("Scanning message consumer type: %s",
         pat.getAnnotatedType().getJavaClass().getName()));
     final AnnotatedType<?> annotatedType = pat.getAnnotatedType();
     for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
-      if (am.isAnnotationPresent(MessageConsumer.class)) {
+      if (am.isAnnotationPresent(MessageReceiver.class)) {
         logger.info(() -> "Found annotated message consumer method, adding for further processing");
-        consumerMethods.add(am);
+        receiverMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
         logger.info(() -> "found annotated message stream method, adding for further processing");
         streamProcessorMethods.add(am);

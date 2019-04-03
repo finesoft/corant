@@ -69,7 +69,7 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    if (instance().select(JMSContext.class).isResolvable()) {
+    if (!instance().select(JMSContext.class).isResolvable()) {
       logger.warning(() -> "Can not found jms context!");
       return;
     }
@@ -105,6 +105,7 @@ public class ArtemisJmsExtension extends AbstractJmsExtension {
         beanManager.createCreationalContext(propertyResolverBean);
     Object inst = beanManager.getReference(propertyResolverBean,
         method.getJavaMember().getDeclaringClass(), creationalContext);
+    method.getJavaMember().setAccessible(true);
     return (msg) -> {
       try {
         method.getJavaMember().invoke(inst, msg);

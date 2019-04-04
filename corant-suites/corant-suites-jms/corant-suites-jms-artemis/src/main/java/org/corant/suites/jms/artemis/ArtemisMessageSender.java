@@ -82,7 +82,7 @@ public class ArtemisMessageSender {
   @SuppressWarnings("unchecked")
   void doSend(Object message) {
     JMSContext jmsc = null;
-    final ArtemisJmsContextFactory fac = instance().select(ArtemisJmsContextFactory.class).get();
+    final ArtemisMessageServiceContextFactory fac = instance().select(ArtemisMessageServiceContextFactory.class).get();
     try {
       jmsc = fac.get();
       Destination d = multicast ? jmsc.createTopic(destinationName) : jmsc.createQueue(destinationName);

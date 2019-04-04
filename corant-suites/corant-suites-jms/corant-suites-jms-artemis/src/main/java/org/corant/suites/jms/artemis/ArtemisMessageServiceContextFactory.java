@@ -33,7 +33,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public class ArtemisJmsContextFactory extends BasePooledObjectFactory<JMSContext> {
+public class ArtemisMessageServiceContextFactory extends BasePooledObjectFactory<JMSContext> {
 
   @Inject
   ActiveMQConnectionFactory activeMQConnectionFactory;

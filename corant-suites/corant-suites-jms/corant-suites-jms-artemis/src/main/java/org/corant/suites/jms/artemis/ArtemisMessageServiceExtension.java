@@ -45,7 +45,7 @@ import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.util.Cdis.InjectionTargetWrapper;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.AbstractJmsExtension;
+import org.corant.suites.jms.shared.AbstractMessageServiceExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceiver;
 import org.corant.suites.jms.shared.annotation.MessageSender;
 import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLiteral;
@@ -56,7 +56,7 @@ import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLite
  * @author bingo 下午4:12:15
  *
  */
-public class ArtemisJmsExtension extends AbstractJmsExtension {
+public class ArtemisMessageServiceExtension extends AbstractMessageServiceExtension {
 
   protected final Map<String, Destination> destinations = new ConcurrentHashMap<>();
   protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();

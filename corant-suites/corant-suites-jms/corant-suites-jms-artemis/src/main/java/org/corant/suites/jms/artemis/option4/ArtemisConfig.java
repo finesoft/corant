@@ -1,33 +1,28 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.artemis;
+package org.corant.suites.jms.artemis.option4;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.apache.artemis.client.cdi.configuration.ArtemisClientConfiguration;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-jms-artemis
  *
- * @author bingo 下午4:34:45
+ * @author bingo 上午10:08:11
  *
  */
-@ApplicationScoped
-public class ArtemisJmsConfig implements ArtemisClientConfiguration {
+public class ArtemisConfig {
 
   @Inject
   @ConfigProperty(name = "jms.artemis.username", defaultValue = "")
@@ -62,49 +57,39 @@ public class ArtemisJmsConfig implements ArtemisClientConfiguration {
   @ConfigProperty(name = "jms.artemis.ha", defaultValue = "false")
   private boolean ha;
 
-  @Override
   public String getConnectorFactory() {
     return connectorFactory;
   }
 
-  @Override
   public String getHost() {
     return host;
   }
 
-  @Override
   public String getPassword() {
     return password;
   }
 
-  @Override
   public Integer getPort() {
     return port;
   }
 
-  @Override
   public String getUrl() {
     return url;
   }
 
-  @Override
   public String getUsername() {
     return userame;
   }
 
-  @Override
   public boolean hasAuthentication() {
     return getUsername() != null && getPassword() != null;
   }
 
-  @Override
   public boolean isHa() {
     return ha;
   }
 
-  @Override
   public boolean startEmbeddedBroker() {
     return embeddedBroker;
   }
-
 }

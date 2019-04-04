@@ -32,7 +32,7 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
  * @author bingo 下午3:53:23
  *
  */
-public abstract class AbstractJmsExtension implements Extension {
+public abstract class AbstractMessageServiceExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
   protected final Set<AnnotatedMethod<?>> receiverMethods =
@@ -50,7 +50,7 @@ public abstract class AbstractJmsExtension implements Extension {
         logger.info(() -> "Found annotated message consumer method, adding for further processing");
         receiverMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
-        logger.info(() -> "found annotated message stream method, adding for further processing");
+        logger.info(() -> "Found annotated message stream method, adding for further processing");
         streamProcessorMethods.add(am);
       }
     }

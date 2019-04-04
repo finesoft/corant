@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * @author bingo 下午4:42:40
  *
  */
-public interface JmsMessageConverter<M extends Supplier<M>, T> {
+public interface MessageConverter<M extends Supplier<M>, T> {
 
   T convert(Supplier<M> supplier);
 

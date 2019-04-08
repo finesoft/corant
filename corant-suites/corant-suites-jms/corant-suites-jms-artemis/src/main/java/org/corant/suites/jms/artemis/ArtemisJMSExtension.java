@@ -41,6 +41,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
@@ -168,7 +169,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         final JMSConsumer consumer =
             isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
                 : jmsc.createConsumer(destination);
-        consumer.setMessageListener(createMessageListener(rm, me().getBeanManager()));
+        consumer.setMessageListener(createMessageListener(rm, me().getBeanManager(), sessionModel));
         consumers.put(key, consumer);
       }
     });
@@ -207,8 +208,8 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     return activeMQConnectionFactory.disableFinalizeChecks();
   }
 
-  private MessageListener createMessageListener(AnnotatedMethod<?> method,
-      BeanManager beanManager) {
+  private MessageListener createMessageListener(AnnotatedMethod<?> method, BeanManager beanManager,
+      int sessoinModel) {
     final Set<Bean<?>> beans = beanManager.getBeans(method.getJavaMember().getDeclaringClass());
     final Bean<?> propertyResolverBean = beanManager.resolve(beans);
     final CreationalContext<?> creationalContext =
@@ -219,7 +220,11 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     return new ArtemisMessageReceiver((msg) -> {
       try {
         method.getJavaMember().invoke(inst, msg);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        if (sessoinModel == JMSContext.CLIENT_ACKNOWLEDGE) {
+          msg.acknowledge();
+        }
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | JMSException e) {
         throw new CorantRuntimeException(e);
       }
     });

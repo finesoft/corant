@@ -41,7 +41,7 @@ public @interface MessageReceive {
 
   String selector() default "";
 
-  int sessionModel() default JMSContext.AUTO_ACKNOWLEDGE;
+  int sessionModel() default JMSContext.CLIENT_ACKNOWLEDGE;
 
   Class<?> type() default String.class;
 }

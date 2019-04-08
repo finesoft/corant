@@ -52,6 +52,7 @@ import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.MessageSender;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
@@ -106,7 +107,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected final Map<String, ArtemisConfig> configs = new HashMap<>();
-  protected final Map<Destination, JMSConsumer> consumers = new ConcurrentHashMap<>();
+  protected final Map<Object, JMSConsumer> consumers = new ConcurrentHashMap<>();
   protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();
 
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
@@ -159,13 +160,14 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         }
         JMSContext jmsc = ctx.createContext(JMSContext.AUTO_ACKNOWLEDGE);
         Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
-        shouldBeFalse(consumers.containsKey(destination),
-            "The destination name %s on %s.%s has been used!", dn, clsNme, metNme);
+        final Pair<String, Destination> key = Pair.of(cfn, destination);
+        shouldBeFalse(consumers.containsKey(key), "The destination name %s on %s.%s has been used!",
+            dn, clsNme, metNme);
         final JMSConsumer consumer =
             isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
                 : jmsc.createConsumer(destination);
         consumer.setMessageListener(createMessageListener(rm, me().getBeanManager()));
-        consumers.put(destination, consumer);
+        consumers.put(key, consumer);
       }
     });
   }

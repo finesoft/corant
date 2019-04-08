@@ -38,12 +38,7 @@ public abstract class JMSContextHolder implements Serializable {
   final transient Map<JMSContextKey, JMSContext> contexts = new ConcurrentHashMap<>();
 
   public JMSContext compute(final JMSContextKey key) {
-    JMSContext jmsContext = get(key);
-    if (jmsContext == null) {
-      jmsContext = key.create();
-      put(key, jmsContext);
-    }
-    return jmsContext;
+    return contexts.computeIfAbsent(key, k -> k.create());
   }
 
   public JMSContext get(final JMSContextKey key) {

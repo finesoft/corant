@@ -314,8 +314,6 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   }
 
   private synchronized JMSContext context() {
-    // instance().select(TransactionServices.class).isResolvable()
-    // && instance().select(TransactionServices.class).get().isTransactionActive()
     if (isInTransaction()) {
       return txCtxHolder.compute(key);
     }

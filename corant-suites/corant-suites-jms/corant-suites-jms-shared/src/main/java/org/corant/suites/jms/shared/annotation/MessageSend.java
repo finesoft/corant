@@ -31,7 +31,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Target(FIELD)
 public @interface MessageSend {
 
-  String connectionFactory();
+  String connectionFactory() default "";
 
   String destination();
 

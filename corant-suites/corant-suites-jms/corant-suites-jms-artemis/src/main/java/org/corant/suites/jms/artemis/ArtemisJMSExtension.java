@@ -142,7 +142,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
-      logger.warning(() -> "Can not found jms connection factory!");
+      logger.warning(() -> "Can not found any jms connection factory!");
       return;
     }
     receiverMethods.forEach(rm -> {
@@ -161,8 +161,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         JMSContext jmsc = ctx.createContext(JMSContext.AUTO_ACKNOWLEDGE);
         Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
         final Pair<String, Destination> key = Pair.of(cfn, destination);
-        shouldBeFalse(consumers.containsKey(key), "The destination name %s on %s.%s has been used!",
-            dn, clsNme, metNme);
+        shouldBeFalse(consumers.containsKey(key),
+            "The destination named %s with connection factory %s on %s.%s has been used!", dn, cfn,
+            clsNme, metNme);
         final JMSConsumer consumer =
             isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
                 : jmsc.createConsumer(destination);

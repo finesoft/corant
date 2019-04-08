@@ -11,33 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.artemis;
+package org.corant.suites.jms.shared;
 
-import java.util.function.Consumer;
-import javax.jms.Message;
-import org.corant.suites.jms.shared.MessageReceiver;
+import javax.jms.MessageListener;
 
 /**
- * corant-suites-jms-artemis
- *
- * @author bingo 下午4:26:21
+ * corant-suites-jms-shared
+ * 
+ * @author bingo 下午3:19:31
  *
  */
-public class ArtemisMessageReceiver implements MessageReceiver {
-
-  private final Consumer<Message> consumer;
-
-  /**
-   * @param consumer
-   */
-  protected ArtemisMessageReceiver(Consumer<Message> consumer) {
-    super();
-    this.consumer = consumer;
-  }
-
-  @Override
-  public void onMessage(Message message) {
-    consumer.accept(message);
-  }
+public interface MessageReceiver extends MessageListener {
 
 }

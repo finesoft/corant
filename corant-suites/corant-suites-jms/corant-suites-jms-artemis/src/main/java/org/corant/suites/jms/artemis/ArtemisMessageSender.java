@@ -14,22 +14,22 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.Corant.instance;
-import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StreamUtils.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils.Pair;
-import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLiteral;
+import org.corant.suites.jms.shared.ExtendedJMSContext;
+import org.corant.suites.jms.shared.JMSContextKey;
+import org.corant.suites.jms.shared.JMSContextProducer;
+import org.corant.suites.jms.shared.MessageSender;
+import org.corant.suites.jms.shared.annotation.MessageSend.MessageSenderLiteral;
 
 /**
  * corant-suites-jms-artemis
@@ -37,24 +37,29 @@ import org.corant.suites.jms.shared.annotation.MessageSender.MessageProducerLite
  * @author bingo 下午4:29:24
  *
  */
-public class ArtemisMessageSender {
+public class ArtemisMessageSender implements MessageSender {
 
   protected final boolean multicast;
 
   protected final String destinationName;
 
-  protected final List<Pair<String, String>> properties = new ArrayList<>();
+  protected final String connectionFactory;
 
-  protected ArtemisMessageSender(MessageProducerLiteral mpl) {
+  protected final int sessionModel;
+
+  protected ArtemisMessageSender(MessageSenderLiteral mpl) {
     multicast = mpl.multicast();
     destinationName = mpl.destination();
-    asStream(mpl.properties()).map(p -> Pair.of(p.name(), p.value())).forEach(properties::add);
+    connectionFactory = mpl.connectionFactory();
+    sessionModel = mpl.sessionModel();
   }
 
+  @Override
   public void send(byte[] message) {
     doSend(message);
   }
 
+  @Override
   public void send(InputStream message) throws IOException {
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
       copy(message, buffer);
@@ -63,29 +68,34 @@ public class ArtemisMessageSender {
     }
   }
 
+  @Override
   public void send(Map<String, Object> message) {
     doSend(message);
   }
 
+  @Override
   public void send(Message message) {
     doSend(message);
   }
 
+  @Override
   public void send(Serializable message) {
     doSend(message);
   }
 
+  @Override
   public void send(String message) {
     doSend(message);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "resource"})
   void doSend(Object message) {
-    JMSContext jmsc = null;
-    final ArtemisMessageServiceContextFactory fac = instance().select(ArtemisMessageServiceContextFactory.class).get();
     try {
-      jmsc = fac.get();
-      Destination d = multicast ? jmsc.createTopic(destinationName) : jmsc.createQueue(destinationName);
+      JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
+      JMSContext jmsc = new ExtendedJMSContext(new JMSContextKey(connectionFactory, sessionModel),
+          ctxProducer.getRequestScoped(), ctxProducer.getTransactionScoped());
+      Destination d =
+          multicast ? jmsc.createTopic(destinationName) : jmsc.createQueue(destinationName);
       JMSProducer p = jmsc.createProducer();
       if (message instanceof String) {
         p.send(d, (String) message);
@@ -100,8 +110,6 @@ public class ArtemisMessageSender {
       }
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
-    } finally {
-      fac.release(jmsc);
     }
   }
 

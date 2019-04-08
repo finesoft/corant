@@ -30,13 +30,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface MessageReceiver {
+public @interface MessageReceive {
 
   String[] destinations() default {};
 
   boolean multicast() default false;
-
-  MessageConfigProperty[] properties() default {};
 
   String selector() default "";
 

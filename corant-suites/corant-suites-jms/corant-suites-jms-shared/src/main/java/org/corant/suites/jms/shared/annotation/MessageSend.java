@@ -19,7 +19,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
-import org.corant.suites.jms.shared.annotation.MessageConfigProperty.MessageConfigPropertyLiteral;
 
 /**
  * corant-suites-jms-shared
@@ -30,44 +29,61 @@ import org.corant.suites.jms.shared.annotation.MessageConfigProperty.MessageConf
 @Documented
 @Retention(RUNTIME)
 @Target(FIELD)
-public @interface MessageSender {
+public @interface MessageSend {
 
-  boolean multicast() default false;
-
-  MessageConfigProperty[] properties() default {};
+  String connectionFactory();
 
   String destination();
 
-  public static class MessageProducerLiteral extends AnnotationLiteral<MessageSender>
-      implements MessageSender {
+  boolean multicast()
+
+  default false;
+
+  int sessionModel() default 1;
+
+  public static class MessageSenderLiteral extends AnnotationLiteral<MessageSend>
+      implements MessageSend {
 
     private static final long serialVersionUID = 7391504689355513463L;
 
-    final MessageConfigPropertyLiteral[] properties;
     final String destination;
     final boolean multicast;
+    final String connectionFactory;
+    final int sessionModel;
 
     /**
-     * @param queue
-     * @param properties
+     * @param connectionFactory
+     * @param sessionModel
+     * @param multicast
+     * @param destination
      */
-    private MessageProducerLiteral(boolean multicast, String queue,
-        MessageConfigPropertyLiteral[] properties) {
+    private MessageSenderLiteral(String connectionFactory, int sessionModel, boolean multicast,
+        String destination) {
       super();
+      this.destination = destination;
       this.multicast = multicast;
-      this.destination = queue;
-      this.properties = properties;
+      this.connectionFactory = connectionFactory;
+      this.sessionModel = sessionModel;
     }
 
-    public static MessageProducerLiteral of(boolean multicast, String destination,
-        MessageConfigProperty[] properties) {
-      return new MessageProducerLiteral(multicast, destination,
-          MessageConfigPropertyLiteral.from(properties));
+    public static MessageSenderLiteral of(MessageSend p) {
+      return new MessageSenderLiteral(p.connectionFactory(), p.sessionModel(), p.multicast(),
+          p.destination());
     }
 
-    public static MessageProducerLiteral of(MessageSender p) {
-      return new MessageProducerLiteral(p.multicast(), p.destination(),
-          MessageConfigPropertyLiteral.from(p.properties()));
+    public static MessageSenderLiteral of(String connectionFactory, int sessionModel,
+        boolean multicast, String destination) {
+      return new MessageSenderLiteral(connectionFactory, sessionModel, multicast, destination);
+    }
+
+    @Override
+    public String connectionFactory() {
+      return connectionFactory;
+    }
+
+    @Override
+    public String destination() {
+      return destination;
     }
 
     @Override
@@ -76,13 +92,8 @@ public @interface MessageSender {
     }
 
     @Override
-    public MessageConfigProperty[] properties() {
-      return properties;
-    }
-
-    @Override
-    public String destination() {
-      return destination;
+    public int sessionModel() {
+      return sessionModel;
     }
 
   }

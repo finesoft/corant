@@ -19,6 +19,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import javax.jms.JMSContext;
 
 /**
  * corant-suites-jms-shared
@@ -39,6 +40,8 @@ public @interface MessageReceive {
   boolean multicast() default false;
 
   String selector() default "";
+
+  int sessionModel() default JMSContext.AUTO_ACKNOWLEDGE;
 
   Class<?> type() default String.class;
 }

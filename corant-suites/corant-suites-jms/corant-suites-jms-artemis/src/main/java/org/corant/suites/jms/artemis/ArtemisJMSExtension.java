@@ -158,7 +158,8 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         if (isBlank(dn)) {
           continue;
         }
-        JMSContext jmsc = ctx.createContext(JMSContext.AUTO_ACKNOWLEDGE);
+        final int sessionModel = msn.sessionModel();
+        JMSContext jmsc = ctx.createContext(sessionModel);
         Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
         final Pair<String, Destination> key = Pair.of(cfn, destination);
         shouldBeFalse(consumers.containsKey(key),

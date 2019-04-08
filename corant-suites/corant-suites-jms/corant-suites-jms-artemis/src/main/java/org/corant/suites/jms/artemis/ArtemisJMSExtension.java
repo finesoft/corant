@@ -17,6 +17,8 @@ import static org.corant.Corant.instance;
 import static org.corant.Corant.me;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -104,8 +106,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected final Map<String, ArtemisConfig> configs = new HashMap<>();
-  protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();
   protected final Map<Destination, JMSConsumer> consumers = new ConcurrentHashMap<>();
+  protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();
 
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {
@@ -138,28 +140,32 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    if (!instance().select(ConnectionFactory.class).isResolvable()) {
-      logger.warning(() -> "Can not found jms context!");
+    if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
+      logger.warning(() -> "Can not found jms connection factory!");
       return;
     }
-    final JMSContext globalJmsc = instance().select(ConnectionFactory.class).get().createContext();
     receiverMethods.forEach(rm -> {
       shouldBeTrue(rm.getJavaMember().getParameterCount() == 1);
       shouldBeTrue(rm.getJavaMember().getParameters()[0].getType().equals(Message.class));
+      final String clsNme = rm.getJavaMember().getDeclaringClass().getName();
+      final String metNme = rm.getJavaMember().getName();
       final MessageReceive msn = rm.getAnnotation(MessageReceive.class);
-      for (String qn : msn.destinations()) {
-        if (isNotBlank(qn)) {
-          shouldBeFalse(consumerJmsContexts.containsKey(qn),
-              "The destination name %s on %s.%s has been used!", qn,
-              rm.getJavaMember().getDeclaringClass().getName(), rm.getJavaMember().getName());
-          JMSContext jmsc = globalJmsc.createContext(JMSContext.AUTO_ACKNOWLEDGE);
-          consumerJmsContexts.put(qn, jmsc);
-          Destination destination = msn.multicast() ? jmsc.createTopic(qn) : jmsc.createQueue(qn);
-          final JMSConsumer consumer = consumers.computeIfAbsent(destination,
-              q -> isNotBlank(msn.selector()) ? jmsc.createConsumer(q, msn.selector())
-                  : jmsc.createConsumer(q));
-          consumer.setMessageListener(createMessageListener(rm, me().getBeanManager()));
+      final String cfn = defaultString(msn.connectionFactory());
+      final JMSContext ctx = consumerJmsContexts.computeIfAbsent(cfn,
+          f -> retriveConnectionFactory(f).createContext(JMSContext.AUTO_ACKNOWLEDGE));
+      for (String dn : msn.destinations()) {
+        if (isBlank(dn)) {
+          continue;
         }
+        JMSContext jmsc = ctx.createContext(JMSContext.AUTO_ACKNOWLEDGE);
+        Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
+        shouldBeFalse(consumers.containsKey(destination),
+            "The destination name %s on %s.%s has been used!", dn, clsNme, metNme);
+        final JMSConsumer consumer =
+            isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
+                : jmsc.createConsumer(destination);
+        consumer.setMessageListener(createMessageListener(rm, me().getBeanManager()));
+        consumers.put(destination, consumer);
       }
     });
   }

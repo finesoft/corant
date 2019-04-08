@@ -32,6 +32,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface MessageReceive {
 
+  String connectionFactory() default "";
+
   String[] destinations() default {};
 
   boolean multicast() default false;

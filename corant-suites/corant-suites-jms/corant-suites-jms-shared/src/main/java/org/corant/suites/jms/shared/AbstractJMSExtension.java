@@ -14,15 +14,21 @@
 package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
+import static org.corant.Corant.instance;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import javax.jms.ConnectionFactory;
+import org.corant.kernel.util.Unnamed;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
@@ -40,6 +46,18 @@ public abstract class AbstractJMSExtension implements Extension {
       newSetFromMap(new ConcurrentHashMap<>());
   protected final Set<AnnotatedMethod<?>> streamProcessorMethods =
       newSetFromMap(new ConcurrentHashMap<>());
+
+  public static ConnectionFactory retriveConnectionFactory(String connectionFactory) {
+    if (isEmpty(connectionFactory)) {
+      if (instance().select(ConnectionFactory.class).isResolvable()) {
+        return instance().select(ConnectionFactory.class).get();
+      }
+      return instance().select(ConnectionFactory.class, Unnamed.INST).get();
+    } else {
+      return shouldNotNull(
+          instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactory)).get());
+    }
+  }
 
   void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {

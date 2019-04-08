@@ -13,19 +13,15 @@
  */
 package org.corant.suites.jms.shared;
 
-import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.io.Serializable;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSSessionMode;
-import org.corant.kernel.util.Unnamed;
 
 /**
  * corant-suites-jms-artemis
@@ -107,15 +103,8 @@ public class JMSContextKey implements Serializable {
       if (connectionFactoryInstance != null) {
         return connectionFactoryInstance;
       }
-      if (isEmpty(connectionFactory)) {
-        if (instance().select(ConnectionFactory.class).isResolvable()) {
-          return instance().select(ConnectionFactory.class).get();
-        }
-        return instance().select(ConnectionFactory.class, Unnamed.INST).get();
-      } else {
-        return shouldNotNull(connectionFactoryInstance =
-            instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactory)).get());
-      }
+      return shouldNotNull(connectionFactoryInstance =
+          AbstractJMSExtension.retriveConnectionFactory(connectionFactory));
     }
   }
 }

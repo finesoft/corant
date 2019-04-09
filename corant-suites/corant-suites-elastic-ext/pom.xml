@@ -18,6 +18,10 @@
 			<name>AL2</name>
 		</license>
 	</licenses>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.elasticsearch>6.5.4</version.elasticsearch>
+	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -35,7 +39,7 @@
 			<artifactId>elasticsearch</artifactId>
 		</dependency>
 	</dependencies>
-	<!--
+	<!-- use maven package modify artifact version name
 	<build>
 		<resources>
 			<resource>

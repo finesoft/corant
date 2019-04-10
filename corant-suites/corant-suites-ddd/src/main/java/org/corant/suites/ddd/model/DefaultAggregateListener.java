@@ -40,6 +40,7 @@ public class DefaultAggregateListener {
   public DefaultAggregateListener() {}
 
   protected void handlePostLoad(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     o.withLifecycle(Lifecycle.ENABLED).callAssistant().clearMessages();
   }
 
@@ -57,7 +58,6 @@ public class DefaultAggregateListener {
 
   protected void handlePrePersist(AbstractAggregate o) {
     o.preEnable();
-    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     return;
   }
 

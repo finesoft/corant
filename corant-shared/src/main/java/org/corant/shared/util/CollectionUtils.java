@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.util.CollectionUtils.ListJoins.JoinType;
 
@@ -157,6 +158,17 @@ public class CollectionUtils {
     }
   }
 
+  public static <T> List<T> listRemoveIf(List<T> list, Predicate<T> p) {
+    if (list == null) {
+      return null;
+    } else if (p == null) {
+      return list;
+    } else {
+      list.removeIf(p);
+      return list;
+    }
+  }
+
   public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
       final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
     return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
@@ -171,6 +183,17 @@ public class CollectionUtils {
           .values().forEach(result::add);
     }
     return result;
+  }
+
+  public static <T> Set<T> setRemoveIf(Set<T> set, Predicate<T> p) {
+    if (set == null) {
+      return null;
+    } else if (p == null) {
+      return set;
+    } else {
+      set.removeIf(p);
+      return set;
+    }
   }
 
   public static class ListJoins<F, J, T> {

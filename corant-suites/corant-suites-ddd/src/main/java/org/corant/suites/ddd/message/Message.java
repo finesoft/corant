@@ -34,16 +34,16 @@ public interface Message extends Serializable {
     return Long.compare(m1.sequenceNumber(), m2.sequenceNumber());
   }
 
+  default Object destination() {
+    return getMetadata() == null ? null : getMetadata().getDestination();
+  }
+
   MessageMetadata getMetadata();
 
   Object getPayload();
 
   default Instant occurredTime() {
     return getMetadata() == null ? null : getMetadata().getOccurredTime();
-  }
-
-  default String queueName() {
-    return getMetadata() == null ? null : getMetadata().getQueue().toString();
   }
 
   default long sequenceNumber() {
@@ -64,8 +64,9 @@ public interface Message extends Serializable {
 
   }
 
+  public interface MessageHandling extends Serializable {
 
-  public static interface MessageHandling extends Serializable {
+    Object getDestination();
 
     Instant getHandledTime();
 
@@ -73,12 +74,10 @@ public interface Message extends Serializable {
 
     Object getMessageId();
 
-    Object getQueue();
-
     boolean isSuccess();
   }
 
-  public static interface MessageIdentifier {
+  public interface MessageIdentifier {
 
     Serializable getId();
 
@@ -88,13 +87,17 @@ public interface Message extends Serializable {
 
   }
 
-  public static interface MessageMetadata extends Serializable {
+  public interface MessageMetadata extends Serializable {
 
-    Object getAttributes();
+    default Object getAttributes() {
+      return null;
+    }
+
+    default Object getDestination() {
+      return null;
+    }
 
     Instant getOccurredTime();
-
-    Object getQueue();
 
     long getSequenceNumber();
 
@@ -109,7 +112,7 @@ public interface Message extends Serializable {
 
   public interface MessageQueues {
 
-    static final String DFLT = "default";
+    String DFLT = "default";
 
   }
 

@@ -23,6 +23,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.Corant;
+import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
@@ -56,15 +57,18 @@ public class DefaultAggregateListener {
 
   protected void handlePrePersist(AbstractAggregate o) {
     o.preEnable();
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     return;
   }
 
   protected void handlePreRemove(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.DESTROYED));
     return;
   }
 
   protected void handlePreUpdate(AbstractAggregate o) {
     o.preEnable();
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     registerToUnitOfWork(o.withLifecycle(Lifecycle.ENABLED));
   }
 
@@ -117,7 +121,7 @@ public class DefaultAggregateListener {
     }
   }
 
-  protected void registerToUnitOfWork(AbstractAggregate o) {
+  protected void registerToUnitOfWork(Object o) {
     Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
     if (um.isResolvable()) {
       um.get().getCurrentUnitOfWork().register(o);

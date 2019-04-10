@@ -16,12 +16,10 @@ package org.corant.suites.ddd.unitwork;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageService;
-import org.corant.suites.ddd.message.MessageService.MessageConvertor;
 import org.corant.suites.ddd.saga.SagaService;
 
 /**
@@ -30,17 +28,15 @@ import org.corant.suites.ddd.saga.SagaService;
 public abstract class AbstractUnitOfWork implements UnitOfWork {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-  protected final List<Message> message = new LinkedList<>();
+  protected final LinkedList<Message> messages = new LinkedList<>();
   protected final AbstractUnitOfWorksManager manager;
   protected final MessageService messageService;
   protected final SagaService sagaService;
-  protected final MessageConvertor messageConvertor;
   protected volatile boolean activated = false;
 
   protected AbstractUnitOfWork(AbstractUnitOfWorksManager manager) {
     this.manager = manager;
     messageService = defaultObject(manager.getMessageService(), MessageService.empty());
-    messageConvertor = manager.getMessageService().getConvertor();
     sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
     activated = true;
   }
@@ -48,22 +44,18 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
   @Override
   public void complete(boolean success) {
     activated = false;
-    if (success && !message.isEmpty()) {
-      message.stream().sorted(Message::compare).map(messageConvertor::to).filter(Objects::nonNull)
-          .forEachOrdered(messageService::send);
-    }
   }
 
   protected void clear() {
-    message.clear();
+    messages.clear();
   }
 
   protected UnitOfWorksManager getManager() {
     return manager;
   }
 
-  protected List<Message> getMessage() {
-    return message;
+  protected List<Message> getMessages() {
+    return messages;
   }
 
   protected void handlePostCompleted(final Object registration, final boolean success) {
@@ -85,5 +77,4 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
       }
     });
   }
-
 }

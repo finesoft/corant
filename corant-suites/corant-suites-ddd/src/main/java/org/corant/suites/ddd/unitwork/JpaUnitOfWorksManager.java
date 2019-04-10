@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -53,6 +55,14 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Inject
   JpaPersistenceService persistenceService;
 
+  @Inject
+  @Any
+  Instance<MessageService> messageService;
+
+  @Inject
+  @Any
+  Instance<SagaService> sagaService;
+
   @Override
   public JpaUnitOfWork getCurrentUnitOfWork() {
     try {
@@ -70,12 +80,12 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Override
   public MessageService getMessageService() {
-    return MessageService.empty();
+    return messageService.isResolvable() ? messageService.get() : MessageService.empty();
   }
 
   @Override
   public SagaService getSagaService() {
-    return SagaService.empty();
+    return sagaService.isResolvable() ? sagaService.get() : SagaService.empty();
   }
 
   public TransactionManager getTransactionManager() {

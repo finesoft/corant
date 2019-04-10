@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.shared.util.CollectionUtils.listRemoveIf;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +30,9 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -92,10 +95,10 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registration.values().forEach(v -> v.remove(ai));
-          message.removeIf(e -> Objects.equals(e.getMetadata().getSource(), ai));
+          messages.removeIf(e -> Objects.equals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        message.remove(obj);
+        messages.remove(obj);
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -149,10 +152,11 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
             }
           });
           registration.get(aggregate.getLifecycle()).add(ai);
-          message.addAll(aggregate.extractMessages(true));
+          aggregate.extractMessages(true)
+              .forEach(message -> MessageUtils.mergeToQueue(messages, message));
         }
       } else if (obj instanceof Message) {
-        message.add((Message) obj);
+        MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -185,8 +189,12 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   }
 
   protected void handleMessage() {
-    message.stream().sorted(Message::compare).map(messageService::store)
-        .forEachOrdered(sagaService::trigger);
+    listRemoveIf(messages, ObjectUtils::isNull).sort(Message::compare);
+    Message message = null;
+    while ((message = messages.poll()) != null) {
+      messageService.store(message);
+      messageService.send(message);
+      sagaService.trigger(message);// FIXME Is it right to do so?
+    }
   }
-
 }

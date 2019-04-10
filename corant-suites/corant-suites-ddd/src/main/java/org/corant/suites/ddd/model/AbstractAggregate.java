@@ -249,5 +249,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
       return result;
     }
 
+    @Override
+    public String toString() {
+      return "{\"typeCls\":\"" + typeCls + "\",\"id\":" + id + "}";
+    }
+
   }
 }

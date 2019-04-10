@@ -13,9 +13,6 @@
  */
 package org.corant.suites.ddd.message;
 
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import java.util.Queue;
-
 /**
  * Marking a integration message object can be merged. Imagine that in the transaction unit of works
  * if an aggregate property value from '1' change to '2' and finally change to '1' then it should
@@ -25,30 +22,6 @@ import java.util.Queue;
  *
  */
 public interface MergableMessage extends Message {
-
-  static boolean isCorrelated(Message m, Message o) {
-    return m instanceof MergableMessage && o instanceof MergableMessage
-        && isEquals(m.getClass(), o.getClass()) && isEquals(m.queueName(), o.queueName())
-        && isEquals(m.sourceObject(), o.sourceObject());
-  }
-
-  static void mergeToQueue(Queue<Message> queue, MergableMessage msg) {
-    MergableMessage newMgbMsg = msg, oldMgbMsg = null;
-    for (Message queMsg : queue) {
-      if (MergableMessage.isCorrelated(queMsg, newMgbMsg)) {
-        oldMgbMsg = (MergableMessage) queMsg;
-        break;
-      }
-    }
-    if (oldMgbMsg == null || !newMgbMsg.canMerge(oldMgbMsg)) {
-      queue.add(newMgbMsg);
-    } else {
-      queue.remove(oldMgbMsg);
-      if (newMgbMsg.merge(oldMgbMsg).isValid()) {
-        queue.add(newMgbMsg);
-      }
-    }
-  }
 
   default boolean canMerge(MergableMessage other) {
     return true;

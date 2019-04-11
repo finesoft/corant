@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.Corant;
+import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
@@ -39,16 +40,16 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   protected transient final Aggregate aggregate;
 
   protected transient final Queue<Message> messages = new LinkedList<>();
-  protected transient volatile long lastMessageSequenceNumber = -1L;
+  protected transient volatile long lastMessageSequenceNumber = 1L;
 
   public DefaultAggregateAssistant(Aggregate aggregate) {
-    this.aggregate = requireNotNull(aggregate, "");
-    lastMessageSequenceNumber = aggregate.getVn();
+    this.aggregate = requireNotNull(aggregate, GlobalMessageCodes.ERR_PARAM);
   }
 
   public DefaultAggregateAssistant(Aggregate aggregate, long lastMessageSequenceNumber) {
     this(aggregate);
-    this.lastMessageSequenceNumber = requireGaet(lastMessageSequenceNumber, 0L, "");
+    this.lastMessageSequenceNumber =
+        requireGaet(lastMessageSequenceNumber, 0L, GlobalMessageCodes.ERR_PARAM);
   }
 
   @Override
@@ -64,7 +65,6 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
       return m;
     }).collect(Collectors.toList());
     if (flush) {
-      lastMessageSequenceNumber += exMsgs.size();
       clearMessages();
     }
     return exMsgs;
@@ -147,7 +147,4 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
     return result;
   }
 
-  protected void setLastMessageSequenceNumber(long lastMessageSequenceNumber) {
-    this.lastMessageSequenceNumber = lastMessageSequenceNumber;
-  }
 }

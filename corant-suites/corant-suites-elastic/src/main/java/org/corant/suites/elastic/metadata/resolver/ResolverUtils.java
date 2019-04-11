@@ -29,8 +29,10 @@ import java.time.temporal.Temporal;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassUtils;
@@ -83,6 +85,9 @@ public class ResolverUtils {
     SIMPLE_TYPE_WRAPPER_MAP.put(Temporal.class, Temporal.class);
     SIMPLE_TYPE_WRAPPER_MAP.put(Currency.class, Currency.class);
     SIMPLE_TYPE_WRAPPER_MAP.put(Number.class, Number.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Locale.class, Locale.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(Enum.class, Enum.class);
+    SIMPLE_TYPE_WRAPPER_MAP.put(TimeZone.class, TimeZone.class);
   }
 
   public static final SimpleModule SIMPLIE_MODEL = new SimpleModule();
@@ -386,7 +391,9 @@ public class ResolverUtils {
   public static boolean isSimpleType(Class<?> type) {
     Class<?> useType = type.isArray() ? type.getComponentType() : type;
     return SIMPLE_TYPE_WRAPPER_MAP.containsKey(useType)
-        || SIMPLE_TYPE_WRAPPER_MAP.containsValue(useType);
+        || SIMPLE_TYPE_WRAPPER_MAP.containsValue(useType)
+        || SIMPLE_TYPE_WRAPPER_MAP.keySet().stream().allMatch(cls -> cls.isAssignableFrom(type));
+
   }
 
   public static void registerSimpleType(Class<?> type, Class<?> clazz) {

@@ -15,6 +15,7 @@ package org.corant.suites.jms.artemis;
 
 import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -24,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
 import org.eclipse.microprofile.config.Config;
 
@@ -42,11 +44,13 @@ public class ArtemisConfig {
   public static final String ATM_HOST = ".host";
   public static final String ATM_PORT = ".port";
   public static final String ATM_HA = ".ha";
+  public static final String ATM_FT = ".factory-type";
 
   private String name; // the connection factory name means a artemis server or cluster
   private String username;
   private String password;
   private String url;
+  private JMSFactoryType factoryType;
   private String host;
   private int port;
   private boolean ha;
@@ -61,9 +65,10 @@ public class ArtemisConfig {
    * @param host
    * @param port
    * @param ha
+   * @param factoryType
    */
   protected ArtemisConfig(String name, String username, String password, String url, String host,
-      int port, boolean ha) {
+      int port, boolean ha, JMSFactoryType factoryType) {
     super();
     this.name = name;
     this.username = username;
@@ -72,6 +77,7 @@ public class ArtemisConfig {
     this.host = host;
     this.port = port;
     this.ha = ha;
+    this.factoryType = factoryType;
   }
 
   public static Map<String, ArtemisConfig> from(Config config) {
@@ -125,6 +131,9 @@ public class ArtemisConfig {
         config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setPort);
       } else if (pn.endsWith(ATM_HA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setHa);
+      } else if (pn.endsWith(ATM_FT)) {
+        String ft = config.getOptionalValue(pn, String.class).orElse("CF");
+        cfg.setFactoryType(toEnum(ft, JMSFactoryType.class));
       }
     });
     if (isNotBlank(cfg.getUrl())) {
@@ -135,6 +144,10 @@ public class ArtemisConfig {
 
   public String getConnectorFactory() {
     return NettyConnectorFactory.class.getName();
+  }
+
+  public JMSFactoryType getFactoryType() {
+    return factoryType;
   }
 
   public String getHost() {
@@ -167,6 +180,10 @@ public class ArtemisConfig {
 
   public boolean isHa() {
     return ha;
+  }
+
+  protected void setFactoryType(JMSFactoryType factoryType) {
+    this.factoryType = factoryType;
   }
 
   protected void setHa(boolean ha) {

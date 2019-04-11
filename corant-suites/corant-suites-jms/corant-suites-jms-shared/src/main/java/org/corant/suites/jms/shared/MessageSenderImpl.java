@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.artemis;
+package org.corant.suites.jms.shared;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.StreamUtils.copy;
@@ -25,10 +25,6 @@ import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.ExtendedJMSContext;
-import org.corant.suites.jms.shared.JMSContextKey;
-import org.corant.suites.jms.shared.JMSContextProducer;
-import org.corant.suites.jms.shared.MessageSender;
 import org.corant.suites.jms.shared.annotation.MessageSend.MessageSenderLiteral;
 
 /**
@@ -37,7 +33,7 @@ import org.corant.suites.jms.shared.annotation.MessageSend.MessageSenderLiteral;
  * @author bingo 下午4:29:24
  *
  */
-public class ArtemisMessageSender implements MessageSender {
+public class MessageSenderImpl implements MessageSender {
 
   protected final boolean multicast;
 
@@ -47,7 +43,7 @@ public class ArtemisMessageSender implements MessageSender {
 
   protected final int sessionModel;
 
-  protected ArtemisMessageSender(MessageSenderLiteral mpl) {
+  protected MessageSenderImpl(MessageSenderLiteral mpl) {
     multicast = mpl.multicast();
     destinationName = mpl.destination();
     connectionFactory = mpl.connectionFactory();
@@ -90,10 +86,11 @@ public class ArtemisMessageSender implements MessageSender {
 
   @SuppressWarnings({"unchecked", "resource"})
   void doSend(Object message) {
+    final JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
+    final JMSContextKey ctxKey = new JMSContextKey(connectionFactory, sessionModel);
+    final JMSContext jmsc = new ExtendedJMSContext(ctxKey, ctxProducer.getRequestScoped(),
+        ctxProducer.getTransactionScoped());
     try {
-      JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
-      JMSContext jmsc = new ExtendedJMSContext(new JMSContextKey(connectionFactory, sessionModel),
-          ctxProducer.getRequestScoped(), ctxProducer.getTransactionScoped());
       Destination d =
           multicast ? jmsc.createTopic(destinationName) : jmsc.createQueue(destinationName);
       JMSProducer p = jmsc.createProducer();

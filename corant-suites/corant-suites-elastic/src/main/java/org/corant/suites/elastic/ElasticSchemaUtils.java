@@ -35,7 +35,7 @@ public class ElasticSchemaUtils {
       ElasticIndexingResolver indexingResolver =
           Corant.instance().select(ElasticIndexingResolver.class).get();
       indexingResolver.getIndexings().forEach((n, i) -> {
-        out.accept(n, asMap("setting", i.getSetting().getSetting(), "mappings",
+        out.accept(n, asMap("settings", i.getSetting().getSetting(), "mappings",
             asMap(Elastic6Constants.TYP_NME, i.getSchema())));
       });
     } catch (Exception e) {

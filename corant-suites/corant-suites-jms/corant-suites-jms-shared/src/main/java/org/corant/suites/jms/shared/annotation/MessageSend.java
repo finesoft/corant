@@ -19,6 +19,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
+import javax.jms.JMSContext;
 
 /**
  * corant-suites-jms-shared
@@ -35,11 +36,11 @@ public @interface MessageSend {
 
   String destination();
 
-  boolean multicast()
+  String durableSubscription() default "";
 
-  default false;
+  boolean multicast() default false;
 
-  int sessionModel() default 1;
+  int sessionModel() default JMSContext.SESSION_TRANSACTED;
 
   public static class MessageSenderLiteral extends AnnotationLiteral<MessageSend>
       implements MessageSend {
@@ -50,30 +51,34 @@ public @interface MessageSend {
     final boolean multicast;
     final String connectionFactory;
     final int sessionModel;
+    final String durableSubscription;
 
     /**
      * @param connectionFactory
      * @param sessionModel
      * @param multicast
      * @param destination
+     * @param durableSubscription;
      */
     private MessageSenderLiteral(String connectionFactory, int sessionModel, boolean multicast,
-        String destination) {
+        String destination, String durableSubscription) {
       super();
       this.destination = destination;
       this.multicast = multicast;
       this.connectionFactory = connectionFactory;
       this.sessionModel = sessionModel;
+      this.durableSubscription = durableSubscription;
     }
 
     public static MessageSenderLiteral of(MessageSend p) {
       return new MessageSenderLiteral(p.connectionFactory(), p.sessionModel(), p.multicast(),
-          p.destination());
+          p.destination(), p.durableSubscription());
     }
 
     public static MessageSenderLiteral of(String connectionFactory, int sessionModel,
-        boolean multicast, String destination) {
-      return new MessageSenderLiteral(connectionFactory, sessionModel, multicast, destination);
+        boolean multicast, String destination, String durableSubscription) {
+      return new MessageSenderLiteral(connectionFactory, sessionModel, multicast, destination,
+          durableSubscription);
     }
 
     @Override
@@ -84,6 +89,11 @@ public @interface MessageSend {
     @Override
     public String destination() {
       return destination;
+    }
+
+    @Override
+    public String durableSubscription() {
+      return durableSubscription;
     }
 
     @Override

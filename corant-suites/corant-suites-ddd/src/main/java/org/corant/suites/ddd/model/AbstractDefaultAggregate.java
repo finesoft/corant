@@ -13,10 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import org.corant.suites.ddd.message.Message;
 
 /**
  * An abstract aggregate that part of the implementation of event processing and other related
@@ -33,19 +31,10 @@ public abstract class AbstractDefaultAggregate extends AbstractAggregate {
    * Message sequence number
    */
   @Column(name = "mn")
-  private volatile long mn = 0L;
+  private volatile long mn = 1L;
 
   protected AbstractDefaultAggregate() {
     super();
-  }
-
-  @Override
-  public synchronized List<Message> extractMessages(boolean flush) {
-    List<Message> events = super.extractMessages(flush);
-    if (flush) {
-      setMn(mn + events.size());
-    }
-    return events;
   }
 
   /**

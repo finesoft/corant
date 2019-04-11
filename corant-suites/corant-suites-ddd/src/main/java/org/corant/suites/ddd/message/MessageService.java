@@ -28,9 +28,9 @@ public interface MessageService {
     return EmptyMessageService.INSTANCE;
   }
 
-  void receive(Object message);
+  void send(Message... messages);
 
-  void send(Message messages);
+  void receive(Object message);
 
   default Message store(Message message) {
     return message;
@@ -43,15 +43,15 @@ public interface MessageService {
     protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
     @Override
-    public void receive(Object message) {
+    public void send(Message... message) {
       logger.warning(
-          () -> "The message service is an empty implementation that does not really implement receive");
+          () -> "The message service is an empty implementation that does not really implement send");
     }
 
     @Override
-    public void send(Message message) {
+    public void receive(Object message) {
       logger.warning(
-          () -> "The message service is an empty implementation that does not really implement send");
+          () -> "The message service is an empty implementation that does not really implement receive");
     }
 
     @Override

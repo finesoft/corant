@@ -21,7 +21,12 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
 import javax.jms.JMSContext;
 import javax.jms.JMSRuntimeException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
+import org.corant.Corant;
+import org.corant.kernel.exception.GeneralRuntimeException;
 
 /**
  * corant-suites-jms-artemis
@@ -36,6 +41,20 @@ public abstract class JMSContextHolder implements Serializable {
   final Logger logger = Logger.getLogger(getClass().getName());
 
   final transient Map<JMSContextKey, JMSContext> contexts = new ConcurrentHashMap<>();
+
+  static boolean isInTransaction() {
+    if (Corant.instance().select(TransactionManager.class).isResolvable()) {
+      try {
+        int status = Corant.instance().select(TransactionManager.class).get().getStatus();
+        return status == Status.STATUS_ACTIVE || status == Status.STATUS_COMMITTING
+            || status == Status.STATUS_MARKED_ROLLBACK || status == Status.STATUS_PREPARED
+            || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
+      } catch (SystemException e) {
+        throw new GeneralRuntimeException(e);
+      }
+    }
+    return false;
+  }
 
   public JMSContext compute(final JMSContextKey key) {
     return contexts.computeIfAbsent(key, k -> k.create());

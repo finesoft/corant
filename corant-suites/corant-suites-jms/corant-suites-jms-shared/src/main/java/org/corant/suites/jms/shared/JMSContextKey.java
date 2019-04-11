@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared;
 
+import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.io.Serializable;
@@ -22,6 +23,9 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSSessionMode;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionSynchronizationRegistry;
 
 /**
  * corant-suites-jms-artemis
@@ -53,7 +57,26 @@ public class JMSContextKey implements Serializable {
 
   public JMSContext create() {
     if (session != null) {
-      return connectionFactory().createContext(session);
+      JMSContext ctx = connectionFactory().createContext(session);
+      // FIXME will be changed in next iteration
+      if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED
+          && instance().select(TransactionSynchronizationRegistry.class).isResolvable()) {
+        instance().select(TransactionSynchronizationRegistry.class).get()
+            .registerInterposedSynchronization(new Synchronization() {
+              @Override
+              public void afterCompletion(int status) {
+                if (status != Status.STATUS_COMMITTED) {
+                  ctx.rollback();
+                }
+              }
+
+              @Override
+              public void beforeCompletion() {
+                ctx.commit();
+              }
+            });
+      }
+      return ctx;
     }
     return connectionFactory().createContext();
   }

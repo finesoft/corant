@@ -14,11 +14,8 @@
 package org.corant.suites.ddd.unitwork;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageService;
 import org.corant.suites.ddd.saga.SagaService;
 
@@ -28,11 +25,11 @@ import org.corant.suites.ddd.saga.SagaService;
 public abstract class AbstractUnitOfWork implements UnitOfWork {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-  protected final LinkedList<Message> messages = new LinkedList<>();
   protected final AbstractUnitOfWorksManager manager;
   protected final MessageService messageService;
   protected final SagaService sagaService;
   protected volatile boolean activated = false;
+  // protected final LinkedList<Message> messages = new LinkedList<>();
 
   protected AbstractUnitOfWork(AbstractUnitOfWorksManager manager) {
     this.manager = manager;
@@ -46,16 +43,8 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
     activated = false;
   }
 
-  protected void clear() {
-    messages.clear();
-  }
-
   protected UnitOfWorksManager getManager() {
     return manager;
-  }
-
-  protected List<Message> getMessages() {
-    return messages;
   }
 
   protected void handlePostCompleted(final Object registration, final boolean success) {
@@ -77,4 +66,12 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
       }
     });
   }
+
+  // protected void clear() {
+  // messages.clear();
+  // }
+
+  // protected List<Message> getMessages() {
+  // return messages;
+  // }
 }

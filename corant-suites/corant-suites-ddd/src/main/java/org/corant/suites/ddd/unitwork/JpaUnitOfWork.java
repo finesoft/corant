@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.shared.util.CollectionUtils.listRemoveIf;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import javax.persistence.EntityManager;
@@ -30,9 +28,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -83,7 +79,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
-    handleMessage();
+    // handleMessageAsync();
     entityManagers.values().forEach(EntityManager::flush);// FIXME Do we need flush here?
   }
 
@@ -95,10 +91,10 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registration.values().forEach(v -> v.remove(ai));
-          messages.removeIf(e -> Objects.equals(e.getMetadata().getSource(), ai));
+          // messages.removeIf(e -> Objects.equals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        messages.remove(obj);
+        // messages.remove(obj);
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -152,11 +148,13 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
             }
           });
           registration.get(aggregate.getLifecycle()).add(ai);
-          aggregate.extractMessages(true)
-              .forEach(message -> MessageUtils.mergeToQueue(messages, message));
+          // aggregate.extractMessages(true)
+          // .forEach(message -> MessageUtils.mergeToQueue(messages, message));
+          handleMessage(aggregate.extractMessages(true).stream().toArray(Message[]::new));
         }
       } else if (obj instanceof Message) {
-        MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
+        // MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
+        handleMessage(Message.class.cast(obj));
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -168,7 +166,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
     return transaction.toString();
   }
 
-  @Override
+  // @Override
   protected void clear() {
     try {
       entityManagers.values().forEach(em -> {
@@ -179,7 +177,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
       registration.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
-      super.clear();
+      // super.clear();
     }
   }
 
@@ -188,13 +186,33 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
     return (JpaUnitOfWorksManager) super.getManager();
   }
 
-  protected void handleMessage() {
-    listRemoveIf(messages, ObjectUtils::isNull).sort(Message::compare);
-    Message message = null;
-    while ((message = messages.poll()) != null) {
-      messageService.store(message);
-      messageService.send(message);
-      sagaService.trigger(message);// FIXME Is it right to do so?
+  protected void handleMessage(Message... msgs) {
+    for (Message msg : msgs) {
+      messageService.store(msg);
+      messageService.send(msg);
+      sagaService.trigger(msg);// FIXME Is it right to do so?
     }
   }
+
+  // protected void handleMessageAsync() {
+  // logger.info(() -> "Handle collected messages before completion");
+  // listRemoveIf(messages, ObjectUtils::isNull).sort(Message::compare);
+  // Message message = null;
+  // final List<Message> messageToSends = new ArrayList<>();
+  // while ((message = messages.poll()) != null) {
+  // messageService.store(message);
+  // messageToSends.add(message);
+  // sagaService.trigger(message);// FIXME Is it right to do so?
+  // }
+  // if (!messageToSends.isEmpty()) {
+  // // another thread to send.
+  // if (CompletableFuture.runAsync(() -> {
+  // logger.info(() -> "Send messages to broker with another thread!");
+  // messageService.send(messageToSends.toArray(new Message[messageToSends.size()]));
+  // }).isCompletedExceptionally()) {
+  // throw new CorantRuntimeException();
+  // }
+  // }
+  // }
+
 }

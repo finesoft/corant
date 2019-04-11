@@ -13,6 +13,9 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.StringUtils.split;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -36,11 +39,13 @@ import org.jboss.tm.XAResourceRecoveryRegistry;
 import org.jboss.tm.usertx.UserTransactionRegistry;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
+import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.internal.jbossatx.jta.jca.XATerminator;
 import com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
+import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.common.jtaPropertyManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 
@@ -58,11 +63,78 @@ public class NarayanaTransactionProducers {
   Integer transactionTimeout;
 
   @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.transactionStatusManagerPort")
+  Optional<Integer> transactionStatusManagerPort;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.transactionStatusManagerAddress")
+  Optional<String> transactionStatusManagerAddress;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.transactionSync", defaultValue = "true")
+  Boolean transactionSync = true;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.socketProcessIdPort", defaultValue = "0")
+  Integer socketProcessIdPort;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.nodeIdentifier")
+  Optional<String> nodeIdentifier;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.xaResourceOrphanFilterClassNames")
+  Optional<String> xaResourceOrphanFilterClassNames;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.expiryScannerClassNames")
+  Optional<String> expiryScannerClassNames;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.commitOnePhase", defaultValue = "true")
+  Boolean commitOnePhase = true;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.xaRecoveryNodes")
+  Optional<String> xaRecoveryNodes;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.periodicRecoveryPeriod", defaultValue = "120")
+  Integer periodicRecoveryPeriod;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.recoveryBackoffPeriod", defaultValue = "10")
+  Integer recoveryBackoffPeriod;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.recoveryPort")
+  Optional<Integer> recoveryPort;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.recoveryAddress")
+  Optional<String> recoveryAddress;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.recoveryModuleClassNames")
+  Optional<String> recoveryModuleClassNames;
+
+  @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.recoveryListener")
+  Optional<Boolean> recoveryListener;
+
+  @Inject
   @Any
   Instance<NarayanaConfigurator> configurators;
 
   @PostConstruct
   void onPostConstruct() {
+
+    if (Thread.currentThread().getContextClassLoader()
+        .getResource("jbossts-properties.xml") != null) {
+      // Use default setting
+      return;
+    }
+
     String dfltObjStoreDir = Defaults.corantUserDir("-narayana-objects").toString();
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
@@ -80,10 +152,43 @@ public class NarayanaTransactionProducers {
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
     coordinatorEnvironmentBean.setDefaultTimeout(transactionTimeout);
+    coordinatorEnvironmentBean.setCommitOnePhase(commitOnePhase);
+
     final CoreEnvironmentBean coreEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class);
+    nodeIdentifier.ifPresent(t -> {
+      try {
+        coreEnvironmentBean.setNodeIdentifier(t);
+      } catch (CoreEnvironmentBeanException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+    coreEnvironmentBean.setSocketProcessIdPort(socketProcessIdPort);
+
+    final JTAEnvironmentBean jtaEnvironmentBean =
+        BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
+    xaRecoveryNodes
+        .ifPresent(x -> jtaEnvironmentBean.setXaRecoveryNodes(asList(split(x, ",", true, true))));
+    xaResourceOrphanFilterClassNames.ifPresent(x -> jtaEnvironmentBean
+        .setXaResourceOrphanFilterClassNames(asList(split(x, ",", true, true))));
+
     final RecoveryEnvironmentBean recoveryEnvironmentBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
+    recoveryEnvironmentBean.setPeriodicRecoveryPeriod(periodicRecoveryPeriod);
+    recoveryEnvironmentBean.setRecoveryBackoffPeriod(recoveryBackoffPeriod);
+    recoveryModuleClassNames.ifPresent(x -> recoveryEnvironmentBean
+        .setRecoveryModuleClassNames(asList(split(x, ",", true, true))));
+    expiryScannerClassNames.ifPresent(
+        x -> recoveryEnvironmentBean.setExpiryScannerClassNames(asList(split(x, ",", true, true))));
+
+    recoveryPort.ifPresent(recoveryEnvironmentBean::setRecoveryPort);
+    recoveryAddress.ifPresent(recoveryEnvironmentBean::setRecoveryAddress);
+    transactionStatusManagerPort
+        .ifPresent(recoveryEnvironmentBean::setTransactionStatusManagerPort);
+    transactionStatusManagerAddress
+        .ifPresent(recoveryEnvironmentBean::setTransactionStatusManagerAddress);
+    recoveryListener.ifPresent(recoveryEnvironmentBean::setRecoveryListener);
+
     if (!configurators.isUnsatisfied()) {
       configurators.stream().sorted(ComparableConfigurator::compare).forEachOrdered(cfgr -> {
         cfgr.configCoreEnvironment(coreEnvironmentBean);

@@ -15,6 +15,7 @@ package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.isNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import org.elasticsearch.search.sort.SortBuilder;
  * @author bingo 下午6:37:55
  *
  */
+@SuppressWarnings("unchecked")
 @ApplicationScoped
 public abstract class AbstractElasticDocumentService implements ElasticDocumentService {
 
@@ -146,17 +148,18 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
     IndexRequestBuilder rb =
         getTransportClient().prepareIndex(indexName, Elastic6Constants.TYP_NME, id)
             .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE)
-            .setSource(XContentType.SMILE, obj);
+            .setSource((Map<String, ?>) obj, XContentType.SMILE);
     if (isNotBlank(routingId)) {
       rb.setRouting(routingId);
     }
     if (isNotBlank(parentId)) {
       rb.setParent(parentId);
     }
-    if (versionType != VersionType.INTERNAL) {
+    VersionType useVersionType = defaultObject(versionType, VersionType.INTERNAL);
+    if (useVersionType != VersionType.INTERNAL) {
       shouldBeTrue(version > 0);
       rb.setVersion(version);
-      rb.setVersionType(versionType);
+      rb.setVersionType(useVersionType);
     }
     return rb;
   }

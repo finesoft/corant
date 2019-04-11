@@ -31,11 +31,6 @@ import javax.jms.TemporaryQueue;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-import org.corant.Corant;
-import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.jms.shared.JMSContextHolder.RequestScopeContextHolder;
 import org.corant.suites.jms.shared.JMSContextHolder.TransactionScopeContextHolder;
 
@@ -314,23 +309,9 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   }
 
   private synchronized JMSContext context() {
-    if (isInTransaction()) {
+    if (JMSContextHolder.isInTransaction()) {
       return txCtxHolder.compute(key);
     }
     return reqCtxHolder.compute(key);
-  }
-
-  private boolean isInTransaction() {
-    if (Corant.instance().select(TransactionManager.class).isResolvable()) {
-      try {
-        int status = Corant.instance().select(TransactionManager.class).get().getStatus();
-        return status == Status.STATUS_ACTIVE || status == Status.STATUS_COMMITTING
-            || status == Status.STATUS_MARKED_ROLLBACK || status == Status.STATUS_PREPARED
-            || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
-      } catch (SystemException e) {
-        throw new GeneralRuntimeException(e);
-      }
-    }
-    return false;
   }
 }

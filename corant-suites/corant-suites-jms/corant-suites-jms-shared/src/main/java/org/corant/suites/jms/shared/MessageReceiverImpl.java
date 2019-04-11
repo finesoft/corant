@@ -11,11 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.artemis;
+package org.corant.suites.jms.shared;
 
 import java.util.function.Consumer;
+import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.suites.jms.shared.MessageReceiver;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jms-artemis
@@ -23,21 +24,33 @@ import org.corant.suites.jms.shared.MessageReceiver;
  * @author bingo 下午4:26:21
  *
  */
-public class ArtemisMessageReceiver implements MessageReceiver {
+public class MessageReceiverImpl implements MessageReceiver {
 
   private final Consumer<Message> consumer;
+  private final JMSContext jmsc;
 
   /**
    * @param consumer
    */
-  protected ArtemisMessageReceiver(Consumer<Message> consumer) {
+  protected MessageReceiverImpl(JMSContext jmsc, Consumer<Message> consumer) {
     super();
     this.consumer = consumer;
+    this.jmsc = jmsc;
   }
 
   @Override
   public void onMessage(Message message) {
-    consumer.accept(message);
+    int sessionModel = jmsc.getSessionMode();
+    try {
+      consumer.accept(message);
+      if (sessionModel == JMSContext.CLIENT_ACKNOWLEDGE) {
+        message.acknowledge();
+      } else if (sessionModel == JMSContext.SESSION_TRANSACTED) {
+        jmsc.commit();
+      }
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
 }

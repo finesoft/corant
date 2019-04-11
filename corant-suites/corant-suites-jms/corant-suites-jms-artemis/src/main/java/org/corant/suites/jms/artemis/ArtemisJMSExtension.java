@@ -13,52 +13,25 @@
  */
 package org.corant.suites.jms.artemis;
 
-import static org.corant.Corant.instance;
-import static org.corant.Corant.me;
-import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
-import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.corant.kernel.event.PostCorantReadyEvent;
-import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
-import org.corant.suites.jms.shared.MessageSender;
-import org.corant.suites.jms.shared.annotation.MessageReceive;
-import org.corant.suites.jms.shared.annotation.MessageSend;
-import org.corant.suites.jms.shared.annotation.MessageSend.MessageSenderLiteral;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -141,52 +114,14 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     }
   }
 
-  void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
-      logger.warning(() -> "Can not found any jms connection factory!");
-      return;
-    }
-    receiverMethods.forEach(rm -> {
-      shouldBeTrue(rm.getJavaMember().getParameterCount() == 1);
-      shouldBeTrue(rm.getJavaMember().getParameters()[0].getType().equals(Message.class));
-      final String clsNme = rm.getJavaMember().getDeclaringClass().getName();
-      final String metNme = rm.getJavaMember().getName();
-      final MessageReceive msn = rm.getAnnotation(MessageReceive.class);
-      final String cfn = defaultString(msn.connectionFactory());
-      final JMSContext ctx = consumerJmsContexts.computeIfAbsent(cfn,
-          f -> retriveConnectionFactory(f).createContext(JMSContext.AUTO_ACKNOWLEDGE));
-      for (String dn : msn.destinations()) {
-        if (isBlank(dn)) {
-          continue;
-        }
-        final int sessionModel = msn.sessionModel();
-        JMSContext jmsc = ctx.createContext(sessionModel);
-        Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
-        final Pair<String, Destination> key = Pair.of(cfn, destination);
-        shouldBeFalse(consumers.containsKey(key),
-            "The destination named %s with connection factory %s on %s.%s has been used!", dn, cfn,
-            clsNme, metNme);
-        final JMSConsumer consumer =
-            isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
-                : jmsc.createConsumer(destination);
-        consumer.setMessageListener(createMessageListener(rm, me().getBeanManager(), sessionModel));
-        consumers.put(key, consumer);
-      }
-    });
-  }
-
-  void onPreCorantStop(@Observes PreContainerStopEvent e) {
-    consumers.values().forEach(JMSConsumer::close);
-    consumerJmsContexts.values().forEach(JMSContext::close);
-  }
-
   private ActiveMQConnectionFactory buildConnectionFactory(Instance<Object> beans,
       ArtemisConfig cfg) throws Exception {
     Map<String, Object> params = new HashMap<>();
     params.put("serverId", "1");
     final ActiveMQConnectionFactory activeMQConnectionFactory;
     if (cfg.getUrl() != null) {
-      activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactory(cfg.getUrl(), null);
+      activeMQConnectionFactory =
+          ActiveMQJMSClient.createConnectionFactory(cfg.getUrl(), cfg.getName());
     } else {
       if (cfg.getHost() != null) {
         params.put(TransportConstants.HOST_PROP_NAME, cfg.getHost());
@@ -194,10 +129,10 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
       }
       if (cfg.isHa()) {
         activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithHA(
-            JMSFactoryType.CF, new TransportConfiguration(cfg.getConnectorFactory(), params));
+            cfg.getFactoryType(), new TransportConfiguration(cfg.getConnectorFactory(), params));
       } else {
         activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(
-            JMSFactoryType.CF, new TransportConfiguration(cfg.getConnectorFactory(), params));
+            cfg.getFactoryType(), new TransportConfiguration(cfg.getConnectorFactory(), params));
       }
     }
     if (cfg.hasAuthentication()) {
@@ -208,35 +143,4 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     return activeMQConnectionFactory.disableFinalizeChecks();
   }
 
-  private MessageListener createMessageListener(AnnotatedMethod<?> method, BeanManager beanManager,
-      int sessoinModel) {
-    final Set<Bean<?>> beans = beanManager.getBeans(method.getJavaMember().getDeclaringClass());
-    final Bean<?> propertyResolverBean = beanManager.resolve(beans);
-    final CreationalContext<?> creationalContext =
-        beanManager.createCreationalContext(propertyResolverBean);
-    Object inst = beanManager.getReference(propertyResolverBean,
-        method.getJavaMember().getDeclaringClass(), creationalContext);
-    method.getJavaMember().setAccessible(true);
-    return new ArtemisMessageReceiver((msg) -> {
-      try {
-        method.getJavaMember().invoke(inst, msg);
-        if (sessoinModel == JMSContext.CLIENT_ACKNOWLEDGE) {
-          msg.acknowledge();
-        }
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | JMSException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
-  }
-
-  @ApplicationScoped
-  public static class ArtemisMessageSenderProducer {
-
-    @Produces
-    public MessageSender messageSender(final InjectionPoint ip) {
-      final MessageSend at = Cdis.getAnnotated(ip).getAnnotation(MessageSend.class);
-      return new ArtemisMessageSender(MessageSenderLiteral.of(at));
-    }
-  }
 }

@@ -26,6 +26,7 @@ import javax.jms.JMSSessionMode;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jms-artemis
@@ -59,24 +60,7 @@ public class JMSContextKey implements Serializable {
     if (session != null) {
       JMSContext ctx = connectionFactory().createContext(session);
       // FIXME will be changed in next iteration
-      if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED
-          && instance().select(TransactionSynchronizationRegistry.class).isResolvable()) {
-        instance().select(TransactionSynchronizationRegistry.class).get()
-            .registerInterposedSynchronization(new Synchronization() {
-              @Override
-              public void afterCompletion(int status) {
-                if (status != Status.STATUS_COMMITTED) {
-                  ctx.rollback();
-                }
-              }
-
-              @Override
-              public void beforeCompletion() {
-                ctx.commit();
-              }
-            });
-      }
-      return ctx;
+      return registerToLocaleTransactionSynchronization(ctx);
     }
     return connectionFactory().createContext();
   }
@@ -129,5 +113,30 @@ public class JMSContextKey implements Serializable {
       return shouldNotNull(connectionFactoryInstance =
           AbstractJMSExtension.retriveConnectionFactory(connectionFactory));
     }
+  }
+
+  JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
+    if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED
+        && instance().select(TransactionSynchronizationRegistry.class).isResolvable()) {
+      instance().select(TransactionSynchronizationRegistry.class).get()
+          .registerInterposedSynchronization(new Synchronization() {
+            @Override
+            public void afterCompletion(int status) {
+              if (status != Status.STATUS_COMMITTED) {
+                jmscontext.rollback();
+              }
+            }
+
+            @Override
+            public void beforeCompletion() {
+              try {
+                jmscontext.commit();
+              } catch (Exception e) {
+                throw new CorantRuntimeException(e);
+              }
+            }
+          });
+    }
+    return jmscontext;
   }
 }

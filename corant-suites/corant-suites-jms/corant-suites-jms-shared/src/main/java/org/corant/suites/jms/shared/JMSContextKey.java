@@ -118,7 +118,8 @@ public class JMSContextKey implements Serializable {
 
   int calHash(final String name, final Integer session) {
     int result = name != null ? name.hashCode() : 0;
-    return result = 31 * result + (session != null ? session.hashCode() : 0);
+    result = 31 * result + (session != null ? session.hashCode() : 0);
+    return result;
   }
 
   ConnectionFactory connectionFactory() {

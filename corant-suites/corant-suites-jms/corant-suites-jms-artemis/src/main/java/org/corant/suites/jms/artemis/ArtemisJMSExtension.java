@@ -15,7 +15,6 @@ package org.corant.suites.jms.artemis;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Default;
@@ -23,8 +22,6 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
@@ -81,8 +78,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected final Map<String, ArtemisConfig> configs = new HashMap<>();
-  protected final Map<Object, JMSConsumer> consumers = new ConcurrentHashMap<>();
-  protected final Map<String, JMSContext> consumerJmsContexts = new ConcurrentHashMap<>();
 
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {

@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import javax.jms.JMSContext;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.XAJMSContext;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -54,7 +55,8 @@ public interface MessageReceiver extends MessageListener {
         consumer.accept(message);
         if (sessionMode == JMSContext.CLIENT_ACKNOWLEDGE) {
           message.acknowledge();
-        } else if (sessionMode == JMSContext.SESSION_TRANSACTED) {
+        } else if (sessionMode == JMSContext.SESSION_TRANSACTED
+            && !(jmsc instanceof XAJMSContext)) {
           jmsc.commit();
         }
       } catch (Exception e) {

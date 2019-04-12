@@ -55,11 +55,11 @@ public class JMSContextKey implements Serializable {
 
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final JMSConnectionFactory jmsConnectionFactory =
-        annotated.getAnnotation(JMSConnectionFactory.class);
+    final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
     final JMSSessionMode sessionMode = annotated.getAnnotation(JMSSessionMode.class);
-    return new JMSContextKey(jmsConnectionFactory.value(),
-        sessionMode == null ? 1 : sessionMode.value());
+    final String factoryName = factory == null ? null : factory.value();
+    final int sesMod = sessionMode == null ? JMSContext.AUTO_ACKNOWLEDGE : sessionMode.value();
+    return new JMSContextKey(factoryName, sesMod);
   }
 
   public JMSContext create() {

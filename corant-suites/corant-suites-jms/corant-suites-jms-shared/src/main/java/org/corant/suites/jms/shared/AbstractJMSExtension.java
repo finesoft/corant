@@ -53,9 +53,10 @@ import org.corant.kernel.util.Cdis;
 import org.corant.kernel.util.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.jms.shared.MessageReceiver.MessageReceiverImpl;
+import org.corant.suites.jms.shared.MessageSender.MessageSenderImpl;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageSend;
-import org.corant.suites.jms.shared.annotation.MessageSend.MessageSenderLiteral;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
 /**
@@ -105,8 +106,8 @@ public abstract class AbstractJMSExtension implements Extension {
         if (isBlank(dn)) {
           continue;
         }
-        final int sessionModel = msn.sessionModel();
-        JMSContext jmsc = ctx.createContext(sessionModel);
+        final int sessionMode = msn.sessionMode();
+        JMSContext jmsc = ctx.createContext(sessionMode);
         Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
         final Pair<String, Destination> key = Pair.of(cfn, destination);
         shouldBeFalse(consumers.containsKey(key),
@@ -116,7 +117,7 @@ public abstract class AbstractJMSExtension implements Extension {
             isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
                 : jmsc.createConsumer(destination);
         consumer.setMessageListener(
-            createMessageListener(rm, me().getBeanManager(), jmsc, sessionModel));
+            createMessageListener(rm, me().getBeanManager(), jmsc, sessionMode));
         consumers.put(key, consumer);
       }
     });
@@ -167,7 +168,7 @@ public abstract class AbstractJMSExtension implements Extension {
     @Produces
     public MessageSender messageSender(final InjectionPoint ip) {
       final MessageSend at = Cdis.getAnnotated(ip).getAnnotation(MessageSend.class);
-      return new MessageSenderImpl(MessageSenderLiteral.of(at));
+      return new MessageSenderImpl(at);
     }
   }
 

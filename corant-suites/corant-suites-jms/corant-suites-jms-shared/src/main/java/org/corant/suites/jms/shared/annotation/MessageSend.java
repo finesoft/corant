@@ -18,7 +18,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.util.AnnotationLiteral;
 import javax.jms.JMSContext;
 
 /**
@@ -40,71 +39,6 @@ public @interface MessageSend {
 
   boolean multicast() default false;
 
-  int sessionModel() default JMSContext.AUTO_ACKNOWLEDGE;
+  int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
 
-  public static class MessageSenderLiteral extends AnnotationLiteral<MessageSend>
-      implements MessageSend {
-
-    private static final long serialVersionUID = 7391504689355513463L;
-
-    final String destination;
-    final boolean multicast;
-    final String connectionFactory;
-    final int sessionModel;
-    final String durableSubscription;
-
-    /**
-     * @param connectionFactory
-     * @param sessionModel
-     * @param multicast
-     * @param destination
-     * @param durableSubscription;
-     */
-    private MessageSenderLiteral(String connectionFactory, int sessionModel, boolean multicast,
-        String destination, String durableSubscription) {
-      super();
-      this.destination = destination;
-      this.multicast = multicast;
-      this.connectionFactory = connectionFactory;
-      this.sessionModel = sessionModel;
-      this.durableSubscription = durableSubscription;
-    }
-
-    public static MessageSenderLiteral of(MessageSend p) {
-      return new MessageSenderLiteral(p.connectionFactory(), p.sessionModel(), p.multicast(),
-          p.destination(), p.durableSubscription());
-    }
-
-    public static MessageSenderLiteral of(String connectionFactory, int sessionModel,
-        boolean multicast, String destination, String durableSubscription) {
-      return new MessageSenderLiteral(connectionFactory, sessionModel, multicast, destination,
-          durableSubscription);
-    }
-
-    @Override
-    public String connectionFactory() {
-      return connectionFactory;
-    }
-
-    @Override
-    public String destination() {
-      return destination;
-    }
-
-    @Override
-    public String durableSubscription() {
-      return durableSubscription;
-    }
-
-    @Override
-    public boolean multicast() {
-      return multicast;
-    }
-
-    @Override
-    public int sessionModel() {
-      return sessionModel;
-    }
-
-  }
 }

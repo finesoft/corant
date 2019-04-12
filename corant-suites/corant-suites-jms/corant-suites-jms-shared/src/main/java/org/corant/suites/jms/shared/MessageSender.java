@@ -13,13 +13,19 @@
  */
 package org.corant.suites.jms.shared;
 
+import static org.corant.Corant.instance;
 import static org.corant.shared.util.StreamUtils.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
+import javax.jms.Destination;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
 import javax.jms.Message;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.annotation.MessageSend;
 
 /**
  * corant-suites-jms-shared
@@ -46,4 +52,88 @@ public interface MessageSender {
   void send(Serializable message);
 
   void send(String message);
+
+  /**
+   * corant-suites-jms-artemis
+   *
+   * @author bingo 下午4:29:24
+   *
+   */
+  public static class MessageSenderImpl implements MessageSender {
+
+    protected final boolean multicast;
+
+    protected final String destination;
+
+    protected final String connectionFactory;
+
+    protected final int sessionMode;
+
+    protected MessageSenderImpl(MessageSend mpl) {
+      multicast = mpl.multicast();
+      destination = mpl.destination();
+      connectionFactory = mpl.connectionFactory();
+      sessionMode = mpl.sessionMode();
+    }
+
+    @Override
+    public void send(byte[] message) {
+      doSend(message);
+    }
+
+    @Override
+    public void send(InputStream message) throws IOException {
+      try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+        copy(message, buffer);
+        byte[] bytes = buffer.toByteArray();
+        send(bytes);
+      }
+    }
+
+    @Override
+    public void send(Map<String, Object> message) {
+      doSend(message);
+    }
+
+    @Override
+    public void send(Message message) {
+      doSend(message);
+    }
+
+    @Override
+    public void send(Serializable message) {
+      doSend(message);
+    }
+
+    @Override
+    public void send(String message) {
+      doSend(message);
+    }
+
+    @SuppressWarnings({"unchecked", "resource"})
+    void doSend(Object message) {
+      final JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
+      final JMSContextKey ctxKey = new JMSContextKey(connectionFactory, sessionMode);
+      final JMSContext jmsc = new ExtendedJMSContext(ctxKey, ctxProducer.getRequestScoped(),
+          ctxProducer.getTransactionScoped());
+      try {
+        Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
+        JMSProducer p = jmsc.createProducer();
+        if (message instanceof String) {
+          p.send(d, (String) message);
+        } else if (message instanceof Message) {
+          p.send(d, (Message) message);
+        } else if (message instanceof Map) {
+          p.send(d, (Map<String, Object>) message);
+        } else if (message instanceof byte[]) {
+          p.send(d, (byte[]) message);
+        } else if (message instanceof Serializable) {
+          p.send(d, (Serializable) message);
+        }
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+  }
 }

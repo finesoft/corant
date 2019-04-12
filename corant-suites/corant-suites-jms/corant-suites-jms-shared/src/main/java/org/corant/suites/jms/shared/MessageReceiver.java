@@ -13,14 +13,54 @@
  */
 package org.corant.suites.jms.shared;
 
+import java.util.function.Consumer;
+import javax.jms.JMSContext;
+import javax.jms.Message;
 import javax.jms.MessageListener;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jms-shared
- * 
+ *
  * @author bingo 下午3:19:31
  *
  */
 public interface MessageReceiver extends MessageListener {
 
+  /**
+   * corant-suites-jms-artemis
+   *
+   * @author bingo 下午4:26:21
+   *
+   */
+  public static class MessageReceiverImpl implements MessageReceiver {
+
+    private final Consumer<Message> consumer;
+    private final JMSContext jmsc;
+
+    /**
+     * @param consumer
+     */
+    protected MessageReceiverImpl(JMSContext jmsc, Consumer<Message> consumer) {
+      super();
+      this.consumer = consumer;
+      this.jmsc = jmsc;
+    }
+
+    @Override
+    public void onMessage(Message message) {
+      int sessionMode = jmsc.getSessionMode();
+      try {
+        consumer.accept(message);
+        if (sessionMode == JMSContext.CLIENT_ACKNOWLEDGE) {
+          message.acknowledge();
+        } else if (sessionMode == JMSContext.SESSION_TRANSACTED) {
+          jmsc.commit();
+        }
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+  }
 }

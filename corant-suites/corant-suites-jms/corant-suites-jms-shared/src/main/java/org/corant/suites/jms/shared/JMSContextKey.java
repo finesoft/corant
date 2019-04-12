@@ -64,7 +64,7 @@ public class JMSContextKey implements Serializable {
 
   public JMSContext create() {
     ConnectionFactory cf = connectionFactory();
-    if (cf instanceof XAConnectionFactory && JMSContextHolder.isInTransaction()) {
+    if (cf instanceof XAConnectionFactory) {
       XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
       try {
         instance().select(TransactionManager.class).get().getTransaction()

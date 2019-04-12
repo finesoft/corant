@@ -22,6 +22,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -96,25 +97,28 @@ public abstract class AbstractJMSExtension implements Extension {
     receiverMethods.forEach(rm -> {
       shouldBeTrue(rm.getJavaMember().getParameterCount() == 1);
       shouldBeTrue(rm.getJavaMember().getParameters()[0].getType().equals(Message.class));
+      final MessageReceive ann = rm.getAnnotation(MessageReceive.class);
+      if (!isNoneBlank(ann.destinations())) {
+        return;
+      }
+      final String cfn = defaultString(ann.connectionFactory());
+      final int sessionMode = ann.sessionMode();
+      final JMSContext ctx = consumerJmsContexts.computeIfAbsent(cfn,
+          f -> retriveConnectionFactory(f).createContext(sessionMode));
       final String clsNme = rm.getJavaMember().getDeclaringClass().getName();
       final String metNme = rm.getJavaMember().getName();
-      final MessageReceive msn = rm.getAnnotation(MessageReceive.class);
-      final String cfn = defaultString(msn.connectionFactory());
-      final JMSContext ctx = consumerJmsContexts.computeIfAbsent(cfn,
-          f -> retriveConnectionFactory(f).createContext(JMSContext.AUTO_ACKNOWLEDGE));
-      for (String dn : msn.destinations()) {
+      for (String dn : ann.destinations()) {
         if (isBlank(dn)) {
           continue;
         }
-        final int sessionMode = msn.sessionMode();
         JMSContext jmsc = ctx.createContext(sessionMode);
-        Destination destination = msn.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
+        Destination destination = ann.multicast() ? jmsc.createTopic(dn) : jmsc.createQueue(dn);
         final Pair<String, Destination> key = Pair.of(cfn, destination);
         shouldBeFalse(consumers.containsKey(key),
             "The destination named %s with connection factory %s on %s.%s has been used!", dn, cfn,
             clsNme, metNme);
         final JMSConsumer consumer =
-            isNotBlank(msn.selector()) ? jmsc.createConsumer(destination, msn.selector())
+            isNotBlank(ann.selector()) ? jmsc.createConsumer(destination, ann.selector())
                 : jmsc.createConsumer(destination);
         consumer.setMessageListener(
             createMessageListener(rm, me().getBeanManager(), jmsc, sessionMode));
@@ -167,7 +171,7 @@ public abstract class AbstractJMSExtension implements Extension {
 
     @Produces
     public MessageSender messageSender(final InjectionPoint ip) {
-      final MessageSend at = Cdis.getAnnotated(ip).getAnnotation(MessageSend.class);
+      final MessageSend at = shouldNotNull(Cdis.getAnnotated(ip).getAnnotation(MessageSend.class));
       return new MessageSenderImpl(at);
     }
   }

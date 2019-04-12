@@ -16,18 +16,26 @@ package org.corant.suites.jms.artemis;
 import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.ConversionUtils.toEnum;
-import static org.corant.shared.util.ObjectUtils.isNotNull;
+import static org.corant.shared.util.ConversionUtils.toInteger;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
+import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -38,22 +46,21 @@ import org.eclipse.microprofile.config.Config;
  */
 public class ArtemisConfig {
 
+  public static final int DFLT_PORT = 61616;
   public static final String ATM_PREFIX = "jms.artemis.";
   public static final String ATM_USER_NAME = ".username";
   public static final String ATM_PASSWOED = ".password";
   public static final String ATM_URL = ".url";
-  public static final String ATM_HOST = ".host";
-  public static final String ATM_PORT = ".port";
   public static final String ATM_HA = ".ha";
   public static final String ATM_FT = ".factory-type";
+  public static final String ATM_HOST_PORTS = ".host-ports";
 
   private String name; // the connection factory name means a artemis server or cluster
   private String username;
   private String password;
   private String url;
   private JMSFactoryType factoryType;
-  private String host;
-  private int port;
+  private Set<Pair<String, Integer>> hostPorts = new LinkedHashSet<>();
   private boolean ha;
 
   protected ArtemisConfig() {}
@@ -63,20 +70,20 @@ public class ArtemisConfig {
    * @param username
    * @param password
    * @param url
-   * @param host
-   * @param port
+   * @param hostPorts
    * @param ha
    * @param factoryType
    */
-  protected ArtemisConfig(String name, String username, String password, String url, String host,
-      int port, boolean ha, JMSFactoryType factoryType) {
+  protected ArtemisConfig(String name, String username, String password, String url,
+      Collection<Pair<String, Integer>> hostPorts, boolean ha, JMSFactoryType factoryType) {
     super();
     this.name = name;
     this.username = username;
     this.password = password;
     this.url = url;
-    this.host = host;
-    this.port = port;
+    if (isNotEmpty(hostPorts)) {
+      this.hostPorts.addAll(hostPorts);
+    }
     this.ha = ha;
     this.factoryType = factoryType;
   }
@@ -110,8 +117,7 @@ public class ArtemisConfig {
     names.add(dfltPrefix + ATM_USER_NAME);
     names.add(dfltPrefix + ATM_PASSWOED);
     names.add(dfltPrefix + ATM_URL);
-    names.add(dfltPrefix + ATM_HOST);
-    names.add(dfltPrefix + ATM_PORT);
+    names.add(dfltPrefix + ATM_HOST_PORTS);
     names.add(dfltPrefix + ATM_HA);
     names.add(dfltPrefix + ATM_FT);
     return names;
@@ -127,10 +133,19 @@ public class ArtemisConfig {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setPassword);
       } else if (pn.endsWith(ATM_URL)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setUrl);
-      } else if (pn.endsWith(ATM_HOST)) {
-        config.getOptionalValue(pn, String.class).ifPresent(cfg::setHost);
-      } else if (pn.endsWith(ATM_PORT)) {
-        config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setPort);
+      } else if (pn.endsWith(ATM_HOST_PORTS)) {
+        config.getOptionalValue(pn, String.class)
+            .ifPresent(hps -> cfg.setHostPorts(asStream(split(hps, ",", true, true)).map(x -> {
+              String[] arr = split(x, ":", true, true);
+              if (isNoneBlank(arr)) {
+                if (arr.length > 1) {
+                  return Pair.of(arr[0], toInteger(arr[1]));
+                } else {
+                  return Pair.of(arr[0], DFLT_PORT);
+                }
+              }
+              return null;
+            }).filter(ObjectUtils::isNotNull).collect(Collectors.toSet())));
       } else if (pn.endsWith(ATM_HA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setHa);
       } else if (pn.endsWith(ATM_FT)) {
@@ -138,7 +153,7 @@ public class ArtemisConfig {
         cfg.setFactoryType(toEnum(ft, JMSFactoryType.class));
       }
     });
-    if (isNotBlank(cfg.getUrl()) || isNotBlank(cfg.getHost()) && isNotNull(cfg.getPort())) {
+    if (isNotBlank(cfg.getUrl()) || isNotEmpty(cfg.getHostPorts())) {
       return cfg;
     }
     return null;
@@ -152,8 +167,8 @@ public class ArtemisConfig {
     return factoryType;
   }
 
-  public String getHost() {
-    return host;
+  public Set<Pair<String, Integer>> getHostPorts() {
+    return Collections.unmodifiableSet(hostPorts);
   }
 
   public String getName() {
@@ -162,10 +177,6 @@ public class ArtemisConfig {
 
   public String getPassword() {
     return password;
-  }
-
-  public Integer getPort() {
-    return port;
   }
 
   public String getUrl() {
@@ -192,8 +203,11 @@ public class ArtemisConfig {
     this.ha = ha;
   }
 
-  protected void setHost(String host) {
-    this.host = host;
+  protected void setHostPorts(Set<Pair<String, Integer>> hostPorts) {
+    this.hostPorts.clear();
+    if (isNotEmpty(hostPorts)) {
+      this.hostPorts.addAll(hostPorts);
+    }
   }
 
   protected void setName(String name) {
@@ -202,10 +216,6 @@ public class ArtemisConfig {
 
   protected void setPassword(String password) {
     this.password = password;
-  }
-
-  protected void setPort(int port) {
-    this.port = port;
   }
 
   protected void setUrl(String url) {

@@ -154,6 +154,10 @@ public class ObjectUtils {
       return new Pair<>(left, right);
     }
 
+    public static <L, R> Pair<L, R> of(Map.Entry<L, R> entry) {
+      return new Pair<>(entry.getKey(), entry.getValue());
+    }
+
     public String asString(final String format) {
       return String.format(format, getLeft(), getRight());
     }

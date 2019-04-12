@@ -13,7 +13,11 @@
  */
 package org.corant.suites.jms.artemis;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StringUtils.defaultBlank;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -28,6 +32,7 @@ import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -86,8 +91,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (configs.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
-      logger.info(() -> String.format("Find %s artemis names %s", configs.size(),
-          String.join(", ", configs.keySet())));
+      logger.info(
+          () -> String.format("Find %s artemis names %s", configs.size(), String.join(", ", configs
+              .keySet().stream().map(c -> defaultBlank(c, "[Unnamed]")).toArray(String[]::new))));
     }
   }
 
@@ -111,23 +117,29 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   private ActiveMQConnectionFactory buildConnectionFactory(Instance<Object> beans,
       ArtemisConfig cfg) throws Exception {
-    Map<String, Object> params = new HashMap<>();
-    params.put("serverId", "1");
+
     final ActiveMQConnectionFactory activeMQConnectionFactory;
     if (cfg.getUrl() != null) {
       activeMQConnectionFactory =
           ActiveMQJMSClient.createConnectionFactory(cfg.getUrl(), cfg.getName());
     } else {
-      if (cfg.getHost() != null) {
-        params.put(TransportConstants.HOST_PROP_NAME, cfg.getHost());
-        params.put(TransportConstants.PORT_PROP_NAME, cfg.getPort());
+      List<TransportConfiguration> tcs = new ArrayList<>();
+      if (isNotEmpty(cfg.getHostPorts())) {
+        int seq = 0;
+        for (Pair<String, Integer> hp : cfg.getHostPorts()) {
+          Map<String, Object> params = new HashMap<>();
+          params.put("serverId", ++seq);
+          params.put(TransportConstants.HOST_PROP_NAME, hp.getLeft());
+          params.put(TransportConstants.PORT_PROP_NAME, hp.getRight());
+          tcs.add(new TransportConfiguration(cfg.getConnectorFactory(), params));
+        }
       }
       if (cfg.isHa()) {
         activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithHA(
-            cfg.getFactoryType(), new TransportConfiguration(cfg.getConnectorFactory(), params));
+            cfg.getFactoryType(), tcs.stream().toArray(TransportConfiguration[]::new));
       } else {
         activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(
-            cfg.getFactoryType(), new TransportConfiguration(cfg.getConnectorFactory(), params));
+            cfg.getFactoryType(), tcs.stream().toArray(TransportConfiguration[]::new));
       }
     }
     if (cfg.hasAuthentication()) {

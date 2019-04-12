@@ -254,8 +254,12 @@ public class MongoClientExtension implements Extension {
         .forEach(db -> shouldBeNull(databaseConfigs.put(db.getNameSpace(), db),
             "The mongodb data base named %s dup!", db.getNameSpace()));
     databaseNames.addAll(databaseConfigs.keySet());
-    logger
-        .info(() -> String.format("Find mongodb databases [%s]!", String.join(",", databaseNames)));
+    if (databaseNames.isEmpty()) {
+      logger.info(() -> "Can not find any mongodb databases!");
+    } else {
+      logger.info(
+          () -> String.format("Find mongodb databases [%s]!", String.join(",", databaseNames)));
+    }
   }
 
   protected MongoClient produceClient(Instance<Object> beans, MongoClientConfig cfg) {

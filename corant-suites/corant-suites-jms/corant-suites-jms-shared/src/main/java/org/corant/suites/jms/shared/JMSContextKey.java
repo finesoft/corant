@@ -17,15 +17,20 @@ import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.io.Serializable;
+import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSSessionMode;
+import javax.jms.XAConnectionFactory;
+import javax.jms.XAJMSContext;
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import javax.transaction.TransactionSynchronizationRegistry;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -36,6 +41,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class JMSContextKey implements Serializable {
   private static final long serialVersionUID = -9143619854361396089L;
+  private static final Logger logger = Logger.getLogger(JMSContextKey.class.getName());
   private volatile ConnectionFactory connectionFactoryInstance;
   private final String connectionFactory;
   private final Integer session;
@@ -57,12 +63,25 @@ public class JMSContextKey implements Serializable {
   }
 
   public JMSContext create() {
-    if (session != null) {
-      JMSContext ctx = connectionFactory().createContext(session);
-      // FIXME will be changed in next iteration
-      return registerToLocaleTransactionSynchronization(ctx);
+    ConnectionFactory cf = connectionFactory();
+    if (cf instanceof XAConnectionFactory && JMSContextHolder.isInTransaction()) {
+      XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
+      try {
+        instance().select(TransactionManager.class).get().getTransaction()
+            .enlistResource(ctx.getXAResource());
+        logger.info(() -> "Create new XAJMSContext for current transaction and register it!");
+      } catch (IllegalStateException | RollbackException | SystemException e) {
+        throw new CorantRuntimeException(e);
+      }
+      return ctx;
+    } else {
+      if (session != null) {
+        JMSContext ctx = connectionFactory().createContext(session);
+        // FIXME will be changed in next iteration
+        return registerToLocaleTransactionSynchronization(ctx);
+      }
+      return connectionFactory().createContext();
     }
-    return connectionFactory().createContext();
   }
 
   @Override
@@ -115,27 +134,31 @@ public class JMSContextKey implements Serializable {
     }
   }
 
+  // TODO In NO XA
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
-    if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED
-        && instance().select(TransactionSynchronizationRegistry.class).isResolvable()) {
-      instance().select(TransactionSynchronizationRegistry.class).get()
-          .registerInterposedSynchronization(new Synchronization() {
-            @Override
-            public void afterCompletion(int status) {
-              if (status != Status.STATUS_COMMITTED) {
-                jmscontext.rollback();
+    if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED) {
+      try {
+        instance().select(TransactionManager.class).get().getTransaction()
+            .registerSynchronization(new Synchronization() {
+              @Override
+              public void afterCompletion(int status) {
+                if (status != Status.STATUS_COMMITTED) {
+                  jmscontext.rollback();
+                }
               }
-            }
 
-            @Override
-            public void beforeCompletion() {
-              try {
-                jmscontext.commit();
-              } catch (Exception e) {
-                throw new CorantRuntimeException(e);
+              @Override
+              public void beforeCompletion() {
+                try {
+                  jmscontext.commit();
+                } catch (Exception e) {
+                  throw new CorantRuntimeException(e);
+                }
               }
-            }
-          });
+            });
+      } catch (IllegalStateException | RollbackException | SystemException e) {
+        throw new CorantRuntimeException(e);
+      }
     }
     return jmscontext;
   }

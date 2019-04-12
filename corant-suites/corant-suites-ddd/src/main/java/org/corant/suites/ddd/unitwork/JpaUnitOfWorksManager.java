@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.Corant.instance;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
@@ -25,10 +26,11 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SynchronizationType;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageService;
@@ -50,9 +52,6 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   TransactionManager transactionManager;
 
   @Inject
-  TransactionSynchronizationRegistry transactionSynchronizationRegistry;
-
-  @Inject
   JpaPersistenceService persistenceService;
 
   @Inject
@@ -63,17 +62,50 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Any
   Instance<SagaService> sagaService;
 
+  public static JpaUnitOfWork curUow() {
+    return instance().select(JpaUnitOfWorksManager.class).get().getCurrentUnitOfWork();
+  }
+
+  public static int getTxStatusFromCurUow() {
+    try {
+      return curUow().transaction.getStatus();
+    } catch (SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void makeCurUowTxRollbackOnly() {
+    try {
+      curUow().transaction.setRollbackOnly();
+    } catch (IllegalStateException | SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void registerTxSyncToCurUow(Synchronization sync) {
+    try {
+      curUow().transaction.registerSynchronization(sync);
+    } catch (IllegalStateException | RollbackException | SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   @Override
   public JpaUnitOfWork getCurrentUnitOfWork() {
     try {
-      final Transaction curtx = getTransactionManager().getTransaction();
-      return uows.computeIfAbsent(wrapUintOfWorksKey(curtx), (key) -> {
-        logger.fine(() -> "Register an new unit of work with the current transacion context.");
-        JpaUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
-        getTransactionSynchronizationRegistry().registerInterposedSynchronization(uow);
-        return uow;
+      final Transaction curTx = getTransactionManager().getTransaction();
+      final JpaUnitOfWork curUow = uows.computeIfAbsent(wrapUintOfWorksKey(curTx), (key) -> {
+        try {
+          logger.fine(() -> "Register an new unit of work with the current transacion context.");
+          JpaUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
+          curTx.registerSynchronization(uow);
+          return uow;
+        } catch (IllegalStateException | RollbackException | SystemException e) {
+          throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
+        }
       });
-    } catch (SystemException e) {
+      return curUow;
+    } catch (SystemException | IllegalStateException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
   }
@@ -90,10 +122,6 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   public TransactionManager getTransactionManager() {
     return transactionManager;
-  }
-
-  public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
-    return transactionSynchronizationRegistry;
   }
 
   protected EntityManager buildEntityManager(Annotation qualifier) {

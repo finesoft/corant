@@ -79,8 +79,8 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       ElasticMapping mapping = mapGetter.apply(docCls);
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
-        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getEsId(), doc.getEsRId(),
-            doc.getEsPId(), mapping.toMap(doc), false, 0l, null).request();
+        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getId(), doc.getRId(),
+            doc.getPId(), mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
     }

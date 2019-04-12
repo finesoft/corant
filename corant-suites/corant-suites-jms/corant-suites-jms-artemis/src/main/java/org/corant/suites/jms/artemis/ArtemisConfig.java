@@ -16,6 +16,7 @@ package org.corant.suites.jms.artemis;
 import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.ConversionUtils.toEnum;
+import static org.corant.shared.util.ObjectUtils.isNotNull;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -112,6 +113,7 @@ public class ArtemisConfig {
     names.add(dfltPrefix + ATM_HOST);
     names.add(dfltPrefix + ATM_PORT);
     names.add(dfltPrefix + ATM_HA);
+    names.add(dfltPrefix + ATM_FT);
     return names;
   }
 
@@ -127,7 +129,7 @@ public class ArtemisConfig {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setUrl);
       } else if (pn.endsWith(ATM_HOST)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setHost);
-      } else if (pn.endsWith(ATM_HOST)) {
+      } else if (pn.endsWith(ATM_PORT)) {
         config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setPort);
       } else if (pn.endsWith(ATM_HA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setHa);
@@ -136,7 +138,7 @@ public class ArtemisConfig {
         cfg.setFactoryType(toEnum(ft, JMSFactoryType.class));
       }
     });
-    if (isNotBlank(cfg.getUrl())) {
+    if (isNotBlank(cfg.getUrl()) || isNotBlank(cfg.getHost()) && isNotNull(cfg.getPort())) {
       return cfg;
     }
     return null;

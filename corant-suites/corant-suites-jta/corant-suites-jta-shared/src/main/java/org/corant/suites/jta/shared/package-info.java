@@ -11,40 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.elastic.model;
-
-import java.io.Serializable;
-
 /**
- * corant-suites-elastic
+ * corant-suites-jta-shared
  *
- * @author bingo 下午2:16:59
+ * @author bingo 下午2:47:48
  *
  */
-public interface ElasticDocument extends Serializable {
-
-  /**
-   * The document id
-   *
-   * @return getId
-   */
-  String getId();
-
-  /**
-   * the parent document id
-   *
-   * @return getPId
-   */
-  default String getPId() {
-    return null;
-  }
-
-  /**
-   * the document routing id
-   *
-   * @return getRId
-   */
-  default String getRId() {
-    return getPId();
-  }
-}
+package org.corant.suites.jta.shared;

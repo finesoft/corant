@@ -21,6 +21,6 @@ package org.corant.suites.elastic.model;
  */
 public interface ElasticVersionedDocument extends ElasticDocument {
 
-  long getEsVn();
+  long getVn();
 
 }

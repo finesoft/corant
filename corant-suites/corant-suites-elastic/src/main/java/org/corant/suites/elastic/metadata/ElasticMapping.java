@@ -24,7 +24,6 @@ import java.util.Set;
 import org.corant.suites.elastic.metadata.resolver.ResolverUtils;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.index.VersionType;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * corant-suites-elastic
@@ -60,8 +59,9 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
     versioned = versionType != VersionType.INTERNAL;
   }
 
+  @SuppressWarnings("unchecked")
   public <T> T fromMap(Map<String, Object> map) {
-    return ResolverUtils.toDocument(map, new TypeReference<T>() {});
+    return (T) ResolverUtils.toDocument(map, documentClass);
   }
 
   /**
@@ -133,7 +133,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
       if (isRoot()) {
         convertedMap.put(getJoinFiledName(), asMap("name", getName()));
       } else {
-        String parentId = shouldNotNull(doc.getEsPId(), "Parent id can not null");
+        String parentId = shouldNotNull(doc.getPId(), "Parent id can not null");
         convertedMap.put(getJoinFiledName(), asMap("name", getName(), "parent", parentId));
       }
     }

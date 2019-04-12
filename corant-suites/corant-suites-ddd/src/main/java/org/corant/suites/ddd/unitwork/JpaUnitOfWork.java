@@ -79,7 +79,6 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
-    // handleMessageAsync();
     entityManagers.values().forEach(EntityManager::flush);// FIXME Do we need flush here?
   }
 
@@ -91,10 +90,9 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registration.values().forEach(v -> v.remove(ai));
-          // messages.removeIf(e -> Objects.equals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        // messages.remove(obj);
+        // TODO
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -148,12 +146,9 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
             }
           });
           registration.get(aggregate.getLifecycle()).add(ai);
-          // aggregate.extractMessages(true)
-          // .forEach(message -> MessageUtils.mergeToQueue(messages, message));
           handleMessage(aggregate.extractMessages(true).stream().toArray(Message[]::new));
         }
       } else if (obj instanceof Message) {
-        // MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
         handleMessage(Message.class.cast(obj));
       }
     } else {
@@ -166,7 +161,6 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
     return transaction.toString();
   }
 
-  // @Override
   protected void clear() {
     try {
       entityManagers.values().forEach(em -> {
@@ -177,7 +171,6 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
       registration.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
-      // super.clear();
     }
   }
 
@@ -193,26 +186,5 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
       sagaService.trigger(msg);// FIXME Is it right to do so?
     }
   }
-
-  // protected void handleMessageAsync() {
-  // logger.info(() -> "Handle collected messages before completion");
-  // listRemoveIf(messages, ObjectUtils::isNull).sort(Message::compare);
-  // Message message = null;
-  // final List<Message> messageToSends = new ArrayList<>();
-  // while ((message = messages.poll()) != null) {
-  // messageService.store(message);
-  // messageToSends.add(message);
-  // sagaService.trigger(message);// FIXME Is it right to do so?
-  // }
-  // if (!messageToSends.isEmpty()) {
-  // // another thread to send.
-  // if (CompletableFuture.runAsync(() -> {
-  // logger.info(() -> "Send messages to broker with another thread!");
-  // messageService.send(messageToSends.toArray(new Message[messageToSends.size()]));
-  // }).isCompletedExceptionally()) {
-  // throw new CorantRuntimeException();
-  // }
-  // }
-  // }
 
 }

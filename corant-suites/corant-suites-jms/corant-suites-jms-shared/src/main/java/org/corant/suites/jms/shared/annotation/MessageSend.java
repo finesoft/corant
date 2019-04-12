@@ -40,7 +40,7 @@ public @interface MessageSend {
 
   boolean multicast() default false;
 
-  int sessionModel() default JMSContext.SESSION_TRANSACTED;
+  int sessionModel() default JMSContext.AUTO_ACKNOWLEDGE;
 
   public static class MessageSenderLiteral extends AnnotationLiteral<MessageSend>
       implements MessageSend {

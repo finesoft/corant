@@ -87,10 +87,10 @@ public interface ElasticDocumentService {
     ElasticMapping mapping = shouldNotNull(resolveMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
-      return index(indexing.getName(), document.getEsId(), document.getEsRId(), document.getEsPId(),
-          mapping.toMap(verDoc), flush, verDoc.getEsVn(), mapping.getVersionType());
+      return index(indexing.getName(), document.getId(), document.getRId(), document.getPId(),
+          mapping.toMap(verDoc), flush, verDoc.getVn(), mapping.getVersionType());
     } else {
-      return index(indexing.getName(), document.getEsId(), document.getEsRId(), document.getEsPId(),
+      return index(indexing.getName(), document.getId(), document.getRId(), document.getPId(),
           mapping.toMap(document), flush, 0L, null);
     }
   }

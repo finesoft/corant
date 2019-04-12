@@ -69,7 +69,7 @@ public class JMSContextKey implements Serializable {
       try {
         instance().select(TransactionManager.class).get().getTransaction()
             .enlistResource(ctx.getXAResource());
-        logger.info(() -> "Create new XAJMSContext for current transaction and register it!");
+        logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
       } catch (IllegalStateException | RollbackException | SystemException e) {
         throw new CorantRuntimeException(e);
       }

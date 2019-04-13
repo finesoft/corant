@@ -26,6 +26,8 @@ import org.xadisk.bridge.proxies.interfaces.XASession;
 /**
  * corant-suites-jta-xadisk
  *
+ * Unfinished yet
+ *
  * @author bingo 上午1:00:55
  *
  */
@@ -40,7 +42,7 @@ public class XADiskSessionProducer {
   @Produces
   @TransactionScoped
   XASession produce() {
-
+    // TODO
     return null;
   }
 }

@@ -15,10 +15,12 @@ package org.corant.suites.jta.xadisk;
 
 /**
  * corant-suites-jta-xadisk
- * 
+ *
+ * Unfinished yet
+ *
  * @author bingo 上午1:08:34
  *
  */
 public class XAFileSystemProvider {
-
+  // TODO
 }

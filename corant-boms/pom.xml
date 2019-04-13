@@ -80,6 +80,7 @@
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.flyway>5.2.0</version.flyway>
+		<version.xadisk>1.2.2</version.xadisk>
 
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.mongodb>3.6.4</version.mongodb>
@@ -340,6 +341,12 @@
 				<artifactId>narayana-jts-integration</artifactId>
 				<version>${version.narayana-jta}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.java.xadisk</groupId>
+				<artifactId>xadisk</artifactId>
+				<version>${version.xadisk}</version>
+			</dependency>
+
 
 			<!-- devops -->
 			<dependency>

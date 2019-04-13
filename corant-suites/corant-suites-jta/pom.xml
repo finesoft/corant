@@ -23,5 +23,6 @@
 		<module>corant-suites-jta-shared</module>
 		<module>corant-suites-jta-narayana</module>
 		<module>corant-suites-jta-atomikos</module>
+		<module>corant-suites-jta-xadisk</module>
 	</modules>
 </project>

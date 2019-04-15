@@ -15,10 +15,13 @@ We have 7 projects under the corant project.
 # 3. corant-devops 
     Corant build and testing project. include maven build plugins and framework testing.
 # 4. corant-kernel 
-    Including application configuration, boostrap and CDI integration, for now we use WELD as CDI container and Microprofile config as configuration processer.
+    Including application configuration, boostrap and CDI integration, 
+    for now we use WELD as CDI container and Microprofile config as configuration processer.
 # 5. corant-shared 
-    The global shared project, contains utility classes for resource handling, string handling, reflection, object conversion, assertion, etc. Most projects rely on this.
+    The global shared project, contains utility classes for resource handling, 
+    string handling, reflection, object conversion, assertion, etc. Most projects rely on this.
 # 6. corant-suites 
-    Integration project. This project includes many subprojects that integrate JEE or other open source components to make integration and development easier. For now we support JTA/JPA/JMS/JNDI/JAXRS and app-server etc.
+    Integration project. This project includes many subprojects that integrate JEE or other open source components
+    to make integration and development easier. For now we support JTA/JPA/JMS/JNDI/JAXRS and app-server etc.
 # 7. corant-asosat 
     The development use cases, include some domains knowledge. 

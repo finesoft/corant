@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -100,7 +101,7 @@ public class Throwables {
         if (e instanceof RuntimeException) {
           throw (RuntimeException) e;
         } else {
-          throw new RuntimeException(e);
+          throw new CorantRuntimeException(e);
         }
       } finally {
         cases.clear();

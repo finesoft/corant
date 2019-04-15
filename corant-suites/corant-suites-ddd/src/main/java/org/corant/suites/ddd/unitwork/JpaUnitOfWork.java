@@ -181,10 +181,10 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
 
   protected void handleMessage(Message... msgs) {
     for (Message msg : msgs) {
-      messageService.store(msg);
-      messageService.send(msg);
+      messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
     }
+    messageDispatcher.accept(msgs);
   }
 
 }

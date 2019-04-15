@@ -33,7 +33,8 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.message.MessageService;
+import org.corant.suites.ddd.message.MessageDispatcher;
+import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
 
 /**
@@ -56,7 +57,11 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Inject
   @Any
-  Instance<MessageService> messageService;
+  Instance<MessageDispatcher> messageDispatch;
+
+  @Inject
+  @Any
+  Instance<MessageStorage> messageStroage;
 
   @Inject
   @Any
@@ -111,8 +116,13 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   @Override
-  public MessageService getMessageService() {
-    return messageService.isResolvable() ? messageService.get() : MessageService.empty();
+  public MessageDispatcher getMessageDispatcher() {
+    return messageDispatch.isResolvable() ? messageDispatch.get() : MessageDispatcher.DUMMY_INST;
+  }
+
+  @Override
+  public MessageStorage getMessageStorage() {
+    return messageStroage.isResolvable() ? messageStroage.get() : MessageStorage.DUMMY_INST;
   }
 
   @Override

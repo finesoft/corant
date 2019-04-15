@@ -39,7 +39,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
   }
 
   @Override
-  public MessageMetadata getMetadata() {
+  public AggregateLifecycleMessageMetadata getMetadata() {
     return metadata;
   }
 
@@ -60,7 +60,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
     private final DefaultAggregateIdentifier source;
     private final Instant occurredTime = Instant.now();
     private final long versionNumber;
-    private long sequenceNumber = -1;
+    private long sequenceNumber = 0;
 
     public AggregateLifecycleMessageMetadata(Aggregate aggregate) {
       source = new DefaultAggregateIdentifier(aggregate);
@@ -86,7 +86,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
     }
 
     @Override
-    public Object getSource() {
+    public DefaultAggregateIdentifier getSource() {
       return source;
     }
 

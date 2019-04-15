@@ -16,7 +16,8 @@ package org.corant.suites.ddd.unitwork;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.corant.suites.ddd.message.MessageService;
+import org.corant.suites.ddd.message.MessageDispatcher;
+import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
 
 /**
@@ -26,14 +27,16 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
   protected final AbstractUnitOfWorksManager manager;
-  protected final MessageService messageService;
-  protected final SagaService sagaService;
+  protected final MessageDispatcher messageDispatcher;
+  protected final MessageStorage messageStorage;
+  protected final SagaService sagaService; // FIXME Is it right to do so?
   protected volatile boolean activated = false;
   // protected final LinkedList<Message> messages = new LinkedList<>();
 
   protected AbstractUnitOfWork(AbstractUnitOfWorksManager manager) {
     this.manager = manager;
-    messageService = defaultObject(manager.getMessageService(), MessageService.empty());
+    messageDispatcher = manager.getMessageDispatcher();
+    messageStorage = manager.getMessageStorage();
     sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
     activated = true;
   }

@@ -163,10 +163,9 @@ public abstract class AbstractJpaRepository implements JpaRepository {
       synchronized (this) {
         if (emfQualifier == null) {
           final Class<?> repoCls = getUserClass(this.getClass());
-          if ((emfQualifier = findAnnotation(repoCls, Named.class)) == null) {
-            if ((emfQualifier = findAnnotation(repoCls, Unnamed.class)) == null) {
-              emfQualifier = Default.Literal.INSTANCE;
-            }
+          if ((emfQualifier = findAnnotation(repoCls, Named.class)) == null
+              && (emfQualifier = findAnnotation(repoCls, Unnamed.class)) == null) {
+            emfQualifier = Default.Literal.INSTANCE;
           }
         }
       }

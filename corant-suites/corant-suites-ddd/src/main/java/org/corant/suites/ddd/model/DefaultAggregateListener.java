@@ -54,12 +54,10 @@ public class DefaultAggregateListener {
 
   protected void handlePrePersist(AbstractAggregate o) {
     o.preEnable();
-    return;
   }
 
   protected void handlePreRemove(AbstractAggregate o) {
     o.raise(new AggregateLifecycleMessage(o, Lifecycle.DESTROYED));
-    return;
   }
 
   protected void handlePreUpdate(AbstractAggregate o) {

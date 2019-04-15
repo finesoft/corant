@@ -50,8 +50,10 @@ public class SQLServer2005Dialect extends SQLServerDialect {
    * @return A new SQL statement with the LIMIT clause applied.
    */
   protected String getLimitString(String sql, int offset, int limit) {
-    String orderby = SqlHelper.getOrderBy(sql), distinct = "",
-        lowered = sql.toLowerCase(Locale.ROOT), sqlPart = sql;
+    String orderby = SqlHelper.getOrderBy(sql);
+    String distinct = "";
+    String lowered = sql.toLowerCase(Locale.ROOT);
+    String sqlPart = sql;
     if (lowered.trim().startsWith(SqlHelper.SELECT_SPACE)) {
       int index = SqlHelper.SELECT_SPACE.length();
       if (lowered.startsWith(SqlHelper.SELECT_DISTINCT_SPACE)) {

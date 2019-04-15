@@ -283,7 +283,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       QueryHint hit = new QueryHint();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_KEY.equalsIgnoreCase(aqn)) {
           hit.setKey(atv);
         }

@@ -24,10 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
 
-  public NumberBooleanConverter() {
-    super();
-  }
-
   @Override
   protected Boolean convert(Number value, Map<String, ?> hints) throws Exception {
     final long v = value.longValue();

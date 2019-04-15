@@ -37,8 +37,6 @@ public class DefaultAggregateListener {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
-  public DefaultAggregateListener() {}
-
   protected void handlePostLoad(AbstractAggregate o) {
     o.withLifecycle(Lifecycle.ENABLED).callAssistant().clearMessages();
   }
@@ -52,9 +50,7 @@ public class DefaultAggregateListener {
     registerToUnitOfWork(o.withLifecycle(Lifecycle.DESTROYED));
   }
 
-  protected void handlePostUpdate(AbstractAggregate o) {
-    return;
-  }
+  protected void handlePostUpdate(AbstractAggregate o) {}
 
   protected void handlePrePersist(AbstractAggregate o) {
     o.preEnable();

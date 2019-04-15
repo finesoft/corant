@@ -34,7 +34,8 @@ public class MessageUtils {
     if (msg == null) {
       return;
     } else if (msg instanceof MergableMessage) {
-      MergableMessage newMgbMsg = (MergableMessage) msg, oldMgbMsg = null;
+      MergableMessage newMgbMsg = (MergableMessage) msg;
+      MergableMessage oldMgbMsg = null;
       for (Message queMsg : queue) {
         if (isCorrelated(queMsg, newMgbMsg)) {
           oldMgbMsg = (MergableMessage) queMsg;

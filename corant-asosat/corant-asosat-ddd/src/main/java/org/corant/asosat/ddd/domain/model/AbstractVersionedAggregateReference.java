@@ -62,10 +62,7 @@ public abstract class AbstractVersionedAggregateReference<T extends AbstractGene
       return false;
     }
     AbstractVersionedAggregateReference other = (AbstractVersionedAggregateReference) obj;
-    if (vn != other.vn) {
-      return false;
-    }
-    return true;
+    return vn == other.vn;
   }
 
   public long getVn() {

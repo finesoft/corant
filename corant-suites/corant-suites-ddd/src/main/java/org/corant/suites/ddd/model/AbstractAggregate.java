@@ -48,10 +48,6 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Column(name = "vn")
   private volatile long vn = 1L;
 
-  public AbstractAggregate() {
-    super();
-  }
-
   @Override
   public synchronized List<Message> extractMessages(boolean flush) {
     return callAssistant().dequeueMessages(flush);

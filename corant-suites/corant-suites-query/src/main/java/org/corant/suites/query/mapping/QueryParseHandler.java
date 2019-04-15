@@ -305,7 +305,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       QueryHintParameter qhp = new QueryHintParameter();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           qhp.setName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {

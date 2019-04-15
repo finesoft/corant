@@ -327,7 +327,8 @@ public class StringUtils {
     if (str == null) {
       return null;
     }
-    int strLen, pos = start;
+    int strLen;
+    int pos = start;
     if (len < 0 || pos > (strLen = str.length())) {
       return EMPTY;
     }
@@ -355,8 +356,10 @@ public class StringUtils {
     String replaced = source;
     int i = 0;
     if ((i = replaced.indexOf(orginal, i)) >= 0) {
-      char[] srcArray = replaced.toCharArray(), nsArray = replace.toCharArray();
-      int olen = orginal.length(), srclen = srcArray.length;
+      char[] srcArray = replaced.toCharArray();
+      char[] nsArray = replace.toCharArray();
+      int olen = orginal.length();
+      int srclen = srcArray.length;
       StringBuilder buf = new StringBuilder(srclen);
       buf.append(srcArray, 0, i).append(nsArray);
       i += olen;
@@ -416,7 +419,10 @@ public class StringUtils {
     if (splitor == null) {
       return new String[] {str};
     }
-    int i = 0, s = 0, g = len > 16 ? 16 : (len >> 1) + 1, ai = 0;
+    int i = 0;
+    int s = 0;
+    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int ai = 0;
     String[] array = new String[g];
     boolean match = false;
     while (i < len) {
@@ -451,7 +457,8 @@ public class StringUtils {
    * @return
    */
   public static String[] split(final String str, final String wholeSpreator) {
-    int len, slen;
+    int len;
+    int slen;
     if (str == null || (len = str.length()) == 0) {
       return new String[0];
     }
@@ -462,7 +469,10 @@ public class StringUtils {
       char wholeChar = wholeSpreator.charAt(0);
       return split(str, c -> c.charValue() == wholeChar);
     }
-    int s = 0, e = 0, i = 0, g = len > 16 ? 16 : (len >> 1) + 1;
+    int s = 0;
+    int e = 0;
+    int i = 0;
+    int g = len > 16 ? 16 : (len >> 1) + 1;
     String[] array = new String[g];
     while (e < len) {
       e = str.indexOf(wholeSpreator, s);

@@ -321,58 +321,59 @@ public class ClassUtils {
 
   public static boolean isAssignable(Class<?> cls, final Class<?> toClass,
       final boolean autoboxing) {
+    Class<?> useCls = cls;
     if (toClass == null) {
       return false;
     }
-    if (cls == null) {
+    if (useCls == null) {
       return !toClass.isPrimitive();
     }
     if (autoboxing) {
-      if (cls.isPrimitive() && !toClass.isPrimitive()) {
-        cls = primitiveToWrapper(cls);
-        if (cls == null) {
+      if (useCls.isPrimitive() && !toClass.isPrimitive()) {
+        useCls = primitiveToWrapper(useCls);
+        if (useCls == null) {
           return false;
         }
       }
-      if (toClass.isPrimitive() && !cls.isPrimitive()) {
-        cls = wrapperToPrimitive(cls);
-        if (cls == null) {
+      if (toClass.isPrimitive() && !useCls.isPrimitive()) {
+        useCls = wrapperToPrimitive(useCls);
+        if (useCls == null) {
           return false;
         }
       }
     }
-    if (cls.equals(toClass)) {
+    if (useCls.equals(toClass)) {
       return true;
     }
-    if (cls.isPrimitive()) {
+    if (useCls.isPrimitive()) {
       if (!toClass.isPrimitive()) {
         return false;
       }
-      if (Integer.TYPE.equals(cls)) {
+      if (Integer.TYPE.equals(useCls)) {
         return Long.TYPE.equals(toClass) || Float.TYPE.equals(toClass)
             || Double.TYPE.equals(toClass);
       }
-      if (Long.TYPE.equals(cls)) {
+      if (Long.TYPE.equals(useCls)) {
         return Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }
-      if (Boolean.TYPE.equals(cls)) {
+      if (Boolean.TYPE.equals(useCls)) {
         return false;
       }
-      if (Double.TYPE.equals(cls)) {
+      if (Double.TYPE.equals(useCls)) {
         return false;
       }
-      if (Float.TYPE.equals(cls)) {
+      if (Float.TYPE.equals(useCls)) {
         return Double.TYPE.equals(toClass);
       }
-      if (Character.TYPE.equals(cls)) {
+      if (Character.TYPE.equals(useCls)) {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }
-      if (Short.TYPE.equals(cls)) {
+      if (Short.TYPE.equals(useCls)) {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }
-      if (Byte.TYPE.equals(cls)) {
+      if (Byte.TYPE.equals(useCls)) {
         return Short.TYPE.equals(toClass) || Integer.TYPE.equals(toClass)
             || Long.TYPE.equals(toClass) || Float.TYPE.equals(toClass)
             || Double.TYPE.equals(toClass);
@@ -380,7 +381,7 @@ public class ClassUtils {
       // should never get here
       return false;
     }
-    return toClass.isAssignableFrom(cls);
+    return toClass.isAssignableFrom(useCls);
   }
 
   public static boolean isConcrete(Class<?> clazz) {

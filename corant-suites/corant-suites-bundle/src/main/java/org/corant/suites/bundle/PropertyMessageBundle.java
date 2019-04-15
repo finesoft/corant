@@ -50,8 +50,6 @@ public class PropertyMessageBundle implements MessageBundle {
       defaultValue = "META-INF/**Messages_*.properties")
   String bundleFilePaths;
 
-  public PropertyMessageBundle() {}
-
   @Override
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException {
     load();

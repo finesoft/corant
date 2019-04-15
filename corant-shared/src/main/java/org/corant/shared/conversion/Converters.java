@@ -91,7 +91,8 @@ public class Converters {
       int maxNestingDepth, Consumer<Set<ConverterType<?, ?>>> consumer) {
     // Only original converter type to compose
     Set<ConverterType<?, ?>> converterTypes = ConverterRegistry.getNotSyntheticConverterTypes();
-    Queue<ConverterPipe> candidatedPipes = new LinkedList<>(), matchedPipes = new LinkedList<>();
+    Queue<ConverterPipe> candidatedPipes = new LinkedList<>();
+    Queue<ConverterPipe> matchedPipes = new LinkedList<>();
     if (quickMatch(converterTypes, sourceClass, targetClass)) {
       for (ConverterType candidate : converterTypes) {
         if (match(candidate.getTargetClass(), targetClass)) {

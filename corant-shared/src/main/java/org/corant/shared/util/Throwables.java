@@ -92,10 +92,8 @@ public class Throwables {
           Iterator<Case<S>> it = cases.iterator();
           for (; it.hasNext();) {
             Case<S> cas = it.next();
-            if (cas.ifThrow != null && cas.ifThrow.test(ce)) {
-              if (cas.rethrow != null) {
-                throw cas.rethrow.get();
-              }
+            if (cas.ifThrow != null && cas.ifThrow.test(ce) && cas.rethrow != null) {
+              throw cas.rethrow.get();
             }
           }
         });

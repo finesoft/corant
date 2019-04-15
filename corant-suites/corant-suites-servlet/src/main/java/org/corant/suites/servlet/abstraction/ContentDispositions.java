@@ -118,30 +118,30 @@ public class ContentDispositions {
         String value = part.startsWith("\"", eqIndex + 1) && part.endsWith("\"")
             ? part.substring(eqIndex + 2, part.length() - 1)
             : part.substring(eqIndex + 1, part.length());
-        if (attribute.equals("name")) {
+        if ("name".equals(attribute)) {
           name = value;
-        } else if (attribute.equals("filename*")) {
+        } else if ("filename*".equals(attribute)) {
           filename = decodeHeaderFieldParam(value);
           charset = Charset.forName(value.substring(0, value.indexOf("'")));
           shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
               "Charset should be UTF-8 or ISO-8859-1");
-        } else if (attribute.equals("filename") && filename == null) {
+        } else if ("filename".equals(attribute) && filename == null) {
           filename = value;
-        } else if (attribute.equals("size")) {
+        } else if ("size".equals(attribute)) {
           size = Long.parseLong(value);
-        } else if (attribute.equals("creation-date")) {
+        } else if ("creation-date".equals(attribute)) {
           try {
             creationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
           } catch (DateTimeParseException ex) {
             // ignore
           }
-        } else if (attribute.equals("modification-date")) {
+        } else if ("modification-date".equals(attribute)) {
           try {
             modificationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
           } catch (DateTimeParseException ex) {
             // ignore
           }
-        } else if (attribute.equals("read-date")) {
+        } else if ("read-date".equals(attribute)) {
           try {
             readDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
           } catch (DateTimeParseException ex) {

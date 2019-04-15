@@ -24,15 +24,19 @@ import java.util.Map;
  */
 public class JsonConfigSource extends AbstractConfigSource {
 
-  JsonConfigSource(URL resourceUrl, int ordinal) {}
+  JsonConfigSource(URL resourceUrl, int ordinal) {
+    // TODO
+  }
 
   @Override
   public Map<String, String> getProperties() {
+    // TODO
     return null;
   }
 
   @Override
   AbstractConfigSource withProperties(Map<String, String> properties) {
+    // TODO
     return null;
   }
 

@@ -53,8 +53,6 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   @ConfigProperty(name = "bundle.enum-file.paths", defaultValue = "META-INF/**Enums_*.properties")
   String bundleFilePaths;
 
-  public PropertyEnumerationBundle() {}
-
   @SuppressWarnings("unchecked")
   @Override
   public List<Class<Enum>> getAllEnumClass() {
@@ -113,7 +111,8 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
                     holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
                 res.dump().forEach((k, v) -> {
                   int i = k.lastIndexOf(".");
-                  String enumClsName = k.substring(0, i), enumItemKey = null;
+                  String enumClsName = k.substring(0, i);
+                  String enumItemKey = null;
                   Class enumCls = null;
                   try {
                     enumCls = Class.forName(enumClsName);

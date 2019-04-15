@@ -830,7 +830,8 @@ public class EncryptUtils {
    */
   public static String toR62String(long r62Number) {
     long r62n = r62Number;
-    StringBuilder tmp = new StringBuilder(), result = new StringBuilder();
+    StringBuilder tmp = new StringBuilder();
+    StringBuilder result = new StringBuilder();
     boolean negative = false;
     if (r62n == 0) {
       return Character.toString(R62_DIGITS[0]);

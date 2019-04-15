@@ -69,7 +69,7 @@ public abstract class JMSContextHolder implements Serializable {
   }
 
   @PreDestroy
-  private void destroy() {
+  void destroy() {
     if (contexts != null) {
       JMSRuntimeException jre = null;
       for (final JMSContext c : contexts.values()) {

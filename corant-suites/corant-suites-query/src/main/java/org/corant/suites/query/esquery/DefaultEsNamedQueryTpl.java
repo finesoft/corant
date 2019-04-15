@@ -50,20 +50,24 @@ public class DefaultEsNamedQueryTpl
   @Override
   protected Map<String, Object> convertParameter(Map<String, Object> param) {
     Map<String, Object> convertedParam = new HashMap<>();
+    Map<String, Object> tempParam = new HashMap<>();
     if (param != null) {
-      convertedParam.putAll(param);
+      tempParam.putAll(param);
       getParamConvertSchema().forEach((pn, pc) -> {
-        if (convertedParam.containsKey(pn)) {
-          try {
-            Object cvtVal = conversionService.convert(param.get(pn), pc);
-            String jsonVal = cvtVal == null ? null : OM.writeValueAsString(cvtVal);
-            convertedParam.put(pn, jsonVal);
-          } catch (JsonProcessingException e) {
-            throw new CorantRuntimeException(e, "Can not convert parameter %s to json string", pn);
-          }
+        if (tempParam.containsKey(pn)) {
+          Object cvtVal = conversionService.convert(param.get(pn), pc);
+          tempParam.put(pn, cvtVal);
         }
       });
     }
+    tempParam.forEach((k, v) -> {
+      try {
+        String jsonVal = v == null ? null : OM.writeValueAsString(v);
+        convertedParam.put(k, jsonVal);
+      } catch (JsonProcessingException e) {
+        throw new CorantRuntimeException(e, "Can not convert parameter %s to json string", k);
+      }
+    });
     return convertedParam;
   }
 

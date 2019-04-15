@@ -62,7 +62,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
   protected ElasticIndexingResolver indexingResolver;
 
   @Override
-  public int bulkIndex(List<ElasticDocument> docList, boolean flush,
+  public int bulkIndex(List<? extends ElasticDocument> docList, boolean flush,
       Function<Class<? extends ElasticDocument>, ElasticIndexing> idxGetter,
       Function<Class<? extends ElasticDocument>, ElasticMapping> mapGetter) {
     Map<Class<? extends ElasticDocument>, List<ElasticDocument>> docMap = new HashMap<>();

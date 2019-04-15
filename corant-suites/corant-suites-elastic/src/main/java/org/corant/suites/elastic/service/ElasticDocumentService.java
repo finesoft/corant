@@ -39,11 +39,11 @@ import org.elasticsearch.search.sort.SortBuilder;
  */
 public interface ElasticDocumentService {
 
-  default int bulkIndex(List<ElasticDocument> docList, boolean flush) {
+  default int bulkIndex(List<? extends ElasticDocument> docList, boolean flush) {
     return bulkIndex(docList, flush, this::resolveIndexing, this::resolveMapping);
   }
 
-  int bulkIndex(List<ElasticDocument> docList, boolean flush,
+  int bulkIndex(List<? extends ElasticDocument> docList, boolean flush,
       Function<Class<? extends ElasticDocument>, ElasticIndexing> indexFunction,
       Function<Class<? extends ElasticDocument>, ElasticMapping> mappingFunction);
 

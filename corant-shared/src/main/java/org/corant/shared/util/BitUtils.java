@@ -27,10 +27,23 @@ public class BitUtils {
     super();
   }
 
+  /**
+   * Create BitArray from bytes array.
+   *
+   * @param bytes
+   * @return asBitArray
+   */
   public static BitArray asBitArray(byte[] bytes) {
     return new BitArray(bytes);
   }
 
+  /**
+   * Create BitArray and initialize with parameter.
+   *
+   * @param size the BitArray length
+   * @param in the boolean that the BitArray initialized
+   * @return asBitArray
+   */
   public static BitArray asBitArray(int size, boolean in) {
     return new BitArray(size, in);
   }
@@ -60,6 +73,12 @@ public class BitUtils {
       this.size = size;
     }
 
+    /**
+     * Obtain bit value
+     *
+     * @param pos
+     * @return getBit
+     */
     public boolean getBit(int pos) {
       return (array[pos >> 3] & 1 << (pos & 7)) != 0;
     }
@@ -72,6 +91,12 @@ public class BitUtils {
       return size;
     }
 
+    /**
+     * Set bit value into array
+     *
+     * @param pos
+     * @param b setBit
+     */
     public void setBit(int pos, boolean b) {
       byte b8 = array[pos >> 3];
       byte posBit = (byte) (1 << (pos & 7));

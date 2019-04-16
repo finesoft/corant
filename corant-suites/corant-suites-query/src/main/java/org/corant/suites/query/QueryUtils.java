@@ -14,9 +14,11 @@
 package org.corant.suites.query;
 
 import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.query.dynamic.NashornScriptEngines;
+import org.corant.suites.query.dynamic.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.FetchQuery.FetchQueryParameterSource;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -76,6 +80,20 @@ public class QueryUtils {
       return ESJOM.copy().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
           .convertValue(data, cls);
     }
+  }
+
+  public static boolean decideFetch(Object obj, FetchQuery fetchQuery, Map<String, Object> param) {
+    // precondition to decide whether execute fetch.
+    if (isNotBlank(fetchQuery.getScript())) {
+      ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "r", "p");
+      if (sf != null) {
+        Boolean b = toBoolean(sf.apply(new Object[] {obj, param}));
+        if (b == null || b.booleanValue() == false) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   public static void extractResult(Object result, String paths, boolean flatList,

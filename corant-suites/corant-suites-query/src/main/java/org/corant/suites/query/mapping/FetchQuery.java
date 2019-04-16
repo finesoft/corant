@@ -36,6 +36,7 @@ public class FetchQuery implements Serializable {
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private String referenceQueryversion = "";
   private boolean multiRecords = true;
+  private String script;
 
   public FetchQuery() {
     super();
@@ -49,10 +50,11 @@ public class FetchQuery implements Serializable {
    * @param parameters
    * @param referenceQueryversion
    * @param multiRecords
+   * @param script
    */
   public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
       int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
-      boolean multiRecords) {
+      boolean multiRecords, String script) {
     super();
     this.referenceQuery = referenceQuery;
     this.injectPropertyName = injectPropertyName;
@@ -61,6 +63,7 @@ public class FetchQuery implements Serializable {
     this.parameters = parameters;
     this.referenceQueryversion = referenceQueryversion;
     this.multiRecords = multiRecords;
+    this.script = script;
   }
 
   /**
@@ -105,6 +108,10 @@ public class FetchQuery implements Serializable {
     return resultClass;
   }
 
+  public String getScript() {
+    return script;
+  }
+
   public String getVersionedReferenceQueryName() {
     return defaultString(getReferenceQuery())
         + (isNotBlank(getReferenceQueryversion()) ? "_" + getReferenceQueryversion() : "");
@@ -136,6 +143,10 @@ public class FetchQuery implements Serializable {
 
   void setResultClass(Class<?> resultClass) {
     this.resultClass = resultClass;
+  }
+
+  void setScript(String script) {
+    this.script = script;
   }
 
   public static class FetchQueryParameter implements Serializable {
@@ -212,4 +223,5 @@ public class FetchQuery implements Serializable {
   public enum FetchQueryParameterSource {
     P, R, C
   }
+
 }

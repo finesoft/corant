@@ -136,6 +136,9 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
       return;
     }
     Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
+    if (!QueryUtils.decideFetch(obj, fetchQuery, param)) {
+      return;
+    }
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();

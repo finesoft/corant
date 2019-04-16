@@ -203,6 +203,9 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       return;
     }
     Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
+    if (!QueryUtils.decideFetch(obj, fetchQuery, param)) {
+      return;
+    }
     int maxSize = fetchQuery.getMaxSize();
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();

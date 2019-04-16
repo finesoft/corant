@@ -98,6 +98,8 @@ public class QueryParseHandler extends DefaultHandler {
         handleQueryScript(false, qName, null);
       } else if (currentObject() instanceof QueryHint) {
         handleQueryHintScript(false, qName, null);
+      } else if (currentObject() instanceof FetchQuery) {
+        handleFetchQueryScript(false, qName, null);
       }
     }
   }
@@ -139,6 +141,8 @@ public class QueryParseHandler extends DefaultHandler {
         handleQueryScript(true, qName, attributes);
       } else if (currentObject() instanceof QueryHint) {
         handleQueryHintScript(true, qName, attributes);
+      } else if (currentObject() instanceof FetchQuery) {
+        handleFetchQueryScript(true, qName, attributes);
       }
     }
   }
@@ -211,6 +215,22 @@ public class QueryParseHandler extends DefaultHandler {
             "Parse error the fetch query parameter must be in fetch query element!");
       }
       q.getParameters().add((FetchQueryParameter) obj);
+      nameStack.pop();
+    }
+  }
+
+  void handleFetchQueryScript(boolean start, String qName, Attributes attributes) {
+    if (start) {
+      nameStack.push(qName);
+    } else {
+      String script = charStack.toString();
+      charStack.delete(0, charStack.length());
+      FetchQuery q = this.currentObject();
+      if (q == null || isBlank(script)) {
+        throw new QueryRuntimeException(
+            "Parse error the query script must be in query element and script can't null!");
+      }
+      q.setScript(script.trim());
       nameStack.pop();
     }
   }

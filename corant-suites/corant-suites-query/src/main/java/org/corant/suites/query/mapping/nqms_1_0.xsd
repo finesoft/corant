@@ -87,6 +87,13 @@
     <xsd:sequence>
       <xsd:element name="parameter" type="fetch-query-parameter" minOccurs="0" maxOccurs="unbounded">
       </xsd:element>
+      <xsd:element name="script" type="xsd:string" maxOccurs="1" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>The precondition script for decide execute this fetch query or not, 
+          script may be a function that receive result-record and query param and return bool.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
     <xsd:attribute name="reference-query" type="xsd:string" use="required">
    	  <xsd:annotation>

@@ -65,7 +65,8 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
   Instance<KeycloakJaxrsSecurityContextResolver> jscResolver;
 
   @Inject
-  SecurityContextHolder jscHolder;
+  @Any
+  Instance<SecurityContextHolder> jscHolder;
 
   @Inject
   @ConfigProperty(name = "security.keycloak.config-file-path",
@@ -78,8 +79,13 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
 
   @Override
   public void filter(ContainerRequestContext request) throws IOException {
-    if (urlMatcher.isCoveredUrl(request.getUriInfo().getBaseUri().getPath()) && isEnabled()) {
-      super.filter(request);
+    if (jscHolder.isResolvable()) {
+      if (urlMatcher.isCoveredUrl(request.getUriInfo().getBaseUri().getPath()) && isEnabled()) {
+        super.filter(request);
+      }
+    } else {
+      logger.warning(
+          () -> "The keycloak filter not available yet, can not find SecurityContextHolder instance for inject!");
     }
   }
 
@@ -105,7 +111,7 @@ public class KeycloakJaxrsBearerTokenFilter extends JaxrsBearerTokenFilterImpl {
     boolean isSecure = anonymousSecurityContext.isSecure();
     Set<String> roles = AdapterUtils.getRolesFromSecurityContext(skSession);
     SecurityContext sc = resolveSecurityContext(principal, isSecure, roles);
-    request.setSecurityContext(jscHolder.put(sc));
+    request.setSecurityContext(jscHolder.get().put(sc));
   }
 
   protected SecurityContext resolveSecurityContext(

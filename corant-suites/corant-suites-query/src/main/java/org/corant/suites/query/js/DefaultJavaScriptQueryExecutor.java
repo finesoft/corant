@@ -19,6 +19,6 @@ package org.corant.suites.query.js;
  * @author bingo 下午8:21:39
  *
  */
-public class DefaultJavascriptQueryExecutor {
+public class DefaultJavaScriptQueryExecutor {
 
 }

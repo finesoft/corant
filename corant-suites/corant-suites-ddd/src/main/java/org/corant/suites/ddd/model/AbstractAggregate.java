@@ -232,6 +232,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     }
 
     @Override
+    @Transient
     public Class<?> getTypeCls() {
       return typeCls;
     }

@@ -11,35 +11,23 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.spi;
-
-import org.corant.suites.query.mapping.QueryHint;
+package org.corant.suites.query.sql.dialect;
 
 /**
  * corant-suites-query
  *
- * @author bingo 上午11:09:08
+ * @author bingo 上午11:42:27
  *
  */
-@FunctionalInterface
-public interface ResultHintHandler {
+public class DerbyDialect implements Dialect {
 
-  static int compare(ResultHintHandler h1, ResultHintHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
+  @Override
+  public String getLimitSql(String sql, int offset, int limit) {
+    throw new UnsupportedOperationException("The database Derby limit script not supported");
   }
 
-  default boolean canHandle(QueryHint qh) {
+  @Override
+  public boolean supportsLimit() {
     return false;
   }
-
-  default boolean exclusive() {
-    return true;
-  }
-
-  default int getOrdinal() {
-    return 0;
-  }
-
-  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
-
 }

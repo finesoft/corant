@@ -11,35 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.spi;
+package org.corant.suites.query.sql;
 
-import org.corant.suites.query.mapping.QueryHint;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * corant-suites-query
  *
- * @author bingo 上午11:09:08
+ * @author bingo 下午5:20:01
  *
  */
-@FunctionalInterface
-public interface ResultHintHandler {
+public interface SqlQueryExecutor {
 
-  static int compare(ResultHintHandler h1, ResultHintHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
-  }
+  Map<String, Object> get(String sql) throws SQLException;
 
-  default boolean canHandle(QueryHint qh) {
-    return false;
-  }
+  <T> T get(String sql, Class<T> resultClass, Object... args) throws SQLException;
 
-  default boolean exclusive() {
-    return true;
-  }
+  List<Map<String, Object>> select(String sql) throws SQLException;
 
-  default int getOrdinal() {
-    return 0;
-  }
+  <T> List<T> select(String sql, Class<T> resultClass, Object... args) throws SQLException;
 
-  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
+  <T> Stream<T> stream(String sql, Map<String, Object> param);
 
 }

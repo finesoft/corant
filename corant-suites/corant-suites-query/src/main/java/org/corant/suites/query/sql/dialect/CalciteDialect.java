@@ -11,35 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.spi;
-
-import org.corant.suites.query.mapping.QueryHint;
+package org.corant.suites.query.sql.dialect;
 
 /**
  * corant-suites-query
  *
- * @author bingo 上午11:09:08
+ * @author bingo 下午1:59:06
  *
  */
-@FunctionalInterface
-public interface ResultHintHandler {
+public class CalciteDialect implements Dialect {
 
-  static int compare(ResultHintHandler h1, ResultHintHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
+  @Override
+  public String getLimitSql(String sql, int offset, int limit) {
+    StringBuilder sbd = new StringBuilder(50 + sql.length());
+    sbd.append(sql).append(" ");
+    sbd.append(" OFFSET ").append(offset).append(" ROWS");
+    if (limit > 0) {
+      sbd.append(" FETCH NEXT ").append(limit).append(" ROWS ONLY");
+    }
+    return sbd.toString();
   }
 
-  default boolean canHandle(QueryHint qh) {
-    return false;
-  }
-
-  default boolean exclusive() {
+  @Override
+  public boolean supportsLimit() {
     return true;
   }
-
-  default int getOrdinal() {
-    return 0;
-  }
-
-  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
 
 }

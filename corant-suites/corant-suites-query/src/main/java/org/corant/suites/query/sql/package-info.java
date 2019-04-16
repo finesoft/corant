@@ -11,35 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.spi;
-
-import org.corant.suites.query.mapping.QueryHint;
-
 /**
  * corant-suites-query
  *
- * @author bingo 上午11:09:08
+ * RDBMS dynamic sql query
+ *
+ * @author bingo 上午9:31:09
  *
  */
-@FunctionalInterface
-public interface ResultHintHandler {
-
-  static int compare(ResultHintHandler h1, ResultHintHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
-  }
-
-  default boolean canHandle(QueryHint qh) {
-    return false;
-  }
-
-  default boolean exclusive() {
-    return true;
-  }
-
-  default int getOrdinal() {
-    return 0;
-  }
-
-  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
-
-}
+package org.corant.suites.query.sql;

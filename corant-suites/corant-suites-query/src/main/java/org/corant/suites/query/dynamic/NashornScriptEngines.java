@@ -39,6 +39,8 @@ public class NashornScriptEngines {
   public static final NashornScriptEngineFactory NASHORN_ENGINE_FACTORY =
       new NashornScriptEngineFactory();
 
+  // -doe Dump a stack trace on errors.
+  // --global-per-engine Use single Global instance per script engine instance
   public static final ScriptEngine ENGINE =
       NASHORN_ENGINE_FACTORY.getScriptEngine(new String[] {"-doe", "--global-per-engine"});
 

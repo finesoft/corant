@@ -85,9 +85,9 @@ public class QueryUtils {
   public static boolean decideFetch(Object obj, FetchQuery fetchQuery, Map<String, Object> param) {
     // precondition to decide whether execute fetch.
     if (isNotBlank(fetchQuery.getScript())) {
-      ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "r", "p");
+      ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
       if (sf != null) {
-        Boolean b = toBoolean(sf.apply(new Object[] {obj, param}));
+        Boolean b = toBoolean(sf.apply(new Object[] {param, obj}));
         if (b == null || b.booleanValue() == false) {
           return false;
         }

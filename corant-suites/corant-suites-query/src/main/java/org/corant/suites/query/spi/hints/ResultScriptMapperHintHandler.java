@@ -23,24 +23,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.BiConsumer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.Query.ForwardList;
 import org.corant.suites.query.Query.PagedList;
+import org.corant.suites.query.dynamic.NashornScriptEngines;
+import org.corant.suites.query.dynamic.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.spi.ResultHintHandler;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 /**
  * corant-suites-query
@@ -91,7 +85,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
  * @author bingo 下午12:02:08
  *
  */
-@SuppressWarnings("restriction")
 @ApplicationScoped
 public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
@@ -101,7 +94,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static final String HINT_SCRIPT_RESU = "r";
 
   static final ScriptEngineManager sm = new ScriptEngineManager();
-  static final Map<QueryHint, BiConsumer<Object, Map<?, ?>>> mappers = new ConcurrentHashMap<>();
+  static final Map<QueryHint, ScriptConsumer> mappers = new ConcurrentHashMap<>();
   static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
@@ -115,12 +108,12 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    BiConsumer<Object, Map<?, ?>> func = null;
+    ScriptConsumer func = null;
     if (brokens.contains(qh) || (func = resolveMapper(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
-      func.accept(parameter, Map.class.cast(result));
+      func.accept(new Object[] {parameter, Map.class.cast(result)});
     } else {
       List<?> list = null;
       if (result instanceof ForwardList) {
@@ -133,14 +126,14 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            func.accept(parameter, Map.class.cast(item));
+            func.accept(new Object[] {parameter, Map.class.cast(item)});
           }
         }
       }
     }
   }
 
-  protected BiConsumer<Object, Map<?, ?>> resolveMapper(QueryHint qh) {
+  protected ScriptConsumer resolveMapper(QueryHint qh) {
     return mappers.computeIfAbsent(qh, (k) -> {
       if (!mapperResolvers.isUnsatisfied()) {
         Optional<ResultMapperResolver> op =
@@ -155,7 +148,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
         }
       }
       brokens.add(qh);
-      return (o, m) -> {
+      return (ps) -> {
       };
     });
   }
@@ -164,8 +157,6 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static class NashornResultMapperResolver implements ResultMapperResolver {
 
     public static final String DFLT_SCRIPT_ENGINE = "Oracle Nashorn";
-
-    private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
 
     @Override
     public boolean accept(QueryHint qh) {
@@ -177,22 +168,8 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     }
 
     @Override
-    public BiConsumer<Object, Map<?, ?>> resolve(QueryHint qh) throws Exception {
-      // -doe Dump a stack trace on errors.
-      // --global-per-engine Use single Global instance per script engine instance
-      final ScriptEngine scriptEngine =
-          factory.getScriptEngine(new String[] {"-doe", "--global-per-engine"});
-      final CompiledScript compiled = ((Compilable) scriptEngine).compile(qh.getScript());
-      return (p, m) -> {
-        Bindings bindings = new SimpleBindings();
-        bindings.put(HINT_SCRIPT_PARA, p);
-        bindings.put(HINT_SCRIPT_RESU, m);
-        try {
-          compiled.eval(bindings);
-        } catch (ScriptException e) {
-          throw new CorantRuntimeException(e);
-        }
-      };
+    public ScriptConsumer resolve(QueryHint qh) throws Exception {
+      return NashornScriptEngines.compileConsumer(qh.getScript(), "p", "r");
     }
 
   }
@@ -201,7 +178,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     boolean accept(QueryHint qh);
 
-    BiConsumer<Object, Map<?, ?>> resolve(QueryHint qh) throws Exception;
+    ScriptConsumer resolve(QueryHint qh) throws Exception;
   }
 
 }

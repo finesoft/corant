@@ -152,6 +152,15 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
+   * destroy preconditions, validate the aggregate consistency
+   *
+   * preDestroy
+   */
+  protected void preDestroy() {
+
+  }
+
+  /**
    * enable preconditions, validate the aggregate consistency
    *
    * preEnable

@@ -57,6 +57,7 @@ public class DefaultAggregateListener {
   }
 
   protected void handlePreRemove(AbstractAggregate o) {
+    o.preDestroy();
     o.raise(new AggregateLifecycleMessage(o, Lifecycle.DESTROYED));
   }
 

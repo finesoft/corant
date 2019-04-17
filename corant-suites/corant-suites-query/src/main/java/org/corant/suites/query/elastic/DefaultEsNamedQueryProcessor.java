@@ -20,8 +20,8 @@ import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.QueryRuntimeException;
-import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
-import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
+import org.corant.suites.query.dynamic.freemark.DynamicQueryTplMmResolver;
+import org.corant.suites.query.dynamic.freemark.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.mapping.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -34,8 +34,8 @@ import freemarker.template.TemplateException;
  * @author bingo 下午8:25:44
  *
  */
-public class DefaultEsNamedQueryTpl
-    extends FreemarkerDynamicQueryTpl<DefaultEsNamedQuerier, Map<String, Object>> {
+public class DefaultEsNamedQueryProcessor
+    extends FreemarkerDynamicQueryProcessor<DefaultEsNamedQuerier, Map<String, Object>> {
 
   public final static ObjectMapper OM = new ObjectMapper();
 
@@ -43,7 +43,7 @@ public class DefaultEsNamedQueryTpl
    * @param query
    * @param conversionService
    */
-  public DefaultEsNamedQueryTpl(Query query, ConversionService conversionService) {
+  public DefaultEsNamedQueryProcessor(Query query, ConversionService conversionService) {
     super(query, conversionService);
   }
 
@@ -75,7 +75,7 @@ public class DefaultEsNamedQueryTpl
   protected DefaultEsNamedQuerier doProcess(Map<String, Object> param,
       DynamicQueryTplMmResolver<Map<String, Object>> tmm) {
     try (StringWriter sw = new StringWriter()) {
-      getTemplate().process(param, sw);
+      getExecution().process(param, sw);
       return new DefaultEsNamedQuerier(
           OM.writer(JsonpCharacterEscapes.instance())
               .writeValueAsString(OM.readValue(sw.toString(), Object.class)),
@@ -84,12 +84,6 @@ public class DefaultEsNamedQueryTpl
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }
-  }
-
-  @Override
-  protected DynamicQueryTplMmResolver<Map<String, Object>> getTemplateMethodModel(
-      Map<String, Object> param) {
-    return null;// We are in line
   }
 
 }

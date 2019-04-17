@@ -18,8 +18,8 @@ import java.io.StringWriter;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
-import org.corant.suites.query.dynamic.template.DynamicQueryTplMmResolver;
-import org.corant.suites.query.dynamic.template.FreemarkerDynamicQueryTpl;
+import org.corant.suites.query.dynamic.freemark.DynamicQueryTplMmResolver;
+import org.corant.suites.query.dynamic.freemark.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.mapping.Query;
 import freemarker.template.TemplateException;
 
@@ -29,10 +29,10 @@ import freemarker.template.TemplateException;
  * @author bingo 下午7:46:22
  *
  */
-public class DefaultSqlNamedQueryTpl
-    extends FreemarkerDynamicQueryTpl<DefaultSqlNamedQuerier, Object[]> {
+public class SqlNamedQueryFmProcessor
+    extends FreemarkerDynamicQueryProcessor<DefaultSqlNamedQuerier, Object[]> {
 
-  public DefaultSqlNamedQueryTpl(Query query, ConversionService conversionService) {
+  public SqlNamedQueryFmProcessor(Query query, ConversionService conversionService) {
     super(query, conversionService);
   }
 
@@ -43,7 +43,7 @@ public class DefaultSqlNamedQueryTpl
   public DefaultSqlNamedQuerier doProcess(Map<String, Object> param,
       DynamicQueryTplMmResolver<Object[]> tmm) {
     try (StringWriter sw = new StringWriter()) {
-      getTemplate().process(param, sw);
+      getExecution().process(param, sw);
       return new DefaultSqlNamedQuerier(sw.toString(), tmm.getParameters(), getResultClass(),
           getFetchQueries(), getHints());
     } catch (TemplateException | IOException | NullPointerException e) {
@@ -53,7 +53,7 @@ public class DefaultSqlNamedQueryTpl
 
   @Override
   protected DynamicQueryTplMmResolver<Object[]> getTemplateMethodModel(Map<String, Object> param) {
-    return new DefaultSqlNamedQueryTplMmResolver().injectTo(param);
+    return new SqlNamedQueryFmTplMmResolver().injectTo(param);
   }
 
 }

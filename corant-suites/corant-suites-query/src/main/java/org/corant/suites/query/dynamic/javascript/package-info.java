@@ -13,8 +13,8 @@
  */
 /**
  * corant-suites-query
- *
- * @author bingo 上午11:21:17
+ * 
+ * @author bingo 上午10:09:33
  *
  */
-package org.corant.suites.query.dynamic.template;
+package org.corant.suites.query.dynamic.javascript;

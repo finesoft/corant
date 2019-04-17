@@ -11,32 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.dynamic.template;
-
-import java.util.List;
-import java.util.Map;
-import org.corant.suites.query.mapping.FetchQuery;
-
 /**
  * corant-suites-query
- *
- * @author bingo 下午3:51:20
+ * 
+ * @author bingo 上午10:00:15
  *
  */
-public interface DynamicQueryTpl<T> {
-
-  long getCachedTimestemp();
-
-  List<FetchQuery> getFetchQueries();
-
-  Map<String, Class<?>> getParamConvertSchema();
-
-  String getQueryName();
-
-  Class<?> getResultClass();
-
-  Object getTemplate();
-
-  T process(Map<String, Object> param);
-
-}
+package org.corant.suites.query.dynamic.freemark;

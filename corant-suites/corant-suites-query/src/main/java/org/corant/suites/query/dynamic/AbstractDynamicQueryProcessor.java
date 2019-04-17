@@ -11,10 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.dynamic.template;
+package org.corant.suites.query.dynamic;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,21 +26,17 @@ import org.corant.suites.query.QueryRuntimeException;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
 import org.corant.suites.query.mapping.QueryHint;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 /**
  * corant-suites-query
  *
- * @author bingo 下午3:50:40
+ * @author bingo 上午9:54:00
  *
  */
-public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl<T> {
-
-  static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_28);
+public abstract class AbstractDynamicQueryProcessor<Q, P, E>
+    implements DynamicQueryProcessor<Q, E> {
 
   protected final String queryName;
-  protected final Template template;
   protected final Map<String, Class<?>> paramConvertSchema;
   protected final long cachedTimestemp;
   protected final Class<?> resultClass;
@@ -49,7 +44,7 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
   protected final ConversionService conversionService;
   protected final List<QueryHint> hints = new ArrayList<>();
 
-  public FreemarkerDynamicQueryTpl(Query query, ConversionService conversionService) {
+  protected AbstractDynamicQueryProcessor(Query query, ConversionService conversionService) {
     if (query == null || conversionService == null) {
       throw new QueryRuntimeException(
           "Can not initialize freemarker query template from null query param!");
@@ -64,81 +59,36 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
       query.getHints().forEach(hints::add);
     }
     this.cachedTimestemp = Instant.now().toEpochMilli();
-
-    try {
-      this.template = new Template(this.queryName, query.getScript(), FM_CFG);
-    } catch (IOException e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the query template [%s].", this.queryName);
-    }
   }
 
-  /**
-   * It is not enabled yet
-   */
   @Override
   public long getCachedTimestemp() {
-    return this.cachedTimestemp;
+    return cachedTimestemp;
   }
 
-  /**
-   * The fetch queries in this query, if there are not exist then return empty.
-   */
   @Override
   public List<FetchQuery> getFetchQueries() {
-    return this.fetchQueries;
+    return fetchQueries;
   }
 
-  /**
-   * @return the hints
-   */
+  @Override
   public List<QueryHint> getHints() {
     return hints;
   }
 
-  /**
-   * The parameter name and to converted type.
-   */
   @Override
   public Map<String, Class<?>> getParamConvertSchema() {
-    return this.paramConvertSchema;
+    return paramConvertSchema;
   }
 
-  /**
-   * The query name (with version suffix)
-   */
   @Override
   public String getQueryName() {
-    return this.queryName;
+    return queryName;
   }
 
-  /**
-   * The query result type, may be Map or Pojo.
-   */
   @Override
   public Class<?> getResultClass() {
-    return this.resultClass;
-  }
-
-  /**
-   * The dynamic query script template to use
-   */
-  @Override
-  public Template getTemplate() {
-    return this.template;
-  }
-
-  /**
-   * Use parameters to process query script.
-   */
-  @Override
-  public T process(Map<String, Object> param) {
-    Map<String, Object> useParam = convertParameter(param);// convert parameter
-    DynamicQueryTplMmResolver<P> qtmm = getTemplateMethodModel(useParam); // inject method object
-    this.preProcess(useParam);
-    T result = this.doProcess(useParam, qtmm);
-    this.postProcess(result, qtmm);
-    return result;
+    return resultClass;
   }
 
   /**
@@ -160,19 +110,4 @@ public abstract class FreemarkerDynamicQueryTpl<T, P> implements DynamicQueryTpl
     return convertedParam;
   }
 
-  /**
-   * Process delegation
-   *
-   * @param param
-   * @param tmm
-   * @return doProcess
-   */
-  protected abstract T doProcess(Map<String, Object> param, DynamicQueryTplMmResolver<P> tmm);
-
-  protected abstract DynamicQueryTplMmResolver<P> getTemplateMethodModel(
-      Map<String, Object> useParam);
-
-  protected void postProcess(T result, DynamicQueryTplMmResolver<P> qtmm) {}
-
-  protected void preProcess(Map<String, Object> param) {}
 }

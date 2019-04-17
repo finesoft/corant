@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.sql;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
@@ -21,6 +22,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.QueryRuntimeException;
+import org.corant.suites.query.dynamic.DynamicQueryProcessor;
 import org.corant.suites.query.mapping.FetchQuery;
 import org.corant.suites.query.mapping.Query;
 import org.corant.suites.query.mapping.QueryHint;
@@ -34,10 +36,11 @@ import org.corant.suites.query.spi.ParamReviser;
  *
  */
 @ApplicationScoped
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultSqlNamedQueryResolver implements
     SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery, QueryHint> {
 
-  final Map<String, DefaultSqlNamedQueryTpl> cachedQueTpls = new ConcurrentHashMap<>();
+  final Map<String, DynamicQueryProcessor> processors = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -51,20 +54,32 @@ public class DefaultSqlNamedQueryResolver implements
 
   @Override
   public DefaultSqlNamedQuerier resolve(String key, Map<String, Object> param) {
-    DefaultSqlNamedQueryTpl tpl = cachedQueTpls.computeIfAbsent(key, this::buildQueryTemplate);
-    handleParamHints(tpl, param);
-    return tpl.process(param);
+    DynamicQueryProcessor processor = processors.computeIfAbsent(key, this::buildProcessor);
+    handleParamHints(processor, param);
+    return forceCast(processor.process(param));
   }
 
-  protected DefaultSqlNamedQueryTpl buildQueryTemplate(String key) {
+  protected DynamicQueryProcessor buildProcessor(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found Query for key %s", key);
     }
-    return new DefaultSqlNamedQueryTpl(query, conversionService);
+    if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
+      return createJsProcessor(query);
+    } else {
+      return createFmProcessor(query);
+    }
   }
 
-  protected void handleParamHints(DefaultSqlNamedQueryTpl tpl, Map<String, Object> param) {
+  protected DynamicQueryProcessor createFmProcessor(Query query) {
+    return new SqlNamedQueryFmProcessor(query, conversionService);
+  }
+
+  protected DynamicQueryProcessor createJsProcessor(Query query) {
+    return new SqlNamedQueryJsProcessor(query, conversionService);
+  }
+
+  protected void handleParamHints(DynamicQueryProcessor tpl, Map<String, Object> param) {
     if (!paramRevisers.isUnsatisfied()) {
       paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
     }

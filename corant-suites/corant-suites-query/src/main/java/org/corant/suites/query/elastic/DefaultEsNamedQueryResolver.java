@@ -37,7 +37,7 @@ import org.corant.suites.query.spi.ParamReviser;
 public class DefaultEsNamedQueryResolver implements
     EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery, QueryHint> {
 
-  final Map<String, DefaultEsNamedQueryTpl> cachedQueTpls = new ConcurrentHashMap<>();
+  final Map<String, DefaultEsNamedQueryProcessor> processors = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -51,20 +51,20 @@ public class DefaultEsNamedQueryResolver implements
 
   @Override
   public DefaultEsNamedQuerier resolve(String key, Map<String, Object> param) {
-    DefaultEsNamedQueryTpl tpl = cachedQueTpls.computeIfAbsent(key, this::buildQueryTemplate);
-    handleParamHints(tpl, param);
-    return tpl.process(param);
+    DefaultEsNamedQueryProcessor processor = processors.computeIfAbsent(key, this::buildProcessor);
+    handleParamHints(processor, param);
+    return processor.process(param);
   }
 
-  protected DefaultEsNamedQueryTpl buildQueryTemplate(String key) {
+  protected DefaultEsNamedQueryProcessor buildProcessor(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found Query for key %s", key);
     }
-    return new DefaultEsNamedQueryTpl(query, conversionService);
+    return new DefaultEsNamedQueryProcessor(query, conversionService);
   }
 
-  protected void handleParamHints(DefaultEsNamedQueryTpl tpl, Map<String, Object> param) {
+  protected void handleParamHints(DefaultEsNamedQueryProcessor tpl, Map<String, Object> param) {
     if (!paramRevisers.isUnsatisfied()) {
       paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
     }

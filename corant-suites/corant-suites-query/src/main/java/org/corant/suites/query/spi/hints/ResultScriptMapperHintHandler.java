@@ -31,8 +31,8 @@ import javax.script.ScriptEngineManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.Query.ForwardList;
 import org.corant.suites.query.Query.PagedList;
-import org.corant.suites.query.dynamic.NashornScriptEngines;
-import org.corant.suites.query.dynamic.NashornScriptEngines.ScriptConsumer;
+import org.corant.suites.query.dynamic.javascript.NashornScriptEngines;
+import org.corant.suites.query.dynamic.javascript.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.mapping.QueryHint;
 import org.corant.suites.query.spi.ResultHintHandler;
 

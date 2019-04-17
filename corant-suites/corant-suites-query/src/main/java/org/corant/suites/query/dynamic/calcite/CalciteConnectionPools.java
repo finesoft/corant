@@ -18,7 +18,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
-import org.apache.calcite.avatica.remote.Driver;
+// import org.apache.calcite.avatica.remote.Driver;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.pool2.impl.BaseObjectPoolConfig;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
@@ -39,8 +39,8 @@ public class CalciteConnectionPools {
     return CPS.computeIfAbsent(name, (k) -> {
       BasicDataSource bds = new BasicDataSource();
       bds.setRollbackOnReturn(false);
-      bds.setUrl(Driver.CONNECT_STRING_PREFIX);
-      bds.setDriver(new Driver());
+      // bds.setUrl(Driver.CONNECT_STRING_PREFIX);
+      // bds.setDriver(new Driver());
       bds.setInitialSize(1);
       bds.setJmxName("asosat-calcite-ds-" + name);
       configPooledDataSource(bds, supplier.get());

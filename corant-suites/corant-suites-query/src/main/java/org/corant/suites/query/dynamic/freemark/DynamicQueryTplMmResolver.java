@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.dynamic.template;
+package org.corant.suites.query.dynamic.freemark;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import java.util.Map;
@@ -23,13 +23,13 @@ import freemarker.template.TemplateMethodModelEx;
  * @author bingo 下午5:40:20
  *
  */
-public interface DynamicQueryTplMmResolver<CP> extends TemplateMethodModelEx {
+public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
 
-  CP getParameters();
+  P getParameters();
 
   QueryTemplateMethodModelType getType();
 
-  default DynamicQueryTplMmResolver<CP> injectTo(Map<String, Object> parameters) {
+  default DynamicQueryTplMmResolver<P> injectTo(Map<String, Object> parameters) {
     if (parameters != null) {
       String tmmName = getType().name();
       shouldBeFalse(parameters.containsKey(tmmName));

@@ -11,10 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.query.dynamic;
+
+import java.util.List;
+import java.util.Map;
+import org.corant.suites.query.mapping.FetchQuery;
+import org.corant.suites.query.mapping.QueryHint;
+
 /**
  * corant-suites-query
- * 
- * @author bingo 上午10:29:23
+ *
+ * @author bingo 上午9:52:43
  *
  */
-package org.corant.suites.query.sql.processor;
+public interface DynamicQueryProcessor<Q, E> {
+
+  long getCachedTimestemp();
+
+  E getExecution();
+
+  List<FetchQuery> getFetchQueries();
+
+  List<QueryHint> getHints();
+
+  Map<String, Class<?>> getParamConvertSchema();
+
+  String getQueryName();
+
+  Class<?> getResultClass();
+
+  Q process(Map<String, Object> param);
+
+}

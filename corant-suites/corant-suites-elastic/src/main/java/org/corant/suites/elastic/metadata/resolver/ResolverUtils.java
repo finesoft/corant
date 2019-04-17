@@ -392,12 +392,20 @@ public class ResolverUtils {
     Class<?> useType = type.isArray() ? type.getComponentType() : type;
     return SIMPLE_TYPE_WRAPPER_MAP.containsKey(useType)
         || SIMPLE_TYPE_WRAPPER_MAP.containsValue(useType)
-        || SIMPLE_TYPE_WRAPPER_MAP.keySet().stream().allMatch(cls -> cls.isAssignableFrom(type));
+        || SIMPLE_TYPE_WRAPPER_MAP.keySet().stream().anyMatch(cls -> cls.isAssignableFrom(type));
 
   }
 
   public static void registerSimpleType(Class<?> type, Class<?> clazz) {
     SIMPLE_TYPE_WRAPPER_MAP.put(type, clazz);
+  }
+
+  public static Map<String, Object> toMap(Object document) {
+    if (document != null) {
+      return ESJOM.convertValue(document, new TypeReference<Map<String, Object>>() {});
+    } else {
+      return new HashMap<>();
+    }
   }
 
   public static <T> T toObject(Object data, Class<T> cls) {
@@ -425,14 +433,6 @@ public class ResolverUtils {
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
-    }
-  }
-
-  public static Map<String, Object> toMap(Object document) {
-    if (document != null) {
-      return ESJOM.convertValue(document, new TypeReference<Map<String, Object>>() {});
-    } else {
-      return new HashMap<>();
     }
   }
 

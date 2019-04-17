@@ -64,6 +64,7 @@ public class DefaultSqlNamedQueryResolver implements
     if (query == null) {
       throw new QueryRuntimeException("Can not found Query for key %s", key);
     }
+    // FIXME decide script engine
     if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
       return createJsProcessor(query);
     } else {

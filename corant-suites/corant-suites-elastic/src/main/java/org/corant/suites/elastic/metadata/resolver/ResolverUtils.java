@@ -400,7 +400,7 @@ public class ResolverUtils {
     SIMPLE_TYPE_WRAPPER_MAP.put(type, clazz);
   }
 
-  public static <T> T toDocument(Object data, Class<T> cls) {
+  public static <T> T toObject(Object data, Class<T> cls) {
     if (data == null) {
       return null;
     } else {
@@ -408,7 +408,7 @@ public class ResolverUtils {
     }
   }
 
-  public static <T> T toDocument(Object object, TypeReference<T> tr) {
+  public static <T> T toObject(Object object, TypeReference<T> tr) {
     if (object == null) {
       return null;
     } else {
@@ -416,7 +416,7 @@ public class ResolverUtils {
     }
   }
 
-  public static <T> T toDocument(String str, Class<T> cls) {
+  public static <T> T toObject(String str, Class<T> cls) {
     if (str == null) {
       return null;
     } else {

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
+import org.corant.suites.elastic.metadata.resolver.ResolverUtils;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.corant.suites.elastic.model.ElasticVersionedDocument;
 import org.elasticsearch.index.VersionType;
@@ -108,10 +109,10 @@ public interface ElasticDocumentService {
 
   default <T> List<T> select(Class<T> cls, QueryBuilder qb, SortBuilder<?> sb, int size) {
     ElasticIndexing indexing = shouldNotNull(resolveIndexing(cls));
-    ElasticMapping mapping = shouldNotNull(resolveMapping(cls));
     List<Map<String, Object>> rawResults = select(indexing.getName(), qb, sb, size);
     if (!isEmpty(rawResults)) {
-      return forceCast(rawResults.stream().map(mapping::fromMap).collect(Collectors.toList()));
+      return forceCast(rawResults.stream().map(m -> ResolverUtils.toObject(m, cls))
+          .collect(Collectors.toList()));
     }
     return new ArrayList<>();
   }

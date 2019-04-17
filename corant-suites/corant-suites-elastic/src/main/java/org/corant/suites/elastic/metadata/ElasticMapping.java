@@ -61,7 +61,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
 
   @SuppressWarnings("unchecked")
   public <T> T fromMap(Map<String, Object> map) {
-    return (T) ResolverUtils.toDocument(map, documentClass);
+    return (T) ResolverUtils.toObject(map, documentClass);
   }
 
   /**

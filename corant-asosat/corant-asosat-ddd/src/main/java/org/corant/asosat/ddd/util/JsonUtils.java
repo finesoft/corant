@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.asMap;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.bundle.EnumerationBundle;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -86,14 +88,34 @@ public class JsonUtils {
   }
 
   /**
+   * Convert bytes to object
+   *
+   * @param <T>
+   * @param bytes
+   * @param cls
+   * @return fromBytes
+   */
+  public static <T> T fromBytes(byte[] bytes, Class<T> cls) {
+    if (isEmpty(bytes)) {
+      return null;
+    } else {
+      try {
+        return objectMapper.readerFor(cls).readValue(bytes);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
    * Convert input json string to Map
    *
    * @param cmd The json string
    * @return Map
    */
   @SuppressWarnings("unchecked")
-  public static <K, V> Map<K, V> fromJsonStr(String cmd) {
-    return fromJsonStr(cmd, Map.class);
+  public static <K, V> Map<K, V> fromString(String cmd) {
+    return fromString(cmd, Map.class);
   }
 
   /**
@@ -105,7 +127,7 @@ public class JsonUtils {
    * @return Object
    */
   @SafeVarargs
-  public static <C, E> C fromJsonStr(String cmd, Class<C> parametrized,
+  public static <C, E> C fromString(String cmd, Class<C> parametrized,
       Class<E>... parameterClasses) {
     if (!isNotBlank(cmd)) {
       return null;
@@ -126,7 +148,7 @@ public class JsonUtils {
    * @param valueCls
    * @return Map
    */
-  public static <K, V> Map<K, V> fromJsonStr(String cmd, Class<K> keyCls, Class<V> valueCls) {
+  public static <K, V> Map<K, V> fromString(String cmd, Class<K> keyCls, Class<V> valueCls) {
     if (!isNotBlank(cmd)) {
       return null;
     }
@@ -145,7 +167,7 @@ public class JsonUtils {
    * @param clazz
    * @return
    */
-  public static <T> T fromJsonStr(String cmd, Class<T> clazz) {
+  public static <T> T fromString(String cmd, Class<T> clazz) {
     if (isNotBlank(cmd)) {
       try {
         return objectMapper.readValue(cmd, clazz);
@@ -163,6 +185,24 @@ public class JsonUtils {
   }
 
   /**
+   * Convert object to bytes
+   *
+   * @param obj
+   * @return toBytes
+   */
+  public static byte[] toBytes(Object obj) {
+    if (obj == null) {
+      return new byte[0];
+    } else {
+      try {
+        return objectMapper.writeValueAsBytes(obj);
+      } catch (JsonProcessingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
    * Convert object to json string
    *
    * @param obj
@@ -170,8 +210,8 @@ public class JsonUtils {
    * @throws JsonMappingException
    * @throws JsonGenerationException
    */
-  public static String toJsonStr(Object obj) {
-    return toJsonStr(obj, false);
+  public static String toString(Object obj) {
+    return toString(obj, false);
   }
 
   /**
@@ -181,7 +221,7 @@ public class JsonUtils {
    * @param pretty
    * @return toJsonStr
    */
-  public static String toJsonStr(Object obj, boolean pretty) {
+  public static String toString(Object obj, boolean pretty) {
     if (obj != null) {
       try {
         if (pretty) {

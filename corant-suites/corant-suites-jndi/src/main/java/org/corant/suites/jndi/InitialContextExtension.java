@@ -98,7 +98,7 @@ public class InitialContextExtension implements Extension {
           String.join(" ", DFLT_SUB_CTX)));
     }
 
-    bm.fireEvent(new PostCorantJndiReadyEvent(useCorantContext, context));
+    bm.fireEvent(new PostCorantJNDIReadyEvent(useCorantContext, context));
   }
 
 }

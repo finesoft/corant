@@ -22,7 +22,7 @@ import org.corant.kernel.event.CorantLifecycleEvent;
  * @author bingo 上午11:30:35
  *
  */
-public class PostCorantJndiReadyEvent implements CorantLifecycleEvent {
+public class PostCorantJNDIReadyEvent implements CorantLifecycleEvent {
 
   private final boolean useCorantContext;
 
@@ -31,7 +31,7 @@ public class PostCorantJndiReadyEvent implements CorantLifecycleEvent {
   /**
    * @param useCorantContext
    */
-  public PostCorantJndiReadyEvent(boolean useCorantContext, InitialContext context) {
+  public PostCorantJNDIReadyEvent(boolean useCorantContext, InitialContext context) {
     super();
     this.useCorantContext = useCorantContext;
     this.context = context;

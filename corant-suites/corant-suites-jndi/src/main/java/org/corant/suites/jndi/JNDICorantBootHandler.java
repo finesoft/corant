@@ -22,7 +22,7 @@ import org.corant.kernel.spi.CorantBootHandler;
  * @author bingo 下午2:35:41
  *
  */
-public class JndiCorantBootHandler implements CorantBootHandler {
+public class JNDICorantBootHandler implements CorantBootHandler {
   @Override
   public void handleAfterStarted(Corant corant, String... args) {}
 

@@ -13,14 +13,9 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
@@ -32,34 +27,13 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 @ApplicationScoped
 public abstract class AbstractJpaProvider {
 
-  protected volatile boolean initedJndiSubCtx = false;
   protected Logger logger = Logger.getLogger(getClass().getName());
-
-  @Inject
-  InitialContext jndi;
 
   public abstract EntityManagerFactory buildEntityManagerFactory(
       PersistenceUnitInfoMetaData metaData);
 
   protected EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
     final EntityManagerFactory emf = buildEntityManagerFactory(metaData);
-    if (getJndi() != null && isNotBlank(metaData.getPersistenceUnitName())) {
-      try {
-        if (!initedJndiSubCtx) {
-          getJndi().createSubcontext(JpaConfig.JNDI_SUBCTX_NAME);
-          initedJndiSubCtx = true;
-        }
-        String jndiName = JpaConfig.JNDI_SUBCTX_NAME + "/" + metaData.getPersistenceUnitName();
-        jndi.bind(jndiName, emf);
-        logger.info(() -> String.format("Bind entity manager factory %s to jndi!", jndiName));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
     return emf;
-  }
-
-  protected InitialContext getJndi() {
-    return jndi;
   }
 }

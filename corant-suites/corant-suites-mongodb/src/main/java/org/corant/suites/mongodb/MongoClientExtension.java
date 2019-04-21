@@ -22,6 +22,7 @@ import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import org.corant.Corant;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.suites.jndi.DefaultReference;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -84,6 +86,7 @@ public class MongoClientExtension implements Extension {
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   volatile boolean initedJndiSubCtx = false;
+  volatile InitialContext jndi;
 
   public static BsonValue bsonId(Serializable id) {
     if (id == null) {
@@ -216,12 +219,30 @@ public class MongoClientExtension implements Extension {
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String cn : getClientNames()) {
-        event.<MongoClient>addBean().addQualifier(Cdis.resolveNamed(cn))
-            .addQualifier(Default.Literal.INSTANCE).addQualifier(Default.Literal.INSTANCE)
-            .addTransitiveTypeClosure(MongoClient.class).beanClass(MongoClient.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
+        final Annotation[] qualifiers = Cdis.resolveNameds(cn);
+        event.<MongoClient>addBean().addQualifiers(qualifiers)
+            .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(MongoClient.class)
+            .beanClass(MongoClient.class).scope(ApplicationScoped.class).produceWith(beans -> {
               return produceClient(beans, getClientConfigs().get(cn));
             }).disposeWith((mc, beans) -> mc.close());
+        if (isNotBlank(cn)) {
+          synchronized (this) {
+            try {
+              if (jndi == null) {
+                jndi = new InitialContext();
+              }
+              if (!initedJndiSubCtx) {
+                jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
+                initedJndiSubCtx = true;
+              }
+              String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cn;
+              jndi.bind(jndiName, new DefaultReference(MongoClient.class, qualifiers));
+              logger.info(() -> String.format("Bind mongo client %s to jndi!", jndiName));
+            } catch (NamingException e) {
+              throw new CorantRuntimeException(e);
+            }
+          }
+        }
       }
 
       for (final String dn : getDatabaseNames()) {
@@ -272,22 +293,6 @@ public class MongoClientExtension implements Extension {
     }
     MongoClientOptions clientOptions = builder.build();
     MongoClient mc = new MongoClient(seeds, credential, clientOptions);
-    InitialContext jndi =
-        beans.select(InitialContext.class).isResolvable() ? beans.select(InitialContext.class).get()
-            : null;
-    if (jndi != null && isNotBlank(cfg.getName())) {
-      try {
-        if (!initedJndiSubCtx) {
-          jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
-          initedJndiSubCtx = true;
-        }
-        String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cfg.getName();
-        jndi.bind(jndiName, mc);
-        logger.info(() -> String.format("Bind mongo client %s to jndi!", jndiName));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
     return mc;
   }
 

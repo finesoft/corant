@@ -14,8 +14,8 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeNull;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -29,9 +29,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.Corant;
-import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jndi.DefaultReference;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -51,6 +50,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   protected volatile boolean initedJndiSubCtx = false;
+  protected volatile InitialContext jndi;
 
   public DataSource getDataSource(String name) {
     return getDataSources().get(name);
@@ -91,25 +91,23 @@ public abstract class AbstractDataSourceExtension implements Extension {
     shouldBeNull(dataSources.put(name, dataSource), "The data source annotated %s dup!", name);
   }
 
-  protected void registerJndi(InitialContext jndi, String name, DataSource dataSource) {
-    if (jndi != null && isNotBlank(name)) {
+  protected synchronized void registerJndi(String name, Annotation... qualifiers) {
+    if (isNotBlank(name)) {
       try {
+        if (jndi == null) {
+          jndi = new InitialContext();
+        }
         if (!initedJndiSubCtx) {
           jndi.createSubcontext(DataSourceConfig.JNDI_SUBCTX_NAME);
           initedJndiSubCtx = true;
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
-        jndi.bind(jndiName, dataSource);
+        jndi.bind(jndiName, new DefaultReference(DataSource.class, qualifiers));
         logger.info(() -> String.format("Bind data source %s to jndi!", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     }
-  }
-
-  // touch for direct lookup data source from jndi. TODO FIXME
-  void onPostContainerStarted(@Observes PostContainerStartedEvent e) {
-    Corant.instance().select(DataSource.class).forEach(ds -> shouldNotNull(ds).toString());
   }
 
 }

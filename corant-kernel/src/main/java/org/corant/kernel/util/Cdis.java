@@ -19,6 +19,7 @@ import static org.corant.shared.util.StringUtils.trim;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -45,6 +46,11 @@ public abstract class Cdis {
 
   public static final Annotation resolveNamed(String name) {
     return isBlank(name) ? Unnamed.INST : NamedLiteral.of(trim(name));
+  }
+
+  public static final Annotation[] resolveNameds(String name) {
+    return isBlank(name) ? new Annotation[] {Unnamed.INST, Default.Literal.INSTANCE}
+        : new Annotation[] {NamedLiteral.of(trim(name)), Default.Literal.INSTANCE};
   }
 
   public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {

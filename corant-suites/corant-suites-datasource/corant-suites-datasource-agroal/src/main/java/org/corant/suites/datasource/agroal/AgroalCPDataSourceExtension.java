@@ -16,13 +16,12 @@ package org.corant.suites.datasource.agroal;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
@@ -59,15 +58,19 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        event.<DataSource>addBean().addQualifier(Cdis.resolveNamed(dsn))
-            .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(AgroalDataSource.class)
-            .beanClass(AgroalDataSource.class).scope(ApplicationScoped.class).produceWith(beans -> {
+        final Annotation[] qualifiers = Cdis.resolveNameds(dsn);
+        event.<DataSource>addBean().addQualifiers(qualifiers)
+            .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
               try {
                 return produce(beans, dsc);
               } catch (NamingException | SQLException e) {
                 throw new CorantRuntimeException(e);
               }
             }).disposeWith((dataSource, beans) -> dataSource.close());
+        if (isNotBlank(dsn)) {
+          registerJndi(dsn, qualifiers);
+        }
       });
     }
   }
@@ -118,10 +121,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
     AgroalDataSource datasource = AgroalDataSource.from(cfgs);
     registerDataSource(cfg.getName(), datasource);
-    if (instance.select(InitialContext.class).isResolvable() && isNotBlank(cfg.getName())) {
-      InitialContext jndi = instance.select(InitialContext.class).get();
-      registerJndi(jndi, cfg.getName(), datasource);
-    }
     return datasource;
   }
 

@@ -15,12 +15,11 @@ package org.corant.suites.datasource.hikari;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.kernel.util.Cdis;
@@ -41,15 +40,19 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        event.<DataSource>addBean().addQualifier(Cdis.resolveNamed(dsn))
-            .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(HikariDataSource.class)
-            .beanClass(HikariDataSource.class).scope(ApplicationScoped.class).produceWith(beans -> {
+        final Annotation[] qualifiers = Cdis.resolveNameds(dsn);
+        event.<DataSource>addBean().addQualifiers(qualifiers)
+            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
+            .scope(ApplicationScoped.class).produceWith(beans -> {
               try {
                 return produce(beans, dsc);
               } catch (NamingException e) {
                 throw new CorantRuntimeException(e);
               }
             }).disposeWith((dataSource, beans) -> dataSource.close());
+        if (isNotBlank(dsn)) {
+          registerJndi(dsn, qualifiers);
+        }
       });
     }
   }
@@ -71,10 +74,6 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
     HikariDataSource datasource = new HikariDataSource(cfgs);
     registerDataSource(cfg.getName(), datasource);
-    if (instance.select(InitialContext.class).isResolvable() && isNotBlank(cfg.getName())) {
-      InitialContext jndi = instance.select(InitialContext.class).get();
-      registerJndi(jndi, cfg.getName(), datasource);
-    }
     return datasource;
   }
 }

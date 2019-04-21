@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -60,7 +61,7 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
     if (isNotBlank(dataSourceName)
         && dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
       try {
-        return forceCast(getJndi().lookup(dataSourceName));
+        return forceCast(new InitialContext().lookup(dataSourceName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

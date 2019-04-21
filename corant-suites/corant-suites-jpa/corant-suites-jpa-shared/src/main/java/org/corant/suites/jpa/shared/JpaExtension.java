@@ -14,14 +14,13 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -34,10 +33,15 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import org.corant.kernel.util.Cdis;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jndi.DefaultReference;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
@@ -67,6 +71,9 @@ public class JpaExtension implements Extension {
       new ConcurrentHashMap<>();
   protected Logger logger = Logger.getLogger(getClass().getName());
 
+  volatile boolean initedJndiSubCtx = false;
+  volatile InitialContext jndi;
+
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(String name) {
     return persistenceUnitInfoMetaDatas.get(defaultTrim(name));
   }
@@ -79,25 +86,22 @@ public class JpaExtension implements Extension {
         persistenceUnits.add(new PersistenceUnitMetaData(null, pc.getUnitName()));
       }
     });
-    Map<String, PersistenceUnitInfoMetaData> copy = new HashMap<>(persistenceUnitInfoMetaDatas);
-    // some injections
+    // check persistence unit injections
     persistenceUnits.forEach(pumd -> {
       final String unitName = pumd.getUnitName();
-      copy.remove(unitName);
-      abd.addBean(new EntityManagerFactoryBean(beanManager, unitName));
+      shouldBeTrue(persistenceUnitInfoMetaDatas.containsKey(unitName),
+          "Can not find persistence unit named %s for injection.", unitName);
     });
+    // create entity manager factory bean from persistence units and register ref to jndi
+    persistenceUnitInfoMetaDatas.forEach((un, puim) -> {
+      abd.addBean(new EntityManagerFactoryBean(beanManager, un));
+      registerJndi(un);
+    });
+    // create entity manager bean from persistence contexts
     persistenceContexts.forEach(pcmd -> {
-      copy.remove(pcmd.getUnitName());
       Annotation qualifier = Cdis.resolveNamed(pcmd.getUnitName());
       abd.addBean(new EntityManagerBean(beanManager, pcmd, qualifier));
     });
-    // not injection but has been configurated
-    for (Iterator<Entry<String, PersistenceUnitInfoMetaData>> it = copy.entrySet().iterator(); it
-        .hasNext();) {
-      Entry<String, PersistenceUnitInfoMetaData> entry = it.next();
-      abd.addBean(new EntityManagerFactoryBean(beanManager, entry.getKey()));
-      it.remove();
-    }
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
@@ -109,7 +113,7 @@ public class JpaExtension implements Extension {
     final PersistenceUnit pu = Cdis.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
       persistenceUnits.add(new PersistenceUnitMetaData(pu));
-      pip.configureInjectionPoint().addQualifier(Cdis.resolveNamed(pu.unitName()));
+      pip.configureInjectionPoint().addQualifiers(Cdis.resolveNameds(pu.unitName()));
     }
     final PersistenceContext pc = Cdis.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {
@@ -122,6 +126,26 @@ public class JpaExtension implements Extension {
             TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
       }
       persistenceContexts.add(new PersistenceContextMetaData(pc));
+    }
+  }
+
+  void registerJndi(String un) {
+    if (isNotBlank(un)) {
+      try {
+        if (jndi == null) {
+          jndi = new InitialContext();
+        }
+        if (!initedJndiSubCtx) {
+          jndi.createSubcontext(JpaConfig.JNDI_SUBCTX_NAME);
+          initedJndiSubCtx = true;
+        }
+        String jndiName = JpaConfig.JNDI_SUBCTX_NAME + "/" + un;
+        jndi.bind(jndiName,
+            new DefaultReference(EntityManagerFactory.class, Cdis.resolveNameds(un)));
+        logger.info(() -> String.format("Bind entity manager factory %s to jndi!", jndiName));
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
     }
   }
 }

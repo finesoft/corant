@@ -33,8 +33,8 @@ public class DefaultReference extends Reference {
   /**
    * @param className
    */
-  public DefaultReference(String className, Annotation... qualifiers) {
-    super(className, DefaultObjectFactory.class.getName(), null);
+  public DefaultReference(Class<?> objectClass, Annotation... qualifiers) {
+    super(objectClass.getName(), DefaultObjectFactory.class.getName(), null);
     for (Annotation qualifier : qualifiers) {
       this.qualifiers.add(qualifier);
     }

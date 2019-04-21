@@ -13,6 +13,9 @@
  */
 package org.corant.suites.jndi;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 import javax.naming.Reference;
 
 /**
@@ -25,11 +28,16 @@ public class DefaultReference extends Reference {
 
   private static final long serialVersionUID = -7231737490239227558L;
 
+  protected final Set<Annotation> qualifiers = new HashSet<>();
+
   /**
    * @param className
    */
-  public DefaultReference(String className) {
+  public DefaultReference(String className, Annotation... qualifiers) {
     super(className, DefaultObjectFactory.class.getName(), null);
+    for (Annotation qualifier : qualifiers) {
+      this.qualifiers.add(qualifier);
+    }
   }
 
 }

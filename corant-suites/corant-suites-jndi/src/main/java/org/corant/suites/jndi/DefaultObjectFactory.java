@@ -15,10 +15,11 @@ package org.corant.suites.jndi;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.ClassUtils.asClass;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import java.lang.annotation.Annotation;
 import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.Name;
-import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
 /**
@@ -42,9 +43,13 @@ public class DefaultObjectFactory implements ObjectFactory {
   @Override
   public Object getObjectInstance(Object obj, Name name, Context nameCtx,
       Hashtable<?, ?> environment) throws Exception {
-    if (obj instanceof Reference) {
-      Reference reference = (Reference) obj;
+    if (obj instanceof DefaultReference) {
+      DefaultReference reference = (DefaultReference) obj;
       Class<?> theClass = asClass(reference.getClassName());
+      if (isNotEmpty(reference.qualifiers)) {
+        return instance().select(theClass)
+            .select(reference.qualifiers.stream().toArray(Annotation[]::new)).get();
+      }
       return instance().select(theClass).get();
     } else {
       throw new RuntimeException("Object " + obj + " is not a reference");

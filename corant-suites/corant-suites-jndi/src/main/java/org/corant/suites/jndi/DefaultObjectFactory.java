@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jndi
@@ -35,10 +36,6 @@ public class DefaultObjectFactory implements ObjectFactory {
 
   private static final DefaultObjectFactory INST = new DefaultObjectFactory();
 
-  public DefaultObjectFactory() {
-
-  }
-
   protected static DefaultObjectFactory build(Object obj, Hashtable<?, ?> environment) {
     return INST;
   }
@@ -54,7 +51,8 @@ public class DefaultObjectFactory implements ObjectFactory {
       }
       return instance().select(theClass).get();
     } else {
-      throw new RuntimeException("Object " + obj + " is not a reference");
+      throw new CorantRuntimeException(
+          "Object %s named %s is not a CDI managed bean instance reference!", obj, name);
     }
   }
 }

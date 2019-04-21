@@ -31,8 +31,8 @@ import javax.jms.TemporaryQueue;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import org.corant.suites.jms.shared.JMSContextHolder.RequestScopeContextHolder;
-import org.corant.suites.jms.shared.JMSContextHolder.TransactionScopeContextHolder;
+import org.corant.suites.jms.shared.JMSContextManager.RequestScopeContextManager;
+import org.corant.suites.jms.shared.JMSContextManager.TransactionScopeContextManager;
 
 /**
  * corant-suites-jms-artemis
@@ -77,21 +77,21 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   final JMSContextKey key;
 
-  final RequestScopeContextHolder reqCtxHolder;
+  final RequestScopeContextManager reqCtxManager;
 
-  final TransactionScopeContextHolder txCtxHolder;
+  final TransactionScopeContextManager txCtxManager;
 
   /**
    * @param key
-   * @param reqCtxHolder
-   * @param txCtxHolder
+   * @param reqCtxManager
+   * @param txCtxManager
    */
-  public ExtendedJMSContext(JMSContextKey key, RequestScopeContextHolder reqCtxHolder,
-      TransactionScopeContextHolder txCtxHolder) {
+  public ExtendedJMSContext(JMSContextKey key, RequestScopeContextManager reqCtxManager,
+      TransactionScopeContextManager txCtxManager) {
     super();
     this.key = key;
-    this.reqCtxHolder = reqCtxHolder;
-    this.txCtxHolder = txCtxHolder;
+    this.reqCtxManager = reqCtxManager;
+    this.txCtxManager = txCtxManager;
   }
 
   @Override
@@ -309,9 +309,9 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   }
 
   private synchronized JMSContext context() {
-    if (JMSContextHolder.isInTransaction()) {
-      return txCtxHolder.compute(key);
+    if (JMSContextManager.isInTransaction()) {
+      return txCtxManager.compute(key);
     }
-    return reqCtxHolder.compute(key);
+    return reqCtxManager.compute(key);
   }
 }

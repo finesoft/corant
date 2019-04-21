@@ -137,7 +137,7 @@ public class JMSContextKey implements Serializable {
 
   // TODO In NO XA
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
-    if (JMSContextHolder.isInTransaction() && session == JMSContext.SESSION_TRANSACTED) {
+    if (JMSContextManager.isInTransaction() && session == JMSContext.SESSION_TRANSACTED) {
       try {
         instance().select(TransactionManager.class).get().getTransaction()
             .registerSynchronization(new Synchronization() {

@@ -19,8 +19,8 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
-import org.corant.suites.jms.shared.JMSContextHolder.RequestScopeContextHolder;
-import org.corant.suites.jms.shared.JMSContextHolder.TransactionScopeContextHolder;
+import org.corant.suites.jms.shared.JMSContextManager.RequestScopeContextManager;
+import org.corant.suites.jms.shared.JMSContextManager.TransactionScopeContextManager;
 
 /**
  * corant-suites-jms-artemis
@@ -33,31 +33,31 @@ public class JMSContextProducer {
 
   @Inject
   @Any
-  RequestScopeContextHolder requestScoped;
+  RequestScopeContextManager requestScopeContextManager;
 
   @Inject
   @Any
-  TransactionScopeContextHolder transactionScoped;
+  TransactionScopeContextManager transactionScopeContextManager;
 
   @Produces
   public JMSContext context(final InjectionPoint ip) {
-    return new ExtendedJMSContext(JMSContextKey.of(ip), requestScoped, transactionScoped);
+    return new ExtendedJMSContext(JMSContextKey.of(ip), requestScopeContextManager, transactionScopeContextManager);
   }
 
   /**
    *
-   * @return the requestScoped
+   * @return the requestScopeContextManager
    */
-  public RequestScopeContextHolder getRequestScoped() {
-    return requestScoped;
+  public RequestScopeContextManager getRequestScopeContextManager() {
+    return requestScopeContextManager;
   }
 
   /**
    *
-   * @return the transactionScoped
+   * @return the transactionScopeContextManager
    */
-  public TransactionScopeContextHolder getTransactionScoped() {
-    return transactionScoped;
+  public TransactionScopeContextManager getTransactionScopeContextManager() {
+    return transactionScopeContextManager;
   }
 
 }

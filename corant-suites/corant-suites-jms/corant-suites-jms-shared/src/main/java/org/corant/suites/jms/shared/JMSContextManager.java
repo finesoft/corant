@@ -34,7 +34,7 @@ import org.corant.kernel.exception.GeneralRuntimeException;
  * @author bingo 下午5:15:28
  *
  */
-public abstract class JMSContextHolder implements Serializable {
+public abstract class JMSContextManager implements Serializable {
 
   private static final long serialVersionUID = 9142893804159414507L;
 
@@ -87,13 +87,13 @@ public abstract class JMSContextHolder implements Serializable {
   }
 
   @RequestScoped
-  public static class RequestScopeContextHolder extends JMSContextHolder {
+  public static class RequestScopeContextManager extends JMSContextManager {
 
     private static final long serialVersionUID = 1256597268320899576L;
   }
 
   @TransactionScoped
-  public static class TransactionScopeContextHolder extends JMSContextHolder {
+  public static class TransactionScopeContextManager extends JMSContextManager {
 
     private static final long serialVersionUID = 5615193709079057726L;
   }

@@ -114,8 +114,8 @@ public interface MessageSender {
     void doSend(Object message) {
       final JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
       final JMSContextKey ctxKey = new JMSContextKey(connectionFactory, sessionMode);
-      final JMSContext jmsc = new ExtendedJMSContext(ctxKey, ctxProducer.getRequestScoped(),
-          ctxProducer.getTransactionScoped());
+      final JMSContext jmsc = new ExtendedJMSContext(ctxKey, ctxProducer.getRequestScopeContextManager(),
+          ctxProducer.getTransactionScopeContextManager());
       try {
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();

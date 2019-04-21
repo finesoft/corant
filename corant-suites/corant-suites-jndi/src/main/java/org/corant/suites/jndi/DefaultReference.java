@@ -57,10 +57,7 @@ public class DefaultReference extends Reference {
       return false;
     }
     DefaultReference other = (DefaultReference) obj;
-    if (!Arrays.equals(qualifiers, other.qualifiers)) {
-      return false;
-    }
-    return true;
+    return Arrays.equals(qualifiers, other.qualifiers);
   }
 
   @Override

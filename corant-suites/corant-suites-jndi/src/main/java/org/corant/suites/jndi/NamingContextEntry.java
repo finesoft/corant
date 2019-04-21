@@ -26,13 +26,10 @@ public class NamingContextEntry {
   public static final int REFERENCE = 2;
   public static final int CONTEXT = 10;
 
-
   /**
    * The type instance variable is used to avoid using RTTI when doing lookups.
    */
   public int type;
-
-
   public final String name;
   public Object value;
 
@@ -42,7 +39,6 @@ public class NamingContextEntry {
     this.type = type;
   }
 
-
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof NamingContextEntry) {
@@ -51,7 +47,6 @@ public class NamingContextEntry {
       return false;
     }
   }
-
 
   @Override
   public int hashCode() {

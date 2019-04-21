@@ -21,6 +21,9 @@ import javax.naming.Reference;
 /**
  * corant-suites-jndi
  *
+ * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
+ * ApplicationScoped.
+ *
  * @author bingo 下午3:20:55
  *
  */
@@ -31,7 +34,8 @@ public class DefaultReference extends Reference {
   protected final Set<Annotation> qualifiers = new HashSet<>();
 
   /**
-   * @param className
+   * @param objectClass
+   * @param qualifiers
    */
   public DefaultReference(Class<?> objectClass, Annotation... qualifiers) {
     super(objectClass.getName(), DefaultObjectFactory.class.getName(), null);

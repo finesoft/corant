@@ -25,6 +25,11 @@ import javax.naming.spi.ObjectFactory;
 /**
  * corant-suites-jndi
  *
+ * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
+ * ApplicationScoped.
+ *
+ * When InitialContext.lookup(...), will invoke CDI.select() to retrieve the object instance.
+ *
  * @author bingo 下午1:03:02
  *
  */

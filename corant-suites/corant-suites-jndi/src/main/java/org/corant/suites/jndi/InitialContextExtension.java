@@ -72,6 +72,7 @@ public class InitialContextExtension implements Extension {
     try {
       if (!NamingManager.hasInitialContextFactoryBuilder()) {
         NamingManager.setInitialContextFactoryBuilder(e -> DefaultInitialContextFactory::build);
+        // NamingManager.setObjectFactoryBuilder((o, e) -> DefaultObjectFactory.build(o, e));
         useCorantContext = true;
       }
       context = new InitialContext();

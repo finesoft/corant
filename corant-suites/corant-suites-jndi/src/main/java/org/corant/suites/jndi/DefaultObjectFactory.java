@@ -13,9 +13,12 @@
  */
 package org.corant.suites.jndi;
 
+import static org.corant.Corant.instance;
+import static org.corant.shared.util.ClassUtils.asClass;
 import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
 /**
@@ -26,10 +29,25 @@ import javax.naming.spi.ObjectFactory;
  */
 public class DefaultObjectFactory implements ObjectFactory {
 
+  private static final DefaultObjectFactory INST = new DefaultObjectFactory();
+
+  public DefaultObjectFactory() {
+
+  }
+
+  protected static DefaultObjectFactory build(Object obj, Hashtable<?, ?> environment) {
+    return INST;
+  }
+
   @Override
   public Object getObjectInstance(Object obj, Name name, Context nameCtx,
       Hashtable<?, ?> environment) throws Exception {
-    return null;
+    if (obj instanceof Reference) {
+      Reference reference = (Reference) obj;
+      Class<?> theClass = asClass(reference.getClassName());
+      return instance().select(theClass).get();
+    } else {
+      throw new RuntimeException("Object " + obj + " is not a reference");
+    }
   }
-
 }

@@ -17,14 +17,10 @@ import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.naming.NamingException;
 import org.corant.kernel.config.ComparableConfigurator;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -34,7 +30,6 @@ import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
-import com.arjuna.ats.jta.utils.JNDIManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 
 /**
@@ -43,8 +38,8 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  * @author bingo 下午7:56:21
  *
  */
-@ApplicationScoped
-public class NarayanaTransactionProducers {
+// @ApplicationScoped
+public class NarayanaTransactionProducers593 {
 
   @Inject
   @ConfigProperty(name = "jta.transaction.timeout", defaultValue = "60")
@@ -191,12 +186,51 @@ public class NarayanaTransactionProducers {
     }
   }
 
-  void register(@Observes PostCorantReadyEvent event) {
-    try {
-      JNDIManager.bindJTAImplementation();
-    } catch (NamingException e) {
-      throw new CorantRuntimeException(e,
-          "An error occurred while registering Transaction Manager to JNDI");
-    }
-  }
+  //
+  // void register(@Observes PostCorantReadyEvent event, InitialContext ctx,
+  // TransactionManager transactionManager) {
+  // try {
+  // ctx.bind(jtaPropertyManager.getJTAEnvironmentBean().getTransactionManagerJNDIContext(),
+  // transactionManager);
+  // } catch (NamingException e) {
+  // throw new CorantRuntimeException(e,
+  // "An error occurred while registering Transaction Manager to JNDI");
+  // }
+  // }
+  //
+  // @Produces
+  // @ApplicationScoped
+  // TransactionManager transactionManager() {
+  // return com.arjuna.ats.jta.TransactionManager.transactionManager();
+  // }
+  //
+  // @Produces
+  // @ApplicationScoped
+  // TransactionSynchronizationRegistry transactionSynchronizationRegistry() {
+  // return new TransactionSynchronizationRegistryImple();
+  // }
+  //
+  // @Produces
+  // @Dependent
+  // UserTransaction userTransaction() {
+  // return com.arjuna.ats.jta.UserTransaction.userTransaction();
+  // }
+  //
+  // @Produces
+  // @ApplicationScoped
+  // UserTransactionRegistry userTransactionRegistry() {
+  // return new UserTransactionRegistry();
+  // }
+  //
+  // @Produces
+  // @ApplicationScoped
+  // XAResourceRecoveryRegistry xaResourceRecoveryRegistry() {
+  // return new RecoveryManagerService();
+  // }
+  //
+  // @Produces
+  // @ApplicationScoped
+  // JBossXATerminator xaTerminator() {
+  // return new XATerminator();
+  // }
 }

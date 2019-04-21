@@ -15,8 +15,6 @@ package org.corant.suites.jndi;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.ClassUtils.asClass;
-import static org.corant.shared.util.Empties.isNotEmpty;
-import java.lang.annotation.Annotation;
 import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -51,9 +49,8 @@ public class DefaultObjectFactory implements ObjectFactory {
     if (obj instanceof DefaultReference) {
       DefaultReference reference = (DefaultReference) obj;
       Class<?> theClass = asClass(reference.getClassName());
-      if (isNotEmpty(reference.qualifiers)) {
-        return instance().select(theClass)
-            .select(reference.qualifiers.stream().toArray(Annotation[]::new)).get();
+      if (reference.qualifiers.length > 0) {
+        return instance().select(theClass).select(reference.qualifiers).get();
       }
       return instance().select(theClass).get();
     } else {

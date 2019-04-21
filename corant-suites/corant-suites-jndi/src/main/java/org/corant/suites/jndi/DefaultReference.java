@@ -14,8 +14,7 @@
 package org.corant.suites.jndi;
 
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
 import javax.naming.Reference;
 
 /**
@@ -31,7 +30,7 @@ public class DefaultReference extends Reference {
 
   private static final long serialVersionUID = -7231737490239227558L;
 
-  protected final Set<Annotation> qualifiers = new HashSet<>();
+  protected Annotation[] qualifiers = new Annotation[0];
 
   /**
    * @param objectClass
@@ -39,9 +38,37 @@ public class DefaultReference extends Reference {
    */
   public DefaultReference(Class<?> objectClass, Annotation... qualifiers) {
     super(objectClass.getName(), DefaultObjectFactory.class.getName(), null);
-    for (Annotation qualifier : qualifiers) {
-      this.qualifiers.add(qualifier);
+    int length;
+    if ((length = qualifiers.length) > 0) {
+      this.qualifiers = new Annotation[length];
+      System.arraycopy(qualifiers, 0, this.qualifiers, 0, length);
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    DefaultReference other = (DefaultReference) obj;
+    if (!Arrays.equals(qualifiers, other.qualifiers)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + Arrays.hashCode(qualifiers);
+    return result;
   }
 
 }

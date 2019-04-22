@@ -40,7 +40,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-jndi</artifactId>
+			<artifactId>corant-kernel</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>

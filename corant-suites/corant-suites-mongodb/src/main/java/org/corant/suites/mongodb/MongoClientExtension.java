@@ -53,9 +53,9 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.corant.Corant;
 import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Manageables.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.suites.jndi.DefaultReference;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -236,7 +236,7 @@ public class MongoClientExtension implements Extension {
                 initedJndiSubCtx = true;
               }
               String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cn;
-              jndi.bind(jndiName, new DefaultReference(MongoClient.class, qualifiers));
+              jndi.bind(jndiName, new NamingReference(MongoClient.class, qualifiers));
               logger.info(() -> String.format("Bind mongo client %s to jndi!", jndiName));
             } catch (NamingException e) {
               throw new CorantRuntimeException(e);

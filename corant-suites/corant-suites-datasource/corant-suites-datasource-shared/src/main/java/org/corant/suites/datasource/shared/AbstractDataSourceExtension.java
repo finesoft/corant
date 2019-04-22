@@ -29,8 +29,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.corant.kernel.util.Manageables.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jndi.DefaultReference;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -102,7 +102,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
           initedJndiSubCtx = true;
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
-        jndi.bind(jndiName, new DefaultReference(DataSource.class, qualifiers));
+        jndi.bind(jndiName, new NamingReference(DataSource.class, qualifiers));
         logger.info(() -> String.format("Bind data source %s to jndi!", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);

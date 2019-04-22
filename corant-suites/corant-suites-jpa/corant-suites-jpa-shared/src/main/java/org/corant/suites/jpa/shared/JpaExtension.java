@@ -40,8 +40,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Manageables.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jndi.DefaultReference;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
@@ -141,7 +141,7 @@ public class JpaExtension implements Extension {
         }
         String jndiName = JpaConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName,
-            new DefaultReference(EntityManagerFactory.class, Cdis.resolveNameds(un)));
+            new NamingReference(EntityManagerFactory.class, Cdis.resolveNameds(un)));
         logger.info(() -> String.format("Bind entity manager factory %s to jndi!", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);

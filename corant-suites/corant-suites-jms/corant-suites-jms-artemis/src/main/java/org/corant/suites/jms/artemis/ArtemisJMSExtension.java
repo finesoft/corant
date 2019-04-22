@@ -84,21 +84,13 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected final Map<String, ArtemisConfig> configs = new HashMap<>();
 
-  protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
-      final BeanManager beanManager) {
-    configs.clear();
-    ArtemisConfig.from(ConfigProvider.getConfig()).forEach(configs::put);
-    if (configs.isEmpty()) {
-      logger.info(() -> "Can not find any artemis configurations.");
-    } else {
-      logger.info(
-          () -> String.format("Find %s artemis names %s", configs.size(), String.join(", ", configs
-              .keySet().stream().map(c -> defaultBlank(c, "[Unnamed]")).toArray(String[]::new))));
-    }
+  @Override
+  protected boolean enable() {
+    return ConfigProvider.getConfig().getOptionalValue("jms.enable", Boolean.class).orElse(true);
   }
 
-  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    if (event != null) {
+  protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    if (event != null && enable()) {
       configs.forEach((dsn, dsc) -> {
         event.<ActiveMQConnectionFactory>addBean().addQualifier(Cdis.resolveNamed(dsn))
             .addQualifier(Default.Literal.INSTANCE)
@@ -112,6 +104,19 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
               }
             }).disposeWith((cf, beans) -> cf.close());
       });
+    }
+  }
+
+  protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
+      final BeanManager beanManager) {
+    configs.clear();
+    ArtemisConfig.from(ConfigProvider.getConfig()).forEach(configs::put);
+    if (configs.isEmpty()) {
+      logger.info(() -> "Can not find any artemis configurations.");
+    } else {
+      logger.info(
+          () -> String.format("Find %s artemis names %s", configs.size(), String.join(", ", configs
+              .keySet().stream().map(c -> defaultBlank(c, "[Unnamed]")).toArray(String[]::new))));
     }
   }
 

@@ -77,7 +77,7 @@ public abstract class AbstractJMSExtension implements Extension {
   protected final Set<AnnotatedMethod<?>> streamProcessorMethods =
       newSetFromMap(new ConcurrentHashMap<>());
 
-  public static ConnectionFactory retriveConnectionFactory(String connectionFactory) {
+  static ConnectionFactory retriveConnectionFactory(String connectionFactory) {
     if (isEmpty(connectionFactory)) {
       if (instance().select(ConnectionFactory.class).isResolvable()) {
         return instance().select(ConnectionFactory.class).get();
@@ -89,9 +89,35 @@ public abstract class AbstractJMSExtension implements Extension {
     }
   }
 
-  void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
+  protected MessageListener createMessageListener(AnnotatedMethod<?> method,
+      BeanManager beanManager, JMSContext jmsc, int sessoinModel) {
+    final Set<Bean<?>> beans = beanManager.getBeans(method.getJavaMember().getDeclaringClass());
+    final Bean<?> propertyResolverBean = beanManager.resolve(beans);
+    final CreationalContext<?> creationalContext =
+        beanManager.createCreationalContext(propertyResolverBean);
+    Object inst = beanManager.getReference(propertyResolverBean,
+        method.getJavaMember().getDeclaringClass(), creationalContext);
+    method.getJavaMember().setAccessible(true);
+    return new MessageReceiverImpl(jmsc, (msg) -> {
+      try {
+        method.getJavaMember().invoke(inst, msg);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+  }
+
+  protected boolean enable() {
+    return true;
+  }
+
+  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
       logger.warning(() -> "Can not found any jms connection factory!");
+      return;
+    }
+    if (!enable()) {
+      logger.info(() -> "Jms not enable!");
       return;
     }
     receiverMethods.forEach(rm -> {
@@ -127,13 +153,19 @@ public abstract class AbstractJMSExtension implements Extension {
     });
   }
 
-  void onPreCorantStop(@Observes PreContainerStopEvent e) {
+  protected void onPreCorantStop(@Observes PreContainerStopEvent e) {
+    if (!enable()) {
+      return;
+    }
     consumers.values().forEach(JMSConsumer::close);
     consumerJmsContexts.values().forEach(JMSContext::close);
   }
 
-  void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
+  protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
+    if (!enable()) {
+      return;
+    }
     logger.info(() -> String.format("Scanning message consumer type: %s",
         pat.getAnnotatedType().getJavaClass().getName()));
     final AnnotatedType<?> annotatedType = pat.getAnnotatedType();
@@ -146,24 +178,6 @@ public abstract class AbstractJMSExtension implements Extension {
         streamProcessorMethods.add(am);
       }
     }
-  }
-
-  private MessageListener createMessageListener(AnnotatedMethod<?> method, BeanManager beanManager,
-      JMSContext jmsc, int sessoinModel) {
-    final Set<Bean<?>> beans = beanManager.getBeans(method.getJavaMember().getDeclaringClass());
-    final Bean<?> propertyResolverBean = beanManager.resolve(beans);
-    final CreationalContext<?> creationalContext =
-        beanManager.createCreationalContext(propertyResolverBean);
-    Object inst = beanManager.getReference(propertyResolverBean,
-        method.getJavaMember().getDeclaringClass(), creationalContext);
-    method.getJavaMember().setAccessible(true);
-    return new MessageReceiverImpl(jmsc, (msg) -> {
-      try {
-        method.getJavaMember().invoke(inst, msg);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
   }
 
   @ApplicationScoped

@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
+import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.XASession;
 
 /**
@@ -37,12 +38,14 @@ public class XADiskSessionProducer {
   @Inject
   TransactionManager transactionManager;
 
+  @Inject
+  XAFileSystem fileSystem;
+
   final transient Map<Transaction, XASession> sessions = new ConcurrentHashMap<>();
 
   @Produces
   @TransactionScoped
   XASession produce() {
-    // TODO
-    return null;
+    return fileSystem.createSessionForXATransaction();
   }
 }

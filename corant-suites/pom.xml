@@ -39,6 +39,7 @@
 		<module>corant-suites-mp</module>
 		<module>corant-suites-cassandra</module>
 		<module>corant-suites-elastic-ext</module>
+		<module>corant-suites-redis</module>
 	</modules>
 	<build>
 		<plugins>

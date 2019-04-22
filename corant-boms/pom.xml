@@ -84,6 +84,7 @@
 
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.mongodb>3.6.4</version.mongodb>
+		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -516,6 +517,11 @@
 				<groupId>org.mongodb</groupId>
 				<artifactId>mongodb-driver</artifactId>
 				<version>${version.mongodb}</version>
+			</dependency>
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>${version.redis-clients-jedis}</version>
 			</dependency>
 
 			<!-- ORM -->

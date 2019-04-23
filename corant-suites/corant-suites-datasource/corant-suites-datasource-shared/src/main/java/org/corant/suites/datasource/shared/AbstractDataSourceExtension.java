@@ -82,7 +82,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     if (dataSourceConfigs.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.info(() -> String.format("Find %s data source names %s", dataSourceNames.size(),
+      logger.info(() -> String.format("Find %s data sources named %s.", dataSourceNames.size(),
           String.join(", ", dataSourceNames)));
     }
   }
@@ -103,7 +103,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
         jndi.bind(jndiName, new NamingReference(DataSource.class, qualifiers));
-        logger.info(() -> String.format("Bind data source %s to jndi!", jndiName));
+        logger.info(() -> String.format("Bind data source %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

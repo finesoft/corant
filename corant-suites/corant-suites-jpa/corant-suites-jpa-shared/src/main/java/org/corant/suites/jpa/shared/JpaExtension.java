@@ -90,7 +90,7 @@ public class JpaExtension implements Extension {
     persistenceUnits.forEach(pumd -> {
       final String unitName = pumd.getUnitName();
       shouldBeTrue(persistenceUnitInfoMetaDatas.containsKey(unitName),
-          "Can not find persistence unit named %s for injection.", unitName);
+          "Can not find persistence unit named %s for injection!", unitName);
     });
     // create entity manager factory bean from persistence units and register ref to jndi
     persistenceUnitInfoMetaDatas.forEach((un, puim) -> {
@@ -142,7 +142,7 @@ public class JpaExtension implements Extension {
         String jndiName = JpaConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName,
             new NamingReference(EntityManagerFactory.class, Cdis.resolveNameds(un)));
-        logger.info(() -> String.format("Bind entity manager factory %s to jndi!", jndiName));
+        logger.info(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

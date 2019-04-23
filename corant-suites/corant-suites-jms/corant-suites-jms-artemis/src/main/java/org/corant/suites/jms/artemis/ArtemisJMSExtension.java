@@ -114,9 +114,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (configs.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
-      logger.info(
-          () -> String.format("Find %s artemis names %s", configs.size(), String.join(", ", configs
-              .keySet().stream().map(c -> defaultBlank(c, "[Unnamed]")).toArray(String[]::new))));
+      logger.info(() -> String.format("Find %s artemis brokers named %s.", configs.size(),
+          String.join(", ", configs.keySet().stream().map(c -> defaultBlank(c, "[Unnamed]"))
+              .toArray(String[]::new))));
     }
   }
 

@@ -112,12 +112,12 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
-      logger.warning(() -> "Can not found any jms connection factory!");
+    if (!enable()) {
+      logger.info(() -> "JMS not enable!");
       return;
     }
-    if (!enable()) {
-      logger.info(() -> "Jms not enable!");
+    if (instance().select(ConnectionFactory.class).isUnsatisfied()) {
+      logger.warning(() -> "Can not found any JMS connection factory!");
       return;
     }
     receiverMethods.forEach(rm -> {

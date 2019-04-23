@@ -154,7 +154,6 @@ public class Corant implements AutoCloseable {
       this.classLoader = classLoader;
     }
     this.args = args;
-    setMe(this);
   }
 
   /**
@@ -266,9 +265,7 @@ public class Corant implements AutoCloseable {
   }
 
   private static synchronized void setMe(Corant me) {
-    if (me != null) {
-      shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
-    }
+    shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
     Corant.me = me;
   }
 
@@ -309,12 +306,16 @@ public class Corant implements AutoCloseable {
   }
 
   public synchronized Corant start(Class<?>... beanClasses) {
+    if (isRuning()) {
+      return this;
+    }
+    setMe(this);
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = StopWatch.press(CORANT, "Execute the handler before corant starting");
+    StopWatch stopWatch = StopWatch.press(CORANT, "Perform the handler before corant starting");
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
 
     Weld weld = new Weld();
@@ -329,17 +330,17 @@ public class Corant implements AutoCloseable {
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
     id = container.getId();
 
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
 
     doAfterContainerInitialized();
 
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
-        .start("Execute the handler after corant startup");
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+        .start("Perform the handler after corant startup");
 
     doAfterStarted(classLoader);
 
-    stopWatch.stop(tk -> log(logger, "%s, in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .destroy(sw -> {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {
@@ -364,8 +365,8 @@ public class Corant implements AutoCloseable {
       emitter.fire(new PreContainerStopEvent(args));
       ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
       container.close();
-      setMe(null);
     }
+    setMe(null);
   }
 
   void doAfterContainerInitialized() {

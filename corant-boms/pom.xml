@@ -75,7 +75,7 @@
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.4</version.agroal>
 		<version.narayana-jta>5.9.5.Final</version.narayana-jta>
-		<version.mssql-jdbc>7.0.0.jre8</version.mssql-jdbc>
+		<version.mssql-jdbc>7.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.47</version.mysql>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
@@ -556,6 +556,7 @@
 				<artifactId>hibernate-ogm-infinispan</artifactId>
 				<version>${version.hibernate-ogm-core}</version>
 			</dependency>
+			
 			<!-- POI -->
 			<dependency>
 				<groupId>org.apache.poi</groupId>

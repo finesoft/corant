@@ -265,7 +265,9 @@ public class Corant implements AutoCloseable {
   }
 
   private static synchronized void setMe(Corant me) {
-    shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
+    if (me != null) {
+      shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
+    }
     Corant.me = me;
   }
 

@@ -13,7 +13,6 @@
  */
 package org.corant.suites.datasource.shared;
 
-import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -46,22 +44,13 @@ public abstract class AbstractDataSourceExtension implements Extension {
 
   protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
   protected final Set<String> dataSourceNames = new LinkedHashSet<>();
-  protected final Map<String, DataSource> dataSources = new ConcurrentHashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   protected volatile boolean initedJndiSubCtx = false;
   protected volatile InitialContext jndi;
 
-  public DataSource getDataSource(String name) {
-    return getDataSources().get(name);
-  }
-
   public Set<String> getDataSourceNames() {
     return Collections.unmodifiableSet(dataSourceNames);
-  }
-
-  public Map<String, DataSource> getDataSources() {
-    return Collections.unmodifiableMap(dataSources);
   }
 
   protected Map<String, DataSourceConfig> getDataSourceConfigs() {
@@ -76,7 +65,6 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     dataSourceConfigs.clear();
     dataSourceNames.clear();
-    dataSources.clear();
     DataSourceConfig.from(ConfigProvider.getConfig()).forEach(dataSourceConfigs::put);
     dataSourceNames.addAll(dataSourceConfigs.keySet());
     if (dataSourceConfigs.isEmpty()) {
@@ -85,10 +73,6 @@ public abstract class AbstractDataSourceExtension implements Extension {
       logger.info(() -> String.format("Find %s data sources named %s.", dataSourceNames.size(),
           String.join(", ", dataSourceNames)));
     }
-  }
-
-  protected synchronized void registerDataSource(String name, DataSource dataSource) {
-    shouldBeNull(dataSources.put(name, dataSource), "The data source annotated %s dup!", name);
   }
 
   protected synchronized void registerJndi(String name, Annotation... qualifiers) {

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.flyway;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.asStream;
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -27,11 +28,15 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
+import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.flyway.FlywayConfigProvider.DefaultFlywayConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.flywaydb.core.Flyway;
@@ -131,9 +136,14 @@ public class FlywayMigrator {
   protected Stream<FlywayConfigProvider> getConfigProviders() {
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
-        return asStream(dse.getDataSources()).map((e) -> {
-          String name = e.getKey();
-          return DefaultFlywayConfigProvider.of(defaultLocation(name), e.getValue());
+        return asStream(dse.getDataSourceNames()).map((e) -> {
+          try {
+            DataSource ds =
+                forceCast(new InitialContext().lookup(DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e));
+            return DefaultFlywayConfigProvider.of(defaultLocation(e), ds);
+          } catch (NamingException ex) {
+            throw new CorantRuntimeException(ex);
+          }
         });
       });
     } else {

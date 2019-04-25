@@ -120,7 +120,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
           AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
     }
     AgroalDataSource datasource = AgroalDataSource.from(cfgs);
-    registerDataSource(cfg.getName(), datasource);
     return datasource;
   }
 

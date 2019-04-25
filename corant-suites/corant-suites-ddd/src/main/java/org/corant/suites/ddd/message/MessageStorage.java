@@ -36,4 +36,6 @@ public interface MessageStorage extends UnaryOperator<Message> {
       return t;
     }
   };
+
+  default void prepare() {}
 }

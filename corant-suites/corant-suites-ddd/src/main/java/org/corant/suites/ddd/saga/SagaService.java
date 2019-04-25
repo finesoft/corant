@@ -36,6 +36,8 @@ public interface SagaService {
 
   void persist(Saga saga);
 
+  default void prepare() {}
+
   void trigger(Message message);
 
   static class EmptySagaService implements SagaService {
@@ -53,13 +55,13 @@ public interface SagaService {
 
     @Override
     public void persist(Saga saga) {
-      logger.warning(
+      logger.fine(
           () -> "The saga service is an empty implementation that does not really implement persistence");
     }
 
     @Override
     public void trigger(Message message) {
-      logger.warning(
+      logger.fine(
           () -> "The saga service is an empty implementation that does not really implement trigger");
     }
   }

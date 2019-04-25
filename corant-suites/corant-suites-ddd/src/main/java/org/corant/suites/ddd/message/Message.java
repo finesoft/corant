@@ -34,6 +34,7 @@ public interface Message extends Serializable {
     return Long.compare(m1.sequenceNumber(), m2.sequenceNumber());
   }
 
+  // Should we have this property?
   default Object destination() {
     return getMetadata() == null ? null : getMetadata().getDestination();
   }
@@ -66,6 +67,7 @@ public interface Message extends Serializable {
 
   public interface MessageHandling extends Serializable {
 
+    // Should we have this property?
     Object getDestination();
 
     Instant getHandledTime();

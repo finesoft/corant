@@ -35,4 +35,6 @@ public interface MessageDispatcher extends Consumer<Message[]> {
     }
   };
 
+  default void prepare() {}
+
 }

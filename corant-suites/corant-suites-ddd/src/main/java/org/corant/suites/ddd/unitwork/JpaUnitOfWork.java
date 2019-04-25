@@ -28,7 +28,9 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -48,9 +50,9 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  */
 public class JpaUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
+  final transient Transaction transaction;
   final Map<Annotation, EntityManager> entityManagers = new HashMap<>();
   final Function<Annotation, EntityManager> entityManagerProvider;
-  final transient Transaction transaction;
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
   protected JpaUnitOfWork(JpaUnitOfWorksManager manager, Transaction transaction,
@@ -79,6 +81,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
+    handleMessage();
     entityManagers.values().forEach(EntityManager::flush);// FIXME Do we need flush here?
   }
 
@@ -90,9 +93,10 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registration.values().forEach(v -> v.remove(ai));
+          messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        // TODO
+        messages.remove(obj);
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -146,10 +150,13 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
             }
           });
           registration.get(aggregate.getLifecycle()).add(ai);
-          handleMessage(aggregate.extractMessages(true).stream().toArray(Message[]::new));
+          // handleMessage(aggregate.extractMessages(true).stream().toArray(Message[]::new));
+          aggregate.extractMessages(true)
+              .forEach(message -> MessageUtils.mergeToQueue(messages, message));
         }
       } else if (obj instanceof Message) {
-        handleMessage(Message.class.cast(obj));
+        // handleMessage(Message.class.cast(obj));
+        MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -161,6 +168,7 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
     return transaction.toString();
   }
 
+  @Override
   protected void clear() {
     try {
       entityManagers.values().forEach(em -> {
@@ -179,12 +187,12 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
     return (JpaUnitOfWorksManager) super.getManager();
   }
 
-  protected void handleMessage(Message... msgs) {
-    for (Message msg : msgs) {
+  protected void handleMessage() {
+    messages.stream().sorted(Message::compare).forEach(msg -> {
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
-    }
-    messageDispatcher.accept(msgs);
+      messageDispatcher.accept(new Message[] {msg});
+    });
   }
 
 }

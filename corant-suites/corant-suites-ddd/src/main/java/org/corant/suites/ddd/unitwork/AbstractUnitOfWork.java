@@ -14,8 +14,11 @@
 package org.corant.suites.ddd.unitwork;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
@@ -30,14 +33,17 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
   protected final MessageDispatcher messageDispatcher;
   protected final MessageStorage messageStorage;
   protected final SagaService sagaService; // FIXME Is it right to do so?
+  protected final LinkedList<Message> messages = new LinkedList<>();
   protected volatile boolean activated = false;
-  // protected final LinkedList<Message> messages = new LinkedList<>();
 
   protected AbstractUnitOfWork(AbstractUnitOfWorksManager manager) {
     this.manager = manager;
     messageDispatcher = manager.getMessageDispatcher();
     messageStorage = manager.getMessageStorage();
     sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
+    messageDispatcher.prepare();
+    messageStorage.prepare();
+    sagaService.prepare();
     activated = true;
   }
 
@@ -46,8 +52,16 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
     activated = false;
   }
 
+  protected void clear() {
+    messages.clear();
+  }
+
   protected UnitOfWorksManager getManager() {
     return manager;
+  }
+
+  protected List<Message> getMessages() {
+    return messages;
   }
 
   protected void handlePostCompleted(final Object registration, final boolean success) {
@@ -69,12 +83,4 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
       }
     });
   }
-
-  // protected void clear() {
-  // messages.clear();
-  // }
-
-  // protected List<Message> getMessages() {
-  // return messages;
-  // }
 }

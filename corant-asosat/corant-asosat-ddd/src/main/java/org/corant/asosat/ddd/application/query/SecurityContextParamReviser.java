@@ -20,7 +20,7 @@ import org.corant.asosat.ddd.domain.shared.Participator;
 import org.corant.asosat.ddd.security.DefaultSecurityContext;
 import org.corant.asosat.ddd.security.DefaultSecurityContextHolder;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.query.spi.ParamReviser;
+import org.corant.suites.query.shared.spi.ParamReviser;
 
 /**
  * corant-asosat-ddd

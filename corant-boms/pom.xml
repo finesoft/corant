@@ -556,7 +556,7 @@
 				<artifactId>hibernate-ogm-infinispan</artifactId>
 				<version>${version.hibernate-ogm-core}</version>
 			</dependency>
-			
+
 			<!-- POI -->
 			<dependency>
 				<groupId>org.apache.poi</groupId>
@@ -836,7 +836,22 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-query</artifactId>
+				<artifactId>corant-suites-query-shared</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-query-sql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-query-elastic</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-query-jpql</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

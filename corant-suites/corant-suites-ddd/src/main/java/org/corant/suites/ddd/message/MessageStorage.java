@@ -31,7 +31,7 @@ public interface MessageStorage extends UnaryOperator<Message> {
 
     @Override
     public Message apply(Message t) {
-      logger.warning(
+      logger.fine(
           () -> "The message dispatch is an empty implementation that does not really implement accept");
       return t;
     }

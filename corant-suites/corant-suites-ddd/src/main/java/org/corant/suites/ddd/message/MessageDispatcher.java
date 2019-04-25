@@ -30,7 +30,7 @@ public interface MessageDispatcher extends Consumer<Message[]> {
 
     @Override
     public void accept(Message[] t) {
-      logger.warning(
+      logger.fine(
           () -> "The message dispatch is an empty implementation that does not really implement accept");
     }
   };

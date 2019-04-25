@@ -46,7 +46,7 @@ public interface SagaService {
 
     @Override
     public Stream<SagaManager> getManagers(Annotation... annotations) {
-      logger.warning(
+      logger.fine(
           () -> "The saga service is an empty implementation that does not really implement persistence");
       return Stream.empty();
     }

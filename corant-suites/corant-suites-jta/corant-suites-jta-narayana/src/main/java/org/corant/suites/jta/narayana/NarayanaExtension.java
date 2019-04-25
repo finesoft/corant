@@ -65,6 +65,7 @@ public class NarayanaExtension implements Extension {
   void afterBeanDiscovery(@Observes final AfterBeanDiscovery event, final BeanManager beanManager) {
     try {
       JNDIManager.bindJTAImplementation();
+      logger.info(() -> "Bind JTA implementations to Jndi.");
     } catch (NamingException e) {
       throw new CorantRuntimeException(e,
           "An error occurred while registering Transaction Manager to JNDI");

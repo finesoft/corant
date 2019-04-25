@@ -111,19 +111,18 @@ public class NarayanaTransactionProducers {
   Optional<Boolean> recoveryListener;
 
   @Inject
+  @ConfigProperty(name = "jta.transaction.narayana.object-store-dir")
+  Optional<String> objectStoreDir;
+
+  @Inject
   @Any
   Instance<NarayanaConfigurator> configurators;
 
   @PostConstruct
   void onPostConstruct() {
 
-    if (Thread.currentThread().getContextClassLoader()
-        .getResource("jbossts-properties.xml") != null) {
-      // Use default setting
-      return;
-    }
-
-    String dfltObjStoreDir = Defaults.corantUserDir("-narayana-objects").toString();
+    String dfltObjStoreDir =
+        objectStoreDir.orElse(Defaults.corantUserDir("-narayana-objects").toString());
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
     nullActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
@@ -136,6 +135,12 @@ public class NarayanaTransactionProducers {
     final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+
+    if (Thread.currentThread().getContextClassLoader()
+        .getResource("jbossts-properties.xml") != null) {
+      // Use default setting
+      return;
+    }
 
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);

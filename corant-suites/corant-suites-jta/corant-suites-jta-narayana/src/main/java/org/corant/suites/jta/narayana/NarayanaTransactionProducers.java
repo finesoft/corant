@@ -21,10 +21,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import org.corant.kernel.config.ComparableConfigurator;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -118,6 +119,15 @@ public class NarayanaTransactionProducers {
   @Any
   Instance<NarayanaConfigurator> configurators;
 
+  void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
+    try {
+      JNDIManager.bindJTAImplementation();
+    } catch (NamingException e) {
+      throw new CorantRuntimeException(e,
+          "An error occurred while registering Transaction Manager to JNDI");
+    }
+  }
+
   @PostConstruct
   void onPostConstruct() {
 
@@ -193,15 +203,6 @@ public class NarayanaTransactionProducers {
         cfgr.configObjectStoreEnvironment(communicationStoreObjectStoreEnvironmentBean,
             "communicationStore");
       });
-    }
-  }
-
-  void register(@Observes PostCorantReadyEvent event) {
-    try {
-      JNDIManager.bindJTAImplementation();
-    } catch (NamingException e) {
-      throw new CorantRuntimeException(e,
-          "An error occurred while registering Transaction Manager to JNDI");
     }
   }
 }

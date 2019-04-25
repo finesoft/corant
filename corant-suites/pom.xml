@@ -40,6 +40,7 @@
 		<module>corant-suites-cassandra</module>
 		<module>corant-suites-elastic-ext</module>
 		<module>corant-suites-redis</module>
+		<module>corant-suites-json</module>
 	</modules>
 	<build>
 		<plugins>

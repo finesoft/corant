@@ -35,14 +35,6 @@
 			<artifactId>corant-suites-query-shared</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-query-shared</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-kernel</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>transport</artifactId>
 		</dependency>

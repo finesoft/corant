@@ -123,6 +123,9 @@ public class PersistencePropertiesParser {
       doParseProperties(config, proPrefix, proCfgNmes, puimd);
       shouldBeNull(map.put(name, puimd),
           "The jpa configuration error persistence unit name %s dup!", name);
+    } else {
+      logger.warning(
+          () -> String.format("Can not find any managed classes for persistence unit %s", name));
     }
   }
 

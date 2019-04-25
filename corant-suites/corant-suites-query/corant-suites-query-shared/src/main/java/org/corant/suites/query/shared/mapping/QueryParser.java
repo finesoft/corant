@@ -31,8 +31,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.shared.util.StringUtils;
+import org.corant.suites.query.shared.QueryRuntimeException;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -47,7 +47,7 @@ import org.xml.sax.XMLReader;
  */
 public class QueryParser {
 
-  public static final String SCHEMA_URL = "org/corant/suites/query/mapping/nqms_1_0.xsd";
+  public static final String SCHEMA_URL = "org/corant/suites/query/shared/mapping/nqms_1_0.xsd";
 
   static Logger logger = Logger.getLogger(QueryParser.class.getName());
 

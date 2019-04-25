@@ -16,15 +16,9 @@ package org.corant.suites.jta.narayana;
 import static org.corant.shared.util.CollectionUtils.asList;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
-import javax.naming.NamingException;
 import org.corant.kernel.config.ComparableConfigurator;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
@@ -35,7 +29,6 @@ import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
-import com.arjuna.ats.jta.utils.JNDIManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 
 /**
@@ -44,7 +37,7 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  * @author bingo 下午7:56:21
  *
  */
-@ApplicationScoped
+// @ApplicationScoped
 public class NarayanaTransactionProducers {
 
   @Inject
@@ -119,16 +112,7 @@ public class NarayanaTransactionProducers {
   @Any
   Instance<NarayanaConfigurator> configurators;
 
-  void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
-    try {
-      JNDIManager.bindJTAImplementation();
-    } catch (NamingException e) {
-      throw new CorantRuntimeException(e,
-          "An error occurred while registering Transaction Manager to JNDI");
-    }
-  }
-
-  @PostConstruct
+  // @PostConstruct
   void onPostConstruct() {
 
     String dfltObjStoreDir =

@@ -57,6 +57,10 @@ public class FlywayMigrator {
   Boolean enable;
 
   @Inject
+  @ConfigProperty(name = "flyway.migrate.file-path")
+  Optional<String> filePath;
+
+  @Inject
   Logger logger;
 
   @Inject
@@ -125,10 +129,6 @@ public class FlywayMigrator {
 
   protected void config(FlywayConfigProvider provider, FluentConfiguration fc) {}
 
-  protected String defaultLocation(String name) {
-    return "META-INF/dbmigration/" + name;
-  }
-
   protected void doMigrate(Flyway flyway) {
     flyway.migrate();
   }
@@ -138,9 +138,9 @@ public class FlywayMigrator {
       return dataSourceExtensions.stream().flatMap(dse -> {
         return asStream(dse.getDataSourceNames()).map((e) -> {
           try {
-            DataSource ds =
-                forceCast(new InitialContext().lookup(DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e));
-            return DefaultFlywayConfigProvider.of(defaultLocation(e), ds);
+            final String name = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e;
+            return DefaultFlywayConfigProvider.of(getLocation(e),
+                forceCast(new InitialContext().lookup(name)));
           } catch (NamingException ex) {
             throw new CorantRuntimeException(ex);
           }
@@ -148,6 +148,14 @@ public class FlywayMigrator {
       });
     } else {
       return Stream.empty();
+    }
+  }
+
+  protected String getLocation(String name) {
+    if (filePath != null && filePath.isPresent()) {
+      return filePath.get() + "/" + name;
+    } else {
+      return "META-INF/dbmigration/" + name;
     }
   }
 }

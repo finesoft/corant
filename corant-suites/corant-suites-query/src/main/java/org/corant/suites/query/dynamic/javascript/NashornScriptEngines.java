@@ -33,7 +33,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
  * @author bingo 下午7:02:11
  *
  */
-@SuppressWarnings("restriction")
 public class NashornScriptEngines {
 
   public static final NashornScriptEngineFactory NASHORN_ENGINE_FACTORY =

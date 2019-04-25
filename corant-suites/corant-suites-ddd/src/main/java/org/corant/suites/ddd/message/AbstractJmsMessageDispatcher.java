@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.message;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isNotNull;
 import static org.corant.shared.util.StreamUtils.copy;
@@ -37,11 +38,9 @@ import javax.transaction.Transactional;
 @Transactional
 public abstract class AbstractJmsMessageDispatcher implements MessageDispatcher {
 
-  volatile JMSProducer jmsp;
-
   @Override
   public void prepare() {
-    jmsp = obtainJmsContext().createProducer();
+    shouldNotNull(obtainJmsContext(), "Can not find any JMS Context!");
   }
 
   protected Destination createDestination(boolean multicast, String destination) {
@@ -51,9 +50,13 @@ public abstract class AbstractJmsMessageDispatcher implements MessageDispatcher 
 
   protected abstract JMSContext obtainJmsContext();
 
+  protected JMSProducer obtainJmsProducer() {
+    return obtainJmsContext().createProducer();
+  }
+
   protected void send(boolean multicast, String destination, byte[] payload) {
     if (isNotEmpty(payload)) {
-      jmsp.send(createDestination(multicast, destination), payload);
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
     }
   }
 
@@ -68,19 +71,19 @@ public abstract class AbstractJmsMessageDispatcher implements MessageDispatcher 
 
   protected void send(boolean multicast, String destination, Map<String, Object> payload) {
     if (isNotEmpty(payload)) {
-      jmsp.send(createDestination(multicast, destination), payload);
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
     }
   }
 
   protected void send(boolean multicast, String destination, Serializable payload) {
     if (isNotNull(payload)) {
-      jmsp.send(createDestination(multicast, destination), payload);
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
     }
   }
 
   protected void send(boolean multicast, String destination, String payload) {
     if (isNotNull(payload)) {
-      jmsp.send(createDestination(multicast, destination), payload);
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
     }
   }
 }

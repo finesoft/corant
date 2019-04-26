@@ -49,8 +49,12 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
  */
 public class ElasticExtension implements Extension {
 
+  static {
+    System.setProperty("es.set.netty.runtime.available.processors", "false");
+  }
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
+
   protected final Map<String, PreBuiltTransportClient> clients = new ConcurrentHashMap<>();
 
   public ElasticConfig getConfig(String clusterName) {

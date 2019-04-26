@@ -81,8 +81,9 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
+    // Enforce flush to collect the messages
+    entityManagers.values().forEach(EntityManager::flush);
     handleMessage();
-    entityManagers.values().forEach(EntityManager::flush);// FIXME Do we need flush here?
   }
 
   @Override

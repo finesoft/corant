@@ -12,11 +12,11 @@
  * the License.
  */
 /**
- * corant-suites-json
+ * corant-suites-query-jpql
  *
  * // TODO Hasn't started yet
  *
- * @author bingo 下午9:51:30
+ * @author bingo 下午2:46:59
  *
  */
-package org.corant.suites.json;
+package org.corant.suites.query.jpql;

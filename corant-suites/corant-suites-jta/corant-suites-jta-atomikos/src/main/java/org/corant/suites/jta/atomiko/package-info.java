@@ -12,11 +12,11 @@
  * the License.
  */
 /**
- * corant-suites-json
+ * corant-suites-jta-atomikos
  *
  * // TODO Hasn't started yet
  *
- * @author bingo 下午9:51:30
+ * @author bingo 下午2:45:13
  *
  */
-package org.corant.suites.json;
+package org.corant.suites.jta.atomiko;

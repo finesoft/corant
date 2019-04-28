@@ -113,15 +113,16 @@ public class NarayanaExtension implements Extension {
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
 
+    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
+        BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
+    coordinatorEnvironmentBean.setDefaultTimeout(config.getTransactionTimeout());
+
     if (Thread.currentThread().getContextClassLoader()
         .getResource("jbossts-properties.xml") != null) {
       logger.info(() -> "Use class path file jbossts-properties.xml as default setting.");
       return;
     }
 
-    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
-        BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
-    coordinatorEnvironmentBean.setDefaultTimeout(config.getTransactionTimeout());
     coordinatorEnvironmentBean.setCommitOnePhase(config.getCommitOnePhase());
 
     final CoreEnvironmentBean coreEnvironmentBean =

@@ -130,15 +130,16 @@ public class NarayanaTransactionProducers {
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
 
+    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
+        BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
+    coordinatorEnvironmentBean.setDefaultTimeout(transactionTimeout);
+
     if (Thread.currentThread().getContextClassLoader()
         .getResource("jbossts-properties.xml") != null) {
       // Use default setting
       return;
     }
 
-    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
-        BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
-    coordinatorEnvironmentBean.setDefaultTimeout(transactionTimeout);
     coordinatorEnvironmentBean.setCommitOnePhase(commitOnePhase);
 
     final CoreEnvironmentBean coreEnvironmentBean =

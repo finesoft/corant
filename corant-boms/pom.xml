@@ -77,6 +77,7 @@
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.4</version.agroal>
 		<version.narayana-jta>5.9.5.Final</version.narayana-jta>
+		<version.atomikos>4.0.6</version.atomikos>
 		<version.mssql-jdbc>7.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.47</version.mysql>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
@@ -389,6 +390,26 @@
 				<groupId>net.java.xadisk</groupId>
 				<artifactId>xadisk</artifactId>
 				<version>${version.xadisk}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-api</artifactId>
+				<version>${version.atomikos}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jta</artifactId>
+				<version>${version.atomikos}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jms</artifactId>
+				<version>${version.atomikos}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>atomikos-util</artifactId>
+				<version>${version.atomikos}</version>
 			</dependency>
 
 			<!-- devops -->

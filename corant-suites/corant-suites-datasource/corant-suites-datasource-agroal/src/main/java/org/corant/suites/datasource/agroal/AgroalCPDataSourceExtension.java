@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -31,6 +32,7 @@ import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
+import org.jboss.tm.XAResourceRecoveryRegistry;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
@@ -94,9 +96,16 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .connectionProviderClass(cfg.getDriver());
     if ((cfg.isJta() || cfg.isXa())
-        && tryAsClass("org.corant.suites.jta.narayana.NarayanaTransactionServices") != null) {
-      TransactionIntegration txIntegration =
-          new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable());
+        && tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
+      TransactionIntegration txIntegration = null;
+      if (instance.select(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
+          .isResolvable()) {
+        txIntegration =
+            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable(), instance
+                .select(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta")).get());
+      } else {
+        txIntegration = new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable());
+      }
       cfgs.connectionPoolConfiguration().transactionIntegration(txIntegration);
     }
     if (cfg.getUsername() != null) {

@@ -49,13 +49,6 @@
 		<dependency>
 			<groupId>io.agroal</groupId>
 			<artifactId>agroal-narayana</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss</groupId>
-					<artifactId>jboss-transaction-spi</artifactId>
-				</exclusion>
-			</exclusions>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>

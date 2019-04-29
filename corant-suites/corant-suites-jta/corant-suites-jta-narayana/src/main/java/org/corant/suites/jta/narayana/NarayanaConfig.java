@@ -112,7 +112,7 @@ public class NarayanaConfig {
   public static NarayanaConfig of(Config config) {
     NarayanaConfig nf = new NarayanaConfig();
     nf.setTransactionTimeout(
-        config.getOptionalValue("jta.transaction.timeout", Integer.class).orElse(60));
+        config.getOptionalValue("jta.transaction.timeout", Integer.class).orElse(0));
     nf.setTransactionStatusManagerPort(config
         .getOptionalValue("jta.transaction.narayana.transactionStatusManagerPort", Integer.class));
     nf.setTransactionStatusManagerAddress(config.getOptionalValue(

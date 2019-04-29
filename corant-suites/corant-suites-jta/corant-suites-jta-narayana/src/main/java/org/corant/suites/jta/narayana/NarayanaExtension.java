@@ -20,13 +20,16 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.asStream;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -48,6 +51,10 @@ import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
+import com.arjuna.ats.arjuna.common.Uid;
+import com.arjuna.ats.arjuna.coordinator.CheckedAction;
+import com.arjuna.ats.arjuna.logging.tsLogger;
+import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
@@ -70,7 +77,10 @@ public class NarayanaExtension implements Extension {
       throw new CorantRuntimeException(e,
           "An error occurred while registering Transaction Manager to JNDI");
     }
+
     if (event != null) {
+      // The TransactionSynchronizationRegistry/TransactionManager has register by narayana self
+      // see com.arjuna.ats.jta.cdi.TransactionExtension
       final Collection<? extends Bean<?>> userTransactionBeans =
           beanManager.getBeans(UserTransaction.class);
       if (isEmpty(userTransactionBeans)) {
@@ -79,6 +89,7 @@ public class NarayanaExtension implements Extension {
             .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).scope(Dependent.class)
             .createWith(cc -> com.arjuna.ats.jta.UserTransaction.userTransaction());
       }
+
       event.addBean().id(Transaction.class.getName())
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).types(Transaction.class)
           .scope(TransactionScoped.class).createWith(cc -> {
@@ -88,9 +99,19 @@ public class NarayanaExtension implements Extension {
               throw new CreationException(systemException.getMessage(), systemException);
             }
           });
+
       event.addBean().addTransitiveTypeClosure(JTAEnvironmentBean.class)
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).scope(Singleton.class)
           .createWith(cc -> BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
+
+      event.<RecoveryManagerService>addBean().addTransitiveTypeClosure(RecoveryManagerService.class)
+          .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
+              NamedLiteral.of("narayana-jta"))
+          .scope(Singleton.class).createWith(cc -> {
+            RecoveryManagerService rms = new RecoveryManagerService();
+            rms.create();
+            return rms;
+          }).disposeWith((t, inst) -> t.destroy());
     }
   }
 
@@ -116,6 +137,7 @@ public class NarayanaExtension implements Extension {
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
     coordinatorEnvironmentBean.setDefaultTimeout(config.getTransactionTimeout());
+    interruptCheckedActionIfNecessary(coordinatorEnvironmentBean, config);
 
     if (Thread.currentThread().getContextClassLoader()
         .getResource("jbossts-properties.xml") != null) {
@@ -174,5 +196,58 @@ public class NarayanaExtension implements Extension {
           cfgr.configObjectStoreEnvironment(communicationStoreObjectStoreEnvironmentBean,
               "communicationStore");
         });
+  }
+
+  private void interruptCheckedActionIfNecessary(
+      CoordinatorEnvironmentBean coordinatorEnvironmentBean, NarayanaConfig config) {
+
+    if (config.getTransactionTimeout() != null && config.getTransactionTimeout() > 0) {
+      logger.info(() -> "User thread interrupt checked action for narayana.");
+      coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
+      coordinatorEnvironmentBean
+          .setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());
+      return;
+    }
+  }
+
+  public static class InterruptCheckedAction extends CheckedAction {
+
+    protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+
+    @Override
+    public synchronized void check(boolean isCommit, Uid actUid,
+        @SuppressWarnings("rawtypes") Hashtable list) {
+      if (isCommit) {
+        tsLogger.i18NLogger.warn_coordinator_CheckedAction_1(actUid, Integer.toString(list.size()));
+      } else {
+        try {
+          for (Object item : list.values()) {
+            if (item instanceof Thread) {
+              Thread thread = Thread.class.cast(item);
+              try {
+                Throwable t =
+                    new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");
+                t.setStackTrace(thread.getStackTrace());
+                logger.log(Level.INFO, t,
+                    () -> String.format("Transaction %s is %s with active thread %s",
+                        actUid.toString(), isCommit ? "committing" : "aborting", thread.getName()));
+              } catch (Exception e) {
+                logger.log(Level.WARNING, e,
+                    () -> String.format(
+                        "Narayana extension checked action execute failed on %s , isCommit %s .",
+                        actUid, isCommit));
+              }
+              thread.interrupt();
+            }
+          }
+        } catch (Exception e) {
+          logger.log(Level.WARNING, e,
+              () -> String.format(
+                  "Narayana extension checked action execute failed on %s , isCommit %s .", actUid,
+                  isCommit));
+        }
+        tsLogger.i18NLogger.warn_coordinator_CheckedAction_2(actUid, Integer.toString(list.size()));
+      }
+    }
   }
 }

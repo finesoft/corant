@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jms.shared;
 
-import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.io.Serializable;
@@ -30,7 +29,6 @@ import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -67,8 +65,7 @@ public class JMSContextKey implements Serializable {
     if (cf instanceof XAConnectionFactory) {
       XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
       try {
-        instance().select(TransactionManager.class).get().getTransaction()
-            .enlistResource(ctx.getXAResource());
+        Transactions.currentTransaction().enlistResource(ctx.getXAResource());
         logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
       } catch (IllegalStateException | RollbackException | SystemException e) {
         throw new CorantRuntimeException(e);
@@ -137,26 +134,25 @@ public class JMSContextKey implements Serializable {
 
   // TODO In NO XA
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
-    if (JMSContextManager.isInTransaction() && session == JMSContext.SESSION_TRANSACTED) {
+    if (session == JMSContext.SESSION_TRANSACTED && Transactions.isInTransaction()) {
       try {
-        instance().select(TransactionManager.class).get().getTransaction()
-            .registerSynchronization(new Synchronization() {
-              @Override
-              public void afterCompletion(int status) {
-                if (status != Status.STATUS_COMMITTED) {
-                  jmscontext.rollback();
-                }
-              }
+        Transactions.currentTransaction().registerSynchronization(new Synchronization() {
+          @Override
+          public void afterCompletion(int status) {
+            if (status != Status.STATUS_COMMITTED) {
+              jmscontext.rollback();
+            }
+          }
 
-              @Override
-              public void beforeCompletion() {
-                try {
-                  jmscontext.commit();
-                } catch (Exception e) {
-                  throw new CorantRuntimeException(e);
-                }
-              }
-            });
+          @Override
+          public void beforeCompletion() {
+            try {
+              jmscontext.commit();
+            } catch (Exception e) {
+              throw new CorantRuntimeException(e);
+            }
+          }
+        });
       } catch (IllegalStateException | RollbackException | SystemException e) {
         throw new CorantRuntimeException(e);
       }

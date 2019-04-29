@@ -79,8 +79,8 @@ public class NarayanaExtension implements Extension {
     }
 
     if (event != null) {
-      // The TransactionSynchronizationRegistry/TransactionManager has register by narayana self
-      // see com.arjuna.ats.jta.cdi.TransactionExtension
+      // The TransactionSynchronizationRegistry && TransactionManager have been registered by
+      // narayana self see com.arjuna.ats.jta.cdi.TransactionExtension
       final Collection<? extends Bean<?>> userTransactionBeans =
           beanManager.getBeans(UserTransaction.class);
       if (isEmpty(userTransactionBeans)) {
@@ -200,9 +200,9 @@ public class NarayanaExtension implements Extension {
 
   private void interruptCheckedActionIfNecessary(
       CoordinatorEnvironmentBean coordinatorEnvironmentBean, NarayanaConfig config) {
-
     if (config.getTransactionTimeout() != null && config.getTransactionTimeout() > 0) {
-      logger.info(() -> "User thread interrupt checked action for narayana.");
+      logger.warning(
+          () -> "Use thread interrupt checked action for narayana, It can cause inconsistencies.");
       coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
       coordinatorEnvironmentBean
           .setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());

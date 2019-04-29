@@ -65,6 +65,7 @@ public class DataSourceConfig {
   public static final String DSC_JTA = ".jta";
   public static final String DSC_METRICS = ".enable-metrics";
   public static final String DSC_NAME = ".name";
+  public static final String DSC_AUTO_COMMIT = ".auto-commit";
 
   private Class<?> driver;
   private String name;
@@ -72,6 +73,7 @@ public class DataSourceConfig {
   private String password;
   private String connectionUrl;
   private boolean jta = true;
+  private boolean autoCommit = false;
   private boolean connectable;
   private boolean xa = false;
 
@@ -93,6 +95,7 @@ public class DataSourceConfig {
    * @param connectionUrl
    * @param jta
    * @param connectable
+   * @param autoCommit
    * @param xa
    * @param initialSize
    * @param minSize
@@ -105,8 +108,8 @@ public class DataSourceConfig {
    * @param enableMetrics
    */
   public DataSourceConfig(String name, Class<?> driver, String username, String password,
-      String connectionUrl, boolean jta, boolean connectable, boolean xa, int initialSize,
-      int minSize, int maxSize, Duration leakTimeout, Duration validationTimeout,
+      String connectionUrl, boolean jta, boolean connectable, boolean autoCommit, boolean xa,
+      int initialSize, int minSize, int maxSize, Duration leakTimeout, Duration validationTimeout,
       Duration reapTimeout, Duration acquisitionTimeout, boolean validateConnection,
       boolean enableMetrics) {
     super();
@@ -117,6 +120,7 @@ public class DataSourceConfig {
     setConnectionUrl(connectionUrl);
     setJta(jta);
     setConnectable(connectable);
+    setAutoCommit(autoCommit);
     setXa(xa);
     setInitialSize(initialSize);
     setMinSize(minSize);
@@ -237,6 +241,7 @@ public class DataSourceConfig {
     names.add(dfltPrefix + DSC_VALIDATION_TIMEOUT);
     names.add(dfltPrefix + DSC_XA);
     names.add(dfltPrefix + DSC_NAME);
+    names.add(dfltPrefix + DSC_AUTO_COMMIT);
     return names;
   }
 
@@ -254,6 +259,8 @@ public class DataSourceConfig {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setConnectionUrl);
       } else if (pn.endsWith(DSC_CONNECTABLE)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setConnectable);
+      } else if (pn.endsWith(DSC_AUTO_COMMIT)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setAutoCommit);
       } else if (pn.endsWith(DSC_JTA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setJta);
       } else if (pn.endsWith(DSC_XA)) {
@@ -384,6 +391,14 @@ public class DataSourceConfig {
 
   /**
    *
+   * @return the autoCommit
+   */
+  public boolean isAutoCommit() {
+    return autoCommit;
+  }
+
+  /**
+   *
    * @return the connectable
    */
   public boolean isConnectable() {
@@ -424,6 +439,14 @@ public class DataSourceConfig {
 
   protected void setAcquisitionTimeout(Duration acquisitionTimeout) {
     this.acquisitionTimeout = acquisitionTimeout;
+  }
+
+  /**
+   *
+   * @param autoCommit the autoCommit to set
+   */
+  protected void setAutoCommit(boolean autoCommit) {
+    this.autoCommit = autoCommit;
   }
 
   protected void setConnectable(boolean connectable) {

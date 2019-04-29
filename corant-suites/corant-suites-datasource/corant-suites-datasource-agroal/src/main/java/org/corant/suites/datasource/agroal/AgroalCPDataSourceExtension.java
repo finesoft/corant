@@ -116,6 +116,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
           .credential(new SimplePassword(cfg.getPassword()));
     }
+    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+        .autoCommit(cfg.isAutoCommit());
     // Configure pool
     cfgs.connectionPoolConfiguration().acquisitionTimeout(cfg.getAcquisitionTimeout());
     cfgs.connectionPoolConfiguration().maxSize(cfg.getMaxSize());

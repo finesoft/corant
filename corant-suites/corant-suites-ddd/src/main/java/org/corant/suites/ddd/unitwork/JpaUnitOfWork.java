@@ -81,7 +81,9 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
-    // Enforce flush to collect the messages
+    logger.fine(() -> String.format(
+        "Enforce entity managers flush to collect the messages, before %s completion.",
+        transaction.toString()));
     entityManagers.values().forEach(EntityManager::flush);
     handleMessage();
   }
@@ -189,6 +191,9 @@ public class JpaUnitOfWork extends AbstractUnitOfWork
   }
 
   protected void handleMessage() {
+    logger.fine(() -> String.format(
+        "Sorted the flushed messages and store them if nessuary and dispatch them to the message dispatcher, before %s completion.",
+        transaction.toString()));
     messages.stream().sorted(Message::compare).forEach(msg -> {
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?

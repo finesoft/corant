@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public interface MessageDispatcher extends Consumer<Message[]> {
 
   MessageDispatcher DUMMY_INST = new MessageDispatcher() {
-    protected transient Logger logger = Logger.getLogger(this.getClass().toString());
+    transient Logger logger = Logger.getLogger(this.getClass().toString());
 
     @Override
     public void accept(Message[] t) {

@@ -27,7 +27,7 @@ import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 public interface MessageStorage extends UnaryOperator<Message> {
 
   MessageStorage DUMMY_INST = new MessageStorage() {
-    protected transient Logger logger = Logger.getLogger(this.getClass().toString());
+    transient Logger logger = Logger.getLogger(this.getClass().toString());
 
     @Override
     public Message apply(Message t) {

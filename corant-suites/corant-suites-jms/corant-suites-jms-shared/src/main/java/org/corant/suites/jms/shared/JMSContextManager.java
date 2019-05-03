@@ -13,6 +13,9 @@
  */
 package org.corant.suites.jms.shared;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +68,14 @@ public abstract class JMSContextManager implements Serializable {
         throw jre;
       }
     }
+  }
+
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
   }
 
   @RequestScoped

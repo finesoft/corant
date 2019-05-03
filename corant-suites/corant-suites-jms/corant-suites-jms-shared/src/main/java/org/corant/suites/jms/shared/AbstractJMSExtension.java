@@ -25,6 +25,8 @@ import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,7 +99,10 @@ public abstract class AbstractJMSExtension implements Extension {
         beanManager.createCreationalContext(propertyResolverBean);
     Object inst = beanManager.getReference(propertyResolverBean,
         method.getJavaMember().getDeclaringClass(), creationalContext);
-    method.getJavaMember().setAccessible(true);
+    AccessController.doPrivileged((PrivilegedAction<?>) () -> {
+      method.getJavaMember().setAccessible(true);
+      return null;
+    });
     return new MessageReceiverImpl(jmsc, (msg) -> {
       try {
         method.getJavaMember().invoke(inst, msg);

@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
-import javax.enterprise.inject.literal.NamedLiteral;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.model.Entity;
@@ -39,8 +38,6 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
     implements EntityReference<T> {
 
   private static final long serialVersionUID = 1261945123532200005L;
-
-  protected static final Annotation[] DEFAULT_REPO_QLFS = new Annotation[] {NamedLiteral.INSTANCE};
 
   protected static JpaRepository obtainRepo(Annotation... qualifiers) {
     return Corant.instance().select(JpaRepository.class, qualifiers).get();

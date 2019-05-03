@@ -15,6 +15,9 @@ package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Annotated;
@@ -40,10 +43,10 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class JMSContextKey implements Serializable {
   private static final long serialVersionUID = -9143619854361396089L;
   private static final Logger logger = Logger.getLogger(JMSContextKey.class.getName());
-  private volatile ConnectionFactory connectionFactoryInstance;
   private final String connectionFactory;
   private final Integer session;
   private final int hash;
+  private volatile ConnectionFactory connectionFactoryInstance;
 
   public JMSContextKey(final String connectionFactory, final Integer session) {
     this.connectionFactory = connectionFactory;
@@ -158,5 +161,13 @@ public class JMSContextKey implements Serializable {
       }
     }
     return jmscontext;
+  }
+
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
   }
 }

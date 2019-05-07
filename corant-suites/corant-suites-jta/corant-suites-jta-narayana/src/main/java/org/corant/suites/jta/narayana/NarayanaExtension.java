@@ -15,9 +15,9 @@ package org.corant.suites.jta.narayana;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -161,18 +161,18 @@ public class NarayanaExtension implements Extension {
     final JTAEnvironmentBean jtaEnvironmentBean =
         BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
     config.getXaRecoveryNodes()
-        .ifPresent(x -> jtaEnvironmentBean.setXaRecoveryNodes(asList(split(x, ",", true, true))));
+        .ifPresent(x -> jtaEnvironmentBean.setXaRecoveryNodes(listOf(split(x, ",", true, true))));
     config.getXaResourceOrphanFilterClassNames().ifPresent(x -> jtaEnvironmentBean
-        .setXaResourceOrphanFilterClassNames(asList(split(x, ",", true, true))));
+        .setXaResourceOrphanFilterClassNames(listOf(split(x, ",", true, true))));
 
     final RecoveryEnvironmentBean recoveryEnvironmentBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     recoveryEnvironmentBean.setPeriodicRecoveryPeriod(config.getPeriodicRecoveryPeriod());
     recoveryEnvironmentBean.setRecoveryBackoffPeriod(config.getRecoveryBackoffPeriod());
     config.getRecoveryModuleClassNames().ifPresent(x -> recoveryEnvironmentBean
-        .setRecoveryModuleClassNames(asList(split(x, ",", true, true))));
+        .setRecoveryModuleClassNames(listOf(split(x, ",", true, true))));
     config.getExpiryScannerClassNames().ifPresent(
-        x -> recoveryEnvironmentBean.setExpiryScannerClassNames(asList(split(x, ",", true, true))));
+        x -> recoveryEnvironmentBean.setExpiryScannerClassNames(listOf(split(x, ",", true, true))));
 
     config.getRecoveryPort().ifPresent(recoveryEnvironmentBean::setRecoveryPort);
     config.getRecoveryAddress().ifPresent(recoveryEnvironmentBean::setRecoveryAddress);
@@ -182,7 +182,7 @@ public class NarayanaExtension implements Extension {
         .ifPresent(recoveryEnvironmentBean::setTransactionStatusManagerAddress);
     config.getRecoveryListener().ifPresent(recoveryEnvironmentBean::setRecoveryListener);
 
-    asStream(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
+    streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
         .sorted(ComparableConfigurator::compare).forEach(cfgr -> {
           logger.info(() -> String.format("Use customer narayana configurator $s.",
               cfgr.getClass().getName()));

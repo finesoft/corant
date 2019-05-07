@@ -22,7 +22,7 @@
 package org.corant.asosat.ddd.application;
 
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
@@ -78,7 +78,7 @@ public class MaintainReturns extends AbstractValueObject
   }
 
   public Map<String, Object> toMap() {
-    return asMap("id", getId(), "vn", getVn());
+    return mapOf("id", getId(), "vn", getVn());
   }
 
 }

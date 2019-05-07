@@ -16,7 +16,7 @@ package org.corant.suites.jpa.shared.metadata;
 import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -87,12 +87,12 @@ public class PersistencePropertiesParser {
         config.getOptionalValue(pn, String.class).ifPresent(puimd::setPersistenceProviderClassName);
       } else if (pn.endsWith(JpaConfig.JC_CLS)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addManagedClassName));
+            .ifPresent(s -> streamOf(split(s, ",")).forEach(puimd::addManagedClassName));
       } else if (pn.endsWith(JpaConfig.JC_MAP_FILE)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(s -> asStream(split(s, ",")).forEach(puimd::addMappingFileName));
+            .ifPresent(s -> streamOf(split(s, ",")).forEach(puimd::addMappingFileName));
       } else if (pn.endsWith(JpaConfig.JC_JAR_FILE)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> asStream(split(s, ","))
+        config.getOptionalValue(pn, String.class).ifPresent(s -> streamOf(split(s, ","))
             .map(PersistencePropertiesParser::toUrl).forEach(puimd::addJarFileUrl));
       } else if (pn.endsWith(JpaConfig.JC_EX_UL_CLS)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setExcludeUnlistedClasses);
@@ -104,7 +104,7 @@ public class PersistencePropertiesParser {
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
       } else if (pn.endsWith(JpaConfig.JC_CLS_PKG)) {
         config.getOptionalValue(pn, String.class).ifPresent(s -> {
-          asStream(split(s, ",", true, true)).forEach(p -> {
+          streamOf(split(s, ",", true, true)).forEach(p -> {
             JpaUtils.getPersistenceClasses(p).stream().map(Class::getName)
                 .forEach(puimd::addManagedClassName);
           });

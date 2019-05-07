@@ -44,22 +44,22 @@ public class CollectionUtils {
   }
 
   @SafeVarargs
-  public static <T> List<T> asImmutableList(final T... objects) {
+  public static <T> List<T> immutableListOf(final T... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptyList();
     }
-    return Collections.unmodifiableList(asList(objects));
+    return Collections.unmodifiableList(listOf(objects));
   }
 
   @SafeVarargs
-  public static <T> Set<T> asImmutableSet(final T... objects) {
+  public static <T> Set<T> immutableSetOf(final T... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptySet();
     }
-    return Collections.unmodifiableSet(asSet(objects));
+    return Collections.unmodifiableSet(setOf(objects));
   }
 
-  public static <T> List<T> asList(final Enumeration<T> enumeration) {
+  public static <T> List<T> listOf(final Enumeration<T> enumeration) {
     List<T> list = new ArrayList<>();
     if (enumeration != null) {
       while (enumeration.hasMoreElements()) {
@@ -69,7 +69,7 @@ public class CollectionUtils {
     return list;
   }
 
-  public static <T> List<T> asList(final Iterable<T> iterable) {
+  public static <T> List<T> listOf(final Iterable<T> iterable) {
     if (iterable instanceof List) {
       return forceCast(iterable);
     } else {
@@ -81,7 +81,7 @@ public class CollectionUtils {
     }
   }
 
-  public static <T> List<T> asList(final Iterator<T> iterator) {
+  public static <T> List<T> listOf(final Iterator<T> iterator) {
     List<T> list = new ArrayList<>();
     if (iterator != null) {
       while (iterator.hasNext()) {
@@ -92,7 +92,7 @@ public class CollectionUtils {
   }
 
   @SafeVarargs
-  public static <T> List<T> asList(final T... objects) {
+  public static <T> List<T> listOf(final T... objects) {
     ArrayList<T> list = new ArrayList<>(objects.length);
     for (T obj : objects) {
       list.add(obj);
@@ -101,7 +101,7 @@ public class CollectionUtils {
   }
 
   @SafeVarargs
-  public static <T> Set<T> asSet(final T... objects) {
+  public static <T> Set<T> setOf(final T... objects) {
     Set<T> set = new HashSet<>(objects.length);
     for (T obj : objects) {
       set.add(obj);

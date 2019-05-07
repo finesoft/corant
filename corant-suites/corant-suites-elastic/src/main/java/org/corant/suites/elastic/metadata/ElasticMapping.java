@@ -16,7 +16,7 @@ package org.corant.suites.elastic.metadata;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -131,10 +131,10 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
       shouldBeFalse(convertedMap.containsKey(getJoinFiledName()),
           "Join field name and property name conflicts %s", getJoinFiledName());
       if (isRoot()) {
-        convertedMap.put(getJoinFiledName(), asMap("name", getName()));
+        convertedMap.put(getJoinFiledName(), mapOf("name", getName()));
       } else {
         String parentId = shouldNotNull(doc.getPId(), "Parent id can not null");
-        convertedMap.put(getJoinFiledName(), asMap("name", getName(), "parent", parentId));
+        convertedMap.put(getJoinFiledName(), mapOf("name", getName(), "parent", parentId));
       }
     }
     return convertedMap;

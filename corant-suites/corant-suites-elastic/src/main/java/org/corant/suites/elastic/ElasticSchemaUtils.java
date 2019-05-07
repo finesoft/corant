@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;
@@ -35,8 +35,8 @@ public class ElasticSchemaUtils {
       ElasticIndexingResolver indexingResolver =
           Corant.instance().select(ElasticIndexingResolver.class).get();
       indexingResolver.getIndexings().forEach((n, i) -> {
-        out.accept(n, asMap("settings", i.getSetting().getSetting(), "mappings",
-            asMap(Elastic6Constants.TYP_NME, i.getSchema())));
+        out.accept(n, mapOf("settings", i.getSetting().getSetting(), "mappings",
+            mapOf(Elastic6Constants.TYP_NME, i.getSchema())));
       });
     } catch (Exception e) {
       throw new CorantRuntimeException(e);

@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -44,7 +44,7 @@ public class EntityManagerFactoryBean
 
   static final Logger logger = Logger.getLogger(EntityManagerFactoryBean.class.getName());
   static final Set<Type> types = Collections
-      .unmodifiableSet(asSet(ExtendedEntityManagerFactory.class, EntityManagerFactory.class));
+      .unmodifiableSet(setOf(ExtendedEntityManagerFactory.class, EntityManagerFactory.class));
   final Set<Annotation> qualifiers = new HashSet<>();
   final BeanManager beanManager;
   final String unitName;

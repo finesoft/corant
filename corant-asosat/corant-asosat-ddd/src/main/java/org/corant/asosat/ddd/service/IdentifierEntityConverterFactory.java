@@ -14,7 +14,7 @@
 package org.corant.asosat.ddd.service;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asImmutableSet;
+import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.lang.annotation.Annotation;
@@ -55,7 +55,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
   static final Map<Class<?>, Boolean> cached = new ConcurrentHashMap<>();
   static final Map<Class<?>, Annotation> puqCached = new ConcurrentHashMap<>();
   final Set<Class<?>> supportedSourceClass =
-      asImmutableSet(Long.class, Long.TYPE, String.class, Entity.class);
+      immutableSetOf(Long.class, Long.TYPE, String.class, Entity.class);
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 

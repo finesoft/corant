@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -43,7 +43,7 @@ import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 public class EntityManagerBean implements Bean<EntityManager>, PassivationCapable {
 
   static final Logger logger = Logger.getLogger(EntityManagerBean.class.getName());
-  static final Set<Type> types = Collections.unmodifiableSet(asSet(EntityManager.class));
+  static final Set<Type> types = Collections.unmodifiableSet(setOf(EntityManager.class));
   final Set<Annotation> extenQualifiers = new HashSet<>();
   final Set<Annotation> transQualifiers = new HashSet<>();
   final BeanManager beanManager;
@@ -61,10 +61,10 @@ public class EntityManagerBean implements Bean<EntityManager>, PassivationCapabl
     this.beanManager = beanManager;
     this.persistenceContextMetaData = shouldNotNull(persistenceContextMetaData);
     unitName = persistenceContextMetaData.getUnitName();
-    transQualifiers.addAll(asSet(qualifiers));
-    transQualifiers.addAll(asSet(TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
-    extenQualifiers.addAll(asSet(qualifiers));
-    extenQualifiers.addAll(asSet(ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
+    transQualifiers.addAll(setOf(qualifiers));
+    transQualifiers.addAll(setOf(TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
+    extenQualifiers.addAll(setOf(qualifiers));
+    extenQualifiers.addAll(setOf(ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
   }
 
   @Override

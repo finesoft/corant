@@ -16,7 +16,7 @@ package org.corant.suites.mongodb;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.MapUtils.getMapInstant;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -157,7 +157,7 @@ public class MongoClientExtension implements Extension {
 
   public Instant getDatabaseLocalTime(MongoDatabase db) {
     return getMapInstant(
-        db.runCommand(new Document(asMap("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0))),
+        db.runCommand(new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0))),
         "localTime");
   }
 

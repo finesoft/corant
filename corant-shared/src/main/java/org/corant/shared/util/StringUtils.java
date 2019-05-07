@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -138,7 +138,7 @@ public class StringUtils {
       Function<String, String[]> func) {
     Map<String, List<String>> map = new LinkedHashMap<>();
     if (iterable != null && filter != null) {
-      asStream(iterable).filter(filter).sorted().map(func).forEach(s -> {
+      streamOf(iterable).filter(filter).sorted().map(func).forEach(s -> {
         if (s.length > 1) {
           map.computeIfAbsent(s[0], (k) -> new ArrayList<>()).add(s[1]);
         }
@@ -254,7 +254,7 @@ public class StringUtils {
     if (seq == null || regex.length == 0) {
       return false;
     } else {
-      return asStream(regex).map(ps -> Pattern.compile(ps, 0)).allMatch(p -> p.matcher(seq).find());
+      return streamOf(regex).map(ps -> Pattern.compile(ps, 0)).allMatch(p -> p.matcher(seq).find());
     }
   }
 
@@ -270,7 +270,7 @@ public class StringUtils {
     if (seq == null || regex.length == 0) {
       return false;
     } else {
-      return asStream(regex).map(ps -> Pattern.compile(ps, flags))
+      return streamOf(regex).map(ps -> Pattern.compile(ps, flags))
           .anyMatch(p -> p.matcher(seq).find());
     }
   }

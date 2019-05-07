@@ -13,7 +13,7 @@
  */
 package org.corant;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import org.corant.asosat.ddd.domain.shared.Param;
 import org.corant.devops.test.unit.CorantJunit4Suite;
 import org.corant.devops.test.unit.RunConfig;
@@ -32,7 +32,7 @@ import org.junit.runners.Suite.SuiteClasses;
 public class TestTwo {
 
   public static void main(String... strings) throws Exception {
-    Param p = Param.empty().withAttribute(asMap("a", true, "b", "1234"));
+    Param p = Param.empty().withAttribute(mapOf("a", true, "b", "1234"));
     System.out.println(p.getAttributes().getString("b"));
   }
 }

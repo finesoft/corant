@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
@@ -45,7 +45,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 public class HibernateJpaOrmProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =
-      asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Inject
   Instance<DataSource> datasources;

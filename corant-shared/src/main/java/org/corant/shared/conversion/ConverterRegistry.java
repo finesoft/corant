@@ -17,8 +17,8 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,10 +49,10 @@ public class ConverterRegistry {
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   static {
-    asStream(ServiceLoader.load(Converter.class, defaultClassLoader()))
+    streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
         .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
         .forEach(ConverterRegistry::register);
-    asStream(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
+    streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
         .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
         .forEach(ConverterRegistry::register);
   }
@@ -136,12 +136,12 @@ public class ConverterRegistry {
       removeConverterPipeTypes(ct);
     }
     if (pipeTypes.length > 0) {
-      SUPPORT_CONVERTER_PIPE_TYPES.put(ct, asSet(pipeTypes));
+      SUPPORT_CONVERTER_PIPE_TYPES.put(ct, setOf(pipeTypes));
     }
   }
 
   private static void removeConverterPipeTypes(ConverterType<?, ?> pipe) {
-    Set<ConverterType<?, ?>> pipeKeys = asStream(SUPPORT_CONVERTER_PIPE_TYPES)
+    Set<ConverterType<?, ?>> pipeKeys = streamOf(SUPPORT_CONVERTER_PIPE_TYPES)
         .filter(e -> e.getValue().contains(pipe)).map(Entry::getKey).collect(Collectors.toSet());
     pipeKeys.stream().forEach(r -> {
       deregister(r);

@@ -16,9 +16,9 @@ package org.corant.shared.conversion;
 import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
 import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
-import static org.corant.shared.util.IterableUtils.asIterable;
+import static org.corant.shared.util.IterableUtils.iterableOf;
 import static org.corant.shared.util.ObjectUtils.tryCast;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -53,7 +53,7 @@ public class Conversions {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
             targetClass, targetClass));
-        return stringConverter.iterable(asIterable(value, ObjectUtils::asString), hints);
+        return stringConverter.iterable(iterableOf(value, ObjectUtils::asString), hints);
       }
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,
@@ -67,19 +67,19 @@ public class Conversions {
     if (value instanceof Iterable) {
       it = convert(tryCast(value, Iterable.class), sourceClass, targetClass, hints);
     } else if (value instanceof Object[]) {
-      it = convert(asIterable((Object[]) value), sourceClass, targetClass, hints);
+      it = convert(iterableOf((Object[]) value), sourceClass, targetClass, hints);
     } else if (value instanceof Iterator) {
       it = convert(() -> ((Iterator) value), sourceClass, targetClass, hints);
     } else if (value instanceof Enumeration) {
-      it = convert(asIterable((Enumeration) value), sourceClass, targetClass, hints);
+      it = convert(iterableOf((Enumeration) value), sourceClass, targetClass, hints);
     } else if (value != null) {
-      it = convert(asIterable(value), sourceClass, targetClass, hints);
+      it = convert(iterableOf(value), sourceClass, targetClass, hints);
     }
     if (it != null) {
       if (List.class.isAssignableFrom(collectionClass)) {
-        return (C) asStream(it).collect(Collectors.toList());
+        return (C) streamOf(it).collect(Collectors.toList());
       } else {
-        return (C) asStream(it).collect(Collectors.toSet());
+        return (C) streamOf(it).collect(Collectors.toSet());
       }
     } else {
       if (List.class.isAssignableFrom(collectionClass)) {

@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.io.Serializable;
 import java.util.Map;
 import org.corant.asosat.ddd.domain.shared.DynamicAttributes.DynamicAttributeMap;
@@ -148,7 +148,7 @@ public class Param implements Serializable {
 
   public Param withAttributes(Object... attrs) {
     Param newer = new Param(operator, attributes);
-    newer.attributes.putAll(asMap(attrs));
+    newer.attributes.putAll(mapOf(attrs));
     return newer;
   }
 

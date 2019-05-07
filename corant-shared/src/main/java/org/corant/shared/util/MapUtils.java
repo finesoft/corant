@@ -48,18 +48,18 @@ public class MapUtils {
     super();
   }
 
-  public static <K, V> Map<K, V> asImmutableMap(Object... objects) {
+  public static <K, V> Map<K, V> immutableMapOf(Object... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptyMap();
     }
-    return Collections.unmodifiableMap(asMap(objects));
+    return Collections.unmodifiableMap(mapOf(objects));
   }
 
-  public static <K, V> Map<K, V> asLinkedMap(Object... objects) {
-    return asMap(true, objects);
+  public static <K, V> Map<K, V> linkedHashMapOf(Object... objects) {
+    return mapOf(true, objects);
   }
 
-  public static <K, V> Map<K, V> asMap(boolean linked, Object... objects) {
+  public static <K, V> Map<K, V> mapOf(boolean linked, Object... objects) {
     int oLen;
     if (objects == null || (oLen = objects.length) == 0) {
       return linked ? new LinkedHashMap<>(0) : new HashMap<>(0);
@@ -76,13 +76,13 @@ public class MapUtils {
     return map;
   }
 
-  public static <K, V> Map<K, V> asMap(Object... objects) {
-    return asMap(false, objects);
+  public static <K, V> Map<K, V> mapOf(Object... objects) {
+    return mapOf(false, objects);
   }
 
-  public static Properties asProperties(String... strings) {
+  public static Properties propertiesOf(String... strings) {
     Properties result = new Properties();
-    asMap((Object[]) strings).forEach(result::put);
+    mapOf((Object[]) strings).forEach(result::put);
     return result;
   }
 

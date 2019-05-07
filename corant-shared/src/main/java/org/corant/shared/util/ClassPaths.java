@@ -16,7 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.CollectionUtils.asImmutableSet;
+import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -83,7 +83,7 @@ public class ClassPaths {
   public static final String JAR_SCHEMA = "jar";
   public static final Map<Path, URLClassLoader> CACHED_CLASS_LOADERS = new ConcurrentHashMap<>();
   public static final Set<String> SYS_LIBS =
-      asImmutableSet("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
+      immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 
@@ -315,7 +315,7 @@ public class ClassPaths {
       Attributes attrs = null;
       if (manifest == null || (attrs = manifest.getMainAttributes()) == null
           || !attrs.containsKey(attrName)) {
-        return asImmutableSet();
+        return immutableSetOf();
       }
       Set<URI> uriSet = new LinkedHashSet<>();
       for (String path : split(attrs.getValue(attrName), " ")) {

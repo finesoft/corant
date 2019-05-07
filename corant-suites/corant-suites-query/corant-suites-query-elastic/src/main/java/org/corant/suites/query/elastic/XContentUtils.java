@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,7 +112,7 @@ public class XContentUtils {
       return XContentHelper.convertToMap(
           BytesReference
               .bytes(searchResponse.toXContent(new XContentBuilder(XContentType.JSON.xContent(),
-                  new ByteArrayOutputStream(), asSet(paths)), ToXContent.EMPTY_PARAMS)),
+                  new ByteArrayOutputStream(), setOf(paths)), ToXContent.EMPTY_PARAMS)),
           false, XContentType.JSON).v2();
     }
   }

@@ -18,7 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
@@ -135,7 +135,7 @@ public class ArtemisConfig {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setUrl);
       } else if (pn.endsWith(ATM_HOST_PORTS)) {
         config.getOptionalValue(pn, String.class)
-            .ifPresent(hps -> cfg.setHostPorts(asStream(split(hps, ",", true, true)).map(x -> {
+            .ifPresent(hps -> cfg.setHostPorts(streamOf(split(hps, ",", true, true)).map(x -> {
               String[] arr = split(x, ":", true, true);
               if (isNoneBlank(arr)) {
                 if (arr.length > 1) {

@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -41,7 +41,7 @@ public class Throwables {
   }
 
   public static Stream<Throwable> causes(final Throwable throwable) {
-    return asStream(() -> new Iterator<Throwable>() {
+    return streamOf(() -> new Iterator<Throwable>() {
       volatile Throwable cause = throwable;
 
       @Override
@@ -73,7 +73,7 @@ public class Throwables {
 
   public static Stream<Throwable> suppresses(final Throwable throwable) {
     return throwable == null || isEmpty(throwable.getSuppressed()) ? Stream.empty()
-        : asStream(throwable.getSuppressed());
+        : streamOf(throwable.getSuppressed());
   }
 
   public static class Attempt<S> {

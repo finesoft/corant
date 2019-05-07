@@ -17,7 +17,7 @@ import static org.corant.shared.normal.Defaults.ONE_MB;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -156,7 +156,7 @@ public class FileUtils {
   }
 
   public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
-    if (asStream(JARS).anyMatch(p -> ObjectUtils.isEquals(p, jarUrl.getProtocol()))) {
+    if (streamOf(JARS).anyMatch(p -> ObjectUtils.isEquals(p, jarUrl.getProtocol()))) {
       String urlFile = jarUrl.getFile();
       int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
       if (separatorIndex != -1) {

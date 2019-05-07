@@ -15,7 +15,7 @@ package org.corant.asosat.ddd.gateway;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asLinkedMap;
+import static org.corant.shared.util.MapUtils.linkedHashMapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -82,7 +82,7 @@ public class Bundles extends AbstractRests {
             result.computeIfAbsent(cls.getName(), (k) -> new LinkedHashMap<>());
         for (Enum e : cls.getEnumConstants()) {
           items.put(e.name(),
-              asLinkedMap("ordinal", e.ordinal(), "literal", bundle.getEnumItemLiteral(e, locale)));
+              linkedHashMapOf("ordinal", e.ordinal(), "literal", bundle.getEnumItemLiteral(e, locale)));
         }
       });
       return ok(result);

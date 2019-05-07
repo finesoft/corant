@@ -13,7 +13,7 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -106,7 +106,7 @@ public class PropertyMessageBundle implements MessageBundle {
         if (!isInitialized()) {
           try {
             onPreDestroy();
-            Set<String> paths = asSet(split(bundleFilePaths, ","));
+            Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, (r) -> true).forEach((s, res) -> {
                 logger.info(() -> String.format("Find message resource, the path is %s", s));

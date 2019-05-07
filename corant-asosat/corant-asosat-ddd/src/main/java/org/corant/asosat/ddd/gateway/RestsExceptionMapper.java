@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.gateway;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Locale;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -58,17 +58,17 @@ public class RestsExceptionMapper implements ExceptionMapper<Exception> {
     if (exception instanceof GeneralRuntimeException) {
       GeneralRuntimeException gre = GeneralRuntimeException.class.cast(exception);
       return Response.serverError()
-          .entity(asMap("message", gre.getLocalizedMessage(locale, exceptionMessager), "attributes",
+          .entity(mapOf("message", gre.getLocalizedMessage(locale, exceptionMessager), "attributes",
               gre.getAttributes(), "code", GlobalMessageCodes.genMessageCode(gre)))
           .type(MediaType.APPLICATION_JSON).build();
     } else if (exception instanceof WebApplicationException) {
       return WebApplicationException.class.cast(exception).getResponse();
     } else {
       Object res = exproseErrorCause
-          ? asMap("message", exceptionMessager.getUnknowErrorMessage(locale), "cause",
-              asMap("exception:", exception.getClass().getName(), "message",
+          ? mapOf("message", exceptionMessager.getUnknowErrorMessage(locale), "cause",
+              mapOf("exception:", exception.getClass().getName(), "message",
                   exception.getLocalizedMessage()))
-          : asMap("message", exceptionMessager.getUnknowErrorMessage(locale));
+          : mapOf("message", exceptionMessager.getUnknowErrorMessage(locale));
       return Response.serverError().entity(res).type(MediaType.APPLICATION_JSON).build();
     }
   }

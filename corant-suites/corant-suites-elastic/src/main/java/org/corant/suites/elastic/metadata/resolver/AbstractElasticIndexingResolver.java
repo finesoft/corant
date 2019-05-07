@@ -20,8 +20,8 @@ import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.FieldUtils.traverseFields;
-import static org.corant.shared.util.MapUtils.asMap;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genFieldMapping;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genJoinMapping;
@@ -143,7 +143,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       mapping = new ElasticMapping(docCls, true, null, null, versionType);
     }
     ElasticSetting setting = ElasticSetting.of(config.getSetting(), doc);
-    final Map<String, Object> schema = new HashMap<>(asMap("properties", propertiesSchema));
+    final Map<String, Object> schema = new HashMap<>(mapOf("properties", propertiesSchema));
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping, schema);
     assembly(indexing, mapping);
     logger.info(() -> String.format("Build elastic index object for %s", docCls.getName()));
@@ -177,7 +177,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected abstract ElasticConfig getConfig();
 
   protected Set<Class<?>> getDocumentClasses() {
-    Set<String> docPaths = asStream(split(getConfig().getDocumentPaths(), ",", true, true))
+    Set<String> docPaths = streamOf(split(getConfig().getDocumentPaths(), ",", true, true))
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {

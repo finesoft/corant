@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +83,7 @@ public class QueryParser {
 
   Map<String, URL> getQueryMappingFiles(String pathExpress) {
     Map<String, URL> map = new HashMap<>();
-    asSet(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
+    setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
       try {
         Resources.fromClassPath(path).forEach(f -> map.put(f.getResourceName(), f.getUrl()));
       } catch (Exception e) {

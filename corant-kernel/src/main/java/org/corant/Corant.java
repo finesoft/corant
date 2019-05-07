@@ -15,8 +15,8 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.asSet;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
@@ -377,7 +377,7 @@ public class Corant implements AutoCloseable {
   }
 
   void doAfterStarted(ClassLoader classLoader) {
-    asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
@@ -385,7 +385,7 @@ public class Corant implements AutoCloseable {
   }
 
   void doBeforeStart(ClassLoader classLoader) {
-    asStream(ServiceLoader.load(CorantBootHandler.class, classLoader))
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
   }
@@ -399,7 +399,7 @@ public class Corant implements AutoCloseable {
   }
 
   private void printBoostLine() {
-    if (!asSet(args).contains("-disable_boost_line")) {
+    if (!setOf(args).contains("-disable_boost_line")) {
       String spLine = "--------------------------------------------------";
       System.out.println(spLine + spLine + "\n");
     }

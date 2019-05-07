@@ -17,7 +17,7 @@ import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
@@ -209,7 +209,7 @@ public class MongoClientConfig {
    */
   public List<Pair<String, Integer>> getHostAndPorts() {
     if (isEmpty(hostAndPorts)) {
-      return Collections.unmodifiableList(asList(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
+      return Collections.unmodifiableList(listOf(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
     }
     return Collections.unmodifiableList(hostAndPorts);
   }

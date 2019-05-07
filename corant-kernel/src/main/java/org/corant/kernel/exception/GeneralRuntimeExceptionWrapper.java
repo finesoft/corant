@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.exception;
 
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -75,7 +75,7 @@ public class GeneralRuntimeExceptionWrapper {
 
     public Builder thenParameters(Function<List<Object>, List<Object>> func) {
       if (func != null) {
-        List<Object> updated = func.apply(asList(parameters));
+        List<Object> updated = func.apply(listOf(parameters));
         setParameters(updated == null ? null : updated.toArray());
       }
       return this;
@@ -92,7 +92,7 @@ public class GeneralRuntimeExceptionWrapper {
 
     public GeneralRuntimeException wrap() {
       GeneralRuntimeException ex = wrapper.exception.attributes(t -> getAttributes())
-          .parameters(t -> asList(getParameters())).subCode(getSubCode());
+          .parameters(t -> listOf(getParameters())).subCode(getSubCode());
       attributes.clear();
       return ex;
     }
@@ -177,7 +177,7 @@ public class GeneralRuntimeExceptionWrapper {
       for (Builder builder : getWrapper().builders) {
         if (isEquals(builder.code, getWrapper().exception.getCode())) {
           getWrapper().exception.attributes(t -> builder.attributes)
-              .parameters(t -> asList(builder.parameters)).subCode(builder.subCode);
+              .parameters(t -> listOf(builder.parameters)).subCode(builder.subCode);
           break;
         } else {
           builder.attributes.clear();

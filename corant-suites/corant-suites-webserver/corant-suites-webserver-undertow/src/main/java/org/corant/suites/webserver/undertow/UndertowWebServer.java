@@ -16,7 +16,7 @@ package org.corant.suites.webserver.undertow;
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
 import static org.corant.shared.normal.Names.CORANT;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
@@ -139,13 +139,13 @@ public class UndertowWebServer extends AbstractWebServer {
         fi.setAsyncSupported(wfm.isAsyncSupported());
         wfm.getInitParamsAsMap().forEach(fi::addInitParam);
         di.addFilter(fi);
-        asStream(wfm.getServletNames()).forEach(sn -> {
-          asStream(wfm.getDispatcherTypes()).forEach(dt -> {
+        streamOf(wfm.getServletNames()).forEach(sn -> {
+          streamOf(wfm.getDispatcherTypes()).forEach(dt -> {
             di.addFilterServletNameMapping(wfm.getFilterName(), sn, dt);
           });
         });
-        asStream(wfm.getUrlPatterns()).forEach(url -> {
-          asStream(wfm.getDispatcherTypes()).forEach(dt -> {
+        streamOf(wfm.getUrlPatterns()).forEach(url -> {
+          streamOf(wfm.getDispatcherTypes()).forEach(dt -> {
             di.addFilterUrlMapping(wfm.getFilterName(), url, dt);
           });
         });
@@ -257,7 +257,7 @@ public class UndertowWebServer extends AbstractWebServer {
             ssi.addRolesAllowed(ssm.getHttpConstraint().getRolesAllowed());
             resolveTransportGuaranteeType(ssi, ssm.getHttpConstraint().getTransportGuarantee());
             ssi.setEmptyRoleSemantic(resolveEmptyRoleSemantic(ssm.getHttpConstraint()));
-            asStream(ssm.getHttpMethodConstraints()).map(m -> m.getValue())
+            streamOf(ssm.getHttpMethodConstraints()).map(m -> m.getValue())
                 .map(m -> new HttpMethodSecurityInfo().setMethod(m))
                 .forEach(ssi::addHttpMethodSecurityInfo);
           }

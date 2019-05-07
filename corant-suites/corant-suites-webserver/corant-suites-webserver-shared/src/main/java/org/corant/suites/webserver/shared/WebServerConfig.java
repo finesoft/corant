@@ -14,7 +14,7 @@
 package org.corant.suites.webserver.shared;
 
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.HashMap;
 import java.util.Locale;
@@ -153,7 +153,7 @@ public class WebServerConfig {
   public Map<String, String> getLocaleCharsetMap() {
     Map<String, String> map = new HashMap<>();
     if (getLocaleCharsetMappings().isPresent()) {
-      asStream(split(getLocaleCharsetMappings().get(), ",")).forEach(lcm -> {
+      streamOf(split(getLocaleCharsetMappings().get(), ",")).forEach(lcm -> {
         String[] lc = split(lcm, ":", true, true);
         if (lc.length == 2) {
           map.put(lc[0], lc[1]);

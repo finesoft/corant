@@ -13,8 +13,8 @@
  */
 package org.corant.kernel.config;
 
-import static org.corant.shared.util.CollectionUtils.asList;
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,9 +43,9 @@ public class ConfigSourceLoader {
       String... classPaths) throws IOException {
     Set<URL> loadedUrls = new LinkedHashSet<>();
     for (String path : classPaths) {
-      asList(classLoader.getResources(path)).stream().filter(filter).forEach(loadedUrls::add);
+      listOf(classLoader.getResources(path)).stream().filter(filter).forEach(loadedUrls::add);
       if (Thread.currentThread().getContextClassLoader() != classLoader) {
-        asList(Thread.currentThread().getContextClassLoader().getResources(path))
+        listOf(Thread.currentThread().getContextClassLoader().getResources(path))
             .forEach(loadedUrls::add);
       }
     }
@@ -56,7 +56,7 @@ public class ConfigSourceLoader {
   public static List<ConfigSource> load(int ordinal, Predicate<URL> filter, String... filePaths)
       throws IOException {
     List<ConfigSource> sources = new ArrayList<>();
-    for (String path : asSet(filePaths)) {
+    for (String path : setOf(filePaths)) {
       File file = new File(path);
       if (file.canRead() && filter.test(file.toURI().toURL())) {
         sources.add(load(new File(path), ordinal));

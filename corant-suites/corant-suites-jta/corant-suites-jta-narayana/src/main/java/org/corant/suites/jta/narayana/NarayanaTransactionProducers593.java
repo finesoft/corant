@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jta.narayana;
 
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
@@ -151,18 +151,18 @@ public class NarayanaTransactionProducers593 {
     final JTAEnvironmentBean jtaEnvironmentBean =
         BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
     xaRecoveryNodes
-        .ifPresent(x -> jtaEnvironmentBean.setXaRecoveryNodes(asList(split(x, ",", true, true))));
+        .ifPresent(x -> jtaEnvironmentBean.setXaRecoveryNodes(listOf(split(x, ",", true, true))));
     xaResourceOrphanFilterClassNames.ifPresent(x -> jtaEnvironmentBean
-        .setXaResourceOrphanFilterClassNames(asList(split(x, ",", true, true))));
+        .setXaResourceOrphanFilterClassNames(listOf(split(x, ",", true, true))));
 
     final RecoveryEnvironmentBean recoveryEnvironmentBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     recoveryEnvironmentBean.setPeriodicRecoveryPeriod(periodicRecoveryPeriod);
     recoveryEnvironmentBean.setRecoveryBackoffPeriod(recoveryBackoffPeriod);
     recoveryModuleClassNames.ifPresent(x -> recoveryEnvironmentBean
-        .setRecoveryModuleClassNames(asList(split(x, ",", true, true))));
+        .setRecoveryModuleClassNames(listOf(split(x, ",", true, true))));
     expiryScannerClassNames.ifPresent(
-        x -> recoveryEnvironmentBean.setExpiryScannerClassNames(asList(split(x, ",", true, true))));
+        x -> recoveryEnvironmentBean.setExpiryScannerClassNames(listOf(split(x, ",", true, true))));
 
     recoveryPort.ifPresent(recoveryEnvironmentBean::setRecoveryPort);
     recoveryAddress.ifPresent(recoveryEnvironmentBean::setRecoveryAddress);

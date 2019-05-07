@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
-import static org.corant.shared.util.CollectionUtils.asImmutableSet;
+import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.split;
@@ -33,7 +33,7 @@ import org.corant.shared.conversion.ConverterFactory;
 public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum<?>> {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
-  final Set<Class<?>> supportedSourceClass = asImmutableSet(Enum.class, Number.class,
+  final Set<Class<?>> supportedSourceClass = immutableSetOf(Enum.class, Number.class,
       CharSequence.class, Integer.TYPE, Long.TYPE, Short.TYPE, Byte.TYPE);
 
   @Override

@@ -14,7 +14,7 @@
 package org.corant.suites.jms.shared.annotation;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
@@ -49,7 +49,7 @@ public @interface MessageConfigProperty {
     }
 
     public static MessageConfigPropertyLiteral[] from(MessageConfigProperty... properties) {
-      return asStream(properties).map(MessageConfigPropertyLiteral::of)
+      return streamOf(properties).map(MessageConfigPropertyLiteral::of)
           .toArray(MessageConfigPropertyLiteral[]::new);
     }
 

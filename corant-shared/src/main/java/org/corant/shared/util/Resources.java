@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.MapUtils.asImmutableMap;
+import static org.corant.shared.util.MapUtils.immutableMapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -576,7 +576,7 @@ public class Resources {
 
     @Override
     public Map<String, Object> getMetadatas() {
-      return asImmutableMap("location", getLocation(), "sourceType", getSourceType(), "path",
+      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "path",
           getFile().getPath(), "fileName", getFile().getName(), "lastModified",
           getFile().lastModified(), "length", getFile().length());
     }
@@ -639,7 +639,7 @@ public class Resources {
     String getLocation();
 
     default Map<String, Object> getMetadatas() {
-      return asImmutableMap("location", getLocation(), "sourceType", getSourceType());
+      return immutableMapOf("location", getLocation(), "sourceType", getSourceType());
     }
 
     SourceType getSourceType();
@@ -724,7 +724,7 @@ public class Resources {
 
     @Override
     public Map<String, Object> getMetadatas() {
-      return asImmutableMap("location", getLocation(), "sourceType", getSourceType(), "url",
+      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "url",
           url.toExternalForm());
     }
 

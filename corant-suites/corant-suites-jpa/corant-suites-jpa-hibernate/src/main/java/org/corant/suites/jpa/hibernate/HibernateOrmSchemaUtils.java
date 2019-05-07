@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.asProperties;
+import static org.corant.shared.util.MapUtils.propertiesOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.replace;
@@ -158,7 +158,7 @@ public class HibernateOrmSchemaUtils {
 
   protected static MetadataImplementor createMetadataImplementor(String pu,
       String... integrations) {
-    Properties props = asProperties(integrations);
+    Properties props = propertiesOf(integrations);
     props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");

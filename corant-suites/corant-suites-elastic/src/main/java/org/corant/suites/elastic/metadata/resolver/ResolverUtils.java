@@ -18,7 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -341,7 +341,7 @@ public class ResolverUtils {
     }
     map.put("term_vector", ann.term_vector().getValue());
     if (ann.index_prefixes_min_chars() >= 0 && ann.index_prefixes_max_chars() > 0) {
-      map.put("index_prefixes", asMap("min_chars", ann.index_prefixes_min_chars(), "max_chars",
+      map.put("index_prefixes", mapOf("min_chars", ann.index_prefixes_min_chars(), "max_chars",
           ann.index_prefixes_max_chars()));
     }
     map.put("index_phrases", ann.index_phrases());

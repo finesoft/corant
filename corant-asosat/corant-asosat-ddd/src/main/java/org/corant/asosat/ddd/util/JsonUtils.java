@@ -14,7 +14,7 @@
 package org.corant.asosat.ddd.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
@@ -288,7 +288,7 @@ public class JsonUtils {
     Map<String, Object> resolveEnumLiteral(Enum value) {
       return CACHES.computeIfAbsent(value, (v) -> {
         String literal = resolveBundle().getEnumItemLiteral(value, Locale.getDefault());
-        return asMap("name", value.name(), "literal", defaultObject(literal, value.name()), "class",
+        return mapOf("name", value.name(), "literal", defaultObject(literal, value.name()), "class",
             value.getDeclaringClass().getName(), "ordinal", value.ordinal());
       });
     }

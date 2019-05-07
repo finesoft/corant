@@ -37,89 +37,6 @@ public class IterableUtils {
     super();
   }
 
-  public static <T> Enumeration<T> asEnumeration(Iterator<T> it) {
-    final Iterator<T> useIt = it == null ? emptyIterator() : it;
-    return new Enumeration<T>() {
-
-      @Override
-      public boolean hasMoreElements() {
-        return useIt.hasNext();
-      }
-
-      @Override
-      public T nextElement() {
-        return useIt.next();
-      }
-    };
-  }
-
-  public static <T> Iterable<T> asIterable(final Enumeration<T> enums) {
-    return enums == null ? emptyIterable() : () -> new Iterator<T>() {
-      final Enumeration<T> fromEnums = enums;
-
-      @Override
-      public boolean hasNext() {
-        return fromEnums.hasMoreElements();
-      }
-
-      @Override
-      public T next() {
-        return fromEnums.nextElement();
-      }
-    };
-  }
-
-  public static <T> Iterable<T> asIterable(final Iterable<?> it,
-      final Function<Object, T> convert) {
-    return it == null ? emptyIterable() : () -> new Iterator<T>() {
-      private final Iterator<?> fromIterator = it.iterator();
-      private final Function<Object, T> useConvert = defaultObject(convert, ObjectUtils::forceCast);
-
-      @Override
-      public boolean hasNext() {
-        return fromIterator.hasNext();
-      }
-
-      @Override
-      public T next() {
-        return useConvert.apply(fromIterator.next());
-      }
-
-      @Override
-      public void remove() {
-        fromIterator.remove();
-      }
-    };
-  }
-
-  @SafeVarargs
-  public static <T> Iterable<T> asIterable(final T... objects) {
-    return new Iterable<T>() {
-      final T[] array = objects;
-      final int size = array.length;
-
-      @Override
-      public Iterator<T> iterator() {
-        return new Iterator<T>() {
-          int i = 0;
-
-          @Override
-          public boolean hasNext() {
-            return size - i > 0;
-          }
-
-          @Override
-          public T next() {
-            if (!hasNext()) {
-              throw new NoSuchElementException();
-            }
-            return array[i++];
-          }
-        };
-      }
-    };
-  }
-
   public static <T extends Iterable<T>> Iterator<T> breadthIterator(T obj) {
     return new BreadthIterable<>(obj).iterator();
   }
@@ -157,6 +74,22 @@ public class IterableUtils {
       @Override
       public T next() {
         throw new NoSuchElementException();
+      }
+    };
+  }
+
+  public static <T> Enumeration<T> enumerationOf(Iterator<T> it) {
+    final Iterator<T> useIt = it == null ? emptyIterator() : it;
+    return new Enumeration<T>() {
+
+      @Override
+      public boolean hasMoreElements() {
+        return useIt.hasNext();
+      }
+
+      @Override
+      public T nextElement() {
+        return useIt.next();
       }
     };
   }
@@ -230,6 +163,73 @@ public class IterableUtils {
       }
     }
     return size;
+  }
+
+  public static <T> Iterable<T> iterableOf(final Enumeration<T> enums) {
+    return enums == null ? emptyIterable() : () -> new Iterator<T>() {
+      final Enumeration<T> fromEnums = enums;
+
+      @Override
+      public boolean hasNext() {
+        return fromEnums.hasMoreElements();
+      }
+
+      @Override
+      public T next() {
+        return fromEnums.nextElement();
+      }
+    };
+  }
+
+  public static <T> Iterable<T> iterableOf(final Iterable<?> it,
+      final Function<Object, T> convert) {
+    return it == null ? emptyIterable() : () -> new Iterator<T>() {
+      private final Iterator<?> fromIterator = it.iterator();
+      private final Function<Object, T> useConvert = defaultObject(convert, ObjectUtils::forceCast);
+
+      @Override
+      public boolean hasNext() {
+        return fromIterator.hasNext();
+      }
+
+      @Override
+      public T next() {
+        return useConvert.apply(fromIterator.next());
+      }
+
+      @Override
+      public void remove() {
+        fromIterator.remove();
+      }
+    };
+  }
+
+  @SafeVarargs
+  public static <T> Iterable<T> iterableOf(final T... objects) {
+    return new Iterable<T>() {
+      final T[] array = objects;
+      final int size = array.length;
+
+      @Override
+      public Iterator<T> iterator() {
+        return new Iterator<T>() {
+          int i = 0;
+
+          @Override
+          public boolean hasNext() {
+            return size - i > 0;
+          }
+
+          @Override
+          public T next() {
+            if (!hasNext()) {
+              throw new NoSuchElementException();
+            }
+            return array[i++];
+          }
+        };
+      }
+    };
   }
 
   public static class BreadthIterable<T extends Iterable<T>> implements Iterable<T> {

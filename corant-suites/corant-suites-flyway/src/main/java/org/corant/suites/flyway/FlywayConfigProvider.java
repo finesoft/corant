@@ -15,7 +15,7 @@
  */
 package org.corant.suites.flyway;
 
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import java.util.Collection;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -44,7 +44,7 @@ public interface FlywayConfigProvider {
     }
 
     public static DefaultFlywayConfigProvider of(String name, DataSource dataSource) {
-      return new DefaultFlywayConfigProvider(dataSource, asSet(name));
+      return new DefaultFlywayConfigProvider(dataSource, setOf(name));
     }
 
     @Override

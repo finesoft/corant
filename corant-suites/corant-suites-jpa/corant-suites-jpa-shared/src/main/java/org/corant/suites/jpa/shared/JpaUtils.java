@@ -16,7 +16,7 @@ package org.corant.suites.jpa.shared;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.getAllSuperclassesAndInterfaces;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.replace;
@@ -46,7 +46,7 @@ import org.corant.shared.util.Resources.ClassResource;
 public class JpaUtils {
 
   static final Set<Class<? extends Annotation>> PERSIS_ANN =
-      asSet(Entity.class, Embeddable.class, MappedSuperclass.class, Converter.class);
+      setOf(Entity.class, Embeddable.class, MappedSuperclass.class, Converter.class);
 
   public static String getMixedPuName(PersistenceUnit pu) {
     String usePuName = defaultString(pu.unitName(), PersistenceNames.PU_DFLT_NME);

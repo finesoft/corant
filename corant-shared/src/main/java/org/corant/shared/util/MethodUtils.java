@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -39,9 +39,9 @@ public class MethodUtils {
       final Class<?>... parameterTypes) {
     shouldNotNull(cls, "Null class not allowed.");
     shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
-    List<Method> methods = asList(cls.getDeclaredMethods());
+    List<Method> methods = listOf(cls.getDeclaredMethods());
     ClassUtils.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
-        .map(CollectionUtils::asList).forEach(methods::addAll);
+        .map(CollectionUtils::listOf).forEach(methods::addAll);
     Method inexactMatch = null;
     for (final Method method : methods) {
       if (methodName.equals(method.getName())

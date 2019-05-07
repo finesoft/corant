@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
@@ -123,7 +123,7 @@ public class QueryUtils {
           }
         }
       } else if (result != null) {
-        extractResult(asList((Object[]) result), paths, flatList, list);// may be array
+        extractResult(listOf((Object[]) result), paths, flatList, list);// may be array
       }
     }
   }
@@ -196,7 +196,7 @@ public class QueryUtils {
       List<Object> list) {
     if (isEmpty(paths)) {
       if (result instanceof Iterable && flatList) {
-        asList((Iterable<?>) result).forEach(list::add);
+        listOf((Iterable<?>) result).forEach(list::add);
       } else {
         list.add(result);
       }

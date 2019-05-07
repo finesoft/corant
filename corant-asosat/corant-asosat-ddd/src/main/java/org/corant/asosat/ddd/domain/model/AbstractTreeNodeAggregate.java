@@ -18,7 +18,7 @@ import static org.corant.kernel.util.Preconditions.requireTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -87,7 +87,7 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
     List<T> childs = new ArrayList<>();
     if (!isPhantom()) {
       childs.addAll(this.tmpChilds);
-      asStream(this.toReference().obtainChilds()).forEach(childs::add);
+      streamOf(this.toReference().obtainChilds()).forEach(childs::add);
     }
     return childs;
   }
@@ -139,7 +139,7 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
   public List<T> getSiblings() {
     List<T> siblings = new ArrayList<>();
     if (!isPhantom()) {
-      asStream(this.toReference().obtainSiblings()).filter(c -> !isEquals(c, this))
+      streamOf(this.toReference().obtainSiblings()).filter(c -> !isEquals(c, this))
           .forEach(siblings::add);
     }
     return siblings;

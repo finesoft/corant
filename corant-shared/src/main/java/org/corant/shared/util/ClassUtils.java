@@ -14,7 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.asImmutableMap;
+import static org.corant.shared.util.MapUtils.immutableMapOf;
 import static org.corant.shared.util.ObjectUtils.trySupplied;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.reflect.Modifier;
@@ -49,12 +49,12 @@ public class ClassUtils {
   public static final String CLASS_FILE_NAME_EXTENSION = ".class";
 
   public static final Map<String, Class<?>> NAME_PRIMITIVE_MAP =
-      asImmutableMap("boolean", Boolean.TYPE, "byte", Byte.TYPE, "char", Character.TYPE, "short",
+      immutableMapOf("boolean", Boolean.TYPE, "byte", Byte.TYPE, "char", Character.TYPE, "short",
           Short.TYPE, "int", Integer.TYPE, "long", Long.TYPE, "double", Double.TYPE, "float",
           Float.TYPE, "void", Void.TYPE);
 
   public static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER_MAP =
-      asImmutableMap(Boolean.TYPE, Boolean.class, Byte.TYPE, Byte.class, Character.TYPE,
+      immutableMapOf(Boolean.TYPE, Boolean.class, Byte.TYPE, Byte.class, Character.TYPE,
           Character.class, Short.TYPE, Short.class, Integer.TYPE, Integer.class, Long.TYPE,
           Long.class, Double.TYPE, Double.class, Float.TYPE, Float.class, Void.TYPE, Void.TYPE);
 

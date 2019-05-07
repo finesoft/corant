@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.exception;
 
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Arrays;
@@ -155,7 +155,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    */
   public GeneralRuntimeException parameters(Function<List<Object>, List<Object>> func) {
     if (func != null) {
-      List<Object> updated = func.apply(asList(parameters));
+      List<Object> updated = func.apply(listOf(parameters));
       setParameters(updated == null ? new Object[0] : updated.toArray());
     }
     return this;

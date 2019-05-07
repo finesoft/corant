@@ -15,7 +15,7 @@
  */
 package org.corant.kernel.service;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Collection;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.conversion.Conversions;
@@ -35,12 +35,12 @@ public class DefaultConversionService implements ConversionService {
   @Override
   public <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClazz,
       Class<T> clazz, Object... hints) {
-    return Conversions.convert(value, collectionClazz, clazz, asMap(hints));
+    return Conversions.convert(value, collectionClazz, clazz, mapOf(hints));
   }
 
   @Override
   public <T> T convert(Object value, Class<T> clazz, Object... hints) {
-    return Conversions.convert(value, clazz, asMap(hints));
+    return Conversions.convert(value, clazz, mapOf(hints));
   }
 
   @Override

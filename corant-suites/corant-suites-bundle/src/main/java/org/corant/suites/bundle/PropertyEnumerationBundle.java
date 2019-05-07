@@ -14,7 +14,7 @@
 package org.corant.suites.bundle;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.asSet;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -102,7 +102,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
         if (!isInitialized()) {
           try {
             onPreDestroy();
-            Set<String> paths = asSet(split(bundleFilePaths, ","));
+            Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
               PropertyResourceBundle.getBundles(path, (r) -> true).forEach((s, res) -> {
                 logger.info(() -> String.format("Find enumeration resource, the path is %s", s));

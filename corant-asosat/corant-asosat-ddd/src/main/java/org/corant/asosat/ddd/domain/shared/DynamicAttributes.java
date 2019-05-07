@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -73,7 +73,7 @@ public interface DynamicAttributes {
     }
 
     public static DynamicAttributeMap of(Object... objects) {
-      return new DynamicAttributeMap(asMap(objects));
+      return new DynamicAttributeMap(mapOf(objects));
     }
 
     @Override

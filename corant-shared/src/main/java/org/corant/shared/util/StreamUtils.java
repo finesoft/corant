@@ -41,9 +41,50 @@ public class StreamUtils {
 
   private StreamUtils() {}
 
-  public static <T> Stream<T> asStream(final Enumeration<T> enumeration) {
+  public static <T> Stream<List<T>> batchCollectStream(int forEachBatchSize, Stream<T> source) {
+    return new BatchCollectStreams<>(source, forEachBatchSize).stream();
+  }
+
+  public static long copy(InputStream input, OutputStream output) throws IOException {
+    byte[] buffer = new byte[4096];
+    long count;
+    int n;
+    for (count = 0L; -1 != (n = input.read(buffer)); count += n) {
+      output.write(buffer, 0, n);
+    }
+    return count;
+  }
+
+  public static byte[] readAllBytes(InputStream is) throws IOException {
+    byte[] buf = new byte[4096];
+    int maxBufferSize = Integer.MAX_VALUE - 8;
+    int capacity = buf.length;
+    int nread = 0;
+    int n;
+    for (;;) {
+      while ((n = is.read(buf, nread, capacity - nread)) > 0) {
+        nread += n;
+      }
+      // returned -1, done
+      if (n < 0) {
+        break;
+      }
+      if (capacity <= maxBufferSize - capacity) {
+        capacity = capacity << 1;
+      } else {
+        if (capacity == maxBufferSize) {
+          throw new OutOfMemoryError("Required array size too large");
+        }
+        capacity = maxBufferSize;
+      }
+      buf = Arrays.copyOf(buf, capacity);
+    }
+    return capacity == nread ? buf : Arrays.copyOf(buf, nread);
+  }
+
+  public static <T> Stream<T> streamOf(final Enumeration<T> enumeration) {
     if (enumeration != null) {
-      return asStream(new Iterator<T>() {
+      return streamOf(new Iterator<T>() {
         @Override
         public boolean hasNext() {
           return enumeration.hasMoreElements();
@@ -59,7 +100,7 @@ public class StreamUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Stream<T> asStream(final Iterable<T> iterable) {
+  public static <T> Stream<T> streamOf(final Iterable<T> iterable) {
     if (iterable instanceof Collection) {
       return Collection.class.cast(iterable).stream();
     } else if (iterable != null) {
@@ -68,7 +109,7 @@ public class StreamUtils {
     return Stream.empty();
   }
 
-  public static <T> Stream<T> asStream(final Iterator<T> iterator) {
+  public static <T> Stream<T> streamOf(final Iterator<T> iterator) {
     if (iterator != null) {
       return StreamSupport
           .stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
@@ -76,7 +117,7 @@ public class StreamUtils {
     return Stream.empty();
   }
 
-  public static <K, V> Stream<Map.Entry<K, V>> asStream(Map<K, V> map) {
+  public static <K, V> Stream<Map.Entry<K, V>> streamOf(Map<K, V> map) {
     if (map != null) {
       return map.entrySet().stream();
     }
@@ -84,22 +125,8 @@ public class StreamUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Stream<T> asStream(T... objects) {
+  public static <T> Stream<T> streamOf(T... objects) {
     return Arrays.stream(objects);
-  }
-
-  public static <T> Stream<List<T>> batchCollectStream(int forEachBatchSize, Stream<T> source) {
-    return new BatchCollectStreams<>(source, forEachBatchSize).stream();
-  }
-
-  public static long copy(InputStream input, OutputStream output) throws IOException {
-    byte[] buffer = new byte[4096];
-    long count;
-    int n;
-    for (count = 0L; -1 != (n = input.read(buffer)); count += n) {
-      output.write(buffer, 0, n);
-    }
-    return count;
   }
 
   public abstract static class AbstractBatchHandlerSpliterator<T> extends AbstractSpliterator<T> {

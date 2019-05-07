@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManagerFactory;
@@ -34,7 +34,7 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 public class HibernateJpaOgmProvider extends AbstractJpaProvider {
 
   static final Map<String, Object> PROPERTIES =
-      asMap(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {

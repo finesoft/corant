@@ -13,7 +13,7 @@
  */
 package org.corant.demo.ddd;
 
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import java.math.BigDecimal;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -53,7 +53,7 @@ public class Poc {
     agg.setOneVal(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE));
     agg.setStrVal("string");
     agg.setTimeVal(System.currentTimeMillis());
-    agg.setSomeValues(asList(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
+    agg.setSomeValues(listOf(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE)));
@@ -70,7 +70,7 @@ public class Poc {
     agg.setOneVal(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE));
     agg.setStrVal("string");
     agg.setTimeVal(System.currentTimeMillis());
-    agg.setSomeValues(asList(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
+    agg.setSomeValues(listOf(new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE),
         new DemoValue("one", BigDecimal.ONE, Boolean.TRUE)));

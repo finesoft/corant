@@ -13,7 +13,7 @@
  */
 package org.corant.demo.ddd;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.MapUtils.getMapInstant;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -73,11 +73,11 @@ public class TestMongodb {
   @Test
   public void testFs() throws FileNotFoundException {
     System.out.println(
-        db.runCommand(new Document(asMap("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0)))
+        db.runCommand(new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0)))
             .toJson());
 
     Instant obj = getMapInstant(
-        db.runCommand(new Document(asMap("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0))),
+        db.runCommand(new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0))),
         "localTime");
 
     System.out.println(obj.toEpochMilli());

@@ -14,7 +14,7 @@
 package org.corant.kernel.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
@@ -36,7 +36,7 @@ public class Configurations {
   public static final String SEPARATOR = String.valueOf(Names.NAME_SPACE_SEPARATOR);
 
   public static void adjust(Object... props) {
-    Map<String, String> map = asMap(props);
+    Map<String, String> map = mapOf(props);
     map.forEach((k, v) -> System.setProperty(ConfigNames.CFG_ADJUST_PREFIX + defaultString(k), v));
   }
 

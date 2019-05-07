@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.message;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.time.Instant;
 import java.util.Map;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
@@ -72,7 +72,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
 
     @Override
     public Map<String, Object> getAttributes() {
-      return asMap("versionNumber", versionNumber);
+      return mapOf("versionNumber", versionNumber);
     }
 
     @Override

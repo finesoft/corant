@@ -13,7 +13,7 @@
  */
 package org.corant.suites.security.keycloak;
 
-import static org.corant.shared.util.MapUtils.asMap;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.MapUtils.getMapString;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +74,7 @@ public class KeycloakTestUtils {
       String client_secret = getMapString(ac.getCredentials(), "secret");
       String client_id = ac.getResource();
       try {
-        return Pair.of(new URL(url), asMap("client_id", client_id, "client_secret", client_secret,
+        return Pair.of(new URL(url), mapOf("client_id", client_id, "client_secret", client_secret,
             "username", username, "password", password, "grant_type", "password"));
       } catch (MalformedURLException e) {
         throw new CorantRuntimeException(e);

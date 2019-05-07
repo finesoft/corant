@@ -14,7 +14,7 @@
 package org.corant.suites.flyway;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -141,7 +141,7 @@ public class FlywayMigrator {
   protected Stream<FlywayConfigProvider> getConfigProviders() {
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
-        return asStream(dse.getDataSourceNames()).map((e) -> {
+        return streamOf(dse.getDataSourceNames()).map((e) -> {
           try {
             final String name = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e;
             return DefaultFlywayConfigProvider.of(getLocation(e),

@@ -18,7 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.ObjectUtils.optional;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -82,7 +82,7 @@ public class Converters {
   }
 
   static Converter getMatchedConverter(Class<?> sourceClass, Class<?> targetClass) {
-    return asStream(ConverterRegistry.getConverters())
+    return streamOf(ConverterRegistry.getConverters())
         .filter(e -> match(e.getKey(), sourceClass, targetClass)).map(Entry::getValue).findFirst()
         .orElse(getMatchedConverterFromFactory(sourceClass, targetClass));
   }

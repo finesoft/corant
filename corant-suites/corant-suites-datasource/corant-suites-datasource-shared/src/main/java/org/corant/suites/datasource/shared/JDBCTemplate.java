@@ -14,7 +14,7 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.asList;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -483,7 +483,7 @@ public class JDBCTemplate {
 
     private PreparedStatement completeStatement(PreparedStatement stmt, Iterable<?> params)
         throws SQLException {
-      List<?> list = asList(params);
+      List<?> list = listOf(params);
       fillStatement(stmt, list.toArray(new Object[list.size()]));
       return stmt;
     }

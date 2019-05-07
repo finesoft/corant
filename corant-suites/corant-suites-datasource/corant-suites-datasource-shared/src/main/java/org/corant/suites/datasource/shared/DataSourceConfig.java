@@ -16,7 +16,7 @@ package org.corant.suites.datasource.shared;
 import static org.corant.kernel.util.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.StreamUtils.asStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -212,7 +212,7 @@ public class DataSourceConfig {
 
   public static DataSourceConfig from(Config config, String name) {
     String prefix = DSC_PREFIX + name;
-    Set<String> pns = asStream(config.getPropertyNames())
+    Set<String> pns = streamOf(config.getPropertyNames())
         .filter(pn -> isNotBlank(pn) && pn.startsWith(prefix)).collect(Collectors.toSet());
     return of(config, name, pns);
   }

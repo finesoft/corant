@@ -17,7 +17,7 @@ package org.corant.suites.webserver.tomcat;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
-import org.corant.kernel.config.ComparableConfigurator;
+import org.corant.config.ComparableConfigurator;
 
 /**
  * corant-suites-webserver-tomcat

@@ -11,13 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.config;
+package org.corant.config;
 
 import java.net.URL;
 import java.util.Map;
 
 /**
- * corant-kernel
+ * corant-config
  *
  * @author bingo 上午10:10:55
  *

@@ -19,7 +19,7 @@ import java.util.Optional;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.kernel.config.ComparableConfigurator;
+import org.corant.config.ComparableConfigurator;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;

@@ -42,7 +42,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
-import org.corant.kernel.config.ComparableConfigurator;
+import org.corant.config.ComparableConfigurator;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.ConfigProvider;

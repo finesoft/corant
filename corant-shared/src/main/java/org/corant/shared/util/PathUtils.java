@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -31,6 +32,12 @@ public class PathUtils {
 
   public static boolean matchClassPath(String path, String globExpress) {
     return matchUnixPath(path, globExpress);
+  }
+
+  public static boolean matchPath(String path, String globExpress) {
+    return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")
+        ? matchWinPath(path, globExpress)
+        : matchUnixPath(path, globExpress);
   }
 
   public static boolean matchUnixPath(String path, String globExpress) {

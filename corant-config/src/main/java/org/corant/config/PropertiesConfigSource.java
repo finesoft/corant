@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.config;
+package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.toMap;
@@ -24,7 +24,7 @@ import java.util.Properties;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
- * corant-kernel
+ * corant-config
  *
  * @author bingo 下午5:19:11
  *

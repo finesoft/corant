@@ -1,3 +1,0 @@
-org.corant.kernel.config.ApplicationConfigSourceProvider
-org.corant.kernel.config.ApplicationProfileConfigSourceProvider
-org.corant.kernel.config.ApplicationAdjustConfigSourceProvider

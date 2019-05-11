@@ -17,8 +17,8 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;
+import org.corant.config.Configurations;
 import org.corant.kernel.logging.LoggerFactory;
-import org.corant.kernel.util.Configurations;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 

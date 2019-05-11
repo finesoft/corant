@@ -11,37 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.config;
+package org.corant.config;
 
-import java.util.Map;
-import org.eclipse.microprofile.config.spi.ConfigSource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import org.corant.kernel.event.PreContainerStopEvent;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
 /**
- * corant-kernel
+ * corant-config
  *
- * @author bingo 下午5:18:28
+ * @author bingo 下午12:25:49
  *
  */
-public abstract class AbstractConfigSource implements ConfigSource {
+@ApplicationScoped
+public class CorantLifecycleHandler {
 
-  protected String name;
-
-  protected int ordinal;
-
-  @Override
-  public String getName() {
-    return name;
+  void onPreContainerStopEvent(@Observes PreContainerStopEvent e) {
+    ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
   }
-
-  @Override
-  public int getOrdinal() {
-    return ordinal;
-  }
-
-  @Override
-  public String getValue(String propertyName) {
-    return getProperties().get(propertyName);
-  }
-
-  abstract AbstractConfigSource withProperties(Map<String, String> properties);
 }

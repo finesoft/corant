@@ -15,7 +15,7 @@
  */
 package org.corant.suites.jta.narayana;
 
-import org.corant.kernel.config.ComparableConfigurator;
+import org.corant.config.ComparableConfigurator;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;

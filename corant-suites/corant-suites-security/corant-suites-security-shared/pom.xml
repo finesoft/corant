@@ -35,9 +35,8 @@
 			<artifactId>corant-kernel</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.microprofile.config</groupId>
-			<artifactId>microprofile-config-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

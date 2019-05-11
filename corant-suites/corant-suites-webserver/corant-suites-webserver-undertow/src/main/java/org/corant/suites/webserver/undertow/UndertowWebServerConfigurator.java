@@ -14,7 +14,7 @@
 package org.corant.suites.webserver.undertow;
 
 import java.util.function.BiConsumer;
-import org.corant.kernel.config.ComparableConfigurator;
+import org.corant.config.ComparableConfigurator;
 import org.xnio.Option;
 import io.undertow.servlet.api.DeploymentInfo;
 

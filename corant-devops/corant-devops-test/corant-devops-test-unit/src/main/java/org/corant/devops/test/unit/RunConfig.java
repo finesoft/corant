@@ -58,7 +58,7 @@ public @interface RunConfig {
   /**
    * Which config path to exclude, use glob pattern.
    */
-  String excludeConfigUrlPattern() default "**/target/classes/META-INF/*";
+  String excludeConfigUrlPattern() default "";// **/target/classes/META-INF/*
 
   /**
    * Assign particularly profile configuration for test environment. If use in test suite, the

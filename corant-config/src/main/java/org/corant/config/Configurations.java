@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.util;
+package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
@@ -26,7 +26,7 @@ import org.corant.shared.normal.Names.ConfigNames;
 import org.eclipse.microprofile.config.Config;
 
 /**
- * corant-kernel
+ * corant-config
  *
  * @author bingo 下午3:23:28
  *

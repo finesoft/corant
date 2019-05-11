@@ -1,0 +1,3 @@
+org.corant.config.ApplicationConfigSourceProvider
+org.corant.config.ApplicationProfileConfigSourceProvider
+org.corant.config.ApplicationAdjustConfigSourceProvider

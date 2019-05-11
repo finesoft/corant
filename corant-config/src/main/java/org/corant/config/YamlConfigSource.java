@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.config;
+package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
@@ -27,7 +27,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * corant-kernel
+ * corant-config
  *
  * @author bingo 上午10:10:30
  *

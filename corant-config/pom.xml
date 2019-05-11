@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.corant</groupId>
-		<artifactId>corant-suites-jta</artifactId>
+		<artifactId>corant-root</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-suites-jta-shared</artifactId>
+	<artifactId>corant-config</artifactId>
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
@@ -31,16 +31,22 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>org.jboss.weld.module</groupId>
-			<artifactId>weld-jta</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-kernel</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-config</artifactId>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.weld.se</groupId>
+			<artifactId>weld-se-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>
@@ -53,4 +59,21 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-devops-maven-jandex</artifactId>
+				<version>${project.version}</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jandex</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

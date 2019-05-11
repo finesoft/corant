@@ -32,9 +32,6 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.kernel.config.ApplicationAdjustConfigSourceProvider;
-import org.corant.kernel.config.ApplicationConfigSourceProvider;
-import org.corant.kernel.config.ApplicationProfileConfigSourceProvider;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -45,8 +42,6 @@ import org.corant.kernel.util.Unmanageables;
 import org.corant.kernel.util.Unmanageables.UnmanageableInstance;
 import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.StopWatch;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.jboss.weld.manager.api.WeldManager;
@@ -365,7 +360,6 @@ public class Corant implements AutoCloseable {
     if (isRuning()) {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
       emitter.fire(new PreContainerStopEvent(args));
-      ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
       container.close();
     }
     setMe(null);

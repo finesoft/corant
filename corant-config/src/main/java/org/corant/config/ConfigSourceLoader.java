@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.config;
+package org.corant.config;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.CollectionUtils.setOf;
@@ -32,7 +32,7 @@ import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
- * corant-kernel
+ * corant-config
  *
  * @author bingo 上午10:52:25
  *

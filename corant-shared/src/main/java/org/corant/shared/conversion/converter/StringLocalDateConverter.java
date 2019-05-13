@@ -72,7 +72,14 @@ public class StringLocalDateConverter extends AbstractConverter<String, LocalDat
     } else if (value.chars().allMatch(Character::isDigit)) {
       return LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE);
     } else {
-      String[] values = split(value, c -> c == '-' || c == ' ');
+      String[] values = split(value, c -> c == '-' || c == ' ' || c == '/' || c == '.');
+      if (values.length == 3) {
+        if (values[0].length() == 2 && values[2].length() == 4) {
+          String t = values[0];
+          values[0] = values[2];
+          values[2] = t;
+        }
+      }
       String fixedValue = String.join("-", values);
       if (values.length == 3) {
         if (values[1].chars().allMatch(Character::isDigit)) {

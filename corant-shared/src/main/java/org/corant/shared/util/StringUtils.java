@@ -278,15 +278,16 @@ public class StringUtils {
   /**
    * @param str
    * @param ignoreCase
+   * @param isDos
    * @param globExpress
    * @return matchGlob
    */
   public static boolean matchGlob(final CharSequence str, final boolean ignoreCase,
-      final String globExpress) {
+      final boolean isDos, final String globExpress) {
     if (str == null || isEmpty(globExpress)) {
       return false;
     } else {
-      return GlobPatterns.build(globExpress, ignoreCase).matcher(str).matches();
+      return GlobPatterns.build(globExpress, isDos, ignoreCase).matcher(str).matches();
     }
   }
 

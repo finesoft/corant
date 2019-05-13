@@ -99,7 +99,7 @@ public interface PathMatcher {
     public void addExpresses(String... strings) {
       for (String s : strings) {
         if (isNotBlank(s)) {
-          patterns.put(s, GlobPatterns.build(s, ignoreCase));
+          patterns.put(s, GlobPatterns.build(s, ignoreCase, false));
         }
       }
     }

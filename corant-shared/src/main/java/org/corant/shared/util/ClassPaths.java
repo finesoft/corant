@@ -237,7 +237,7 @@ public class ClassPaths {
   public static final class PathFilter extends GlobMatcher {
 
     protected PathFilter(boolean ignoreCase, String pathExpress) {
-      super(ignoreCase, pathExpress);
+      super(false, ignoreCase, pathExpress);
     }
 
     public String getRoot() {

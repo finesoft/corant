@@ -56,8 +56,8 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
       : Arrays.stream(appExtName).map(e -> locationDir + File.separator + appBaseName + e)
           .toArray(String[]::new);
 
-  static Predicate<URL> filter =
-      u -> isBlank(cfgUrlExPattern) || PathUtils.matchPath(u.toExternalForm(), cfgUrlExPattern);
+  static Predicate<URL> filter = u -> isBlank(cfgUrlExPattern)
+      || !PathUtils.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {

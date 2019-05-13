@@ -41,13 +41,11 @@ public class PathUtils {
   }
 
   public static boolean matchUnixPath(String path, String globExpress) {
-    return GlobPatterns.build(GlobPatterns.toUnixRegexPattern(globExpress), false).matcher(path)
-        .matches();
+    return GlobPatterns.build(globExpress, false, false).matcher(path).matches();
   }
 
   public static boolean matchWinPath(String path, String globExpress) {
-    return GlobPatterns.build(GlobPatterns.toWindowsRegexPattern(globExpress), false).matcher(path)
-        .matches();
+    return GlobPatterns.build(globExpress, true, true).matcher(path).matches();
   }
 
   /**
@@ -60,27 +58,62 @@ public class PathUtils {
    */
   public static class GlobMatcher implements Predicate<String> {
 
+    private final boolean isDos;
     private final boolean ignoreCase;
     private final String globExpress;
     private final Pattern pattern;
 
     /**
+     * @param isDos
      * @param ignoreCase
      * @param globExpress
      */
-    protected GlobMatcher(boolean ignoreCase, String globExpress) {
+    protected GlobMatcher(boolean isDos, boolean ignoreCase, String globExpress) {
       super();
+      this.isDos = isDos;
       this.ignoreCase = ignoreCase;
       this.globExpress = globExpress;
-      pattern = GlobPatterns.build(globExpress, ignoreCase);
+      pattern = GlobPatterns.build(globExpress, isDos, ignoreCase);
     }
 
     public static boolean hasGlobChar(String str) {
       return str != null && str.chars().anyMatch(GlobPatterns::isGlobChar);
     }
 
-    public static GlobMatcher of(boolean ignoreCase, String globExpress) {
-      return new GlobMatcher(ignoreCase, globExpress);
+    public static GlobMatcher of(String globExpress) {
+      return new GlobMatcher(false, false, globExpress);
+    }
+
+    public static GlobMatcher ofDos(String globExpress) {
+      return new GlobMatcher(true, true, globExpress);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      GlobMatcher other = (GlobMatcher) obj;
+      if (globExpress == null) {
+        if (other.globExpress != null) {
+          return false;
+        }
+      } else if (!globExpress.equals(other.globExpress)) {
+        return false;
+      }
+      if (ignoreCase != other.ignoreCase) {
+        return false;
+      }
+      if (isDos != other.isDos) {
+        return false;
+      }
+      return true;
     }
 
     public String getGlobExpress() {
@@ -89,6 +122,20 @@ public class PathUtils {
 
     public Pattern getPattern() {
       return pattern;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (globExpress == null ? 0 : globExpress.hashCode());
+      result = prime * result + (ignoreCase ? 1231 : 1237);
+      result = prime * result + (isDos ? 1231 : 1237);
+      return result;
+    }
+
+    public boolean isDos() {
+      return isDos;
     }
 
     public boolean isIgnoreCase() {
@@ -114,12 +161,21 @@ public class PathUtils {
     public static final String GLO_CHARS = "\\*?[{";
     private static final char EOL = 0;
 
-    public static Pattern build(String globExpress, boolean ignoreCase) {
-      if (ignoreCase) {
-        return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
+    public static Pattern build(String globExpress, boolean isDos, boolean ignoreCase) {
+      if (isDos) {
+        if (ignoreCase) {
+          return Pattern.compile(toWindowsRegexPattern(globExpress), Pattern.UNICODE_CASE);
+        } else {
+          return Pattern.compile(toWindowsRegexPattern(globExpress),
+              Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        }
       } else {
-        return Pattern.compile(toUnixRegexPattern(globExpress),
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        if (ignoreCase) {
+          return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
+        } else {
+          return Pattern.compile(toUnixRegexPattern(globExpress),
+              Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        }
       }
     }
 

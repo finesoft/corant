@@ -83,7 +83,7 @@ public interface CorantJunit4Runner {
   }
 
   default Class<?> configTestClass(final Class<?> testClass) {
-    // System.setProperty(CFG_LOCATION_EXCLUDE_PATTERN, "**/target/classes/META-INF/*");
+    System.setProperty(CFG_LOCATION_EXCLUDE_PATTERN, "**/target/classes/META-INF/*");
     RunConfig rc = null;
     if (isEmbedded() || (rc = testClass.getAnnotation(RunConfig.class)) == null) {
       return testClass;

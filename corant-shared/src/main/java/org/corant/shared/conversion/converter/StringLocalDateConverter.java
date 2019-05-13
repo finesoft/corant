@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
+import static org.corant.shared.util.CollectionUtils.swap;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.split;
 import java.time.LocalDate;
@@ -73,12 +74,8 @@ public class StringLocalDateConverter extends AbstractConverter<String, LocalDat
       return LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE);
     } else {
       String[] values = split(value, c -> c == '-' || c == ' ' || c == '/' || c == '.');
-      if (values.length == 3) {
-        if (values[0].length() == 2 && values[2].length() == 4) {
-          String t = values[0];
-          values[0] = values[2];
-          values[2] = t;
-        }
+      if (values.length == 3 && values[0].length() == 2 && values[2].length() == 4) {
+        swap(values, 0, 2);// MM/DD/YYYY
       }
       String fixedValue = String.join("-", values);
       if (values.length == 3) {

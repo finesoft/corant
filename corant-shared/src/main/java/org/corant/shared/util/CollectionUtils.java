@@ -43,6 +43,55 @@ public class CollectionUtils {
     super();
   }
 
+  public static Object get(final Object object, final int index) {
+    final int i = index;
+    if (i < 0) {
+      throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
+    }
+    if (object == null) {
+      throw new IllegalArgumentException("Unsupported object type: null");
+    }
+    if (object instanceof Iterable<?>) {
+      return get(object, i);
+    } else if (object instanceof Object[]) {
+      return ((Object[]) object)[i];
+    } else if (object instanceof Iterator<?>) {
+      return IterableUtils.get((Iterator<?>) object, index);
+    } else if (object instanceof Enumeration<?>) {
+      return IterableUtils.get((Enumeration<?>) object, index);
+    } else {
+      try {
+        return Array.get(object, i);
+      } catch (final IllegalArgumentException ex) {
+        throw new IllegalArgumentException(
+            "Unsupported object type: " + object.getClass().getName());
+      }
+    }
+  }
+
+  public static int getSize(final Object object) {
+    if (object == null) {
+      return 0;
+    } else if (object instanceof Collection<?>) {
+      return ((Collection<?>) object).size();
+    } else if (object instanceof Object[]) {
+      return ((Object[]) object).length;
+    } else if (object instanceof Iterable<?>) {
+      return IterableUtils.getSize((Iterable<?>) object);
+    } else if (object instanceof Iterator<?>) {
+      return IterableUtils.getSize((Iterator<?>) object);
+    } else if (object instanceof Enumeration<?>) {
+      return IterableUtils.getSize((Enumeration<?>) object);
+    } else {
+      try {
+        return Array.getLength(object);
+      } catch (final IllegalArgumentException ex) {
+        throw new IllegalArgumentException(
+            "Unsupported object type: " + object.getClass().getName());
+      }
+    }
+  }
+
   @SafeVarargs
   public static <T> List<T> immutableListOf(final T... objects) {
     if (objects == null || objects.length == 0) {
@@ -100,64 +149,6 @@ public class CollectionUtils {
     return list;
   }
 
-  @SafeVarargs
-  public static <T> Set<T> setOf(final T... objects) {
-    Set<T> set = new HashSet<>(objects.length);
-    for (T obj : objects) {
-      set.add(obj);
-    }
-    return set;
-  }
-
-  public static Object get(final Object object, final int index) {
-    final int i = index;
-    if (i < 0) {
-      throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
-    }
-    if (object == null) {
-      throw new IllegalArgumentException("Unsupported object type: null");
-    }
-    if (object instanceof Iterable<?>) {
-      return get(object, i);
-    } else if (object instanceof Object[]) {
-      return ((Object[]) object)[i];
-    } else if (object instanceof Iterator<?>) {
-      return IterableUtils.get((Iterator<?>) object, index);
-    } else if (object instanceof Enumeration<?>) {
-      return IterableUtils.get((Enumeration<?>) object, index);
-    } else {
-      try {
-        return Array.get(object, i);
-      } catch (final IllegalArgumentException ex) {
-        throw new IllegalArgumentException(
-            "Unsupported object type: " + object.getClass().getName());
-      }
-    }
-  }
-
-  public static int getSize(final Object object) {
-    if (object == null) {
-      return 0;
-    } else if (object instanceof Collection<?>) {
-      return ((Collection<?>) object).size();
-    } else if (object instanceof Object[]) {
-      return ((Object[]) object).length;
-    } else if (object instanceof Iterable<?>) {
-      return IterableUtils.getSize((Iterable<?>) object);
-    } else if (object instanceof Iterator<?>) {
-      return IterableUtils.getSize((Iterator<?>) object);
-    } else if (object instanceof Enumeration<?>) {
-      return IterableUtils.getSize((Enumeration<?>) object);
-    } else {
-      try {
-        return Array.getLength(object);
-      } catch (final IllegalArgumentException ex) {
-        throw new IllegalArgumentException(
-            "Unsupported object type: " + object.getClass().getName());
-      }
-    }
-  }
-
   public static <T> List<T> listRemoveIf(List<T> list, Predicate<T> p) {
     if (list == null) {
       return null;
@@ -185,6 +176,15 @@ public class CollectionUtils {
     return result;
   }
 
+  @SafeVarargs
+  public static <T> Set<T> setOf(final T... objects) {
+    Set<T> set = new HashSet<>(objects.length);
+    for (T obj : objects) {
+      set.add(obj);
+    }
+    return set;
+  }
+
   public static <T> Set<T> setRemoveIf(Set<T> set, Predicate<T> p) {
     if (set == null) {
       return null;
@@ -194,6 +194,16 @@ public class CollectionUtils {
       set.removeIf(p);
       return set;
     }
+  }
+
+  public static final <T> void swap(List<T> l, int i, int j) {
+    Collections.swap(l, i, j);
+  }
+
+  public static final <T> void swap(T[] a, int i, int j) {
+    final T t = a[i];
+    a[i] = a[j];
+    a[j] = t;
   }
 
   public static class ListJoins<F, J, T> {

@@ -1,4 +1,7 @@
 org.corant.shared.conversion.converter.DateInstantConverter
+org.corant.shared.conversion.converter.InstantTimestampConverter
+org.corant.shared.conversion.converter.LocalDateSqlDateConverter
+org.corant.shared.conversion.converter.LocalDateTimeTimestampConverter
 org.corant.shared.conversion.converter.NumberBigDecimalConverter
 org.corant.shared.conversion.converter.NumberBigIntegerConverter
 org.corant.shared.conversion.converter.NumberBooleanConverter
@@ -14,6 +17,7 @@ org.corant.shared.conversion.converter.NumberShortConverter
 org.corant.shared.conversion.converter.NumberZonedDateTimeConverter
 org.corant.shared.conversion.converter.ObjectClassConveter
 org.corant.shared.conversion.converter.SqlDateInstantConverter
+org.corant.shared.conversion.converter.SqlDateLocalDateConverter
 org.corant.shared.conversion.converter.StringBigDecimalConverter
 org.corant.shared.conversion.converter.StringBigIntegerConverter
 org.corant.shared.conversion.converter.StringBooleanConverter
@@ -36,3 +40,5 @@ org.corant.shared.conversion.converter.TemporalInstantConverter
 org.corant.shared.conversion.converter.TemporalLocalDateConverter
 org.corant.shared.conversion.converter.TemporalLocalDateTimeConverter
 org.corant.shared.conversion.converter.TemporalZonedDateTimeConverter
+org.corant.shared.conversion.converter.TimestampInstantConverter
+org.corant.shared.conversion.converter.TimestampLocalDateTimeConverter

@@ -24,6 +24,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
@@ -46,44 +48,6 @@ public class MapUtils {
 
   private MapUtils() {
     super();
-  }
-
-  public static <K, V> Map<K, V> immutableMapOf(Object... objects) {
-    if (objects == null || objects.length == 0) {
-      return Collections.emptyMap();
-    }
-    return Collections.unmodifiableMap(mapOf(objects));
-  }
-
-  public static <K, V> Map<K, V> linkedHashMapOf(Object... objects) {
-    return mapOf(true, objects);
-  }
-
-  public static <K, V> Map<K, V> mapOf(boolean linked, Object... objects) {
-    int oLen;
-    if (objects == null || (oLen = objects.length) == 0) {
-      return linked ? new LinkedHashMap<>(0) : new HashMap<>(0);
-    }
-    int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
-    int size = (rLen >> 1) + 1;
-    Map<K, V> map = linked ? new LinkedHashMap<>(size) : new HashMap<>(size);
-    for (int i = 0; i < rLen; i += 2) {
-      map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
-    }
-    if (rLen < oLen) {
-      map.put(forceCast(objects[rLen]), null);
-    }
-    return map;
-  }
-
-  public static <K, V> Map<K, V> mapOf(Object... objects) {
-    return mapOf(false, objects);
-  }
-
-  public static Properties propertiesOf(String... strings) {
-    Properties result = new Properties();
-    mapOf((Object[]) strings).forEach(result::put);
-    return result;
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
@@ -240,6 +204,10 @@ public class MapUtils {
     return getMapObject(map, key, ConversionUtils::toLocalDate, nvt);
   }
 
+  public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, ZoneId zoneId) {
+    return getMapObject(map, key, (v) -> ConversionUtils.toLocalDate(v, zoneId), null);
+  }
+
   public static Locale getMapLocale(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, ConversionUtils::toLocale, null);
   }
@@ -317,9 +285,30 @@ public class MapUtils {
     return getMapObject(map, key, ConversionUtils::toString, nvt);
   }
 
+  public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key) {
+    return getMapObject(map, key, ConversionUtils::toZonedDateTime, null);
+  }
+
+  public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key,
+      ZonedDateTime nvt) {
+    return getMapObject(map, key, ConversionUtils::toZonedDateTime, nvt);
+  }
+
+  public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key,
+      ZoneId zoneId) {
+    return getMapObject(map, key, (v) -> ConversionUtils.toZonedDateTime(v, zoneId), null);
+  }
+
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);
+  }
+
+  public static <K, V> Map<K, V> immutableMapOf(Object... objects) {
+    if (objects == null || objects.length == 0) {
+      return Collections.emptyMap();
+    }
+    return Collections.unmodifiableMap(mapOf(objects));
   }
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
@@ -327,6 +316,37 @@ public class MapUtils {
     if (map != null) {
       map.forEach((k, v) -> result.put(v, k));
     }
+    return result;
+  }
+
+  public static <K, V> Map<K, V> linkedHashMapOf(Object... objects) {
+    return mapOf(true, objects);
+  }
+
+  public static <K, V> Map<K, V> mapOf(boolean linked, Object... objects) {
+    int oLen;
+    if (objects == null || (oLen = objects.length) == 0) {
+      return linked ? new LinkedHashMap<>(0) : new HashMap<>(0);
+    }
+    int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
+    int size = (rLen >> 1) + 1;
+    Map<K, V> map = linked ? new LinkedHashMap<>(size) : new HashMap<>(size);
+    for (int i = 0; i < rLen; i += 2) {
+      map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
+    }
+    if (rLen < oLen) {
+      map.put(forceCast(objects[rLen]), null);
+    }
+    return map;
+  }
+
+  public static <K, V> Map<K, V> mapOf(Object... objects) {
+    return mapOf(false, objects);
+  }
+
+  public static Properties propertiesOf(String... strings) {
+    Properties result = new Properties();
+    mapOf((Object[]) strings).forEach(result::put);
     return result;
   }
 

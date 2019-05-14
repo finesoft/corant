@@ -107,13 +107,7 @@ public class PathUtils {
       } else if (!globExpress.equals(other.globExpress)) {
         return false;
       }
-      if (ignoreCase != other.ignoreCase) {
-        return false;
-      }
-      if (isDos != other.isDos) {
-        return false;
-      }
-      return true;
+      return isDos == other.isDos && ignoreCase == other.ignoreCase;
     }
 
     public String getGlobExpress() {

@@ -196,11 +196,11 @@ public class CollectionUtils {
     }
   }
 
-  public static final <T> void swap(List<T> l, int i, int j) {
+  public static <T> void swap(List<T> l, int i, int j) {
     Collections.swap(l, i, j);
   }
 
-  public static final <T> void swap(T[] a, int i, int j) {
+  public static <T> void swap(T[] a, int i, int j) {
     final T t = a[i];
     a[i] = a[j];
     a[j] = t;

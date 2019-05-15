@@ -134,7 +134,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   }
 
   @Override
-  public boolean canHandle(QueryHint hint) {
+  public boolean canHandle(Class<?> resultClass, QueryHint hint) {
     return conversionService != null && hint != null && isEquals(hint.getKey(), HINT_NAME);
   }
 

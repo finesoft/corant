@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -106,6 +107,15 @@ public class CollectionUtils {
       return Collections.emptySet();
     }
     return Collections.unmodifiableSet(setOf(objects));
+  }
+
+  @SafeVarargs
+  public static <T> Set<T> linkedHashSetOf(final T... objects) {
+    Set<T> set = new LinkedHashSet<>(objects.length);
+    for (T obj : objects) {
+      set.add(obj);
+    }
+    return set;
   }
 
   public static <T> List<T> listOf(final Enumeration<T> enumeration) {

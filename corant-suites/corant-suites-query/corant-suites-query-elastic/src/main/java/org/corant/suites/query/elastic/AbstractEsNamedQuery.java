@@ -145,6 +145,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     Querier<String, FetchQuery, QueryHint> querier = resolver.resolve(refQueryName, fetchParam);
     String script = querier.getScript();
     Class<?> rcls = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
+    List<QueryHint> hints = querier.getHints();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     try {
       log("fetch-> " + refQueryName, fetchParam, script);
@@ -164,6 +165,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
         }
         QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
         this.fetch(fetchedList, fetchQueries, param);
+        handleResultHints(rcls, hints, param, fetchedList);
       }
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
@@ -189,12 +191,13 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     return resolver;
   }
 
-  protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
+  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
+      Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).sorted(ResultHintHandler::compare)
-            .forEachOrdered(h -> {
+        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
+            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
               if (!exclusive.get()) {
                 try {
                   h.handle(qh, param, result);
@@ -239,7 +242,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
         }
         this.fetch(result, fetchQueries, param);
       }
-      handleResultHints(querier.getHints(), param, result);
+      handleResultHints(rcls, querier.getHints(), param, result);
       return Pair.of(hits.getLeft(), result);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,

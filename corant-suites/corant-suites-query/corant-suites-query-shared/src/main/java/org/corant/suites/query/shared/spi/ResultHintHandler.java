@@ -28,7 +28,7 @@ public interface ResultHintHandler {
     return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
   }
 
-  default boolean canHandle(QueryHint qh) {
+  default boolean canHandle(Class<?> resultClass, QueryHint qh) {
     return false;
   }
 

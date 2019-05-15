@@ -99,7 +99,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         } else {
           result.withResults(list);
         }
-        handleResultHints(hints, param, result);
+        handleResultHints(resultClass, hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -120,7 +120,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       log(q, queryParam, sql);
       T result = getExecutor().get(sql, resultClass, queryParam);
       this.fetch(result, fetchQueries, param);
-      handleResultHints(hints, param, result);
+      handleResultHints(resultClass, hints, param, result);
       return result;
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
@@ -155,7 +155,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         }
         this.fetch(list, fetchQueries, param);
         result.withResults(list);
-        handleResultHints(hints, param, result);
+        handleResultHints(resultClass, hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -178,7 +178,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       int size = getSize(result);
       if (size > 0) {
         this.fetch(result, fetchQueries, param);
-        handleResultHints(hints, param, result);
+        handleResultHints(rcls, hints, param, result);
       }
       return result;
     } catch (SQLException e) {
@@ -215,6 +215,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String sql = querier.getScript();
     Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     Object[] params = querier.getConvertedParameters();
+    List<QueryHint> hints = querier.getHints();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     if (maxSize > 0) {
       sql = getDialect().getLimitSql(sql, SqlHelper.OFFSET_PARAM_VAL, maxSize);
@@ -231,6 +232,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       }
       QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
       this.fetch(fetchedList, fetchQueries, param);
+      handleResultHints(resultClass, hints, param, fetchedList);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());
@@ -257,12 +259,13 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     return resolver;
   }
 
-  protected void handleResultHints(List<QueryHint> hints, Object param, Object result) {
+  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
+      Object result) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(qh)).sorted(ResultHintHandler::compare)
-            .forEachOrdered(h -> {
+        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
+            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
               if (!exclusive.get()) {
                 try {
                   h.handle(qh, param, result);

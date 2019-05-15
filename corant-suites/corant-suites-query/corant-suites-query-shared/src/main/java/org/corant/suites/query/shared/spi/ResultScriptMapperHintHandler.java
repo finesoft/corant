@@ -101,7 +101,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   Instance<ResultMapperResolver> mapperResolvers;
 
   @Override
-  public boolean canHandle(QueryHint hint) {
+  public boolean canHandle(Class<?> resultClass, QueryHint hint) {
     return hint != null && isEquals(hint.getKey(), HINT_NAME) && isNotBlank(hint.getScript());
   }
 

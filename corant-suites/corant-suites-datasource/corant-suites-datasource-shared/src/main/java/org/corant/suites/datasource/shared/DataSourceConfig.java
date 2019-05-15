@@ -73,7 +73,7 @@ public class DataSourceConfig {
   private String password;
   private String connectionUrl;
   private boolean jta = true;
-  private boolean autoCommit = false;
+  private boolean autoCommit = true;
   private boolean connectable;
   private boolean xa = false;
 

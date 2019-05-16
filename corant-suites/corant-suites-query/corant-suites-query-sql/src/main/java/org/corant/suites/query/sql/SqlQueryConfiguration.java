@@ -25,7 +25,7 @@ import org.corant.suites.query.sql.dialect.Dialect;
  */
 public interface SqlQueryConfiguration {
 
-  static final Integer DFLT_FETCH_SIZE = 16;
+  Integer DFLT_FETCH_SIZE = 16;
 
   static Builder defaultBuilder() {
     return new Builder();
@@ -52,7 +52,7 @@ public interface SqlQueryConfiguration {
   }
 
   /**
-   * @see java.sql.Statement#getMaxRows()
+   * @see java.sql.Statement#getMaxFieldSize()
    * @return the maxFieldSize
    */
   default Integer getMaxFieldSize() {
@@ -60,7 +60,7 @@ public interface SqlQueryConfiguration {
   }
 
   /**
-   * @see java.sql.Statement#getMaxFieldSize()
+   * @see java.sql.Statement#getMaxRows()
    * @return the maxFieldSize
    */
   default Integer getMaxRows() {
@@ -111,6 +111,11 @@ public interface SqlQueryConfiguration {
       return this;
     }
 
+    public Builder maxRows(Integer maxRows) {
+      cfg.maxRows = maxRows;
+      return this;
+    }
+
     public Builder queryTimeout(Integer queryTimeout) {
       cfg.queryTimeout = queryTimeout;
       return this;
@@ -125,8 +130,7 @@ public interface SqlQueryConfiguration {
     protected Integer fetchSize = DFLT_FETCH_SIZE;
     protected Integer maxFieldSize = 0;
     protected Integer queryTimeout = 0;
-
-    protected Integer maxRows = 32;
+    protected Integer maxRows = 0;
 
     @Override
     public DataSource getDataSource() {

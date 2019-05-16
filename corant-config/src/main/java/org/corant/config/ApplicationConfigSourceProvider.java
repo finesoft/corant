@@ -62,6 +62,8 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
+    list.add(new SystemPropertiesConfigSource());// system.properties
+    list.add(new SystemEnvironmentConfigSource());// system.environment
     try {
       list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filter, filePaths));
       if (isEmpty(filePaths)) {

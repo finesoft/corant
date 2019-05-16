@@ -21,4 +21,19 @@ public class NotSupportedException extends CorantRuntimeException {
 
   private static final long serialVersionUID = 6106399720806482079L;
 
+  /**
+   *
+   */
+  public NotSupportedException() {
+    super();
+  }
+
+  /**
+   * @param msgOrFormat
+   * @param args
+   */
+  public NotSupportedException(String msgOrFormat, Object... args) {
+    super(msgOrFormat, args);
+  }
+
 }

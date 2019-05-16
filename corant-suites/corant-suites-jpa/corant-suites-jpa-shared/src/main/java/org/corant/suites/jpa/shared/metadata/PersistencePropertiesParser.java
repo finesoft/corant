@@ -118,14 +118,16 @@ public class PersistencePropertiesParser {
         config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       }
     });
-    if (isNotEmpty(puimd.getManagedClassNames())) {
-      puimd.resolvePersistenceProvider();
-      doParseProperties(config, proPrefix, proCfgNmes, puimd);
-      shouldBeNull(map.put(name, puimd),
-          "The jpa configuration error persistence unit name %s dup!", name);
-    } else {
-      logger.warning(
-          () -> String.format("Can not find any managed classes for persistence unit %s", name));
+    if (isNotBlank(puimd.getPersistenceProviderClassName())) {
+      if (isNotEmpty(puimd.getManagedClassNames())) {
+        puimd.resolvePersistenceProvider();
+        doParseProperties(config, proPrefix, proCfgNmes, puimd);
+        shouldBeNull(map.put(name, puimd),
+            "The jpa configuration error persistence unit name %s dup!", name);
+      } else {
+        logger.warning(
+            () -> String.format("Can not find any managed classes for persistence unit %s", name));
+      }
     }
   }
 

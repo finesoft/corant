@@ -13,49 +13,35 @@
  */
 package org.corant.config;
 
+import java.util.Collections;
 import java.util.Map;
-import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.normal.Priorities;
 
 /**
  * corant-config
  *
- * @author bingo 下午5:18:28
+ * @author bingo 上午11:04:36
  *
  */
-public abstract class AbstractConfigSource implements ConfigSource {
+public class SystemEnvironmentConfigSource extends AbstractConfigSource {
 
-  protected String name;
+  final Map<String, String> sysPros = Collections.unmodifiableMap(System.getenv());
 
-  protected int ordinal;
-
-  protected AbstractConfigSource() {
+  public SystemEnvironmentConfigSource() {
     super();
-  }
-
-  /**
-   * @param name
-   * @param ordinal
-   */
-  protected AbstractConfigSource(String name, int ordinal) {
-    super();
-    this.name = name;
-    this.ordinal = ordinal;
+    name = "System.environment";
+    ordinal = Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
   }
 
   @Override
-  public String getName() {
-    return name;
+  public Map<String, String> getProperties() {
+    return sysPros;
   }
 
   @Override
-  public int getOrdinal() {
-    return ordinal;
+  AbstractConfigSource withProperties(Map<String, String> properties) {
+    throw new NotSupportedException("Can not adjust system environment!");
   }
 
-  @Override
-  public String getValue(String propertyName) {
-    return getProperties().get(propertyName);
-  }
-
-  abstract AbstractConfigSource withProperties(Map<String, String> properties);
 }

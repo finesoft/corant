@@ -51,7 +51,8 @@ public class JsonUtils {
   final static BigInteger BROWSER_SAFE_BIGINTEGER = BigInteger.valueOf(BROWSER_SAFE_LONG);
   final static ObjectMapper objectMapper = new ObjectMapper();
   static {
-    objectMapper.registerModule(new SimpleModule().addSerializer(new SqlDateSerializer()));
+    objectMapper.registerModule(
+        new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null)));
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     objectMapper.enable(Feature.ALLOW_COMMENTS);
     objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

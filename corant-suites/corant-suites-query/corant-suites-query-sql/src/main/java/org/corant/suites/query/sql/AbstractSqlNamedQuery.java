@@ -63,8 +63,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   Instance<ResultHintHandler> resultHintHandlers;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
-    if (param != null && param.containsKey(SqlHelper.OFFSET_PARAM_NME)) {
-      if (param.containsKey(SqlHelper.LIMIT_PARAM_NME)) {
+    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
+      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
         return this.page(q, param);
       } else {
         return this.forward(q, param);
@@ -218,7 +218,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     List<QueryHint> hints = querier.getHints();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     if (maxSize > 0) {
-      sql = getDialect().getLimitSql(sql, SqlHelper.OFFSET_PARAM_VAL, maxSize);
+      sql = getDialect().getLimitSql(sql, QueryUtils.OFFSET_PARAM_VAL, maxSize);
     }
     try {
       log("fetch-> " + refQueryName, params, sql);

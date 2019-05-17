@@ -62,6 +62,18 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
   @Any
   Instance<ResultHintHandler> resultHintHandlers;
 
+  public Object adaptiveSelect(String q, Map<String, Object> param) {
+    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
+      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
+        return this.page(q, param);
+      } else {
+        return this.forward(q, param);
+      }
+    } else {
+      return this.select(q, param);
+    }
+  }
+
   @Override
   public Map<String, Object> aggregate(String q, Map<String, Object> param) {
     Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
@@ -116,6 +128,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
+    param.putIfAbsent(QueryUtils.LIMIT_PARAM_NME, 128);
     Pair<Long, List<T>> hits = searchHits(q, param);
     return hits.getValue();
   }

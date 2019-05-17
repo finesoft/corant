@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.corant.suites.query.shared.QueryUtils;
 
 /**
  * corant-suites-query
@@ -28,11 +29,6 @@ import java.util.regex.Pattern;
  *
  */
 public class SqlHelper {
-
-  public static final String OFFSET_PARAM_NME = "_offset";
-  public static final String LIMIT_PARAM_NME = "_limit";
-  public static final int OFFSET_PARAM_VAL = 0;
-  public static final int LIMIT_PARAM_VAL = 15;
 
   public static final String SELECT = "select";
   public static final String FROM = "from";
@@ -79,11 +75,11 @@ public class SqlHelper {
   }
 
   public static int getLimit(Map<String, Object> param) {
-    return getMapInteger(param, LIMIT_PARAM_NME, LIMIT_PARAM_VAL);
+    return getMapInteger(param, QueryUtils.LIMIT_PARAM_NME, QueryUtils.LIMIT_PARAM_VAL);
   }
 
   public static int getOffset(Map<String, Object> param) {
-    return getMapInteger(param, OFFSET_PARAM_NME, OFFSET_PARAM_VAL);
+    return getMapInteger(param, QueryUtils.OFFSET_PARAM_NME, QueryUtils.OFFSET_PARAM_VAL);
   }
 
   public static String getOrderBy(String sql) {

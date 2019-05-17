@@ -13,6 +13,9 @@
  */
 package org.corant.suites.query.elastic;
 
+import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
+import static org.corant.shared.util.MapUtils.getMapInteger;
+import static org.corant.shared.util.ObjectUtils.max;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.QueryRuntimeException;
+import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
@@ -34,6 +38,7 @@ import freemarker.template.TemplateException;
  * @author bingo 下午8:25:44
  *
  */
+@SuppressWarnings("rawtypes")
 public class DefaultEsNamedQueryProcessor
     extends FreemarkerDynamicQueryProcessor<DefaultEsNamedQuerier, Map<String, Object>> {
 
@@ -62,8 +67,12 @@ public class DefaultEsNamedQueryProcessor
     }
     tempParam.forEach((k, v) -> {
       try {
-        String jsonVal = v == null ? null : OM.writeValueAsString(v);
-        convertedParam.put(k, jsonVal);
+        if (v != null && isPrimitiveOrWrapper(v.getClass())) {
+          convertedParam.put(k, v);
+        } else {
+          String jsonVal = v == null ? null : OM.writeValueAsString(v);
+          convertedParam.put(k, jsonVal);
+        }
       } catch (JsonProcessingException e) {
         throw new CorantRuntimeException(e, "Can not convert parameter %s to json string", k);
       }
@@ -76,13 +85,26 @@ public class DefaultEsNamedQueryProcessor
       DynamicQueryTplMmResolver<Map<String, Object>> tmm) {
     try (StringWriter sw = new StringWriter()) {
       getExecution().process(param, sw);
+      // OM.readValue(sw.toString(), Object.class) FIXME Do some protection
+      final Map esQuery = OM.readValue(sw.toString(), Map.class);
+      doSomthing(esQuery, param);
       return new DefaultEsNamedQuerier(
-          OM.writer(JsonpCharacterEscapes.instance())
-              .writeValueAsString(OM.readValue(sw.toString(), Object.class)),
-          getResultClass(), getHints(), getFetchQueries());// FIXME Do some
-                                                           // protection
+          OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(esQuery), getResultClass(),
+          getHints(), getFetchQueries());
     } catch (TemplateException | IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  void doSomthing(Map esQuery, Map<String, Object> param) {
+    Integer from = getMapInteger(param, QueryUtils.OFFSET_PARAM_NME);
+    if (from != null) {
+      esQuery.put("from", max(from, Integer.valueOf(0)));
+    }
+    Integer size = getMapInteger(param, QueryUtils.LIMIT_PARAM_NME);
+    if (size != null) {
+      esQuery.put("size", max(size, Integer.valueOf(0)));
     }
   }
 

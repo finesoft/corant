@@ -206,4 +206,15 @@ public class Assertions {
     }
     return obj;
   }
+
+  /**
+   * Throw CorantRuntimeException if argument is null
+   *
+   * @param args shouldNoneNull
+   */
+  public void shouldNoneNull(Object... args) {
+    for (Object obj : args) {
+      shouldNotNull(obj);
+    }
+  }
 }

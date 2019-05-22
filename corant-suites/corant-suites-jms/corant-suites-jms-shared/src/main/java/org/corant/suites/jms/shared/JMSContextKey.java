@@ -25,13 +25,12 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.JMSSessionMode;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
-import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -43,40 +42,42 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class JMSContextKey implements Serializable {
   private static final long serialVersionUID = -9143619854361396089L;
   private static final Logger logger = Logger.getLogger(JMSContextKey.class.getName());
-  private final String connectionFactory;
-  private final Integer session;
+  private final String connectionFactoryId;
+  private final Integer sessionMode;
   private final int hash;
-  private volatile ConnectionFactory connectionFactoryInstance;
+  private volatile ConnectionFactory connectionFactory;
 
-  public JMSContextKey(final String connectionFactory, final Integer session) {
-    this.connectionFactory = connectionFactory;
-    this.session = session;
-    hash = calHash(connectionFactory, session);
+  public JMSContextKey(final String connectionFactoryId, final Integer sessionMode) {
+    this.connectionFactoryId = connectionFactoryId;
+    this.sessionMode = sessionMode;
+    hash = calHash(connectionFactoryId, sessionMode);
   }
 
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
     final JMSSessionMode sessionMode = annotated.getAnnotation(JMSSessionMode.class);
-    final String factoryName = factory == null ? null : factory.value();
+    final String facId = factory == null ? null : factory.value();
     final int sesMod = sessionMode == null ? JMSContext.AUTO_ACKNOWLEDGE : sessionMode.value();
-    return new JMSContextKey(factoryName, sesMod);
+    return new JMSContextKey(facId, sesMod);
   }
 
-  public JMSContext create() {
+  static int calHash(final String facId, final Integer sesMod) {
+    int result = facId != null ? facId.hashCode() : 0;
+    result = 31 * result + (sesMod != null ? sesMod.hashCode() : 0);
+    return result;
+  }
+
+  public JMSContext create() throws JMSException {
     ConnectionFactory cf = connectionFactory();
-    if (cf instanceof XAConnectionFactory) {
+    if (cf instanceof XAConnectionFactory && Transactions.isInTransaction()) {
       XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
-      try {
-        Transactions.currentTransaction().enlistResource(ctx.getXAResource());
-        logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
-      } catch (IllegalStateException | RollbackException | SystemException e) {
-        throw new CorantRuntimeException(e);
-      }
+      Transactions.registerXAResource(ctx.getXAResource());
+      logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
       return ctx;
     } else {
-      if (session != null) {
-        JMSContext ctx = connectionFactory().createContext(session);
+      if (sessionMode != null && Transactions.isInTransaction()) {
+        JMSContext ctx = connectionFactory().createContext(sessionMode);
         // FIXME will be changed in next iteration
         return registerToLocaleTransactionSynchronization(ctx);
       }
@@ -93,16 +94,17 @@ public class JMSContextKey implements Serializable {
       return false;
     }
     final JMSContextKey key = JMSContextKey.class.cast(o);
-    return isEquals(connectionFactory, key.connectionFactory) && isEquals(session, key.session);
+    return isEquals(connectionFactoryId, key.connectionFactoryId)
+        && isEquals(sessionMode, key.sessionMode);
 
   }
 
-  public String getConnectionFactory() {
-    return connectionFactory;
+  public String getConnectionFactoryId() {
+    return connectionFactoryId;
   }
 
-  public Integer getSession() {
-    return session;
+  public Integer getSessionMode() {
+    return sessionMode;
   }
 
   @Override
@@ -112,34 +114,28 @@ public class JMSContextKey implements Serializable {
 
   @Override
   public String toString() {
-    return "JMSContextKey [connectionFactoryName=" + connectionFactory + ", session=" + session
-        + "]";
-  }
-
-  int calHash(final String name, final Integer session) {
-    int result = name != null ? name.hashCode() : 0;
-    result = 31 * result + (session != null ? session.hashCode() : 0);
-    return result;
+    return "JMSContextKey [connectionFactoryId=" + connectionFactoryId + ", sessionMode="
+        + sessionMode + "]";
   }
 
   ConnectionFactory connectionFactory() {
-    if (connectionFactoryInstance != null) {
-      return connectionFactoryInstance;
+    if (connectionFactory != null) {
+      return connectionFactory;
     }
     synchronized (this) {
-      if (connectionFactoryInstance != null) {
-        return connectionFactoryInstance;
+      if (connectionFactory != null) {
+        return connectionFactory;
       }
-      return shouldNotNull(connectionFactoryInstance =
-          AbstractJMSExtension.retriveConnectionFactory(connectionFactory));
+      return shouldNotNull(
+          connectionFactory = AbstractJMSExtension.retriveConnectionFactory(connectionFactoryId));
     }
   }
 
   // TODO In NO XA
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
-    if (session == JMSContext.SESSION_TRANSACTED && Transactions.isInTransaction()) {
+    if (sessionMode == JMSContext.SESSION_TRANSACTED) {
       try {
-        Transactions.currentTransaction().registerSynchronization(new Synchronization() {
+        Transactions.registerSynchronization(new Synchronization() {
           @Override
           public void afterCompletion(int status) {
             if (status != Status.STATUS_COMMITTED) {
@@ -156,7 +152,7 @@ public class JMSContextKey implements Serializable {
             }
           }
         });
-      } catch (IllegalStateException | RollbackException | SystemException e) {
+      } catch (JMSException e) {
         throw new CorantRuntimeException(e);
       }
     }

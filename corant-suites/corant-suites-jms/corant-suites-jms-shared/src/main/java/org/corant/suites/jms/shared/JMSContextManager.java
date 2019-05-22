@@ -23,8 +23,10 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
 import javax.transaction.TransactionScoped;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jms-artemis
@@ -41,7 +43,13 @@ public abstract class JMSContextManager implements Serializable {
   final transient Map<JMSContextKey, JMSContext> contexts = new ConcurrentHashMap<>();
 
   public JMSContext compute(final JMSContextKey key) {
-    return contexts.computeIfAbsent(key, k -> k.create());
+    return contexts.computeIfAbsent(key, k -> {
+      try {
+        return k.create();
+      } catch (JMSException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
   }
 
   public JMSContext get(final JMSContextKey key) {

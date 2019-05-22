@@ -11,9 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared;
+package org.corant.suites.jms.shared.send;
 
 import static org.corant.Corant.instance;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.JMSContextProducer;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 
 /**
@@ -62,17 +64,14 @@ public interface MessageSender {
   public static class MessageSenderImpl implements MessageSender {
 
     protected final boolean multicast;
-
     protected final String destination;
-
-    protected final String connectionFactory;
-
+    protected final String connectionFactoryId;
     protected final int sessionMode;
 
-    protected MessageSenderImpl(MessageSend mpl) {
+    public MessageSenderImpl(MessageSend mpl) {
       multicast = mpl.multicast();
-      destination = mpl.destination();
-      connectionFactory = mpl.connectionFactory();
+      destination = shouldNotNull(mpl.destination());
+      connectionFactoryId = mpl.connectionFactoryId();
       sessionMode = mpl.sessionMode();
     }
 
@@ -110,12 +109,10 @@ public interface MessageSender {
       doSend(message);
     }
 
-    @SuppressWarnings({"unchecked", "resource"})
+    @SuppressWarnings({"unchecked"})
     void doSend(Object message) {
       final JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
-      final JMSContextKey ctxKey = new JMSContextKey(connectionFactory, sessionMode);
-      final JMSContext jmsc = new ExtendedJMSContext(ctxKey, ctxProducer.getRequestScopeContextManager(),
-          ctxProducer.getTransactionScopeContextManager());
+      final JMSContext jmsc = ctxProducer.create(connectionFactoryId, sessionMode);
       try {
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();
@@ -134,6 +131,5 @@ public interface MessageSender {
         throw new CorantRuntimeException(e);
       }
     }
-
   }
 }

@@ -33,15 +33,23 @@ import javax.jms.JMSContext;
 @Documented
 public @interface MessageReceive {
 
-  String connectionFactory() default "";
+  int acknowledge() default JMSContext.CLIENT_ACKNOWLEDGE;
+
+  int cacheLevel() default 1;// 0 Not cache,1 Cache connection, 2 Cache session
+
+  String clientId() default "";
+
+  String connectionFactoryId() default "";
 
   String[] destinations() default {};
 
   boolean multicast() default false;
 
+  long receiveTimeout() default 1000L;
+
   String selector() default "";
 
-  int sessionMode() default JMSContext.CLIENT_ACKNOWLEDGE;
+  boolean subscriptionDurable() default false;
 
   Class<?> type() default String.class;
 }

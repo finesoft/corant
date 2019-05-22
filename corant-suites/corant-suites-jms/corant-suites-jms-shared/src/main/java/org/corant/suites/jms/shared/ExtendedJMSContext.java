@@ -20,6 +20,7 @@ import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.JMSProducer;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -32,8 +33,6 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.XAJMSContext;
-import javax.transaction.SystemException;
-import javax.transaction.xa.XAResource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.JMSContextManager.RequestScopeContextManager;
 import org.corant.suites.jms.shared.JMSContextManager.TransactionScopeContextManager;
@@ -109,9 +108,8 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
     // When manually called close() then delistResource from current transaction if necessarily
     if (ctx != null && ctx instanceof XAJMSContext && Transactions.isInTransaction()) {
       try {
-        Transactions.currentTransaction()
-            .delistResource(XAJMSContext.class.cast(ctx).getXAResource(), XAResource.TMSUCCESS);
-      } catch (IllegalStateException | SystemException e) {
+        Transactions.deregisterXAResource(XAJMSContext.class.cast(ctx).getXAResource());
+      } catch (JMSException e) {
         throw new CorantRuntimeException(e);
       }
     }

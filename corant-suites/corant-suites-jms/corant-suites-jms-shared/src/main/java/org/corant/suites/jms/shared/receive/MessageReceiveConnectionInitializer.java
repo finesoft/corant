@@ -11,34 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared.annotation;
+package org.corant.suites.jms.shared.receive;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import javax.jms.JMSContext;
+import javax.jms.Connection;
 
 /**
  * corant-suites-jms-shared
  *
- * @author bingo 下午3:49:53
+ * @author bingo 下午7:27:36
  *
  */
-@Documented
-@Retention(RUNTIME)
-@Target(FIELD)
-public @interface MessageSend {
+public interface MessageReceiveConnectionInitializer {
 
-  String connectionFactoryId() default "";
-
-  String destination();
-
-  String durableSubscription() default "";
-
-  boolean multicast() default false;
-
-  int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
+  void initialize(Connection connection, MessageReceiverMetaData metaData);
 
 }

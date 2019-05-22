@@ -15,9 +15,13 @@ package org.corant.suites.jms.shared;
 
 import static javax.transaction.Status.STATUS_ACTIVE;
 import static javax.transaction.Status.STATUS_MARKED_ROLLBACK;
+import javax.jms.JMSException;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -29,7 +33,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Transactions {
 
-  static Transaction currentTransaction() {
+  public static Transaction currentTransaction() {
     if (Corant.instance().select(TransactionManager.class).isResolvable()) {
       try {
         Transaction tx = Corant.instance().select(TransactionManager.class).get().getTransaction();
@@ -41,7 +45,23 @@ public class Transactions {
     return null;
   }
 
-  static boolean isInTransaction() {
+  public static void deregisterXAResource(XAResource xaResource) throws JMSException {
+    try {
+      if (!currentTransaction().delistResource(xaResource, XAResource.TMSUCCESS)) {
+        throw getJmsException("Can not delist resource from current transaction.", null);
+      }
+    } catch (IllegalStateException | SystemException e) {
+      throw getJmsException("Can not delist resource from current transaction.", e);
+    }
+  }
+
+  public static JMSException getJmsException(String message, Exception cause) {
+    JMSException jmsException = new JMSException(message);
+    jmsException.setLinkedException(cause);
+    return jmsException;
+  }
+
+  public static boolean isInTransaction() {
     Transaction tx = currentTransaction();
     try {
       return tx != null
@@ -49,5 +69,30 @@ public class Transactions {
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  public static void registerSynchronization(Synchronization synchronization) throws JMSException {
+    try {
+      currentTransaction().registerSynchronization(synchronization);
+    } catch (IllegalStateException | RollbackException | SystemException e) {
+      throw getJmsException("Can not register synchronization to current transaction.", e);
+    }
+  }
+
+  public static void registerXAResource(XAResource xaResource) throws JMSException {
+    try {
+      if (!currentTransaction().enlistResource(xaResource)) {
+        throw getJmsException("Can not enlist resource to current transaction.", null);
+      }
+    } catch (RollbackException | IllegalStateException | SystemException e) {
+      throw getJmsException("Can not enlist resource to current transaction.", e);
+    }
+  }
+
+  public static TransactionManager transactionManager() {
+    if (Corant.instance().select(TransactionManager.class).isResolvable()) {
+      return Corant.instance().select(TransactionManager.class).get();
+    }
+    return null;
   }
 }

@@ -39,9 +39,9 @@ public class JMSContextProducer {
   @Any
   TransactionScopeContextManager transactionScopeContextManager;
 
-  @Produces
-  public JMSContext context(final InjectionPoint ip) {
-    return new ExtendedJMSContext(JMSContextKey.of(ip), requestScopeContextManager, transactionScopeContextManager);
+  public JMSContext create(final String connectionFactoryId, final int sessionMode) {
+    return new ExtendedJMSContext(new JMSContextKey(connectionFactoryId, sessionMode),
+        getRequestScopeContextManager(), getTransactionScopeContextManager());
   }
 
   /**
@@ -58,6 +58,12 @@ public class JMSContextProducer {
    */
   public TransactionScopeContextManager getTransactionScopeContextManager() {
     return transactionScopeContextManager;
+  }
+
+  @Produces
+  JMSContext produce(final InjectionPoint ip) {
+    return new ExtendedJMSContext(JMSContextKey.of(ip), getRequestScopeContextManager(),
+        getTransactionScopeContextManager());
   }
 
 }

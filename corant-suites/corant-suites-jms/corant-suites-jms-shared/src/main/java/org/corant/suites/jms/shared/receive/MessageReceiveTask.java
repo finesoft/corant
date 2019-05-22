@@ -101,7 +101,7 @@ public class MessageReceiveTask implements Runnable {
     }
   }
 
-  synchronized boolean initialize() throws JMSException {
+  boolean initialize() throws JMSException {
     // initialize connection
     if (connection == null) {
       try {

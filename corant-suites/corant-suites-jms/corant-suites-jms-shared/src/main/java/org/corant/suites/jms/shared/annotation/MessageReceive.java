@@ -35,7 +35,7 @@ public @interface MessageReceive {
 
   int acknowledge() default JMSContext.CLIENT_ACKNOWLEDGE;
 
-  int cacheLevel() default 1;// 0 Not cache,1 Cache connection, 2 Cache session
+  int cacheLevel() default 2;// 0 Not cache,1 Cache connection, 2 Cache session
 
   String clientId() default "";
 

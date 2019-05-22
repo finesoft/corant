@@ -69,7 +69,7 @@ public class MessageReceiveTask implements Runnable {
         AbstractJMSExtension.retriveConnectionFactory(metaData.getConnectionFactoryId());
     xa = connectionFactory instanceof XAConnectionFactory;
     messageHandler = new MessageHandler(metaData.getMethod());
-    logInf("Create message receive task for %s", metaData);
+    logFin("Create message receive task for %s", metaData);
   }
 
   @Override
@@ -91,9 +91,9 @@ public class MessageReceiveTask implements Runnable {
     try {
       Message message = null;
       message = messageConsumer.receive(metaData.getReceiveTimeout());
-      logInf("5. Received message from queue, [%s]", metaData);
+      logFin("5. Received message from queue, [%s]", metaData);
       messageHandler.onMessage(message);
-      logInf("5. Invoked message handler and processed message, [%s]", metaData);
+      logFin("5. Invoked message handler and processed message, [%s]", metaData);
       return message;
     } catch (JMSException e) {
       logErr("5-x. Receive and process message occurred error, [%s]", metaData);
@@ -107,10 +107,10 @@ public class MessageReceiveTask implements Runnable {
       try {
         if (xa) {
           connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
-          logInf("1. Created message receive task xaconnection, [%s]", metaData);
+          logFin("1. Created message receive task xaconnection, [%s]", metaData);
         } else {
           connection = connectionFactory.createConnection();
-          logInf("1. Created message receive task connection, [%s]", metaData);
+          logFin("1. Created message receive task connection, [%s]", metaData);
         }
         if (instance().select(MessageReceiveConnectionInitializer.class).isResolvable()) {
           instance().select(MessageReceiveConnectionInitializer.class).get().initialize(connection,
@@ -126,17 +126,17 @@ public class MessageReceiveTask implements Runnable {
       try {
         if (xa) {
           session = ((XAConnection) connection).createXASession();
-          logInf("2. Created message receive task xasession, [%s]", metaData);
+          logFin("2. Created message receive task xasession, [%s]", metaData);
         } else {
           session = connection.createSession(metaData.getAcknowledge());
-          logInf("2. Created message receive task session, [%s]", metaData);
+          logFin("2. Created message receive task session, [%s]", metaData);
         }
       } catch (JMSException je) {
         if (connection != null) {
           try {
             connection.close();
             connection = null;
-            logInf(
+            logFin(
                 "2-1. Close message receive task connection when initialize session occurred error, [%s]",
                 metaData);
           } catch (JMSException e) {
@@ -161,20 +161,20 @@ public class MessageReceiveTask implements Runnable {
         } else {
           messageConsumer = session.createConsumer(destination);
         }
-        logInf("3. Created message receive task consumer, [%s]", metaData);
+        logFin("3. Created message receive task consumer, [%s]", metaData);
       } catch (JMSException je) {
         try {
           if (session != null) {
             session.close();
             session = null;
-            logInf(
+            logFin(
                 "3-1. Close message receive task sesion when initialize consumer occurred error, [%s]",
                 metaData);
           }
           if (connection != null) {
             connection.close();
             connection = null;
-            logInf(
+            logFin(
                 "3-2. Close message receive task connection when initialize consumer occurred error, [%s]",
                 metaData);
           }
@@ -218,13 +218,13 @@ public class MessageReceiveTask implements Runnable {
     try {
       if (xa) {
         Transactions.transactionManager().commit();
-        logInf("7-1. Commit message receive task JTA transaction, [%s]", metaData);
+        logFin("7-1. Commit message receive task JTA transaction, [%s]", metaData);
       } else if (metaData.getAcknowledge() == Session.SESSION_TRANSACTED) {
         session.commit();
-        logInf("7-2. Commit message receive task session, [%s]", metaData);
+        logFin("7-2. Commit message receive task session, [%s]", metaData);
       } else if (metaData.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE && message != null) {
         message.acknowledge();
-        logInf("7-3. Acknowledge message message receive task session, [%s]", metaData);
+        logFin("7-3. Acknowledge message message receive task session, [%s]", metaData);
       }
     } catch (RollbackException | HeuristicMixedException | HeuristicRollbackException
         | SecurityException | IllegalStateException | SystemException te) {
@@ -240,11 +240,11 @@ public class MessageReceiveTask implements Runnable {
   void preConsume() throws NotSupportedException, SystemException, JMSException {
     try {
       connection.start();
-      logInf("4. Message receive task connection started, [%s]", metaData);
+      logFin("4. Message receive task connection started, [%s]", metaData);
       if (xa) {
         Transactions.transactionManager().begin();
         Transactions.registerXAResource(((XASession) session).getXAResource());
-        logInf("4-1. Message receive task JTA transaction began, [%s]", metaData);
+        logFin("4-1. Message receive task JTA transaction began, [%s]", metaData);
       }
     } catch (NotSupportedException | SystemException te) {
       logErr("4-x. Initialize message receive task JTA environment occurred error, [%s]", metaData);
@@ -314,11 +314,11 @@ public class MessageReceiveTask implements Runnable {
     }
   }
 
-  private void logInf(String msgOrFmt, Object... params) {
+  private void logFin(String msgOrFmt, Object... params) {
     if (params.length > 0) {
-      logger.info(() -> String.format(msgOrFmt, params));
+      logger.fine(() -> String.format(msgOrFmt, params));
     } else {
-      logger.info(() -> msgOrFmt);
+      logger.fine(() -> msgOrFmt);
     }
   }
 

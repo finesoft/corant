@@ -13,11 +13,14 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.trim;
 import java.lang.annotation.Annotation;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
@@ -36,6 +39,19 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  *
  */
 public abstract class Cdis {
+
+  public static <T> void acceptResolvabled(Class<T> instanceClass, Consumer<T> consumer) {
+    if (instance().select(instanceClass).isResolvable()) {
+      consumer.accept(instance().select(instanceClass).get());
+    }
+  }
+
+  public static <T, R> R applyResolvabled(Class<T> instanceClass, Function<T, R> function) {
+    if (instance().select(instanceClass).isResolvable()) {
+      return function.apply(instance().select(instanceClass).get());
+    }
+    return null;
+  }
 
   public static Annotated getAnnotated(InjectionPoint injectionPoint) {
     if (injectionPoint instanceof ParameterInjectionPoint) {

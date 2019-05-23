@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared;
+package org.corant.suites.jms.shared.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
@@ -32,6 +32,8 @@ import javax.jms.XAJMSContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.AbstractJMSExtension;
+import org.corant.suites.jms.shared.Transactions;
 
 /**
  * corant-suites-jms-artemis
@@ -69,8 +71,7 @@ public class JMSContextKey implements Serializable {
   }
 
   public JMSContext create() throws JMSException {
-    ConnectionFactory cf = connectionFactory();
-    if (cf instanceof XAConnectionFactory && Transactions.isInTransaction()) {
+    if (isXa() && Transactions.isInTransaction()) {
       XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
       Transactions.registerXAResource(ctx.getXAResource());
       logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
@@ -129,6 +130,10 @@ public class JMSContextKey implements Serializable {
       return shouldNotNull(
           connectionFactory = AbstractJMSExtension.retriveConnectionFactory(connectionFactoryId));
     }
+  }
+
+  boolean isXa() {
+    return AbstractJMSExtension.retrieveConfig(connectionFactoryId).isXa();
   }
 
   // TODO In NO XA

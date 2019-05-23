@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared;
+package org.corant.suites.jms.shared.context;
 
 import java.io.Serializable;
 import javax.jms.BytesMessage;
@@ -34,8 +34,9 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.XAJMSContext;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.JMSContextManager.RequestScopeContextManager;
-import org.corant.suites.jms.shared.JMSContextManager.TransactionScopeContextManager;
+import org.corant.suites.jms.shared.Transactions;
+import org.corant.suites.jms.shared.context.JMSContextManager.RequestScopeContextManager;
+import org.corant.suites.jms.shared.context.JMSContextManager.TransactionScopeContextManager;
 
 /**
  * corant-suites-jms-artemis
@@ -106,7 +107,7 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   public void close() {
     JMSContext ctx = context();
     // When manually called close() then delistResource from current transaction if necessarily
-    if (ctx != null && ctx instanceof XAJMSContext && Transactions.isInTransaction()) {
+    if (ctx != null && key.isXa() && Transactions.isInTransaction()) {
       try {
         Transactions.deregisterXAResource(XAJMSContext.class.cast(ctx).getXAResource());
       } catch (JMSException e) {

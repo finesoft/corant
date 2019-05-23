@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared;
+package org.corant.suites.jms.shared.context;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

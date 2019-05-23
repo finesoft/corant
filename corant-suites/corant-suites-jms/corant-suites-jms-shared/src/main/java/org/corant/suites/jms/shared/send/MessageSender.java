@@ -26,8 +26,8 @@ import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.JMSContextProducer;
 import org.corant.suites.jms.shared.annotation.MessageSend;
+import org.corant.suites.jms.shared.context.JMSContextProducer;
 
 /**
  * corant-suites-jms-shared

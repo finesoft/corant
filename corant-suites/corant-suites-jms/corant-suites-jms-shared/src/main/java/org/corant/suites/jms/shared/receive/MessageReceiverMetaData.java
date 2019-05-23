@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -58,7 +59,7 @@ public class MessageReceiverMetaData {
     final MessageReceive ann = method.getAnnotation(MessageReceive.class);
     acknowledge = ann.acknowledge();
     clientId = ann.clientId();
-    connectionFactoryId = ann.connectionFactoryId();
+    connectionFactoryId = defaultTrim(ann.connectionFactoryId());
     destination = destinationName;
     multicast = ann.multicast();
     selector = ann.selector();

@@ -13,7 +13,11 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -24,12 +28,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
-import javax.transaction.TransactionManager;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-jms-shared
@@ -46,57 +48,38 @@ public class MessageReceiverContainer {
   @Inject
   AbstractJMSExtension extesion;
 
-  @Inject
-  BeanManager beanManager;
+  final Map<Object, ScheduledExecutorService> executorServices = new HashMap<>();
 
-  @Inject
-  TransactionManager transactionManager;
-
-  @Inject
-  @ConfigProperty(name = "jms.enable", defaultValue = "true")
-  boolean enable;
-
-  @Inject
-  @ConfigProperty(name = "jms.receiver.executor.initialDelayMs", defaultValue = "0")
-  Integer esInitialDelay;
-
-  @Inject
-  @ConfigProperty(name = "jms.receiver.executor.initialDelayMs", defaultValue = "1000")
-  Integer esDelay;
-
-  @Inject
-  @ConfigProperty(name = "jms.receiver.executor.threads", defaultValue = "4")
-  Integer esThreads;
-
-  ScheduledExecutorService executorService;
-
-  Set<MessageReceiverMetaData> receiverMetaDatas =
+  final Set<MessageReceiverMetaData> receiveMetaDatas =
       Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    for (final MessageReceiverMetaData metaData : receiverMetaDatas) {
-      executorService.scheduleWithFixedDelay(new MessageReceiveTask(metaData),
-          esInitialDelay.intValue(), esDelay.intValue(), TimeUnit.MICROSECONDS);
+    for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
+      final AbstractJMSConfig cfg = defaultObject(
+          extesion.getConfig(metaData.getConnectionFactoryId()), AbstractJMSConfig.DFLT_INSTANCE);
+      ScheduledExecutorService ses =
+          shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()));
+      ses.scheduleWithFixedDelay(new MessageReceiveTask(metaData),
+          cfg.getReceiveTaskInitialDelayMs(), cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
     }
   }
 
   @PostConstruct
   void postConstruct() {
-    if (!enable) {
-      logger.info(() -> "JMS not enable!");
-      return;
-    }
-    extesion.receiverMethods().stream().map(MessageReceiverMetaData::of)
-        .forEach(receiverMetaDatas::addAll);
-    executorService = Executors.newScheduledThreadPool(esThreads);
+    extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
+        .forEach(receiveMetaDatas::addAll);
+    extesion.getConfigs().keySet().forEach(cfId -> executorServices.put(cfId,
+        Executors.newScheduledThreadPool(extesion.getConfig(cfId).getReceiveTaskThreads())));
   }
 
   @PreDestroy
   void preDestroy() {
-    executorService.shutdownNow().forEach(r -> {
-      if (r instanceof MessageReceiveTask) {
-        MessageReceiveTask.class.cast(r).release(true);
-      }
+    executorServices.values().forEach(es -> {
+      es.shutdownNow().forEach(r -> {
+        if (r instanceof MessageReceiveTask) {
+          MessageReceiveTask.class.cast(r).release(true);
+        }
+      });
     });
   }
 }

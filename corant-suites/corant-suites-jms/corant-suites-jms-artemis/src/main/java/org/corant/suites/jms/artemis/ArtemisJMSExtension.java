@@ -14,6 +14,8 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +30,13 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
+import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -82,15 +86,13 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 
-  protected final Map<String, ArtemisConfig> configs = new HashMap<>();
-
   @Override
-  protected boolean enable() {
-    return ConfigProvider.getConfig().getOptionalValue("jms.enable", Boolean.class).orElse(true);
+  public AbstractJMSConfig getConfig(String connectionFactoryId) {
+    return defaultObject(configs.get(connectionFactoryId), AbstractJMSConfig.DFLT_INSTANCE);
   }
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    if (event != null && enable()) {
+    if (event != null) {
       configs.forEach((dsn, dsc) -> {
         event.<ActiveMQConnectionFactory>addBean().addQualifier(Cdis.resolveNamed(dsn))
             .addQualifier(Default.Literal.INSTANCE)
@@ -98,7 +100,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
             .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
-                return buildConnectionFactory(beans, dsc);
+                return buildConnectionFactory(beans, forceCast(dsc));
               } catch (Exception e) {
                 throw new CorantRuntimeException(e);
               }
@@ -126,7 +128,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     final ActiveMQConnectionFactory activeMQConnectionFactory;
     if (cfg.getUrl() != null) {
       activeMQConnectionFactory =
-          ActiveMQJMSClient.createConnectionFactory(cfg.getUrl(), cfg.getName());
+          ActiveMQJMSClient.createConnectionFactory(cfg.getUrl(), cfg.getConnectionFactoryId());
     } else {
       List<TransportConfiguration> tcs = new ArrayList<>();
       if (isNotEmpty(cfg.getHostPorts())) {
@@ -139,12 +141,13 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
           tcs.add(new TransportConfiguration(cfg.getConnectorFactory(), params));
         }
       }
+      JMSFactoryType factoryType = cfg.isXa() ? JMSFactoryType.XA_CF : JMSFactoryType.CF;
       if (cfg.isHa()) {
-        activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithHA(
-            cfg.getFactoryType(), tcs.stream().toArray(TransportConfiguration[]::new));
+        activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithHA(factoryType,
+            tcs.stream().toArray(TransportConfiguration[]::new));
       } else {
-        activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(
-            cfg.getFactoryType(), tcs.stream().toArray(TransportConfiguration[]::new));
+        activeMQConnectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(factoryType,
+            tcs.stream().toArray(TransportConfiguration[]::new));
       }
     }
     if (cfg.hasAuthentication()) {

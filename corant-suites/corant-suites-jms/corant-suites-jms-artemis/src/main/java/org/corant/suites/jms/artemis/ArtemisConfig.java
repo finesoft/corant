@@ -15,7 +15,6 @@ package org.corant.suites.jms.artemis;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeNull;
-import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -32,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -44,48 +43,47 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 上午10:08:11
  *
  */
-public class ArtemisConfig {
+public class ArtemisConfig extends AbstractJMSConfig {
 
   public static final int DFLT_PORT = 61616;
+
   public static final String ATM_PREFIX = "jms.artemis.";
+
   public static final String ATM_USER_NAME = ".username";
   public static final String ATM_PASSWOED = ".password";
   public static final String ATM_URL = ".url";
   public static final String ATM_HA = ".ha";
-  public static final String ATM_FT = ".factory-type";
   public static final String ATM_HOST_PORTS = ".host-ports";
 
-  private String name; // the connection factory name means a artemis server or cluster
   private String username;
   private String password;
   private String url;
-  private JMSFactoryType factoryType;
   private Set<Pair<String, Integer>> hostPorts = new LinkedHashSet<>();
   private boolean ha;
 
   protected ArtemisConfig() {}
 
   /**
-   * @param name
+   * @param connectionFactoryId
    * @param username
    * @param password
    * @param url
    * @param hostPorts
    * @param ha
-   * @param factoryType
+   * @param xa
    */
-  protected ArtemisConfig(String name, String username, String password, String url,
-      Collection<Pair<String, Integer>> hostPorts, boolean ha, JMSFactoryType factoryType) {
+  protected ArtemisConfig(String connectionFactoryId, String username, String password, String url,
+      Collection<Pair<String, Integer>> hostPorts, boolean ha, boolean xa) {
     super();
-    this.name = name;
-    this.username = username;
-    this.password = password;
-    this.url = url;
+    setConnectionFactoryId(connectionFactoryId);
+    setUsername(username);
+    setPassword(password);
+    setUrl(url);
     if (isNotEmpty(hostPorts)) {
-      this.hostPorts.addAll(hostPorts);
+      setHostPorts(new LinkedHashSet<>(hostPorts));
     }
-    this.ha = ha;
-    this.factoryType = factoryType;
+    setHa(ha);
+    setXa(xa);
   }
 
   public static Map<String, ArtemisConfig> from(Config config) {
@@ -97,16 +95,16 @@ public class ArtemisConfig {
     namedCfgKeys.forEach((k, v) -> {
       final ArtemisConfig cfg = of(config, k, v);
       if (cfg != null) {
-        shouldBeNull(artMisCfgs.put(defaultTrim(cfg.getName()), cfg),
-            "The artemis named %s configuration dup!", cfg.getName());
+        shouldBeNull(artMisCfgs.put(defaultTrim(cfg.getConnectionFactoryId()), cfg),
+            "The artemis id %s configuration dup!", cfg.getConnectionFactoryId());
       }
     });
     // handle default configuration
-    String dfltName = config.getOptionalValue(ATM_PREFIX + "name", String.class).orElse(null);
+    String dfltName = config.getOptionalValue(ATM_PREFIX + "id", String.class).orElse(null);
     ArtemisConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (dfltCfg != null) {
-      shouldBeNull(artMisCfgs.put(defaultTrim(dfltCfg.getName()), dfltCfg),
-          "The artemis named %s configuration dup!", dfltName);
+      shouldBeNull(artMisCfgs.put(defaultTrim(dfltCfg.getConnectionFactoryId()), dfltCfg),
+          "The artemis id %s configuration dup!", dfltName);
     }
     return artMisCfgs;
   }
@@ -114,18 +112,23 @@ public class ArtemisConfig {
   static Set<String> defaultPropertyNames() {
     String dfltPrefix = ATM_PREFIX.substring(0, ATM_PREFIX.length() - 1);
     Set<String> names = new LinkedHashSet<>();
+    names.add(dfltPrefix + JMS_ENABLE);
+    names.add(dfltPrefix + JMS_REC_TSK_DELAYMS);
+    names.add(dfltPrefix + JMS_REC_TSK_INIT_DELAYMS);
+    names.add(dfltPrefix + JMS_REC_TSK_THREADS);
+    names.add(dfltPrefix + JMS_XA);
     names.add(dfltPrefix + ATM_USER_NAME);
     names.add(dfltPrefix + ATM_PASSWOED);
     names.add(dfltPrefix + ATM_URL);
     names.add(dfltPrefix + ATM_HOST_PORTS);
     names.add(dfltPrefix + ATM_HA);
-    names.add(dfltPrefix + ATM_FT);
     return names;
   }
 
-  static ArtemisConfig of(Config config, String name, Collection<String> propertieNames) {
+  static ArtemisConfig of(Config config, String connectionFactoryId,
+      Collection<String> propertieNames) {
     final ArtemisConfig cfg = new ArtemisConfig();
-    cfg.setName(name);
+    cfg.setConnectionFactoryId(connectionFactoryId);
     propertieNames.forEach(pn -> {
       if (pn.endsWith(ATM_USER_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(cfg::setUsername);
@@ -148,9 +151,16 @@ public class ArtemisConfig {
             }).filter(ObjectUtils::isNotNull).collect(Collectors.toSet())));
       } else if (pn.endsWith(ATM_HA)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setHa);
-      } else if (pn.endsWith(ATM_FT)) {
-        String ft = config.getOptionalValue(pn, String.class).orElse("CF");
-        cfg.setFactoryType(toEnum(ft, JMSFactoryType.class));
+      } else if (pn.endsWith(JMS_ENABLE)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setEnable);
+      } else if (pn.endsWith(JMS_XA)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(cfg::setXa);
+      } else if (pn.endsWith(JMS_REC_TSK_DELAYMS)) {
+        config.getOptionalValue(pn, Long.class).ifPresent(cfg::setReceiveTaskDelayMs);
+      } else if (pn.endsWith(JMS_REC_TSK_INIT_DELAYMS)) {
+        config.getOptionalValue(pn, Long.class).ifPresent(cfg::setReceiveTaskInitialDelayMs);
+      } else if (pn.endsWith(JMS_REC_TSK_THREADS)) {
+        config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setReceiveTaskThreads);
       }
     });
     if (isNotBlank(cfg.getUrl()) || isNotEmpty(cfg.getHostPorts())) {
@@ -163,16 +173,8 @@ public class ArtemisConfig {
     return NettyConnectorFactory.class.getName();
   }
 
-  public JMSFactoryType getFactoryType() {
-    return factoryType;
-  }
-
   public Set<Pair<String, Integer>> getHostPorts() {
     return Collections.unmodifiableSet(hostPorts);
-  }
-
-  public String getName() {
-    return name;
   }
 
   public String getPassword() {
@@ -195,10 +197,6 @@ public class ArtemisConfig {
     return ha;
   }
 
-  protected void setFactoryType(JMSFactoryType factoryType) {
-    this.factoryType = factoryType;
-  }
-
   protected void setHa(boolean ha) {
     this.ha = ha;
   }
@@ -208,10 +206,6 @@ public class ArtemisConfig {
     if (isNotEmpty(hostPorts)) {
       this.hostPorts.addAll(hostPorts);
     }
-  }
-
-  protected void setName(String name) {
-    this.name = name;
   }
 
   protected void setPassword(String password) {

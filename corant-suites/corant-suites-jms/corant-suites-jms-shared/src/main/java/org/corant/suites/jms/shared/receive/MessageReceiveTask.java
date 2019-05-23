@@ -52,7 +52,7 @@ public class MessageReceiveTask implements Runnable {
 
   final Logger logger = Logger.getLogger(MessageReceiveTask.class.getName());
   final MessageReceiverMetaData metaData;
-  final ConnectionFactory connectionFactory;
+  final Object connectionFactory;
   final MessageHandler messageHandler;
   final boolean xa;
   volatile Connection connection;
@@ -65,9 +65,9 @@ public class MessageReceiveTask implements Runnable {
   protected MessageReceiveTask(MessageReceiverMetaData metaData) {
     super();
     this.metaData = metaData;
+    xa = AbstractJMSExtension.retrieveConfig(metaData.getConnectionFactoryId()).isXa();
     connectionFactory =
         AbstractJMSExtension.retriveConnectionFactory(metaData.getConnectionFactoryId());
-    xa = connectionFactory instanceof XAConnectionFactory;
     messageHandler = new MessageHandler(metaData.getMethod());
     logFin("Create message receive task for %s", metaData);
   }
@@ -109,7 +109,7 @@ public class MessageReceiveTask implements Runnable {
           connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
           logFin("1. Created message receive task xaconnection, [%s]", metaData);
         } else {
-          connection = connectionFactory.createConnection();
+          connection = ((ConnectionFactory) connectionFactory).createConnection();
           logFin("1. Created message receive task connection, [%s]", metaData);
         }
         if (instance().select(MessageReceiveConnectionInitializer.class).isResolvable()) {

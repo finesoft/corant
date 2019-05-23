@@ -17,6 +17,10 @@ import static java.util.Collections.newSetFromMap;
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -41,46 +45,57 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
-  protected final Set<AnnotatedMethod<?>> receiverMethods =
-      newSetFromMap(new ConcurrentHashMap<>());
-  protected final Set<AnnotatedMethod<?>> streamProcessorMethods =
-      newSetFromMap(new ConcurrentHashMap<>());
+  protected final Map<String, AbstractJMSConfig> configs = new HashMap<>();
+  protected final Set<AnnotatedMethod<?>> receiveMethods = newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<AnnotatedMethod<?>> streamMethods = newSetFromMap(new ConcurrentHashMap<>());
 
-  public static ConnectionFactory retriveConnectionFactory(String connectionFactory) {
-    if (isEmpty(connectionFactory)) {
+  public static AbstractJMSConfig retrieveConfig(String connectionFactoryId) {
+    if (instance().select(AbstractJMSExtension.class).isResolvable()) {
+      return instance().select(AbstractJMSExtension.class).get().getConfig(connectionFactoryId);
+    }
+    return null;
+  }
+
+  public static ConnectionFactory retriveConnectionFactory(String connectionFactoryId) {
+    if (isEmpty(connectionFactoryId)) {
       if (instance().select(ConnectionFactory.class).isResolvable()) {
         return instance().select(ConnectionFactory.class).get();
       }
       return instance().select(ConnectionFactory.class, Unnamed.INST).get();
     } else {
       return shouldNotNull(
-          instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactory)).get());
+          instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactoryId)).get());
     }
   }
 
-  public Set<AnnotatedMethod<?>> receiverMethods() {
-    return receiverMethods;
+  public AbstractJMSConfig getConfig(String connectionFactoryId) {
+    return defaultObject(configs.get(connectionFactoryId), AbstractJMSConfig.DFLT_INSTANCE);
   }
 
-  protected boolean enable() {
-    return true;
+  public Map<String, ? extends AbstractJMSConfig> getConfigs() {
+    return Collections.unmodifiableMap(configs);
+  }
+
+  public Set<AnnotatedMethod<?>> getReceiveMethods() {
+    return Collections.unmodifiableSet(receiveMethods);
+  }
+
+  public Set<AnnotatedMethod<?>> getStreamMethods() {
+    return Collections.unmodifiableSet(streamMethods);
   }
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
-    if (!enable()) {
-      return;
-    }
     logger.info(() -> String.format("Scanning message consumer type: %s",
         pat.getAnnotatedType().getJavaClass().getName()));
     final AnnotatedType<?> annotatedType = pat.getAnnotatedType();
     for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
       if (am.isAnnotationPresent(MessageReceive.class)) {
         logger.info(() -> "Found annotated message consumer method, adding for further processing");
-        receiverMethods.add(am);
+        receiveMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
         logger.info(() -> "Found annotated message stream method, adding for further processing");
-        streamProcessorMethods.add(am);
+        streamMethods.add(am);
       }
     }
   }

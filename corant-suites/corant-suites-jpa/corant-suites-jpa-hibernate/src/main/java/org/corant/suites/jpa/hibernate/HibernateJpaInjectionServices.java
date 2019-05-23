@@ -36,8 +36,9 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  */
 public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices {
 
-  static final Map<String, Object> PROPERTIES =
-      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+  static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
+      new NarayanaJtaPlatform(), AvailableSettings.HBM2DDL_DATABASE_ACTION, "none",
+      AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
 
   @Override
   protected EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {

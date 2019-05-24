@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -51,7 +52,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   @Transactional
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
     if (e.getSource() != null) {
-      Entity entity = e.getSource();
+      Entity entity = forceCast(e.getSource());
       Annotation named = persistenceService.getPersistenceUnitQualifier(entity.getClass());
       LifecyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();

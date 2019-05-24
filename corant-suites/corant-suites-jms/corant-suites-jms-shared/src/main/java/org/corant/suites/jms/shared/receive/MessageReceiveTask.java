@@ -55,6 +55,7 @@ public class MessageReceiveTask implements Runnable {
   final Object connectionFactory;
   final MessageHandler messageHandler;
   final boolean xa;
+  volatile boolean inProgress;
   volatile Connection connection;
   volatile Session session;
   volatile MessageConsumer messageConsumer;
@@ -72,13 +73,20 @@ public class MessageReceiveTask implements Runnable {
     logFin("Create message receive task for %s", metaData);
   }
 
+  public boolean isInProgress() {
+    return inProgress;
+  }
+
   @Override
   public void run() {
     try {
       if (initialize()) {
-        preConsume();
-        Message message = consume();
-        postConsume(message);
+        int rt = metaData.getNumberOfReceivePerExecution();
+        while (--rt >= 0) {
+          preConsume();
+          Message message = consume();
+          postConsume(message);
+        }
       }
     } catch (Throwable e) {
       onException(e);
@@ -90,10 +98,16 @@ public class MessageReceiveTask implements Runnable {
   Message consume() throws JMSException {
     try {
       Message message = null;
-      message = messageConsumer.receive(metaData.getReceiveTimeout());
+      if (metaData.getReceiveTimeout() <= 0) {
+        message = messageConsumer.receiveNoWait();
+      } else {
+        message = messageConsumer.receive(metaData.getReceiveTimeout());
+      }
       logFin("5. Received message from queue, [%s]", metaData);
-      messageHandler.onMessage(message);
-      logFin("5. Invoked message handler and processed message, [%s]", metaData);
+      if (message != null) {
+        messageHandler.onMessage(message);
+        logFin("5. Invoked message handler and processed message, [%s]", metaData);
+      }
       return message;
     } catch (JMSException e) {
       logErr("5-x. Receive and process message occurred error, [%s]", metaData);
@@ -102,6 +116,7 @@ public class MessageReceiveTask implements Runnable {
   }
 
   boolean initialize() throws JMSException {
+    inProgress = true;
     // initialize connection
     if (connection == null) {
       try {
@@ -188,6 +203,9 @@ public class MessageReceiveTask implements Runnable {
         throw je;
       }
     }
+    // start connection
+    connection.start();
+    logFin("4. Message receive task connection started, [%s]", metaData);
     return true;
   }
 
@@ -239,8 +257,6 @@ public class MessageReceiveTask implements Runnable {
 
   void preConsume() throws NotSupportedException, SystemException, JMSException {
     try {
-      connection.start();
-      logFin("4. Message receive task connection started, [%s]", metaData);
       if (xa) {
         Transactions.transactionManager().begin();
         Transactions.registerXAResource(((XASession) session).getXAResource());
@@ -303,6 +319,8 @@ public class MessageReceiveTask implements Runnable {
     } catch (JMSException e) {
       // TODO
       throw new CorantRuntimeException(e);
+    } finally {
+      inProgress = false;
     }
   }
 

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import java.security.AccessController;
@@ -48,6 +49,7 @@ public class MessageReceiverMetaData {
   private final Transactional transactional;
   private final int cacheLevel;
   private final long receiveTimeout;
+  private final int numberOfReceivePerExecution;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
     this.method = shouldNotNull(method);
@@ -68,6 +70,7 @@ public class MessageReceiverMetaData {
     transactional = TransactionalMetaUtils.getTransactionalAnnotationRecursive(method);
     cacheLevel = ann.cacheLevel();
     receiveTimeout = ann.receiveTimeout();
+    numberOfReceivePerExecution = max(1, ann.numberOfReceivePerExecution());
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -167,6 +170,14 @@ public class MessageReceiverMetaData {
    */
   public AnnotatedMethod<?> getMethod() {
     return method;
+  }
+
+  /**
+   * 
+   * @return the numberOfReceivePerExecution
+   */
+  public int getNumberOfReceivePerExecution() {
+    return numberOfReceivePerExecution;
   }
 
   public long getReceiveTimeout() {

@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import javax.jms.JMSContext;
+import javax.jms.Session;
 
 /**
  * corant-suites-jms-shared
@@ -33,23 +34,99 @@ import javax.jms.JMSContext;
 @Documented
 public @interface MessageReceive {
 
-  int acknowledge() default JMSContext.CLIENT_ACKNOWLEDGE;
+  /**
+   *
+   * @see Session#AUTO_ACKNOWLEDGE
+   * @see Session#CLIENT_ACKNOWLEDGE
+   * @see Session#DUPS_OK_ACKNOWLEDGE
+   * @see Session#SESSION_TRANSACTED
+   *
+   * @return acknowledge
+   */
+  int acknowledge() default Session.CLIENT_ACKNOWLEDGE;
 
-  int cacheLevel() default 2;// 0 Not cache,1 Cache connection, 2 Cache session
+  /**
+   * Marks whether a connection or session is cached.
+   *
+   * <pre>
+   * Value of 0 represents Not cache
+   * Value of 1 represents cache connection
+   * Value of 2 represents cache session
+   * </pre>
+   *
+   * @return cacheLevel
+   */
+  int cacheLevel() default 2;
 
+  /**
+   * @see JMSContext#setClientID(String)
+   * @return clientId
+   */
   String clientId() default "";
 
+  /**
+   * The connection factory id, used to represent a JMS service or cluster, usually set up through a
+   * configuration file.
+   *
+   * @return connectionFactoryId
+   */
   String connectionFactoryId() default "";
 
+  /**
+   * The destination name
+   *
+   * @see javax.jms.Destination
+   * @return destinations
+   */
   String[] destinations() default {};
 
+  /**
+   * Marks whether a queue or topic.
+   *
+   * Value of true represents Topic, Value of false represents Queue, default is false.
+   *
+   * @return multicast
+   */
   boolean multicast() default false;
 
+  /**
+   * The number of messages received per execution, using the same message consumer. Each message
+   * receipt has its own message acknowledgement, Each message receipt has its own message
+   * acknowledgement, which means that in JTA XA, each message received and processed is a separate
+   * transaction; in SESSION_TRANSACTED, each message received and processed is committed
+   * independently; in CLIENT_ACKNOWLEDGE, each receive processing is notified acknowledged.
+   *
+   * Default value is 1.
+   *
+   * @return numberOfReceivePerExecution
+   */
+  int numberOfReceivePerExecution() default 1;
+
+  /**
+   * Internal MessageConsumer receive timeout in millseconds
+   *
+   * @see javax.jms.MessageConsumer#receive(long)
+   * @return receiveTimeout
+   */
   long receiveTimeout() default 1000L;
 
+  /**
+   * @see Session#createConsumer(javax.jms.Destination, String)
+   * @return selector
+   */
   String selector() default "";
 
+  /**
+   * TODO
+   *
+   * @return subscriptionDurable
+   */
   boolean subscriptionDurable() default false;
 
+  /**
+   * TODO
+   *
+   * @return type
+   */
   Class<?> type() default String.class;
 }

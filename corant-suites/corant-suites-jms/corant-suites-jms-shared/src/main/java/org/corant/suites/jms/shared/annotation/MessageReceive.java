@@ -91,10 +91,10 @@ public @interface MessageReceive {
 
   /**
    * The number of messages received per execution, using the same message consumer. Each message
-   * receipt has its own message acknowledgement, Each message receipt has its own message
-   * acknowledgement, which means that in JTA XA, each message received and processed is a separate
-   * transaction; in SESSION_TRANSACTED, each message received and processed is committed
-   * independently; in CLIENT_ACKNOWLEDGE, each receive processing is notified acknowledged.
+   * receipt has its own message acknowledgement, which means that in JTA XA, each message received
+   * and processed is a separate transaction; in SESSION_TRANSACTED, each message received and
+   * processed is committed independently; in CLIENT_ACKNOWLEDGE, each receive processing is
+   * notified acknowledged.
    *
    * Default value is 1.
    *

@@ -85,11 +85,11 @@ public class MessageReceiveTask implements Runnable {
       if (initialize()) {
         int rt = metaData.getNumberOfReceivePerExecution();
         while (--rt >= 0) {
-          logFin("----------Begin message receive task progess.----------");
+          logFin("----------Begin message consuming.----------");
           preConsume();
           Message message = consume();
           postConsume(message);
-          logFin("----------End message receive task progess.----------");
+          logFin("----------End message consuming.----------");
         }
       }
     } catch (Throwable e) {

@@ -46,6 +46,7 @@ import org.keycloak.jaxrs.JaxrsHttpFacade;
  * @author bingo 下午7:40:34
  *
  */
+@SuppressWarnings("deprecation")
 @ApplicationScoped
 @PreMatching
 @Priority(Priorities.AUTHENTICATION)

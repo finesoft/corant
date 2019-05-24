@@ -353,6 +353,8 @@ public class Corant implements AutoCloseable {
     log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
         LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
     printBoostLine();
+
+    doOnReady();
     return this;
   }
 
@@ -374,14 +376,17 @@ public class Corant implements AutoCloseable {
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
-    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostCorantReadyEvent(args));
   }
 
   void doBeforeStart(ClassLoader classLoader) {
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
+  }
+
+  void doOnReady() {
+    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
+    emitter.fire(new PostCorantReadyEvent(args));
   }
 
   private void log(Logger logger, String msgOrFmt, Object... args) {

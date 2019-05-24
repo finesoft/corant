@@ -80,16 +80,16 @@ public class MessageReceiveTask implements Runnable {
 
   @Override
   public void run() {
-    logFin("----------Start message receive task.----------");
+    logFin("Start message receive task.");
     try {
       if (initialize()) {
         int rt = metaData.getNumberOfReceivePerExecution();
         while (--rt >= 0) {
-          logFin("----------Begin message consuming.----------");
+          logFin("Begin message consuming.");
           preConsume();
           Message message = consume();
           postConsume(message);
-          logFin("----------End message consuming.----------");
+          logFin("End message consuming.\n");
         }
       }
     } catch (Throwable e) {
@@ -97,7 +97,7 @@ public class MessageReceiveTask implements Runnable {
     } finally {
       release(false);
     }
-    logFin("----------Stopped message receive task.----------");
+    logFin("Stopped message receive task.\n\n");
   }
 
   Message consume() throws JMSException {

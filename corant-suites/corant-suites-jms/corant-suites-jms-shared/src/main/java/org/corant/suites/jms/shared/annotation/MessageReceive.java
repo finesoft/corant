@@ -94,7 +94,7 @@ public @interface MessageReceive {
    * receipt has its own message acknowledgement, which means that in JTA XA, each message received
    * and processed is a separate transaction; in SESSION_TRANSACTED, each message received and
    * processed is committed independently; in CLIENT_ACKNOWLEDGE, each receive processing is
-   * notified acknowledged.
+   * acknowledged independently.
    *
    * Default value is 1.
    *

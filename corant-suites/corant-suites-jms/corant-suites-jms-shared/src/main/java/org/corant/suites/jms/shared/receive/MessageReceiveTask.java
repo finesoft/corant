@@ -16,6 +16,7 @@ package org.corant.suites.jms.shared.receive;
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -225,7 +226,7 @@ public class MessageReceiveTask implements Runnable {
         }
       }
     } catch (Exception te) {
-      te.printStackTrace();
+      logger.log(Level.SEVERE, te, () -> "Rollback message receive occurred error");
       throw new CorantRuntimeException(e);
     }
   }

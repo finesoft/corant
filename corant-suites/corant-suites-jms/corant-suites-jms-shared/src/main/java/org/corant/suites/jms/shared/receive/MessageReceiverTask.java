@@ -39,6 +39,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.Corant;
+import org.corant.config.ComparableConfigurator;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.Transactions;
@@ -49,9 +50,9 @@ import org.corant.suites.jms.shared.Transactions;
  * @author bingo 上午11:33:15
  *
  */
-public class MessageReceiveTask implements Runnable {
+public class MessageReceiverTask implements Runnable {
 
-  final Logger logger = Logger.getLogger(MessageReceiveTask.class.getName());
+  final Logger logger = Logger.getLogger(MessageReceiverTask.class.getName());
   final MessageReceiverMetaData metaData;
   final Object connectionFactory;
   final MessageHandler messageHandler;
@@ -64,7 +65,7 @@ public class MessageReceiveTask implements Runnable {
   /**
    * @param metaData
    */
-  protected MessageReceiveTask(MessageReceiverMetaData metaData) {
+  protected MessageReceiverTask(MessageReceiverMetaData metaData) {
     super();
     this.metaData = metaData;
     xa = AbstractJMSExtension.retrieveConfig(metaData.getConnectionFactoryId()).isXa();
@@ -132,10 +133,9 @@ public class MessageReceiveTask implements Runnable {
           connection = ((ConnectionFactory) connectionFactory).createConnection();
           logFin("1. Created message receive task connection, [%s]", metaData);
         }
-        if (instance().select(MessageReceiveConnectionInitializer.class).isResolvable()) {
-          instance().select(MessageReceiveConnectionInitializer.class).get().initialize(connection,
-              metaData);
-        }
+        instance().select(MessageReceiverTaskConfigurator.class).stream()
+            .sorted(ComparableConfigurator::compare)
+            .forEach(c -> c.configConnection(connection, metaData));
       } catch (JMSException je) {
         logErr("1-x. Initialize message receive task connection occurred error, [%s]", metaData);
         throw je;
@@ -151,6 +151,9 @@ public class MessageReceiveTask implements Runnable {
           session = connection.createSession(metaData.getAcknowledge());
           logFin("2. Created message receive task session, [%s]", metaData);
         }
+        instance().select(MessageReceiverTaskConfigurator.class).stream()
+            .sorted(ComparableConfigurator::compare)
+            .forEach(c -> c.configSession(session, metaData));
       } catch (JMSException je) {
         if (connection != null) {
           try {
@@ -181,6 +184,9 @@ public class MessageReceiveTask implements Runnable {
         } else {
           messageConsumer = session.createConsumer(destination);
         }
+        instance().select(MessageReceiverTaskConfigurator.class).stream()
+            .sorted(ComparableConfigurator::compare)
+            .forEach(c -> c.configMessageConsumer(messageConsumer, metaData));
         logFin("3. Created message receive task consumer, [%s]", metaData);
       } catch (JMSException je) {
         try {

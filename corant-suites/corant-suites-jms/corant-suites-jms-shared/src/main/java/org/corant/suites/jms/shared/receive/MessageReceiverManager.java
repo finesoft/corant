@@ -40,7 +40,7 @@ import org.corant.suites.jms.shared.AbstractJMSExtension;
  *
  */
 @ApplicationScoped
-public class MessageReceiverContainer {
+public class MessageReceiverManager {
 
   @Inject
   Logger logger;
@@ -59,7 +59,7 @@ public class MessageReceiverContainer {
           extesion.getConfig(metaData.getConnectionFactoryId()), AbstractJMSConfig.DFLT_INSTANCE);
       ScheduledExecutorService ses =
           shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()));
-      ses.scheduleWithFixedDelay(new MessageReceiveTask(metaData),
+      ses.scheduleWithFixedDelay(new MessageReceiverTask(metaData),
           cfg.getReceiveTaskInitialDelayMs(), cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
     }
   }
@@ -70,14 +70,17 @@ public class MessageReceiverContainer {
         .forEach(receiveMetaDatas::addAll);
     extesion.getConfigs().keySet().forEach(cfId -> executorServices.put(cfId,
         Executors.newScheduledThreadPool(extesion.getConfig(cfId).getReceiveTaskThreads())));
+    logger.info(
+        () -> String.format("Find %s message receivers that involving %s connection factories.",
+            receiveMetaDatas.size(), executorServices.size()));
   }
 
   @PreDestroy
   void preDestroy() {
     executorServices.values().forEach(es -> {
       es.shutdownNow().forEach(r -> {
-        if (r instanceof MessageReceiveTask) {
-          MessageReceiveTask.class.cast(r).release(true);
+        if (r instanceof MessageReceiverTask) {
+          MessageReceiverTask.class.cast(r).release(true);
         }
       });
     });

@@ -27,9 +27,9 @@ public abstract class AbstractJMSConfig {
 
   public static final String JMS_ENABLE = ".enable";
   public static final String JMS_XA = ".xa";
-  public static final String JMS_REC_TSK_INIT_DELAYMS = ".receive-task-initial-delayMs";
-  public static final String JMS_REC_TSK_DELAYMS = ".receive-task-delayMs";
-  public static final String JMS_REC_TSK_THREADS = ".receive-task-threads";
+  public static final String JMS_REC_TSK_INIT_DELAYMS = ".receiver-task-initial-delayMs";
+  public static final String JMS_REC_TSK_DELAYMS = ".receiver-task-delayMs";
+  public static final String JMS_REC_TSK_THREADS = ".receiver-task-threads";
 
   public final static AbstractJMSConfig DFLT_INSTANCE = new AbstractJMSConfig() {};
   // the connection factory id means a artemis server or cluster

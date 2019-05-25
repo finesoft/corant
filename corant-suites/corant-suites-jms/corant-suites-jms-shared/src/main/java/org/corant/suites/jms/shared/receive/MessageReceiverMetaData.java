@@ -25,9 +25,7 @@ import java.security.PrivilegedAction;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.transaction.Transactional;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
-import org.corant.suites.jta.shared.TransactionalMetaUtils;
 
 /**
  * corant-suites-jms-shared
@@ -46,7 +44,6 @@ public class MessageReceiverMetaData {
   private final String selector;
   private final boolean subscriptionDurable;
   private final Class<?> type;
-  private final Transactional transactional;
   private final int cacheLevel;
   private final long receiveTimeout;
   private final int numberOfReceivePerExecution;
@@ -67,7 +64,6 @@ public class MessageReceiverMetaData {
     selector = ann.selector();
     subscriptionDurable = ann.subscriptionDurable();
     type = defaultObject(ann.type(), String.class);
-    transactional = TransactionalMetaUtils.getTransactionalAnnotationRecursive(method);
     cacheLevel = ann.cacheLevel();
     receiveTimeout = ann.receiveTimeout();
     numberOfReceivePerExecution = max(1, ann.numberOfReceivePerExecution());
@@ -173,7 +169,7 @@ public class MessageReceiverMetaData {
   }
 
   /**
-   * 
+   *
    * @return the numberOfReceivePerExecution
    */
   public int getNumberOfReceivePerExecution() {
@@ -190,14 +186,6 @@ public class MessageReceiverMetaData {
    */
   public String getSelector() {
     return selector;
-  }
-
-  /**
-   *
-   * @return the transactional
-   */
-  public Transactional getTransactional() {
-    return transactional;
   }
 
   /**

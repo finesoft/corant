@@ -11,18 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared;
+package org.corant.suites.jms.shared.receive;
 
-import java.util.function.Supplier;
+import javax.jms.Connection;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import org.corant.config.ComparableConfigurator;
 
 /**
  * corant-suites-jms-shared
  *
- * @author bingo 下午4:42:40
+ * @author bingo 下午7:27:36
  *
  */
-public interface MessageConverter<M extends Supplier<M>, T> {
+public interface MessageReceiverTaskConfigurator extends ComparableConfigurator {
 
-  T convert(Supplier<M> supplier);
+  void configConnection(Connection connection, MessageReceiverMetaData metaData);
 
+  void configMessageConsumer(MessageConsumer messageConsumer, MessageReceiverMetaData metaData);
+
+  void configSession(Session session, MessageReceiverMetaData metaData);
 }

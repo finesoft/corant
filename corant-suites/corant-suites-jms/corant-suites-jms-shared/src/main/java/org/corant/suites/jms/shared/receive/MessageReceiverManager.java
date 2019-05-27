@@ -58,7 +58,9 @@ public class MessageReceiverManager {
       final AbstractJMSConfig cfg = defaultObject(
           extesion.getConfig(metaData.getConnectionFactoryId()), AbstractJMSConfig.DFLT_INSTANCE);
       ScheduledExecutorService ses =
-          shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()));
+          shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
+              "Can not find any executor service for connection factory id [%s].",
+              cfg.getConnectionFactoryId());
       ses.scheduleWithFixedDelay(new MessageReceiverTask(metaData),
           cfg.getReceiveTaskInitialDelayMs(), cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
     }

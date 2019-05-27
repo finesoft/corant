@@ -90,6 +90,9 @@ public class MessageReceiverTask implements Runnable {
           preConsume();
           Message message = consume();
           postConsume(message);
+          if (message == null) {
+            break;
+          }
           logFin("End message consuming.\n");
         }
       }

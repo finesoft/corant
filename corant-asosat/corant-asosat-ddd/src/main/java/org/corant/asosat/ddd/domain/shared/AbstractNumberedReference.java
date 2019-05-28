@@ -19,72 +19,73 @@ import static org.corant.shared.util.MapUtils.getMapString;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 
 @MappedSuperclass
-public abstract class AbstractReferenceData extends AbstractValueObject implements Nameable {
+public abstract class AbstractNumberedReference extends AbstractReference implements Numbered {
 
   private static final long serialVersionUID = -8160589662074054451L;
 
-  @Column(name = "referenceId")
-  private Long id;
+  @Column(name = "referenceNumber")
+  private String number;
 
-  @Column(name = "referenceVn")
-  private long vn;
-
-  @Column(name = "referenceName")
-  private String name;
-
-  public AbstractReferenceData(Long id, long vn, String name) {
-    setId(id);
-    setVn(vn);
-    setName(name);
+  public AbstractNumberedReference(Long id, long vn, String number) {
+    super(id, vn);
+    setNumber(number);
   }
 
-  public AbstractReferenceData(Object obj) {
+  public AbstractNumberedReference(Object obj) {
     if (obj instanceof Map) {
       Map<?, ?> mapObj = requireNotNull(Map.class.cast(obj), "");// FIXME MSG
       setId(getMapLong(mapObj, "id"));
       setVn(getMapLong(mapObj, "vn"));
-      setName(getMapString(mapObj, "name"));
-    } else if (obj instanceof AbstractReferenceData) {
-      AbstractReferenceData other = AbstractReferenceData.class.cast(obj);
+      setNumber(getMapString(mapObj, "number"));
+    } else if (obj instanceof AbstractNumberedReference) {
+      AbstractNumberedReference other = AbstractNumberedReference.class.cast(obj);
       setId(other.getId());
       setVn(other.getVn());
-      setName(other.getName());
+      setNumber(other.getNumber());
     }
   }
 
-  protected AbstractReferenceData() {}
+  protected AbstractNumberedReference() {}
 
-  public Long getId() {
-    return id;
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    AbstractNumberedReference other = (AbstractNumberedReference) obj;
+    if (number == null) {
+      if (other.number != null) {
+        return false;
+      }
+    } else if (!number.equals(other.number)) {
+      return false;
+    }
+    return true;
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  public long getVn() {
-    return vn;
+  public String getNumber() {
+    return number;
   }
 
   @Override
-  public String toString() {
-    return "Industry [id=" + getId() + ", vn=" + getVn() + ", name=" + getName() + "]";
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (number == null ? 0 : number.hashCode());
+    return result;
   }
 
-  protected void setId(Long id) {
-    this.id = id;
-  }
-
-  protected void setName(String name) {
-    this.name = name;
-  }
-
-  protected void setVn(long vn) {
-    this.vn = vn;
+  protected void setNumber(String number) {
+    this.number = number;
   }
 
 }

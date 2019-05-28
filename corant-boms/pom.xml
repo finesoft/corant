@@ -83,6 +83,7 @@
 		<version.mysql>5.1.47</version.mysql>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
+		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
 		<version.flyway>5.2.0</version.flyway>
 		<version.xadisk>1.2.2</version.xadisk>
 
@@ -638,6 +639,11 @@
 				<groupId>org.hibernate.ogm</groupId>
 				<artifactId>hibernate-ogm-infinispan</artifactId>
 				<version>${version.hibernate-ogm-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator-cdi</artifactId>
+				<version>${version.hibernate-validator-cdi}</version>
 			</dependency>
 
 			<!-- POI -->

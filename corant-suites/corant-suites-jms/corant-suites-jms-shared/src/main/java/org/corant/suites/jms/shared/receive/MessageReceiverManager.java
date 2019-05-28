@@ -53,6 +53,10 @@ public class MessageReceiverManager {
   final Set<MessageReceiverMetaData> receiveMetaDatas =
       Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
 
+  protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {
+    return new MessageReceiverTask(metaData);
+  }
+
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
       final AbstractJMSConfig cfg = defaultObject(
@@ -61,8 +65,8 @@ public class MessageReceiverManager {
           shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
               "Can not find any executor service for connection factory id [%s].",
               cfg.getConnectionFactoryId());
-      ses.scheduleWithFixedDelay(new MessageReceiverTask(metaData),
-          cfg.getReceiveTaskInitialDelayMs(), cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
+      ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelayMs(),
+          cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
     }
   }
 

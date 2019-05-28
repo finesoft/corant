@@ -16,6 +16,7 @@ package org.corant.suites.jms.shared.receive;
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.spi.CreationalContext;
@@ -52,11 +53,13 @@ import org.corant.suites.jms.shared.Transactions;
  */
 public class MessageReceiverTask implements Runnable {
 
-  final Logger logger = Logger.getLogger(MessageReceiverTask.class.getName());
+  static final Logger logger = Logger.getLogger(MessageReceiverTask.class.getName());
   final MessageReceiverMetaData metaData;
   final Object connectionFactory;
   final MessageHandler messageHandler;
   final boolean xa;
+  final AtomicInteger jmsErrs = new AtomicInteger(0);
+  final int maxJmsErrs = 16;
   volatile boolean inProgress;
   volatile Connection connection;
   volatile Session session;
@@ -99,12 +102,12 @@ public class MessageReceiverTask implements Runnable {
     } catch (Throwable e) {
       onException(e);
     } finally {
-      release(false);
+      release(jmsErrs.compareAndSet(maxJmsErrs, 0));
     }
     logFin("Stopped message receive task.\n\n");
   }
 
-  Message consume() throws JMSException {
+  protected Message consume() throws JMSException {
     try {
       Message message = null;
       if (metaData.getReceiveTimeout() <= 0) {
@@ -115,16 +118,16 @@ public class MessageReceiverTask implements Runnable {
       logFin("5. Received message from queue, [%s]", metaData);
       if (message != null) {
         messageHandler.onMessage(message);
-        logFin("5. Invoked message handler and processed message, [%s]", metaData);
+        logFin("6. Invoked message handler and processed message, [%s]", metaData);
       }
       return message;
     } catch (JMSException e) {
-      logErr("5-x. Receive and process message occurred error, [%s]", metaData);
+      logErr("6-x. Receive and process message occurred error, [%s]", metaData);
       throw e;
     }
   }
 
-  boolean initialize() throws JMSException {
+  protected boolean initialize() throws JMSException {
     inProgress = true;
     // initialize connection
     if (connection == null) {
@@ -223,7 +226,12 @@ public class MessageReceiverTask implements Runnable {
     return true;
   }
 
-  void onException(Throwable e) {
+  protected void onException(Throwable e) {
+    if (e instanceof JMSException) {
+      jmsErrs.incrementAndGet();
+    }
+    logger.log(Level.SEVERE, e,
+        () -> String.format("Message receiver task occurred error, %s", metaData));
     try {
       if (xa && Transactions.isInTransaction()) {
         Transactions.transactionManager().rollback();
@@ -239,12 +247,13 @@ public class MessageReceiverTask implements Runnable {
         }
       }
     } catch (Exception te) {
-      logger.log(Level.SEVERE, te, () -> "Rollback message receive occurred error");
+      logger.log(Level.SEVERE, te,
+          () -> String.format("Rollback message receive occurred error, %s", metaData));
       throw new CorantRuntimeException(e);
     }
   }
 
-  void postConsume(Message message)
+  protected void postConsume(Message message)
       throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
       SecurityException, IllegalStateException, SystemException, JMSException {
     try {
@@ -269,7 +278,7 @@ public class MessageReceiverTask implements Runnable {
     }
   }
 
-  void preConsume() throws NotSupportedException, SystemException, JMSException {
+  protected void preConsume() throws NotSupportedException, SystemException, JMSException {
     try {
       if (xa) {
         Transactions.transactionManager().begin();
@@ -287,54 +296,56 @@ public class MessageReceiverTask implements Runnable {
     }
   }
 
-  void release(boolean stop) {
+  protected void release(boolean stop) {
     try {
-      if (messageConsumer != null) {
-        messageConsumer.close();
-        messageConsumer = null;
-      }
-      if (!stop) {
-        // if (metaData.getCacheLevel() <= 2 && messageConsumer != null) {
-        // messageConsumer.close();
-        // messageConsumer = null;
-        // }
-        if (metaData.getCacheLevel() <= 1 && session != null) {
-          if (xa && Transactions.isInTransaction()) {
-            Transactions.deregisterXAResource(((XASession) session).getXAResource());
-          }
-          session.close();
-          session = null;
-          if (connection != null) {
-            connection.stop();
-          }
-        }
-        if (metaData.getCacheLevel() <= 0 && connection != null) {
-          connection.close();
-          connection = null;
-        }
-      } else {
-        // if (messageConsumer != null) {
-        // messageConsumer.close();
-        // messageConsumer = null;
-        // }
-        if (session != null) {
-          if (xa && Transactions.isInTransaction()) {
-            Transactions.deregisterXAResource(((XASession) session).getXAResource());
-          }
-          session.close();
-          session = null;
-        }
-        if (connection != null) {
-          connection.stop();
-          connection.close();
-          connection = null;
-        }
-      }
+      closeMessageConsumerIfNecessary(stop);
+      closeSessionIfNecessary(stop);
+      closeConnectionIfNecessary(stop);
     } catch (JMSException e) {
-      // TODO
       throw new CorantRuntimeException(e);
     } finally {
       inProgress = false;
+    }
+  }
+
+  private void closeConnectionIfNecessary(boolean forceClose) throws JMSException {
+    if ((metaData.getCacheLevel() <= 0 || forceClose) && connection != null) {
+      try {
+        connection.stop();
+        connection.close();
+        logFin("9-4. Stop and close message receive task connection, [%s]", metaData);
+      } finally {
+        connection = null;
+      }
+    }
+  }
+
+  private void closeMessageConsumerIfNecessary(boolean forceClose) throws JMSException {
+    if (messageConsumer != null) {
+      try {
+        messageConsumer.close();
+        logFin("9-1. Close message receive task consumer, [%s]", metaData);
+      } finally {
+        messageConsumer = null;
+      }
+    }
+  }
+
+  private void closeSessionIfNecessary(boolean forceClose) throws JMSException {
+    if ((metaData.getCacheLevel() <= 1 || forceClose) && session != null) {
+      try {
+        if (xa && Transactions.isInTransaction()) {
+          Transactions.deregisterXAResource(((XASession) session).getXAResource());
+        }
+        session.close();
+        logFin("9-2. Close message receive task session, [%s]", metaData);
+        if (connection != null) {
+          connection.stop();
+          logFin("9-3. Stop message receive task connection, [%s]", metaData);
+        }
+      } finally {
+        session = null;
+      }
     }
   }
 
@@ -375,6 +386,8 @@ public class MessageReceiverTask implements Runnable {
       try {
         method.getJavaMember().invoke(object, message);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        logger.log(Level.SEVERE, e,
+            () -> String.format("5-x. Invok message receive method %s occurred error.", method));
         throw new CorantRuntimeException(e);
       }
     }

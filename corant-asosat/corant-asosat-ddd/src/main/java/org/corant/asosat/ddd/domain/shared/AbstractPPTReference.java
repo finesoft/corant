@@ -21,8 +21,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class AbstractPPTReference extends AbstractReference
-    implements Nameable, Numbered {
+public abstract class AbstractPPTReference extends AbstractReference implements Nameable, Numbered {
 
   private static final long serialVersionUID = -8160589662074054451L;
 
@@ -36,6 +35,7 @@ public abstract class AbstractPPTReference extends AbstractReference
     setId(id);
     setVn(vn);
     setName(name);
+    setNumber(number);
   }
 
   public AbstractPPTReference(Object obj) {

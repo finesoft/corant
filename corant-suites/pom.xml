@@ -42,6 +42,7 @@
 		<module>corant-suites-redis</module>
 		<module>corant-suites-json</module>
 		<module>corant-suites-jasperreports</module>
+		<module>corant-suites-beanvalidation</module>
 	</modules>
 	<build>
 		<plugins>

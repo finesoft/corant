@@ -982,6 +982,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-beanvalidation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-ddd</artifactId>
 				<version>${project.version}</version>
 			</dependency>

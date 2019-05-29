@@ -81,6 +81,14 @@ public @interface MessageReceive {
   String[] destinations() default {};
 
   /**
+   * The maximum number of JMSExceptions, and once they are exceeded, the connection and session are
+   * re-established.
+   *
+   * @return maxJmsExceptions
+   */
+  int maxJmsExceptions() default 16;
+
+  /**
    * Marks whether a queue or topic.
    *
    * Value of true represents Topic, Value of false represents Queue, default is false.

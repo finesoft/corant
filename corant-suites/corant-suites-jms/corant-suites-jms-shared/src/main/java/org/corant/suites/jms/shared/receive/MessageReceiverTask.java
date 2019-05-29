@@ -58,8 +58,8 @@ public class MessageReceiverTask implements Runnable {
   final Object connectionFactory;
   final MessageHandler messageHandler;
   final boolean xa;
-  final AtomicInteger jmsErrs = new AtomicInteger(0);
-  final int maxJmsErrs = 16;
+  final AtomicInteger jmsErrCounter = new AtomicInteger(0);
+  final int maxJmsErrs;
   volatile boolean inProgress;
   volatile Connection connection;
   volatile Session session;
@@ -71,6 +71,7 @@ public class MessageReceiverTask implements Runnable {
   protected MessageReceiverTask(MessageReceiverMetaData metaData) {
     super();
     this.metaData = metaData;
+    maxJmsErrs = metaData.getMaxJmsExceptions();
     xa = AbstractJMSExtension.retrieveConfig(metaData.getConnectionFactoryId()).isXa();
     connectionFactory =
         AbstractJMSExtension.retriveConnectionFactory(metaData.getConnectionFactoryId());
@@ -102,7 +103,7 @@ public class MessageReceiverTask implements Runnable {
     } catch (Throwable e) {
       onException(e);
     } finally {
-      release(jmsErrs.compareAndSet(maxJmsErrs, 0));
+      release(jmsErrCounter.compareAndSet(maxJmsErrs, 0));
     }
     logFin("Stopped message receive task.\n\n");
   }
@@ -228,7 +229,7 @@ public class MessageReceiverTask implements Runnable {
 
   protected void onException(Throwable e) {
     if (e instanceof JMSException) {
-      jmsErrs.incrementAndGet();
+      jmsErrCounter.incrementAndGet();
     }
     logger.log(Level.SEVERE, e,
         () -> String.format("Message receiver task occurred error, %s", metaData));
@@ -387,7 +388,8 @@ public class MessageReceiverTask implements Runnable {
         method.getJavaMember().invoke(object, message);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         logger.log(Level.SEVERE, e,
-            () -> String.format("5-x. Invok message receive method %s occurred error.", method));
+            () -> String.format("5-x. Invok message receive method %s occurred error.",
+                method.getJavaMember()));
         throw new CorantRuntimeException(e);
       }
     }

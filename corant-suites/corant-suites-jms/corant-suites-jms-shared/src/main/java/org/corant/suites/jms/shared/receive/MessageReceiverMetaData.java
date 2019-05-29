@@ -47,6 +47,7 @@ public class MessageReceiverMetaData {
   private final int cacheLevel;
   private final long receiveTimeout;
   private final int numberOfReceivePerExecution;
+  private final int maxJmsExceptions;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
     this.method = shouldNotNull(method);
@@ -67,6 +68,7 @@ public class MessageReceiverMetaData {
     cacheLevel = ann.cacheLevel();
     receiveTimeout = ann.receiveTimeout();
     numberOfReceivePerExecution = max(1, ann.numberOfReceivePerExecution());
+    maxJmsExceptions = max(4, ann.maxJmsExceptions());
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -158,6 +160,10 @@ public class MessageReceiverMetaData {
    */
   public String getDestination() {
     return destination;
+  }
+
+  public int getMaxJmsExceptions() {
+    return maxJmsExceptions;
   }
 
   /**

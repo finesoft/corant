@@ -28,7 +28,7 @@ public abstract class AbstractNamedReference extends AbstractReference implement
   @Column(name = "referenceName")
   private String name;
 
-  public AbstractNamedReference(Long id, long vn, String name) {
+  public AbstractNamedReference(Long id, Long vn, String name) {
     super(id, vn);
     setName(name);
   }
@@ -54,7 +54,7 @@ public abstract class AbstractNamedReference extends AbstractReference implement
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
+    if (!super.equals(obj)) {
       return false;
     }
     if (getClass() != obj.getClass()) {
@@ -79,7 +79,7 @@ public abstract class AbstractNamedReference extends AbstractReference implement
   @Override
   public int hashCode() {
     final int prime = 31;
-    int result = 1;
+    int result = super.hashCode();
     result = prime * result + (name == null ? 0 : name.hashCode());
     return result;
   }

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
@@ -67,7 +68,7 @@ public class Query implements Serializable {
       Map<String, ParameterMapping> paramMappings) {
     super();
     this.name = name;
-    this.resultClass = resultClass;
+    setResultClass(resultClass);
     this.resultSetMapping = resultSetMapping;
     this.cache = cache;
     this.cacheResultSetMetadata = cacheResultSetMetadata;
@@ -182,7 +183,7 @@ public class Query implements Serializable {
   }
 
   void setResultClass(Class<?> resultClass) {
-    this.resultClass = resultClass;
+    this.resultClass = defaultObject(resultClass, Map.class);
   }
 
   void setResultSetMapping(Class<?> resultSetMapping) {

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
@@ -58,7 +59,7 @@ public class FetchQuery implements Serializable {
     super();
     this.referenceQuery = referenceQuery;
     this.injectPropertyName = injectPropertyName;
-    this.resultClass = resultClass;
+    this.setResultClass(resultClass);
     this.maxSize = maxSize;
     this.parameters = parameters;
     this.referenceQueryversion = referenceQueryversion;
@@ -142,7 +143,7 @@ public class FetchQuery implements Serializable {
   }
 
   void setResultClass(Class<?> resultClass) {
-    this.resultClass = resultClass;
+    this.resultClass = defaultObject(resultClass, Map.class);
   }
 
   void setScript(String script) {

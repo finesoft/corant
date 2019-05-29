@@ -14,7 +14,6 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.kernel.util.Cdis;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
-import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -86,25 +84,22 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 
-  @Override
-  public AbstractJMSConfig getConfig(String connectionFactoryId) {
-    return defaultObject(configs.get(connectionFactoryId), AbstractJMSConfig.DFLT_INSTANCE);
-  }
-
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       configs.forEach((dsn, dsc) -> {
-        event.<ActiveMQConnectionFactory>addBean().addQualifier(Cdis.resolveNamed(dsn))
-            .addQualifier(Default.Literal.INSTANCE)
-            .addTransitiveTypeClosure(ActiveMQConnectionFactory.class)
-            .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
-            .produceWith(beans -> {
-              try {
-                return buildConnectionFactory(beans, forceCast(dsc));
-              } catch (Exception e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((cf, beans) -> cf.close());
+        if (dsc.isEnable()) {
+          event.<ActiveMQConnectionFactory>addBean().addQualifier(Cdis.resolveNamed(dsn))
+              .addQualifier(Default.Literal.INSTANCE)
+              .addTransitiveTypeClosure(ActiveMQConnectionFactory.class)
+              .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
+              .produceWith(beans -> {
+                try {
+                  return buildConnectionFactory(beans, forceCast(dsc));
+                } catch (Exception e) {
+                  throw new CorantRuntimeException(e);
+                }
+              }).disposeWith((cf, beans) -> cf.close());
+        }
       });
     }
   }

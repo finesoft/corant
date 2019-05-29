@@ -14,7 +14,6 @@
 package org.corant.suites.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,14 +58,15 @@ public class MessageReceiverManager {
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
-      final AbstractJMSConfig cfg = defaultObject(
-          extesion.getConfig(metaData.getConnectionFactoryId()), AbstractJMSConfig.DFLT_INSTANCE);
-      ScheduledExecutorService ses =
-          shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
-              "Can not find any executor service for connection factory id [%s].",
-              cfg.getConnectionFactoryId());
-      ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelayMs(),
-          cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
+      final AbstractJMSConfig cfg = extesion.getConfig(metaData.getConnectionFactoryId());
+      if (cfg != null && cfg.isEnable()) {
+        ScheduledExecutorService ses =
+            shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
+                "Can not find any executor service for connection factory id [%s].",
+                cfg.getConnectionFactoryId());
+        ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelayMs(),
+            cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
+      }
     }
   }
 
@@ -74,8 +74,12 @@ public class MessageReceiverManager {
   void postConstruct() {
     extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
         .forEach(receiveMetaDatas::addAll);
-    extesion.getConfigs().keySet().forEach(cfId -> executorServices.put(cfId,
-        Executors.newScheduledThreadPool(extesion.getConfig(cfId).getReceiveTaskThreads())));
+    extesion.getConfigs().values().forEach(cfg -> {
+      if (cfg != null && cfg.isEnable()) {
+        executorServices.put(cfg.getConnectionFactoryId(),
+            Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
+      }
+    });
     logger.info(
         () -> String.format("Find %s message receivers that involving %s connection factories.",
             receiveMetaDatas.size(), executorServices.size()));

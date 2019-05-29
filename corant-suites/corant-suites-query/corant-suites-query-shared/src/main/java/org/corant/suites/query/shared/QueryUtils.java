@@ -66,7 +66,11 @@ public class QueryUtils {
       .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
 
-  public static <T> T converDataFromJsonStr(String str, Class<T> cls) {
+  public static final ObjectMapper RCJOM =
+      new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new SimpleModule())
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+  public static <T> T converEsData(String str, Class<T> cls) {
     if (str == null) {
       return null;
     } else {
@@ -79,7 +83,30 @@ public class QueryUtils {
     }
   }
 
-  public static <T> T convertData(Object data, Class<T> cls) {
+  @SuppressWarnings("unchecked")
+  public static <T> List<T> convert(List<Map<String, Object>> result, Class<T> cls) {
+    List<T> list = new ArrayList<>();
+    if (!isEmpty(result)) {
+      if (Map.class.isAssignableFrom(cls)) {
+        for (Object r : result) {
+          list.add((T) r);
+        }
+      } else {
+        for (Map<String, Object> r : result) {
+          list.add(convert(r, cls));
+        }
+      }
+    }
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T convert(Map<String, Object> result, Class<T> cls) {
+    return result == null ? null
+        : Map.class.isAssignableFrom(cls) ? (T) result : RCJOM.convertValue(result, cls);
+  }
+
+  public static <T> T convertEsData(Object data, Class<T> cls) {
     if (data == null) {
       return null;
     } else {

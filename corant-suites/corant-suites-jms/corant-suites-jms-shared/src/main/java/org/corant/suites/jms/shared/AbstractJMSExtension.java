@@ -17,7 +17,6 @@ import static java.util.Collections.newSetFromMap;
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +68,7 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   public AbstractJMSConfig getConfig(String connectionFactoryId) {
-    return defaultObject(configs.get(connectionFactoryId), AbstractJMSConfig.DFLT_INSTANCE);
+    return configs.get(connectionFactoryId);
   }
 
   public Map<String, ? extends AbstractJMSConfig> getConfigs() {

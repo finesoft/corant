@@ -26,14 +26,10 @@ import java.util.stream.Stream;
  */
 public interface SqlQueryExecutor {
 
-  Map<String, Object> get(String sql) throws SQLException;
+  Map<String, Object> get(String sql, Object... args) throws SQLException;
 
-  <T> T get(String sql, Class<T> resultClass, Object... args) throws SQLException;
+  List<Map<String, Object>> select(String sql, Object... args) throws SQLException;
 
-  List<Map<String, Object>> select(String sql) throws SQLException;
-
-  <T> List<T> select(String sql, Class<T> resultClass, Object... args) throws SQLException;
-
-  <T> Stream<T> stream(String sql, Map<String, Object> param);
+  Stream<Map<String, Object>> stream(String sql, Object... args);
 
 }

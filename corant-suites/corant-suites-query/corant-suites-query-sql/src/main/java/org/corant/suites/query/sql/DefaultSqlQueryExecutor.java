@@ -16,7 +16,6 @@ package org.corant.suites.query.sql;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -24,10 +23,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
-import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -72,42 +68,29 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public Map<String, Object> get(String sql) throws SQLException {
-    return getRunner().query(sql, new MapHandler());
-  }
-
-  @Override
-  public <T> T get(String sql, Class<T> resultClass, Object... args) throws SQLException {
-    ResultSetHandler<?> handler = resolveResultSetHandler(resultClass, false);
+  public Map<String, Object> get(String sql, Object... args) throws SQLException {
     Object result = null;
     if (args.length > 0) {
-      result = getRunner().query(sql, handler, args);
+      result = getRunner().query(sql, MAP_HANDLER, args);
     } else {
-      result = getRunner().query(sql, handler);
+      result = getRunner().query(sql, MAP_HANDLER);
     }
     return forceCast(result);
   }
 
   @Override
-  public List<Map<String, Object>> select(String sql) throws SQLException {
-    List<Map<String, Object>> tmp = getRunner().query(sql, new MapListHandler());
-    return tmp == null ? new ArrayList<>() : tmp;
-  }
-
-  @Override
-  public <T> List<T> select(String sql, Class<T> resultClass, Object... args) throws SQLException {
-    ResultSetHandler<?> handler = resolveResultSetHandler(resultClass, true);
+  public List<Map<String, Object>> select(String sql, Object... args) throws SQLException {
     Object result = null;
     if (args.length > 0) {
-      result = getRunner().query(sql, handler, args);
+      result = getRunner().query(sql, MAP_LIST_HANDLER, args);
     } else {
-      result = getRunner().query(sql, handler);
+      result = getRunner().query(sql, MAP_LIST_HANDLER);
     }
     return forceCast(result);
   }
 
   @Override
-  public <T> Stream<T> stream(String sql, Map<String, Object> param) {
+  public Stream<Map<String, Object>> stream(String sql, Object... args) {
     return Stream.empty();
   }
 
@@ -115,12 +98,4 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
     return runner;
   }
 
-  protected ResultSetHandler<?> resolveResultSetHandler(Class<?> resultClass, boolean isList) {
-    if (isList) {
-      return Map.class.isAssignableFrom(resultClass) ? MAP_LIST_HANDLER
-          : new BeanListHandler<>(resultClass);
-    } else {
-      return Map.class.isAssignableFrom(resultClass) ? MAP_HANDLER : new BeanHandler<>(resultClass);
-    }
-  }
 }

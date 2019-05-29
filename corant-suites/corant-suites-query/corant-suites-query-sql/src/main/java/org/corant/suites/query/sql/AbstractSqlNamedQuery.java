@@ -17,7 +17,7 @@ import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.asStrings;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.suites.query.shared.QueryUtils.convert;
 import static org.corant.suites.query.sql.SqlHelper.getLimit;
 import static org.corant.suites.query.sql.SqlHelper.getOffset;
 import java.sql.SQLException;
@@ -32,6 +32,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.NamedQuery;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
@@ -88,20 +89,17 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
       ForwardList<T> result = ForwardList.inst();
-      List<T> list = getExecutor().select(limitSql, resultClass, queryParam);
+      List<Map<String, Object>> list = getExecutor().select(limitSql, queryParam);
       int size = getSize(list);
       if (size > 0) {
         this.fetch(list, fetchQueries, param);
         if (size > limit) {
           list.remove(size - 1);
-          result.withResults(list);
           result.withHasNext(true);
-        } else {
-          result.withResults(list);
         }
-        handleResultHints(resultClass, hints, param, result);
+        handleResultHints(resultClass, hints, param, list);
       }
-      return result;
+      return result.withResults(convert(list, resultClass));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the forward query [%s].", q);
@@ -118,10 +116,10 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String sql = querier.getScript();
     try {
       log(q, queryParam, sql);
-      T result = getExecutor().get(sql, resultClass, queryParam);
+      Map<String, Object> result = getExecutor().get(sql, queryParam);
       this.fetch(result, fetchQueries, param);
       handleResultHints(resultClass, hints, param, result);
-      return result;
+      return convert(result, resultClass);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
           q);
@@ -141,7 +139,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
       log(q, queryParam, sql, "Limit: " + limitSql);
-      List<T> list = getExecutor().select(limitSql, resultClass, queryParam);
+      List<Map<String, Object>> list = getExecutor().select(limitSql, queryParam);
       PagedList<T> result = PagedList.of(offset, limit);
       int size = getSize(list);
       if (size > 0) {
@@ -150,14 +148,13 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         } else {
           String totalSql = getDialect().getCountSql(sql);
           log("total-> " + q, queryParam, totalSql);
-          result.withTotal(getMapInteger(getExecutor().get(totalSql, Map.class, queryParam),
-              Dialect.COUNT_FIELD_NAME));
+          result.withTotal(
+              getMapInteger(getExecutor().get(totalSql, queryParam), Dialect.COUNT_FIELD_NAME));
         }
         this.fetch(list, fetchQueries, param);
-        result.withResults(list);
-        handleResultHints(resultClass, hints, param, result);
+        handleResultHints(resultClass, hints, param, list);
       }
-      return result;
+      return result.withResults(convert(list, resultClass));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
           q);
@@ -174,13 +171,13 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String sql = querier.getScript();
     try {
       log(q, queryParam, sql);
-      List<T> result = getExecutor().select(sql, rcls, queryParam);
+      List<Map<String, Object>> result = getExecutor().select(sql, queryParam);
       int size = getSize(result);
       if (size > 0) {
         this.fetch(result, fetchQueries, param);
         handleResultHints(rcls, hints, param, result);
       }
-      return result;
+      return convert(result, rcls);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
           q);
@@ -189,7 +186,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    return null;
+    throw new NotSupportedException();
   }
 
   protected <T> void fetch(List<T> list, List<FetchQuery> fetchQueries, Map<String, Object> param) {
@@ -213,7 +210,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     Querier<String, Object[], FetchQuery, QueryHint> querier =
         resolver.resolve(refQueryName, fetchParam);
     String sql = querier.getScript();
-    Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
+    // Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
+    Class<?> resultClass = Map.class;
     Object[] params = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
@@ -222,7 +220,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     }
     try {
       log("fetch-> " + refQueryName, params, sql);
-      List<?> fetchedList = getExecutor().select(sql, resultClass, params);
+      List<Map<String, Object>> fetchedList = getExecutor().select(sql, params);
       Object fetchedResult = null;
       if (multiRecords) {
         fetchedResult = fetchedList;

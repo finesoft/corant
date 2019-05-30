@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
@@ -88,8 +87,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (event != null) {
       configs.forEach((dsn, dsc) -> {
         if (dsc.isEnable()) {
-          event.<ActiveMQConnectionFactory>addBean().addQualifier(Cdis.resolveNamed(dsn))
-              .addQualifier(Default.Literal.INSTANCE)
+          event.<ActiveMQConnectionFactory>addBean().addQualifiers(Cdis.resolveNameds(dsn))
               .addTransitiveTypeClosure(ActiveMQConnectionFactory.class)
               .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {

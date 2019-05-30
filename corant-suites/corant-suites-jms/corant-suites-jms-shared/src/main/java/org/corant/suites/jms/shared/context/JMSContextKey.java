@@ -15,6 +15,7 @@ package org.corant.suites.jms.shared.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -50,7 +51,7 @@ public class JMSContextKey implements Serializable {
   private volatile ConnectionFactory connectionFactory;
 
   public JMSContextKey(final String connectionFactoryId, final Integer sessionMode) {
-    this.connectionFactoryId = connectionFactoryId;
+    this.connectionFactoryId = defaultTrim(connectionFactoryId);
     this.sessionMode = sessionMode;
     hash = calHash(connectionFactoryId, sessionMode);
   }

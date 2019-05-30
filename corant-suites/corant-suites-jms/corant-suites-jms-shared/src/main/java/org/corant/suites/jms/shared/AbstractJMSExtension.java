@@ -16,7 +16,7 @@ package org.corant.suites.jms.shared;
 import static java.util.Collections.newSetFromMap;
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   public static ConnectionFactory retriveConnectionFactory(String connectionFactoryId) {
-    if (isEmpty(connectionFactoryId)) {
+    if (isBlank(connectionFactoryId)) {
       if (instance().select(ConnectionFactory.class).isResolvable()) {
         return instance().select(ConnectionFactory.class).get();
       }

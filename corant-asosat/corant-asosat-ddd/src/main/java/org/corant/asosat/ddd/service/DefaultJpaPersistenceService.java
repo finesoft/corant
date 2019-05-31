@@ -24,7 +24,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.unitwork.JpaPersistenceService;
@@ -65,7 +65,8 @@ public class DefaultJpaPersistenceService implements JpaPersistenceService {
   @PostConstruct
   void onPostConstruct() {
     emfs.forEach(emf -> {
-      Annotation ann = Cdis.resolveNamed(emf.getPersistenceUnitInfo().getPersistenceUnitName());
+      Annotation ann =
+          Qualifiers.resolveNamed(emf.getPersistenceUnitInfo().getPersistenceUnitName());
       emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
         clsUns.put(cls, ann);
       });

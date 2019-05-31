@@ -40,7 +40,7 @@ import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
 import org.corant.suites.ddd.unitwork.JpaPersistenceService;
-import org.corant.suites.jpa.shared.JpaUtils;
+import org.corant.suites.jpa.shared.JPAUtils;
 
 /**
  * corant-asosat-ddd
@@ -86,7 +86,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
   @Override
   public boolean isSupportTargetClass(Class<?> targetClass) {
     return cached.computeIfAbsent(targetClass,
-        t -> Entity.class.isAssignableFrom(t) && JpaUtils.isPersistenceClass(t));
+        t -> Entity.class.isAssignableFrom(t) && JPAUtils.isPersistenceClass(t));
   }
 
   @Transactional

@@ -13,7 +13,6 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.normal.Defaults.ONE_MB;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ public class LaunchUtils {
   }
 
   public static Long getFreeMemoryMb() {
-    return Runtime.getRuntime().freeMemory() / ONE_MB;
+    return Runtime.getRuntime().freeMemory() / Defaults.ONE_MB;
   }
 
   public static String getJavaHome() {
@@ -86,7 +85,7 @@ public class LaunchUtils {
   }
 
   public static Long getMaxMemoryMb() {
-    return Runtime.getRuntime().maxMemory() / ONE_MB;
+    return Runtime.getRuntime().maxMemory() / Defaults.ONE_MB;
   }
 
   public static String getPid() {
@@ -99,11 +98,12 @@ public class LaunchUtils {
   }
 
   public static Long getTotalMemoryMb() {
-    return Runtime.getRuntime().totalMemory() / ONE_MB;
+    return Runtime.getRuntime().totalMemory() / Defaults.ONE_MB;
   }
 
   public static Long getUsedMemoryMb() {
-    return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / ONE_MB;
+    return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())
+        / Defaults.ONE_MB;
   }
 
   public static void runAs() throws IOException, InterruptedException {

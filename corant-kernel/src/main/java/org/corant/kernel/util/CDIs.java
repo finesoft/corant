@@ -13,17 +13,9 @@
  */
 package org.corant.kernel.util;
 
-import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.trim;
-import java.lang.annotation.Annotation;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -38,35 +30,13 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  * @author bingo 下午6:29:46
  *
  */
-public abstract class Cdis {
-
-  public static <T> void acceptResolvabled(Class<T> instanceClass, Consumer<T> consumer) {
-    if (instance().select(instanceClass).isResolvable()) {
-      consumer.accept(instance().select(instanceClass).get());
-    }
-  }
-
-  public static <T, R> R applyResolvabled(Class<T> instanceClass, Function<T, R> function) {
-    if (instance().select(instanceClass).isResolvable()) {
-      return function.apply(instance().select(instanceClass).get());
-    }
-    return null;
-  }
+public abstract class CDIs {
 
   public static Annotated getAnnotated(InjectionPoint injectionPoint) {
     if (injectionPoint instanceof ParameterInjectionPoint) {
       return ((ParameterInjectionPoint<?, ?>) injectionPoint).getAnnotated().getDeclaringCallable();
     }
     return injectionPoint.getAnnotated();
-  }
-
-  public static final Annotation resolveNamed(String name) {
-    return isBlank(name) ? Unnamed.INST : NamedLiteral.of(trim(name));
-  }
-
-  public static final Annotation[] resolveNameds(String name) {
-    return isBlank(name) ? new Annotation[] {Unnamed.INST, Default.Literal.INSTANCE}
-        : new Annotation[] {NamedLiteral.of(trim(name)), Default.Literal.INSTANCE};
   }
 
   public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {

@@ -13,8 +13,12 @@
  */
 /**
  * corant-shared
- * 
+ *
  * @author bingo 上午11:48:16
  *
  */
 package org.corant.shared.util;
+
+class Defaults {
+  public static int ONE_MB = 1024 * 1024;
+}

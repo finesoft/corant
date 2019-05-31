@@ -11,28 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.normal;
-
 /**
- * corant-shared
- *
- * @author bingo 上午10:20:20
+ * corant-kernel
+ * 
+ * @author bingo 下午3:20:44
  *
  */
-public interface Priorities {
-
-  interface ConfigPriorities {
-    int FRAMEWORK_DEFAULTS_ORDINAL = -1000;
-    int APPLICATION_ORDINAL = 200;
-    int APPLICATION_PROFILE_ORDINAL = 250;
-    int SYSTEM_ENVIRONMENT_ORGINAL = 300;
-    int SYSTEM_PROPERTIES_ORGINAL = 400;
-    int APPLICATION_ADJUST_ORDINAL = 1000;
-
-  }
-
-  interface PostReadyEventPriorities {
-
-  }
-
-}
+package org.corant.kernel.normal;

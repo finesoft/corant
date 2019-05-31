@@ -25,7 +25,7 @@ import org.hibernate.engine.transaction.jta.platform.internal.AbstractJtaPlatfor
  * @author bingo 下午6:49:00
  *
  */
-public class NarayanaJtaPlatform extends AbstractJtaPlatform {
+public class NarayanaJTAPlatform extends AbstractJtaPlatform {
 
   private static final long serialVersionUID = -6662006780960101741L;
 

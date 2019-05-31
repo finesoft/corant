@@ -25,7 +25,7 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
  *
  */
 @ApplicationScoped
-public abstract class AbstractJpaProvider {
+public abstract class AbstractJPAProvider {
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 

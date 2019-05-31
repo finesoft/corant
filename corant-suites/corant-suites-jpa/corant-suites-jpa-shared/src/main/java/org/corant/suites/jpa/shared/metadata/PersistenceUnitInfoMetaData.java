@@ -33,7 +33,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.JpaConfig;
+import org.corant.suites.jpa.shared.JPAConfig;
 
 public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
@@ -396,7 +396,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   void resolvePersistenceProvider() {
     if (isBlank(persistenceProviderClassName)) {
-      PersistenceProvider pp = JpaConfig.resolvePersistenceProvider()
+      PersistenceProvider pp = JPAConfig.resolvePersistenceProvider()
           .orElseThrow(() -> new CorantRuntimeException("Can not find jpa provider"));
       setPersistenceProviderClassName(getUserClass(pp.getClass()).getName());
     }

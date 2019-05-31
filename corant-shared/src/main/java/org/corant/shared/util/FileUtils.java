@@ -13,7 +13,6 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.normal.Defaults.ONE_MB;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
@@ -46,7 +45,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class FileUtils {
 
-  public static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 16;
+  public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16;
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());

@@ -39,9 +39,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.CDIs;
 import org.corant.kernel.util.Manageables.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
@@ -61,7 +62,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * @author bingo 上午11:32:56
  *
  */
-public class JpaExtension implements Extension {
+public class JPAExtension implements Extension {
 
   protected final Set<PersistenceUnitMetaData> persistenceUnits =
       Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnitMetaData, Boolean>());
@@ -99,23 +100,23 @@ public class JpaExtension implements Extension {
     });
     // create entity manager bean from persistence contexts
     persistenceContexts.forEach(pcmd -> {
-      Annotation qualifier = Cdis.resolveNamed(pcmd.getUnitName());
+      Annotation qualifier = Qualifiers.resolveNamed(pcmd.getUnitName());
       abd.addBean(new EntityManagerBean(beanManager, pcmd, qualifier));
     });
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
-    JpaConfig.from(ConfigProvider.getConfig()).forEach(persistenceUnitInfoMetaDatas::put);
+    JPAConfig.from(ConfigProvider.getConfig()).forEach(persistenceUnitInfoMetaDatas::put);
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();
-    final PersistenceUnit pu = Cdis.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
+    final PersistenceUnit pu = CDIs.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
       persistenceUnits.add(new PersistenceUnitMetaData(pu));
-      pip.configureInjectionPoint().addQualifiers(Cdis.resolveNameds(pu.unitName()));
+      pip.configureInjectionPoint().addQualifiers(Qualifiers.resolveNameds(pu.unitName()));
     }
-    final PersistenceContext pc = Cdis.getAnnotated(ip).getAnnotation(PersistenceContext.class);
+    final PersistenceContext pc = CDIs.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {
       if (pc.type() != PersistenceContextType.TRANSACTION) {
         shouldBeFalse(ip.getBean().getScope().equals(ApplicationScoped.class));
@@ -136,12 +137,12 @@ public class JpaExtension implements Extension {
           jndi = new InitialContext();
         }
         if (!initedJndiSubCtx) {
-          jndi.createSubcontext(JpaConfig.JNDI_SUBCTX_NAME);
+          jndi.createSubcontext(JPAConfig.JNDI_SUBCTX_NAME);
           initedJndiSubCtx = true;
         }
-        String jndiName = JpaConfig.JNDI_SUBCTX_NAME + "/" + un;
+        String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName,
-            new NamingReference(EntityManagerFactory.class, Cdis.resolveNameds(un)));
+            new NamingReference(EntityManagerFactory.class, Qualifiers.resolveNameds(un)));
         logger.info(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);

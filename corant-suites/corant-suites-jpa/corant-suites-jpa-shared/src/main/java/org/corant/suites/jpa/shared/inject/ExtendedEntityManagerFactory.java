@@ -28,9 +28,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitInfo;
 import org.corant.Corant;
-import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.JpaExtension;
-import org.corant.suites.jpa.shared.inject.JpaProvider.JpaProviderLiteral;
+import org.corant.suites.jpa.shared.AbstractJPAProvider;
+import org.corant.suites.jpa.shared.JPAExtension;
+import org.corant.suites.jpa.shared.inject.JPAProvider.JPAProviderLiteral;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**
@@ -57,9 +57,9 @@ public class ExtendedEntityManagerFactory implements EntityManagerFactory {
   static ExtendedEntityManagerFactory of(PersistenceUnitInfoMetaData pu) {
     return emfs.computeIfAbsent(pu, p -> {
       String providerName = p.getPersistenceProviderClassName();
-      JpaProvider jp = JpaProviderLiteral.of(providerName);
-      Instance<AbstractJpaProvider> provider =
-          Corant.instance().select(AbstractJpaProvider.class, jp);
+      JPAProvider jp = JPAProviderLiteral.of(providerName);
+      Instance<AbstractJPAProvider> provider =
+          Corant.instance().select(AbstractJPAProvider.class, jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
       final ExtendedEntityManagerFactory emf =
           new ExtendedEntityManagerFactory(provider.get().buildEntityManagerFactory(p), p);
@@ -69,7 +69,7 @@ public class ExtendedEntityManagerFactory implements EntityManagerFactory {
   }
 
   static ExtendedEntityManagerFactory of(String unitName) {
-    Instance<JpaExtension> ext = Corant.instance().select(JpaExtension.class);
+    Instance<JPAExtension> ext = Corant.instance().select(JPAExtension.class);
     shouldBeTrue(ext.isResolvable(), "Can not find jpa extension.");
     PersistenceUnitInfoMetaData pu = ext.get().getPersistenceUnitInfoMetaData(unitName);
     return of(pu);

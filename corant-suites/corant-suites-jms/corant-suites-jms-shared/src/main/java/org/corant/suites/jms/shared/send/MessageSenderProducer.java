@@ -17,7 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.CDIs;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.send.MessageSender.MessageSenderImpl;
 
@@ -32,7 +32,7 @@ public class MessageSenderProducer {
 
   @Produces
   public MessageSender produce(final InjectionPoint ip) {
-    final MessageSend at = shouldNotNull(Cdis.getAnnotated(ip).getAnnotation(MessageSend.class));
+    final MessageSend at = shouldNotNull(CDIs.getAnnotated(ip).getAnnotation(MessageSend.class));
     return new MessageSenderImpl(at);
   }
 }

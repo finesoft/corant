@@ -31,8 +31,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceUnit;
+import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
 
@@ -43,7 +43,7 @@ import org.corant.shared.util.Resources.ClassResource;
  * @author bingo 下午6:27:53
  *
  */
-public class JpaUtils {
+public class JPAUtils {
 
   static final Set<Class<? extends Annotation>> PERSIS_ANN =
       setOf(Entity.class, Embeddable.class, MappedSuperclass.class, Converter.class);
@@ -59,7 +59,7 @@ public class JpaUtils {
     try {
       Resources.fromClassPath(replace(packages, ".", "/")).filter(c -> c instanceof ClassResource)
           .map((c) -> (ClassResource) c).map(ClassResource::load)
-          .filter(JpaUtils::isPersistenceClass).forEach(clses::add);
+          .filter(JPAUtils::isPersistenceClass).forEach(clses::add);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
@@ -103,7 +103,7 @@ public class JpaUtils {
   public static void stdoutPersistClasses(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replaceAll("\\.", "/");
     Resources.fromClassPath(path).filter(c -> c instanceof ClassResource)
-        .map(c -> (ClassResource) c).map(ClassResource::load).filter(JpaUtils::isPersistenceClass)
+        .map(c -> (ClassResource) c).map(ClassResource::load).filter(JPAUtils::isPersistenceClass)
         .map(Class::getName).sorted(String::compareTo)
         .map(x -> new StringBuilder("<class>").append(x).append("</class>").toString())
         .forEach(ps::println);

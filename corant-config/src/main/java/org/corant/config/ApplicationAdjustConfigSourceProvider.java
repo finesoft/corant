@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import org.corant.shared.normal.Names.ConfigNames;
-import org.corant.shared.normal.Priorities.ConfigPriorities;
+import org.corant.kernel.normal.Names.ConfigNames;
+import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 

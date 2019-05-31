@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.elasticsearch.client.transport.TransportClient;
@@ -87,7 +87,7 @@ public class ElasticExtension implements Extension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String clusterName : configs.keySet()) {
-        event.<PreBuiltTransportClient>addBean().addQualifier(Cdis.resolveNamed(clusterName))
+        event.<PreBuiltTransportClient>addBean().addQualifier(Qualifiers.resolveNamed(clusterName))
             .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(TransportClient.class)
             .beanClass(PreBuiltTransportClient.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {

@@ -30,12 +30,12 @@ import javax.sql.DataSource;
 import org.corant.Corant;
 import org.corant.config.Configurations;
 import org.corant.kernel.logging.LoggerFactory;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.corant.suites.jpa.shared.JpaExtension;
-import org.corant.suites.jpa.shared.JpaUtils;
+import org.corant.suites.jpa.shared.JPAExtension;
+import org.corant.suites.jpa.shared.JPAUtils;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cfg.AvailableSettings;
@@ -61,7 +61,7 @@ public class HibernateOrmSchemaUtils {
 
   public static void stdoutPersistClasses(String pkg, Consumer<String> out) {
     try (Corant corant = prepare()) {
-      new ArrayList<>(JpaUtils.getPersistenceClasses(pkg)).stream().map(Class::getName)
+      new ArrayList<>(JPAUtils.getPersistenceClasses(pkg)).stream().map(Class::getName)
           .sorted(String::compareTo).forEach(out);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
@@ -164,7 +164,7 @@ public class HibernateOrmSchemaUtils {
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
     InitialContext jndi = Corant.instance().select(InitialContext.class).get();
-    JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
+    JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
     Instance<DataSource> datasources = Corant.instance().select(DataSource.class);
     PersistenceUnitInfoMetaData pum = shouldNotNull(extension.getPersistenceUnitInfoMetaData(pu));
     PersistenceUnitInfoMetaData usePum =
@@ -202,7 +202,7 @@ public class HibernateOrmSchemaUtils {
         throw new CorantRuntimeException(e);
       }
     } else if (!datasources.isUnsatisfied()) {
-      return datasources.select(Cdis.resolveNamed(dataSourceName)).get();
+      return datasources.select(Qualifiers.resolveNamed(dataSourceName)).get();
     }
     throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }

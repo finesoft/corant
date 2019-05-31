@@ -13,8 +13,8 @@
  */
 package org.corant.suites.webserver.undertow;
 
-import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.kernel.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.kernel.normal.Names.CORANT;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;

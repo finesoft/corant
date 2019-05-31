@@ -23,7 +23,7 @@ import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.corant.suites.jpa.shared.AbstractJpaInjectionServices;
+import org.corant.suites.jpa.shared.AbstractJPAInjectionServices;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -34,10 +34,10 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  * @author bingo 下午4:36:44
  *
  */
-public class HibernateJpaInjectionServices extends AbstractJpaInjectionServices {
+public class HibernateJPAInjectionServices extends AbstractJPAInjectionServices {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new NarayanaJtaPlatform(), AvailableSettings.HBM2DDL_DATABASE_ACTION, "none",
+      new NarayanaJTAPlatform(), AvailableSettings.HBM2DDL_DATABASE_ACTION, "none",
       AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
 
   @Override

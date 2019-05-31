@@ -16,8 +16,8 @@ package org.corant.suites.mongodb;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.MapUtils.getMapInstant;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
@@ -52,10 +52,10 @@ import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.corant.Corant;
-import org.corant.kernel.util.Cdis;
 import org.corant.kernel.util.Manageables.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
+import org.corant.kernel.normal.Names;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -219,7 +219,7 @@ public class MongoClientExtension implements Extension {
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       for (final String cn : getClientNames()) {
-        final Annotation[] qualifiers = Cdis.resolveNameds(cn);
+        final Annotation[] qualifiers = Qualifiers.resolveNameds(cn);
         event.<MongoClient>addBean().addQualifiers(qualifiers)
             .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(MongoClient.class)
             .beanClass(MongoClient.class).scope(ApplicationScoped.class).produceWith(beans -> {

@@ -21,8 +21,8 @@ import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import org.corant.shared.normal.Names;
-import org.corant.shared.normal.Names.ConfigNames;
+import org.corant.kernel.normal.Names;
+import org.corant.kernel.normal.Names.ConfigNames;
 import org.eclipse.microprofile.config.Config;
 
 /**

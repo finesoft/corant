@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -60,7 +60,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation[] qualifiers = Cdis.resolveNameds(dsn);
+        final Annotation[] qualifiers = Qualifiers.resolveNameds(dsn);
         event.<DataSource>addBean().addQualifiers(qualifiers)
             .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {

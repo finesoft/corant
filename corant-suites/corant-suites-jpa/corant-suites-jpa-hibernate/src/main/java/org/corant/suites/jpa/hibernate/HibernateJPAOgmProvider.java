@@ -17,8 +17,8 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManagerFactory;
-import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.inject.JpaProvider;
+import org.corant.suites.jpa.shared.AbstractJPAProvider;
+import org.corant.suites.jpa.shared.inject.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
@@ -30,11 +30,11 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  *
  */
 @ApplicationScoped
-@JpaProvider("org.hibernate.ogm.jpa.HibernateOgmPersistence")
-public class HibernateJpaOgmProvider extends AbstractJpaProvider {
+@JPAProvider("org.hibernate.ogm.jpa.HibernateOgmPersistence")
+public class HibernateJPAOgmProvider extends AbstractJPAProvider {
 
   static final Map<String, Object> PROPERTIES =
-      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJTAPlatform());
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {

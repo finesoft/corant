@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import org.corant.Corant;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.CDIs;
 import org.corant.kernel.util.ResourceReferences;
 import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -29,16 +29,16 @@ import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
- * The JpaInjectionServices implemention, we don't use it by default. We use AbstractJpaProvider by
+ * The JpaInjectionServices implemention, we don't use it by default. We use AbstractJPAProvider by
  * default, because it support scope. If you're going to use it, the new subclasses, and set in the
  * meta-inf/services corresponding "org. jboss.Weld.bootstrap.api.Service" interface description
  * file.
  *
- * @see AbstractJpaProvider
+ * @see AbstractJPAProvider
  * @author bingo 下午4:18:45
  *
  */
-public abstract class AbstractJpaInjectionServices implements JpaInjectionServices {
+public abstract class AbstractJPAInjectionServices implements JpaInjectionServices {
 
   protected static final Map<PersistenceUnitInfoMetaData, EntityManagerFactory> EMFS =
       new ConcurrentHashMap<>();
@@ -56,7 +56,7 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   public ResourceReferenceFactory<EntityManager> registerPersistenceContextInjectionPoint(
       InjectionPoint injectionPoint) {
     PersistenceContext pc =
-        Cdis.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
+        CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
     PersistenceContextMetaData pcmd = new PersistenceContextMetaData(pc);
     return ResourceReferences.refac(() -> getEntityManagerFactory(pcmd.getUnit())
         .createEntityManager(pcmd.getSynchronization(), pcmd.getProperties()));
@@ -65,10 +65,10 @@ public abstract class AbstractJpaInjectionServices implements JpaInjectionServic
   @Override
   public ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnitInjectionPoint(
       InjectionPoint injectionPoint) {
-    JpaExtension extension = Corant.instance().select(JpaExtension.class).get();
-    PersistenceUnit pu = Cdis.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
+    JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
+    PersistenceUnit pu = CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
     final PersistenceUnitInfoMetaData pumd =
-        extension.getPersistenceUnitInfoMetaData(JpaUtils.getMixedPuName(pu));
+        extension.getPersistenceUnitInfoMetaData(JPAUtils.getMixedPuName(pu));
     return ResourceReferences.refac(() -> getEntityManagerFactory(pumd));
   }
 

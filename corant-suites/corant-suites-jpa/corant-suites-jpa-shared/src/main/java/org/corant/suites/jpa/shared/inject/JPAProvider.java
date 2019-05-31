@@ -33,27 +33,27 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface JpaProvider {
+public @interface JPAProvider {
 
-  String value() default "org.hibernate.jpa.HibernatePersistenceProvider";
+  String value();
 
-  public static class JpaProviderLiteral extends AnnotationLiteral<JpaProvider>
-      implements JpaProvider {
+  public static class JPAProviderLiteral extends AnnotationLiteral<JPAProvider>
+      implements JPAProvider {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
     private final String value;
 
-    private JpaProviderLiteral(String value) {
+    private JPAProviderLiteral(String value) {
       this.value = value;
     }
 
-    public static JpaProviderLiteral[] from(String... values) {
-      return Arrays.stream(values).map(JpaProviderLiteral::of).toArray(JpaProviderLiteral[]::new);
+    public static JPAProviderLiteral[] from(String... values) {
+      return Arrays.stream(values).map(JPAProviderLiteral::of).toArray(JPAProviderLiteral[]::new);
     }
 
-    public static JpaProviderLiteral of(String value) {
-      return new JpaProviderLiteral(value);
+    public static JPAProviderLiteral of(String value) {
+      return new JPAProviderLiteral(value);
     }
 
     @Override
@@ -67,7 +67,7 @@ public @interface JpaProvider {
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      JpaProviderLiteral other = (JpaProviderLiteral) obj;
+      JPAProviderLiteral other = (JPAProviderLiteral) obj;
       if (value == null) {
         if (other.value != null) {
           return false;

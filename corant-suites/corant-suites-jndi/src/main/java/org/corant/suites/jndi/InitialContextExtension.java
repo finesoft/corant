@@ -25,8 +25,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
+import org.corant.kernel.normal.Names.JndiNames;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names.JndiNames;
 
 /**
  * corant-suites-jndi

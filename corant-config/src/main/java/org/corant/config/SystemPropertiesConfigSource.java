@@ -16,8 +16,8 @@ package org.corant.config;
 import static org.corant.shared.util.MapUtils.toMap;
 import java.util.Collections;
 import java.util.Map;
+import org.corant.kernel.normal.Priorities;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.normal.Priorities;
 
 /**
  * corant-config

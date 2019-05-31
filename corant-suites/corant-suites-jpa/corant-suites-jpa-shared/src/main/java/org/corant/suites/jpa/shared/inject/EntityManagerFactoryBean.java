@@ -31,7 +31,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManagerFactory;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 
 /**
  * corant-suites-jpa-shared
@@ -58,7 +58,7 @@ public class EntityManagerFactoryBean
     this.unitName = shouldNotNull(unitName);
     qualifiers.add(Any.Literal.INSTANCE);
     qualifiers.add(Default.Literal.INSTANCE);
-    qualifiers.add(Cdis.resolveNamed(unitName));
+    qualifiers.add(Qualifiers.resolveNamed(unitName));
   }
 
   @Override

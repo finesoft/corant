@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.kernel.normal.Names.JndiNames;
 import org.corant.kernel.util.Unnamed;
-import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.StringUtils;
 import org.eclipse.microprofile.config.Config;
 

@@ -227,10 +227,10 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     }
   }
 
-  protected void log(String name, Map<String, Object> param, String... sql) {
+  protected void log(String name, Map<String, Object> param, String... script) {
     logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query sql]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", sql)));
+        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query script]: %s",
+            name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 
   protected String resolveIndexName(String q) {

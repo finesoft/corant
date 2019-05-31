@@ -25,11 +25,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.corant.suites.jpa.shared.AbstractJpaProvider;
-import org.corant.suites.jpa.shared.inject.JpaProvider;
+import org.corant.suites.jpa.shared.AbstractJPAProvider;
+import org.corant.suites.jpa.shared.inject.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -41,11 +41,11 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  *
  */
 @ApplicationScoped
-@JpaProvider("org.hibernate.jpa.HibernatePersistenceProvider")
-public class HibernateJpaOrmProvider extends AbstractJpaProvider {
+@JPAProvider("org.hibernate.jpa.HibernatePersistenceProvider")
+public class HibernateJPAOrmProvider extends AbstractJPAProvider {
 
   static final Map<String, Object> PROPERTIES =
-      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJtaPlatform());
+      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJTAPlatform());
 
   @Inject
   Instance<DataSource> datasources;
@@ -66,7 +66,7 @@ public class HibernateJpaOrmProvider extends AbstractJpaProvider {
         throw new CorantRuntimeException(e);
       }
     } else if (!datasources.isUnsatisfied()) {
-      return datasources.select(Cdis.resolveNamed(dataSourceName)).get();
+      return datasources.select(Qualifiers.resolveNamed(dataSourceName)).get();
     }
     throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }

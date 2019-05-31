@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
+import static org.corant.kernel.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Priorities.ConfigPriorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**

@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
-import org.corant.shared.normal.Names;
-import org.corant.shared.normal.Names.JndiNames;
+import org.corant.kernel.normal.Names;
+import org.corant.kernel.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.StringUtils;
 import org.corant.suites.jpa.shared.metadata.PersistencePropertiesParser;
@@ -38,7 +38,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 上午10:32:07
  *
  */
-public class JpaConfig {
+public class JPAConfig {
 
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
   public static final String DFLT_ORM_XML_LOCATION = "META-INF/*JpaOrm.xml";
@@ -79,7 +79,7 @@ public class JpaConfig {
   public static final String JC_SHARE_CACHE_MOD = "." + JCX_SHARE_CACHE_MOD;
   public static final String JC_PRO = "." + "property";
 
-  protected static final Logger logger = Logger.getLogger(JpaConfig.class.getName());
+  protected static final Logger logger = Logger.getLogger(JPAConfig.class.getName());
 
   public static Set<String> defaultPropertyNames(Config config) {
     String dfltPrefix = JC_PREFIX.substring(0, JC_PREFIX.length() - 1);

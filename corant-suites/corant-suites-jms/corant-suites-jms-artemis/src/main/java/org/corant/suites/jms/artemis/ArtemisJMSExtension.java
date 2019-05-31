@@ -31,7 +31,7 @@ import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
@@ -87,7 +87,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (event != null) {
       configs.forEach((dsn, dsc) -> {
         if (dsc.isEnable()) {
-          event.<ActiveMQConnectionFactory>addBean().addQualifiers(Cdis.resolveNameds(dsn))
+          event.<ActiveMQConnectionFactory>addBean().addQualifiers(Qualifiers.resolveNameds(dsn))
               .addTransitiveTypeClosure(ActiveMQConnectionFactory.class)
               .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {

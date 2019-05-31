@@ -22,7 +22,7 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.kernel.util.Cdis;
+import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -40,7 +40,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation[] qualifiers = Cdis.resolveNameds(dsn);
+        final Annotation[] qualifiers = Qualifiers.resolveNameds(dsn);
         event.<DataSource>addBean().addQualifiers(qualifiers)
             .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {

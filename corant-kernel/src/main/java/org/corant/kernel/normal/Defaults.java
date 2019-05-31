@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.normal;
+package org.corant.kernel.normal;
 
-import static org.corant.shared.normal.Names.CORANT;
+import static org.corant.kernel.normal.Names.CORANT;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.nio.charset.Charset;
 import java.nio.file.Path;

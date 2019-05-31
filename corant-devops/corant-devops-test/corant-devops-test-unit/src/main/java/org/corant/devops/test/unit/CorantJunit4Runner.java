@@ -13,8 +13,8 @@
  */
 package org.corant.devops.test.unit;
 
-import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
-import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
+import static org.corant.kernel.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
+import static org.corant.kernel.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;

@@ -43,6 +43,7 @@
 		<module>corant-suites-json</module>
 		<module>corant-suites-jasperreports</module>
 		<module>corant-suites-beanvalidation</module>
+		<module>corant-suites-concurrency</module>
 	</modules>
 	<build>
 		<plugins>

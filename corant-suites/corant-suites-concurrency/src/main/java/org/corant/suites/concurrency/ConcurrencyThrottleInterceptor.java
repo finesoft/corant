@@ -38,10 +38,6 @@ public class ConcurrencyThrottleInterceptor {
 
   static final Map<MethodSignature, Semaphore> THROTTLES = new ConcurrentHashMap<>();
 
-  public ConcurrencyThrottleInterceptor() {
-    super();
-  }
-
   @AroundInvoke
   public Object concurrencyThrottleInvocation(final InvocationContext ctx) throws Exception {
     ConcurrencyThrottle ann =

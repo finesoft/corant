@@ -149,7 +149,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
       return;
     }
     Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
-    if (!QueryUtils.decideFetch(obj, fetchQuery, param)) {
+    if (!QueryUtils.decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }
     boolean multiRecords = fetchQuery.isMultiRecords();
@@ -177,8 +177,8 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
           fetchedList = fetchedList.subList(0, 1);
         }
         QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
-        this.fetch(fetchedList, fetchQueries, param);
-        handleResultHints(rcls, hints, param, fetchedList);
+        this.fetch(fetchedList, fetchQueries, fetchParam);
+        handleResultHints(rcls, hints, fetchParam, fetchedList);
       }
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",

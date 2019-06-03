@@ -200,7 +200,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       return;
     }
     Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
-    if (!QueryUtils.decideFetch(obj, fetchQuery, param)) {
+    if (!QueryUtils.decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }
     int maxSize = fetchQuery.getMaxSize();
@@ -229,8 +229,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
         fetchedList = fetchedList.subList(0, 1);
       }
       QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
-      this.fetch(fetchedList, fetchQueries, param);
-      handleResultHints(resultClass, hints, param, fetchedList);
+      this.fetch(fetchedList, fetchQueries, fetchParam);
+      handleResultHints(resultClass, hints, fetchParam, fetchedList);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

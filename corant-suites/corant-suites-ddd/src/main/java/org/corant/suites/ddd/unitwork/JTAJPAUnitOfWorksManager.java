@@ -45,15 +45,15 @@ import org.corant.suites.ddd.saga.SagaService;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
+public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
-  protected final Map<Object, JpaUnitOfWork> uows = new ConcurrentHashMap<>();
+  protected final Map<Object, JTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
   TransactionManager transactionManager;
 
   @Inject
-  JpaPersistenceService persistenceService;
+  JPAPersistenceService persistenceService;
 
   @Inject
   @Any
@@ -67,8 +67,8 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Any
   Instance<SagaService> sagaService;
 
-  public static JpaUnitOfWork curUow() {
-    return instance().select(JpaUnitOfWorksManager.class).get().getCurrentUnitOfWork();
+  public static JTAJPAUnitOfWork curUow() {
+    return instance().select(JTAJPAUnitOfWorksManager.class).get().getCurrentUnitOfWork();
   }
 
   public static int getTxStatusFromCurUow() {
@@ -96,13 +96,13 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   @Override
-  public JpaUnitOfWork getCurrentUnitOfWork() {
+  public JTAJPAUnitOfWork getCurrentUnitOfWork() {
     try {
       final Transaction curTx = getTransactionManager().getTransaction();
-      final JpaUnitOfWork curUow = uows.computeIfAbsent(wrapUintOfWorksKey(curTx), (key) -> {
+      final JTAJPAUnitOfWork curUow = uows.computeIfAbsent(wrapUintOfWorksKey(curTx), (key) -> {
         try {
           logger.fine(() -> "Register an new unit of work with the current transacion context.");
-          JpaUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
+          JTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
           curTx.registerSynchronization(uow);
           return uow;
         } catch (IllegalStateException | RollbackException | SystemException e) {
@@ -139,8 +139,8 @@ public class JpaUnitOfWorksManager extends AbstractUnitOfWorksManager {
         getEntityManagerProperties());
   }
 
-  protected JpaUnitOfWork buildUnitOfWork(Transaction transaction) {
-    return new JpaUnitOfWork(this, transaction, this::buildEntityManager);
+  protected JTAJPAUnitOfWork buildUnitOfWork(Transaction transaction) {
+    return new JTAJPAUnitOfWork(this, transaction, this::buildEntityManager);
   }
 
   protected EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {

@@ -11,21 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.unitwork;
-
-import java.lang.annotation.Annotation;
-import javax.persistence.EntityManagerFactory;
-
 /**
- * corant-suites-ddd
- *
- * @author bingo 下午2:16:37
+ * corant-suites-concurrency
+ * 
+ * @author bingo 上午9:49:16
  *
  */
-public interface JpaPersistenceService {
-
-  EntityManagerFactory getEntityManagerFactory(Annotation qualifier);
-
-  Annotation getPersistenceUnitQualifier(Class<?> entityClass);
-
-}
+package org.corant.suites.concurrency.annotation;

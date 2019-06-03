@@ -37,7 +37,7 @@ import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
-import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
  * corant-suites-ddd
@@ -52,7 +52,7 @@ public abstract class AbstractJpaRepository implements JpaRepository {
   protected Logger logger;
 
   @Inject
-  JpaUnitOfWorksManager unitOfWorkManager;
+  JTAJPAUnitOfWorksManager unitOfWorkManager;
 
   protected volatile Annotation emfQualifier;
 

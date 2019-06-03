@@ -26,7 +26,7 @@ import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityReference;
 import org.corant.suites.ddd.repository.JpaRepository;
-import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 
 /**
  * corant-asosat-ddd
@@ -45,7 +45,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   protected static <T> T retrieve(Serializable id, Class<T> cls) {
     if (id != null && cls != null) {
-      T persistObj = obtainRepo(Corant.instance().select(JpaPersistenceService.class).get()
+      T persistObj = obtainRepo(Corant.instance().select(JPAPersistenceService.class).get()
           .getPersistenceUnitQualifier(cls)).get(cls, id);
       return persistObj;
     }
@@ -90,7 +90,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
   }
 
   protected Annotation[] obtainRepoQualifiers() {
-    Annotation qf = Corant.instance().select(JpaPersistenceService.class).get()
+    Annotation qf = Corant.instance().select(JPAPersistenceService.class).get()
         .getPersistenceUnitQualifier(resolveClass());
     return new Annotation[] {qf};
   }

@@ -27,8 +27,8 @@ import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
 import org.corant.suites.ddd.model.AggregateLifecycleManager;
 import org.corant.suites.ddd.model.Entity;
-import org.corant.suites.ddd.unitwork.JpaPersistenceService;
-import org.corant.suites.ddd.unitwork.JpaUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JPAPersistenceService;
+import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
  * corant-asosat-ddd
@@ -43,10 +43,10 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
   @Inject
-  JpaUnitOfWorksManager unitOfWorksManager;
+  JTAJPAUnitOfWorksManager unitOfWorksManager;
 
   @Inject
-  JpaPersistenceService persistenceService;
+  JPAPersistenceService persistenceService;
 
   @Override
   @Transactional

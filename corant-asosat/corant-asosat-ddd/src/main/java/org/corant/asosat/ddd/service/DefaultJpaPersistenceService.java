@@ -27,7 +27,7 @@ import javax.persistence.metamodel.ManagedType;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
 
 /**
@@ -38,7 +38,7 @@ import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class DefaultJpaPersistenceService implements JpaPersistenceService {
+public class DefaultJpaPersistenceService implements JPAPersistenceService {
 
   protected static final Map<Class<?>, Annotation> clsUns = new ConcurrentHashMap<>();
 
@@ -71,7 +71,7 @@ public class DefaultJpaPersistenceService implements JpaPersistenceService {
         clsUns.put(cls, ann);
       });
     });
-    logger.info(() -> "Initialized JpaPersistenceService.");
+    logger.info(() -> "Initialized JPAPersistenceService.");
   }
 
 }

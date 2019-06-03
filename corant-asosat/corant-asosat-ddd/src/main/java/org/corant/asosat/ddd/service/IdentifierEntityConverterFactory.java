@@ -39,7 +39,7 @@ import org.corant.shared.conversion.ConverterType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.repository.JpaRepository;
-import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.shared.JPAUtils;
 
 /**
@@ -131,7 +131,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
 
   Annotation resolveQualifier(Class<?> cls) {
     return puqCached.computeIfAbsent(cls, (c) -> {
-      Instance<JpaPersistenceService> jps = Corant.instance().select(JpaPersistenceService.class);
+      Instance<JPAPersistenceService> jps = Corant.instance().select(JPAPersistenceService.class);
       return shouldNotNull(jps.isResolvable() ? jps.get().getPersistenceUnitQualifier(c) : null,
           "Can not convert, the persistence unit qualifier for %s not found!", c);
     });

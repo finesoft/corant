@@ -22,7 +22,7 @@ import org.corant.demo.ddd.nosql.domain.NoSqlDemoAggregate;
 import org.corant.demo.ddd.shared.domain.DemoValue;
 import org.corant.demo.ddd.sql.domain.SqlDemoAggregate;
 import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
-import org.corant.suites.ddd.unitwork.JpaPersistenceService;
+import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.hibernate.HibernateOrmSchemaUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 public class Poc {
 
   @Inject
-  JpaPersistenceService ps;
+  JPAPersistenceService ps;
 
   public static void main(String... strings) {
     HibernateOrmSchemaUtils.stdoutRebuildSchema("");

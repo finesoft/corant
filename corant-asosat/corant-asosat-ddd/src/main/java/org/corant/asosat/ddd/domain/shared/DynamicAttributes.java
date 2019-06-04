@@ -39,7 +39,7 @@ public interface DynamicAttributes {
   }
 
   @Converter
-  public static class AttributeTypeJpaConverter
+  public static class AttributeTypeJPAConverter
       implements AttributeConverter<AttributeType, String> {
     @Override
     public String convertToDatabaseColumn(AttributeType attribute) {

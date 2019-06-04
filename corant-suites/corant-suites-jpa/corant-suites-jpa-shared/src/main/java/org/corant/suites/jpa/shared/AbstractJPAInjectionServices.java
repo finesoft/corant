@@ -29,7 +29,7 @@ import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
- * The JpaInjectionServices implemention, we don't use it by default. We use AbstractJPAProvider by
+ * The JPAInjectionServices implemention, we don't use it by default. We use AbstractJPAProvider by
  * default, because it support scope. If you're going to use it, the new subclasses, and set in the
  * meta-inf/services corresponding "org. jboss.Weld.bootstrap.api.Service" interface description
  * file.

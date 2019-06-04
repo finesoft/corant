@@ -26,7 +26,7 @@ import org.corant.suites.ddd.model.Entity;
  * @author bingo 下午9:39:59
  *
  */
-public interface JpaRepository extends Repository<Query> {
+public interface JPARepository extends Repository<Query> {
 
   void clear();
 

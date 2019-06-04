@@ -17,7 +17,7 @@ import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.suites.ddd.repository.JpaQueryBuilder.namedQuery;
+import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
  *
  */
 @Repositories
-public abstract class AbstractJpaRepository implements JpaRepository {
+public abstract class AbstractJPARepository implements JPARepository {
 
   @Inject
   protected Logger logger;

@@ -72,7 +72,7 @@ public enum MeasureUnit {
   }
 
   @Converter
-  public static class MeasureUnitJpaConverter implements AttributeConverter<MeasureUnit, String> {
+  public static class MeasureUnitJPAConverter implements AttributeConverter<MeasureUnit, String> {
     @Override
     public String convertToDatabaseColumn(MeasureUnit attribute) {
       return attribute.name();

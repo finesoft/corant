@@ -38,7 +38,7 @@ import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
-import org.corant.suites.ddd.repository.JpaRepository;
+import org.corant.suites.ddd.repository.JPARepository;
 import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.shared.JPAUtils;
 
@@ -104,8 +104,8 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     }
     T entity = null;
     if (id != null) {
-      Instance<JpaRepository> repos =
-          Corant.instance().select(JpaRepository.class, resolveQualifier(targetClass));
+      Instance<JPARepository> repos =
+          Corant.instance().select(JPARepository.class, resolveQualifier(targetClass));
       if (repos.isResolvable()) {
         entity = repos.get().get(targetClass, id);
       }

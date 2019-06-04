@@ -27,15 +27,15 @@ import javax.persistence.Query;
  * @author bingo 下午9:43:04
  *
  */
-public abstract class JpaQueryBuilder {
+public abstract class JPAQueryBuilder {
 
   protected ParameterBuilder parameterBuilder;
 
   /**
    * Build name query builder
    */
-  public static JpaQueryBuilder namedQuery(final String namedQuery) {
-    return new JpaQueryBuilder() {
+  public static JPAQueryBuilder namedQuery(final String namedQuery) {
+    return new JPAQueryBuilder() {
       @Override
       public String toString() {
         return "Named: " + namedQuery + getParameterDescription();
@@ -51,8 +51,8 @@ public abstract class JpaQueryBuilder {
   /**
    * Build native query with SQL statement builder
    */
-  public static JpaQueryBuilder nativeQuery(final String nativeQuery) {
-    return new JpaQueryBuilder() {
+  public static JPAQueryBuilder nativeQuery(final String nativeQuery) {
+    return new JPAQueryBuilder() {
       @Override
       public String toString() {
         return "NativeQuery: " + nativeQuery + getParameterDescription();
@@ -68,8 +68,8 @@ public abstract class JpaQueryBuilder {
   /**
    * Build JPQL query builder
    */
-  public static JpaQueryBuilder query(final String query) {
-    return new JpaQueryBuilder() {
+  public static JPAQueryBuilder query(final String query) {
+    return new JPAQueryBuilder() {
       @Override
       public String toString() {
         return "Query: " + query + getParameterDescription();
@@ -94,14 +94,14 @@ public abstract class JpaQueryBuilder {
   /**
    * Set the parameter's collection to the builder.
    */
-  public JpaQueryBuilder parameters(Collection<?> parameters) {
+  public JPAQueryBuilder parameters(Collection<?> parameters) {
     return this.parameters(parameters == null ? null : parameters.toArray());
   }
 
   /**
    * Set the parameter's map to the builder.
    */
-  public JpaQueryBuilder parameters(final Map<?, ?> parameterMap) {
+  public JPAQueryBuilder parameters(final Map<?, ?> parameterMap) {
     checkNoParametersConfigured();
     parameterBuilder = new ParameterBuilder() {
       @Override
@@ -124,7 +124,7 @@ public abstract class JpaQueryBuilder {
   /**
    * Set the parameter's array to the builder.
    */
-  public JpaQueryBuilder parameters(final Object... parameters) {
+  public JPAQueryBuilder parameters(final Object... parameters) {
     checkNoParametersConfigured();
     parameterBuilder = new ParameterBuilder() {
       @Override
@@ -148,7 +148,7 @@ public abstract class JpaQueryBuilder {
   protected void checkNoParametersConfigured() {
     if (parameterBuilder != null) {
       throw new IllegalArgumentException(
-          "Cannot add parameters to a JpaQueryBuilder which already has parameters configured");
+          "Cannot add parameters to a JPAQueryBuilder which already has parameters configured");
     }
   }
 

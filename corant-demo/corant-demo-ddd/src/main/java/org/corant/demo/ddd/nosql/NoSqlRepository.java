@@ -15,7 +15,7 @@ package org.corant.demo.ddd.nosql;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
-import org.corant.suites.ddd.repository.AbstractJpaRepository;
+import org.corant.suites.ddd.repository.AbstractJPARepository;
 
 /**
  * corant-demo-ddd
@@ -25,6 +25,6 @@ import org.corant.suites.ddd.repository.AbstractJpaRepository;
  */
 @Named("nosql")
 @ApplicationScoped
-public class NoSqlRepository extends AbstractJpaRepository {
+public class NoSqlRepository extends AbstractJPARepository {
 
 }

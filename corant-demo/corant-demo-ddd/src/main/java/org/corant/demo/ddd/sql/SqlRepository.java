@@ -15,7 +15,7 @@ package org.corant.demo.ddd.sql;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
-import org.corant.suites.ddd.repository.AbstractJpaRepository;
+import org.corant.suites.ddd.repository.AbstractJPARepository;
 
 /**
  * corant-demo-ddd
@@ -25,6 +25,6 @@ import org.corant.suites.ddd.repository.AbstractJpaRepository;
  */
 @Named
 @ApplicationScoped
-public class SqlRepository extends AbstractJpaRepository {
+public class SqlRepository extends AbstractJPARepository {
 
 }

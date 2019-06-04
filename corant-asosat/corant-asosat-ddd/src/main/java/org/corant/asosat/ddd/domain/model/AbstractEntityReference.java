@@ -25,7 +25,7 @@ import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.model.Entity.EntityReference;
-import org.corant.suites.ddd.repository.JpaRepository;
+import org.corant.suites.ddd.repository.JPARepository;
 import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 
 /**
@@ -39,8 +39,8 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   private static final long serialVersionUID = 1261945123532200005L;
 
-  protected static JpaRepository obtainRepo(Annotation... qualifiers) {
-    return Corant.instance().select(JpaRepository.class, qualifiers).get();
+  protected static JPARepository obtainRepo(Annotation... qualifiers) {
+    return Corant.instance().select(JPARepository.class, qualifiers).get();
   }
 
   protected static <T> T retrieve(Serializable id, Class<T> cls) {

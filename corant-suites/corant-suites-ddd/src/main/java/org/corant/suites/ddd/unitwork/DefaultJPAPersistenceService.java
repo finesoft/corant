@@ -11,10 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.service;
+package org.corant.suites.ddd.unitwork;
 
+import static org.corant.kernel.util.Qualifiers.resolveNamed;
+import static org.corant.shared.util.ObjectUtils.asString;
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -23,12 +26,11 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
-import org.corant.kernel.util.Qualifiers;
+import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.unitwork.JPAPersistenceService;
-import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
 
 /**
  * corant-asosat-ddd
@@ -46,7 +48,7 @@ public class DefaultJPAPersistenceService implements JPAPersistenceService {
 
   @Inject
   @Any
-  Instance<ExtendedEntityManagerFactory> emfs;
+  Instance<EntityManagerFactory> emfs;
 
   @Override
   public EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
@@ -65,11 +67,10 @@ public class DefaultJPAPersistenceService implements JPAPersistenceService {
   @PostConstruct
   void onPostConstruct() {
     emfs.forEach(emf -> {
-      Annotation ann =
-          Qualifiers.resolveNamed(emf.getPersistenceUnitInfo().getPersistenceUnitName());
-      emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType).forEach(cls -> {
-        clsUns.put(cls, ann);
-      });
+      String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
+      Annotation ann = resolveNamed(puNme);
+      Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
+      entities.stream().map(ManagedType::getJavaType).forEach(cls -> clsUns.put(cls, ann));
     });
     logger.info(() -> "Initialized JPAPersistenceService.");
   }

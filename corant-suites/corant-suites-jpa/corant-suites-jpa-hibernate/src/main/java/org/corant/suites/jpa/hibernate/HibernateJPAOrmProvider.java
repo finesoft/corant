@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
@@ -51,10 +52,15 @@ public class HibernateJPAOrmProvider extends AbstractJPAProvider {
   Instance<DataSource> datasources;
 
   @Override
-  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
+  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
+      Map<String, Object> additionalProperties) {
     shouldNotNull(metaData).configDataSource(this::resolveDataSource);
+    Map<String, Object> properties = new HashMap<>(PROPERTIES);
+    if (additionalProperties != null) {
+      properties.putAll(additionalProperties);
+    }
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
-        PROPERTIES);
+        properties);
   }
 
   protected DataSource resolveDataSource(String dataSourceName) {

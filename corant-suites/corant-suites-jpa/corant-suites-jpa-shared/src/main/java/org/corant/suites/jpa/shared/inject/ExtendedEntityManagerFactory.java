@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.shared.inject;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.inject.Instance;
@@ -28,6 +29,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitInfo;
 import org.corant.Corant;
+import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.AbstractJPAProvider;
 import org.corant.suites.jpa.shared.JPAExtension;
 import org.corant.suites.jpa.shared.inject.JPAProvider.JPAProviderLiteral;
@@ -62,7 +64,8 @@ public class ExtendedEntityManagerFactory implements EntityManagerFactory {
           Corant.instance().select(AbstractJPAProvider.class, jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
       final ExtendedEntityManagerFactory emf =
-          new ExtendedEntityManagerFactory(provider.get().buildEntityManagerFactory(p), p);
+          new ExtendedEntityManagerFactory(provider.get().buildEntityManagerFactory(p,
+              mapOf(PersistenceNames.PU_NME_KEY, pu.getPersistenceUnitName())), p);
       return emf;
     });
 

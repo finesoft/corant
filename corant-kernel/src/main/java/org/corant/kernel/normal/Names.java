@@ -28,11 +28,12 @@ public interface Names {
   String NAME_SPACE_SEPARATORS = ".";
 
   interface ConfigNames {
-    String CFG_LOCATION_KEY = CORANT + ".config.location";
-    String CFG_PROFILE_KEY = CORANT + ".config.profile";
-    String CFG_ADJUST_KEY = CORANT + ".config.adjust";
-    String CFG_ADJUST_PREFIX = CFG_ADJUST_KEY + ".";
-    String CFG_LOCATION_EXCLUDE_PATTERN = CORANT + ".config.location.exclude.pattern";
+    String CFG_LOCATION_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.location";
+    String CFG_PROFILE_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.profile";
+    String CFG_ADJUST_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.adjust";
+    String CFG_ADJUST_PREFIX = CFG_ADJUST_KEY + NAME_SPACE_SEPARATORS;
+    String CFG_LOCATION_EXCLUDE_PATTERN =
+        CORANT + NAME_SPACE_SEPARATORS + "config.location.exclude.pattern";
   }
 
   interface JndiNames {
@@ -43,5 +44,6 @@ public interface Names {
 
   interface PersistenceNames {
     String PU_DFLT_NME = CORANT;
+    String PU_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "persistence-unit-name";
   }
 }

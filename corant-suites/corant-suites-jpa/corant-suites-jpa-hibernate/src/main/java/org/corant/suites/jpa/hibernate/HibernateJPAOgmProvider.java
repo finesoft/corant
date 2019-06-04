@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.MapUtils.mapOf;
+import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManagerFactory;
@@ -37,8 +38,13 @@ public class HibernateJPAOgmProvider extends AbstractJPAProvider {
       mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJTAPlatform());
 
   @Override
-  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData) {
-    return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, PROPERTIES);
+  public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
+      Map<String, Object> additionalProperties) {
+    Map<String, Object> properties = new HashMap<>(PROPERTIES);
+    if (additionalProperties != null) {
+      properties.putAll(additionalProperties);
+    }
+    return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, properties);
   }
 
 }

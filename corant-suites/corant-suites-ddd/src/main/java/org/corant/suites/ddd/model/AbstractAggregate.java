@@ -28,7 +28,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
-import org.corant.suites.ddd.event.LifecycleEvent;
+import org.corant.suites.ddd.event.LifecycleManageEvent;
 import org.corant.suites.ddd.message.Message;
 
 /**
@@ -125,9 +125,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * destroyed
    */
   protected synchronized void destroy(boolean immediately) {
-    this.raise(new LifecycleEvent(this, LifecyclePhase.DESTROY, immediately),
-        lifecycleServiceQualifier());
-    this.raise(new LifecycleEvent(this, LifecyclePhase.DESTROYED), lifecycleServiceQualifier());
+    this.raise(new LifecycleManageEvent(this, true, immediately));
   }
 
   /**
@@ -135,9 +133,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   protected synchronized AbstractAggregate enable(boolean immediately) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new LifecycleEvent(this, LifecyclePhase.ENABLE, immediately),
-        lifecycleServiceQualifier());
-    this.raise(new LifecycleEvent(this, LifecyclePhase.ENABLED), lifecycleServiceQualifier());
+    this.raise(new LifecycleManageEvent(this, false, immediately));
     return this;
   }
 

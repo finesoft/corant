@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
-import org.corant.suites.ddd.event.LifecycleEvent;
+import org.corant.suites.ddd.event.LifecycleManageEvent;
 
 /**
  * corant-suites-ddd
@@ -23,6 +23,6 @@ import org.corant.suites.ddd.event.LifecycleEvent;
  */
 public interface AggregateLifecycleManager {
 
-  void on(LifecycleEvent e);
+  void on(LifecycleManageEvent e);
 
 }

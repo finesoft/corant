@@ -68,50 +68,50 @@ public interface Aggregate extends Entity {
    */
   void raiseAsync(Event event, Annotation... qualifiers);
 
-  static interface AggregateIdentifier extends EntityIdentifier {
+  interface AggregateIdentifier extends EntityIdentifier {
 
     @Override
-    public Serializable getId();
+    Serializable getId();
 
     @Override
-    public String getType();
+    String getType();
 
     default Class<?> getTypeCls() {
       return tryAsClass(getType());
     }
   }
 
-  static interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
+  interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
 
     Long getVn();
 
   }
 
   @FunctionalInterface
-  static interface Destroyable<P, T> {
+  interface Destroyable<P, T> {
     void destroy(P param, DestroyHandler<P, T> handler);
   }
 
   @FunctionalInterface
-  static interface DestroyHandler<P, T> {
+  interface DestroyHandler<P, T> {
     void preDestroy(P param, T destroyable);
   }
 
   @FunctionalInterface
-  static interface Enabling<P, T> {
+  interface Enabling<P, T> {
     T enable(P param, EnablingHandler<P, T> handler);
   }
 
   @FunctionalInterface
-  static interface EnablingHandler<P, T> {
+  interface EnablingHandler<P, T> {
     void preEnable(P param, T enabling);
-  }
-
-  public enum LifecyclePhase {
-    ENABLE, ENABLED, DESTROY, DESTROYED
   }
 
   public enum Lifecycle {
     INITIAL, ENABLED, DESTROYED
+  }
+
+  public enum LifecyclePhase {
+    ENABLED, DESTROYED
   }
 }

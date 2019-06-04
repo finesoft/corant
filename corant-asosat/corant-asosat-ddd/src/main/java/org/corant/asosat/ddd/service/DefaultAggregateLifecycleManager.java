@@ -13,9 +13,11 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
@@ -23,8 +25,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.event.LifecycleEvent;
-import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
+import org.corant.suites.ddd.event.LifecycleManageEvent;
 import org.corant.suites.ddd.model.AggregateLifecycleManager;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.unitwork.JPAPersistenceService;
@@ -50,21 +51,27 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
 
   @Override
   @Transactional
-  public void on(@Observes(during = TransactionPhase.IN_PROGRESS) LifecycleEvent e) {
+  public void on(@Observes(
+      during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION + 1000) LifecycleManageEvent e) {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
       Annotation named = persistenceService.getPersistenceUnitQualifier(entity.getClass());
-      LifecyclePhase phase = e.getPhase();
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, phase, effectImmediately, named);
-      logger.fine(() -> String.format("Listen %s %s", entity.getClass().getName(), phase.name()));
+      handle(entity, e.isDestroy(), effectImmediately, named);
+      logger.fine(() -> String.format("Handle %s %s", entity.getClass().getName(),
+          e.isDestroy() ? "destroy" : "persist"));
     }
   }
 
-  protected void handle(Entity entity, LifecyclePhase lifcyclePhase, boolean effectImmediately,
+  protected void handle(Entity entity, boolean destroy, boolean effectImmediately,
       Annotation qualifier) {
     EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(qualifier);
-    if (lifcyclePhase == LifecyclePhase.ENABLE) {
+    if (destroy) {
+      em.remove(entity);
+      if (effectImmediately) {
+        em.flush();
+      }
+    } else {
       if (entity.getId() == null) {
         em.persist(entity);
         if (effectImmediately) {
@@ -75,11 +82,6 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
         if (effectImmediately) {
           em.flush();
         }
-      }
-    } else if (lifcyclePhase == LifecyclePhase.DESTROY && entity.getId() != null) {
-      em.remove(entity);
-      if (effectImmediately) {
-        em.flush();
       }
     }
   }

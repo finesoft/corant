@@ -32,7 +32,7 @@
 		<version.javax.ws.rs-api>2.1</version.javax.ws.rs-api>
 		<version.javax.validation-api>2.0.1.Final</version.javax.validation-api>
 		<version.javax.cdi-api>2.0</version.javax.cdi-api>
-		<version.weld>3.1.0.Final</version.weld>
+		<version.weld>3.1.1.Final</version.weld>
 
 		<version.commons-lang3>3.8</version.commons-lang3>
 		<version.commons-io>2.6</version.commons-io>

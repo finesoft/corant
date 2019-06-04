@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.service;
+package org.corant.suites.ddd.model;
 
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -26,8 +26,6 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleManageEvent;
-import org.corant.suites.ddd.model.AggregateLifecycleManager;
-import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 

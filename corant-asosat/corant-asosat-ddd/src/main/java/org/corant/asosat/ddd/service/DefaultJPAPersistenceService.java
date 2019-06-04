@@ -38,7 +38,7 @@ import org.corant.suites.jpa.shared.inject.ExtendedEntityManagerFactory;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class DefaultJpaPersistenceService implements JPAPersistenceService {
+public class DefaultJPAPersistenceService implements JPAPersistenceService {
 
   protected static final Map<Class<?>, Annotation> clsUns = new ConcurrentHashMap<>();
 

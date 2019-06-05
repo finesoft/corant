@@ -49,23 +49,29 @@ import java.util.zip.CRC32;
  */
 public class JarLauncher {
 
-  public static final String WORK_DIR = ".corant-works";
-  public static final Attributes.Name RUNNER_CLS_ATTR_NME = new Attributes.Name("runner-class");
+  public static final String APP_NME_KEY = "corant.application-name";
+  public static final String DFLT_APP_NAME = "corant";
+  public static final Attributes.Name RUNNER_CLS_ATTR_NME = new Attributes.Name("Runner-Class");
   public static final String MANIFEST = "META-INF/MANIFEST.MF";
   public static final String MAIN = "main";
   public static final String JAREXT = ".jar";
   public static final int JAREXT_LEN = JAREXT.length();
-  private final Path workPath;
+  private String workDir;
+  private String appName;
+  private String mainClsName;
+  private Path workPath;
   private final List<Path> classpaths = new ArrayList<>();
 
   private String[] args = new String[0];
   private Manifest manifest;
 
-  JarLauncher(String... args) {
+  JarLauncher(String... args) throws IOException {
     this.args = Arrays.stream(args).filter(arg -> arg.startsWith("-")).toArray(String[]::new);
     Arrays.stream(args).filter(arg -> arg.startsWith("+")).map(arg -> Paths.get(arg.substring(1)))
         .forEach(classpaths::add);
-    workPath = Paths.get(System.getProperty("user.home")).resolve(WORK_DIR);
+    loadManifest();
+    initialize();
+
   }
 
   public static void main(String... args) throws Exception {
@@ -77,9 +83,9 @@ public class JarLauncher {
       Files.createDirectories(workPath);
       cleanWorkDir();
       extract();
-      Class<?> mainClass =
-          getClassLoader().loadClass(manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME));
-      log(true, "Find application main class %s, the application is starting...", mainClass);
+      Class<?> mainClass = getClassLoader().loadClass(mainClsName);
+      System.setProperty(APP_NME_KEY, appName);
+      log(true, "Find %s main class %s, the application is starting...", mainClass, appName);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -113,8 +119,6 @@ public class JarLauncher {
           JarEntry each = entries.nextElement();
           if (each.getName().endsWith(JAREXT)) {
             extract(jar, each, newJarPaths, existedJarPaths);
-          } else if (each.getName().equals(MANIFEST)) {
-            loadManifest(jar, each);
           }
         }
       }
@@ -187,6 +191,26 @@ public class JarLauncher {
     throw new NoSuchMethodException("public static void main(String...args)");
   }
 
+  void initialize() {
+    if (manifest.getMainAttributes().getValue(Attributes.Name.EXTENSION_NAME) == null) {
+      appName = DFLT_APP_NAME;
+    } else {
+      appName = manifest.getMainAttributes().getValue(Attributes.Name.EXTENSION_NAME);
+    }
+    workDir = "." + appName + "-works";
+    workPath = Paths.get(System.getProperty("user.home")).resolve(workDir);
+    mainClsName = manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME);
+  }
+
+  void loadManifest() throws IOException {
+    URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
+    if (location.toExternalForm().endsWith(JAREXT)) {
+      try (JarFile jar = new JarFile(new File(location.getPath()))) {
+        manifest = jar.getManifest();
+      }
+    }
+  }
+
   void loadManifest(JarFile jar, JarEntry each) throws IOException {
     try (InputStream in = jar.getInputStream(each)) {
       manifest = new Manifest(in);
@@ -208,4 +232,5 @@ public class JarLauncher {
       }
     }
   }
+
 }

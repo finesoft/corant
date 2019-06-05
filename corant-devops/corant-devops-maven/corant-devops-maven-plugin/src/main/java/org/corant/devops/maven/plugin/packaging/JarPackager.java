@@ -81,7 +81,21 @@ public class JarPackager implements Packager {
         .addEntry(FileEntry.of(mojo.getProject().getArtifact().getFile()));
     DefaultArchive.of(JAR_BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
-      attr.put(new Attributes.Name("runner-class"), mojo.getMainClass());
+
+      // The application runner class
+      attr.put(new Attributes.Name("Runner-Class"), mojo.getMainClass());
+
+      attr.put(Attributes.Name.EXTENSION_NAME, resolveApplicationName());
+      attr.put(Attributes.Name.SPECIFICATION_TITLE, mojo.getProject().getName());
+      attr.put(Attributes.Name.SPECIFICATION_VERSION, mojo.getProject().getVersion());
+      attr.put(Attributes.Name.IMPLEMENTATION_TITLE, mojo.getProject().getName());
+      attr.put(Attributes.Name.IMPLEMENTATION_VERSION, mojo.getProject().getVersion());
+      if (mojo.getProject().getOrganization() != null) {
+        attr.put(Attributes.Name.IMPLEMENTATION_VENDOR,
+            mojo.getProject().getOrganization().getName());
+        attr.put(Attributes.Name.SPECIFICATION_VENDOR,
+            mojo.getProject().getOrganization().getName());
+      }
       attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());
     }));
     log.debug("(corant) built archive for packaging.");
@@ -139,6 +153,10 @@ public class JarPackager implements Packager {
     artifact.setFile(mojo.getDestination().toFile());
     mojo.getProject().addAttachedArtifact(artifact);
     log.debug("(corant) created attach!");
+  }
+
+  String resolveApplicationName() {
+    return mojo.getFinalName() == null ? "corant" : mojo.getFinalName();
   }
 
 }

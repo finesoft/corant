@@ -14,7 +14,6 @@
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.kernel.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.kernel.normal.Names.CORANT;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;
@@ -26,6 +25,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import org.corant.kernel.normal.Names;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources.SourceType;
@@ -196,7 +196,7 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected DeploymentManager resolveServerDeploymentManager() {
-    String name = CORANT + "-undertow";
+    String name = Names.applicationName() + "-undertow";
     DeploymentInfo di = new DeploymentInfo();
     di.setContextPath(config.getContextPath());
     di.setDeploymentName(name);

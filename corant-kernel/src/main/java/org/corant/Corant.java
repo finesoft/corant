@@ -13,7 +13,7 @@
  */
 package org.corant;
 
-import static org.corant.kernel.normal.Names.CORANT;
+import static org.corant.kernel.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -308,7 +308,8 @@ public class Corant implements AutoCloseable {
     }
     setMe(this);
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = StopWatch.press(CORANT, "Perform the handler before corant starting");
+    StopWatch stopWatch = StopWatch.press(applicationName(),
+        "Perform the handler before " + applicationName() + " starting");
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());

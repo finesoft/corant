@@ -13,6 +13,8 @@
  */
 package org.corant.kernel.normal;
 
+import static org.corant.shared.util.StringUtils.defaultString;
+
 /**
  * corant-kernel
  *
@@ -26,6 +28,12 @@ public interface Names {
   char NAME_SPACE_SEPARATOR = '.';
 
   String NAME_SPACE_SEPARATORS = ".";
+
+  String CORANT_APP_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "application-name";
+
+  static String applicationName() {
+    return defaultString(System.getProperty(CORANT_APP_NME_KEY), CORANT);
+  }
 
   interface ConfigNames {
     String CFG_LOCATION_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.location";

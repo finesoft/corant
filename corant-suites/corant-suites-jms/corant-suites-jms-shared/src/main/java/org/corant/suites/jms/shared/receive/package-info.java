@@ -13,8 +13,10 @@
  */
 /**
  * corant-suites-jms-shared
- * 
+ *
  * @author bingo 下午12:01:04
  *
  */
 package org.corant.suites.jms.shared.receive;
+
+// FIXME introduce circuit breaker message receiver manager

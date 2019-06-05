@@ -79,7 +79,9 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
     String script = querier.getScript();
     try {
-      return getExecutor().searchAggregation(resolveIndexName(q), script);
+      Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(q), script);
+      handleResultHints(Map.class, querier.getHints(), param, result);
+      return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the aggregate query [%s].", q);
@@ -119,7 +121,9 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
     String script = querier.getScript();
     try {
-      return getExecutor().search(resolveIndexName(q), script);
+      Map<String, Object> result = getExecutor().search(resolveIndexName(q), script);
+      handleResultHints(Map.class, querier.getHints(), param, result);
+      return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the search query [%s].",
           q);

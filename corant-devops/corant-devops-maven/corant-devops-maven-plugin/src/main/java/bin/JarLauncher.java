@@ -56,12 +56,11 @@ public class JarLauncher {
   public static final String MAIN = "main";
   public static final String JAREXT = ".jar";
   public static final int JAREXT_LEN = JAREXT.length();
+  private final List<Path> classpaths = new ArrayList<>();
   private String workDir;
   private String appName;
   private String mainClsName;
   private Path workPath;
-  private final List<Path> classpaths = new ArrayList<>();
-
   private String[] args = new String[0];
   private Manifest manifest;
 

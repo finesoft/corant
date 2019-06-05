@@ -83,7 +83,7 @@ public class JarPackager implements Packager {
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
 
       // The application runner class
-      attr.put(new Attributes.Name("Runner-Class"), mojo.getMainClass());
+      attr.put(JarLauncher.RUNNER_CLS_ATTR_NME, mojo.getMainClass());
 
       attr.put(Attributes.Name.EXTENSION_NAME, resolveApplicationName());
       attr.put(Attributes.Name.SPECIFICATION_TITLE, mojo.getProject().getName());
@@ -156,7 +156,7 @@ public class JarPackager implements Packager {
   }
 
   String resolveApplicationName() {
-    return mojo.getFinalName() == null ? "corant" : mojo.getFinalName();
+    return mojo.getFinalName() == null ? JarLauncher.DFLT_APP_NAME : mojo.getFinalName();
   }
 
 }

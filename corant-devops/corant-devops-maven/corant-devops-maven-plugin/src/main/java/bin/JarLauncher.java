@@ -69,9 +69,7 @@ public class JarLauncher {
     this.args = Arrays.stream(args).filter(arg -> arg.startsWith("-")).toArray(String[]::new);
     Arrays.stream(args).filter(arg -> arg.startsWith("+")).map(arg -> Paths.get(arg.substring(1)))
         .forEach(classpaths::add);
-    loadManifest();
     initialize();
-
   }
 
   public static void main(String... args) throws Exception {
@@ -191,7 +189,8 @@ public class JarLauncher {
     throw new NoSuchMethodException("public static void main(String...args)");
   }
 
-  void initialize() {
+  void initialize() throws IOException {
+    loadManifest();
     if (manifest.getMainAttributes().getValue(Attributes.Name.EXTENSION_NAME) == null) {
       appName = DFLT_APP_NAME;
     } else {

@@ -57,7 +57,6 @@ public class JarLauncher {
   public static final String JAREXT = ".jar";
   public static final int JAREXT_LEN = JAREXT.length();
   private final List<Path> classpaths = new ArrayList<>();
-  private String workDir;
   private String appName;
   private String mainClsName;
   private Path workPath;
@@ -195,8 +194,7 @@ public class JarLauncher {
     } else {
       appName = manifest.getMainAttributes().getValue(Attributes.Name.EXTENSION_NAME);
     }
-    workDir = "." + appName + "-works";
-    workPath = Paths.get(System.getProperty("user.home")).resolve(workDir);
+    workPath = Paths.get(System.getProperty("user.home")).resolve("." + appName + "-works");
     mainClsName = manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME);
   }
 

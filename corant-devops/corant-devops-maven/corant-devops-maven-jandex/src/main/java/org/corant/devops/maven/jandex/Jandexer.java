@@ -42,6 +42,7 @@ public class Jandexer extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    getLog().debug("(corant)--------------------------[index classes]--------------------------");
     if (!project.getPackaging().equals("jar") && !project.getPackaging().equals("war")) {
       getLog().debug("(corant) skip jandex index, only support jar or war");
       return;

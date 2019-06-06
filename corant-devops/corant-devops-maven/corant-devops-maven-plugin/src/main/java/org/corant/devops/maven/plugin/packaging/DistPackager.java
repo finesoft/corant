@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.Artifact;
@@ -49,6 +50,12 @@ import org.corant.devops.maven.plugin.archive.FileEntry;
  */
 public class DistPackager implements Packager {
 
+  public static final String JVM_OPT = "jvm.options";
+  public static final Charset CHARSET = StandardCharsets.UTF_8;
+  public static final String RUN_BAT = "run.bat";
+  public static final String RUN_BAT_TITLE_PH = "#TITLE#";
+  public static final String RUN_BAT_MAIN_CLASS_PH = "#MAIN_CLASS#";
+  public static final String DIST_NAME_SUF = "-dist.zip";
   public static final String JAR_LIB_DIR = "lib";
   public static final String JAR_APP_DIR = "app";
   public static final String JAR_CFG_DIR = "cfg";
@@ -73,8 +80,7 @@ public class DistPackager implements Packager {
 
   @Override
   public void pack() throws Exception {
-    log.debug(
-        "(corant)--------------------------------[pack dist]--------------------------------");
+    log.debug("(corant)----------------------------[pack dist]----------------------------");
     log.debug("(corant) start packaging process...");
     doPack(buildArchive());
   }
@@ -84,17 +90,17 @@ public class DistPackager implements Packager {
     Files.createDirectories(destPath.getParent());
     log.debug(String.format("(corant) created destination dir %s for packaging.",
         destPath.getParent().toUri().getPath()));
-    try (ZipArchiveOutputStream jos =
+    try (ZipArchiveOutputStream zos =
         new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
-          JarArchiveEntry jarFileEntry =
-              new JarArchiveEntry(root.getPath().resolve(entry.getName()).toString());
-          jos.putArchiveEntry(jarFileEntry);
-          IOUtils.copy(entry.getInputStream(), jos);
-          jos.closeArchiveEntry();
-          log.debug(String.format("(corant) created entry %s", jarFileEntry.getName()));
+          ZipArchiveEntry zipEntry =
+              new ZipArchiveEntry(resolveArchivePath(root.getPath(), entry.getName()));
+          zos.putArchiveEntry(zipEntry);
+          IOUtils.copy(entry.getInputStream(), zos);
+          zos.closeArchiveEntry();
+          log.debug(String.format("(corant) packaged entry %s", zipEntry.getName()));
         }
       }
       // handle child archives
@@ -103,12 +109,12 @@ public class DistPackager implements Packager {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
           for (Entry childEntry : childArchive) {
-            JarArchiveEntry childJarFileEntry = new JarArchiveEntry(
-                childArchive.getPath().resolve(childEntry.getName()).toString());
-            jos.putArchiveEntry(childJarFileEntry);
-            IOUtils.copy(childEntry.getInputStream(), jos);
-            jos.closeArchiveEntry();
-            log.debug(String.format("(corant) created entry %s", childJarFileEntry.getName()));
+            ZipArchiveEntry childZipEntry = new ZipArchiveEntry(
+                resolveArchivePath(childArchive.getPath(), childEntry.getName()));
+            zos.putArchiveEntry(childZipEntry);
+            IOUtils.copy(childEntry.getInputStream(), zos);
+            zos.closeArchiveEntry();
+            log.debug(String.format("(corant) packaged entry %s", childZipEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());
@@ -118,10 +124,8 @@ public class DistPackager implements Packager {
 
   Archive buildArchive() throws IOException {
     Archive root = DefaultArchive.root();
-
     // LICENE README NOTICE
     resolveRootResources().forEach(root::addEntry);
-
     DefaultArchive.of(JAR_LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
     DefaultArchive.of(JAR_APP_DIR, root)
@@ -152,13 +156,14 @@ public class DistPackager implements Packager {
         entries.add(FileEntry.of(new File(artDir, file)));
       }
     }
-    entries.add(ClassPathEntry.of("jvm.options", "jvm.options"));
+    entries.add(ClassPathEntry.of(JVM_OPT, JVM_OPT));
     return entries;
   }
 
   Path resolvePath() {
     Path target = Paths.get(getMojo().getProject().getBuild().getDirectory());
-    return target.resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + "-dist.zip");
+    return target
+        .resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + DIST_NAME_SUF);
   }
 
   List<Entry> resolveRootResources() throws IOException {
@@ -179,19 +184,19 @@ public class DistPackager implements Packager {
   }
 
   Entry resolveRunbat() throws IOException {
-    String runbat = IOUtils.toString(ClassPathEntry.of("run.bat", "run.bat").getInputStream(),
-        StandardCharsets.UTF_8);
-    final String useRunbat = runbat.replaceAll("#MAIN_CLASS#", getMojo().getMainClass())
-        .replaceAll("#TITLE#", resolveApplicationName());
+    String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(),
+        CHARSET);
+    final String useRunbat = runbat.replaceAll(RUN_BAT_MAIN_CLASS_PH, getMojo().getMainClass())
+        .replaceAll(RUN_BAT_TITLE_PH, resolveApplicationName());
     return new Entry() {
       @Override
       public InputStream getInputStream() throws IOException {
-        return IOUtils.toInputStream(useRunbat, StandardCharsets.UTF_8);
+        return IOUtils.toInputStream(useRunbat, CHARSET);
       }
 
       @Override
       public String getName() {
-        return "run.bat";
+        return RUN_BAT;
       }
     };
   }

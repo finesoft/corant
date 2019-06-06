@@ -14,7 +14,9 @@
 package org.corant;
 
 import static org.corant.shared.util.MapUtils.mapOf;
+import java.time.LocalDate;
 import org.corant.asosat.ddd.domain.shared.Param;
+import org.corant.asosat.ddd.util.JsonUtils;
 import org.corant.devops.test.unit.CorantJunit4Suite;
 import org.corant.devops.test.unit.RunConfig;
 import org.junit.runner.RunWith;
@@ -34,5 +36,7 @@ public class TestTwo {
   public static void main(String... strings) throws Exception {
     Param p = Param.empty().withAttribute(mapOf("a", true, "b", "1234"));
     System.out.println(p.getAttributes().getString("b"));
+    // System.out.println(JsonUtils.toString(ZonedDateTime.now(), true));
+    System.out.println(JsonUtils.toString(LocalDate.now(), true));
   }
 }

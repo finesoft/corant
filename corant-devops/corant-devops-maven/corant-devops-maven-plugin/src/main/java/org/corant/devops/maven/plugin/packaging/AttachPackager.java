@@ -46,15 +46,14 @@ public class AttachPackager implements Packager {
 
   @Override
   public void pack() throws Exception {
-    log.debug(
-        "(corant)--------------------------------[pack withAttach]--------------------------------");
+    log.debug("(corant)----------------------------[pack attach]----------------------------");
     DefaultArtifact artifact = new DefaultArtifact(getMojo().getProject().getGroupId(),
         getMojo().getProject().getArtifactId(), getMojo().getProject().getVersion(),
         getMojo().getProject().getArtifact().getScope(), "jar", getMojo().getClassifier(),
         new DefaultArtifactHandler("jar"));
     artifact.setFile(resolvePath().toFile());
     getMojo().getProject().addAttachedArtifact(artifact);
-    log.debug("(corant) created withAttach!");
+    log.debug("(corant) packaged attach!");
   }
 
   Path resolvePath() {

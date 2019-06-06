@@ -13,13 +13,13 @@
  */
 package org.corant.suites.ddd.event;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
 
 /**
- * Every aggregate that extends AbstractAggregate when life cycle change then will fire
- * LifecycleEvent, the infrastructure service will listen this event and do persist or destroy the
- * aggregate.
+ * The lifecycle manage event, the infrastructure service will listen this event and do persist or
+ * destroy the aggregate.
  *
  * @author bingo 上午9:39:28
  */
@@ -40,6 +40,11 @@ public class LifecycleManageEvent extends AbstractEvent {
     super(source);
     this.destroy = destroy;
     this.effectImmediately = effectImmediately;
+  }
+
+  @Override
+  public Aggregate getSource() {
+    return forceCast(super.getSource());
   }
 
   public boolean isDestroy() {

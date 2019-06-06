@@ -70,7 +70,7 @@ public class JarPackager implements Packager {
 
   @Override
   public void pack() throws Exception {
-    log.debug("(corant)--------------------------------[pack jar]--------------------------------");
+    log.debug("(corant)----------------------------[pack jar]----------------------------");
     log.debug("(corant) start packaging process...");
     doPack(buildArchive());
   }
@@ -86,11 +86,11 @@ public class JarPackager implements Packager {
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
           JarArchiveEntry jarFileEntry =
-              new JarArchiveEntry(root.getPath().resolve(entry.getName()).toString());
+              new JarArchiveEntry(resolveArchivePath(root.getPath(), entry.getName()));
           jos.putArchiveEntry(jarFileEntry);
           IOUtils.copy(entry.getInputStream(), jos);
           jos.closeArchiveEntry();
-          log.debug(String.format("(corant) created entry %s", jarFileEntry.getName()));
+          log.debug(String.format("(corant) packaged entry %s", jarFileEntry.getName()));
         }
       }
       // handle child archives
@@ -100,11 +100,11 @@ public class JarPackager implements Packager {
         if (!childArchive.getEntries(null).isEmpty()) {
           for (Entry childEntry : childArchive) {
             JarArchiveEntry childJarFileEntry = new JarArchiveEntry(
-                childArchive.getPath().resolve(childEntry.getName()).toString());
+                resolveArchivePath(childArchive.getPath(), childEntry.getName()));
             jos.putArchiveEntry(childJarFileEntry);
             IOUtils.copy(childEntry.getInputStream(), jos);
             jos.closeArchiveEntry();
-            log.debug(String.format("(corant) created entry %s", childJarFileEntry.getName()));
+            log.debug(String.format("(corant) packaged entry %s", childJarFileEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());

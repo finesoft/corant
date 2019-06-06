@@ -13,6 +13,8 @@
  */
 package org.corant.devops.maven.plugin.packaging;
 
+import java.io.File;
+import java.nio.file.Path;
 import bin.JarLauncher;
 
 /**
@@ -32,5 +34,16 @@ public interface Packager {
 
   default String resolveApplicationName() {
     return getMojo().getFinalName() == null ? JarLauncher.DFLT_APP_NAME : getMojo().getFinalName();
+  }
+
+  default String resolveArchivePath(Path path, String... others) {
+    if (path == null) {
+      return null;
+    }
+    Path usePath = path;
+    for (String other : others) {
+      usePath = path.resolve(other);
+    }
+    return usePath.toString().replace(File.separatorChar, '/');
   }
 }

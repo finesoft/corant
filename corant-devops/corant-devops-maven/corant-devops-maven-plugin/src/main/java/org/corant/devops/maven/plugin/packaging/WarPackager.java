@@ -32,6 +32,11 @@ public class WarPackager implements Packager {
   }
 
   @Override
+  public PackageMojo getMojo() {
+    return mojo;
+  }
+
+  @Override
   public void pack() throws Exception {
 
   }

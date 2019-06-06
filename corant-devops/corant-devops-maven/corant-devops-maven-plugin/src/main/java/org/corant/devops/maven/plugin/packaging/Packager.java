@@ -13,6 +13,8 @@
  */
 package org.corant.devops.maven.plugin.packaging;
 
+import bin.JarLauncher;
+
 /**
  * corant-devops-maven
  *
@@ -21,8 +23,14 @@ package org.corant.devops.maven.plugin.packaging;
  */
 public interface Packager {
 
-  public static final String META_INF_DIR = "META-INF";
-  public static final String MF_NME = "MANIFEST.MF";
+  String META_INF_DIR = "META-INF";
+  String MF_NME = "MANIFEST.MF";
+
+  PackageMojo getMojo();
 
   void pack() throws Exception;
+
+  default String resolveApplicationName() {
+    return getMojo().getFinalName() == null ? JarLauncher.DFLT_APP_NAME : getMojo().getFinalName();
+  }
 }

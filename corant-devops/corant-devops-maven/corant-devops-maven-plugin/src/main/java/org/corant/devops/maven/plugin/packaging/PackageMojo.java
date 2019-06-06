@@ -13,8 +13,6 @@
  */
 package org.corant.devops.maven.plugin.packaging;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -38,31 +36,41 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true)
   protected MavenProject project;
 
-  @Parameter(defaultValue = "bin", property = "corant.classifier")
+  @Parameter(defaultValue = "bin", property = "corant.maven-mojo.classifier")
   protected String classifier;
 
-  @Parameter(defaultValue = "${project.build.finalName}", property = "corant.finalName")
+  @Parameter(defaultValue = "${project.build.finalName}", property = "corant.maven-mojo.final-name")
   protected String finalName;
 
-  @Parameter(defaultValue = "true", property = "corant.attach")
-  protected boolean attach;
+  @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-attach")
+  protected boolean withAttach;
 
-  @Parameter(defaultValue = "true", property = "corant.jandex")
-  protected boolean jandex;
+  @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-dist")
+  protected boolean withDist;
 
-  @Parameter(property = "corant.mainClass")
+  @Parameter(property = "corant.maven-mojo.mainClass")
   protected String mainClass;
+
+  @Parameter(defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,**log*.*",
+      property = "corant.maven-mojo.config-paths")
+  protected String configPaths;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (isJar()) {
       try {
         new JarPackager(this).pack();
+        if (isWithAttach()) {
+          new AttachPackager(this).pack();
+        }
+        if (isWithDist()) {
+          new DistPackager(this).pack();
+        }
       } catch (Exception e) {
         throw new MojoExecutionException("Packaging error!", e);
       }
     } else if (isWar()) {
-      // TODO
+      throw new MojoExecutionException("We do not currently support packaging as war!");
     } else {
       getLog()
           .info("(corant) skipping " + project.getArtifactId() + " as packaging is not jar/war");
@@ -73,12 +81,8 @@ public class PackageMojo extends AbstractMojo {
     return classifier;
   }
 
-  public Path getDestination() {
-    Path target = Paths.get(project.getBuild().getDirectory());
-    if (isWar()) {
-      return target.resolve(finalName + "-" + classifier + ".war");
-    }
-    return target.resolve(finalName + "-" + classifier + ".jar");
+  public String getConfigPaths() {
+    return configPaths;
   }
 
   public String getFinalName() {
@@ -93,8 +97,12 @@ public class PackageMojo extends AbstractMojo {
     return project;
   }
 
-  public boolean isAttach() {
-    return attach;
+  public boolean isWithAttach() {
+    return withAttach;
+  }
+
+  public boolean isWithDist() {
+    return withDist;
   }
 
   public boolean isJar() {

@@ -13,28 +13,33 @@
  */
 package org.corant.devops.maven.plugin.packaging;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.jar.Attributes;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
-import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.DirectoryScanner;
 import org.corant.devops.maven.plugin.BuildStageException;
 import org.corant.devops.maven.plugin.archive.Archive;
 import org.corant.devops.maven.plugin.archive.Archive.Entry;
 import org.corant.devops.maven.plugin.archive.ClassPathEntry;
 import org.corant.devops.maven.plugin.archive.DefaultArchive;
 import org.corant.devops.maven.plugin.archive.FileEntry;
-import org.corant.devops.maven.plugin.archive.ManifestEntry;
-import bin.JarLauncher;
 
 /**
  * corant-devops-maven
@@ -42,20 +47,18 @@ import bin.JarLauncher;
  * @author bingo 下午4:33:08
  *
  */
-public class JarPackager implements Packager {
+public class DistPackager implements Packager {
 
   public static final String JAR_LIB_DIR = "lib";
   public static final String JAR_APP_DIR = "app";
   public static final String JAR_CFG_DIR = "cfg";
   public static final String JAR_BIN_DIR = "bin";
-  public static final String JAR_LAU_PATH =
-      JarLauncher.class.getName().replaceAll("\\.", "/") + ".class";
-  public static final String JAR_LAU_NME = JarLauncher.class.getSimpleName() + ".class";
+  public static final String LOG_BIN_DIR = "log";
 
   private final PackageMojo mojo;
   final Log log;
 
-  JarPackager(PackageMojo mojo) {
+  DistPackager(PackageMojo mojo) {
     if (!mojo.isJar()) {
       throw new BuildStageException("Only support jar mojo!");
     }
@@ -70,7 +73,8 @@ public class JarPackager implements Packager {
 
   @Override
   public void pack() throws Exception {
-    log.debug("(corant)--------------------------------[pack jar]--------------------------------");
+    log.debug(
+        "(corant)--------------------------------[pack dist]--------------------------------");
     log.debug("(corant) start packaging process...");
     doPack(buildArchive());
   }
@@ -80,8 +84,8 @@ public class JarPackager implements Packager {
     Files.createDirectories(destPath.getParent());
     log.debug(String.format("(corant) created destination dir %s for packaging.",
         destPath.getParent().toUri().getPath()));
-    try (JarArchiveOutputStream jos =
-        new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
+    try (ZipArchiveOutputStream jos =
+        new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         JarArchiveEntry jarDirEntry = new JarArchiveEntry(root.getPathName());
@@ -119,35 +123,62 @@ public class JarPackager implements Packager {
     }
   }
 
-  Archive buildArchive() {
+  Archive buildArchive() throws IOException {
     Archive root = DefaultArchive.root();
     DefaultArchive.of(JAR_LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
     DefaultArchive.of(JAR_APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-    DefaultArchive.of(JAR_BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
-    DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
-      // The application runner class
-      attr.put(JarLauncher.RUNNER_CLS_ATTR_NME, getMojo().getMainClass());
-      attr.put(Attributes.Name.EXTENSION_NAME, resolveApplicationName());
-      attr.put(Attributes.Name.SPECIFICATION_TITLE, getMojo().getProject().getName());
-      attr.put(Attributes.Name.SPECIFICATION_VERSION, getMojo().getProject().getVersion());
-      attr.put(Attributes.Name.IMPLEMENTATION_TITLE, getMojo().getProject().getName());
-      attr.put(Attributes.Name.IMPLEMENTATION_VERSION, getMojo().getProject().getVersion());
-      if (getMojo().getProject().getOrganization() != null) {
-        attr.put(Attributes.Name.IMPLEMENTATION_VENDOR,
-            getMojo().getProject().getOrganization().getName());
-        attr.put(Attributes.Name.SPECIFICATION_VENDOR,
-            getMojo().getProject().getOrganization().getName());
-      }
-      attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());
-    }));
+    DefaultArchive.of(JAR_CFG_DIR, root).addEntries(resolveCfgFiles());
+    DefaultArchive.of(JAR_BIN_DIR, root).addEntries(resolveBinFiles());
     log.debug("(corant) built archive for packaging.");
     return root;
   }
 
+  List<Entry> resolveBinFiles() throws IOException {
+    List<Entry> entries = new ArrayList<>();
+    entries.add(resolveRunbat());
+    return entries;
+  }
+
+  List<Entry> resolveCfgFiles() {
+    List<Entry> entries = new ArrayList<>();
+    String regex = getMojo().getConfigPaths();
+    List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
+        .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
+    final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
+    final DirectoryScanner scanner = new DirectoryScanner();
+    scanner.setBasedir(artDir);
+    scanner.scan();
+    for (final String file : scanner.getIncludedFiles()) {
+      if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+        entries.add(FileEntry.of(new File(artDir, file)));
+      }
+    }
+    entries.add(ClassPathEntry.of("jvm.options", "jvm.options"));
+    return entries;
+  }
+
   Path resolvePath() {
     Path target = Paths.get(getMojo().getProject().getBuild().getDirectory());
-    return target.resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + ".jar");
+    return target.resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + "-dist.zip");
+  }
+
+  Entry resolveRunbat() throws IOException {
+    String runbat = IOUtils.toString(ClassPathEntry.of("run.bat", "run.bat").getInputStream(),
+        StandardCharsets.UTF_8);
+    final String useRunbat = runbat.replaceAll("#MAIN_CLASS#", getMojo().getMainClass())
+        .replaceAll("#TITLE#", resolveApplicationName());
+    return new Entry() {
+      @Override
+      public InputStream getInputStream() throws IOException {
+        return IOUtils.toInputStream(useRunbat, StandardCharsets.UTF_8);
+      }
+
+      @Override
+      public String getName() {
+        return "run.bat";
+      }
+    };
   }
 }

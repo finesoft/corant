@@ -15,6 +15,7 @@ package org.corant.devops.maven.plugin.archive;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.List;
@@ -34,7 +35,7 @@ public interface Archive extends Iterable<Archive.Entry> {
 
   List<Entry> getEntries(Predicate<Entry> filter) throws IOException;
 
-  String getPathName();
+  Path getPath();
 
   void removeEntry(Entry entry);
 

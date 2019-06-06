@@ -84,12 +84,9 @@ public class JarPackager implements Packager {
         new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
-        JarArchiveEntry jarDirEntry = new JarArchiveEntry(root.getPathName());
-        jos.putArchiveEntry(jarDirEntry);
-        jos.closeArchiveEntry();
-        log.debug(String.format("(corant) created dir %s", jarDirEntry.getName()));
         for (Entry entry : root) {
-          JarArchiveEntry jarFileEntry = new JarArchiveEntry(root.getPathName() + entry.getName());
+          JarArchiveEntry jarFileEntry =
+              new JarArchiveEntry(root.getPath().resolve(entry.getName()).toString());
           jos.putArchiveEntry(jarFileEntry);
           IOUtils.copy(entry.getInputStream(), jos);
           jos.closeArchiveEntry();
@@ -101,13 +98,9 @@ public class JarPackager implements Packager {
       while (!childrenArchives.isEmpty()) {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
-          JarArchiveEntry childJarDirEntry = new JarArchiveEntry(childArchive.getPathName());
-          jos.putArchiveEntry(childJarDirEntry);
-          jos.closeArchiveEntry();
-          log.debug(String.format("(corant) created dir %s", childJarDirEntry.getName()));
           for (Entry childEntry : childArchive) {
-            JarArchiveEntry childJarFileEntry =
-                new JarArchiveEntry(childArchive.getPathName() + childEntry.getName());
+            JarArchiveEntry childJarFileEntry = new JarArchiveEntry(
+                childArchive.getPath().resolve(childEntry.getName()).toString());
             jos.putArchiveEntry(childJarFileEntry);
             IOUtils.copy(childEntry.getInputStream(), jos);
             jos.closeArchiveEntry();

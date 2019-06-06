@@ -13,5 +13,59 @@
 ##
 ################################################################
 
+# Xms represents the initial size of total heap space
+# Xmx represents the maximum size of total heap space
+
 -Xms1g
 -Xmx1g
+
+################################################################
+## Expert settings
+################################################################
+##
+## All settings below this section are considered
+## expert settings. Don't tamper with them unless
+## you understand what you are doing
+##
+################################################################
+
+## GC configuration
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseCMSInitiatingOccupancyOnly
+
+## optimizations
+
+# pre-touch memory pages used by the JVM during initialization
+-XX:+AlwaysPreTouch
+
+## basic
+
+# force the server VM (remove on 32-bit client JVMs)
+-server
+
+# explicitly set the stack size (reduce to 320k on 32-bit client JVMs)
+-Xss1m
+
+# set to headless, just in case
+-Djava.awt.headless=true
+
+## GC logging
+
+#-XX:+PrintGCDetails
+#-XX:+PrintGCTimeStamps
+#-XX:+PrintGCDateStamps
+#-XX:+PrintClassHistogram
+#-XX:+PrintTenuringDistribution
+#-XX:+PrintGCApplicationStoppedTime
+
+# log GC status to a file with time stamps
+# ensure the directory exists
+#-Xloggc:${loggc}
+
+# By default, the GC log file will not rotate.
+# By uncommenting the lines below, the GC log file
+# will be rotated every 128MB at most 32 times.
+#-XX:+UseGCLogFileRotation
+#-XX:NumberOfGCLogFiles=32
+#-XX:GCLogFileSize=128M

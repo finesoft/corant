@@ -14,6 +14,8 @@
 package org.corant.devops.maven.plugin.archive;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,15 +32,12 @@ public class DefaultArchive implements Archive {
 
   private final List<Entry> entries = new ArrayList<>();
   private final List<Archive> children = new ArrayList<>();
-  private final String pathName;
+  private final Path path;
 
   DefaultArchive(String name, Archive parent) {
+    path = Paths.get(name);
     if (parent != null) {
       parent.getChildren().add(this);
-      String _pathName = parent.getPathName() + name + "/";
-      pathName = _pathName.startsWith("/") ? _pathName.substring(1) : _pathName;
-    } else {
-      pathName = name + "/";
     }
   }
 
@@ -76,8 +75,8 @@ public class DefaultArchive implements Archive {
   }
 
   @Override
-  public String getPathName() {
-    return pathName;
+  public Path getPath() {
+    return path;
   }
 
   @Override

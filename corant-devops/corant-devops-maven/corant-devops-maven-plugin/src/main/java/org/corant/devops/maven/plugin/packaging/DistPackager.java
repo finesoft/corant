@@ -88,12 +88,9 @@ public class DistPackager implements Packager {
         new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
-        JarArchiveEntry jarDirEntry = new JarArchiveEntry(root.getPathName());
-        jos.putArchiveEntry(jarDirEntry);
-        jos.closeArchiveEntry();
-        log.debug(String.format("(corant) created dir %s", jarDirEntry.getName()));
         for (Entry entry : root) {
-          JarArchiveEntry jarFileEntry = new JarArchiveEntry(root.getPathName() + entry.getName());
+          JarArchiveEntry jarFileEntry =
+              new JarArchiveEntry(root.getPath().resolve(entry.getName()).toString());
           jos.putArchiveEntry(jarFileEntry);
           IOUtils.copy(entry.getInputStream(), jos);
           jos.closeArchiveEntry();
@@ -105,13 +102,9 @@ public class DistPackager implements Packager {
       while (!childrenArchives.isEmpty()) {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
-          JarArchiveEntry childJarDirEntry = new JarArchiveEntry(childArchive.getPathName());
-          jos.putArchiveEntry(childJarDirEntry);
-          jos.closeArchiveEntry();
-          log.debug(String.format("(corant) created dir %s", childJarDirEntry.getName()));
           for (Entry childEntry : childArchive) {
-            JarArchiveEntry childJarFileEntry =
-                new JarArchiveEntry(childArchive.getPathName() + childEntry.getName());
+            JarArchiveEntry childJarFileEntry = new JarArchiveEntry(
+                childArchive.getPath().resolve(childEntry.getName()).toString());
             jos.putArchiveEntry(childJarFileEntry);
             IOUtils.copy(childEntry.getInputStream(), jos);
             jos.closeArchiveEntry();
@@ -125,6 +118,10 @@ public class DistPackager implements Packager {
 
   Archive buildArchive() throws IOException {
     Archive root = DefaultArchive.root();
+
+    // LICENE README NOTICE
+    resolveRootResources().forEach(root::addEntry);
+
     DefaultArchive.of(JAR_LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
     DefaultArchive.of(JAR_APP_DIR, root)
@@ -162,6 +159,23 @@ public class DistPackager implements Packager {
   Path resolvePath() {
     Path target = Paths.get(getMojo().getProject().getBuild().getDirectory());
     return target.resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + "-dist.zip");
+  }
+
+  List<Entry> resolveRootResources() throws IOException {
+    List<Entry> entries = new ArrayList<>();
+    String regex = getMojo().getResourcePaths();
+    List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
+        .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
+    final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
+    final DirectoryScanner scanner = new DirectoryScanner();
+    scanner.setBasedir(artDir);
+    scanner.scan();
+    for (final String file : scanner.getIncludedFiles()) {
+      if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+        entries.add(FileEntry.of(new File(artDir, file)));
+      }
+    }
+    return entries;
   }
 
   Entry resolveRunbat() throws IOException {

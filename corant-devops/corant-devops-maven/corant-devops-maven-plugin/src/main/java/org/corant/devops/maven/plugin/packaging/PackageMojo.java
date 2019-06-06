@@ -55,6 +55,10 @@ public class PackageMojo extends AbstractMojo {
       property = "corant.maven-mojo.config-paths")
   protected String configPaths;
 
+  @Parameter(defaultValue = "**README*,**LICENSE*,**NOTICE*",
+      property = "corant.maven-mojo.resource-paths")
+  protected String resourcePaths;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (isJar()) {
@@ -97,12 +101,8 @@ public class PackageMojo extends AbstractMojo {
     return project;
   }
 
-  public boolean isWithAttach() {
-    return withAttach;
-  }
-
-  public boolean isWithDist() {
-    return withDist;
+  public String getResourcePaths() {
+    return resourcePaths;
   }
 
   public boolean isJar() {
@@ -111,6 +111,14 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isWar() {
     return project.getPackaging().equals("war");
+  }
+
+  public boolean isWithAttach() {
+    return withAttach;
+  }
+
+  public boolean isWithDist() {
+    return withDist;
   }
 
 }

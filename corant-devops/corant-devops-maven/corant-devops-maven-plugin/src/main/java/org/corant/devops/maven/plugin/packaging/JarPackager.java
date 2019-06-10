@@ -53,7 +53,7 @@ public class JarPackager implements Packager {
   public static final String JAR_LAU_NME = JarLauncher.class.getSimpleName() + ".class";
 
   private final PackageMojo mojo;
-  final Log log;
+  private final Log log;
 
   JarPackager(PackageMojo mojo) {
     if (!mojo.isJar()) {
@@ -120,21 +120,23 @@ public class JarPackager implements Packager {
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
     DefaultArchive.of(JAR_BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
-      // The application runner class
+      // The application main class and runner class
+      attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());
       attr.put(JarLauncher.RUNNER_CLS_ATTR_NME, getMojo().getMainClass());
       attr.put(Attributes.Name.EXTENSION_NAME, resolveApplicationName());
       attr.put(Attributes.Name.SPECIFICATION_TITLE, getMojo().getProject().getName());
       attr.put(Attributes.Name.SPECIFICATION_VERSION, getMojo().getProject().getVersion());
       attr.put(Attributes.Name.IMPLEMENTATION_TITLE, getMojo().getProject().getName());
       attr.put(Attributes.Name.IMPLEMENTATION_VERSION, getMojo().getProject().getVersion());
+      resolveFrameworkVersion().ifPresent(v -> attr.put(FW_VER_KEY, v));
       if (getMojo().getProject().getOrganization() != null) {
         attr.put(Attributes.Name.IMPLEMENTATION_VENDOR,
             getMojo().getProject().getOrganization().getName());
         attr.put(Attributes.Name.SPECIFICATION_VENDOR,
             getMojo().getProject().getOrganization().getName());
       }
-      attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());
     }));
+
     log.debug("(corant) built archive for packaging.");
     return root;
   }

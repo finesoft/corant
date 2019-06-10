@@ -28,7 +28,7 @@ import org.apache.maven.plugin.logging.Log;
 public class AttachPackager implements Packager {
 
   private final PackageMojo mojo;
-  final Log log;
+  private final Log log;
 
   /**
    * @param mojo

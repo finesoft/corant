@@ -15,6 +15,8 @@ package org.corant.devops.maven.plugin.packaging;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.jar.Attributes;
 import bin.JarLauncher;
 
 /**
@@ -27,6 +29,8 @@ public interface Packager {
 
   String META_INF_DIR = "META-INF";
   String MF_NME = "MANIFEST.MF";
+  String FW_NME = "corant-kernel";
+  Attributes.Name FW_VER_KEY = new Attributes.Name("Corant-Kernel-Version");
 
   PackageMojo getMojo();
 
@@ -42,8 +46,13 @@ public interface Packager {
     }
     Path usePath = path;
     for (String other : others) {
-      usePath = path.resolve(other);
+      usePath = usePath.resolve(other);
     }
     return usePath.toString().replace(File.separatorChar, '/');
+  }
+
+  default Optional<String> resolveFrameworkVersion() {
+    return getMojo().getProject().getArtifacts().stream()
+        .filter(a -> FW_NME.equals(a.getArtifactId())).map(a -> a.getVersion()).findFirst();
   }
 }

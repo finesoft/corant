@@ -63,7 +63,7 @@ public class DistPackager implements Packager {
   public static final String LOG_BIN_DIR = "log";
 
   private final PackageMojo mojo;
-  final Log log;
+  private final Log log;
 
   DistPackager(PackageMojo mojo) {
     if (!mojo.isJar()) {
@@ -184,8 +184,7 @@ public class DistPackager implements Packager {
   }
 
   Entry resolveRunbat() throws IOException {
-    String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(),
-        CHARSET);
+    String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
     final String useRunbat = runbat.replaceAll(RUN_BAT_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_BAT_TITLE_PH, resolveApplicationName());
     return new Entry() {

@@ -45,3 +45,5 @@ org.corant.shared.conversion.converter.TimestampLocalDateTimeConverter
 org.corant.shared.conversion.converter.MapInstantConverter
 org.corant.shared.conversion.converter.MapLocalDateConverter
 org.corant.shared.conversion.converter.MapLocalDateTimeConverter
+org.corant.shared.conversion.converter.StringLocalTimeConverter
+org.corant.shared.conversion.converter.MapLocalTimeConverter

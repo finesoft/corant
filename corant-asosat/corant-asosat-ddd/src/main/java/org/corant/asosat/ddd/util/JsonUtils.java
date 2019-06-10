@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * corant-asosat-ddd
@@ -47,12 +48,13 @@ import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
  *
  */
 public class JsonUtils {
-  final static Long BROWSER_SAFE_LONG = 9007199254740991L;
-  final static BigInteger BROWSER_SAFE_BIGINTEGER = BigInteger.valueOf(BROWSER_SAFE_LONG);
+  public final static Long BROWSER_SAFE_LONG = 9007199254740991L;
+  public final static BigInteger BROWSER_SAFE_BIGINTEGER = BigInteger.valueOf(BROWSER_SAFE_LONG);
   final static ObjectMapper objectMapper = new ObjectMapper();
+  public final static SimpleModule SIMPLE_MODULE =
+      new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null));
   static {
-    objectMapper.registerModule(
-        new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null)));
+    objectMapper.registerModules(SIMPLE_MODULE, new JavaTimeModule());
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     objectMapper.enable(Feature.ALLOW_COMMENTS);
     objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

@@ -88,16 +88,16 @@ public interface ElasticDocumentService {
     ElasticMapping mapping = shouldNotNull(resolveMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
       ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
-      return index(indexing.getName(), document.getId(), document.getRId(), document.getPId(),
-          mapping.toMap(verDoc), flush, verDoc.getVn(), mapping.getVersionType());
+      return index(indexing.getName(), document.getId(), document.getRId(), mapping.toMap(verDoc),
+          flush, verDoc.getVn(), mapping.getVersionType());
     } else {
-      return index(indexing.getName(), document.getId(), document.getRId(), document.getPId(),
-          mapping.toMap(document), flush, 0L, null);
+      return index(indexing.getName(), document.getId(), document.getRId(), mapping.toMap(document),
+          flush, 0L, null);
     }
   }
 
-  boolean index(String indexName, String id, String routingId, String parentId, Map<?, ?> obj,
-      boolean flush, long version, VersionType versionType);
+  boolean index(String indexName, String id, String routingId, Map<?, ?> obj, boolean flush,
+      long version, VersionType versionType);
 
   ElasticIndexing resolveIndexing(Class<?> docCls);
 

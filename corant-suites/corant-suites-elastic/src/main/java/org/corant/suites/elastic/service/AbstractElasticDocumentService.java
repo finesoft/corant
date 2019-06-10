@@ -80,7 +80,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
         IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getId(), doc.getRId(),
-            doc.getPId(), mapping.toMap(doc), false, 0l, null).request();
+            mapping.toMap(doc), false, 0l, null).request();
         brb.add(rb);
       }
     }
@@ -105,11 +105,11 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
   public abstract TransportClient getTransportClient();
 
   @Override
-  public boolean index(String indexName, String id, String routingId, String parentId,
-      Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
+  public boolean index(String indexName, String id, String routingId, Map<?, ?> obj, boolean flush,
+      long version, VersionType versionType) {
     try {
-      return indexRequestBuilder(indexName, id, routingId, parentId, obj, flush, version,
-          versionType).get().getResult() != Result.NOOP;
+      return indexRequestBuilder(indexName, id, routingId, obj, flush, version, versionType).get()
+          .getResult() != Result.NOOP;
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
@@ -144,6 +144,11 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
   }
 
   protected IndexRequestBuilder indexRequestBuilder(String indexName, String id, String routingId,
+      Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
+    return indexRequestBuilderx(indexName, id, routingId, null, obj, flush, version, versionType);
+  }
+
+  protected IndexRequestBuilder indexRequestBuilderx(String indexName, String id, String routingId,
       String parentId, Map<?, ?> obj, boolean flush, long version, VersionType versionType) {
     IndexRequestBuilder rb =
         getTransportClient().prepareIndex(indexName, Elastic6Constants.TYP_NME, id)

@@ -13,7 +13,6 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.kernel.util.Preconditions.requireNotNull;
 import static org.corant.shared.util.MapUtils.getMapLong;
 import java.util.Map;
 import javax.persistence.Column;
@@ -38,7 +37,7 @@ public abstract class AbstractReference extends AbstractValueObject {
 
   public AbstractReference(Object obj) {
     if (obj instanceof Map) {
-      Map<?, ?> mapObj = requireNotNull(Map.class.cast(obj), "");// FIXME MSG
+      Map<?, ?> mapObj = Map.class.cast(obj);// FIXME MSG
       setId(getMapLong(mapObj, "id"));
       setVn(getMapLong(mapObj, "vn"));
     } else if (obj instanceof AbstractReference) {

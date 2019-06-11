@@ -13,7 +13,6 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.kernel.util.Preconditions.requireNotNull;
 import static org.corant.shared.util.MapUtils.getMapLong;
 import static org.corant.shared.util.MapUtils.getMapString;
 import java.util.Map;
@@ -35,7 +34,7 @@ public abstract class AbstractNumberedReference extends AbstractReference implem
 
   public AbstractNumberedReference(Object obj) {
     if (obj instanceof Map) {
-      Map<?, ?> mapObj = requireNotNull(Map.class.cast(obj), "");// FIXME MSG
+      Map<?, ?> mapObj = Map.class.cast(obj);
       setId(getMapLong(mapObj, "id"));
       setVn(getMapLong(mapObj, "vn"));
       setNumber(getMapString(mapObj, "number"));

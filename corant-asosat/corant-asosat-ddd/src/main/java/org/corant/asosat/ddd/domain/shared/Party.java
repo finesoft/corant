@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -89,7 +90,9 @@ public interface Party extends Nameable, Entity {
      *
      * @return
      */
-    Set<?> getRealms();
+    default Set<?> getRealms() {
+      return Collections.emptySet();
+    }
   }
 
   /**

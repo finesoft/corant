@@ -61,6 +61,10 @@ public class FlywayMigrator {
   Boolean cleanOnValidationError;
 
   @Inject
+  @ConfigProperty(name = "flyway.migrate.cleanDisabled", defaultValue = "true")
+  Boolean cleanDisabled;
+
+  @Inject
   @ConfigProperty(name = "flyway.migrate.file-path")
   Optional<String> filePath;
 
@@ -109,9 +113,9 @@ public class FlywayMigrator {
     if (!locationsToUse.isEmpty()) {
       logger.info(() -> String.format("Build flyway instance from locations [%s]",
           String.join(",", locationsToUse)));
-      FluentConfiguration fc =
-          Flyway.configure().dataSource(ds).cleanOnValidationError(cleanOnValidationError)
-              .locations(locationsToUse.toArray(new String[locationsToUse.size()]));
+      FluentConfiguration fc = Flyway.configure().dataSource(ds)
+          .cleanOnValidationError(cleanOnValidationError).cleanDisabled(cleanDisabled)
+          .locations(locationsToUse.toArray(new String[locationsToUse.size()]));
       if (!callbacks.isUnsatisfied()) {
         fc.callbacks(callbacks.stream().toArray(Callback[]::new));
       }

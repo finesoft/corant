@@ -47,7 +47,7 @@ public abstract class AbstractAggregateReference<T extends AbstractGenericAggreg
   @Transient
   protected transient boolean holdReferred = true;
 
-  @Column(name = "refId")
+  @Column(name = "referenceId")
   private Long id;
 
   protected AbstractAggregateReference() {}

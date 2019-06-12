@@ -37,7 +37,7 @@ public abstract class AbstractVersionedAggregateReference<T extends AbstractGene
 
   private static final long serialVersionUID = -3880835071968870788L;
 
-  @Column(name = "refVn")
+  @Column(name = "referenceVn")
   private long vn;
 
   protected AbstractVersionedAggregateReference() {}

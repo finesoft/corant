@@ -22,7 +22,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<version.javaee-api>8.0</version.javaee-api>
 		<version.javax.servlet-api>3.1.0</version.javax.servlet-api>
 		<version.javax.jms-api>2.0.1</version.javax.jms-api>
@@ -93,6 +93,8 @@
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.mongodb>3.6.4</version.mongodb>
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
+		
+		<version.kotlin-compiler-embeddable>1.3.31</version.kotlin-compiler-embeddable>
 
 		<version.assertj>3.10.0</version.assertj>
 		<version.junit>4.12</version.junit>
@@ -699,6 +701,13 @@
 				<artifactId>groovy</artifactId>
 				<version>${version.groovy}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-compiler-embeddable</artifactId>
+				<version>${version.kotlin-compiler-embeddable}</version>
+				<scope>runtime</scope>
+			</dependency>
+
 
 
 			<!-- CDI -->

@@ -1,5 +1,8 @@
-package org.corant.suites.jpa.hibernate.types.descriptor;
+package org.corant.suites.jpa.hibernate.type.descriptor;
 
+import static org.corant.shared.util.ConversionUtils.toInstant;
+import java.time.Instant;
+import java.util.Date;
 import org.hibernate.ogm.model.spi.Tuple;
 import org.hibernate.ogm.type.descriptor.impl.BasicGridBinder;
 import org.hibernate.ogm.type.descriptor.impl.GridTypeDescriptor;
@@ -8,18 +11,15 @@ import org.hibernate.ogm.type.descriptor.impl.GridValueExtractor;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
 
-import java.time.Instant;
-import java.util.Date;
-
-import static org.corant.shared.util.ConversionUtils.toInstant;
-
 /**
- * corant-root <br>
+ * corant-suites-jpa-hibernate <br>
  *
  * @auther sushuaihao 2019/6/12
  * @since
  */
 public class InstantGridTypeDescriptor implements GridTypeDescriptor {
+
+  private static final long serialVersionUID = 991665264844086431L;
 
   public static final InstantGridTypeDescriptor INSTANCE = new InstantGridTypeDescriptor();
 

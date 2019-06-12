@@ -44,6 +44,7 @@
 		<module>corant-suites-jasperreports</module>
 		<module>corant-suites-beanvalidation</module>
 		<module>corant-suites-concurrency</module>
+		<module>corant-suites-lang</module>
 	</modules>
 	<build>
 		<plugins>

@@ -1,20 +1,21 @@
 package org.corant.suites.jpa.hibernate;
 
-import org.corant.suites.jpa.hibernate.types.InstantType;
+import org.corant.suites.jpa.hibernate.type.InstantType;
 import org.hibernate.ogm.datastore.mongodb.MongoDBDialect;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 import org.hibernate.ogm.type.spi.GridType;
 import org.hibernate.type.Type;
 
 /**
- * corant-root <br>
+ * corant-suites-jpa-hibernate <br>
  *
  * @auther sushuaihao 2019/6/12
  * @since
  */
 public class HibernateMongoDBDialect extends MongoDBDialect {
 
-  /** @param provider */
+  private static final long serialVersionUID = -5387045835552664861L;
+
   public HibernateMongoDBDialect(MongoDBDatastoreProvider provider) {
     super(provider);
   }

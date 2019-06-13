@@ -13,12 +13,13 @@
  */
 package org.corant.suites.query.jpql;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
+import javax.persistence.SynchronizationType;
 
 /**
  * corant-suites-query-jpql
@@ -28,33 +29,25 @@ import javax.persistence.EntityManager;
  */
 public class DefaultJpqlQueryExecutor implements JpqlQueryExecutor {
 
-  @Inject
-  EntityManager entityManager;
+  private EntityManagerFactory entityManagerFactory;
 
-  @Override
-  public <T> T get(String jpql, Map<String, Object> args) throws SQLException {
-    entityManager.createQuery(jpql);
-    return null;
+  /**
+   * @param entityManagerFactory
+   */
+  public DefaultJpqlQueryExecutor(JpqlQueryConfiguration cfg) {
+    super();
+    entityManagerFactory = cfg.getEntityManagerFactory();
   }
 
   @Override
   public <T> T get(String jpql, Object... args) throws SQLException {
-    return null;
+    return forceCast(createQuery(jpql, args).getSingleResult());
   }
 
-  @Override
-  public <T> List<T> select(String jpql, Map<String, Object> args) throws SQLException {
-    return null;
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> select(String jpql, Object... args) throws SQLException {
-    return null;
-  }
-
-  @Override
-  public <T> Stream<T> stream(String jpql, Map<String, Object> args) {
-    return null;
+    return createQuery(jpql, args).getResultList();
   }
 
   @Override
@@ -62,4 +55,13 @@ public class DefaultJpqlQueryExecutor implements JpqlQueryExecutor {
     return null;
   }
 
+  protected Query createQuery(String sql, Object... args) {
+    Query q =
+        entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED).createQuery(sql);
+    int counter = 0;
+    for (Object arg : args) {
+      q.setParameter(counter++, arg);
+    }
+    return q;
+  }
 }

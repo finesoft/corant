@@ -14,5 +14,6 @@
 		<module>corant-suites-query-sql</module>
 		<module>corant-suites-query-jpql</module>
 		<module>corant-suites-query-elastic</module>
+		<module>corant-suites-query-mongodb</module>
 	</modules>
 </project>

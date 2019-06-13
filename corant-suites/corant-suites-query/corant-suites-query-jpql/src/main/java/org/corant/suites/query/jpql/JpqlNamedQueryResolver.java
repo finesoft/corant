@@ -13,22 +13,32 @@
  */
 package org.corant.suites.query.jpql;
 
-import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
- * corant-suites-query-jpql
+ * corant-suites-query
  *
- * @author bingo 下午12:09:13
+ * @author bingo 下午3:13:37
  *
  */
-public interface JpqlQueryExecutor {
+public interface JpqlNamedQueryResolver<K, P, S, CP, F, H> {
 
-  <T> T get(String jpql, Object... args) throws SQLException;
+  Querier<S, CP, F, H> resolve(K key, P param);
 
-  <T> List<T> select(String jpql, Object... args) throws SQLException;
+  interface Querier<S, CP, F, H> {
 
-  <T> Stream<T> stream(String jpql, Object... args);
+    CP getConvertedParameters();
+
+    List<F> getFetchQueries();
+
+    default List<H> getHints() {
+      return Collections.emptyList();
+    }
+
+    <T> Class<T> getResultClass();
+
+    S getScript();
+  }
 
 }

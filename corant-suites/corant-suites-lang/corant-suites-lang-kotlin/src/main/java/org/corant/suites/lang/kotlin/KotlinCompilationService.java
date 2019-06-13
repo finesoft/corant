@@ -13,9 +13,21 @@
  */
 package org.corant.suites.lang.kotlin;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.corant.kernel.service.CompilationService;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.jetbrains.kotlin.cli.common.ExitCode;
+import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments;
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation;
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity;
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector;
+import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler;
+import org.jetbrains.kotlin.config.Services;
 
 /**
  * corant-suites-lang-kotlin
@@ -31,6 +43,47 @@ public class KotlinCompilationService implements CompilationService {
   }
 
   @Override
-  public void compile(Context context) {}
+  public void compile(Context context) {
+    K2JVMCompilerArguments cas = new K2JVMCompilerArguments();
+    cas.setClasspath(context.getClasspaths().stream().map(File::getAbsolutePath)
+        .collect(Collectors.joining(File.pathSeparator)));
+    cas.setDestination(context.getOutputDirectory().getAbsolutePath());
+    cas.setFreeArgs(context.getSourceDirectories().stream().map(File::getAbsolutePath)
+        .collect(Collectors.toList()));
+    cas.setSuppressWarnings(true);
+    final SimpleMessageCollector smc = new SimpleMessageCollector();
+    ExitCode exitCode = new K2JVMCompiler().exec(smc, new Services.Builder().build(), cas);
+    if (exitCode != ExitCode.OK && exitCode != ExitCode.COMPILATION_ERROR) {
+      throw new CorantRuntimeException("Unable to invoke Kotlin compiler");
+    }
+    if (smc.hasErrors()) {
+      throw new CorantRuntimeException("Compilation failed" + String.join("\n", smc.errors));
+    }
+  }
 
+  public static class SimpleMessageCollector implements MessageCollector {
+
+    final List<String> errors = new ArrayList<>();
+
+    @Override
+    public void clear() {}
+
+    @Override
+    public boolean hasErrors() {
+      return !errors.isEmpty();
+    }
+
+    @Override
+    public void report(CompilerMessageSeverity severity, String error,
+        CompilerMessageLocation location) {
+      if (severity.isError()) {
+        if (location != null && location.getLineContent() != null) {
+          errors.add(String.format("%s\n%s:%d:%d", location.getLineContent(), location.getPath(),
+              location.getLine(), location.getColumn()));
+        } else {
+          errors.add(error);
+        }
+      }
+    }
+  }
 }

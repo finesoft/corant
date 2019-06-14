@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.jpql;
 
+import java.util.Locale;
+
 /**
  * corant-suites-query-jpql
  *
@@ -41,7 +43,7 @@ public class JpqlHelper {
    * @return Position of the first match, or {@literal -1} if not found.
    */
   static final int shallowIndexOf(String sb, String search, int fromIndex) {
-    final String lowercase = sb.toLowerCase(); // case-insensitive match
+    final String lowercase = sb.toLowerCase(Locale.ROOT); // case-insensitive match
     final int len = lowercase.length();
     final int searchlen = search.length();
     int pos = -1, depth = 0, cur = fromIndex;

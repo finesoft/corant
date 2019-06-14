@@ -15,6 +15,7 @@ package org.corant.suites.query.sql;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * corant-suites-query
@@ -34,6 +35,10 @@ public interface SqlNamedQueryResolver<K, P, S, CP, F, H> {
 
     default List<H> getHints() {
       return Collections.emptyList();
+    }
+
+    default Map<String, String> getProperties() {
+      return Collections.emptyMap();
     }
 
     <T> Class<T> getResultClass();

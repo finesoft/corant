@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ public abstract class AbstractDynamicQueryProcessor<Q, P, E>
   protected final List<FetchQuery> fetchQueries;
   protected final ConversionService conversionService;
   protected final List<QueryHint> hints = new ArrayList<>();
+  protected final Map<String, String> properties = new LinkedHashMap<>();
 
   protected AbstractDynamicQueryProcessor(Query query, ConversionService conversionService) {
     if (query == null || conversionService == null) {
@@ -59,6 +61,9 @@ public abstract class AbstractDynamicQueryProcessor<Q, P, E>
       query.getHints().forEach(hints::add);
     }
     this.cachedTimestemp = Instant.now().toEpochMilli();
+    if (!isEmpty(query.getProperties())) {
+      this.properties.putAll(query.getProperties());
+    }
   }
 
   @Override
@@ -79,6 +84,14 @@ public abstract class AbstractDynamicQueryProcessor<Q, P, E>
   @Override
   public Map<String, Class<?>> getParamConvertSchema() {
     return paramConvertSchema;
+  }
+
+  /**
+   * 
+   * @return the properties
+   */
+  public Map<String, String> getProperties() {
+    return properties;
   }
 
   @Override

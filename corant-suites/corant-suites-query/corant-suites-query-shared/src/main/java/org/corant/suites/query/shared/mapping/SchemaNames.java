@@ -31,6 +31,8 @@ public class SchemaNames {
   public static final String X_ENTRY = "entry";
   public static final String X_DESC = "description";
   public static final String X_KEY = "key";
+  public static final String X_PROS = "properties";
+  public static final String X_PRO = "property";
 
   public static final String PARAM_ELE = "parameters-mapping";
 

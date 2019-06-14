@@ -52,8 +52,8 @@ public class JpqlNamedQueryJsProcessor
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {convertedParam, useParam});
     return new DefaultJpqlNamedQuerier(script.toString(),
-        useParam.toArray(new Object[useParam.size()]), getResultClass(), getFetchQueries(),
-        getHints());
+        useParam.toArray(new Object[useParam.size()]), getResultClass(), getHints(),
+        getProperties());
   }
 
 }

@@ -13,15 +13,11 @@
  */
 package org.corant.suites.query.sql;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
-import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
-import freemarker.template.TemplateException;
 
 /**
  * corant-suites-query
@@ -40,19 +36,14 @@ public class SqlNamedQueryFmProcessor
    * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultSqlNamedQuerier doProcess(Map<String, Object> param,
-      DynamicQueryTplMmResolver<Object[]> tmm) {
-    try (StringWriter sw = new StringWriter()) {
-      getExecution().process(param, sw);
-      return new DefaultSqlNamedQuerier(sw.toString(), tmm.getParameters(), getResultClass(),
-          getFetchQueries(), getHints());
-    } catch (TemplateException | IOException | NullPointerException e) {
-      throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
-    }
+  public DefaultSqlNamedQuerier doProcess(String script, Object[] param) {
+    return new DefaultSqlNamedQuerier(script, param, getResultClass(), getFetchQueries(),
+        getHints(), getProperties());
   }
 
   @Override
-  protected DynamicQueryTplMmResolver<Object[]> getTemplateMethodModel(Map<String, Object> param) {
+  protected DynamicQueryTplMmResolver<Object[]> handleTemplateMethodModel(
+      Map<String, Object> param) {
     return new SqlNamedQueryFmTplMmResolver().injectTo(param);
   }
 

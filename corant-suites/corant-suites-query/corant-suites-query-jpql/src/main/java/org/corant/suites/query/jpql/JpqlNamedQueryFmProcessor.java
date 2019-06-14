@@ -13,15 +13,12 @@
  */
 package org.corant.suites.query.jpql;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
-import freemarker.template.TemplateException;
 
 /**
  * corant-suites-query
@@ -37,22 +34,21 @@ public class JpqlNamedQueryFmProcessor
   }
 
   /**
-   * Generate SQL script with placeholder, and converted the parameter to appropriate type.
+   * Generate JPQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultJpqlNamedQuerier doProcess(Map<String, Object> param,
-      DynamicQueryTplMmResolver<Object[]> tmm) {
-    try (StringWriter sw = new StringWriter()) {
-      getExecution().process(param, sw);
-      return new DefaultJpqlNamedQuerier(sw.toString(), tmm.getParameters(), getResultClass(),
-          getFetchQueries(), getHints());
-    } catch (TemplateException | IOException | NullPointerException e) {
+  public DefaultJpqlNamedQuerier doProcess(String script, Object[] param) {
+    try {
+      return new DefaultJpqlNamedQuerier(script, param, getResultClass(), getHints(),
+          getProperties());
+    } catch (NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
     }
   }
 
   @Override
-  protected DynamicQueryTplMmResolver<Object[]> getTemplateMethodModel(Map<String, Object> param) {
+  protected DynamicQueryTplMmResolver<Object[]> handleTemplateMethodModel(
+      Map<String, Object> param) {
     return new JpqlNamedQueryFmTplMmResolver().injectTo(param);
   }
 

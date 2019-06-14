@@ -13,14 +13,20 @@
  */
 package org.corant.suites.query.shared.dynamic.freemarker;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.List;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 
 /**
  * corant-suites-query
@@ -60,27 +66,54 @@ public abstract class FreemarkerDynamicQueryProcessor<Q, P>
   @Override
   public Q process(Map<String, Object> param) {
     Map<String, Object> useParam = convertParameter(param);// convert parameter
-    DynamicQueryTplMmResolver<P> qtmm = getTemplateMethodModel(useParam); // inject method object
     this.preProcess(useParam);
-    Q result = this.doProcess(useParam, qtmm);
-    this.postProcess(result, qtmm);
+    Pair<String, P> executeResult = execute(useParam);
+    Q result = this.doProcess(executeResult.getKey(), executeResult.getValue());
+    this.postProcess(result, executeResult.getValue());
     return result;
   }
 
   /**
-   * Process delegation
    *
+   * @param script
    * @param param
-   * @param tmm
    * @return doProcess
    */
-  protected abstract Q doProcess(Map<String, Object> param, DynamicQueryTplMmResolver<P> tmm);
+  protected abstract Q doProcess(String script, P param);
 
-  protected DynamicQueryTplMmResolver<P> getTemplateMethodModel(Map<String, Object> useParam) {
-    return null;
+  protected Pair<String, P> execute(Map<String, Object> param) {
+    try (StringWriter sw = new StringWriter()) {
+      DynamicQueryTplMmResolver<P> tmm = handleTemplateMethodModel(param);
+      getExecution().process(param, sw);
+      return Pair.of(sw.toString(), tmm.getParameters());
+    } catch (IOException | TemplateException e) {
+      throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
+    }
   }
 
-  protected void postProcess(Q result, DynamicQueryTplMmResolver<P> qtmm) {}
+  protected DynamicQueryTplMmResolver<P> handleTemplateMethodModel(Map<String, Object> useParam) {
+    return new DynamicQueryTplMmResolver<P>() {
+
+      @SuppressWarnings("rawtypes")
+      @Override
+      public Object exec(List arguments) throws TemplateModelException {
+        return arguments;
+      }
+
+      @Override
+      public P getParameters() {
+        return forceCast(useParam);
+      }
+
+      @Override
+      public QueryTemplateMethodModelType getType() {
+        return null;
+      }
+
+    };
+  }
+
+  protected void postProcess(Q result, P param) {}
 
   protected void preProcess(Map<String, Object> param) {}
 

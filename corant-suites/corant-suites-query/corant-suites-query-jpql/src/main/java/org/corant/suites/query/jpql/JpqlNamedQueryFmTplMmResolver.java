@@ -38,6 +38,7 @@ public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
 
   private List<Object> parameters = new ArrayList<>();
+  private int seq = 0;
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -50,12 +51,12 @@ public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
           parameters.add(argList[i]);
-          placeHolders[i] = SQL_PS_PLACE_HOLDER;
+          placeHolders[i] = getPlaceHolder();
         }
         return new SimpleScalar(String.join(",", placeHolders));
       } else {
         parameters.add(arg);
-        return SQL_SS_PLACE_HOLDER;
+        return getPlaceHolder();
       }
     }
     return arguments;
@@ -94,6 +95,12 @@ public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<
       throw new QueryRuntimeException("Unknow arguement,the class is %s",
           arg == null ? "null" : arg.getClass());
     }
+  }
+
+  String getPlaceHolder() {
+    String pl = SQL_PS_PLACE_HOLDER + seq;
+    seq++;
+    return pl;
   }
 
 }

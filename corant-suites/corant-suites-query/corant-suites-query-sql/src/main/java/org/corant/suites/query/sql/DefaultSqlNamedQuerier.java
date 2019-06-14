@@ -16,7 +16,9 @@ package org.corant.suites.query.sql;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.sql.SqlNamedQueryResolver.Querier;
@@ -34,18 +36,23 @@ public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQu
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
   protected final List<QueryHint> hints = new ArrayList<>();
+  protected final Map<String, String> properties = new LinkedHashMap<>();
 
   /**
    * @param script
    * @param resultClass
    * @param fetchQueries
+   * @param properties
    */
-  public DefaultSqlNamedQuerier(String script, Class<?> resultClass,
-      List<FetchQuery> fetchQueries) {
+  public DefaultSqlNamedQuerier(String script, Class<?> resultClass, List<FetchQuery> fetchQueries,
+      Map<String, String> properties) {
     super();
     this.script = script.replaceAll("[\\t\\n\\r]", " ");
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
   }
 
   /**
@@ -54,10 +61,11 @@ public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQu
    * @param resultClass
    * @param fetchQueries
    * @param hints
+   * @param properties
    */
   public DefaultSqlNamedQuerier(String script, Object[] convertedParams, Class<?> resultClass,
-      List<FetchQuery> fetchQueries, List<QueryHint> hints) {
-    this(script, resultClass, fetchQueries);
+      List<FetchQuery> fetchQueries, List<QueryHint> hints, Map<String, String> properties) {
+    this(script, resultClass, fetchQueries, properties);
     setConvertedParams(convertedParams);
     if (!isEmpty(hints)) {
       for (QueryHint qh : hints) {
@@ -79,6 +87,15 @@ public class DefaultSqlNamedQuerier implements Querier<String, Object[], FetchQu
   @Override
   public List<QueryHint> getHints() {
     return hints;
+  }
+
+  /**
+   *
+   * @return the properties
+   */
+  @Override
+  public Map<String, String> getProperties() {
+    return properties;
   }
 
   /**

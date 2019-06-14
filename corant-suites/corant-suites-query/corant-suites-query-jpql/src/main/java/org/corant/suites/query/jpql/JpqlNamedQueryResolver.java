@@ -15,6 +15,7 @@ package org.corant.suites.query.jpql;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * corant-suites-query
@@ -22,18 +23,20 @@ import java.util.List;
  * @author bingo 下午3:13:37
  *
  */
-public interface JpqlNamedQueryResolver<K, P, S, CP, F, H> {
+public interface JpqlNamedQueryResolver<K, P, S, CP, H> {
 
-  Querier<S, CP, F, H> resolve(K key, P param);
+  Querier<S, CP, H> resolve(K key, P param);
 
-  interface Querier<S, CP, F, H> {
+  interface Querier<S, CP, H> {
 
     CP getConvertedParameters();
 
-    List<F> getFetchQueries();
-
     default List<H> getHints() {
       return Collections.emptyList();
+    }
+
+    default Map<String, String> getProperties() {
+      return Collections.emptyMap();
     }
 
     <T> Class<T> getResultClass();

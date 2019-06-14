@@ -31,11 +31,17 @@ public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
 
   default DynamicQueryTplMmResolver<P> injectTo(Map<String, Object> parameters) {
     if (parameters != null) {
-      String tmmName = getType().name();
-      shouldBeFalse(parameters.containsKey(tmmName));
-      parameters.put(getType().name(), this);
+      String tmmName = resolveTmmExName();
+      shouldBeFalse(parameters.containsKey(tmmName),
+          "The key named \"%s\" in the parameter is system reserved, please choose another.",
+          tmmName);
+      parameters.put(tmmName, this);
     }
     return this;
+  }
+
+  default String resolveTmmExName() {
+    return getType().name();
   }
 
   public enum QueryTemplateMethodModelType {

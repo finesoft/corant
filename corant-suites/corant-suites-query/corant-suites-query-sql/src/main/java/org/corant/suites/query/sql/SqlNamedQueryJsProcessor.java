@@ -53,7 +53,7 @@ public class SqlNamedQueryJsProcessor
     Object script = getExecution().apply(new Object[] {convertedParam, useParam});
     return new DefaultSqlNamedQuerier(script.toString(),
         useParam.toArray(new Object[useParam.size()]), getResultClass(), getFetchQueries(),
-        getHints());
+        getHints(), getProperties());
   }
 
 }

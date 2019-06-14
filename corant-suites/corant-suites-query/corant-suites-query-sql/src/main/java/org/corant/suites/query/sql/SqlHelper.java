@@ -13,14 +13,11 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.corant.suites.query.shared.QueryUtils;
 
 /**
  * corant-suites-query
@@ -72,14 +69,6 @@ public class SqlHelper {
 
   public static boolean containWhere(String sql) {
     return sql != null && shallowIndexOfPattern(sql, WHERE_PATTERN, 0) > 0;
-  }
-
-  public static int getLimit(Map<String, Object> param) {
-    return getMapInteger(param, QueryUtils.LIMIT_PARAM_NME, QueryUtils.LIMIT_PARAM_VAL);
-  }
-
-  public static int getOffset(Map<String, Object> param) {
-    return getMapInteger(param, QueryUtils.OFFSET_PARAM_NME, QueryUtils.OFFSET_PARAM_VAL);
   }
 
   public static String getOrderBy(String sql) {

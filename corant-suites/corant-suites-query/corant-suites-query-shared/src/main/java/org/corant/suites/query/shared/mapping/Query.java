@@ -44,6 +44,7 @@ public class Query implements Serializable {
   private List<QueryHint> hints = new ArrayList<>();
   private String version = "";
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
+  private Map<String, String> properties = new HashMap<>();
 
   public Query() {
     super();
@@ -61,11 +62,12 @@ public class Query implements Serializable {
    * @param hints
    * @param version
    * @param paramMappings
+   * @param properties
    */
   public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
       boolean cacheResultSetMetadata, String description, String script,
       List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
-      Map<String, ParameterMapping> paramMappings) {
+      Map<String, ParameterMapping> paramMappings, Map<String, String> properties) {
     super();
     this.name = name;
     setResultClass(resultClass);
@@ -78,6 +80,7 @@ public class Query implements Serializable {
     this.hints = hints;
     this.version = version;
     this.paramMappings = paramMappings;
+    this.properties = properties;
   }
 
   /**
@@ -113,6 +116,14 @@ public class Query implements Serializable {
    */
   public Map<String, ParameterMapping> getParamMappings() {
     return paramMappings;
+  }
+
+  /**
+   *
+   * @return the properties
+   */
+  public Map<String, String> getProperties() {
+    return properties;
   }
 
   /**
@@ -166,6 +177,10 @@ public class Query implements Serializable {
     return cacheResultSetMetadata;
   }
 
+  void addProperty(String name, String value) {
+    properties.put(name, value);
+  }
+
   void setCache(boolean cache) {
     this.cache = cache;
   }
@@ -180,6 +195,14 @@ public class Query implements Serializable {
 
   void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   *
+   * @param properties the properties to set
+   */
+  void setProperties(Map<String, String> properties) {
+    this.properties = properties;
   }
 
   void setResultClass(Class<?> resultClass) {

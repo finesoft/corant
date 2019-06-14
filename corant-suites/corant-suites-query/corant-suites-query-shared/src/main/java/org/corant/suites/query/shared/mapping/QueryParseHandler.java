@@ -24,6 +24,7 @@ import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.suites.query.shared.mapping.Properties.Property;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -93,6 +94,10 @@ public class QueryParseHandler extends DefaultHandler {
       if (currentObject() instanceof Query) {
         handleQueryDesc(false, qName, null);
       }
+    } else if (SchemaNames.X_PROS.equalsIgnoreCase(qName)) {
+      handleQueryProperties(false, qName, null);
+    } else if (SchemaNames.X_PRO.equalsIgnoreCase(qName)) {
+      handleProperty(false, qName, null);
     } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Query) {
         handleQueryScript(false, qName, null);
@@ -135,6 +140,14 @@ public class QueryParseHandler extends DefaultHandler {
     } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Query) {
         handleQueryDesc(true, qName, attributes);
+      }
+    } else if (SchemaNames.X_PROS.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Query) {
+        handleQueryProperties(true, qName, attributes);
+      }
+    } else if (SchemaNames.X_PRO.equalsIgnoreCase(qName)) {
+      if (currentObject() instanceof Properties) {
+        handleProperty(true, qName, attributes);
       }
     } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Query) {
@@ -255,6 +268,27 @@ public class QueryParseHandler extends DefaultHandler {
     }
   }
 
+  void handleProperty(boolean start, String qName, Attributes attributes) {
+    if (start) {
+      Property pm = new Property();
+      for (int i = 0; i < attributes.getLength(); i++) {
+        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+          pm.setName(atv);
+        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
+          pm.setValue(atv);
+        }
+      }
+      valueStack.push(pm);
+      nameStack.push(qName);
+    } else {
+      Object obj = valueStack.pop();
+      Properties ps = this.currentObject();
+      ps.add((Property) obj);
+      nameStack.pop();
+    }
+  }
+
   void handleQuery(boolean start, String qName, Attributes attributes) {
     if (start) {
       Query q = new Query();
@@ -364,6 +398,22 @@ public class QueryParseHandler extends DefaultHandler {
             "Parse error the query hit script must be in query element and script can't null!");
       }
       q.setScript(script.trim());
+      nameStack.pop();
+    }
+  }
+
+  void handleQueryProperties(boolean start, String qName, Attributes attributes) {
+    if (start) {
+      Properties fq = new Properties();
+      valueStack.push(fq);
+      nameStack.push(qName);
+    } else {
+      Object obj = valueStack.pop();
+      Query q = this.currentObject();
+      if (q == null) {
+        throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
+      }
+      ((Properties) obj).toMap().forEach((k, v) -> q.addProperty(k, v));
       nameStack.pop();
     }
   }

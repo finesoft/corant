@@ -17,20 +17,17 @@ import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.template.TemplateException;
 
 /**
  * corant-suites-query
@@ -81,17 +78,15 @@ public class DefaultEsNamedQueryProcessor
   }
 
   @Override
-  protected DefaultEsNamedQuerier doProcess(Map<String, Object> param,
-      DynamicQueryTplMmResolver<Map<String, Object>> tmm) {
-    try (StringWriter sw = new StringWriter()) {
-      getExecution().process(param, sw);
+  protected DefaultEsNamedQuerier doProcess(String script, Map<String, Object> param) {
+    try {
       // OM.readValue(sw.toString(), Object.class) FIXME Do some protection
-      final Map esQuery = OM.readValue(sw.toString(), Map.class);
+      final Map esQuery = OM.readValue(script, Map.class);
       doSomthing(esQuery, param);
       return new DefaultEsNamedQuerier(
           OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(esQuery), getResultClass(),
           getHints(), getFetchQueries());
-    } catch (TemplateException | IOException | NullPointerException e) {
+    } catch (IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }
   }

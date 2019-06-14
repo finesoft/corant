@@ -40,7 +40,6 @@ import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.jpql.JpqlNamedQueryResolver.Querier;
 import org.corant.suites.query.shared.NamedQuery;
 import org.corant.suites.query.shared.QueryUtils;
@@ -123,7 +122,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     T result = null;
     @SuppressWarnings("unchecked")
     List<T> list = createQuery(ql, properties, resultClass, queryParam).getResultList();
-    if (isEmpty(list)) {
+    if (!isEmpty(list)) {
       result = list.get(0);
     }
     handleResultHints(resultClass, hints, param, result);
@@ -180,9 +179,19 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     return result;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    throw new NotSupportedException();
+    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    Class<T> rcls = querier.getResultClass();
+    Object[] queryParam = querier.getConvertedParameters();
+    List<QueryHint> hints = querier.getHints();
+    Map<String, String> properties = querier.getProperties();
+    return createQuery(querier.getScript(), properties, rcls, queryParam).getResultStream()
+        .map(r -> {
+          handleResultHints(rcls, hints, param, r);
+          return r;
+        });
   }
 
   protected Query createQuery(String ql, Map<String, String> properties, Class<?> cls,

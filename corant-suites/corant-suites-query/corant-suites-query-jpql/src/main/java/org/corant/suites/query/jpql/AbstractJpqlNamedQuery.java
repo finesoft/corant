@@ -14,13 +14,15 @@
 package org.corant.suites.query.jpql;
 
 import static org.corant.shared.util.CollectionUtils.getSize;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapBoolean;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.ObjectUtils.asStrings;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
 import static org.corant.suites.query.shared.QueryUtils.getLimit;
 import static org.corant.suites.query.shared.QueryUtils.getOffset;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +99,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     Query query = createQuery(ql, properties, resultClass, queryParam);
     query.setFirstResult(offset).setMaxResults(limit + 1);
     @SuppressWarnings("unchecked")
-    List<T> list = query.getResultList();
+    List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
     int size = getSize(list);
     if (size > 0) {
       if (size > limit) {
@@ -118,7 +120,12 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     Map<String, String> properties = querier.getProperties();
     String ql = querier.getScript();
     log(q, queryParam, ql);
-    T result = forceCast(createQuery(ql, properties, resultClass, queryParam).getSingleResult());
+    T result = null;
+    @SuppressWarnings("unchecked")
+    List<T> list = createQuery(ql, properties, resultClass, queryParam).getResultList();
+    if (isEmpty(list)) {
+      result = list.get(0);
+    }
     handleResultHints(resultClass, hints, param, result);
     return result;
   }
@@ -137,7 +144,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     Query query = createQuery(ql, properties, resultClass, queryParam);
     query.setFirstResult(offset).setMaxResults(limit);
     @SuppressWarnings("unchecked")
-    List<T> list = query.getResultList();
+    List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
     PagedList<T> result = PagedList.of(offset, limit);
     int size = getSize(list);
     if (size > 0) {

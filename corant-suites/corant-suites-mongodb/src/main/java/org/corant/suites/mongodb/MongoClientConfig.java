@@ -257,10 +257,6 @@ public class MongoClientConfig {
   public Builder produceBuiler() {
     Builder builder = new Builder();
     builder.applicationName(applicationName);
-    getOptMapObject(options, "alwaysUseMBeans", ConversionUtils::toBoolean)
-        .ifPresent(builder::alwaysUseMBeans);
-    getOptMapObject(options, "description", ConversionUtils::toString)
-        .ifPresent(builder::description);
     getOptMapObject(options, "connectionsPerHost", ConversionUtils::toInteger)
         .ifPresent(builder::connectionsPerHost);
     getOptMapObject(options, "connectTimeout", ConversionUtils::toInteger)

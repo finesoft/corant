@@ -36,7 +36,7 @@ import com.mongodb.BasicDBObject;
 public class DefaultMgNamedQuerier
     implements Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> {
 
-  public static ObjectMapper OM = new ObjectMapper();
+  public static final ObjectMapper OM = new ObjectMapper();
 
   protected final EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
   protected final Class<?> resultClass;

@@ -299,6 +299,10 @@ public class MapUtils {
     return getMapObject(map, key, (v) -> ConversionUtils.toZonedDateTime(v, zoneId), null);
   }
 
+  public static <K, V> Optional<V> getOpt(Map<K, V> map, K key) {
+    return Optional.ofNullable(map != null ? map.get(key) : null);
+  }
+
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);

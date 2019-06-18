@@ -16,10 +16,12 @@ package org.corant.suites.query.jpql;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver.Querier;
+import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
+import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**
@@ -28,8 +30,9 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultJpqlNamedQuerier implements Querier<String, Object[], QueryHint> {
+public class DefaultJpqlNamedQuerier implements JpqlQuerier {
 
+  protected final String name;
   protected final String script;
   protected Object[] convertedParams;
   protected final Class<?> resultClass;
@@ -37,13 +40,15 @@ public class DefaultJpqlNamedQuerier implements Querier<String, Object[], QueryH
   protected final Map<String, String> properties = new LinkedHashMap<>();
 
   /**
+   * @param name
    * @param script
    * @param resultClass
    * @param properties
    */
-  public DefaultJpqlNamedQuerier(String script, Class<?> resultClass,
+  public DefaultJpqlNamedQuerier(String name, String script, Class<?> resultClass,
       Map<String, String> properties) {
     super();
+    this.name = name;
     this.script = script.replaceAll("[\\t\\n\\r]", " ");
     this.resultClass = resultClass;
     if (properties != null) {
@@ -52,15 +57,16 @@ public class DefaultJpqlNamedQuerier implements Querier<String, Object[], QueryH
   }
 
   /**
+   * @param name
    * @param script
    * @param convertedParams
    * @param resultClass
    * @param hints
    * @param properties
    */
-  public DefaultJpqlNamedQuerier(String script, Object[] convertedParams, Class<?> resultClass,
-      List<QueryHint> hints, Map<String, String> properties) {
-    this(script, resultClass, properties);
+  public DefaultJpqlNamedQuerier(String name, String script, Object[] convertedParams,
+      Class<?> resultClass, List<QueryHint> hints, Map<String, String> properties) {
+    this(name, script, resultClass, properties);
     setConvertedParams(convertedParams);
     if (!isEmpty(hints)) {
       for (QueryHint qh : hints) {
@@ -75,8 +81,18 @@ public class DefaultJpqlNamedQuerier implements Querier<String, Object[], QueryH
   }
 
   @Override
+  public List<FetchQuery> getFetchQueries() {
+    return Collections.emptyList();
+  }
+
+  @Override
   public List<QueryHint> getHints() {
     return hints;
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -84,9 +100,6 @@ public class DefaultJpqlNamedQuerier implements Querier<String, Object[], QueryH
     return properties;
   }
 
-  /**
-   * @return the resultClass
-   */
   @SuppressWarnings("unchecked")
   @Override
   public <T> Class<T> getResultClass() {

@@ -15,11 +15,12 @@ package org.corant.suites.query.mongodb;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.Querier;
+import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -33,31 +34,43 @@ import com.mongodb.BasicDBObject;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultMgNamedQuerier
-    implements Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> {
+public class DefaultMgNamedQuerier implements MgQuerier {
 
   public static final ObjectMapper OM = new ObjectMapper();
 
+  protected final String name;
   protected final EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
   protected final List<QueryHint> hints = new ArrayList<>();
+  protected final Map<String, String> properties = new HashMap<>();
+  protected final String originalScript;
 
   /**
+   * @param name
    * @param script
+   * @param originalScript
    * @param resultClass
    * @param hints
    * @param fetchQueries
+   * @param properties
    */
-  public DefaultMgNamedQuerier(Map<?, ?> mgQuery, Class<?> resultClass, List<QueryHint> hints,
-      List<FetchQuery> fetchQueries) {
+  public DefaultMgNamedQuerier(String name, Map<?, ?> mgQuery, String originalScript,
+      Class<?> resultClass, List<QueryHint> hints, List<FetchQuery> fetchQueries,
+      Map<String, String> properties) {
     super();
-    init(mgQuery);
+
+    this.name = name;
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
     if (hints != null) {
       this.hints.addAll(hints);
     }
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
+    init(mgQuery);
+    this.originalScript = originalScript;
   }
 
   @Override
@@ -65,19 +78,32 @@ public class DefaultMgNamedQuerier
     return fetchQueries;
   }
 
-  /**
-   * @return the resultClass
-   */
+  @Override
+  public List<QueryHint> getHints() {
+    return hints;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getOriginalScript() {
+    return originalScript;
+  }
+
+  @Override
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> Class<T> getResultClass() {
     return (Class<T>) resultClass;
   }
 
-  /**
-   *
-   * @return the script
-   */
   @Override
   public EnumMap<MgOperator, Bson> getScript() {
     return script;

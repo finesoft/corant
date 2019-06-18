@@ -83,7 +83,7 @@ public class DefaultEsNamedQueryProcessor
       // OM.readValue(sw.toString(), Object.class) FIXME Do some protection
       final Map esQuery = OM.readValue(script, Map.class);
       doSomthing(esQuery, param);
-      return new DefaultEsNamedQuerier(
+      return new DefaultEsNamedQuerier(getQueryName(),
           OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(esQuery), getResultClass(),
           getHints(), getFetchQueries());
     } catch (IOException | NullPointerException e) {

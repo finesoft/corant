@@ -13,20 +13,15 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.bson.conversions.Bson;
 import org.corant.kernel.service.ConversionService;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
 import org.corant.suites.query.shared.spi.ParamReviser;
 
@@ -37,8 +32,8 @@ import org.corant.suites.query.shared.spi.ParamReviser;
  *
  */
 @ApplicationScoped
-public class DefaultMgNamedQueryResolver implements
-    MgInLineNamedQueryResolver<String, Map<String, Object>, EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> {
+public class DefaultMgNamedQueryResolver
+    implements MgInLineNamedQueryResolver<String, Map<String, Object>> {
 
   final Map<String, DefaultMgNamedQueryProcessor> processors = new ConcurrentHashMap<>();
 

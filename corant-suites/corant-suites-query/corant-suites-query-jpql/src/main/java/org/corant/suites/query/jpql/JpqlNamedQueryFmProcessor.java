@@ -39,8 +39,8 @@ public class JpqlNamedQueryFmProcessor
   @Override
   public DefaultJpqlNamedQuerier doProcess(String script, Object[] param) {
     try {
-      return new DefaultJpqlNamedQuerier(script, param, getResultClass(), getHints(),
-          getProperties());
+      return new DefaultJpqlNamedQuerier(getQueryName(), script, param, getResultClass(),
+          getHints(), getProperties());
     } catch (NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
     }

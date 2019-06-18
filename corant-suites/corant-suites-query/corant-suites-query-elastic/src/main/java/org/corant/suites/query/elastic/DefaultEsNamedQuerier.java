@@ -15,7 +15,7 @@ package org.corant.suites.query.elastic;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.Querier;
+import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
 
@@ -25,22 +25,25 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultEsNamedQuerier implements Querier<String, FetchQuery, QueryHint> {
+public class DefaultEsNamedQuerier implements EsQuerier {
 
   protected final String script;
   protected final Class<?> resultClass;
   protected final List<FetchQuery> fetchQueries;
   protected final List<QueryHint> hints = new ArrayList<>();
+  protected final String name;
 
   /**
+   * @param name
    * @param script
    * @param resultClass
    * @param hints
    * @param fetchQueries
    */
-  public DefaultEsNamedQuerier(String script, Class<?> resultClass, List<QueryHint> hints,
-      List<FetchQuery> fetchQueries) {
+  public DefaultEsNamedQuerier(String name, String script, Class<?> resultClass,
+      List<QueryHint> hints, List<FetchQuery> fetchQueries) {
     super();
+    this.name = name;
     this.script = script;
     this.resultClass = resultClass;
     this.fetchQueries = fetchQueries;
@@ -59,9 +62,11 @@ public class DefaultEsNamedQuerier implements Querier<String, FetchQuery, QueryH
     return hints;
   }
 
-  /**
-   * @return the resultClass
-   */
+  @Override
+  public String getName() {
+    return name;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> Class<T> getResultClass() {

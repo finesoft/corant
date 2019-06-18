@@ -77,7 +77,8 @@ public class DefaultMgNamedQueryProcessor
       final Map mgQuery = DefaultMgNamedQuerier.OM.readValue(script, Map.class);
       doSomthing(mgQuery, param);
       // OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(mgQuery)
-      return new DefaultMgNamedQuerier(mgQuery, getResultClass(), getHints(), getFetchQueries());
+      return new DefaultMgNamedQuerier(getQueryName(), mgQuery, script, getResultClass(),
+          getHints(), getFetchQueries(), getProperties());
     } catch (IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }

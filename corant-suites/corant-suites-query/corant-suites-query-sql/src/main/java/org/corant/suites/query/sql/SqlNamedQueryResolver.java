@@ -13,9 +13,7 @@
  */
 package org.corant.suites.query.sql;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.corant.suites.query.shared.NamedQuerier;
 
 /**
  * corant-suites-query
@@ -23,27 +21,15 @@ import java.util.Map;
  * @author bingo 下午3:13:37
  *
  */
-public interface SqlNamedQueryResolver<K, P, S, CP, F, H> {
+public interface SqlNamedQueryResolver<K, P> {
 
-  Querier<S, CP, F, H> resolve(K key, P param);
+  SqlQuerier resolve(K key, P param);
 
-  interface Querier<S, CP, F, H> {
+  interface SqlQuerier extends NamedQuerier {
 
-    CP getConvertedParameters();
+    Object[] getConvertedParameters();
 
-    List<F> getFetchQueries();
-
-    default List<H> getHints() {
-      return Collections.emptyList();
-    }
-
-    default Map<String, String> getProperties() {
-      return Collections.emptyMap();
-    }
-
-    <T> Class<T> getResultClass();
-
-    S getScript();
+    String getScript();
   }
 
 }

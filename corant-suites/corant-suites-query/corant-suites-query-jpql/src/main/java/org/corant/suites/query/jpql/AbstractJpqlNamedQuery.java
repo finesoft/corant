@@ -40,7 +40,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver.Querier;
+import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
 import org.corant.suites.query.shared.NamedQuery;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -62,14 +62,14 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  JpqlNamedQueryResolver<String, Map<String, Object>, String, Object[], QueryHint> resolver;
+  protected JpqlNamedQueryResolver<String, Map<String, Object>> resolver;
 
   @Inject
   @Any
-  Instance<ResultHintHandler> resultHintHandlers;
+  protected Instance<ResultHintHandler> resultHintHandlers;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
     if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
@@ -85,7 +85,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
-    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    JpqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -112,7 +112,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> T get(String q, Map<String, Object> param) {
-    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    JpqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -131,7 +131,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
-    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    JpqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -163,7 +163,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
-    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    JpqlQuerier querier = getResolver().resolve(q, param);
     Class<T> rcls = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -182,7 +182,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
   @SuppressWarnings("unchecked")
   @Override
   public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    Querier<String, Object[], QueryHint> querier = getResolver().resolve(q, param);
+    JpqlQuerier querier = getResolver().resolve(q, param);
     Class<T> rcls = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -234,7 +234,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected JpqlNamedQueryResolver<String, Map<String, Object>, String, Object[], QueryHint> getResolver() {
+  protected JpqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
   }
 

@@ -37,8 +37,8 @@ public class SqlNamedQueryFmProcessor
    */
   @Override
   public DefaultSqlNamedQuerier doProcess(String script, Object[] param) {
-    return new DefaultSqlNamedQuerier(script, param, getResultClass(), getFetchQueries(),
-        getHints(), getProperties());
+    return new DefaultSqlNamedQuerier(getQueryName(), script, param, getResultClass(),
+        getFetchQueries(), getHints(), getProperties());
   }
 
   @Override

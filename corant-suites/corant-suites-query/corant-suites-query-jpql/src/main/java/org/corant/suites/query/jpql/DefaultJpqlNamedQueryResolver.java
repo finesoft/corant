@@ -24,7 +24,6 @@ import org.corant.kernel.service.ConversionService;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
 import org.corant.suites.query.shared.spi.ParamReviser;
 
@@ -37,7 +36,7 @@ import org.corant.suites.query.shared.spi.ParamReviser;
 @ApplicationScoped
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultJpqlNamedQueryResolver
-    implements JpqlNamedQueryResolver<String, Map<String, Object>, String, Object[], QueryHint> {
+    implements JpqlNamedQueryResolver<String, Map<String, Object>> {
 
   final Map<String, DynamicQueryProcessor> processors = new ConcurrentHashMap<>();
 

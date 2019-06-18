@@ -39,7 +39,7 @@ import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.spi.ResultHintHandler;
-import org.corant.suites.query.sql.SqlNamedQueryResolver.Querier;
+import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 import org.corant.suites.query.sql.dialect.Dialect;
 
 /**
@@ -54,14 +54,14 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
   protected SqlQueryExecutor executor;
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery, QueryHint> resolver;
+  protected SqlNamedQueryResolver<String, Map<String, Object>> resolver;
 
   @Inject
   @Any
-  Instance<ResultHintHandler> resultHintHandlers;
+  protected Instance<ResultHintHandler> resultHintHandlers;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
     if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
@@ -77,7 +77,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
-    Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    SqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
@@ -108,7 +108,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> T get(String q, Map<String, Object> param) {
-    Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    SqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
@@ -128,7 +128,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
-    Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    SqlQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
@@ -163,8 +163,8 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
-    Querier<String, Object[], FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
+    SqlQuerier querier = getResolver().resolve(q, param);
+    Class<T> resultClass = querier.getResultClass();
     Object[] queryParam = querier.getConvertedParameters();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
@@ -175,9 +175,9 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
       int size = getSize(result);
       if (size > 0) {
         this.fetch(result, fetchQueries, param);
-        handleResultHints(rcls, hints, param, result);
+        handleResultHints(resultClass, hints, param, result);
       }
-      return convert(result, rcls);
+      return convert(result, resultClass);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
           q);
@@ -207,8 +207,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    Querier<String, Object[], FetchQuery, QueryHint> querier =
-        resolver.resolve(refQueryName, fetchParam);
+    SqlQuerier querier = resolver.resolve(refQueryName, fetchParam);
     String sql = querier.getScript();
     // Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     Class<?> resultClass = Map.class;
@@ -253,7 +252,7 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     return executor;
   }
 
-  protected SqlNamedQueryResolver<String, Map<String, Object>, String, Object[], FetchQuery, QueryHint> getResolver() {
+  protected SqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
   }
 

@@ -51,7 +51,7 @@ public class JpqlNamedQueryJsProcessor
     Map<String, Object> convertedParam = convertParameter(param);// convert parameter
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {convertedParam, useParam});
-    return new DefaultJpqlNamedQuerier(script.toString(),
+    return new DefaultJpqlNamedQuerier(getQueryName(), script.toString(),
         useParam.toArray(new Object[useParam.size()]), getResultClass(), getHints(),
         getProperties());
   }

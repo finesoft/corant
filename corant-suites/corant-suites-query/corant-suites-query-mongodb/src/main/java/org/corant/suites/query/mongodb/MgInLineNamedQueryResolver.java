@@ -13,9 +13,9 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.EnumMap;
+import org.bson.conversions.Bson;
+import org.corant.suites.query.shared.NamedQuerier;
 
 /**
  * corant-suites-query
@@ -23,9 +23,9 @@ import java.util.Map;
  * @author bingo 下午3:13:37
  *
  */
-public interface MgInLineNamedQueryResolver<K, P, S, F, H> {
+public interface MgInLineNamedQueryResolver<K, P> {
 
-  Querier<S, F, H> resolve(K key, P param);
+  MgQuerier resolve(K key, P param);
 
   public enum MgOperator {
 
@@ -42,21 +42,11 @@ public interface MgInLineNamedQueryResolver<K, P, S, F, H> {
     }
   }
 
-  interface Querier<S, F, H> {
+  interface MgQuerier extends NamedQuerier {
 
-    List<F> getFetchQueries();
+    String getOriginalScript();
 
-    default List<H> getHints() {
-      return Collections.emptyList();
-    }
-
-    default Map<String, String> getProperties() {
-      return Collections.emptyMap();
-    }
-
-    <T> Class<T> getResultClass();
-
-    S getScript();
+    EnumMap<MgOperator, Bson> getScript();
 
   }
 

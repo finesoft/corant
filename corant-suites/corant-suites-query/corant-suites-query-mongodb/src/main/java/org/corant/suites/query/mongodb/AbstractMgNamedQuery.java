@@ -16,7 +16,9 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.MapUtils.getOpt;
+import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -27,6 +29,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -38,15 +41,16 @@ import javax.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.Querier;
+import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
 import org.corant.suites.query.shared.NamedQuery;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.spi.ResultHintHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
+import com.mongodb.CursorType;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 
@@ -59,15 +63,26 @@ import com.mongodb.client.MongoDatabase;
 @ApplicationScoped
 public abstract class AbstractMgNamedQuery implements NamedQuery {
 
-  @Inject
-  Logger logger;
+  public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
+  public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
+  public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeoutMs";
+  public static final String PRO_KEY_OPLOG_REPLAY = "mg.oplogReplay";
+  public static final String PRO_KEY_PARTIAL = "mg.partial";
+  public static final String PRO_KEY_CURSOR_TYPE = "mg.cursorType";
+  public static final String PRO_KEY_BATCH_SIZE = "mg.batchSize";
+  public static final String PRO_KEY_RETURN_KEY = "mg.returnKey";
+  public static final String PRO_KEY_COMMENT = "mg.comment";
+  public static final String PRO_KEY_SHOW_RECORDID = "mg.showRecordId";
 
   @Inject
-  MgInLineNamedQueryResolver<String, Map<String, Object>, EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> resolver;
+  protected Logger logger;
+
+  @Inject
+  protected MgInLineNamedQueryResolver<String, Map<String, Object>> resolver;
 
   @Inject
   @Any
-  Instance<ResultHintHandler> resultHintHandlers;
+  protected Instance<ResultHintHandler> resultHintHandlers;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
     if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
@@ -85,15 +100,13 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
     int offset = getOffset(param);
     int limit = getLimit(param);
-    Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> querier =
-        getResolver().resolve(q, param);
+    MgQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
-    EnumMap<MgOperator, Bson> script = querier.getScript();
+    log(q, param, querier.getOriginalScript());
     ForwardList<T> result = ForwardList.inst();
-    FindIterable<Document> fi =
-        query(resolveCollectionName(q), script).skip(offset).limit(limit + 1);
+    FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     int size = getSize(list);
@@ -110,13 +123,12 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
 
   @Override
   public <T> T get(String q, Map<String, Object> param) {
-    Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> querier =
-        getResolver().resolve(q, param);
+    MgQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
-    EnumMap<MgOperator, Bson> script = querier.getScript();
-    FindIterable<Document> fi = query(resolveCollectionName(q), script).limit(1);
+    log(q, param, querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = fi.first();
     this.fetch(result, fetchQueries, param);
     handleResultHints(resultClass, hints, param, result);
@@ -127,15 +139,13 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
   public <T> PagedList<T> page(String q, Map<String, Object> param) {
     int offset = getOffset(param);
     int limit = getLimit(param);
-    Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> querier =
-        getResolver().resolve(q, param);
+    MgQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
-    EnumMap<MgOperator, Bson> script = querier.getScript();
     PagedList<T> result = PagedList.of(offset, limit);
-    FindIterable<Document> fi =
-        query(resolveCollectionName(q), script).skip(offset).limit(limit + 1);
+    log(q, param, querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     int size = getSize(list);
@@ -143,7 +153,7 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
       if (size < limit) {
         result.withTotal(offset + size);
       } else {
-        result.withTotal(Long.valueOf(queryCount(resolveCollectionName(q), script)).intValue());
+        result.withTotal(Long.valueOf(queryCount(querier)).intValue());
       }
       this.fetch(list, fetchQueries, param);
       handleResultHints(resultClass, hints, param, list);
@@ -153,13 +163,12 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
-    Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> querier =
-        getResolver().resolve(q, param);
+    MgQuerier querier = getResolver().resolve(q, param);
     Class<T> resultClass = querier.getResultClass();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
-    EnumMap<MgOperator, Bson> script = querier.getScript();
-    FindIterable<Document> fi = query(resolveCollectionName(q), script).limit(128);
+    log(q, param, querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).limit(128);
     List<Map<String, Object>> result =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     int size = getSize(result);
@@ -192,13 +201,11 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    Querier<EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> querier =
-        resolver.resolve(refQueryName, fetchParam);
-    EnumMap<MgOperator, Bson> script = querier.getScript();
-    // Class<?> rcls = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
+    MgQuerier querier = resolver.resolve(refQueryName, fetchParam);
     List<QueryHint> hints = querier.getHints();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    FindIterable<Document> fi = query(resolveCollectionName(refQueryName), script).limit(128);
+    log(refQueryName, param, querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).limit(128);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     Object fetchedResult = null;
@@ -221,11 +228,7 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
 
   protected abstract MongoDatabase getDataBase();
 
-  protected ObjectMapper getObjectMapper() {
-    return QueryUtils.ESJOM;
-  }
-
-  protected MgInLineNamedQueryResolver<String, Map<String, Object>, EnumMap<MgOperator, Bson>, FetchQuery, QueryHint> getResolver() {
+  protected MgInLineNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
   }
 
@@ -258,38 +261,61 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
             name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 
-  protected FindIterable<Document> query(String collection, EnumMap<MgOperator, Bson> script) {
-    FindIterable<Document> it = getDataBase().getCollection(collection).find();
+  protected FindIterable<Document> query(MgQuerier querier) {
+    FindIterable<Document> fi =
+        getDataBase().getCollection(resolveCollectionName(querier.getName())).find();
+    EnumMap<MgOperator, Bson> script = querier.getScript();
     for (MgOperator op : MgOperator.values()) {
       switch (op) {
         case FILTER:
-          getOpt(script, op).ifPresent(it::filter);
+          getOpt(script, op).ifPresent(fi::filter);
           break;
         case PROJECTION:
-          getOpt(script, op).ifPresent(it::projection);
+          getOpt(script, op).ifPresent(fi::projection);
           break;
         case MIN:
-          getOpt(script, op).ifPresent(it::min);
+          getOpt(script, op).ifPresent(fi::min);
           break;
         case MAX:
-          getOpt(script, op).ifPresent(it::max);
+          getOpt(script, op).ifPresent(fi::max);
           break;
         case HINT:
-          getOpt(script, op).ifPresent(it::hint);
+          getOpt(script, op).ifPresent(fi::hint);
           break;
         case SORT:
-          getOpt(script, op).ifPresent(it::sort);
+          getOpt(script, op).ifPresent(fi::sort);
           break;
         default:
           break;
       }
     }
-    return it;
+    Map<String, String> pros = querier.getProperties();
+    // handle properties
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(fi::batchSize);
+    getOptMapObject(pros, PRO_KEY_COMMENT, ConversionUtils::toString).ifPresent(fi::comment);
+    CursorType ct = getMapEnum(pros, PRO_KEY_CURSOR_TYPE, CursorType.class);
+    if (ct != null) {
+      fi.cursorType(ct);
+    }
+    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, ConversionUtils::toLong)
+        .ifPresent(t -> fi.maxAwaitTime(t, TimeUnit.MILLISECONDS));
+    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, ConversionUtils::toLong)
+        .ifPresent(t -> fi.maxTime(t, TimeUnit.MILLISECONDS));
+    getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, ConversionUtils::toBoolean)
+        .ifPresent(fi::noCursorTimeout);
+    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, ConversionUtils::toBoolean)
+        .ifPresent(fi::oplogReplay);
+    getOptMapObject(pros, PRO_KEY_PARTIAL, ConversionUtils::toBoolean).ifPresent(fi::partial);
+    getOptMapObject(pros, PRO_KEY_RETURN_KEY, ConversionUtils::toBoolean).ifPresent(fi::returnKey);
+    getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, ConversionUtils::toBoolean)
+        .ifPresent(fi::showRecordId);
+    return fi;
   }
 
-  protected long queryCount(String collection, EnumMap<MgOperator, Bson> script) {
-    Bson bson = script.getOrDefault(MgOperator.FILTER, new BasicDBObject());
-    return getDataBase().getCollection(collection).countDocuments(bson);
+  protected long queryCount(MgQuerier querier) {
+    Bson bson = querier.getScript().getOrDefault(MgOperator.FILTER, new BasicDBObject());
+    return getDataBase().getCollection(resolveCollectionName(querier.getName()))
+        .countDocuments(bson);
   }
 
   protected String resolveCollectionName(String q) {

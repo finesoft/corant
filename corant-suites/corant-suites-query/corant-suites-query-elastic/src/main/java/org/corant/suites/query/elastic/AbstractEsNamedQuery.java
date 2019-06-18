@@ -33,7 +33,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
-import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.Querier;
+import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -53,14 +53,14 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
   protected EsQueryExecutor executor;
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery, QueryHint> resolver;
+  protected EsInLineNamedQueryResolver<String, Map<String, Object>> resolver;
 
   @Inject
   @Any
-  Instance<ResultHintHandler> resultHintHandlers;
+  protected Instance<ResultHintHandler> resultHintHandlers;
 
   public Object adaptiveSelect(String q, Map<String, Object> param) {
     if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
@@ -76,7 +76,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public Map<String, Object> aggregate(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    EsQuerier querier = getResolver().resolve(q, param);
     String script = querier.getScript();
     try {
       Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(q), script);
@@ -118,7 +118,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public Map<String, Object> search(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    EsQuerier querier = getResolver().resolve(q, param);
     String script = querier.getScript();
     try {
       Map<String, Object> result = getExecutor().search(resolveIndexName(q), script);
@@ -159,7 +159,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    Querier<String, FetchQuery, QueryHint> querier = resolver.resolve(refQueryName, fetchParam);
+    EsQuerier querier = resolver.resolve(refQueryName, fetchParam);
     String script = querier.getScript();
     Class<?> rcls = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     List<QueryHint> hints = querier.getHints();
@@ -204,7 +204,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     return QueryUtils.ESJOM;
   }
 
-  protected EsInLineNamedQueryResolver<String, Map<String, Object>, String, FetchQuery, QueryHint> getResolver() {
+  protected EsInLineNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
   }
 
@@ -244,7 +244,7 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
   }
 
   protected <T> Pair<Long, List<T>> searchHits(String q, Map<String, Object> param) {
-    Querier<String, FetchQuery, QueryHint> querier = getResolver().resolve(q, param);
+    EsQuerier querier = getResolver().resolve(q, param);
     Class<T> rcls = querier.getResultClass();
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     String script = querier.getScript();

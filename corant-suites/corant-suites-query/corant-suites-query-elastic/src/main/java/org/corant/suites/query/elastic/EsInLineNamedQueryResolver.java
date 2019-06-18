@@ -13,8 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
-import java.util.Collections;
-import java.util.List;
+import org.corant.suites.query.shared.NamedQuerier;
 
 /**
  * corant-suites-query
@@ -22,21 +21,13 @@ import java.util.List;
  * @author bingo 下午3:13:37
  *
  */
-public interface EsInLineNamedQueryResolver<K, P, S, F, H> {
+public interface EsInLineNamedQueryResolver<K, P> {
 
-  Querier<S, F, H> resolve(K key, P param);
+  EsQuerier resolve(K key, P param);
 
-  interface Querier<S, F, H> {
+  interface EsQuerier extends NamedQuerier {
 
-    List<F> getFetchQueries();
-
-    default List<H> getHints() {
-      return Collections.emptyList();
-    }
-
-    <T> Class<T> getResultClass();
-
-    S getScript();
+    String getScript();
   }
 
 }

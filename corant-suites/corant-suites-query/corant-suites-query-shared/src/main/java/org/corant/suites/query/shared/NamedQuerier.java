@@ -11,25 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.jpql;
-
-import org.corant.suites.query.shared.NamedQuerier;
+package org.corant.suites.query.shared;
 
 /**
- * corant-suites-query
+ * corant-suites-query-shared
  *
- * @author bingo 下午3:13:37
+ * @author bingo 上午9:59:24
  *
  */
-public interface JpqlNamedQueryResolver<K, P> {
-
-  JpqlQuerier resolve(K key, P param);
-
-  interface JpqlQuerier extends NamedQuerier {
-
-    Object[] getConvertedParameters();
-
-    String getScript();
-  }
-
+public interface NamedQuerier extends Querier {
+  String getName();
 }

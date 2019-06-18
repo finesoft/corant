@@ -16,29 +16,19 @@ package org.corant.suites.query.sql;
 import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
-import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.suites.query.shared.QueryUtils.convert;
 import static org.corant.suites.query.shared.QueryUtils.getLimit;
 import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.query.shared.NamedQuery;
+import org.corant.suites.query.shared.AbstractNamedQuery;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
-import org.corant.suites.query.shared.spi.ResultHintHandler;
 import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 import org.corant.suites.query.sql.dialect.Dialect;
 
@@ -49,31 +39,12 @@ import org.corant.suites.query.sql.dialect.Dialect;
  *
  */
 @ApplicationScoped
-public abstract class AbstractSqlNamedQuery implements NamedQuery {
+public abstract class AbstractSqlNamedQuery extends AbstractNamedQuery {
 
   protected SqlQueryExecutor executor;
 
   @Inject
-  protected Logger logger;
-
-  @Inject
   protected SqlNamedQueryResolver<String, Map<String, Object>> resolver;
-
-  @Inject
-  @Any
-  protected Instance<ResultHintHandler> resultHintHandlers;
-
-  public Object adaptiveSelect(String q, Map<String, Object> param) {
-    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
-      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
-        return this.page(q, param);
-      } else {
-        return this.forward(q, param);
-      }
-    } else {
-      return this.select(q, param);
-    }
-  }
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
@@ -170,6 +141,9 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     List<QueryHint> hints = querier.getHints();
     String sql = querier.getScript();
     try {
+      if (enableMaxSelect()) {
+        sql = getDialect().getLimitSql(sql, QueryUtils.OFFSET_PARAM_VAL, getMaxSelectSize(querier));
+      }
       log(q, queryParam, sql);
       List<Map<String, Object>> result = getExecutor().select(sql, queryParam);
       int size = getSize(result);
@@ -184,17 +158,11 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     }
   }
 
+  protected boolean enableMaxSelect() {
+    return true;
+  }
+
   @Override
-  public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    throw new NotSupportedException();
-  }
-
-  protected <T> void fetch(List<T> list, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (!isEmpty(list) && !isEmpty(fetchQueries)) {
-      list.forEach(e -> fetchQueries.stream().forEach(f -> this.fetch(e, f, new HashMap<>(param))));
-    }
-  }
-
   protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
     if (null == obj || fetchQuery == null) {
       return;
@@ -209,7 +177,6 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     SqlQuerier querier = resolver.resolve(refQueryName, fetchParam);
     String sql = querier.getScript();
-    // Class<?> resultClass = defaultObject(fetchQuery.getResultClass(), querier.getResultClass());
     Class<?> resultClass = Map.class;
     Object[] params = querier.getConvertedParameters();
     List<QueryHint> hints = querier.getHints();
@@ -236,12 +203,6 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
     }
   }
 
-  protected <T> void fetch(T obj, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (obj != null && !isEmpty(fetchQueries)) {
-      fetchQueries.stream().forEach(f -> this.fetch(obj, f, new HashMap<>(param)));
-    }
-  }
-
   protected abstract SqlQueryConfiguration getConfiguration();
 
   protected Dialect getDialect() {
@@ -254,35 +215,6 @@ public abstract class AbstractSqlNamedQuery implements NamedQuery {
 
   protected SqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
-  }
-
-  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
-      Object result) {
-    if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      hints.forEach(qh -> {
-        AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
-            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
-              if (!exclusive.get()) {
-                try {
-                  h.handle(qh, param, result);
-                } catch (Exception e) {
-                  throw new CorantRuntimeException(e);
-                } finally {
-                  if (h.exclusive()) {
-                    exclusive.set(true);
-                  }
-                }
-              }
-            });
-      });
-    }
-  }
-
-  protected void log(String name, Object[] param, String... sql) {
-    logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query sql]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", sql)));
   }
 
   protected void setExecutor(SqlQueryExecutor executor) {

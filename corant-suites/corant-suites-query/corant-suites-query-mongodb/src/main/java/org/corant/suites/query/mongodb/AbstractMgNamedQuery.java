@@ -19,36 +19,27 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.MapUtils.getOpt;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
-import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.query.shared.QueryUtils.convert;
 import static org.corant.suites.query.shared.QueryUtils.getLimit;
 import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
-import org.corant.suites.query.shared.NamedQuery;
+import org.corant.suites.query.shared.AbstractNamedQuery;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
-import org.corant.suites.query.shared.spi.ResultHintHandler;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.FindIterable;
@@ -61,7 +52,7 @@ import com.mongodb.client.MongoDatabase;
  *
  */
 @ApplicationScoped
-public abstract class AbstractMgNamedQuery implements NamedQuery {
+public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
 
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
@@ -75,26 +66,7 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
   public static final String PRO_KEY_SHOW_RECORDID = "mg.showRecordId";
 
   @Inject
-  protected Logger logger;
-
-  @Inject
   protected MgInLineNamedQueryResolver<String, Map<String, Object>> resolver;
-
-  @Inject
-  @Any
-  protected Instance<ResultHintHandler> resultHintHandlers;
-
-  public Object adaptiveSelect(String q, Map<String, Object> param) {
-    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
-      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
-        return this.page(q, param);
-      } else {
-        return this.forward(q, param);
-      }
-    } else {
-      return this.select(q, param);
-    }
-  }
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
@@ -145,7 +117,7 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
     List<QueryHint> hints = querier.getHints();
     PagedList<T> result = PagedList.of(offset, limit);
     log(q, param, querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
+    FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     int size = getSize(list);
@@ -168,7 +140,7 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
     log(q, param, querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(128);
+    FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
     List<Map<String, Object>> result =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     int size = getSize(result);
@@ -180,16 +152,6 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
   }
 
   @Override
-  public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    return Stream.empty();
-  }
-
-  protected <T> void fetch(List<T> list, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (!isEmpty(list) && !isEmpty(fetchQueries)) {
-      list.forEach(e -> fetchQueries.stream().forEach(f -> fetch(e, f, new HashMap<>(param))));
-    }
-  }
-
   protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
     if (null == obj || fetchQuery == null) {
       return;
@@ -220,45 +182,10 @@ public abstract class AbstractMgNamedQuery implements NamedQuery {
     handleResultHints(Map.class, hints, fetchParam, fetchedList);
   }
 
-  protected <T> void fetch(T obj, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (obj != null && !isEmpty(fetchQueries)) {
-      fetchQueries.stream().forEach(f -> this.fetch(obj, f, new HashMap<>(param)));
-    }
-  }
-
   protected abstract MongoDatabase getDataBase();
 
   protected MgInLineNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
-  }
-
-  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
-      Object result) {
-    if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      hints.forEach(qh -> {
-        AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
-            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
-              if (!exclusive.get()) {
-                try {
-                  h.handle(qh, param, result);
-                } catch (Exception e) {
-                  throw new CorantRuntimeException(e);
-                } finally {
-                  if (h.exclusive()) {
-                    exclusive.set(true);
-                  }
-                }
-              }
-            });
-      });
-    }
-  }
-
-  protected void log(String name, Map<String, Object> param, String... script) {
-    logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query script]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 
   protected FindIterable<Document> query(MgQuerier querier) {

@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,11 @@ public interface Querier {
   }
 
   default <T> T getProperty(String name, Class<T> cls) {
-    return toObject(getProperties().get(name), cls);
+    return getProperties() == null ? null : toObject(getProperties().get(name), cls);
+  }
+
+  default <T> T getProperty(String name, Class<T> cls, T altVal) {
+    return defaultObject(getProperty(name, cls), altVal);
   }
 
   <T> Class<T> getResultClass();

@@ -15,30 +15,23 @@ package org.corant.suites.query.elastic;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.query.shared.QueryUtils.getLimit;
 import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
+import org.corant.suites.query.shared.AbstractNamedQuery;
+import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
-import org.corant.suites.query.shared.spi.ResultHintHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -48,31 +41,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @ApplicationScoped
-public abstract class AbstractEsNamedQuery implements EsNamedQuery {
+public abstract class AbstractEsNamedQuery extends AbstractNamedQuery implements EsNamedQuery {
 
   protected EsQueryExecutor executor;
 
   @Inject
-  protected Logger logger;
-
-  @Inject
   protected EsInLineNamedQueryResolver<String, Map<String, Object>> resolver;
-
-  @Inject
-  @Any
-  protected Instance<ResultHintHandler> resultHintHandlers;
-
-  public Object adaptiveSelect(String q, Map<String, Object> param) {
-    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
-      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
-        return this.page(q, param);
-      } else {
-        return this.forward(q, param);
-      }
-    } else {
-      return this.select(q, param);
-    }
-  }
 
   @Override
   public Map<String, Object> aggregate(String q, Map<String, Object> param) {
@@ -132,22 +106,11 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   @Override
   public <T> List<T> select(String q, Map<String, Object> param) {
-    param.putIfAbsent(QueryUtils.LIMIT_PARAM_NME, 128);
     Pair<Long, List<T>> hits = searchHits(q, param);
     return hits.getValue();
   }
 
   @Override
-  public <T> Stream<T> stream(String q, Map<String, Object> param) {
-    return Stream.empty();
-  }
-
-  protected <T> void fetch(List<T> list, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (!isEmpty(list) && !isEmpty(fetchQueries)) {
-      list.forEach(e -> fetchQueries.stream().forEach(f -> fetch(e, f, new HashMap<>(param))));
-    }
-  }
-
   protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
     if (null == obj || fetchQuery == null) {
       return;
@@ -190,14 +153,13 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
     }
   }
 
-  protected <T> void fetch(T obj, List<FetchQuery> fetchQueries, Map<String, Object> param) {
-    if (obj != null && !isEmpty(fetchQueries)) {
-      fetchQueries.stream().forEach(f -> this.fetch(obj, f, new HashMap<>(param)));
-    }
-  }
-
   protected EsQueryExecutor getExecutor() {
     return executor;
+  }
+
+  @Override
+  protected int getMaxSelectSize(Querier querier) {
+    return super.getMaxSelectSize(querier);
   }
 
   protected ObjectMapper getObjectMapper() {
@@ -206,35 +168,6 @@ public abstract class AbstractEsNamedQuery implements EsNamedQuery {
 
   protected EsInLineNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
-  }
-
-  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
-      Object result) {
-    if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      hints.forEach(qh -> {
-        AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
-            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
-              if (!exclusive.get()) {
-                try {
-                  h.handle(qh, param, result);
-                } catch (Exception e) {
-                  throw new CorantRuntimeException(e);
-                } finally {
-                  if (h.exclusive()) {
-                    exclusive.set(true);
-                  }
-                }
-              }
-            });
-      });
-    }
-  }
-
-  protected void log(String name, Map<String, Object> param, String... script) {
-    logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query script]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 
   protected String resolveIndexName(String q) {

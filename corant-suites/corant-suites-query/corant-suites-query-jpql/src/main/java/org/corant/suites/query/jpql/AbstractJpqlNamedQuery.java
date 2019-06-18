@@ -17,7 +17,6 @@ import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapBoolean;
 import static org.corant.shared.util.MapUtils.getMapEnum;
-import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
 import static org.corant.suites.query.shared.QueryUtils.getLimit;
@@ -26,12 +25,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,12 +34,11 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
-import org.corant.suites.query.shared.NamedQuery;
-import org.corant.suites.query.shared.QueryUtils;
+import org.corant.suites.query.shared.AbstractNamedQuery;
+import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.QueryHint;
-import org.corant.suites.query.shared.spi.ResultHintHandler;
 
 /**
  * corant-suites-query
@@ -53,7 +47,7 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
  *
  */
 @ApplicationScoped
-public abstract class AbstractJpqlNamedQuery implements NamedQuery {
+public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
 
   public static final String PRO_KEY_FLUSH_MODE_TYPE = "jpa.query.flushModeType";
   public static final String PRO_KEY_LOCK_MODE_TYPE = "jpa.query.lockModeType";
@@ -62,26 +56,7 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
   @Inject
-  protected Logger logger;
-
-  @Inject
   protected JpqlNamedQueryResolver<String, Map<String, Object>> resolver;
-
-  @Inject
-  @Any
-  protected Instance<ResultHintHandler> resultHintHandlers;
-
-  public Object adaptiveSelect(String q, Map<String, Object> param) {
-    if (param != null && param.containsKey(QueryUtils.OFFSET_PARAM_NME)) {
-      if (param.containsKey(QueryUtils.LIMIT_PARAM_NME)) {
-        return this.page(q, param);
-      } else {
-        return this.forward(q, param);
-      }
-    } else {
-      return this.select(q, param);
-    }
-  }
 
   @Override
   public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
@@ -170,8 +145,10 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     Map<String, String> properties = querier.getProperties();
     String ql = querier.getScript();
     log(q, queryParam, ql);
+    Query query =
+        createQuery(ql, properties, rcls, queryParam).setMaxResults(getMaxSelectSize(querier));
     @SuppressWarnings("unchecked")
-    List<T> result = createQuery(ql, properties, rcls, queryParam).getResultList();
+    List<T> result = query.getResultList();
     int size = getSize(result);
     if (size > 0) {
       handleResultHints(rcls, hints, param, result);
@@ -232,6 +209,11 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
     return query;
   }
 
+  @Override
+  protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
+    throw new NotSupportedException();
+  }
+
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
   protected JpqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
@@ -240,32 +222,4 @@ public abstract class AbstractJpqlNamedQuery implements NamedQuery {
 
   protected void handleQuery(Query query, Class<?> cls, Map<String, String> properties) {}
 
-  protected void handleResultHints(Class<?> resultClass, List<QueryHint> hints, Object param,
-      Object result) {
-    if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      hints.forEach(qh -> {
-        AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
-            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
-              if (!exclusive.get()) {
-                try {
-                  h.handle(qh, param, result);
-                } catch (Exception e) {
-                  throw new CorantRuntimeException(e);
-                } finally {
-                  if (h.exclusive()) {
-                    exclusive.set(true);
-                  }
-                }
-              }
-            });
-      });
-    }
-  }
-
-  protected void log(String name, Object[] param, String... sql) {
-    logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query sql]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", sql)));
-  }
 }

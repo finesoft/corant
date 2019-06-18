@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.query.shared.AbstractNamedQuery;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
@@ -99,7 +100,11 @@ public class DefaultEsNamedQueryProcessor
     }
     Integer size = getMapInteger(param, QueryUtils.LIMIT_PARAM_NME);
     if (size != null) {
-      esQuery.put("size", max(size, Integer.valueOf(0)));
+      esQuery.put("size", max(size, Integer.valueOf(1)));
+    } else {
+      esQuery.put("size",
+          max(getMapInteger(getProperties(), AbstractNamedQuery.PRO_KEY_MAX_SELECT_SIZE,
+              AbstractNamedQuery.MAX_SELECT_SIZE), Integer.valueOf(1)));
     }
   }
 

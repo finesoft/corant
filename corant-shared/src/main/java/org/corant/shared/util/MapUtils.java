@@ -344,6 +344,17 @@ public class MapUtils {
     return map;
   }
 
+  @SafeVarargs
+  public static <K, V> Map<K, V> mapOf(Entry<? extends K, ? extends V>... entries) {
+    Object[] array = new Object[entries.length << 1];
+    int len = 0;
+    for (Entry<? extends K, ? extends V> entry : entries) {
+      array[len++] = entry.getKey();
+      array[len++] = entry.getValue();
+    }
+    return mapOf(array);
+  }
+
   public static <K, V> Map<K, V> mapOf(Object... objects) {
     return mapOf(false, objects);
   }

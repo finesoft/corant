@@ -159,17 +159,6 @@ public class CollectionUtils {
     return list;
   }
 
-  public static <T> List<T> listRemoveIf(List<T> list, Predicate<T> p) {
-    if (list == null) {
-      return null;
-    } else if (p == null) {
-      return list;
-    } else {
-      list.removeIf(p);
-      return list;
-    }
-  }
-
   public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
       final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
     return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
@@ -186,6 +175,17 @@ public class CollectionUtils {
     return result;
   }
 
+  public static <C extends Collection<T>, T> C removeIf(C collection, Predicate<T> p) {
+    if (collection == null) {
+      return null;
+    } else if (p == null) {
+      return collection;
+    } else {
+      collection.removeIf(p);
+      return collection;
+    }
+  }
+
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
     Set<T> set = new HashSet<>(objects.length);
@@ -193,17 +193,6 @@ public class CollectionUtils {
       set.add(obj);
     }
     return set;
-  }
-
-  public static <T> Set<T> setRemoveIf(Set<T> set, Predicate<T> p) {
-    if (set == null) {
-      return null;
-    } else if (p == null) {
-      return set;
-    } else {
-      set.removeIf(p);
-      return set;
-    }
   }
 
   public static <T> void swap(List<T> l, int i, int j) {
@@ -219,7 +208,6 @@ public class CollectionUtils {
   public static class ListJoins<F, J, T> {
 
     private List<F> from;
-
     private List<J> join;
     private BiPredicate<F, J> on;
     private BiFunction<F, J, T> select;

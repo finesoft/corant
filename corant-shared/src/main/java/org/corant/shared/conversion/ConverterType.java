@@ -24,8 +24,8 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 public class ConverterType<S, T> {
 
   private final Class<S> sourceClass;
-
   private final Class<T> targetClass;
+  private final int hash;
 
   /**
    * @param sourceClass
@@ -35,6 +35,7 @@ public class ConverterType<S, T> {
     super();
     this.sourceClass = shouldNotNull(sourceClass);
     this.targetClass = shouldNotNull(targetClass);
+    this.hash = calHash(sourceClass, targetClass);
   }
 
   public static <S, T> ConverterType<S, T> of(Class<S> sourceClass, Class<T> targetClass) {
@@ -87,15 +88,19 @@ public class ConverterType<S, T> {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (sourceClass == null ? 0 : sourceClass.hashCode());
-    result = prime * result + (targetClass == null ? 0 : targetClass.hashCode());
-    return result;
+    return hash;
   }
 
   @Override
   public String toString() {
     return "ConverterType [sourceClass=" + sourceClass + ", targetClass=" + targetClass + "]";
+  }
+
+  int calHash(Class<S> sourceClass, Class<T> targetClass) {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (sourceClass == null ? 0 : sourceClass.hashCode());
+    result = prime * result + (targetClass == null ? 0 : targetClass.hashCode());
+    return result;
   }
 }

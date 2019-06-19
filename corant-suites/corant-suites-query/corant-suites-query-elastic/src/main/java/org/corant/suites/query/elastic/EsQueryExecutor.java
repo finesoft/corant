@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
@@ -42,12 +43,16 @@ public interface EsQueryExecutor {
   String AGG_RS_ETR_PATH = "aggregations";
   String SUG_RS_ERT_PATH = "suggest";
 
-  default SearchRequest buildSearchRequest(String script, String... indexNames) {
+  static SearchSourceBuilder buildSearchSourceBuilder(String script) {
     try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
-      return new SearchRequest(indexNames).source(SearchSourceBuilder.fromXContent(parser));
+      return SearchSourceBuilder.fromXContent(parser);
     } catch (IOException e) {
       throw new QueryRuntimeException(e);
     }
+  }
+
+  default SearchRequest buildSearchRequest(String script, String... indexNames) {
+    return new SearchRequest(indexNames).source(buildSearchSourceBuilder(script));
   }
 
   SearchResponse execute(SearchRequest searchRequest) throws Exception;
@@ -96,5 +101,7 @@ public interface EsQueryExecutor {
     }
     return Pair.of(total, list);
   }
+
+  Stream<Map<String, Object>> stream(String indexName, String script) throws Exception;
 
 }

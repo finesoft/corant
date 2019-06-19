@@ -26,7 +26,9 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.QueryRuntimeException;
+import org.corant.suites.query.sql.dialect.Dialect;
 
 /**
  * corant-suites-query
@@ -39,13 +41,17 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   public final static MapHandler MAP_HANDLER = new MapHandler();
   public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
 
+  protected final SqlQueryConfiguration confiuration;
   protected final QueryRunner runner;
+  protected final Dialect dialect;
 
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
+    this.confiuration = confiuration;
     runner = new QueryRunner(confiuration.getDataSource(),
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
             confiuration.getMaxFieldSize(), confiuration.getMaxRows(),
             confiuration.getQueryTimeout()));
+    dialect = confiuration.getDialect();
   }
 
   public static DefaultSqlQueryExecutor of(DataSource ds) {
@@ -79,6 +85,11 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
+  public Dialect getDialect() {
+    return dialect;
+  }
+
+  @Override
   public List<Map<String, Object>> select(String sql, Object... args) throws SQLException {
     Object result = null;
     if (args.length > 0) {
@@ -91,7 +102,12 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
   @Override
   public Stream<Map<String, Object>> stream(String sql, Object... args) {
-    return Stream.empty();
+    try {
+      return new StreamableQueryRunner(confiuration)
+          .streamQuery(confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, args);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   protected QueryRunner getRunner() {

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.bson.Document;
@@ -56,7 +57,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
 
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
-  public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeoutMs";
+  public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeout";
   public static final String PRO_KEY_OPLOG_REPLAY = "mg.oplogReplay";
   public static final String PRO_KEY_PARTIAL = "mg.partial";
   public static final String PRO_KEY_CURSOR_TYPE = "mg.cursorType";
@@ -101,7 +102,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     List<QueryHint> hints = querier.getHints();
     log(q, param, querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result = fi.first();
+    Map<String, Object> result = fi.iterator().tryNext();
     this.fetch(result, fetchQueries, param);
     handleResultHints(resultClass, hints, param, result);
     return convert(result, resultClass);
@@ -149,6 +150,21 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
       handleResultHints(resultClass, hints, param, result);
     }
     return convert(result, resultClass);
+  }
+
+  @Override
+  public <T> Stream<T> stream(String q, Map<String, Object> param) {
+    MgQuerier querier = getResolver().resolve(q, param);
+    Class<T> resultClass = querier.getResultClass();
+    List<FetchQuery> fetchQueries = querier.getFetchQueries();
+    List<QueryHint> hints = querier.getHints();
+    log(q, param, querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
+    return streamOf(fi).map(result -> {
+      this.fetch(result, fetchQueries, param);
+      handleResultHints(resultClass, hints, param, result);
+      return convert(result, resultClass);
+    });
   }
 
   @Override

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.suites.query.sql.dialect.Dialect;
 
 /**
  * corant-suites-query
@@ -27,6 +28,8 @@ import java.util.stream.Stream;
 public interface SqlQueryExecutor {
 
   Map<String, Object> get(String sql, Object... args) throws SQLException;
+
+  Dialect getDialect();
 
   List<Map<String, Object>> select(String sql, Object... args) throws SQLException;
 

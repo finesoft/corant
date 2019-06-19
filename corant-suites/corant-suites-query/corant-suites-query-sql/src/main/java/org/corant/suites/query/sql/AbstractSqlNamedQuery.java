@@ -22,6 +22,7 @@ import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQuery;
@@ -40,8 +41,6 @@ import org.corant.suites.query.sql.dialect.Dialect;
  */
 @ApplicationScoped
 public abstract class AbstractSqlNamedQuery extends AbstractNamedQuery {
-
-  protected SqlQueryExecutor executor;
 
   @Inject
   protected SqlNamedQueryResolver<String, Map<String, Object>> resolver;
@@ -158,6 +157,21 @@ public abstract class AbstractSqlNamedQuery extends AbstractNamedQuery {
     }
   }
 
+  @Override
+  public <T> Stream<T> stream(String q, Map<String, Object> param) {
+    SqlQuerier querier = getResolver().resolve(q, param);
+    Class<T> resultClass = querier.getResultClass();
+    Object[] queryParam = querier.getConvertedParameters();
+    List<FetchQuery> fetchQueries = querier.getFetchQueries();
+    List<QueryHint> hints = querier.getHints();
+    String sql = querier.getScript();
+    return getExecutor().stream(sql, queryParam).map(result -> {
+      this.fetch(result, fetchQueries, param);
+      handleResultHints(resultClass, hints, param, result);
+      return convert(result, resultClass);
+    });
+  }
+
   protected boolean enableMaxSelect() {
     return true;
   }
@@ -203,21 +217,13 @@ public abstract class AbstractSqlNamedQuery extends AbstractNamedQuery {
     }
   }
 
-  protected abstract SqlQueryConfiguration getConfiguration();
-
   protected Dialect getDialect() {
-    return getConfiguration().getDialect();
+    return getExecutor().getDialect();
   }
 
-  protected SqlQueryExecutor getExecutor() {
-    return executor;
-  }
+  protected abstract SqlQueryExecutor getExecutor();
 
   protected SqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;
-  }
-
-  protected void setExecutor(SqlQueryExecutor executor) {
-    this.executor = executor;
   }
 }

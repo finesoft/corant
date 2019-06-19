@@ -13,6 +13,9 @@
  */
 package org.corant.suites.query.elastic;
 
+import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -35,6 +38,12 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   @Override
   public SearchResponse execute(SearchRequest searchRequest) throws Exception {
     return transportClient.search(searchRequest).get();
+  }
+
+  @Override
+  public Stream<Map<String, Object>> stream(String indexName, String script) throws Exception {
+    return StreamSupport.stream(new EsScrollableSpliterator(transportClient, indexName, script),
+        false);
   }
 
 }

@@ -70,7 +70,7 @@ public abstract class AbstractNamedQuery implements NamedQuery {
 
   protected <T> void fetch(List<T> list, List<FetchQuery> fetchQueries, Map<String, Object> param) {
     if (!isEmpty(list) && !isEmpty(fetchQueries)) {
-      list.forEach(e -> fetchQueries.stream().forEach(f -> this.fetch(e, f, new HashMap<>(param))));
+      list.forEach(e -> fetchQueries.forEach(f -> this.fetch(e, f, new HashMap<>(param))));
     }
   }
 
@@ -78,7 +78,7 @@ public abstract class AbstractNamedQuery implements NamedQuery {
 
   protected <T> void fetch(T obj, List<FetchQuery> fetchQueries, Map<String, Object> param) {
     if (obj != null && !isEmpty(fetchQueries)) {
-      fetchQueries.stream().forEach(f -> this.fetch(obj, f, new HashMap<>(param)));
+      fetchQueries.forEach(f -> this.fetch(obj, f, new HashMap<>(param)));
     }
   }
 
@@ -97,12 +97,9 @@ public abstract class AbstractNamedQuery implements NamedQuery {
               if (!exclusive.get()) {
                 try {
                   h.handle(qh, param, result);
+                  exclusive.set(h.exclusive());
                 } catch (Exception e) {
                   throw new CorantRuntimeException(e);
-                } finally {
-                  if (h.exclusive()) {
-                    exclusive.set(true);
-                  }
                 }
               }
             });
@@ -118,7 +115,7 @@ public abstract class AbstractNamedQuery implements NamedQuery {
 
   protected void log(String name, Object[] param, String... script) {
     logger.fine(
-        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query sql]: %s",
+        () -> String.format("%n[Query name]: %s; %n[Query parameters]: [%s]; %n[Query script]: %s",
             name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 

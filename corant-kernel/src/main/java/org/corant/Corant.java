@@ -14,7 +14,6 @@
 package org.corant;
 
 import static org.corant.kernel.normal.Names.applicationName;
-import static org.corant.kernel.util.Instances.resolvableAnyway;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -217,19 +216,12 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
-  @SuppressWarnings("resource")
   public synchronized static Corant run(Class<?> configClass, String... args) {
-    return new Corant(configClass, args).start();
+    return configClass == null ? new Corant(args).start() : new Corant(configClass, args).start();
   }
 
-  @SuppressWarnings("resource")
   public synchronized static Corant run(Object configObject, String... args) {
-    if (configObject == null) {
-      return new Corant(args);
-    }
-    Corant inst = new Corant(configObject.getClass(), args).start();
-    resolvableAnyway(configObject);
-    return inst;
+    return run(configObject == null ? null : configObject.getClass(), args);
   }
 
   public synchronized static Optional<Instance<Object>> tryInstance() {

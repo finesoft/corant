@@ -79,7 +79,7 @@
 		<version.keycloak>6.0.1</version.keycloak>
 
 		<version.HikariCP>3.2.0</version.HikariCP>
-		<version.agroal>1.4</version.agroal>
+		<version.agroal>1.5</version.agroal>
 		<version.narayana-jta>5.9.5.Final</version.narayana-jta>
 		<version.atomikos>4.0.6</version.atomikos>
 		<version.mssql-jdbc>7.2.2.jre8</version.mssql-jdbc>

@@ -81,10 +81,10 @@ public class DataSourceConfig {
   private volatile int minSize = 0;
   private int maxSize = 16;
   private Duration leakTimeout = Duration.ZERO;
-  private Duration validationTimeout = Duration.ZERO;
+  private Duration validationTimeout = Duration.ofMinutes(15);
   private Duration reapTimeout = Duration.ZERO;
   private volatile Duration acquisitionTimeout = Duration.ZERO;
-  private boolean validateConnection = false;
+  private boolean validateConnection = true;
   private boolean enableMetrics = false;
 
   /**

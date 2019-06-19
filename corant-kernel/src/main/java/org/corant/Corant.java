@@ -256,7 +256,7 @@ public class Corant implements AutoCloseable {
   }
 
   public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
-    return Unmanageables.accpet(object);
+    return Unmanageables.accept(object);
   }
 
   private static synchronized void setMe(Corant me) {

@@ -31,7 +31,7 @@ import org.jboss.weld.manager.api.WeldManager;
  */
 public class Unmanageables {
 
-  public static <T> UnmanageableInstance<T> accpet(T obj) {
+  public static <T> UnmanageableInstance<T> accept(T obj) {
     return UnmanageableInstance.of(obj).produce().inject().postConstruct();
   }
 

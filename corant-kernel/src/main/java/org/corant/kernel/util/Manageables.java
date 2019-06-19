@@ -15,6 +15,7 @@ package org.corant.kernel.util;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.ClassUtils.asClass;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -23,7 +24,6 @@ import javax.naming.Name;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.jboss.weld.bean.proxy.ProxyObject;
 
 /**
  * corant-kernel
@@ -40,7 +40,7 @@ public class Manageables {
 
   // FIXME
   public static boolean isManagedBean(Object object) {
-    return ProxyObject.class.isInstance(object);
+    return object != null && !instance().select(getUserClass(object)).isUnsatisfied();
   }
 
   /**

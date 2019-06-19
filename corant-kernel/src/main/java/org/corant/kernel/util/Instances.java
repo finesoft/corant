@@ -14,6 +14,7 @@
 package org.corant.kernel.util;
 
 import static org.corant.Corant.instance;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -26,24 +27,51 @@ import java.util.function.Function;
  */
 public class Instances {
 
-  public static <T> void acceptIfResolvable(Class<T> instanceClass, Consumer<T> consumer) {
-    if (instance().select(instanceClass).isResolvable()) {
-      consumer.accept(instance().select(instanceClass).get());
-    }
-  }
-
-  public static <T, R> R applyIfResolvable(Class<T> instanceClass, Function<T, R> function) {
-    if (instance().select(instanceClass).isResolvable()) {
-      return function.apply(instance().select(instanceClass).get());
-    }
-    return null;
-  }
-
   public static <T> Optional<T> resolvable(Class<T> instanceClass) {
     if (instance().select(instanceClass).isResolvable()) {
       return Optional.of(instance().select(instanceClass).get());
     } else {
       return Optional.empty();
     }
+  }
+
+  public static <T> void resolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
+    shouldNotNull(consumer).accept(instance().select(instanceClass).get());
+  }
+
+  public static <T> T resolvableAnyway(Class<T> instanceClass) {
+    if (instance().select(instanceClass).isResolvable()) {
+      return instance().select(instanceClass).get();
+    } else if (instance().select(instanceClass).isUnsatisfied()) {
+      return Unmanageables.create(instanceClass).get();
+    } else {
+      return null;
+    }
+  }
+
+  public static <T> T resolvableAnyway(T obj) {
+    if (Manageables.isManagedBean(obj)) {
+      return obj;
+    } else if (obj != null) {
+      return Unmanageables.accept(obj).get();
+    }
+    return null;
+  }
+
+  public static <T, R> R resolvableApply(Class<T> instanceClass, Function<T, R> function) {
+    return shouldNotNull(function).apply(instance().select(instanceClass).get());
+  }
+
+  public static <T> void tryResolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
+    if (instance().select(instanceClass).isResolvable()) {
+      shouldNotNull(consumer).accept(instance().select(instanceClass).get());
+    }
+  }
+
+  public static <T, R> R tryResolvableApply(Class<T> instanceClass, Function<T, R> function) {
+    if (instance().select(instanceClass).isResolvable()) {
+      return shouldNotNull(function).apply(instance().select(instanceClass).get());
+    }
+    return null;
   }
 }

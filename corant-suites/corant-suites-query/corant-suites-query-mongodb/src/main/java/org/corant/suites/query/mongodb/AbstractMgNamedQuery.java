@@ -159,8 +159,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     List<FetchQuery> fetchQueries = querier.getFetchQueries();
     List<QueryHint> hints = querier.getHints();
     log(q, param, querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
-    return streamOf(fi).map(result -> {
+    return streamOf(query(querier)).map(result -> {
       this.fetch(result, fetchQueries, param);
       handleResultHints(resultClass, hints, param, result);
       return convert(result, resultClass);

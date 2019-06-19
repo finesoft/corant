@@ -14,10 +14,29 @@
 package org.corant.kernel.util;
 
 import static org.corant.Corant.instance;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ClassUtils.asClass;
+import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
+import org.corant.Corant;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.jboss.weld.bean.builtin.BeanManagerProxy;
+import org.jboss.weld.injection.InterceptionFactoryImpl;
+import org.jboss.weld.manager.api.WeldInjectionTarget;
+import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-kernel
@@ -26,6 +45,10 @@ import java.util.function.Function;
  *
  */
 public class Instances {
+
+  public static boolean isManagedBean(Object object, Annotation... qualifiers) {
+    return object != null && !instance().select(getUserClass(object), qualifiers).isUnsatisfied();
+  }
 
   public static <T> Optional<T> resolvable(Class<T> instanceClass) {
     if (instance().select(instanceClass).isResolvable()) {
@@ -39,21 +62,21 @@ public class Instances {
     shouldNotNull(consumer).accept(instance().select(instanceClass).get());
   }
 
-  public static <T> T resolvableAnyway(Class<T> instanceClass) {
-    if (instance().select(instanceClass).isResolvable()) {
+  public static <T> T resolvableAnyway(Class<T> instanceClass, Annotation... qualifiers) {
+    if (instance().select(instanceClass, qualifiers).isResolvable()) {
       return instance().select(instanceClass).get();
     } else if (instance().select(instanceClass).isUnsatisfied()) {
-      return Unmanageables.create(instanceClass).get();
+      return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
     } else {
       return null;
     }
   }
 
-  public static <T> T resolvableAnyway(T obj) {
-    if (Manageables.isManagedBean(obj)) {
+  public static <T> T resolvableAnyway(T obj, Annotation... qualifiers) {
+    if (isManagedBean(obj, qualifiers)) {
       return obj;
     } else if (obj != null) {
-      return Unmanageables.accept(obj).get();
+      return UnmanageableInstance.of(obj).produce().inject().postConstruct().get();
     }
     return null;
   }
@@ -73,5 +96,250 @@ public class Instances {
       return shouldNotNull(function).apply(instance().select(instanceClass).get());
     }
     return null;
+  }
+
+  /**
+   * corant-kernel
+   *
+   * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
+   * ApplicationScoped.
+   *
+   * When InitialContext.lookup(...), will invoke CDI.select() to retrieve the object instance.
+   *
+   * @author bingo 下午7:42:18
+   *
+   */
+  public static class NamingObjectFactory implements ObjectFactory {
+    @Override
+    public Object getObjectInstance(Object obj, Name name, Context nameCtx,
+        Hashtable<?, ?> environment) throws Exception {
+      if (obj instanceof NamingReference) {
+        NamingReference reference = (NamingReference) obj;
+        Class<?> theClass = asClass(reference.getClassName());
+        if (reference.qualifiers.length > 0) {
+          return instance().select(theClass).select(reference.qualifiers).get();
+        }
+        return instance().select(theClass).get();
+      } else {
+        throw new CorantRuntimeException(
+            "Object %s named %s is not a CDI managed bean instance reference!", obj, name);
+      }
+    }
+  }
+
+  /**
+   * corant-kernel
+   *
+   * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
+   * ApplicationScoped.
+   *
+   * @author bingo 下午7:42:38
+   *
+   */
+  public static class NamingReference extends Reference {
+
+    private static final long serialVersionUID = -7231737490239227558L;
+
+    protected Annotation[] qualifiers = new Annotation[0];
+
+    /**
+     * @param objectClass
+     * @param qualifiers
+     */
+    public NamingReference(Class<?> objectClass, Annotation... qualifiers) {
+      super(objectClass.getName(), NamingObjectFactory.class.getName(), null);
+      int length;
+      if ((length = qualifiers.length) > 0) {
+        this.qualifiers = new Annotation[length];
+        System.arraycopy(qualifiers, 0, this.qualifiers, 0, length);
+      }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      NamingReference other = (NamingReference) obj;
+      return Arrays.equals(qualifiers, other.qualifiers);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + Arrays.hashCode(qualifiers);
+      return result;
+    }
+  }
+
+  /**
+   * Hanle CDI unmanageable bean class or object
+   *
+   * corant-kernel
+   *
+   * @author bingo 下午11:02:59
+   *
+   */
+  public static class UnmanageableInstance<T> implements AutoCloseable {
+
+    private T instance;
+    private final CreationalContext<T> creationalContext;
+    private final WeldInjectionTarget<T> injectionTarget;
+    private final AnnotatedType<T> annotatedType;
+    private final T orginalInstance;
+    private final WeldManager bm;
+    private boolean disposed = false;
+
+    public UnmanageableInstance(Class<T> clazz) {
+      bm = Corant.me().getBeanManager();
+      creationalContext = bm.createCreationalContext(null);
+      annotatedType = bm.createAnnotatedType(clazz);
+      injectionTarget = bm.getInjectionTargetFactory(annotatedType).createInjectionTarget(null);
+      orginalInstance = null;
+    }
+
+    public UnmanageableInstance(T object) {
+      shouldBeFalse(isManagedBean(object));
+      bm = Corant.me().getBeanManager();
+      creationalContext = bm.createCreationalContext(null);
+      annotatedType = bm.createAnnotatedType(forceCast(object.getClass()));
+      injectionTarget =
+          bm.getInjectionTargetFactory(annotatedType).createNonProducibleInjectionTarget();
+      orginalInstance = object;
+    }
+
+    public static <T> UnmanageableInstance<T> of(Class<T> clazz) {
+      return new UnmanageableInstance<>(clazz);
+    }
+
+    public static <T> UnmanageableInstance<T> of(T object) {
+      return new UnmanageableInstance<>(object);
+    }
+
+    @Override
+    public void close() throws Exception {
+      preDestroy();
+      dispose();
+    }
+
+    /**
+     * Dispose of the instance, doing any necessary cleanup
+     *
+     * @throws IllegalStateException if dispose() is called before produce() is called
+     * @throws IllegalStateException if dispose() is called on an instance that has already been
+     *         disposed
+     * @return self
+     */
+    public UnmanageableInstance<T> dispose() {
+      if (instance == null) {
+        throw new IllegalStateException("Trying to call dispose() before produce() was called");
+      }
+      if (disposed) {
+        throw new IllegalStateException("Trying to call dispose() on already disposed instance");
+      }
+      disposed = true;
+      injectionTarget.dispose(instance);
+      creationalContext.release();
+      return this;
+    }
+
+    /**
+     * Get the instance
+     *
+     * @return the instance
+     */
+    public T get() {
+      return instance;
+    }
+
+    /**
+     * Inject the instance
+     *
+     * @throws IllegalStateException if inject() is called before produce() is called
+     * @throws IllegalStateException if inject() is called on an instance that has already been
+     *         disposed
+     * @return self
+     */
+    public UnmanageableInstance<T> inject() {
+      if (instance == null) {
+        throw new IllegalStateException("Trying to call inject() before produce() was called");
+      }
+      if (disposed) {
+        throw new IllegalStateException("Trying to call inject() on already disposed instance");
+      }
+      injectionTarget.inject(instance, creationalContext);
+      return this;
+    }
+
+    /**
+     * Call the @PostConstruct callback
+     *
+     * @throws IllegalStateException if postConstruct() is called before produce() is called
+     * @throws IllegalStateException if postConstruct() is called on an instance that has already
+     *         been disposed
+     * @return self
+     */
+    public UnmanageableInstance<T> postConstruct() {
+      if (instance == null) {
+        throw new IllegalStateException(
+            "Trying to call postConstruct() before produce() was called");
+      }
+      if (disposed) {
+        throw new IllegalStateException(
+            "Trying to call postConstruct() on already disposed instance");
+      }
+      injectionTarget.postConstruct(instance);
+      return this;
+    }
+
+    /**
+     * Call the @PreDestroy callback
+     *
+     * @throws IllegalStateException if preDestroy() is called before produce() is called
+     * @throws IllegalStateException if preDestroy() is called on an instance that has already been
+     *         disposed
+     * @return self
+     */
+    public UnmanageableInstance<T> preDestroy() {
+      if (instance == null) {
+        throw new IllegalStateException("Trying to call preDestroy() before produce() was called");
+      }
+      if (disposed) {
+        throw new IllegalStateException("Trying to call preDestroy() on already disposed instance");
+      }
+      injectionTarget.preDestroy(instance);
+      return this;
+    }
+
+    /**
+     * Create the instance
+     *
+     * @throws IllegalStateException if produce() is called on an already produced instance
+     * @throws IllegalStateException if produce() is called on an instance that has already been
+     *         disposed
+     * @return self
+     */
+    public UnmanageableInstance<T> produce() {
+      if (instance != null) {
+        throw new IllegalStateException("Trying to call produce() on already constructed instance");
+      }
+      if (disposed) {
+        throw new IllegalStateException("Trying to call produce() on an already disposed instance");
+      }
+      instance =
+          InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
+              .createInterceptedInstance(
+                  orginalInstance == null ? injectionTarget.produce(creationalContext)
+                      : orginalInstance);
+      return this;
+    }
+
   }
 }

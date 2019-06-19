@@ -27,7 +27,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.kernel.util.Manageables.NamingReference;
+import org.corant.kernel.util.Instances.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 

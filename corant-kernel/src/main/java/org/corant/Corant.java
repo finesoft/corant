@@ -14,6 +14,7 @@
 package org.corant;
 
 import static org.corant.kernel.normal.Names.applicationName;
+import static org.corant.kernel.util.Instances.resolvableAnyway;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -37,9 +38,6 @@ import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
-import org.corant.kernel.util.Manageables;
-import org.corant.kernel.util.Unmanageables;
-import org.corant.kernel.util.Unmanageables.UnmanageableInstance;
 import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.StopWatch;
 import org.jboss.weld.environment.se.Weld;
@@ -219,17 +217,6 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
-  public static <T> UnmanageableInstance<T> produceUnmanageableBean(Class<T> clazz) {
-    return Unmanageables.create(clazz);
-  }
-
-  public static <T> T resolveManageable(Class<T> manageableBeanClass, Annotation... qualifiers) {
-    if (instance().select(manageableBeanClass, qualifiers).isResolvable()) {
-      return instance().select(manageableBeanClass, qualifiers).get();
-    }
-    return null;
-  }
-
   @SuppressWarnings("resource")
   public synchronized static Corant run(Class<?> configClass, String... args) {
     return new Corant(configClass, args).start();
@@ -241,10 +228,7 @@ public class Corant implements AutoCloseable {
       return new Corant(args);
     }
     Corant inst = new Corant(configObject.getClass(), args).start();
-    if (!Manageables.isManagedBean(configObject)
-        && Corant.instance().select(configObject.getClass()).isUnsatisfied()) {
-      Corant.wrapUnmanageableBean(configObject);
-    }
+    resolvableAnyway(configObject);
     return inst;
   }
 
@@ -253,10 +237,6 @@ public class Corant implements AutoCloseable {
       return Optional.empty();
     }
     return Optional.of(me.container);
-  }
-
-  public static <T> UnmanageableInstance<T> wrapUnmanageableBean(T object) {
-    return Unmanageables.accept(object);
   }
 
   private static synchronized void setMe(Corant me) {

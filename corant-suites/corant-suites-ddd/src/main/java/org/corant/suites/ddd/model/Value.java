@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public interface Value extends Serializable {
 
@@ -57,6 +58,10 @@ public interface Value extends Serializable {
 
     public <T> T get(String key) {
       return forceCast(contents.get(key));
+    }
+
+    public <T> T get(String key, Function<Object, T> conversion) {
+      return conversion.apply(contents.get(key));
     }
 
   }

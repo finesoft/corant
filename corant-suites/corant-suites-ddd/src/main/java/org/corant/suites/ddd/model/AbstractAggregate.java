@@ -183,7 +183,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     stream.defaultWriteObject();
   }
 
-  public static class DefaultAggregateIdentifier implements AggregateIdentifier {
+  public static final class DefaultAggregateIdentifier implements AggregateIdentifier {
 
     private static final long serialVersionUID = -930151000998600572L;
 

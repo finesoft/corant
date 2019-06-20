@@ -25,6 +25,7 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -300,8 +301,12 @@ public class MongoClientConfig {
   }
 
   public MongoCredential produceCredential() {
-    return MongoCredential.createCredential(getUsername(), getAuthenticationDatabase(),
-        getPassword());
+    if (isNoneBlank(getUsername(), getAuthenticationDatabase()) && isNotEmpty(getPassword())) {
+      return MongoCredential.createCredential(getUsername(), getAuthenticationDatabase(),
+          getPassword());
+    } else {
+      return null;
+    }
   }
 
   /**

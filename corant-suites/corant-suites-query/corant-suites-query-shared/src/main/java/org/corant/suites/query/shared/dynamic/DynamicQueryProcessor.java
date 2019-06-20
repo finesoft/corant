@@ -36,6 +36,8 @@ public interface DynamicQueryProcessor<Q, E> {
 
   Map<String, Class<?>> getParamConvertSchema();
 
+  Map<String, String> getProperties();
+
   String getQueryName();
 
   Class<?> getResultClass();

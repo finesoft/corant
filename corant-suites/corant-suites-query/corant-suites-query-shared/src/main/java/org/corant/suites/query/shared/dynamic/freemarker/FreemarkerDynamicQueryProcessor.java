@@ -39,6 +39,10 @@ public abstract class FreemarkerDynamicQueryProcessor<Q, P>
 
   static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_28);
 
+  static {
+    FM_CFG.setNumberFormat("computer");
+  }
+
   protected final Template execution;
 
   /**

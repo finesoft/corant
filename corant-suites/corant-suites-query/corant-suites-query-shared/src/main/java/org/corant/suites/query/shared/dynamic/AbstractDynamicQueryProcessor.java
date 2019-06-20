@@ -86,10 +86,7 @@ public abstract class AbstractDynamicQueryProcessor<Q, P, E>
     return paramConvertSchema;
   }
 
-  /**
-   * 
-   * @return the properties
-   */
+  @Override
   public Map<String, String> getProperties() {
     return properties;
   }

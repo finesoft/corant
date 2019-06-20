@@ -47,5 +47,4 @@ public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
   public enum QueryTemplateMethodModelType {
     SP, MP, EP
   }
-
 }

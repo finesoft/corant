@@ -191,10 +191,13 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
     private final Class<?> typeCls;
 
+    private final int hash;
+
     public DefaultAggregateIdentifier(Aggregate aggregate) {
       id = requireNotNull(requireNotNull(aggregate, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
           GlobalMessageCodes.ERR_SYS);
       typeCls = requireNotNull(aggregate.getClass(), GlobalMessageCodes.ERR_SYS);
+      hash = calHash(id, typeCls);
     }
 
     @Override
@@ -244,11 +247,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
     @Override
     public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (id == null ? 0 : id.hashCode());
-      result = prime * result + (typeCls == null ? 0 : typeCls.hashCode());
-      return result;
+      return hash;
     }
 
     @Override
@@ -256,5 +255,12 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
       return "{\"typeCls\":\"" + typeCls + "\",\"id\":" + id + "}";
     }
 
+    int calHash(Serializable id, Class<?> typeCls) {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (id == null ? 0 : id.hashCode());
+      result = prime * result + (typeCls == null ? 0 : typeCls.hashCode());
+      return result;
+    }
   }
 }

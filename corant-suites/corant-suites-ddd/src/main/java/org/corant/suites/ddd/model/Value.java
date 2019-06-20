@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.io.Serializable;
 import java.time.temporal.Temporal;
@@ -31,13 +32,15 @@ public interface Value extends Serializable {
    * @author bingo 下午2:59:24
    *
    */
-  public static class SimpleValueMap implements Value {
+  public static final class SimpleValueMap implements Value {
 
     private static final long serialVersionUID = -3001346370986339895L;
 
     public static final SimpleValueMap EMPTY_INST = new SimpleValueMap(null);
 
-    protected final Map<String, Object> contents;
+    private final Map<String, Object> contents;
+
+    private final int hash;
 
     protected SimpleValueMap(Map<String, Object> contents) {
       super();
@@ -46,6 +49,7 @@ public interface Value extends Serializable {
       } else {
         this.contents = Collections.emptyMap();
       }
+      hash = 31 + (contents == null ? 0 : contents.hashCode());
     }
 
     public static SimpleValueMapBuilder builder() {
@@ -56,12 +60,43 @@ public interface Value extends Serializable {
       return EMPTY_INST;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      SimpleValueMap other = (SimpleValueMap) obj;
+      if (contents == null) {
+        if (other.contents != null) {
+          return false;
+        }
+      } else if (!contents.equals(other.contents)) {
+        return false;
+      }
+      return true;
+    }
+
     public <T> T get(String key) {
       return forceCast(contents.get(key));
     }
 
     public <T> T get(String key, Function<Object, T> conversion) {
       return conversion.apply(contents.get(key));
+    }
+
+    public <T> T get(String key, T altVal) {
+      return defaultObject(forceCast(contents.get(key)), altVal);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash;
     }
 
   }
@@ -73,7 +108,7 @@ public interface Value extends Serializable {
    * @author bingo 下午2:59:29
    *
    */
-  public static class SimpleValueMapBuilder {
+  public static final class SimpleValueMapBuilder {
 
     final Map<String, Object> contents = new HashMap<>();
 

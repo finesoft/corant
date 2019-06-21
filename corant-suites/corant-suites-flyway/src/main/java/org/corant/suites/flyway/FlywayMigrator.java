@@ -127,8 +127,8 @@ public class FlywayMigrator {
 
   protected boolean checkLocation(String location) {
     try {
-      return Resources.fromClassPath(location)
-          .anyMatch(r -> r.getResourceName().toLowerCase(Locale.ROOT).endsWith(".sql"));
+      return Resources.from(location)
+          .anyMatch(r -> r.getLocation().toLowerCase(Locale.ROOT).endsWith(".sql"));
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
           () -> String.format("Can't find any migrated data from location %s", location));

@@ -127,8 +127,8 @@ public class JPAConfig {
   private static Map<String, PersistenceUnitInfoMetaData> generateFromXml() {
     Map<String, PersistenceUnitInfoMetaData> map = new LinkedHashMap<>();
     try {
-      Resources.fromClassPath(DFLT_PU_XML_LOCATION).map(r -> r.getUrl())
-          .map(PersistenceXmlParser::parse).forEach(m -> {
+      Resources.from(DFLT_PU_XML_LOCATION).map(r -> r.getUrl()).map(PersistenceXmlParser::parse)
+          .forEach(m -> {
             map.putAll(m);
           });
     } catch (IOException e) {

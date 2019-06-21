@@ -48,17 +48,13 @@ public class Resources {
 
   public static <T extends Resource> Stream<T> from(String path) throws IOException {
     if (isNotBlank(path)) {
-      Optional<SourceType> ost = SourceType.decide(path);
-      if (ost.isPresent()) {
-        SourceType st = ost.get();
-        if (st == SourceType.FILE_SYSTEM) {
-          return forceCast(fromFileSystem(path));
-        } else if (st == SourceType.URL) {
-          return forceCast(fromUrl(path));
-        } else {
-          // default
-          return forceCast(fromClassPath(path));
-        }
+      SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);
+      if (st == SourceType.FILE_SYSTEM) {
+        return forceCast(fromFileSystem(path));
+      } else if (st == SourceType.URL) {
+        return forceCast(fromUrl(path));
+      } else {
+        return forceCast(fromClassPath(path));// default from class path;
       }
     }
     return Stream.empty();
@@ -431,6 +427,7 @@ public class Resources {
       return sourceType;
     }
 
+    @Override
     public final URL getUrl() {
       return classLoader.getResource(location);
     }
@@ -587,6 +584,15 @@ public class Resources {
     }
 
     @Override
+    public URL getUrl() {
+      try {
+        return file.toURI().toURL();
+      } catch (MalformedURLException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -598,23 +604,25 @@ public class Resources {
     public InputStream openStream() throws IOException {
       return new FileInputStream(file);
     }
-
   }
 
   public static class InputStreamResource implements Resource {
     final String location;
     final SourceType sourceType = SourceType.UNKNOW;
     final InputStream inputStream;
+    final URL url;
 
     public InputStreamResource(String location, InputStream inputStream) {
       super();
       this.location = location;
       this.inputStream = inputStream;
+      url = null;
     }
 
     public InputStreamResource(URL url) throws MalformedURLException, IOException {
       location = url.toExternalForm();
       inputStream = url.openStream();
+      this.url = url;
     }
 
     @Override
@@ -625,6 +633,11 @@ public class Resources {
     @Override
     public SourceType getSourceType() {
       return sourceType;
+    }
+
+    @Override
+    public URL getUrl() {
+      return url;
     }
 
     @Override
@@ -643,6 +656,8 @@ public class Resources {
     }
 
     SourceType getSourceType();
+
+    URL getUrl();
 
     InputStream openStream() throws IOException;
   }
@@ -731,6 +746,11 @@ public class Resources {
     @Override
     public SourceType getSourceType() {
       return sourceType;
+    }
+
+    @Override
+    public URL getUrl() {
+      return url;
     }
 
     @Override

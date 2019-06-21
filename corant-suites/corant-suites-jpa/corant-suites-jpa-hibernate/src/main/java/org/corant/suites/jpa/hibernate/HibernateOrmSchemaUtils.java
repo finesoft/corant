@@ -98,8 +98,8 @@ public class HibernateOrmSchemaUtils {
   public static void stdoutPersistJpaOrmXml(String pkg, String endWith, Consumer<String> out) {
     try (Corant corant = prepare()) {
       String usePkg = replace(pkg, ".", "/");
-      Resources.fromClassPath(usePkg).filter(f -> f.getResourceName().endsWith(endWith))
-          .map(f -> f.getResourceName()).sorted(String::compareTo).forEach(s -> {
+      Resources.from(usePkg).filter(f -> f.getLocation().endsWith(endWith))
+          .map(f -> f.getLocation()).sorted(String::compareTo).forEach(s -> {
             if (s.contains(usePkg) && s.endsWith(endWith)) {
               out.accept(s.substring(s.indexOf(usePkg)));
             }

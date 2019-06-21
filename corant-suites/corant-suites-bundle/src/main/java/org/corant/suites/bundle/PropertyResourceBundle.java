@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.corant.kernel.normal.Defaults;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
+import org.corant.shared.util.Resources.Resource;
 
 /**
  * corant-suites-bundle
@@ -56,8 +56,8 @@ public class PropertyResourceBundle extends ResourceBundle {
   private String baseBundleName;
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public PropertyResourceBundle(ClassPathResource fo) throws IOException {
-    baseBundleName = fo.getResourceName();
+  public PropertyResourceBundle(Resource fo) throws IOException {
+    baseBundleName = fo.getLocation();
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
     Properties properties = new Properties();
@@ -67,21 +67,21 @@ public class PropertyResourceBundle extends ResourceBundle {
     lookup = new HashMap(properties);
   }
 
-  public static Map<String, PropertyResourceBundle> getBundles(String classPath,
-      Predicate<ClassPathResource> fs) {
+  public static Map<String, PropertyResourceBundle> getBundles(String path,
+      Predicate<Resource> fs) {
     Map<String, PropertyResourceBundle> map = new HashMap<>();
     try {
-      Resources.fromClassPath(classPath).filter(fs).forEach((fo) -> {
+      Resources.from(path).filter(fs).forEach((fo) -> {
         try {
-          map.putIfAbsent(fo.getResourceName(), new PropertyResourceBundle(fo));
+          map.putIfAbsent(fo.getLocation(), new PropertyResourceBundle(fo));
         } catch (IOException e) {
-          logger.log(Level.WARNING, e, () -> String
-              .format("Can not load property resource bundle %s", fo.getResourceName()));
+          logger.log(Level.WARNING, e,
+              () -> String.format("Can not load property resource bundle %s", fo.getLocation()));
         }
       });
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not load property resource bundles from paths %s", classPath));
+          () -> String.format("Can not load property resource bundles from paths %s", path));
     }
     return map;
   }

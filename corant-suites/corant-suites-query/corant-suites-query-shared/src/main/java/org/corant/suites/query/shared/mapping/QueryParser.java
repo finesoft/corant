@@ -17,7 +17,6 @@ import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
+import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.StringUtils;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.xml.sax.ErrorHandler;
@@ -55,8 +55,8 @@ public class QueryParser {
     List<QueryMapping> qmList = new ArrayList<>();
     final QueryParserErrorHandler errHdl = new QueryParserErrorHandler();
     final SAXParserFactory factory = createSAXParserFactory();
-    final Map<String, URL> fileMap = getQueryMappingFiles(pathExpress);
-    for (Entry<String, URL> entry : fileMap.entrySet()) {
+    final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpress);
+    for (Entry<String, Resource> entry : fileMap.entrySet()) {
       logger.info(() -> String.format("Parse query mapping file %s.", entry.getKey()));
       try (InputStream is = entry.getValue().openStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
@@ -81,11 +81,11 @@ public class QueryParser {
     return factory;
   }
 
-  Map<String, URL> getQueryMappingFiles(String pathExpress) {
-    Map<String, URL> map = new HashMap<>();
+  Map<String, Resource> getQueryMappingFiles(String pathExpress) {
+    Map<String, Resource> map = new HashMap<>();
     setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
       try {
-        Resources.fromClassPath(path).forEach(f -> map.put(f.getResourceName(), f.getUrl()));
+        Resources.from(path).forEach(f -> map.put(f.getLocation(), f));
       } catch (Exception e) {
         throw new QueryRuntimeException(e);
       }

@@ -23,7 +23,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleManageEvent;
 import org.corant.suites.ddd.unitwork.JPAPersistenceService;
@@ -48,7 +47,6 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   JPAPersistenceService persistenceService;
 
   @Override
-  @Transactional
   public void on(@Observes(
       during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION + 1000) LifecycleManageEvent e) {
     if (e.getSource() != null) {

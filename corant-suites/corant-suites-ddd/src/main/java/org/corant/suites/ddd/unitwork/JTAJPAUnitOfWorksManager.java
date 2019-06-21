@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.unitwork;
 
 import static org.corant.Corant.instance;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
@@ -98,7 +99,8 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Override
   public JTAJPAUnitOfWork getCurrentUnitOfWork() {
     try {
-      final Transaction curTx = getTransactionManager().getTransaction();
+      final Transaction curTx = shouldNotNull(getTransactionManager().getTransaction(),
+          "For now we only support transactional unit of work.");
       final JTAJPAUnitOfWork curUow = uows.computeIfAbsent(wrapUintOfWorksKey(curTx), (key) -> {
         try {
           logger.fine(() -> "Register an new unit of work with the current transacion context.");

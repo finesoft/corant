@@ -15,10 +15,13 @@ package org.corant.suites.query.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.getSize;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.MapUtils.getOpt;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
+import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.query.shared.QueryUtils.convert;
@@ -27,6 +30,7 @@ import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +49,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.CollationAlternate;
+import com.mongodb.client.model.CollationCaseFirst;
+import com.mongodb.client.model.CollationMaxVariable;
+import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.CountOptions;
 
 /**
  * corant-suites-query
@@ -65,6 +75,22 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
   public static final String PRO_KEY_RETURN_KEY = "mg.returnKey";
   public static final String PRO_KEY_COMMENT = "mg.comment";
   public static final String PRO_KEY_SHOW_RECORDID = "mg.showRecordId";
+
+  public static final String PRO_KEY_CO = "mg.count-options";
+  public static final String PRO_KEY_CO_LIMIT = PRO_KEY_CO + ".limit";
+  public static final String PRO_KEY_CO_SKIP = PRO_KEY_CO + ".skip";
+  public static final String PRO_KEY_CO_MAX_TIMEMS = PRO_KEY_CO + ".maxTimeMS";
+
+  public static final String PRO_KEY_CO_COLA = PRO_KEY_CO + ".collation";
+  public static final String PRO_KEY_CO_COLA_LOCALE = PRO_KEY_CO_COLA + ".locale";
+  public static final String PRO_KEY_CO_COLA_CASE_LEVEL = PRO_KEY_CO_COLA + ".caseLevel";
+  public static final String PRO_KEY_CO_COLA_CASE_FIRST = PRO_KEY_CO_COLA + ".caseFirst";
+  public static final String PRO_KEY_CO_COLA_STRENGTH = PRO_KEY_CO_COLA + ".strength";
+  public static final String PRO_KEY_CO_COLA_NUMORD = PRO_KEY_CO_COLA + ".numericOrdering";
+  public static final String PRO_KEY_CO_COLA_ALTERNATE = PRO_KEY_CO_COLA + ".alternate";
+  public static final String PRO_KEY_CO_COLA_MAXVAR = PRO_KEY_CO_COLA + ".maxVariable";
+  public static final String PRO_KEY_CO_COLA_NORMA = PRO_KEY_CO_COLA + ".normalization";
+  public static final String PRO_KEY_CO_COLA_BACKWORDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Inject
   protected MgInLineNamedQueryResolver<String, Map<String, Object>> resolver;
@@ -251,18 +277,61 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     getOptMapObject(pros, PRO_KEY_RETURN_KEY, ConversionUtils::toBoolean).ifPresent(fi::returnKey);
     getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, ConversionUtils::toBoolean)
         .ifPresent(fi::showRecordId);
+    resovleCollation(querier).ifPresent(fi::collation);
     return fi;
   }
 
   protected long queryCount(MgQuerier querier) {
+    CountOptions co = new CountOptions();
+    if (querier.getScript().get(MgOperator.HINT) != null) {
+      co.hint(querier.getScript().get(MgOperator.HINT));
+    }
+    Map<String, String> pros = querier.getProperties();
+    getOptMapObject(pros, PRO_KEY_CO_LIMIT, ConversionUtils::toInteger).ifPresent(co::limit);
+    getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, ConversionUtils::toLong)
+        .ifPresent(t -> co.maxTime(t, TimeUnit.MILLISECONDS));
+    getOptMapObject(pros, PRO_KEY_CO_SKIP, ConversionUtils::toInteger).ifPresent(co::skip);
+    resovleCollation(querier).ifPresent(co::collation);
+    if (co.getLimit() <= 0) {
+      co.limit(max(resolveCountOptionsLimit(), 1));
+    }
     Bson bson = querier.getScript().getOrDefault(MgOperator.FILTER, new BasicDBObject());
     return getDataBase().getCollection(resolveCollectionName(querier.getName()))
-        .countDocuments(bson);
+        .countDocuments(bson, co);
   }
 
   protected String resolveCollectionName(String q) {
     int pos = 0;
     shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
     return q.substring(0, pos);
+  }
+
+  protected int resolveCountOptionsLimit() {
+    return 1024;
+  }
+
+  protected Optional<Collation> resovleCollation(MgQuerier querier) {
+    Map<String, String> pros = querier.getProperties();
+    if (pros.keySet().stream().anyMatch(t -> t.startsWith(PRO_KEY_CO_COLA))) {
+      Collation.Builder b = Collation.builder();
+      getOptMapObject(pros, PRO_KEY_CO_COLA_ALTERNATE, t -> toEnum(t, CollationAlternate.class))
+          .ifPresent(b::collationAlternate);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWORDS, t -> toBoolean(t)).ifPresent(b::backwards);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_FIRST, t -> toEnum(t, CollationCaseFirst.class))
+          .ifPresent(b::collationCaseFirst);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, t -> toBoolean(t)).ifPresent(b::caseLevel);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_LOCALE, t -> ConversionUtils.toString(t))
+          .ifPresent(b::locale);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_MAXVAR, t -> toEnum(t, CollationMaxVariable.class))
+          .ifPresent(b::collationMaxVariable);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NORMA, t -> toBoolean(t)).ifPresent(b::normalization);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NUMORD, t -> toBoolean(t))
+          .ifPresent(b::numericOrdering);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_STRENGTH, t -> toEnum(t, CollationStrength.class))
+          .ifPresent(b::collationStrength);
+      return Optional.of(b.build());
+    }
+
+    return Optional.empty();
   }
 }

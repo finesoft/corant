@@ -13,6 +13,10 @@
  */
 package org.corant.suites.mongodb;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 
 /**
@@ -22,6 +26,21 @@ import com.mongodb.MongoClientOptions.Builder;
  *
  */
 public interface MongoClientConfigurator {
+
+  static Map<String, Method> createSettingsMap() {
+    Map<String, Method> settingsMap = new HashMap<>();
+    Method[] methods = MongoClientOptions.Builder.class.getDeclaredMethods();
+    for (Method method : methods) {
+      if (method.getParameterTypes().length == 1) {
+        Class<?> parameterType = method.getParameterTypes()[0];
+        if (String.class.equals(parameterType) || int.class.equals(parameterType)
+            || boolean.class.equals(parameterType)) {
+          settingsMap.put(method.getName(), method);
+        }
+      }
+    }
+    return settingsMap;
+  }
 
   void configure(Builder optionsBuilder);
 }

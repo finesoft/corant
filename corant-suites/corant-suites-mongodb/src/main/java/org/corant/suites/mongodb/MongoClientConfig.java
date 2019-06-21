@@ -18,15 +18,17 @@ import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,9 +41,10 @@ import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.normal.Names;
 import org.corant.kernel.normal.Names.JndiNames;
-import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.eclipse.microprofile.config.Config;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
@@ -256,48 +259,31 @@ public class MongoClientConfig {
   }
 
   public Builder produceBuiler() {
-    Builder builder = new Builder();
-    builder.applicationName(applicationName);
-    getOptMapObject(options, "connectionsPerHost", ConversionUtils::toInteger)
-        .ifPresent(builder::connectionsPerHost);
-    getOptMapObject(options, "connectTimeout", ConversionUtils::toInteger)
-        .ifPresent(builder::connectTimeout);
-    getOptMapObject(options, "cursorFinalizerEnabled", ConversionUtils::toBoolean)
-        .ifPresent(builder::cursorFinalizerEnabled);
-    getOptMapObject(options, "heartbeatConnectTimeout", ConversionUtils::toInteger)
-        .ifPresent(builder::heartbeatConnectTimeout);
-    getOptMapObject(options, "heartbeatFrequency", ConversionUtils::toInteger)
-        .ifPresent(builder::heartbeatFrequency);
-    getOptMapObject(options, "heartbeatSocketTimeout", ConversionUtils::toInteger)
-        .ifPresent(builder::heartbeatSocketTimeout);
-    getOptMapObject(options, "localThreshold", ConversionUtils::toInteger)
-        .ifPresent(builder::localThreshold);
-    getOptMapObject(options, "maxConnectionIdleTime", ConversionUtils::toInteger)
-        .ifPresent(builder::maxConnectionIdleTime);
-    getOptMapObject(options, "maxConnectionLifeTime", ConversionUtils::toInteger)
-        .ifPresent(builder::maxConnectionLifeTime);
-    getOptMapObject(options, "maxWaitTime", ConversionUtils::toInteger)
-        .ifPresent(builder::maxWaitTime);
-    getOptMapObject(options, "minConnectionsPerHost", ConversionUtils::toInteger)
-        .ifPresent(builder::minConnectionsPerHost);
-    getOptMapObject(options, "minHeartbeatFrequency", ConversionUtils::toInteger)
-        .ifPresent(builder::minHeartbeatFrequency);
-    getOptMapObject(options, "requiredReplicaSetName", ConversionUtils::toString)
-        .ifPresent(builder::requiredReplicaSetName);
-    getOptMapObject(options, "retryWrites", ConversionUtils::toBoolean)
-        .ifPresent(builder::retryWrites);
-    getOptMapObject(options, "serverSelectionTimeout", ConversionUtils::toInteger)
-        .ifPresent(builder::serverSelectionTimeout);
-    getOptMapObject(options, "socketTimeout", ConversionUtils::toInteger)
-        .ifPresent(builder::socketTimeout);
-    getOptMapObject(options, "sslEnabled", ConversionUtils::toBoolean)
-        .ifPresent(builder::sslEnabled);
-    getOptMapObject(options, "sslInvalidHostNameAllowed", ConversionUtils::toBoolean)
-        .ifPresent(builder::sslInvalidHostNameAllowed);
-    getOptMapObject(options, "threadsAllowedToBlockForConnectionMultiplier",
-        ConversionUtils::toInteger)
-            .ifPresent(builder::threadsAllowedToBlockForConnectionMultiplier);
-    return builder;
+    Map<String, Method> settingsMap = MongoClientConfigurator.createSettingsMap();
+    MongoClientOptions.Builder optionsBuilder = MongoClientOptions.builder();
+    for (Map.Entry<String, Method> entry : settingsMap.entrySet()) {
+      Class<?> type = entry.getValue().getParameterTypes()[0];
+      if (int.class.equals(type)) {
+        type = Integer.class;
+      }
+      if (boolean.class.equals(type)) {
+        type = Boolean.class;
+      }
+      if (String.class.equals(type)) {
+        type = String.class;
+      }
+      Object value = toObject(options.get(entry.getKey()), type);
+      if (value == null) {
+        continue;
+      }
+      try {
+        entry.getValue().invoke(optionsBuilder, value);
+      } catch (InvocationTargetException | IllegalAccessException e) {
+        throw new CorantRuntimeException("Unable to build mongo client options [%s]",
+            entry.getKey());
+      }
+    }
+    return optionsBuilder;
   }
 
   public MongoCredential produceCredential() {

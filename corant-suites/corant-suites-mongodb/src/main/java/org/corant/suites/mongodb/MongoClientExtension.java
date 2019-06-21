@@ -289,7 +289,8 @@ public class MongoClientExtension implements Extension {
     MongoCredential credential = cfg.produceCredential();
     Builder builder = cfg.produceBuiler();
     if (!beans.select(MongoClientConfigurator.class).isUnsatisfied()) {
-      beans.select(MongoClientConfigurator.class).forEach(h -> h.configure(builder));
+      beans.select(MongoClientConfigurator.class, Qualifiers.resolveNamed(cfg.getName()))
+          .forEach(h -> h.configure(builder));
     }
     MongoClientOptions clientOptions = builder.build();
     MongoClient mc = credential == null ? new MongoClient(seeds, clientOptions)

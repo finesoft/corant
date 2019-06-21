@@ -13,8 +13,11 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.File;
@@ -29,13 +32,17 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
  * Origin of code: org.apache.commons.io.FileUtils
@@ -182,6 +189,63 @@ public class FileUtils {
     } catch (IOException e) {
     }
     return null;
+  }
+
+  public static String resolveGlobPathPrefix(String globExpress) {
+    String path = parseGlobPathPrefix(globExpress);
+    try {
+      return new File(path).getCanonicalPath();
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static List<File> selectFiles(String directoryName, Predicate<File> p) {
+    final File directory = new File(directoryName);
+    final Predicate<File> up = p == null ? (t) -> true : p;
+    List<File> files = new ArrayList<>();
+    if (directory.isFile() && up.test(directory)) {
+      files.add(directory);
+      return files;
+    }
+    List<File> tmp = new LinkedList<>();
+    tmp.addAll(listOf(directory.listFiles()));
+    while (!tmp.isEmpty()) {
+      File f = tmp.remove(0);
+      if (f.isFile() && up.test(f)) {
+        files.add(f);
+      } else if (f.isDirectory()) {
+        tmp.addAll(listOf(f.listFiles()));
+      }
+    }
+    return files;
+  }
+
+  static String parseGlobPathPrefix(String globExpress) {
+    String usePath = shouldNotBlank(globExpress).replaceAll("\\\\", "/");
+    int gidx = -1;
+    int fidx = -1;
+    int len = usePath.length();
+    for (int i = 0; i < len; i++) {
+      if (GlobPatterns.isGlobChar(usePath.charAt(i))) {
+        gidx = i;
+        break;
+      }
+    }
+    shouldBeFalse(gidx == 0);
+    if (gidx == -1) {
+      return usePath;
+    } else {
+      usePath = usePath.substring(0, gidx);
+      fidx = usePath.lastIndexOf('/');
+      shouldBeFalse(fidx == 0);
+      if (fidx == -1) {
+        return usePath;
+      } else {
+        usePath = usePath.substring(0, fidx);
+        return usePath + "/";
+      }
+    }
   }
 
 }

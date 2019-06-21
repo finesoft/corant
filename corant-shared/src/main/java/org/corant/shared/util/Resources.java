@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.PathUtils.GlobMatcher;
 
 /**
  * corant-shared
@@ -135,8 +136,22 @@ public class Resources {
    * @return
    * @throws IOException fromFileSystem
    */
-  public static FileSystemResource fromFileSystem(String path) throws IOException {
-    return new FileSystemResource(shouldNotNull(SourceType.FILE_SYSTEM.resolve(path)));
+  public static Stream<FileSystemResource> fromFileSystem(String path) throws IOException {
+    String usePath = SourceType.FILE_SYSTEM.resolve(path);
+    if (GlobMatcher.hasGlobChar(usePath)) {
+      String resolvedPath = FileUtils.resolveGlobPathPrefix(usePath);
+      final GlobMatcher m = new GlobMatcher(false, true, usePath.replace('\\', '/'));
+      return FileUtils.selectFiles(resolvedPath, (f) -> {
+        try {
+          return m.test(f.getCanonicalPath().replace('\\', '/'));
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+      }).stream().map(FileSystemResource::new);
+    } else {
+      return FileUtils.selectFiles(usePath, null).stream().map(FileSystemResource::new);
+    }
+
   }
 
   /**
@@ -279,7 +294,7 @@ public class Resources {
    * @param path
    * @return tryFromFileSystem
    */
-  public static FileSystemResource tryFromFileSystem(String path) {
+  public static Stream<FileSystemResource> tryFromFileSystem(String path) {
     try {
       return fromFileSystem(path);
     } catch (IOException e) {

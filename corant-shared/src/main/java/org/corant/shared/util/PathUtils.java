@@ -84,6 +84,12 @@ public class PathUtils {
       return new GlobMatcher(false, false, globExpress);
     }
 
+    public static GlobMatcher of(String globExpress, boolean ignoreCase) {
+      return new GlobMatcher(
+          System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window"),
+          ignoreCase, globExpress);
+    }
+
     public static GlobMatcher ofDos(String globExpress) {
       return new GlobMatcher(true, true, globExpress);
     }

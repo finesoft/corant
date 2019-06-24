@@ -14,46 +14,40 @@
 package org.corant.suites.concurrency;
 
 import java.util.Map;
-import javax.enterprise.concurrent.ContextService;
+import org.glassfish.enterprise.concurrent.ContextServiceImpl;
+import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
+import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
 
 /**
  * corant-suites-concurrency
  *
- * @author bingo 下午8:54:34
+ * @author bingo 上午10:18:55
  *
  */
-public abstract class AbstractContextService implements ContextService {
+public class DefaultContextService extends ContextServiceImpl {
 
-  @Override
-  public Object createContextualProxy(Object instance, Class<?>... interfaces) {
-    // TODO Auto-generated method stub
-    return null;
+  private static final long serialVersionUID = -2380561596716132958L;
+
+  /**
+   * @param name
+   * @param contextSetupProvider
+   * @param transactionSetupProvider
+   */
+  public DefaultContextService(String name, ContextSetupProvider contextSetupProvider,
+      TransactionSetupProvider transactionSetupProvider) {
+    super(name, contextSetupProvider, transactionSetupProvider);
   }
 
   @Override
   public Object createContextualProxy(Object instance, Map<String, String> executionProperties,
       Class<?>... interfaces) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <T> T createContextualProxy(T instance, Class<T> intf) {
-    // TODO Auto-generated method stub
-    return null;
+    return super.createContextualProxy(instance, executionProperties, interfaces);
   }
 
   @Override
   public <T> T createContextualProxy(T instance, Map<String, String> executionProperties,
       Class<T> intf) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Map<String, String> getExecutionProperties(Object contextualProxy) {
-    // TODO Auto-generated method stub
-    return null;
+    return super.createContextualProxy(instance, executionProperties, intf);
   }
 
 }

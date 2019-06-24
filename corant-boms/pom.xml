@@ -32,6 +32,7 @@
 		<version.javax.ws.rs-api>2.1</version.javax.ws.rs-api>
 		<version.javax.validation-api>2.0.1.Final</version.javax.validation-api>
 		<version.javax.cdi-api>2.0</version.javax.cdi-api>
+		<version.javax.enterprise.concurrent>1.1</version.javax.enterprise.concurrent>
 		<version.weld>3.1.1.Final</version.weld>
 
 		<version.commons-lang3>3.8</version.commons-lang3>
@@ -776,6 +777,19 @@
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>${version.javax.validation-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.enterprise.concurrent</groupId>
+				<artifactId>javax.enterprise.concurrent-api</artifactId>
+				<version>${version.javax.enterprise.concurrent}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<!-- glass fish -->
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.enterprise.concurrent</artifactId>
+				<version>${version.javax.enterprise.concurrent}</version>
 			</dependency>
 
 			<!-- Testing -->

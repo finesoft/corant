@@ -13,18 +13,27 @@
  */
 package org.corant.suites.concurrency;
 
-import javax.enterprise.concurrent.ManagedThreadFactory;
+import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
+import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
 
 /**
  * corant-suites-concurrency
- * 
- * @author bingo 下午8:56:31
+ *
+ * @author bingo 上午10:26:12
  *
  */
-public abstract class AbstractManagedThreadFactory implements ManagedThreadFactory {
+public class DefaultTransactionSetupProvider implements TransactionSetupProvider {
+
+  private static final long serialVersionUID = 1194633142409438228L;
 
   @Override
-  public Thread newThread(Runnable r) {
+  public void afterProxyMethod(TransactionHandle handle, String transactionExecutionProperty) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public TransactionHandle beforeProxyMethod(String transactionExecutionProperty) {
     // TODO Auto-generated method stub
     return null;
   }

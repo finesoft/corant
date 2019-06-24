@@ -13,40 +13,21 @@
  */
 package org.corant.suites.concurrency;
 
-import javax.enterprise.concurrent.ManageableThread;
+import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**
  * corant-suites-concurrency
  *
- * @author bingo 下午7:02:00
+ * @author bingo 上午10:24:41
  *
  */
-public abstract class AbstractManagedThread extends Thread implements ManageableThread {
+public class DefaultManagedThreadFactory extends ManagedThreadFactoryImpl {
 
-  volatile boolean shutdown = false;
-  final long startTime = System.currentTimeMillis();
-
-  public AbstractManagedThread(Runnable target) {
-    super(target);
+  /**
+   * @param name
+   */
+  public DefaultManagedThreadFactory(String name) {
+    super(name);
   }
-
-  public long getStartTime() {
-    return startTime;
-  }
-
-  @Override
-  public boolean isShutdown() {
-    return shutdown;
-  }
-
-  public void shutdown() {
-    shutdown = true;
-  }
-
-  abstract String getTaskIdentityName();
-
-  abstract long getTaskRunTime(long now);
-
-  abstract boolean isTaskHung(long now);
 
 }

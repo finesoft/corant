@@ -26,6 +26,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.corant.Corant;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -45,8 +46,8 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 @JPAProvider("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJPAOrmProvider extends AbstractJPAProvider {
 
-  static final Map<String, Object> PROPERTIES =
-      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJTAPlatform());
+  static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
+      new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
   @Inject
   Instance<DataSource> datasources;

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManagerFactory;
+import org.corant.Corant;
 import org.corant.suites.jpa.shared.AbstractJPAProvider;
 import org.corant.suites.jpa.shared.inject.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -34,8 +35,8 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @JPAProvider("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider extends AbstractJPAProvider {
 
-  static final Map<String, Object> PROPERTIES =
-      mapOf(AvailableSettings.JTA_PLATFORM, new NarayanaJTAPlatform());
+  static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
+      new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,

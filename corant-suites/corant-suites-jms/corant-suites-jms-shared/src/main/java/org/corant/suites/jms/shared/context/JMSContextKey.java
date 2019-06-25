@@ -32,9 +32,9 @@ import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
-import org.corant.suites.jms.shared.Transactions;
 
 /**
  * corant-suites-jms-artemis
@@ -72,18 +72,24 @@ public class JMSContextKey implements Serializable {
   }
 
   public JMSContext create() throws JMSException {
-    if (isXa() && Transactions.isInTransaction()) {
-      XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
-      Transactions.registerXAResource(ctx.getXAResource());
-      logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
-      return ctx;
-    } else {
-      if (sessionMode != null && Transactions.isInTransaction()) {
-        JMSContext ctx = connectionFactory().createContext(sessionMode);
-        // FIXME will be changed in next iteration
-        return registerToLocaleTransactionSynchronization(ctx);
+    try {
+      if (isXa() && TransactionService.isCurrentTransactionActive()) {
+        XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
+        TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
+        logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
+        return ctx;
+      } else {
+        if (sessionMode != null && TransactionService.isCurrentTransactionActive()) {
+          JMSContext ctx = connectionFactory().createContext(sessionMode);
+          // FIXME will be changed in next iteration
+          return registerToLocaleTransactionSynchronization(ctx);
+        }
+        return connectionFactory().createContext();
       }
-      return connectionFactory().createContext();
+    } catch (Exception ex) {
+      JMSException je = new JMSException(ex.getMessage());
+      je.setLinkedException(ex);
+      throw je;
     }
   }
 
@@ -141,7 +147,7 @@ public class JMSContextKey implements Serializable {
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
     if (sessionMode == JMSContext.SESSION_TRANSACTED) {
       try {
-        Transactions.registerSynchronization(new Synchronization() {
+        TransactionService.registerSynchronizationToCurrentTransaction(new Synchronization() {
           @Override
           public void afterCompletion(int status) {
             if (status != Status.STATUS_COMMITTED) {
@@ -158,7 +164,7 @@ public class JMSContextKey implements Serializable {
             }
           }
         });
-      } catch (JMSException e) {
+      } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
     }

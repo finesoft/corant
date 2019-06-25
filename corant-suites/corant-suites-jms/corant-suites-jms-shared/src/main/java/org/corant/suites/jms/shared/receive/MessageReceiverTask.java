@@ -36,14 +36,14 @@ import javax.jms.XAConnectionFactory;
 import javax.jms.XASession;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
+import javax.transaction.xa.XAResource;
 import org.corant.Corant;
 import org.corant.config.ComparableConfigurator;
+import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
-import org.corant.suites.jms.shared.Transactions;
 
 /**
  * corant-suites-jms-shared
@@ -234,8 +234,8 @@ public class MessageReceiverTask implements Runnable {
     logger.log(Level.SEVERE, e,
         () -> String.format("Message receiver task occurred error, %s", metaData));
     try {
-      if (xa && Transactions.isInTransaction()) {
-        Transactions.transactionManager().rollback();
+      if (xa && TransactionService.isCurrentTransactionActive()) {
+        TransactionService.transactionManager().rollback();
         logErr("8-x. Rollback message receive task JTA transaction when occurred error, [%s]",
             metaData);
       } else if (session != null) {
@@ -259,7 +259,7 @@ public class MessageReceiverTask implements Runnable {
       SecurityException, IllegalStateException, SystemException, JMSException {
     try {
       if (xa) {
-        Transactions.transactionManager().commit();
+        TransactionService.transactionManager().commit();
         logFin("7-1. Commit message receive task JTA transaction, [%s]", metaData);
       } else if (metaData.getAcknowledge() == Session.SESSION_TRANSACTED) {
         session.commit();
@@ -279,20 +279,20 @@ public class MessageReceiverTask implements Runnable {
     }
   }
 
-  protected void preConsume() throws NotSupportedException, SystemException, JMSException {
+  protected void preConsume() throws JMSException {
     try {
       if (xa) {
-        Transactions.transactionManager().begin();
-        Transactions.registerXAResource(((XASession) session).getXAResource());
+        TransactionService.transactionManager().begin();
+        TransactionService
+            .enlistXAResourceToCurrentTransaction(((XASession) session).getXAResource());
         logFin("4-1. Message receive task JTA transaction began, [%s]", metaData);
       }
-    } catch (NotSupportedException | SystemException te) {
-      logErr("4-x. Initialize message receive task JTA environment occurred error, [%s]", metaData);
-      throw te;
-    } catch (JMSException je) {
+    } catch (Exception te) {
       logErr(
           "4-x. Enlist message receive task session xa resource to JTA environment occurred error, [%s]",
           metaData);
+      JMSException je = new JMSException(te.getMessage());
+      je.setLinkedException(te);
       throw je;
     }
   }
@@ -335,8 +335,9 @@ public class MessageReceiverTask implements Runnable {
   private void closeSessionIfNecessary(boolean forceClose) throws JMSException {
     if ((metaData.getCacheLevel() <= 1 || forceClose) && session != null) {
       try {
-        if (xa && Transactions.isInTransaction()) {
-          Transactions.deregisterXAResource(((XASession) session).getXAResource());
+        if (xa && TransactionService.isCurrentTransactionActive()) {
+          TransactionService.delistXAResourceFromCurrentTransaction(
+              ((XASession) session).getXAResource(), XAResource.TMSUCCESS);
         }
         session.close();
         logFin("9-2. Close message receive task session, [%s]", metaData);

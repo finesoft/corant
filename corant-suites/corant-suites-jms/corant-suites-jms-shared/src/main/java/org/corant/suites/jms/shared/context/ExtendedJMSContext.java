@@ -20,7 +20,6 @@ import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.JMSProducer;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -33,8 +32,9 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.XAJMSContext;
+import javax.transaction.xa.XAResource;
+import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.Transactions;
 import org.corant.suites.jms.shared.context.JMSContextManager.RequestScopeContextManager;
 import org.corant.suites.jms.shared.context.JMSContextManager.TransactionScopeContextManager;
 
@@ -107,10 +107,11 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   public void close() {
     JMSContext ctx = context();
     // When manually called close() then delistResource from current transaction if necessarily
-    if (ctx != null && key.isXa() && Transactions.isInTransaction()) {
+    if (ctx != null && key.isXa() && TransactionService.isCurrentTransactionActive()) {
       try {
-        Transactions.deregisterXAResource(XAJMSContext.class.cast(ctx).getXAResource());
-      } catch (JMSException e) {
+        TransactionService.delistXAResourceFromCurrentTransaction(
+            XAJMSContext.class.cast(ctx).getXAResource(), XAResource.TMSUCCESS);
+      } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
     }
@@ -322,7 +323,7 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   }
 
   private synchronized JMSContext context() {
-    if (Transactions.isInTransaction()) {
+    if (TransactionService.isCurrentTransactionActive()) {
       return txCtxManager.compute(key);
     }
     return reqCtxManager.compute(key);

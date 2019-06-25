@@ -13,16 +13,16 @@
  */
 package org.corant.suites.jta.narayana;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
-import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
+import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jta.shared.TransactionService;
 import org.jboss.weld.transaction.spi.TransactionServices;
-import com.arjuna.ats.jta.TransactionManager;
 
 /**
  * corant-suites-jta-narayana
@@ -30,20 +30,15 @@ import com.arjuna.ats.jta.TransactionManager;
  * @author bingo 下午7:47:50
  *
  */
-public class NarayanaTransactionServices implements TransactionServices, TransactionService {
+public class NarayanaTransactionServices implements TransactionServices {
 
   @Override
   public void cleanup() {
     // NOOP
   }
 
-  @Override
-  public Transaction getTransaction() {
-    try {
-      return com.arjuna.ats.jta.TransactionManager.transactionManager().getTransaction();
-    } catch (SystemException e) {
-      throw new CorantRuntimeException(e);
-    }
+  public TransactionManager getTransactionManager() {
+    return com.arjuna.ats.jta.TransactionManager.transactionManager();
   }
 
   @Override
@@ -54,10 +49,7 @@ public class NarayanaTransactionServices implements TransactionServices, Transac
   @Override
   public boolean isTransactionActive() {
     try {
-      int status = TransactionManager.transactionManager().getStatus();
-      return status == Status.STATUS_ACTIVE || status == Status.STATUS_COMMITTING
-          || status == Status.STATUS_MARKED_ROLLBACK || status == Status.STATUS_PREPARED
-          || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
+      return getTransactionManager().getStatus() != Status.STATUS_NO_TRANSACTION;
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }
@@ -66,11 +58,24 @@ public class NarayanaTransactionServices implements TransactionServices, Transac
   @Override
   public void registerSynchronization(Synchronization synchronizedObserver) {
     try {
-      TransactionManager.transactionManager().getTransaction()
-          .registerSynchronization(synchronizedObserver);
+      getTransactionManager().getTransaction().registerSynchronization(synchronizedObserver);
     } catch (IllegalStateException | RollbackException | SystemException e) {
       throw new CorantRuntimeException(e);
     }
   }
 
+  @ApplicationScoped
+  public static class NarayanaTransactionService implements TransactionService {
+
+    @Override
+    public TransactionManager getTransactionManager() {
+      return com.arjuna.ats.jta.TransactionManager.transactionManager();
+    }
+
+    @Override
+    public UserTransaction getUserTransaction() {
+      return com.arjuna.ats.jta.UserTransaction.userTransaction();
+    }
+
+  }
 }

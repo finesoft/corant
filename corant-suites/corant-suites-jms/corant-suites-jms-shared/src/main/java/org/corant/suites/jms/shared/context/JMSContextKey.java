@@ -26,7 +26,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.JMSSessionMode;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
@@ -71,7 +70,7 @@ public class JMSContextKey implements Serializable {
     return result;
   }
 
-  public JMSContext create() throws JMSException {
+  public JMSContext create() {
     try {
       if (isXa() && TransactionService.isCurrentTransactionActive()) {
         XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
@@ -87,9 +86,9 @@ public class JMSContextKey implements Serializable {
         return connectionFactory().createContext();
       }
     } catch (Exception ex) {
-      JMSException je = new JMSException(ex.getMessage());
-      je.setLinkedException(ex);
-      throw je;
+      // JMSException je = new JMSException(ex.getMessage());
+      // je.setLinkedException(ex);
+      throw new CorantRuntimeException(ex);
     }
   }
 

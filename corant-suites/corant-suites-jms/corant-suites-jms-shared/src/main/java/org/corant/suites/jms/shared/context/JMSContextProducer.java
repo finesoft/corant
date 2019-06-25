@@ -19,8 +19,8 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
-import org.corant.suites.jms.shared.context.JMSContextManager.RequestScopeContextManager;
-import org.corant.suites.jms.shared.context.JMSContextManager.TransactionScopeContextManager;
+import org.corant.suites.jms.shared.context.JMSContextManager.RsJMSContextManager;
+import org.corant.suites.jms.shared.context.JMSContextManager.TsJMSContextManager;
 
 /**
  * corant-suites-jms-artemis
@@ -33,37 +33,37 @@ public class JMSContextProducer {
 
   @Inject
   @Any
-  RequestScopeContextManager requestScopeContextManager;
+  RsJMSContextManager rsJMSContextManager;
 
   @Inject
   @Any
-  TransactionScopeContextManager transactionScopeContextManager;
+  TsJMSContextManager tsJMSContextManager;
 
   public JMSContext create(final String connectionFactoryId, final int sessionMode) {
     return new ExtendedJMSContext(new JMSContextKey(connectionFactoryId, sessionMode),
-        getRequestScopeContextManager(), getTransactionScopeContextManager());
+        getRsJMSContextManager(), getTsJMSContextManager());
   }
 
   /**
    *
-   * @return the requestScopeContextManager
+   * @return the rsJMSContextManager
    */
-  public RequestScopeContextManager getRequestScopeContextManager() {
-    return requestScopeContextManager;
+  public RsJMSContextManager getRsJMSContextManager() {
+    return rsJMSContextManager;
   }
 
   /**
    *
-   * @return the transactionScopeContextManager
+   * @return the tsJMSContextManager
    */
-  public TransactionScopeContextManager getTransactionScopeContextManager() {
-    return transactionScopeContextManager;
+  public TsJMSContextManager getTsJMSContextManager() {
+    return tsJMSContextManager;
   }
 
   @Produces
   JMSContext produce(final InjectionPoint ip) {
-    return new ExtendedJMSContext(JMSContextKey.of(ip), getRequestScopeContextManager(),
-        getTransactionScopeContextManager());
+    return new ExtendedJMSContext(JMSContextKey.of(ip), getRsJMSContextManager(),
+        getTsJMSContextManager());
   }
 
 }

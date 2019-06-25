@@ -13,20 +13,11 @@
  */
 package org.corant.suites.jms.shared.context;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
 import javax.transaction.TransactionScoped;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.kernel.service.ComponentManager.AbstractComponentManager;
 
 /**
  * corant-suites-jms-artemis
@@ -34,67 +25,34 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午5:15:28
  *
  */
-public abstract class JMSContextManager implements Serializable {
+public abstract class JMSContextManager
+    extends AbstractComponentManager<JMSContextKey, JMSContext> {
 
-  private static final long serialVersionUID = 9142893804159414507L;
+  private static final long serialVersionUID = 4705029747035011785L;
 
-  final Logger logger = Logger.getLogger(getClass().getName());
-
-  final transient Map<JMSContextKey, JMSContext> contexts = new ConcurrentHashMap<>();
-
-  public JMSContext compute(final JMSContextKey key) {
-    return contexts.computeIfAbsent(key, k -> {
+  @Override
+  protected void preDestroy() {
+    JMSRuntimeException jre = null;
+    for (final JMSContext c : components.values()) {
       try {
-        return k.create();
-      } catch (JMSException e) {
-        throw new CorantRuntimeException(e);
+        logger.fine(() -> String.format("Close JMSContext %s", c));
+        c.close();
+      } catch (final JMSRuntimeException e) {
+        jre = e;
       }
-    });
-  }
-
-  public JMSContext get(final JMSContextKey key) {
-    return contexts.get(key);
-  }
-
-  public void put(final JMSContextKey key, final JMSContext c) {
-    contexts.put(key, c);
-  }
-
-  @PreDestroy
-  void destroy() {
-    if (contexts != null) {
-      JMSRuntimeException jre = null;
-      for (final JMSContext c : contexts.values()) {
-        try {
-          logger.fine(() -> String.format("Close JMSContext %s", c));
-          c.close();
-        } catch (final JMSRuntimeException e) {
-          jre = e;
-        }
-      }
-      if (jre != null) {
-        throw jre;
-      }
+    }
+    if (jre != null) {
+      throw jre;
     }
   }
 
-  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    stream.defaultReadObject();
-  }
-
-  private void writeObject(ObjectOutputStream stream) throws IOException {
-    stream.defaultWriteObject();
-  }
-
   @RequestScoped
-  public static class RequestScopeContextManager extends JMSContextManager {
+  public static class RsJMSContextManager extends JMSContextManager {
+    private static final long serialVersionUID = -3536990470379061678L;
 
-    private static final long serialVersionUID = 1256597268320899576L;
   }
-
   @TransactionScoped
-  public static class TransactionScopeContextManager extends JMSContextManager {
-
-    private static final long serialVersionUID = 5615193709079057726L;
+  public static class TsJMSContextManager extends JMSContextManager {
+    private static final long serialVersionUID = -3536990470379061678L;
   }
 }

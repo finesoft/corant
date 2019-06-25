@@ -35,8 +35,8 @@ import javax.jms.XAJMSContext;
 import javax.transaction.xa.XAResource;
 import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.context.JMSContextManager.RequestScopeContextManager;
-import org.corant.suites.jms.shared.context.JMSContextManager.TransactionScopeContextManager;
+import org.corant.suites.jms.shared.context.JMSContextManager.RsJMSContextManager;
+import org.corant.suites.jms.shared.context.JMSContextManager.TsJMSContextManager;
 
 /**
  * corant-suites-jms-artemis
@@ -81,17 +81,17 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   final JMSContextKey key;
 
-  final RequestScopeContextManager reqCtxManager;
+  final RsJMSContextManager reqCtxManager;
 
-  final TransactionScopeContextManager txCtxManager;
+  final TsJMSContextManager txCtxManager;
 
   /**
    * @param key
    * @param reqCtxManager
    * @param txCtxManager
    */
-  public ExtendedJMSContext(JMSContextKey key, RequestScopeContextManager reqCtxManager,
-      TransactionScopeContextManager txCtxManager) {
+  public ExtendedJMSContext(JMSContextKey key, RsJMSContextManager reqCtxManager,
+      TsJMSContextManager txCtxManager) {
     super();
     this.key = key;
     this.reqCtxManager = reqCtxManager;
@@ -324,8 +324,8 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   private synchronized JMSContext context() {
     if (TransactionService.isCurrentTransactionActive()) {
-      return txCtxManager.compute(key);
+      return txCtxManager.computeIfAbsent(key, JMSContextKey::create);
     }
-    return reqCtxManager.compute(key);
+    return reqCtxManager.computeIfAbsent(key, JMSContextKey::create);
   }
 }

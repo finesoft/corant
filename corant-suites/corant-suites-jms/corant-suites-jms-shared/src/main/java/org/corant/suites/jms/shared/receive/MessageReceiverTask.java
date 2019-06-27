@@ -116,11 +116,11 @@ public class MessageReceiverTask implements Runnable {
   @Override
   public void run() {
     Exception ex = null;
+    if (!preRun()) {
+      tryThreadSleep(metaData.getReceiveTimeout());
+      return;
+    }
     try {
-      if (!preRun()) {
-        tryThreadSleep(metaData.getReceiveTimeout());
-        return;
-      }
       logFin("Start message receive task.");
       if (initialize()) {
         int rt = metaData.getReceiveThreshold();

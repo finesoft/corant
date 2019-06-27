@@ -66,6 +66,8 @@ public class MessageReceiverTask implements Runnable {
   protected final ConnectionFactory connectionFactory;
   protected final MessageListener messageListener;
   protected final boolean xa;
+  protected final int receiveThreshold;
+  protected final long receiveTimeout;
 
   // worker object
   protected volatile Connection connection;
@@ -106,6 +108,8 @@ public class MessageReceiverTask implements Runnable {
     failureDuration = metaData.getFailureDuration();
     breakedDuration = metaData.getBreakedDuration();
     tryThreshold = metaData.getTryThreshold();
+    receiveThreshold = metaData.getReceiveThreshold();
+    receiveTimeout = metaData.getReceiveTimeout();
     logFin("Create message receive task for %s", metaData);
   }
 
@@ -117,13 +121,13 @@ public class MessageReceiverTask implements Runnable {
   public void run() {
     Exception ex = null;
     if (!preRun()) {
-      tryThreadSleep(metaData.getReceiveTimeout());
+      tryThreadSleep(max(500L, receiveTimeout));
       return;
     }
     try {
       logFin("Start message receive task.");
       if (initialize()) {
-        int rt = metaData.getReceiveThreshold();
+        int rt = receiveThreshold;
         while (--rt >= 0) {
           logFin("Begin message consuming.");
           preConsume();

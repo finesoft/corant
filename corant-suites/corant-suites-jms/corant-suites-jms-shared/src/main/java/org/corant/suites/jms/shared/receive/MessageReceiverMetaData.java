@@ -83,8 +83,8 @@ public class MessageReceiverMetaData {
     tryThreshold = max(2, ann.tryThreshold());
     failureDuration = isBlank(ann.failureDuration()) ? Duration.ofMinutes(5)
         : Duration.parse(ann.failureDuration());
-    breakedDuration = isBlank(ann.failureDuration()) ? Duration.ofMinutes(15)
-        : Duration.parse(ann.failureDuration());
+    breakedDuration = isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
+        : Duration.parse(ann.breakedDuration());
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -271,9 +271,13 @@ public class MessageReceiverMetaData {
 
   @Override
   public String toString() {
-    return "MessageReceiverMetaData [method=" + method + ", connectionFactoryId="
-        + connectionFactoryId + ", destination=" + destination + ", multicast=" + multicast
-        + ", selector=" + selector + ", cacheLevel=" + cacheLevel + "]";
+    return "MessageReceiverMetaData [acknowledge=" + acknowledge + ", clientId=" + clientId
+        + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination
+        + ", multicast=" + multicast + ", selector=" + selector + ", subscriptionDurable="
+        + subscriptionDurable + ", type=" + type + ", cacheLevel=" + cacheLevel
+        + ", receiveTimeout=" + receiveTimeout + ", receiveThreshold=" + receiveThreshold
+        + ", failureThreshold=" + failureThreshold + ", tryThreshold=" + tryThreshold
+        + ", failureDuration=" + failureDuration + ", breakedDuration=" + breakedDuration + "]";
   }
 
   ConnectionFactory connectionFactory() {

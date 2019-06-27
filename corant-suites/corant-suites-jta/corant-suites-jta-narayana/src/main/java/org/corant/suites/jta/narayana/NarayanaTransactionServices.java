@@ -13,7 +13,12 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.kernel.util.Instances.resolvable;
+import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.select;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -23,6 +28,7 @@ import javax.transaction.UserTransaction;
 import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jboss.weld.transaction.spi.TransactionServices;
+import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 
 /**
  * corant-suites-jta-narayana
@@ -38,12 +44,12 @@ public class NarayanaTransactionServices implements TransactionServices {
   }
 
   public TransactionManager getTransactionManager() {
-    return com.arjuna.ats.jta.TransactionManager.transactionManager();
+    return resolvableApply(NarayanaTransactionService.class, ts -> ts.getTransactionManager());
   }
 
   @Override
   public UserTransaction getUserTransaction() {
-    return com.arjuna.ats.jta.UserTransaction.userTransaction();
+    return resolvableApply(NarayanaTransactionService.class, ts -> ts.getUserTransaction());
   }
 
   @Override
@@ -69,12 +75,20 @@ public class NarayanaTransactionServices implements TransactionServices {
 
     @Override
     public TransactionManager getTransactionManager() {
-      return com.arjuna.ats.jta.TransactionManager.transactionManager();
+      return resolvable(TransactionManager.class)
+          .orElse(com.arjuna.ats.jta.TransactionManager.transactionManager());
     }
 
     @Override
     public UserTransaction getUserTransaction() {
-      return com.arjuna.ats.jta.UserTransaction.userTransaction();
+      final Instance<JTAEnvironmentBean> jtaEnvironmentBeans =
+          shouldNotNull(select(JTAEnvironmentBean.class));
+      if (jtaEnvironmentBeans.isUnsatisfied()) {
+        return com.arjuna.ats.jta.common.jtaPropertyManager.getJTAEnvironmentBean()
+            .getUserTransaction();
+      } else {
+        return jtaEnvironmentBeans.get().getUserTransaction();
+      }
     }
 
   }

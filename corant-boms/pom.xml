@@ -71,12 +71,12 @@
 
 		<version.netty>4.1.34.Final</version.netty>
 		<version.xnio>3.3.8.Final</version.xnio>
-		<version.tomcat>9.0.19</version.tomcat>
+		<version.tomcat>9.0.20</version.tomcat>
 		<version.undertow>2.0.21.Final</version.undertow>
 		<version.resteasy>3.6.3.Final</version.resteasy>
 		<version.com.fasterxml.jackson>2.9.9</version.com.fasterxml.jackson>
 
-		<version.artemis>2.7.0</version.artemis>
+		<version.artemis>2.9.0</version.artemis>
 		<version.keycloak>6.0.1</version.keycloak>
 
 		<version.HikariCP>3.2.0</version.HikariCP>

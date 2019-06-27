@@ -46,12 +46,20 @@ public @interface MessageReceive {
   int acknowledge() default Session.CLIENT_ACKNOWLEDGE;
 
   /**
+   * The breaked duration, if exceeds then start try mode.
+   *
+   * @return breakedDuration
+   */
+  String breakedDuration() default "PT5M";
+
+  /**
    * Marks whether a connection or session is cached.
    *
    * <pre>
    * Value of 0 represents Not cache
    * Value of 1 represents cache connection
    * Value of 2 represents cache session
+   * Value of 3 represents cache message consumer
    * </pre>
    *
    * @return cacheLevel
@@ -81,12 +89,18 @@ public @interface MessageReceive {
   String[] destinations() default {};
 
   /**
-   * The maximum number of JMSExceptions, and once they are exceeded, the connection and session are
-   * re-established.
+   * Monitor the failure time interval
    *
-   * @return maxJmsExceptions
+   * @return failureDuration
    */
-  int maxJmsExceptions() default 16;
+  String failureDuration() default "PT5M";
+
+  /**
+   * The failure threshold, if exceeds then start break mode
+   *
+   * @return failureThreshold
+   */
+  int failureThreshold() default 16;
 
   /**
    * Marks whether a queue or topic.
@@ -106,9 +120,9 @@ public @interface MessageReceive {
    *
    * Default value is 1.
    *
-   * @return numberOfReceivePerExecution
+   * @return receiveThreshold
    */
-  int numberOfReceivePerExecution() default 1;
+  int receiveThreshold() default 1;
 
   /**
    * Internal MessageConsumer receive timeout in millseconds
@@ -130,6 +144,14 @@ public @interface MessageReceive {
    * @return subscriptionDurable
    */
   boolean subscriptionDurable() default false;
+
+  /**
+   * the try threshold, used to recover from break mode and enter try mode. In try mode, if any
+   * error occurs, go straight into break mode.
+   *
+   * @return tryThreshold
+   */
+  int tryThreshold() default 4;
 
   /**
    * TODO

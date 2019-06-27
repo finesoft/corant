@@ -144,6 +144,14 @@ public class ObjectUtils {
     return supplied;
   }
 
+  public static void tryThreadSleep(Long ms) {
+    try {
+      Thread.sleep(ms);
+    } catch (InterruptedException e) {
+      // Noop! we are try....
+    }
+  }
+
   public static class Pair<L, R> implements Map.Entry<L, R>, Serializable {
     private static final long serialVersionUID = -474294448204498274L;
     private final L left;

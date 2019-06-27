@@ -33,6 +33,7 @@ import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -147,6 +148,26 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
       activeMQConnectionFactory.setUser(cfg.getUsername());
       activeMQConnectionFactory.setPassword(cfg.getPassword());
     }
+    cfg.getProperties().forEach((m, v) -> {
+      if (v.isPresent()) {
+        try {
+          Class<?> parameterType = m.getParameterTypes()[0];
+          if (String.class.equals(parameterType)) {
+            m.invoke(activeMQConnectionFactory, ConversionUtils.toString(v.get()));
+          } else if (int.class.equals(parameterType)) {
+            m.invoke(activeMQConnectionFactory, ConversionUtils.toInteger(v.get()));
+          } else if (long.class.equals(parameterType)) {
+            m.invoke(activeMQConnectionFactory, ConversionUtils.toLong(v.get()));
+          } else if (boolean.class.equals(parameterType)) {
+            m.invoke(activeMQConnectionFactory, ConversionUtils.toBoolean(v.get()));
+          } else if (double.class.equals(parameterType)) {
+            m.invoke(activeMQConnectionFactory, ConversionUtils.toDouble(v.get()));
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
     // The CF will probably be GCed since it was injected, so we disable the finalize check
     return activeMQConnectionFactory.disableFinalizeChecks();
   }

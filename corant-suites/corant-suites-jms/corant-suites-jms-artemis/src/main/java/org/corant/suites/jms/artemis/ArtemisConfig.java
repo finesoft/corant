@@ -23,15 +23,21 @@ import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.corant.shared.util.MethodUtils;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
@@ -55,11 +61,17 @@ public class ArtemisConfig extends AbstractJMSConfig {
   public static final String ATM_HA = ".ha";
   public static final String ATM_HOST_PORTS = ".host-ports";
 
+  private static final Map<String, Method> propertiesMaps = new HashMap<>();
+  static {
+    propertiesMaps.putAll(createSettingsMap());
+  }
+
   private String username;
   private String password;
   private String url;
   private Set<Pair<String, Integer>> hostPorts = new LinkedHashSet<>();
   private boolean ha;
+  private Map<Method, Optional<?>> properties = new LinkedHashMap<>();
 
   protected ArtemisConfig() {}
 
@@ -109,6 +121,23 @@ public class ArtemisConfig extends AbstractJMSConfig {
     return artMisCfgs;
   }
 
+  static Map<String, Method> createSettingsMap() {
+    Map<String, Method> settingsMap = new HashMap<>();
+    Method[] methods = ActiveMQConnectionFactory.class.getDeclaredMethods();
+    for (Method method : methods) {
+      if (MethodUtils.isSetter(method)) {
+        Class<?> parameterType = method.getParameterTypes()[0];
+        if (String.class.equals(parameterType) || int.class.equals(parameterType)
+            || long.class.equals(parameterType) || double.class.equals(parameterType)
+            || boolean.class.equals(parameterType)) {
+          settingsMap.put("." + method.getName().substring(3, 4).toLowerCase(Locale.ENGLISH)
+              + method.getName().substring(4), method);
+        }
+      }
+    }
+    return settingsMap;
+  }
+
   static Set<String> defaultPropertyNames() {
     String dfltPrefix = ATM_PREFIX.substring(0, ATM_PREFIX.length() - 1);
     Set<String> names = new LinkedHashSet<>();
@@ -122,6 +151,9 @@ public class ArtemisConfig extends AbstractJMSConfig {
     names.add(dfltPrefix + ATM_URL);
     names.add(dfltPrefix + ATM_HOST_PORTS);
     names.add(dfltPrefix + ATM_HA);
+    propertiesMaps.keySet().forEach(s -> {
+      names.add(dfltPrefix + s);
+    });
     return names;
   }
 
@@ -161,6 +193,12 @@ public class ArtemisConfig extends AbstractJMSConfig {
         config.getOptionalValue(pn, Long.class).ifPresent(cfg::setReceiveTaskInitialDelayMs);
       } else if (pn.endsWith(JMS_REC_TSK_THREADS)) {
         config.getOptionalValue(pn, Integer.class).ifPresent(cfg::setReceiveTaskThreads);
+      } else {
+        propertiesMaps.forEach((k, m) -> {
+          if (pn.endsWith(k)) {
+            cfg.properties.put(m, config.getOptionalValue(pn, m.getParameterTypes()[0]));
+          }
+        });
       }
     });
     if (isNotBlank(cfg.getUrl()) || isNotEmpty(cfg.getHostPorts())) {
@@ -195,6 +233,10 @@ public class ArtemisConfig extends AbstractJMSConfig {
 
   public boolean isHa() {
     return ha;
+  }
+
+  protected Map<Method, Optional<?>> getProperties() {
+    return Collections.unmodifiableMap(properties);
   }
 
   protected void setHa(boolean ha) {

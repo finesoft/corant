@@ -19,6 +19,7 @@ import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -60,6 +61,18 @@ public class MethodUtils {
     return inexactMatch;
   }
 
+  public static boolean isGetter(Method method) {
+    if (Modifier.isPublic(method.getModifiers()) && method.getParameterTypes().length == 0) {
+      if (method.getName().matches("^get[A-Z].*") && !method.getReturnType().equals(void.class)) {
+        return true;
+      }
+      if (method.getName().matches("^is[A-Z].*") && method.getReturnType().equals(boolean.class)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
       final boolean autoboxing) {
     Class<?>[] useClsArr = classArray == null ? new Class<?>[0] : classArray;
@@ -73,6 +86,11 @@ public class MethodUtils {
       }
     }
     return true;
+  }
+
+  public static boolean isSetter(Method method) {
+    return Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(void.class)
+        && method.getParameterTypes().length == 1 && method.getName().matches("^set[A-Z].*");
   }
 
   public static MethodSignature signature(Method method) {

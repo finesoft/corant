@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -83,6 +84,10 @@ public class Instances {
 
   public static <T, R> R resolvableApply(Class<T> instanceClass, Function<T, R> function) {
     return shouldNotNull(function).apply(instance().select(instanceClass).get());
+  }
+
+  public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
+    return instance().select(instanceClass, qualifiers);
   }
 
   public static <T> void tryResolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {

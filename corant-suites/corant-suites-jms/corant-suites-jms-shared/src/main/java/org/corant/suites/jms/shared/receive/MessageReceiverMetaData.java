@@ -13,19 +13,27 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.time.Duration;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.jms.ConnectionFactory;
+import org.corant.config.ComparableConfigurator;
+import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
+import org.corant.suites.jms.shared.context.JMSExceptionListener;
 
 /**
  * corant-suites-jms-shared
@@ -46,8 +54,11 @@ public class MessageReceiverMetaData {
   private final Class<?> type;
   private final int cacheLevel;
   private final long receiveTimeout;
-  private final int numberOfReceivePerExecution;
-  private final int maxJmsExceptions;
+  private final int receiveThreshold;
+  private final int failureThreshold;
+  private final int tryThreshold;
+  private final Duration failureDuration;
+  private final Duration breakedDuration;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
     this.method = shouldNotNull(method);
@@ -67,8 +78,13 @@ public class MessageReceiverMetaData {
     type = defaultObject(ann.type(), String.class);
     cacheLevel = ann.cacheLevel();
     receiveTimeout = ann.receiveTimeout();
-    numberOfReceivePerExecution = max(1, ann.numberOfReceivePerExecution());
-    maxJmsExceptions = max(4, ann.maxJmsExceptions());
+    receiveThreshold = max(1, ann.receiveThreshold());
+    failureThreshold = max(4, ann.failureThreshold());
+    tryThreshold = max(2, ann.tryThreshold());
+    failureDuration = isBlank(ann.failureDuration()) ? Duration.ofMinutes(5)
+        : Duration.parse(ann.failureDuration());
+    breakedDuration = isBlank(ann.failureDuration()) ? Duration.ofMinutes(15)
+        : Duration.parse(ann.failureDuration());
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -132,6 +148,14 @@ public class MessageReceiverMetaData {
 
   /**
    *
+   * @return the breakedDuration
+   */
+  public Duration getBreakedDuration() {
+    return breakedDuration;
+  }
+
+  /**
+   *
    * @return the cacheLevel
    */
   public int getCacheLevel() {
@@ -162,8 +186,16 @@ public class MessageReceiverMetaData {
     return destination;
   }
 
-  public int getMaxJmsExceptions() {
-    return maxJmsExceptions;
+  /**
+   *
+   * @return the failureDuration
+   */
+  public Duration getFailureDuration() {
+    return failureDuration;
+  }
+
+  public int getFailureThreshold() {
+    return failureThreshold;
   }
 
   /**
@@ -176,10 +208,10 @@ public class MessageReceiverMetaData {
 
   /**
    *
-   * @return the numberOfReceivePerExecution
+   * @return the receiveThreshold
    */
-  public int getNumberOfReceivePerExecution() {
-    return numberOfReceivePerExecution;
+  public int getReceiveThreshold() {
+    return receiveThreshold;
   }
 
   public long getReceiveTimeout() {
@@ -192,6 +224,14 @@ public class MessageReceiverMetaData {
    */
   public String getSelector() {
     return selector;
+  }
+
+  /**
+   *
+   * @return the tryThreshold
+   */
+  public int getTryThreshold() {
+    return tryThreshold;
   }
 
   /**
@@ -236,4 +276,17 @@ public class MessageReceiverMetaData {
         + ", selector=" + selector + ", cacheLevel=" + cacheLevel + "]";
   }
 
+  ConnectionFactory connectionFactory() {
+    return AbstractJMSExtension.retriveConnectionFactory(getConnectionFactoryId());
+
+  }
+
+  Optional<JMSExceptionListener> exceptionListener() {
+    return instance().select(JMSExceptionListener.class).stream()
+        .sorted(ComparableConfigurator::compare).findFirst();
+  }
+
+  boolean xa() {
+    return AbstractJMSExtension.retrieveConfig(getConnectionFactoryId()).isXa();
+  }
 }

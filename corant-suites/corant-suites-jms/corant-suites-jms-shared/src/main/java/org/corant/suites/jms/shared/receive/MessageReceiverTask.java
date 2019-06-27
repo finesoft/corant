@@ -121,7 +121,7 @@ public class MessageReceiverTask implements Runnable {
   public void run() {
     Exception ex = null;
     if (!preRun()) {
-      tryThreadSleep(max(500L, receiveTimeout));
+      tryThreadSleep(max(1000L, receiveTimeout));
       return;
     }
     try {

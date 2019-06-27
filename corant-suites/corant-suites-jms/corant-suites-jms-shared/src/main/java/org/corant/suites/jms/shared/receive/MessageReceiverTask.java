@@ -132,7 +132,7 @@ public class MessageReceiverTask implements Runnable {
           if (message == null) {
             break;
           }
-          logFin("End message consuming.\n");
+          logFin("End message consuming.");
         }
       }
     } catch (Exception e) {

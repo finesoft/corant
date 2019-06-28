@@ -113,9 +113,9 @@ public class MessageReceiverTask implements Runnable {
 
   protected static void log(Level l, Throwable t, String msgOrFmt, Object... params) {
     if (params.length > 0) {
-      logger.log(l, String.format(msgOrFmt, params), t);
+      logger.log(l, t, () -> String.format(msgOrFmt, params));
     } else {
-      logger.log(l, String.format(msgOrFmt), t);
+      logger.log(l, t, () -> msgOrFmt);
     }
   }
 

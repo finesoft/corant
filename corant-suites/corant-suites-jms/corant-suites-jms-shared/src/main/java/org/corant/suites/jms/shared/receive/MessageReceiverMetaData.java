@@ -57,7 +57,7 @@ public class MessageReceiverMetaData {
   private final int receiveThreshold;
   private final int failureThreshold;
   private final int tryThreshold;
-  private final Duration failureDuration;
+  private final long loopIntervalMs;
   private final Duration breakedDuration;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
@@ -81,10 +81,9 @@ public class MessageReceiverMetaData {
     receiveThreshold = max(1, ann.receiveThreshold());
     failureThreshold = max(4, ann.failureThreshold());
     tryThreshold = max(2, ann.tryThreshold());
-    failureDuration = isBlank(ann.failureDuration()) ? Duration.ofMinutes(5)
-        : Duration.parse(ann.failureDuration());
-    breakedDuration = isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
-        : Duration.parse(ann.breakedDuration());
+    loopIntervalMs = max(500L, ann.loopIntervalMs());
+    breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
+        : Duration.parse(ann.breakedDuration()), Duration.ofSeconds(8L));
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -186,16 +185,16 @@ public class MessageReceiverMetaData {
     return destination;
   }
 
-  /**
-   *
-   * @return the failureDuration
-   */
-  public Duration getFailureDuration() {
-    return failureDuration;
-  }
-
   public int getFailureThreshold() {
     return failureThreshold;
+  }
+
+  /**
+   *
+   * @return the loopIntervalMs
+   */
+  public long getLoopIntervalMs() {
+    return loopIntervalMs;
   }
 
   /**
@@ -271,13 +270,14 @@ public class MessageReceiverMetaData {
 
   @Override
   public String toString() {
-    return "MessageReceiverMetaData [acknowledge=" + acknowledge + ", clientId=" + clientId
-        + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination
-        + ", multicast=" + multicast + ", selector=" + selector + ", subscriptionDurable="
-        + subscriptionDurable + ", type=" + type + ", cacheLevel=" + cacheLevel
-        + ", receiveTimeout=" + receiveTimeout + ", receiveThreshold=" + receiveThreshold
-        + ", failureThreshold=" + failureThreshold + ", tryThreshold=" + tryThreshold
-        + ", failureDuration=" + failureDuration + ", breakedDuration=" + breakedDuration + "]";
+    return "MessageReceiverMetaData [method=" + method + ", acknowledge=" + acknowledge
+        + ", clientId=" + clientId + ", connectionFactoryId=" + connectionFactoryId
+        + ", destination=" + destination + ", multicast=" + multicast + ", selector=" + selector
+        + ", subscriptionDurable=" + subscriptionDurable + ", type=" + type + ", cacheLevel="
+        + cacheLevel + ", receiveTimeout=" + receiveTimeout + ", receiveThreshold="
+        + receiveThreshold + ", failureThreshold=" + failureThreshold + ", tryThreshold="
+        + tryThreshold + ", loopIntervalMs=" + loopIntervalMs + ", breakedDuration="
+        + breakedDuration + "]";
   }
 
   ConnectionFactory connectionFactory() {

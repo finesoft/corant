@@ -62,12 +62,13 @@ public class MessageReceiverTask implements Runnable {
   static final Logger logger = Logger.getLogger(MessageReceiverTask.class.getName());
 
   // config
-  protected final MessageReceiverMetaData metaData;
+  protected final MessageReceiverMetaData meta;
   protected final ConnectionFactory connectionFactory;
   protected final MessageListener messageListener;
   protected final boolean xa;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
+  protected final long loopInterval;
 
   // worker object
   protected volatile Connection connection;
@@ -81,36 +82,41 @@ public class MessageReceiverTask implements Runnable {
 
   // controll circuit break
   protected final int failureThreshold;
-  protected final int tryThreshold;
-  protected final Duration failureDuration;
   protected final Duration breakedDuration;
+  protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
   protected volatile boolean lastExecutionSuccessfully = true;
   protected volatile long breakedTimePoint;
-  protected volatile long firstFailureTimePoint;
 
   protected final AtomicInteger failureCounter = new AtomicInteger(0);
-  protected final AtomicInteger continuousFailureCounter = new AtomicInteger(0);
   protected final AtomicInteger tryCounter = new AtomicInteger(0);
 
   /**
-   * @param metaData
+   * @param meta
    */
   protected MessageReceiverTask(MessageReceiverMetaData metaData) {
     super();
-    this.metaData = metaData;
+    meta = metaData;
     xa = metaData.xa();
     connectionFactory = metaData.connectionFactory();
     messageListener = new MessageHandler(metaData.getMethod());
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
-    failureDuration = metaData.getFailureDuration();
     breakedDuration = metaData.getBreakedDuration();
     tryThreshold = metaData.getTryThreshold();
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
-    logFin("Create message receive task for %s", metaData);
+    loopInterval = metaData.getLoopIntervalMs();
+    log(Level.FINE, null, "Create message receive task for %s", metaData);
+  }
+
+  protected static void log(Level l, Throwable t, String msgOrFmt, Object... params) {
+    if (params.length > 0) {
+      logger.log(l, String.format(msgOrFmt, params), t);
+    } else {
+      logger.log(l, String.format(msgOrFmt), t);
+    }
   }
 
   public boolean isInProgress() {
@@ -121,22 +127,22 @@ public class MessageReceiverTask implements Runnable {
   public void run() {
     Exception ex = null;
     if (!preRun()) {
-      tryThreadSleep(max(1000L, receiveTimeout));
+      tryThreadSleep(loopInterval);
       return;
     }
     try {
-      logFin("Start message receive task.");
+      log(Level.FINE, null, "Start message receive task.");
       if (initialize()) {
         int rt = receiveThreshold;
         while (--rt >= 0) {
-          logFin("Begin message consuming.");
+          log(Level.FINE, null, "Start receiving messages.");
           preConsume();
           Message message = consume();
           postConsume(message);
           if (message == null) {
             break;
           }
-          logFin("End message consuming.");
+          log(Level.FINE, null, "Stop receiving messages.");
         }
       }
     } catch (Exception e) {
@@ -144,27 +150,87 @@ public class MessageReceiverTask implements Runnable {
     } finally {
       lastExecutionSuccessfully = ex == null;
       postRun();
-      logFin("Stopped message receive task.\n\n");
+      log(Level.FINE, null, "Stopped message receive task.");
+    }
+  }
+
+  protected void closeConnectionIfNecessary(boolean forceClose) {
+    if ((meta.getCacheLevel() <= 0 || forceClose) && connection != null) {
+      try {
+        connection.stop();
+        connection.close();
+      } catch (JMSException e) {
+        log(Level.SEVERE, null, "9-4x. Stop and close message receive task occurred error, [%s]",
+            meta);
+      } finally {
+        messageConsumer = null;
+        session = null;
+        connection = null;
+        log(Level.FINE, null, "9-4. Stop and close message receive task connection, [%s]", meta);
+      }
+    }
+  }
+
+  protected void closeMessageConsumerIfNecessary(boolean forceClose) {
+    if ((meta.getCacheLevel() <= 2 || forceClose) && messageConsumer != null) {
+      try {
+        messageConsumer.close();
+      } catch (JMSException e) {
+        log(Level.SEVERE, e, "9-1x. Close message receive task consumer occurred error, [%s]",
+            meta);
+      } finally {
+        messageConsumer = null;
+        log(Level.FINE, null, "9-1. Close message receive task consumer, [%s]", meta);
+      }
+    }
+  }
+
+  protected void closeSessionIfNecessary(boolean forceClose) {
+    if ((meta.getCacheLevel() <= 1 || forceClose) && session != null) {
+      try {
+        session.close();
+        log(Level.FINE, null, "9-2. Close message receive task session, [%s]", meta);
+        if (connection != null) {
+          connection.stop();
+          log(Level.FINE, null, "9-3. Stop message receive task connection, [%s]", meta);
+        }
+      } catch (JMSException e) {
+        log(Level.FINE, null, "9-3x. Stop message receive task connection occurred error, [%s]",
+            meta);
+      } finally {
+        messageConsumer = null;
+        session = null;
+      }
     }
   }
 
   protected Message consume() throws JMSException {
     try {
       Message message = null;
-      if (metaData.getReceiveTimeout() <= 0) {
+      if (meta.getReceiveTimeout() <= 0) {
         message = messageConsumer.receiveNoWait();
       } else {
-        message = messageConsumer.receive(metaData.getReceiveTimeout());
+        message = messageConsumer.receive(meta.getReceiveTimeout());
       }
-      logFin("5. Received message from queue, [%s]", metaData);
       if (message != null) {
+        log(Level.FINE, null, "5. Received message from queue and start handling, [%s]", meta);
         messageListener.onMessage(message);
-        logFin("6. Invoked message handler and processed message, [%s]", metaData);
+        log(Level.FINE, null, "6. Finish message handle, [%s]", meta);
       }
       return message;
     } catch (JMSException e) {
-      logServ("6-x. Receive and process message occurred error, [%s]", metaData);
+      log(Level.SEVERE, null, "6-x. Receive and process message occurred error, [%s]", meta);
       throw e;
+    }
+  }
+
+  protected JMSException generateJMSException(Exception t) {
+    if (t instanceof JMSException) {
+      return (JMSException) t;
+    } else {
+      JMSException jmsException = new JMSException(t.getMessage());
+      jmsException.setLinkedException(t);
+      return jmsException;
     }
   }
 
@@ -175,17 +241,18 @@ public class MessageReceiverTask implements Runnable {
       try {
         if (xa) {
           connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
-          logFin("1. Created message receive task xaconnection, [%s]", metaData);
+          log(Level.FINE, null, "1. Created message receive task xaconnection, [%s]", meta);
         } else {
           connection = connectionFactory.createConnection();
-          logFin("1. Created message receive task connection, [%s]", metaData);
+          log(Level.FINE, null, "1. Created message receive task connection, [%s]", meta);
         }
         select(MessageReceiverTaskConfigurator.class).stream()
             .sorted(ComparableConfigurator::compare)
-            .forEach(c -> c.configConnection(connection, metaData));
-        metaData.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
+            .forEach(c -> c.configConnection(connection, meta));
+        meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
       } catch (JMSException je) {
-        logServ("1-x. Initialize message receive task connection occurred error, [%s]", metaData);
+        log(Level.SEVERE, null,
+            "1-x. Initialize message receive task connection occurred error, [%s]", meta);
         throw je;
       }
     }
@@ -194,77 +261,77 @@ public class MessageReceiverTask implements Runnable {
       try {
         if (xa) {
           session = ((XAConnection) connection).createXASession();
-          logFin("2. Created message receive task xasession, [%s]", metaData);
+          log(Level.FINE, null, "2. Created message receive task xasession, [%s]", meta);
         } else {
-          session = connection.createSession(metaData.getAcknowledge());
-          logFin("2. Created message receive task session, [%s]", metaData);
+          session = connection.createSession(meta.getAcknowledge());
+          log(Level.FINE, null, "2. Created message receive task session, [%s]", meta);
         }
         instance().select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(ComparableConfigurator::compare)
-            .forEach(c -> c.configSession(session, metaData));
+            .sorted(ComparableConfigurator::compare).forEach(c -> c.configSession(session, meta));
       } catch (JMSException je) {
         if (connection != null) {
           try {
             connection.close();
             connection = null;
-            logFin(
+            log(Level.FINE, null,
                 "2-1. Close message receive task connection when initialize session occurred error, [%s]",
-                metaData);
+                meta);
           } catch (JMSException e) {
-            logServ(
+            log(Level.SEVERE, null,
                 "2-x. Close message receive task connection occurred error when initialize session occurred error, [%s]",
-                metaData);
+                meta);
             throw je;
           }
         }
-        logServ("2-x. Initialize message receive task session occurred error, [%s]", metaData);
+        log(Level.SEVERE, null, "2-x. Initialize message receive task session occurred error, [%s]",
+            meta);
         throw je;
       }
     }
     // initialize message consumer
     if (messageConsumer == null) {
       try {
-        Destination destination =
-            metaData.isMulticast() ? session.createTopic(metaData.getDestination())
-                : session.createQueue(metaData.getDestination());
-        if (isNotBlank(metaData.getSelector())) {
-          messageConsumer = session.createConsumer(destination, metaData.getSelector());
+        Destination destination = meta.isMulticast() ? session.createTopic(meta.getDestination())
+            : session.createQueue(meta.getDestination());
+        if (isNotBlank(meta.getSelector())) {
+          messageConsumer = session.createConsumer(destination, meta.getSelector());
         } else {
           messageConsumer = session.createConsumer(destination);
         }
         instance().select(MessageReceiverTaskConfigurator.class).stream()
             .sorted(ComparableConfigurator::compare)
-            .forEach(c -> c.configMessageConsumer(messageConsumer, metaData));
-        logFin("3. Created message receive task consumer, [%s]", metaData);
+            .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
+        log(Level.FINE, null, "3. Created message receive task consumer, [%s]", meta);
       } catch (JMSException je) {
         try {
           if (session != null) {
             session.close();
             session = null;
-            logFin(
+            log(Level.FINE, null,
                 "3-1. Close message receive task sesion when initialize consumer occurred error, [%s]",
-                metaData);
+                meta);
           }
           if (connection != null) {
             connection.close();
             connection = null;
-            logFin(
+            log(Level.FINE, null,
                 "3-2. Close message receive task connection when initialize consumer occurred error, [%s]",
-                metaData);
+                meta);
           }
         } catch (JMSException e) {
-          logServ(
+          log(Level.SEVERE, null,
               "3-x. Close message receive task session and connection occurred error when initialize consumer occurred error, [%s]",
-              metaData);
+              meta);
           throw je;
         }
-        logServ("3-x.Initialize message receive task consumer occurred error, [%s]", metaData);
+        log(Level.SEVERE, null, "3-x.Initialize message receive task consumer occurred error, [%s]",
+            meta);
         throw je;
       }
     }
     // start connection
     connection.start();
-    logFin("4. Message receive task connection started, [%s]", metaData);
+    log(Level.FINE, null, "4. Message receive task was initialized, [%s]", meta);
     return true;
   }
 
@@ -272,35 +339,33 @@ public class MessageReceiverTask implements Runnable {
     if (e instanceof JMSException) {
       jmsFailureCounter.incrementAndGet();
     }
-    if (failureCounter.get() == 0) {
-      firstFailureTimePoint = System.currentTimeMillis();
-    }
     if (lastExecutionSuccessfully) {
-      continuousFailureCounter.set(1);
+      failureCounter.set(1);
     } else {
-      continuousFailureCounter.incrementAndGet();
+      failureCounter.incrementAndGet();
     }
-    failureCounter.incrementAndGet();
 
-    logEx(e, "Message receiver task occurred error, %s", metaData);
+    log(Level.SEVERE, e, "Message receiver task occurred error, %s", meta);
     try {
       if (xa) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
-          logServ("8-x. Rollback message receive task JTA transaction when occurred error, [%s]",
-              metaData);
+          log(Level.SEVERE, null,
+              "8-x. Rollback message receive task JTA transaction when occurred error, [%s]", meta);
         }
       } else if (session != null) {
-        if (metaData.getAcknowledge() == Session.SESSION_TRANSACTED) {
+        if (meta.getAcknowledge() == Session.SESSION_TRANSACTED) {
           session.rollback();
-          logServ("8-x. Rollback message receive task session when occurred error, [%s]", metaData);
-        } else if (metaData.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE) {
+          log(Level.SEVERE, null,
+              "8-x. Rollback message receive task session when occurred error, [%s]", meta);
+        } else if (meta.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE) {
           session.recover();
-          logServ("8-x. Recover message receive task session when occurred error, [%s]", metaData);
+          log(Level.SEVERE, null,
+              "8-x. Recover message receive task session when occurred error, [%s]", meta);
         }
       }
     } catch (Exception te) {
-      logEx(te, "Rollback message receive occurred error, %s", metaData);
+      log(Level.SEVERE, te, "Rollback message receive occurred error, %s", meta);
       // throw new CorantRuntimeException(te);
     }
     // throw new CorantRuntimeException(e);
@@ -312,23 +377,48 @@ public class MessageReceiverTask implements Runnable {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().commit();
         }
-        logFin("7-1. Commit message receive task JTA transaction, [%s]", metaData);
-      } else if (metaData.getAcknowledge() == Session.SESSION_TRANSACTED && session != null) {
+        log(Level.FINE, null, "7-1. Commit message receive task JTA transaction, [%s]", meta);
+      } else if (meta.getAcknowledge() == Session.SESSION_TRANSACTED && session != null) {
         session.commit();
-        logFin("7-2. Commit message receive task session, [%s]", metaData);
-      } else if (metaData.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE && message != null) {
+        log(Level.FINE, null, "7-2. Commit message receive task session, [%s]", meta);
+      } else if (meta.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE && message != null) {
         message.acknowledge();
-        logFin("7-3. Acknowledge message message receive task session, [%s]", metaData);
+        log(Level.FINE, null, "7-3. Acknowledge message message receive task session, [%s]", meta);
       }
     } catch (RollbackException | HeuristicMixedException | HeuristicRollbackException
         | SecurityException | IllegalStateException | SystemException te) {
-      logServ("7-x. Commit message receive task JTA transaction occurred error, [%s]", metaData);
+      log(Level.SEVERE, null,
+          "7-x. Commit message receive task JTA transaction occurred error, [%s]", meta);
       throw generateJMSException(te);
     } catch (JMSException je) {
-      logServ(
+      log(Level.SEVERE, null,
           "7-x. Commit/Acknowledge message receive task session or message occurred error, [%s]",
-          metaData);
+          meta);
       throw je;
+    }
+  }
+
+  protected void postRun() {
+    try {
+      if (state == STATE_RUN) {
+        if (failureCounter.intValue() >= failureThreshold) {
+          stateBrk();
+          return;
+        }
+      } else if (state == STATE_TRY) {
+        if (failureCounter.intValue() > 0) {
+          stateBrk();
+          return;
+        } else {
+          if (tryCounter.incrementAndGet() >= tryThreshold) {
+            stateRun();
+          }
+        }
+      }
+      release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, e,
+          () -> String.format("On post run message receive task occurred error, %s", meta));
     }
   }
 
@@ -338,14 +428,32 @@ public class MessageReceiverTask implements Runnable {
         TransactionService.transactionManager().begin();
         TransactionService
             .enlistXAResourceToCurrentTransaction(((XASession) session).getXAResource());
-        logFin("4-1. Message receive task JTA transaction began, [%s]", metaData);
+        log(Level.FINE, null, "4-1. Message receive task JTA transaction began, [%s]", meta);
       }
     } catch (Exception te) {
-      logServ(
+      log(Level.SEVERE, null,
           "4-x. Enlist message receive task session xa resource to JTA environment occurred error, [%s]",
-          metaData);
+          meta);
       throw generateJMSException(te);
     }
+  }
+
+  protected boolean preRun() {
+    if (state == STATE_BRK) {
+      long countdownMs =
+          breakedDuration.toMillis() - (System.currentTimeMillis() - breakedTimePoint);
+      if (countdownMs > 0) {
+        if (countdownMs < loopInterval * 3) {
+          log(Level.INFO, null, "The message receive task was breaked countdown %s ms, [%s]!",
+              countdownMs, meta);
+        }
+        return false;
+      } else {
+        stateTry();
+        return true;
+      }
+    }
+    return true;
   }
 
   protected void release(boolean stop) {
@@ -358,154 +466,32 @@ public class MessageReceiverTask implements Runnable {
     }
   }
 
-  void postRun() {
-    try {
-      if (state == STATE_RUN) {
-        if (continuousFailureCounter.intValue() >= failureThreshold
-            || failureCounter.intValue() >= failureThreshold
-                && System.currentTimeMillis() - breakedTimePoint >= failureDuration.toMillis()) {
-          stateBrk();
-          return;
-        }
-      } else if (state == STATE_TRY && tryCounter.incrementAndGet() > tryThreshold) {
-        if (failureCounter.intValue() > 0) {
-          stateBrk();
-          return;
-        } else {
-          stateRun();
-        }
-      }
-      release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));
-    } catch (Exception e) {
-      logger.log(Level.SEVERE, e,
-          () -> String.format("On post run message receive task occurred error, %s", metaData));
-    }
-  }
-
-  boolean preRun() {
-    if (state == STATE_BRK) {
-      long countdownMs =
-          breakedDuration.toMillis() - (System.currentTimeMillis() - breakedTimePoint);
-      if (countdownMs >= 0) {
-        logFin("The message receive task is breaking countdown %s ms, [%s]!", countdownMs,
-            metaData);
-        return false;
-      } else {
-        stateTry();
-        return true;
-      }
-    }
-    return true;
-  }
-
-  private void closeConnectionIfNecessary(boolean forceClose) {
-    if ((metaData.getCacheLevel() <= 0 || forceClose) && connection != null) {
-      try {
-        connection.stop();
-        connection.close();
-      } catch (JMSException e) {
-        logServ("9-4x. Stop and close message receive task occurred error, [%s]", metaData);
-      } finally {
-        session = null;
-        messageConsumer = null;
-        connection = null;
-        logFin("9-4. Stop and close message receive task connection, [%s]", metaData);
-      }
-    }
-  }
-
-  private void closeMessageConsumerIfNecessary(boolean forceClose) {
-    if ((metaData.getCacheLevel() <= 2 || forceClose) && messageConsumer != null) {
-      try {
-        messageConsumer.close();
-      } catch (JMSException e) {
-        logEx(e, "9-1x. Close message receive task consumer occurred error, [%s]", metaData);
-      } finally {
-        messageConsumer = null;
-        logFin("9-1. Close message receive task consumer, [%s]", metaData);
-      }
-    }
-  }
-
-  private void closeSessionIfNecessary(boolean forceClose) {
-    if ((metaData.getCacheLevel() <= 1 || forceClose) && session != null) {
-      try {
-        session.close();
-        logFin("9-2. Close message receive task session, [%s]", metaData);
-        if (connection != null) {
-          connection.stop();
-          logFin("9-3. Stop message receive task connection, [%s]", metaData);
-        }
-      } catch (JMSException e) {
-        logFin("9-3x. Stop message receive task connection occurred error, [%s]", metaData);
-      } finally {
-        messageConsumer = null;
-        session = null;
-      }
-    }
-  }
-
-  private JMSException generateJMSException(Exception t) {
-    if (t instanceof JMSException) {
-      return (JMSException) t;
-    } else {
-      JMSException jmsException = new JMSException(t.getMessage());
-      jmsException.setLinkedException(t);
-      return jmsException;
-    }
-  }
-
-  private void logEx(Throwable t, String msgOrFmt, Object... params) {
-    if (params.length > 0) {
-      logger.log(Level.SEVERE, String.format(msgOrFmt, params), t);
-    } else {
-      logger.log(Level.SEVERE, String.format(msgOrFmt), t);
-    }
-  }
-
-  private void logFin(String msgOrFmt, Object... params) {
-    if (params.length > 0) {
-      logger.fine(() -> String.format(msgOrFmt, params));
-    } else {
-      logger.fine(() -> msgOrFmt);
-    }
-  }
-
-  private void logServ(String msgOrFmt, Object... params) {
-    if (params.length > 0) {
-      logger.severe(() -> String.format(msgOrFmt, params));
-    } else {
-      logger.severe(() -> msgOrFmt);
-    }
-  }
-
-  private void resetMonitors() {
+  protected void resetMonitors() {
+    lastExecutionSuccessfully = true;
     jmsFailureCounter.set(0);
-    continuousFailureCounter.set(0);
     failureCounter.set(0);
-    firstFailureTimePoint = 0;
     breakedTimePoint = 0;
     tryCounter.set(0);
   }
 
-  private void stateBrk() {
+  protected void stateBrk() {
     resetMonitors();
     breakedTimePoint = System.currentTimeMillis();
     state = STATE_BRK;
-    logFin("The message receive task start break mode, [%s]!", metaData);
+    log(Level.WARNING, null, "The message receive task start break mode, [%s]!", meta);
     release(true);
   }
 
-  private void stateRun() {
+  protected void stateRun() {
     resetMonitors();
     state = STATE_RUN;
-    logFin("The message receive task start run mode, [%s]!", metaData);
+    log(Level.INFO, null, "The message receive task start run mode, [%s]!", meta);
   }
 
-  private void stateTry() {
+  protected void stateTry() {
     resetMonitors();
     state = STATE_TRY;
-    logFin("The message receive task start try mode, [%s]!", metaData);
+    log(Level.INFO, null, "The message receive task start try mode, [%s]!", meta);
   }
 
   static class MessageHandler implements MessageListener {
@@ -530,9 +516,8 @@ public class MessageReceiverTask implements Runnable {
       try {
         method.getJavaMember().invoke(object, message);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("5-x. Invok message receive method %s occurred error.",
-                method.getJavaMember()));
+        log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
+            method.getJavaMember());
         throw new CorantRuntimeException(e);
       }
     }

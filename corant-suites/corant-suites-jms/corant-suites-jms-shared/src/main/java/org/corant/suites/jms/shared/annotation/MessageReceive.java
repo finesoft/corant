@@ -64,7 +64,7 @@ public @interface MessageReceive {
    *
    * @return cacheLevel
    */
-  int cacheLevel() default 2;
+  int cacheLevel() default 3;
 
   /**
    * @see JMSContext#setClientID(String)
@@ -89,18 +89,19 @@ public @interface MessageReceive {
   String[] destinations() default {};
 
   /**
-   * Monitor the failure time interval
-   *
-   * @return failureDuration
-   */
-  String failureDuration() default "PT5M";
-
-  /**
    * The failure threshold, if exceeds then start break mode
    *
    * @return failureThreshold
    */
   int failureThreshold() default 16;
+
+  /**
+   * When the task breaks itself, the scheduler can still schedule the task, but the task execution
+   * only sleeps for a short time and then returns directly. The sleep short time is loopIntervalMs
+   *
+   * @return loopIntervalMs
+   */
+  long loopIntervalMs() default 500L;
 
   /**
    * Marks whether a queue or topic.

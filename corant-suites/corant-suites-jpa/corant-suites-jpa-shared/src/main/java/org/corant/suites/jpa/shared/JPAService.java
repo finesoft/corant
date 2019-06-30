@@ -120,7 +120,9 @@ public class JPAService implements PersistenceService {
       for (final EntityManager c : components.values()) {
         try {
           logger.fine(() -> String.format("Close entityManager %s", c));
-          c.close();
+          if (c.isOpen()) {
+            c.close();
+          }
         } catch (final Exception e) {
           ex = e;
         }

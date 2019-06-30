@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.service;
 
+import static org.corant.kernel.util.Instances.resolvableApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
@@ -38,8 +39,8 @@ import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.model.Entity;
+import org.corant.suites.ddd.model.EntityLifecycleManager;
 import org.corant.suites.ddd.repository.JPARepository;
-import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.shared.JPAUtils;
 
 /**
@@ -53,7 +54,7 @@ import org.corant.suites.jpa.shared.JPAUtils;
 public class IdentifierEntityConverterFactory implements ConverterFactory<Object, Entity> {
 
   static final Map<Class<?>, Boolean> cached = new ConcurrentHashMap<>();
-  static final Map<Class<?>, Annotation> puqCached = new ConcurrentHashMap<>();
+  static final Map<Class<?>, Annotation[]> puqCached = new ConcurrentHashMap<>();
   final Set<Class<?>> supportedSourceClass =
       immutableSetOf(Long.class, Long.TYPE, String.class, Entity.class);
 
@@ -129,11 +130,9 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
     cached.keySet().forEach(c -> ConverterRegistry.deregister(ConverterType.of(Object.class, c)));
   }
 
-  Annotation resolveQualifier(Class<?> cls) {
+  Annotation[] resolveQualifier(Class<?> cls) {
     return puqCached.computeIfAbsent(cls, (c) -> {
-      Instance<JPAPersistenceService> jps = Corant.instance().select(JPAPersistenceService.class);
-      return shouldNotNull(jps.isResolvable() ? jps.get().getPersistenceUnitQualifier(c) : null,
-          "Can not convert, the persistence unit qualifier for %s not found!", c);
+      return resolvableApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(cls));
     });
   }
 }

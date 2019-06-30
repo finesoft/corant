@@ -53,5 +53,6 @@ public interface Names {
   interface PersistenceNames {
     String PU_DFLT_NME = CORANT;
     String PU_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "persistence-unit-name";
+    String PU_ANN = CORANT + NAME_SPACE_SEPARATORS + "persistence-unit";
   }
 }

@@ -39,7 +39,7 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
 
   /**
    * @param weight
-   * @param unit
+   * @param pu
    */
   public WeightInfo(BigDecimal weight, MeasureUnit unit) {
     super();

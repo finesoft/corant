@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -21,8 +20,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
@@ -51,15 +50,12 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
   final transient Transaction transaction;
-  final Map<Annotation, EntityManager> entityManagers = new HashMap<>();
-  final Function<Annotation, EntityManager> entityManagerProvider;
+  final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
-  protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction,
-      Function<Annotation, EntityManager> entityManagerProvider) {
+  protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager);
     this.transaction = transaction;
-    this.entityManagerProvider = entityManagerProvider;
     Arrays.stream(Lifecycle.values()).forEach(e -> registration.put(e, new LinkedHashSet<>()));
     logger.fine(() -> String.format("Begin unit of work [%s]", transaction.toString()));
   }
@@ -107,8 +103,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public EntityManager getEntityManager(Annotation qualifier) {
-    return entityManagers.computeIfAbsent(qualifier, entityManagerProvider);
+  public EntityManager getEntityManager(PersistenceContext pc) {
+    return entityManagers.computeIfAbsent(pc, persistenceService::getEntityManager);
   }
 
   @Override

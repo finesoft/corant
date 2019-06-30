@@ -19,12 +19,10 @@ import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Cache;
@@ -32,7 +30,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import org.corant.kernel.util.Unnamed;
+import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
+import org.corant.shared.util.StringUtils;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
@@ -54,7 +53,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   @Inject
   JTAJPAUnitOfWorksManager unitOfWorkManager;
 
-  protected volatile Annotation emfQualifier;
+  protected volatile String persistenceUnitName;
 
   @Override
   public void clear() {
@@ -159,18 +158,20 @@ public abstract class AbstractJPARepository implements JPARepository {
   @Override
   public EntityManager getEntityManager() {
     // FIXME TODO CHECK THE REPO NAMES AND EMF NAMES
-    if (emfQualifier == null) {
+    if (persistenceUnitName == null) {
       synchronized (this) {
-        if (emfQualifier == null) {
-          final Class<?> repoCls = getUserClass(this.getClass());
-          if ((emfQualifier = findAnnotation(repoCls, Named.class)) == null
-              && (emfQualifier = findAnnotation(repoCls, Unnamed.class)) == null) {
-            emfQualifier = Default.Literal.INSTANCE;
+        if (persistenceUnitName == null) {
+          Named name = findAnnotation(getUserClass(this.getClass()), Named.class);
+          if (name != null) {
+            persistenceUnitName = name.value();
+          } else {
+            persistenceUnitName = StringUtils.EMPTY;
           }
         }
       }
     }
-    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(emfQualifier);
+    return unitOfWorkManager.getCurrentUnitOfWork()
+        .getEntityManager(PersistenceContextLiteral.of(persistenceUnitName));
   }
 
   public EntityManagerFactory getEntityManagerFactory() {

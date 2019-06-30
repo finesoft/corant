@@ -97,7 +97,7 @@ public class DimensionInfo extends AbstractValueObject {
 
   /**
    *
-   * @param unit
+   * @param pu
    * @return calVolume
    */
   public BigDecimal calVolume(MeasureUnit unit) {
@@ -105,7 +105,7 @@ public class DimensionInfo extends AbstractValueObject {
   }
 
   /**
-   * @param unit
+   * @param pu
    * @param lengthOffset
    * @param widthOffset
    * @param heightOffset

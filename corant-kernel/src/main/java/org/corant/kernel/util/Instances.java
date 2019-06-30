@@ -52,22 +52,25 @@ public class Instances {
   }
 
   public static <T> Optional<T> resolvable(Class<T> instanceClass) {
-    if (instance().select(instanceClass).isResolvable()) {
-      return Optional.of(instance().select(instanceClass).get());
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    if (instance().select(instCls).isResolvable()) {
+      return Optional.of(instance().select(instCls).get());
     } else {
       return Optional.empty();
     }
   }
 
   public static <T> void resolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    shouldNotNull(consumer).accept(instance().select(instanceClass).get());
+    shouldNotNull(consumer).accept(resolvable(instanceClass).orElseThrow(
+        () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
   }
 
   public static <T> T resolvableAnyway(Class<T> instanceClass, Annotation... qualifiers) {
-    if (instance().select(instanceClass, qualifiers).isResolvable()) {
-      return instance().select(instanceClass).get();
-    } else if (instance().select(instanceClass).isUnsatisfied()) {
-      return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    if (instance().select(instCls, qualifiers).isResolvable()) {
+      return instance().select(instCls).get();
+    } else if (instance().select(instCls).isUnsatisfied()) {
+      return UnmanageableInstance.of(instCls).produce().inject().postConstruct().get();
     } else {
       return null;
     }
@@ -83,22 +86,26 @@ public class Instances {
   }
 
   public static <T, R> R resolvableApply(Class<T> instanceClass, Function<T, R> function) {
-    return shouldNotNull(function).apply(instance().select(instanceClass).get());
+    return shouldNotNull(function).apply(resolvable(instanceClass).orElseThrow(
+        () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
-    return instance().select(instanceClass, qualifiers);
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    return instance().select(instCls, qualifiers);
   }
 
   public static <T> void tryResolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    if (instance().select(instanceClass).isResolvable()) {
-      shouldNotNull(consumer).accept(instance().select(instanceClass).get());
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    if (instance().select(instCls).isResolvable()) {
+      shouldNotNull(consumer).accept(instance().select(instCls).get());
     }
   }
 
   public static <T, R> R tryResolvableApply(Class<T> instanceClass, Function<T, R> function) {
-    if (instance().select(instanceClass).isResolvable()) {
-      return shouldNotNull(function).apply(instance().select(instanceClass).get());
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    if (instance().select(instCls).isResolvable()) {
+      return shouldNotNull(function).apply(instance().select(instCls).get());
     }
     return null;
   }

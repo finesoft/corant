@@ -15,14 +15,12 @@ package org.corant.demo.ddd;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
 import java.math.BigDecimal;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import org.corant.asosat.ddd.domain.shared.Param;
 import org.corant.demo.ddd.nosql.domain.NoSqlDemoAggregate;
 import org.corant.demo.ddd.shared.domain.DemoValue;
 import org.corant.demo.ddd.sql.domain.SqlDemoAggregate;
 import org.corant.devops.test.unit.CorantJUnit4ClassRunner;
-import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.jpa.hibernate.HibernateOrmSchemaUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +33,6 @@ import org.junit.runner.RunWith;
  */
 @RunWith(CorantJUnit4ClassRunner.class)
 public class Poc {
-
-  @Inject
-  JPAPersistenceService ps;
 
   public static void main(String... strings) {
     HibernateOrmSchemaUtils.stdoutRebuildSchema("");

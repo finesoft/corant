@@ -13,24 +13,17 @@
  */
 package org.corant.suites.jpa.shared.inject;
 
+import static org.corant.kernel.util.Instances.resolvableApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.defaultBlank;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.PassivationCapable;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
+import org.corant.kernel.service.PersistenceService;
+import org.corant.kernel.util.AbstractBean;
 import org.corant.kernel.util.Qualifiers;
 
 /**
@@ -39,83 +32,47 @@ import org.corant.kernel.util.Qualifiers;
  * @author bingo 上午10:34:41
  *
  */
-public class EntityManagerFactoryBean
-    implements Bean<ExtendedEntityManagerFactory>, PassivationCapable {
+public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory> {
 
-  static final Logger logger = Logger.getLogger(EntityManagerFactoryBean.class.getName());
-  static final Set<Type> types = Collections
-      .unmodifiableSet(setOf(ExtendedEntityManagerFactory.class, EntityManagerFactory.class));
-  final Set<Annotation> qualifiers = new HashSet<>();
-  final BeanManager beanManager;
-  final String unitName;
+  final PersistenceUnit pu;
 
   /**
    * @param beanManager
-   * @param unitName
+   * @param pu
    */
-  public EntityManagerFactoryBean(BeanManager beanManager, String unitName) {
-    this.beanManager = beanManager;
-    this.unitName = shouldNotNull(unitName);
+  public EntityManagerFactoryBean(BeanManager beanManager, PersistenceUnit pu) {
+    super(beanManager);
+    this.pu = shouldNotNull(pu);
     qualifiers.add(Any.Literal.INSTANCE);
     qualifiers.add(Default.Literal.INSTANCE);
-    qualifiers.add(Qualifiers.resolveNamed(unitName));
+    qualifiers.add(Qualifiers.resolveNamed(pu.unitName()));
+    types.add(EntityManagerFactory.class);
   }
 
   @Override
-  public ExtendedEntityManagerFactory create(
-      CreationalContext<ExtendedEntityManagerFactory> creationalContext) {
-    return ExtendedEntityManagerFactory.of(unitName);
+  public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
+    return resolvableApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu));
   }
 
   @Override
-  public void destroy(ExtendedEntityManagerFactory instance,
-      CreationalContext<ExtendedEntityManagerFactory> creationalContext) {
+  public void destroy(EntityManagerFactory instance,
+      CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
       logger.info(
-          () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
-              defaultBlank(unitName, "unnamed")));
+          () -> String.format("Destroyed entity manager factory that persistence pu named %s.",
+              defaultBlank(pu.unitName(), "unnamed")));
     }
   }
 
   @Override
-  public Class<?> getBeanClass() {
-    return EntityManagerFactoryBean.class;
-  }
-
-  @Override
   public String getId() {
-    return EntityManagerFactoryBean.class.getName() + "." + unitName;
-  }
-
-  @Override
-  public Set<InjectionPoint> getInjectionPoints() {
-    return Collections.emptySet();
+    return EntityManagerFactoryBean.class.getName() + "." + pu.unitName();
   }
 
   @Override
   public String getName() {
-    return "EntityManagerFactoryBean." + unitName;
-  }
-
-  @Override
-  public Set<Annotation> getQualifiers() {
-    return qualifiers;
-  }
-
-  @Override
-  public Class<? extends Annotation> getScope() {
-    return ApplicationScoped.class;
-  }
-
-  @Override
-  public Set<Class<? extends Annotation>> getStereotypes() {
-    return Collections.emptySet();
-  }
-
-  @Override
-  public Set<Type> getTypes() {
-    return types;
+    return "EntityManagerFactoryBean." + pu.unitName();
   }
 
   @Override

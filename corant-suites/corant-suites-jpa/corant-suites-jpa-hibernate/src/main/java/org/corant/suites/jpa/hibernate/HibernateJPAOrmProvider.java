@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
@@ -30,8 +31,7 @@ import org.corant.Corant;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.corant.suites.jpa.shared.AbstractJPAProvider;
-import org.corant.suites.jpa.shared.inject.JPAProvider;
+import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -43,8 +43,8 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
  *
  */
 @ApplicationScoped
-@JPAProvider("org.hibernate.jpa.HibernatePersistenceProvider")
-public class HibernateJPAOrmProvider extends AbstractJPAProvider {
+@Named("org.hibernate.jpa.HibernatePersistenceProvider")
+public class HibernateJPAOrmProvider implements JPAProvider {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
       new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());

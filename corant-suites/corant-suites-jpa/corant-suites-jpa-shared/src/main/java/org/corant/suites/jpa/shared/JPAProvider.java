@@ -14,8 +14,6 @@
 package org.corant.suites.jpa.shared;
 
 import java.util.Map;
-import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManagerFactory;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
@@ -25,17 +23,10 @@ import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
  * @author bingo 上午11:08:47
  *
  */
-@ApplicationScoped
-public abstract class AbstractJPAProvider {
+@FunctionalInterface
+public interface JPAProvider {
 
-  protected Logger logger = Logger.getLogger(getClass().getName());
+  EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
+      Map<String, Object> additionalProperties);
 
-  public abstract EntityManagerFactory buildEntityManagerFactory(
-      PersistenceUnitInfoMetaData metaData, Map<String, Object> additionalProperties);
-
-  protected EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
-      Map<String, Object> additionalProperties) {
-    final EntityManagerFactory emf = buildEntityManagerFactory(metaData, additionalProperties);
-    return emf;
-  }
 }

@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 
 
 /**
- * corant-devops-test-unit
+ * corant-devops-test-pu
  *
  * @author bingo 下午3:18:48
  *

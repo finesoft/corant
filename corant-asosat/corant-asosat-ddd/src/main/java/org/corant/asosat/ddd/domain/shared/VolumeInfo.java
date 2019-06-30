@@ -39,7 +39,7 @@ public class VolumeInfo extends AbstractValueObject implements Comparable<Volume
 
   /**
    * @param volume
-   * @param unit
+   * @param pu
    */
   public VolumeInfo(BigDecimal volume, MeasureUnit unit) {
     super();

@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.unitwork;
 
 import java.util.stream.Stream;
+import org.corant.kernel.service.PersistenceService;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
@@ -34,6 +35,8 @@ public interface UnitOfWorksManager {
   MessageDispatcher getMessageDispatcher();
 
   MessageStorage getMessageStorage();
+
+  PersistenceService getPersistenceService();
 
   SagaService getSagaService();
 

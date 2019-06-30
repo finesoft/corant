@@ -11,72 +11,53 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jpa.shared;
+package org.corant.suites.jpa.shared.inject;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import static org.corant.kernel.util.Instances.resolvableApply;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import org.corant.Corant;
+import org.corant.kernel.service.PersistenceService;
 import org.corant.kernel.util.CDIs;
 import org.corant.kernel.util.ResourceReferences;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.suites.jpa.shared.JPAProvider;
 import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
- * The JPAInjectionServices implemention, we don't use it by default. We use AbstractJPAProvider by
+ * The JPAInjectionServices implemention, we don't use it by default. We use JPAProvider by
  * default, because it support scope. If you're going to use it, the new subclasses, and set in the
  * meta-inf/services corresponding "org. jboss.Weld.bootstrap.api.Service" interface description
  * file.
  *
- * @see AbstractJPAProvider
+ * @see JPAProvider
  * @author bingo 下午4:18:45
  *
  */
-public abstract class AbstractJPAInjectionServices implements JpaInjectionServices {
-
-  protected static final Map<PersistenceUnitInfoMetaData, EntityManagerFactory> EMFS =
-      new ConcurrentHashMap<>();
+public class JPAInjectionServices implements JpaInjectionServices {
 
   @Override
   public void cleanup() {
-    EMFS.values().forEach(emf -> {
-      if (emf.isOpen()) {
-        emf.close();
-      }
-    });
+    // Noop
   }
 
   @Override
   public ResourceReferenceFactory<EntityManager> registerPersistenceContextInjectionPoint(
       InjectionPoint injectionPoint) {
-    PersistenceContext pc =
+    final PersistenceContext pc =
         CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
-    PersistenceContextMetaData pcmd = new PersistenceContextMetaData(pc);
-    return ResourceReferences.refac(() -> getEntityManagerFactory(pcmd.getUnit())
-        .createEntityManager(pcmd.getSynchronization(), pcmd.getProperties()));
+    return ResourceReferences
+        .refac(() -> resolvableApply(PersistenceService.class, b -> b.getEntityManager(pc)));
   }
 
   @Override
   public ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnitInjectionPoint(
       InjectionPoint injectionPoint) {
-    JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
     PersistenceUnit pu = CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
-    final PersistenceUnitInfoMetaData pumd =
-        extension.getPersistenceUnitInfoMetaData(JPAUtils.getMixedPuName(pu));
-    return ResourceReferences.refac(() -> getEntityManagerFactory(pumd));
-  }
-
-  protected abstract EntityManagerFactory buildEntityManagerFactory(
-      PersistenceUnitInfoMetaData metaData);
-
-  protected EntityManagerFactory getEntityManagerFactory(PersistenceUnitInfoMetaData pumd) {
-    return EMFS.computeIfAbsent(pumd, this::buildEntityManagerFactory);
+    return ResourceReferences
+        .refac(() -> resolvableApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)));
   }
 
 }

@@ -15,9 +15,9 @@ package org.corant.suites.ddd.model;
 
 import static org.corant.kernel.util.Preconditions.requireTrue;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.function.Predicate;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 /**
  * @author bingo 上午12:26:44
@@ -36,7 +36,7 @@ public interface Entity extends Serializable {
 
   @FunctionalInterface
   public interface EntityManagerProvider {
-    EntityManager getEntityManager(Annotation qualifier);
+    EntityManager getEntityManager(PersistenceContext qualifier);
   }
 
   public interface EntityReference<T extends Entity> extends Reference<T> {

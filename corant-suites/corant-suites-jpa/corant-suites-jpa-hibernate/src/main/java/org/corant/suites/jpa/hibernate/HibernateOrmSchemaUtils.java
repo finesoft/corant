@@ -30,6 +30,7 @@ import javax.sql.DataSource;
 import org.corant.Corant;
 import org.corant.config.Configurations;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.service.PersistenceService.PersistenceUnitLiteral;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
@@ -166,7 +167,8 @@ public class HibernateOrmSchemaUtils {
     InitialContext jndi = Corant.instance().select(InitialContext.class).get();
     JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
     Instance<DataSource> datasources = Corant.instance().select(DataSource.class);
-    PersistenceUnitInfoMetaData pum = shouldNotNull(extension.getPersistenceUnitInfoMetaData(pu));
+    PersistenceUnitInfoMetaData pum =
+        shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource((dsn) -> resolveDataSource(jndi, datasources, dsn));

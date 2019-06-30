@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.corant.kernel.service.PersistenceService;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
@@ -30,6 +31,7 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
   protected final AbstractUnitOfWorksManager manager;
+  protected final PersistenceService persistenceService;
   protected final MessageDispatcher messageDispatcher;
   protected final MessageStorage messageStorage;
   protected final SagaService sagaService; // FIXME Is it right to do so?
@@ -40,6 +42,7 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
     this.manager = manager;
     messageDispatcher = manager.getMessageDispatcher();
     messageStorage = manager.getMessageStorage();
+    persistenceService = manager.getPersistenceService();
     sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
     messageDispatcher.prepare();
     messageStorage.prepare();

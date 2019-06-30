@@ -13,20 +13,15 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -37,20 +32,15 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
+import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
+import org.corant.kernel.service.PersistenceService.PersistenceUnitLiteral;
 import org.corant.kernel.util.CDIs;
 import org.corant.kernel.util.Instances.NamingReference;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.inject.EntityManagerBean;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
-import org.corant.suites.jpa.shared.inject.ExtendedPersistenceContextType;
-import org.corant.suites.jpa.shared.inject.PersistenceContextInjectionPoint;
-import org.corant.suites.jpa.shared.inject.TransactionPersistenceContextType;
-import org.corant.suites.jpa.shared.metadata.PersistenceContextMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.suites.jpa.shared.metadata.PersistenceUnitMetaData;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -64,81 +54,67 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class JPAExtension implements Extension {
 
-  protected final Set<PersistenceUnitMetaData> persistenceUnits =
-      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnitMetaData, Boolean>());
-  protected final Set<PersistenceContextMetaData> persistenceContexts =
-      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContextMetaData, Boolean>());
-  protected final Map<String, PersistenceUnitInfoMetaData> persistenceUnitInfoMetaDatas =
+  protected final Set<PersistenceUnit> persistenceUnits =
+      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceUnit, Boolean>());
+  protected final Set<PersistenceContext> persistenceContexts =
+      Collections.newSetFromMap(new ConcurrentHashMap<PersistenceContext, Boolean>());
+  protected final Map<PersistenceUnit, PersistenceUnitInfoMetaData> persistenceUnitInfoMetaDatas =
       new ConcurrentHashMap<>();
   protected Logger logger = Logger.getLogger(getClass().getName());
 
-  volatile boolean initedJndiSubCtx = false;
   volatile InitialContext jndi;
 
-  public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(String name) {
-    return persistenceUnitInfoMetaDatas.get(defaultTrim(name));
+  public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(PersistenceUnit pu) {
+    return persistenceUnitInfoMetaDatas.get(pu);
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
+
     // assembly
     persistenceContexts.forEach(pc -> {
-      if (persistenceUnits.stream().map(PersistenceUnitMetaData::getUnitName)
-          .noneMatch((un) -> isEquals(pc.getUnitName(), un))) {
-        persistenceUnits.add(new PersistenceUnitMetaData(null, pc.getUnitName()));
+      if (persistenceUnits.stream().map(PersistenceUnit::unitName)
+          .noneMatch((un) -> isEquals(pc.unitName(), un))) {
+        persistenceUnits.add(PersistenceUnitLiteral.of(pc));
       }
     });
-    // check persistence unit injections
+
+    // check persistence pu injections
     persistenceUnits.forEach(pumd -> {
-      final String unitName = pumd.getUnitName();
-      shouldBeTrue(persistenceUnitInfoMetaDatas.containsKey(unitName),
-          "Can not find persistence unit named %s for injection!", unitName);
+      shouldBeTrue(persistenceUnitInfoMetaDatas.containsKey(pumd),
+          "Can not find persistence pu named %s for injection!", pumd.unitName());
     });
-    // create entity manager factory bean from persistence units and register ref to jndi
-    persistenceUnitInfoMetaDatas.forEach((un, puim) -> {
-      abd.addBean(new EntityManagerFactoryBean(beanManager, un));
-      registerJndi(un);
+
+    // create entity manager factory bean from persistence units
+    persistenceUnitInfoMetaDatas.forEach((pu, puim) -> {
+      abd.addBean(new EntityManagerFactoryBean(beanManager, pu));
+      registerJndi(pu.unitName());
     });
-    // create entity manager bean from persistence contexts
-    persistenceContexts.forEach(pcmd -> {
-      Annotation qualifier = Qualifiers.resolveNamed(pcmd.getUnitName());
-      abd.addBean(new EntityManagerBean(beanManager, pcmd, qualifier));
-    });
+
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
-    JPAConfig.from(ConfigProvider.getConfig()).forEach(persistenceUnitInfoMetaDatas::put);
+    JPAConfig.from(ConfigProvider.getConfig())
+        .forEach((pun, pu) -> persistenceUnitInfoMetaDatas.put(PersistenceUnitLiteral.of(pun), pu));
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();
     final PersistenceUnit pu = CDIs.getAnnotated(ip).getAnnotation(PersistenceUnit.class);
     if (pu != null) {
-      persistenceUnits.add(new PersistenceUnitMetaData(pu));
-      pip.configureInjectionPoint().addQualifiers(Qualifiers.resolveNameds(pu.unitName()));
+      persistenceUnits.add(PersistenceUnitLiteral.of(pu));
     }
     final PersistenceContext pc = CDIs.getAnnotated(ip).getAnnotation(PersistenceContext.class);
     if (pc != null) {
-      if (pc.type() != PersistenceContextType.TRANSACTION) {
-        shouldBeFalse(ip.getBean().getScope().equals(ApplicationScoped.class));
-        pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
-            ExtendedPersistenceContextType.INST, Any.Literal.INSTANCE));
-      } else {
-        pip.setInjectionPoint(new PersistenceContextInjectionPoint(ip,
-            TransactionPersistenceContextType.INST, Any.Literal.INSTANCE));
-      }
-      persistenceContexts.add(new PersistenceContextMetaData(pc));
+      persistenceContexts.add(PersistenceContextLiteral.of(pc));
     }
   }
 
-  void registerJndi(String un) {
+  synchronized void registerJndi(String un) {
     if (isNotBlank(un)) {
       try {
         if (jndi == null) {
           jndi = new InitialContext();
-        }
-        if (!initedJndiSubCtx) {
           jndi.createSubcontext(JPAConfig.JNDI_SUBCTX_NAME);
-          initedJndiSubCtx = true;
         }
         String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName,

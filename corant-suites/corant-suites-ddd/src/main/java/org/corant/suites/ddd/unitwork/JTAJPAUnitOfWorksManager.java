@@ -15,8 +15,6 @@ package org.corant.suites.ddd.unitwork;
 
 import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
@@ -24,14 +22,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.SynchronizationType;
 import javax.transaction.RollbackException;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import org.corant.kernel.service.PersistenceService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageDispatcher;
@@ -54,7 +50,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   TransactionManager transactionManager;
 
   @Inject
-  JPAPersistenceService persistenceService;
+  PersistenceService persistenceService;
 
   @Inject
   @Any
@@ -128,6 +124,11 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   @Override
+  public PersistenceService getPersistenceService() {
+    return persistenceService;
+  }
+
+  @Override
   public SagaService getSagaService() {
     return sagaService.isResolvable() ? sagaService.get() : SagaService.empty();
   }
@@ -136,21 +137,8 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     return transactionManager;
   }
 
-  protected EntityManager buildEntityManager(Annotation qualifier) {
-    return getEntityManagerFactory(qualifier).createEntityManager(SynchronizationType.SYNCHRONIZED,
-        getEntityManagerProperties());
-  }
-
   protected JTAJPAUnitOfWork buildUnitOfWork(Transaction transaction) {
-    return new JTAJPAUnitOfWork(this, transaction, this::buildEntityManager);
-  }
-
-  protected EntityManagerFactory getEntityManagerFactory(Annotation qualifier) {
-    return persistenceService.getEntityManagerFactory(qualifier);
-  }
-
-  protected Map<?, ?> getEntityManagerProperties() {
-    return Collections.emptyMap();
+    return new JTAJPAUnitOfWork(this, transaction);
   }
 
   protected Transaction unwrapUnifOfWorksKey(Object object) {

@@ -14,18 +14,29 @@
 package org.corant.suites.ddd.model;
 
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
+import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
+import org.corant.kernel.normal.Names.PersistenceNames;
+import org.corant.kernel.service.PersistenceService;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.LifecycleManageEvent;
-import org.corant.suites.ddd.unitwork.JPAPersistenceService;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
@@ -36,32 +47,43 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
+public class DefaultEntityManagerService implements EntityLifecycleManager {
+
+  static final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
+
+  @Inject
+  @Any
+  Instance<EntityManagerFactory> emfs;
 
   @Inject
   JTAJPAUnitOfWorksManager unitOfWorksManager;
 
   @Inject
-  JPAPersistenceService persistenceService;
+  PersistenceService jpaService;
+
+  @Override
+  public PersistenceContext getPersistenceContext(Class<?> cls) {
+    return clsUns.get(cls);
+  }
 
   @Override
   public void on(@Observes(
       during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION + 1000) LifecycleManageEvent e) {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
-      Annotation named = persistenceService.getPersistenceUnitQualifier(entity.getClass());
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, e.isDestroy(), effectImmediately, named);
+      handle(entity, e.isDestroy(), effectImmediately,
+          getPersistenceContext(entity.getClass()));
       logger.fine(() -> String.format("Handle %s %s", entity.getClass().getName(),
           e.isDestroy() ? "destroy" : "persist"));
     }
   }
 
   protected void handle(Entity entity, boolean destroy, boolean effectImmediately,
-      Annotation qualifier) {
-    EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(qualifier);
+      PersistenceContext pc) {
+    EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(pc);
     if (destroy) {
       em.remove(entity);
       if (effectImmediately) {
@@ -80,5 +102,16 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
         }
       }
     }
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    emfs.forEach(emf -> {
+      String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
+      Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
+      entities.stream().map(ManagedType::getJavaType)
+          .forEach(cls -> clsUns.put(cls, jpaService.getPersistenceContext(puNme)));
+    });
+    logger.info(() -> "Initialized JPAPersistenceService.");
   }
 }

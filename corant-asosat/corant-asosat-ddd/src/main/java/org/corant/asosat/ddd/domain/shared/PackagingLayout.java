@@ -48,7 +48,7 @@ public class PackagingLayout extends AbstractValueObject {
 
   /**
    * @param qty
-   * @param unit
+   * @param pu
    */
   public PackagingLayout(BigDecimal qty, String unit) {
     super();
@@ -95,7 +95,7 @@ public class PackagingLayout extends AbstractValueObject {
 
   /**
    *
-   * @return the unit
+   * @return the pu
    */
   public String getUnit() {
     return unit;
@@ -120,7 +120,7 @@ public class PackagingLayout extends AbstractValueObject {
 
   /**
    *
-   * @param unit the unit to set
+   * @param pu the pu to set
    */
   protected void setUnit(String unit) {
     this.unit = unit;
@@ -161,7 +161,7 @@ public class PackagingLayout extends AbstractValueObject {
 
     /**
      * @param qty
-     * @param unit
+     * @param pu
      */
     public RegularPackagingLayout(BigDecimal qty, String unit) {
       super(qty, unit);

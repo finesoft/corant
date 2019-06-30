@@ -37,6 +37,7 @@ import org.corant.suites.jpa.shared.JPAConfig;
 
 public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
+  private String name;
   private final String persistenceUnitName;
   private String version;
   private boolean excludeUnlistedClasses = true;
@@ -164,6 +165,14 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   @Override
   public List<String> getMappingFileNames() {
     return Collections.unmodifiableList(mappingFileNames);
+  }
+
+  /**
+   *
+   * @return the name
+   */
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -335,6 +344,14 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     if (mappingFileNames != null) {
       mappingFileNames.forEach(this::addMappingFileName);
     }
+  }
+
+  /**
+   *
+   * @param name the name to set
+   */
+  protected void setName(String name) {
+    this.name = defaultTrim(name);
   }
 
   protected void setNewTempClassLoader(ClassLoader newTempClassLoader) {

@@ -57,7 +57,7 @@ public class PersistenceXmlParser {
   public static Map<String, PersistenceUnitInfoMetaData> parse(URL url) {
     Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
     doParse(url, map);
-    logger.info(() -> String.format("Parsed persistence unit from %s", url.toExternalForm()));
+    logger.info(() -> String.format("Parsed persistence pu from %s", url.toExternalForm()));
     return map;
   }
 
@@ -122,7 +122,7 @@ public class PersistenceXmlParser {
         final String tag = element.getTagName();
         if (tag.equals(JPAConfig.JCX_TAG)) {
           final String puName = element.getAttribute(JPAConfig.JCX_NME);
-          shouldBeFalse(map.containsKey(puName), "Persistence unit name %s dup!", tag);
+          shouldBeFalse(map.containsKey(puName), "Persistence pu name %s dup!", tag);
           PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(puName);
           puimd.setVersion(version);
           puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
@@ -163,7 +163,7 @@ public class PersistenceXmlParser {
     } else if (value.equalsIgnoreCase("RESOURCE_LOCAL")) {
       return PersistenceUnitTransactionType.RESOURCE_LOCAL;
     } else {
-      throw new CorantRuntimeException("Unknown persistence unit transaction type : %s", value);
+      throw new CorantRuntimeException("Unknown persistence pu transaction type : %s", value);
     }
   }
 

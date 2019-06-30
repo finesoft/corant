@@ -47,7 +47,7 @@ public class JPAConfig {
 
   public static final String JC_PREFIX = "jpa.";
 
-  public static final String JCX_TAG = "persistence-unit";
+  public static final String JCX_TAG = "persistence-pu";
   public static final String JCX_NME = "name";
   public static final String JCX_TRANS_TYP = "transaction-type";
   public static final String JCX_NON_JTA_DS = "non-jta-data-source";
@@ -64,7 +64,7 @@ public class JPAConfig {
   public static final String JCX_PRO_NME = "name";
   public static final String JCX_PRO_VAL = "value";
 
-  public static final String JC_PU_NME = "." + JCX_TAG + "." + JCX_NME;// persistence-unit.name
+  public static final String JC_PU_NME = "." + JCX_TAG + "." + JCX_NME;// persistence-pu.name
   public static final String JC_TRANS_TYP = "." + JCX_TRANS_TYP;
   public static final String JC_NON_JTA_DS = "." + JCX_NON_JTA_DS;
   public static final String JC_JTA_DS = "." + JCX_JTA_DS;
@@ -111,7 +111,7 @@ public class JPAConfig {
     Map<String, PersistenceUnitInfoMetaData> metaDatas = new LinkedHashMap<>();
     generateFromXml().forEach(metaDatas::put);
     generateFromConfig(config).forEach(
-        (n, u) -> shouldBeNull(metaDatas.put(n, u), "The persistence unit name %s is dup!", n));
+        (n, u) -> shouldBeNull(metaDatas.put(n, u), "The persistence pu name %s is dup!", n));
     return metaDatas;
   }
 
@@ -132,7 +132,7 @@ public class JPAConfig {
             map.putAll(m);
           });
     } catch (IOException e) {
-      logger.warning(() -> String.format("Parse persistence unit meta data from %s error %s",
+      logger.warning(() -> String.format("Parse persistence pu meta data from %s error %s",
           DFLT_PU_XML_LOCATION, e.getMessage()));
     }
     return map;

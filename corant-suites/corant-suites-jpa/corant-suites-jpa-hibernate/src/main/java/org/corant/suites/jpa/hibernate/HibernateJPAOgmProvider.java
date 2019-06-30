@@ -17,10 +17,10 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
-import org.corant.suites.jpa.shared.AbstractJPAProvider;
-import org.corant.suites.jpa.shared.inject.JPAProvider;
+import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
@@ -32,8 +32,8 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  *
  */
 @ApplicationScoped
-@JPAProvider("org.hibernate.ogm.jpa.HibernateOgmPersistence")
-public class HibernateJPAOgmProvider extends AbstractJPAProvider {
+@Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
+public class HibernateJPAOgmProvider implements JPAProvider {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
       new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());

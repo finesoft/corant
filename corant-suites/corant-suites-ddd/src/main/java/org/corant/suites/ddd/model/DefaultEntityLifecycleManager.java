@@ -47,7 +47,7 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
  */
 @ApplicationScoped
 @InfrastructureServices
-public class DefaultEntityManagerService implements EntityLifecycleManager {
+public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   static final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 

@@ -83,17 +83,15 @@ public class JPAService implements PersistenceService {
 
   @Override
   public EntityManagerFactory getEntityManagerFactory(PersistenceUnit pu) {
-    EntityManagerFactory emf = emfs.computeIfAbsent(pu, p -> {
+    return emfs.computeIfAbsent(pu, p -> {
       PersistenceUnitInfoMetaData puim =
           resolvableApply(JPAExtension.class, b -> b.getPersistenceUnitInfoMetaData(pu));
       Named jp = NamedLiteral.of(puim.getPersistenceProviderClassName());
       Instance<JPAProvider> provider = select(JPAProvider.class, jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
-      final EntityManagerFactory newEmf = provider.get().buildEntityManagerFactory(puim,
+      return provider.get().buildEntityManagerFactory(puim,
           mapOf(PersistenceNames.PU_NME_KEY, pu.unitName()));
-      return newEmf;
     });
-    return emf;
   }
 
   @Produces

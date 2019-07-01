@@ -80,9 +80,11 @@ public class MessageReceiverManager {
             Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
       }
     });
-    logger.info(
-        () -> String.format("Find %s message receivers that involving %s connection factories.",
-            receiveMetaDatas.size(), executorServices.size()));
+    if (receiveMetaDatas.size() > 0) {
+      logger.info(
+          () -> String.format("Find %s message receivers that involving %s connection factories.",
+              receiveMetaDatas.size(), executorServices.size()));
+    }
   }
 
   @PreDestroy

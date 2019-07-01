@@ -51,9 +51,9 @@ public class Instances {
     return object != null && !instance().select(getUserClass(object), qualifiers).isUnsatisfied();
   }
 
-  public static <T> Optional<T> resolvable(Class<T> instanceClass) {
+  public static <T> Optional<T> resolvable(Class<T> instanceClass, Annotation... qualifiers) {
     Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
-    if (instance().select(instCls).isResolvable()) {
+    if (instance().select(instCls, qualifiers).isResolvable()) {
       return Optional.of(instance().select(instCls).get());
     } else {
       return Optional.empty();

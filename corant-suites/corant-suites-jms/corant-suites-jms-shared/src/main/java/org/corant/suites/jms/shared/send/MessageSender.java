@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Instances.resolvableApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StreamUtils.copy;
 import java.io.ByteArrayOutputStream;
@@ -109,10 +109,10 @@ public interface MessageSender {
       doSend(message);
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     void doSend(Object message) {
-      final JMSContextProducer ctxProducer = instance().select(JMSContextProducer.class).get();
-      final JMSContext jmsc = ctxProducer.create(connectionFactoryId, sessionMode);
+      final JMSContext jmsc = resolvableApply(JMSContextProducer.class,
+          b -> b.create(connectionFactoryId, sessionMode));
       try {
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();

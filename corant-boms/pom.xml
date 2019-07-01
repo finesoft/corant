@@ -48,7 +48,7 @@
 		<version.commons-dbcp2>2.0.1</version.commons-dbcp2>
 		<version.commons-pool2>2.6.1</version.commons-pool2>
 		<version.freemarker>2.3.28</version.freemarker>
-		<version.jandex>2.0.5.Final</version.jandex>
+		<version.jandex>2.1.1.Final</version.jandex>
 		<version.snakeyaml>1.19</version.snakeyaml>
 		<version.jasperreports>6.8.0</version.jasperreports>
 
@@ -784,7 +784,7 @@
 				<version>${version.javax.enterprise.concurrent}</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<!-- glass fish -->
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -868,6 +868,28 @@
 				<artifactId>keycloak-jaxrs-oauth-client</artifactId>
 				<version>${version.keycloak}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-admin-client</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-authz-client</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-server-spi</artifactId>
+				<version>${version.keycloak}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-undertow-adapter</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+
 
 			<!-- Corant -->
 			<dependency>

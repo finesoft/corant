@@ -89,6 +89,15 @@ public class ObjectUtils {
     return Objects.equals(a, b) || a != null && b != null && a.compareTo(b) == 0;
   }
 
+  public static boolean isNoneNull(Object... objs) {
+    for (Object obj : objs) {
+      if (isNull(obj)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static boolean isNotNull(Object obj) {
     return Objects.nonNull(obj);
   }

@@ -85,7 +85,6 @@ public class MongoClientExtension implements Extension {
   protected final Map<String, MongodbConfig> databaseConfigs = new HashMap<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-  volatile boolean initedJndiSubCtx = false;
   volatile InitialContext jndi;
 
   public static BsonValue bsonId(Serializable id) {
@@ -230,10 +229,7 @@ public class MongoClientExtension implements Extension {
             try {
               if (jndi == null) {
                 jndi = new InitialContext();
-              }
-              if (!initedJndiSubCtx) {
                 jndi.createSubcontext(MongoClientConfig.JNDI_SUBCTX_NAME);
-                initedJndiSubCtx = true;
               }
               String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + cn;
               jndi.bind(jndiName, new NamingReference(MongoClient.class, qualifiers));

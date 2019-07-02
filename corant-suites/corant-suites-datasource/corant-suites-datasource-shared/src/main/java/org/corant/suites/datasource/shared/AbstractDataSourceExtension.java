@@ -46,7 +46,6 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected final Set<String> dataSourceNames = new LinkedHashSet<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-  protected volatile boolean initedJndiSubCtx = false;
   protected volatile InitialContext jndi;
 
   public Set<String> getDataSourceNames() {
@@ -80,10 +79,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
       try {
         if (jndi == null) {
           jndi = new InitialContext();
-        }
-        if (!initedJndiSubCtx) {
           jndi.createSubcontext(DataSourceConfig.JNDI_SUBCTX_NAME);
-          initedJndiSubCtx = true;
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
         jndi.bind(jndiName, new NamingReference(DataSource.class, qualifiers));

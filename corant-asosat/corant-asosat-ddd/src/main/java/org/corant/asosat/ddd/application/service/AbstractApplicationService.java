@@ -13,11 +13,13 @@
  */
 package org.corant.asosat.ddd.application.service;
 
+import static org.corant.kernel.util.Preconditions.requireNotBlank;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import static org.corant.kernel.util.Preconditions.requireTrue;
 import static org.corant.shared.util.MapUtils.getMapObject;
 import java.util.Map;
 import org.corant.asosat.ddd.domain.shared.Participator;
+import org.corant.shared.util.Empties;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
@@ -51,6 +53,14 @@ public abstract class AbstractApplicationService implements ApplicationService {
 
   protected Participator currentUser(Map<?, ?> cmd) {
     return getMapObject(cmd, Participator.CURRENT_USER_KEY, ObjectUtils::forceCast, null);
+  }
+
+  protected String notBlank(String obj, String msgCode, Object... objects) {
+    return requireNotBlank(obj, msgCode, objects);
+  }
+
+  protected <T> T notEmpty(T obj, String msgCode, Object... objects) {
+    return requireTrue(obj, Empties::isNotEmpty, msgCode, objects);
   }
 
   protected <T> T notNull(T obj) {

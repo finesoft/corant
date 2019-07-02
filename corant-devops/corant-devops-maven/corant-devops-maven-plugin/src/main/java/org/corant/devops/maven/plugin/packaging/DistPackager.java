@@ -50,11 +50,12 @@ import org.corant.devops.maven.plugin.archive.FileEntry;
  */
 public class DistPackager implements Packager {
 
-  public static final String JVM_OPT = "jvm.options";
   public static final Charset CHARSET = StandardCharsets.UTF_8;
+  public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
-  public static final String RUN_BAT_TITLE_PH = "#TITLE#";
-  public static final String RUN_BAT_MAIN_CLASS_PH = "#MAIN_CLASS#";
+  public static final String RUN_SH = "run.sh";
+  public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
+  public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String DIST_NAME_SUF = "-dist.zip";
   public static final String JAR_LIB_DIR = "lib";
   public static final String JAR_APP_DIR = "app";
@@ -130,7 +131,7 @@ public class DistPackager implements Packager {
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
     DefaultArchive.of(JAR_APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-    DefaultArchive.of(JAR_CFG_DIR, root).addEntries(resolveCfgFiles());
+    DefaultArchive.of(JAR_CFG_DIR, root).addEntries(resolveConfigFiles());
     DefaultArchive.of(JAR_BIN_DIR, root).addEntries(resolveBinFiles());
     log.debug("(corant) built archive for packaging.");
     return root;
@@ -139,10 +140,11 @@ public class DistPackager implements Packager {
   List<Entry> resolveBinFiles() throws IOException {
     List<Entry> entries = new ArrayList<>();
     entries.add(resolveRunbat());
+    entries.add(resolveRunsh());
     return entries;
   }
 
-  List<Entry> resolveCfgFiles() {
+  List<Entry> resolveConfigFiles() {
     List<Entry> entries = new ArrayList<>();
     String regex = getMojo().getConfigPaths();
     List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
@@ -185,17 +187,34 @@ public class DistPackager implements Packager {
 
   Entry resolveRunbat() throws IOException {
     String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
-    final String useRunbat = runbat.replaceAll(RUN_BAT_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_BAT_TITLE_PH, resolveApplicationName());
+    final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
+        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
     return new Entry() {
       @Override
       public InputStream getInputStream() throws IOException {
-        return IOUtils.toInputStream(useRunbat, CHARSET);
+        return IOUtils.toInputStream(usebat, CHARSET);
       }
 
       @Override
       public String getName() {
         return RUN_BAT;
+      }
+    };
+  }
+
+  Entry resolveRunsh() throws IOException {
+    String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
+    final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
+        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
+    return new Entry() {
+      @Override
+      public InputStream getInputStream() throws IOException {
+        return IOUtils.toInputStream(usesh, CHARSET);
+      }
+
+      @Override
+      public String getName() {
+        return RUN_SH;
       }
     };
   }

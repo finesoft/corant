@@ -55,8 +55,16 @@ public abstract class AbstractApplicationService implements ApplicationService {
     return getMapObject(cmd, Participator.CURRENT_USER_KEY, ObjectUtils::forceCast, null);
   }
 
+  protected String notBlank(String obj) {
+    return requireNotBlank(obj, GlobalMessageCodes.ERR_PARAM);
+  }
+
   protected String notBlank(String obj, String msgCode, Object... objects) {
     return requireNotBlank(obj, msgCode, objects);
+  }
+
+  protected <T> T notEmpty(T obj) {
+    return requireTrue(obj, Empties::isNotEmpty, GlobalMessageCodes.ERR_PARAM);
   }
 
   protected <T> T notEmpty(T obj, String msgCode, Object... objects) {
@@ -65,10 +73,6 @@ public abstract class AbstractApplicationService implements ApplicationService {
 
   protected <T> T notNull(T obj) {
     return this.notNull(obj, GlobalMessageCodes.ERR_OBJ_NON_FUD);
-  }
-
-  protected <T> T notNull(T obj, String msgCode) {
-    return this.notNull(obj, msgCode, new Object[0]);
   }
 
   protected <T> T notNull(T obj, String msgCode, Object... objects) {

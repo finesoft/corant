@@ -2,7 +2,7 @@
 
 setlocal enabledelayedexpansion
 
-TITLE #TITLE#
+TITLE #APPLICATION_NAME#
 
 set MAIN_CLASS=#MAIN_CLASS#
 

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.datasource.agroal;
 
+import static org.corant.kernel.util.Instances.resolvable;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -38,7 +39,6 @@ import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
 import io.agroal.api.security.NamePrincipal;
 import io.agroal.api.security.SimplePassword;
-import io.agroal.api.transaction.TransactionIntegration;
 import io.agroal.narayana.NarayanaTransactionIntegration;
 
 /**
@@ -79,35 +79,27 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   AgroalDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
-    TransactionManager tm = instance.select(TransactionManager.class).isResolvable()
-        ? instance.select(TransactionManager.class).get()
-        : null;
-    TransactionSynchronizationRegistry tsr =
-        instance.select(TransactionSynchronizationRegistry.class).isResolvable()
-            ? instance.select(TransactionSynchronizationRegistry.class).get()
-            : null;
+
+    AgroalDataSourceConfigurationSupplier cfgs = new AgroalDataSourceConfigurationSupplier();
+
+    // transaction
     if (cfg.isXa()) {
       shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
     }
-    AgroalDataSourceConfigurationSupplier cfgs = new AgroalDataSourceConfigurationSupplier();
+    transactionIntegration(cfg, cfgs);
+
+    // metrics
     cfgs.metricsEnabled(cfg.isEnableMetrics());
+
+    // jdbc
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .jdbcUrl(cfg.getConnectionUrl());
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .connectionProviderClass(cfg.getDriver());
-    if ((cfg.isJta() || cfg.isXa())
-        && tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-      TransactionIntegration txIntegration = null;
-      if (instance.select(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
-          .isResolvable()) {
-        txIntegration =
-            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable(), instance
-                .select(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta")).get());
-      } else {
-        txIntegration = new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable());
-      }
-      cfgs.connectionPoolConfiguration().transactionIntegration(txIntegration);
-    }
+    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+        .autoCommit(cfg.isAutoCommit());
+
+    // auth
     if (cfg.getUsername() != null) {
       cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
           .principal(new NamePrincipal(cfg.getUsername()));
@@ -116,9 +108,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
           .credential(new SimplePassword(cfg.getPassword()));
     }
-    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
-        .autoCommit(cfg.isAutoCommit());
-    // Configure pool
+
+    // connection pool
     cfgs.connectionPoolConfiguration().acquisitionTimeout(cfg.getAcquisitionTimeout());
     cfgs.connectionPoolConfiguration().maxSize(cfg.getMaxSize());
     cfgs.connectionPoolConfiguration().minSize(cfg.getMinSize());
@@ -130,8 +121,29 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       cfgs.connectionPoolConfiguration().connectionValidator(
           AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
     }
-    AgroalDataSource datasource = AgroalDataSource.from(cfgs);
-    return datasource;
+    return AgroalDataSource.from(cfgs);
+  }
+
+  void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {
+    if (cfg.isJta() || cfg.isXa()) {
+      TransactionManager tm = resolvable(TransactionManager.class).orElse(null);
+      TransactionSynchronizationRegistry tsr =
+          resolvable(TransactionSynchronizationRegistry.class).orElse(null);
+      XAResourceRecoveryRegistry xar = null;
+      if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
+        xar = resolvable(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
+            .orElse(null);
+      } else {
+        xar = resolvable(XAResourceRecoveryRegistry.class).orElse(null);
+      }
+      if (xar != null) {
+        cfgs.connectionPoolConfiguration().transactionIntegration(
+            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable(), xar));
+      } else {
+        cfgs.connectionPoolConfiguration().transactionIntegration(
+            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable()));
+      }
+    }
   }
 
 }

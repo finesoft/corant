@@ -17,14 +17,16 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class AbstractCommodity extends AbstractPPTReference implements Numbered {
+public abstract class AbstractCommodity extends AbstractPPTReference {
 
   private static final long serialVersionUID = 3565638036145351917L;
 
   @Column
   private String remark;
 
-  protected AbstractCommodity() {}
+  protected AbstractCommodity() {
+    super();
+  }
 
   protected AbstractCommodity(Long id, Long vn, String number, String name, String remark) {
     super(id, vn, name, number);

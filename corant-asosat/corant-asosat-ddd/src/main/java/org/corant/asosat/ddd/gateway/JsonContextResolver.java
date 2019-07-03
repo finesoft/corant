@@ -22,7 +22,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import org.corant.asosat.ddd.util.JsonUtils;
+import org.corant.suites.json.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**

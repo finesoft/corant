@@ -16,9 +16,9 @@ package org.corant;
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.time.LocalDate;
 import org.corant.asosat.ddd.domain.shared.Param;
-import org.corant.asosat.ddd.util.JsonUtils;
 import org.corant.devops.test.unit.CorantJunit4Suite;
 import org.corant.devops.test.unit.RunConfig;
+import org.corant.suites.json.JsonUtils;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 

@@ -7,7 +7,7 @@
 		<artifactId>corant-suites-mp</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>corant-suites-mp-healthcheck</artifactId>
+	<artifactId>corant-suites-mp-restclient</artifactId>
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
@@ -31,8 +31,8 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-health</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client-microprofile</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>

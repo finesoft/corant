@@ -14,5 +14,7 @@
   	<module>corant-suites-mp-metrics</module>
   	<module>corant-suites-mp-openapi</module>
   	<module>corant-suites-mp-opentracking</module>
+  	<module>corant-suites-mp-restclient</module>
+  	<module>corant-suites-mp-config</module>
   </modules>
 </project>

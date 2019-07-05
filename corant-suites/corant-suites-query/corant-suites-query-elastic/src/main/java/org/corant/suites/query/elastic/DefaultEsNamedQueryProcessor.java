@@ -13,20 +13,19 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.corant.kernel.service.ConversionService;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.AbstractNamedQuery;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
+import org.corant.suites.query.shared.dynamic.freemarker.JsonDynamicQueryFmTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,28 +52,15 @@ public class DefaultEsNamedQueryProcessor
   @Override
   protected Map<String, Object> convertParameter(Map<String, Object> param) {
     Map<String, Object> convertedParam = new HashMap<>();
-    Map<String, Object> tempParam = new HashMap<>();
     if (param != null) {
-      tempParam.putAll(param);
+      convertedParam.putAll(param);
       getParamConvertSchema().forEach((pn, pc) -> {
-        if (tempParam.containsKey(pn)) {
+        if (convertedParam.containsKey(pn)) {
           Object cvtVal = conversionService.convert(param.get(pn), pc);
-          tempParam.put(pn, cvtVal);
+          convertedParam.put(pn, cvtVal);
         }
       });
     }
-    tempParam.forEach((k, v) -> {
-      try {
-        if (v != null && isPrimitiveOrWrapper(v.getClass())) {
-          convertedParam.put(k, v);
-        } else {
-          String jsonVal = v == null ? null : OM.writeValueAsString(v);
-          convertedParam.put(k, jsonVal);
-        }
-      } catch (JsonProcessingException e) {
-        throw new CorantRuntimeException(e, "Can not convert parameter %s to json string", k);
-      }
-    });
     return convertedParam;
   }
 
@@ -90,6 +76,12 @@ public class DefaultEsNamedQueryProcessor
     } catch (IOException | NullPointerException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }
+  }
+
+  @Override
+  protected DynamicQueryTplMmResolver<Map<String, Object>> handleTemplateMethodModel(
+      Map<String, Object> useParam) {
+    return new JsonDynamicQueryFmTplMmResolver().injectTo(useParam);
   }
 
   @SuppressWarnings("unchecked")

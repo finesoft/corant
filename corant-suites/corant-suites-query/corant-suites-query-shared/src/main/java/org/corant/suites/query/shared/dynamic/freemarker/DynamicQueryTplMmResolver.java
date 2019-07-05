@@ -15,7 +15,15 @@ package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import java.util.Map;
+import org.corant.suites.query.shared.QueryRuntimeException;
+import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * corant-suites-query
@@ -26,6 +34,31 @@ import freemarker.template.TemplateMethodModelEx;
 public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
 
   P getParameters();
+
+  default Object getParamValue(Object arg) throws TemplateModelException {
+    if (arg instanceof TemplateScalarModel) {
+      return ((TemplateScalarModel) arg).getAsString().trim();
+    } else if (arg instanceof TemplateDateModel) {
+      return ((TemplateDateModel) arg).getAsDate();
+    } else if (arg instanceof TemplateNumberModel) {
+      return ((TemplateNumberModel) arg).getAsNumber();
+    } else if (arg instanceof TemplateBooleanModel) {
+      return ((TemplateBooleanModel) arg).getAsBoolean();
+    } else if (arg instanceof TemplateSequenceModel) {
+      TemplateSequenceModel tsm = (TemplateSequenceModel) arg;
+      int size = tsm.size();
+      Object[] list = new Object[size];
+      for (int i = 0; i < size; i++) {
+        list[i] = getParamValue(tsm.get(i));
+      }
+      return list;
+    } else if (arg instanceof WrapperTemplateModel) {
+      return ((WrapperTemplateModel) arg).getWrappedObject();
+    } else {
+      throw new QueryRuntimeException("Unknow arguement,the class is %s",
+          arg == null ? "null" : arg.getClass());
+    }
+  }
 
   QueryTemplateMethodModelType getType();
 
@@ -45,6 +78,6 @@ public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
   }
 
   public enum QueryTemplateMethodModelType {
-    SP, MP, EP
+    SP, JP
   }
 }

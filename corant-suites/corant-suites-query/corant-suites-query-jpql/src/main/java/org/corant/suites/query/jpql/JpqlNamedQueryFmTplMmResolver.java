@@ -15,16 +15,9 @@ package org.corant.suites.query.jpql;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
-import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateBooleanModel;
-import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateNumberModel;
-import freemarker.template.TemplateScalarModel;
-import freemarker.template.TemplateSequenceModel;
 
 /**
  * corant-suites-query
@@ -70,31 +63,6 @@ public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<
   @Override
   public QueryTemplateMethodModelType getType() {
     return QueryTemplateMethodModelType.SP;
-  }
-
-  Object getParamValue(Object arg) throws TemplateModelException {
-    if (arg instanceof TemplateScalarModel) {
-      return ((TemplateScalarModel) arg).getAsString().trim();
-    } else if (arg instanceof TemplateDateModel) {
-      return ((TemplateDateModel) arg).getAsDate();
-    } else if (arg instanceof TemplateNumberModel) {
-      return ((TemplateNumberModel) arg).getAsNumber();
-    } else if (arg instanceof TemplateBooleanModel) {
-      return ((TemplateBooleanModel) arg).getAsBoolean();
-    } else if (arg instanceof TemplateSequenceModel) {
-      TemplateSequenceModel tsm = (TemplateSequenceModel) arg;
-      int size = tsm.size();
-      Object[] list = new Object[size];
-      for (int i = 0; i < size; i++) {
-        list[i] = getParamValue(tsm.get(i));
-      }
-      return list;
-    } else if (arg instanceof WrapperTemplateModel) {
-      return ((WrapperTemplateModel) arg).getWrappedObject();
-    } else {
-      throw new QueryRuntimeException("Unknow arguement,the class is %s",
-          arg == null ? "null" : arg.getClass());
-    }
   }
 
   String getPlaceHolder() {

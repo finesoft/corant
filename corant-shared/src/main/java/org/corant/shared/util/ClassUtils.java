@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.immutableMapOf;
 import static org.corant.shared.util.ObjectUtils.trySupplied;
 import static org.corant.shared.util.StringUtils.isBlank;
+import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -246,7 +247,16 @@ public class ClassUtils {
         }
       }
     } else if (object != null && object.getClass().isArray()) {
-      clazz = object.getClass().getComponentType();
+      if (Array.getLength(object) == 0) {
+        clazz = object.getClass().getComponentType();
+      } else {
+        for (Object obj : (Object[]) object) {
+          if (obj != null) {
+            clazz = obj.getClass();
+            break;
+          }
+        }
+      }
     } else if (object instanceof Iterator<?>) {
       Iterator<?> it = (Iterator<?>) object;
       while (clazz == null && it.hasNext()) {

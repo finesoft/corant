@@ -86,10 +86,9 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
   Supplier<?> resolveTimer(final SharedSessionContractImplementor session, Object object) {
     return timeSuppliers.computeIfAbsent(getUserClass(object.getClass()), c -> {
-      if (session.getFactory().getServiceRegistry()
-          .getService(MongoDBDatastoreProvider.class) != null) {
-        final MongoDatabase md = session.getFactory().getServiceRegistry()
-            .getService(MongoDBDatastoreProvider.class).getDatabase();
+      MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(session);
+      if (mp != null) {
+        final MongoDatabase md = mp.getDatabase();
         final Document timeBson =
             new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
         return () -> {
@@ -127,5 +126,15 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
         };
       }
     });
+  }
+
+  private MongoDBDatastoreProvider resolveMongoDBDatastoreProvider(
+      SharedSessionContractImplementor session) {
+    try {
+      return session.getFactory().getServiceRegistry().getService(MongoDBDatastoreProvider.class);
+    } catch (Exception e) {
+      // Noop FIXME
+    }
+    return null;
   }
 }

@@ -13,17 +13,28 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.ConversionUtils.toLong;
+import static org.corant.shared.util.MapUtils.getMapInstant;
+import static org.corant.shared.util.MapUtils.mapOf;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
+import org.bson.Document;
 import org.corant.shared.util.Identifiers;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
+import com.mongodb.client.MongoDatabase;
 
 /**
  * corant-suites-jpa-hibernate
@@ -38,11 +49,12 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
   static Identifiers.IdentifierGenerator GENERATOR;
   static volatile boolean ENABLED = false;
-  static volatile String TSSQL = null;
   static volatile int DATA_CENTER_ID;
   static volatile int WORKER_ID;
   static volatile boolean usePersistenceTime =
-      ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
+      getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
+  static Map<Class<?>, Supplier<?>> timeSuppliers = new ConcurrentHashMap<>();
+
   static {
     DATA_CENTER_ID =
         ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
@@ -62,45 +74,58 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
-    return GENERATOR.generate(() -> timeSeq(session));
+    return GENERATOR.generate(() -> getTimeSeq(session, object));
   }
 
-  long timeSeq(SharedSessionContractImplementor session) {
+  long getTimeSeq(SharedSessionContractImplementor session, Object object) {
     if (!usePersistenceTime) {
       return System.currentTimeMillis();
     }
-    if (TSSQL == null) {
-      synchronized (HibernateSnowflakeIdGenerator.class) {
-        if (TSSQL == null) {
-          TSSQL = session.getFactory().getServiceRegistry().getService(JdbcServices.class)
-              .getDialect().getCurrentTimestampSelectString();
-        }
-      }
-    }
-    try {
-      final PreparedStatement st =
-          session.getJdbcCoordinator().getStatementPreparer().prepareStatement(TSSQL);
-      try {
-        final ResultSet rs = session.getJdbcCoordinator().getResultSetReturn().extract(st);
-        try {
-          rs.next();
-          long value = rs.getTimestamp(1).getTime();
-          return value;
-        } finally {
-          try {
-            session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry().release(rs,
-                st);
-          } catch (Throwable ignore) {
-          }
-        }
-      } finally {
-        session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry().release(st);
-        session.getJdbcCoordinator().afterStatementExecution();
-      }
+    return toLong(resolveTimer(session, object).get());
+  }
 
-    } catch (SQLException sqle) {
-      throw session.getFactory().getServiceRegistry().getService(JdbcServices.class)
-          .getSqlExceptionHelper().convert(sqle, "could not get next sequence value", TSSQL);
-    }
+  Supplier<?> resolveTimer(final SharedSessionContractImplementor session, Object object) {
+    return timeSuppliers.computeIfAbsent(getUserClass(object.getClass()), c -> {
+      if (session.getFactory().getServiceRegistry()
+          .getService(MongoDBDatastoreProvider.class) != null) {
+        final MongoDatabase md = session.getFactory().getServiceRegistry()
+            .getService(MongoDBDatastoreProvider.class).getDatabase();
+        final Document timeBson =
+            new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
+        return () -> {
+          return getMapInstant(md.runCommand(timeBson), "localTime").toEpochMilli();
+        };
+      } else {
+        final String timeSql = session.getFactory().getServiceRegistry()
+            .getService(JdbcServices.class).getDialect().getCurrentTimestampSelectString();
+        return () -> {
+          try {
+            final PreparedStatement st =
+                session.getJdbcCoordinator().getStatementPreparer().prepareStatement(timeSql);
+            try {
+              final ResultSet rs = session.getJdbcCoordinator().getResultSetReturn().extract(st);
+              try {
+                rs.next();
+                return rs.getTimestamp(1).getTime();
+              } finally {
+                try {
+                  session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry()
+                      .release(rs, st);
+                } catch (Throwable ignore) {
+                }
+              }
+            } finally {
+              session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry().release(st);
+              session.getJdbcCoordinator().afterStatementExecution();
+            }
+
+          } catch (SQLException sqle) {
+            throw session.getFactory().getServiceRegistry().getService(JdbcServices.class)
+                .getSqlExceptionHelper()
+                .convert(sqle, "could not get next sequence value", timeSql);
+          }
+        };
+      }
+    });
   }
 }

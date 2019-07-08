@@ -13,10 +13,15 @@
  */
 package org.corant.asosat.ddd.gateway;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
@@ -28,6 +33,7 @@ import org.corant.suites.ddd.annotation.stereotype.ApplicationServices;
 import org.corant.suites.jaxrs.shared.StreamOutputBuilder;
 import org.corant.suites.servlet.abstraction.ContentDispositions;
 import org.corant.suites.servlet.abstraction.ContentDispositions.ContentDisposition;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
 /**
  * @author bingo 下午5:51:09
@@ -110,6 +116,26 @@ public abstract class AbstractRests {
   protected String parseMpFileName(MultivaluedMap<String, String> headers) {
     ContentDisposition cd = ContentDispositions.parse(headers.getFirst("Content-Disposition"));
     return defaultObject(cd.getFilename(), "unnamed-" + System.currentTimeMillis());
+  }
+
+  protected Map<String, Object> parseMpFormFields(Map<String, List<InputPart>> uploadForm,
+      String... fieldNames) throws IOException {
+    if (isEmpty(uploadForm) || isEmpty(fieldNames)) {
+      return new LinkedHashMap<>();
+    }
+    Map<String, Object> map = new LinkedHashMap<>(uploadForm.size());
+    for (String fileName : fieldNames) {
+      List<String> lp = new ArrayList<>();
+      for (InputPart ip : uploadForm.get(fileName)) {
+        lp.add(ip.getBodyAsString());
+      }
+      if (lp.size() > 1) {
+        map.put(fileName, lp);
+      } else if (lp.size() == 1) {
+        map.put(fileName, lp.get(0));
+      }
+    }
+    return map;
   }
 
   protected String resolvePath() {

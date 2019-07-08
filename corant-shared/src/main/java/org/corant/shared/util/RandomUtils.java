@@ -43,11 +43,11 @@ public class RandomUtils {
     return result;
   }
 
-  public static double randomDouble(double max) {
+  public static double randomDouble(final double max) {
     return randomDouble(0, max);
   }
 
-  public static double randomDouble(double min, double max) {
+  public static double randomDouble(final double min, final double max) {
     shouldBeFalse(min > max);
     if (min == max) {
       return min;
@@ -55,11 +55,11 @@ public class RandomUtils {
     return min + (max - min) * RANDOM.nextDouble();
   }
 
-  public static double randomFloat(float max) {
+  public static double randomFloat(final float max) {
     return randomFloat(0, max);
   }
 
-  public static float randomFloat(float min, float max) {
+  public static float randomFloat(final float min, final float max) {
     shouldBeFalse(min > max);
     if (min == max) {
       return min;
@@ -67,11 +67,11 @@ public class RandomUtils {
     return min + (max - min) * RANDOM.nextFloat();
   }
 
-  public static int randomInt(int max) {
+  public static int randomInt(final int max) {
     return randomInt(0, max);
   }
 
-  public static int randomInt(int min, int max) {
+  public static int randomInt(final int min, final int max) {
     shouldBeFalse(min > max);
     if (min == max) {
       return min;
@@ -79,31 +79,31 @@ public class RandomUtils {
     return min + RANDOM.nextInt(max - min);
   }
 
-  public static String randomLetters(int length) {
+  public static String randomLetters(final int length) {
     return randomString(LETTERS, length);
   }
 
-  public static long randomLong(long max) {
+  public static long randomLong(final long max) {
     return randomLong(0L, max);
   }
 
-  public static long randomLong(long min, long max) {
+  public static long randomLong(final long min, final long max) {
     return (long) randomDouble(min, max);
   }
 
-  public static String randomLowerCaseLetters(int length) {
+  public static String randomLowerCaseLetters(final int length) {
     return randomString(LOWER_CASE_LETTERS, length);
   }
 
-  public static String randomNumbers(int length) {
+  public static String randomNumbers(final int length) {
     return randomString(NUMBERS, length);
   }
 
-  public static String randomNumbersAndLetters(int length) {
+  public static String randomNumbersAndLetters(final int length) {
     return randomString(NUMBERS_AND_LETTERS, length);
   }
 
-  public static String randomString(char[] sourceChar, int length) {
+  public static String randomString(final char[] sourceChar, final int length) {
     if (sourceChar == null || sourceChar.length == 0 || length < 0) {
       return null;
     }
@@ -114,11 +114,11 @@ public class RandomUtils {
     return str.toString();
   }
 
-  public static String randomString(String source, int length) {
+  public static String randomString(final String source, final int length) {
     return source == null ? null : randomString(source.toCharArray(), length);
   }
 
-  public static String randomUpperCaseLetters(int length) {
+  public static String randomUpperCaseLetters(final int length) {
     return randomString(UPPER_CASE_LETTERS, length);
   }
 }

@@ -25,12 +25,16 @@ import java.util.Random;
  */
 public class RandomUtils {
   private static final Random RANDOM = new Random();
-  public static final String NUMBERS_AND_LETTERS =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static final String NUMBERS = "0123456789";
   public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static final String UPPER_CASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+  public static final String NUMBERS_AND_LETTERS =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String NUMBERS_AND_UPPER_CASE_LETTERS =
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String NUMBERS_AND_LOWER_CASE_LETTERS =
+      "0123456789abcdefghijklmnopqrstuvwxyz";
 
   public static boolean randomBoolean() {
     return RANDOM.nextBoolean();
@@ -43,28 +47,32 @@ public class RandomUtils {
     return result;
   }
 
+  public static char[] randomChars(final char[] sourceChar, final int length) {
+    shouldBeTrue(sourceChar != null && sourceChar.length > 0 && length > 0);
+    int sLen = sourceChar.length;
+    char[] chars = new char[length];
+    for (int i = 0; i < length; i++) {
+      chars[i] = sourceChar[RANDOM.nextInt(sLen)];
+    }
+    return chars;
+  }
+
   public static double randomDouble(final double max) {
     return randomDouble(0, max);
   }
 
   public static double randomDouble(final double min, final double max) {
     shouldBeFalse(min > max);
-    if (min == max) {
-      return min;
-    }
-    return min + (max - min) * RANDOM.nextDouble();
+    return min == max ? min : min + (max - min) * RANDOM.nextDouble();
   }
 
-  public static double randomFloat(final float max) {
+  public static float randomFloat(final float max) {
     return randomFloat(0, max);
   }
 
   public static float randomFloat(final float min, final float max) {
     shouldBeFalse(min > max);
-    if (min == max) {
-      return min;
-    }
-    return min + (max - min) * RANDOM.nextFloat();
+    return min == max ? min : min + (max - min) * RANDOM.nextFloat();
   }
 
   public static int randomInt(final int max) {
@@ -73,10 +81,7 @@ public class RandomUtils {
 
   public static int randomInt(final int min, final int max) {
     shouldBeFalse(min > max);
-    if (min == max) {
-      return min;
-    }
-    return min + RANDOM.nextInt(max - min);
+    return min == max ? min : min + RANDOM.nextInt(max - min);
   }
 
   public static String randomLetters(final int length) {
@@ -99,23 +104,27 @@ public class RandomUtils {
     return randomString(NUMBERS, length);
   }
 
+  public static String randomNumbersAndLcLetters(final int length) {
+    return randomString(NUMBERS_AND_LOWER_CASE_LETTERS, length);
+  }
+
   public static String randomNumbersAndLetters(final int length) {
     return randomString(NUMBERS_AND_LETTERS, length);
   }
 
-  public static String randomString(final char[] sourceChar, final int length) {
-    if (sourceChar == null || sourceChar.length == 0 || length < 0) {
-      return null;
-    }
-    StringBuilder str = new StringBuilder(length);
-    for (int i = 0; i < length; i++) {
-      str.append(sourceChar[RANDOM.nextInt(sourceChar.length)]);
-    }
-    return str.toString();
+  public static String randomNumbersAndUcLetters(final int length) {
+    return randomString(NUMBERS_AND_UPPER_CASE_LETTERS, length);
   }
 
   public static String randomString(final String source, final int length) {
-    return source == null ? null : randomString(source.toCharArray(), length);
+    shouldBeTrue(source != null && source.length() > 0 && length > 0);
+    StringBuilder sb = new StringBuilder(length);
+    char[] sourceChar = source.toCharArray();
+    int sLen = sourceChar.length;
+    for (int i = 0; i < length; i++) {
+      sb.append(sourceChar[RANDOM.nextInt(sLen)]);
+    }
+    return sb.toString();
   }
 
   public static String randomUpperCaseLetters(final int length) {

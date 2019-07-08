@@ -15,6 +15,7 @@ package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
 import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Collections;
@@ -31,7 +32,6 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.ConnectionFactory;
-import org.corant.kernel.util.Unnamed;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
@@ -60,7 +60,8 @@ public abstract class AbstractJMSExtension implements Extension {
       if (instance().select(ConnectionFactory.class).isResolvable()) {
         return instance().select(ConnectionFactory.class).get();
       }
-      return instance().select(ConnectionFactory.class, Unnamed.INST).get();
+      return shouldNotNull(
+          instance().select(ConnectionFactory.class, resolveNameds(connectionFactoryId)).get());
     } else {
       return shouldNotNull(
           instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactoryId)).get());

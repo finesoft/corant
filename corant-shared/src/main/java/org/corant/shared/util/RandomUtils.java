@@ -13,6 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.util.Random;
 
 /**
@@ -30,7 +32,78 @@ public class RandomUtils {
   public static final String UPPER_CASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
-  public static String random(char[] sourceChar, int length) {
+  public static boolean randomBoolean() {
+    return RANDOM.nextBoolean();
+  }
+
+  public static byte[] randomBytes(final int count) {
+    shouldBeTrue(count >= 0, "Count cannot be negative.");
+    final byte[] result = new byte[count];
+    RANDOM.nextBytes(result);
+    return result;
+  }
+
+  public static double randomDouble(double max) {
+    return randomDouble(0, max);
+  }
+
+  public static double randomDouble(double min, double max) {
+    shouldBeFalse(min > max);
+    if (min == max) {
+      return min;
+    }
+    return min + (max - min) * RANDOM.nextDouble();
+  }
+
+  public static double randomFloat(float max) {
+    return randomFloat(0, max);
+  }
+
+  public static float randomFloat(float min, float max) {
+    shouldBeFalse(min > max);
+    if (min == max) {
+      return min;
+    }
+    return min + (max - min) * RANDOM.nextFloat();
+  }
+
+  public static int randomInt(int max) {
+    return randomInt(0, max);
+  }
+
+  public static int randomInt(int min, int max) {
+    shouldBeFalse(min > max);
+    if (min == max) {
+      return min;
+    }
+    return min + RANDOM.nextInt(max - min);
+  }
+
+  public static String randomLetters(int length) {
+    return randomString(LETTERS, length);
+  }
+
+  public static long randomLong(long max) {
+    return randomLong(0L, max);
+  }
+
+  public static long randomLong(long min, long max) {
+    return (long) randomDouble(min, max);
+  }
+
+  public static String randomLowerCaseLetters(int length) {
+    return randomString(LOWER_CASE_LETTERS, length);
+  }
+
+  public static String randomNumbers(int length) {
+    return randomString(NUMBERS, length);
+  }
+
+  public static String randomNumbersAndLetters(int length) {
+    return randomString(NUMBERS_AND_LETTERS, length);
+  }
+
+  public static String randomString(char[] sourceChar, int length) {
     if (sourceChar == null || sourceChar.length == 0 || length < 0) {
       return null;
     }
@@ -41,41 +114,11 @@ public class RandomUtils {
     return str.toString();
   }
 
-  public static int random(int max) {
-    return random(0, max);
-  }
-
-  public static int random(int min, int max) {
-    if (min > max) {
-      return 0;
-    }
-    if (min == max) {
-      return min;
-    }
-    return min + RANDOM.nextInt(max - min);
-  }
-
-  public static String random(String source, int length) {
-    return source == null ? null : random(source.toCharArray(), length);
+  public static String randomString(String source, int length) {
+    return source == null ? null : randomString(source.toCharArray(), length);
   }
 
   public static String randomUpperCaseLetters(int length) {
-    return random(UPPER_CASE_LETTERS, length);
-  }
-
-  public static String randomLetters(int length) {
-    return random(LETTERS, length);
-  }
-
-  public static String randomLowerCaseLetters(int length) {
-    return random(LOWER_CASE_LETTERS, length);
-  }
-
-  public static String randomNumbers(int length) {
-    return random(NUMBERS, length);
-  }
-
-  public static String randomNumbersAndLetters(int length) {
-    return random(NUMBERS_AND_LETTERS, length);
+    return randomString(UPPER_CASE_LETTERS, length);
   }
 }

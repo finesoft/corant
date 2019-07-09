@@ -15,26 +15,19 @@ package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.propertiesOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.replace;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.function.Consumer;
-import javax.enterprise.inject.Instance;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
 import org.corant.Corant;
 import org.corant.config.Configurations;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.service.DataSourceService;
 import org.corant.kernel.service.PersistenceService.PersistenceUnitLiteral;
-import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
-import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.jpa.shared.JPAExtension;
 import org.corant.suites.jpa.shared.JPAUtils;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -164,14 +157,13 @@ public class HibernateOrmSchemaUtils {
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
-    InitialContext jndi = Corant.instance().select(InitialContext.class).get();
     JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
-    Instance<DataSource> datasources = Corant.instance().select(DataSource.class);
+    DataSourceService dataSourceService = Corant.instance().select(DataSourceService.class).get();
     PersistenceUnitInfoMetaData pum =
         shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource((dsn) -> resolveDataSource(jndi, datasources, dsn));
+    usePum.configDataSource((dsn) -> dataSourceService.get(dsn));
     props.putAll(usePum.getProperties());
     EntityManagerFactoryBuilderImpl emfb = EntityManagerFactoryBuilderImpl.class
         .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
@@ -194,18 +186,4 @@ public class HibernateOrmSchemaUtils {
     return Corant.run(HibernateOrmSchemaUtils.class, "-disable_boost_line");
   }
 
-  private static DataSource resolveDataSource(InitialContext jndi, Instance<DataSource> datasources,
-      String dataSourceName) {
-    if (isNotBlank(dataSourceName)
-        && dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
-      try {
-        return forceCast(jndi.lookup(dataSourceName));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
-    } else if (!datasources.isUnsatisfied()) {
-      return datasources.select(Qualifiers.resolveNamed(dataSourceName)).get();
-    }
-    throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
-  }
 }

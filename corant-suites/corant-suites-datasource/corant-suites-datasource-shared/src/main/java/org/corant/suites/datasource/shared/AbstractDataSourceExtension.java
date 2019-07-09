@@ -15,11 +15,6 @@ package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -28,6 +23,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.kernel.util.Instances.NamingReference;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -42,18 +38,17 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public abstract class AbstractDataSourceExtension implements Extension {
 
-  protected final Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<>();
-  protected final Set<String> dataSourceNames = new LinkedHashSet<>();
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-
+  protected volatile NamedQualifierObjectManager<DataSourceConfig> configManager =
+      NamedQualifierObjectManager.empty();
   protected volatile InitialContext jndi;
 
-  public Set<String> getDataSourceNames() {
-    return Collections.unmodifiableSet(dataSourceNames);
-  }
-
-  protected Map<String, DataSourceConfig> getDataSourceConfigs() {
-    return Collections.unmodifiableMap(dataSourceConfigs);
+  /**
+   * 
+   * @return the configManager
+   */
+  public NamedQualifierObjectManager<DataSourceConfig> getConfigManager() {
+    return configManager;
   }
 
   /**
@@ -62,15 +57,12 @@ public abstract class AbstractDataSourceExtension implements Extension {
    * @param bbd onBeforeBeanDiscovery
    */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    dataSourceConfigs.clear();
-    dataSourceNames.clear();
-    DataSourceConfig.from(ConfigProvider.getConfig()).forEach(dataSourceConfigs::put);
-    dataSourceNames.addAll(dataSourceConfigs.keySet());
-    if (dataSourceConfigs.isEmpty()) {
+    configManager = DataSourceConfig.from(ConfigProvider.getConfig());
+    if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.info(() -> String.format("Find %s data sources named %s.", dataSourceNames.size(),
-          String.join(", ", dataSourceNames)));
+      logger.info(() -> String.format("Find %s data sources named %s.", configManager.size(),
+          String.join(", ", configManager.getAllDisplayNames())));
     }
   }
 

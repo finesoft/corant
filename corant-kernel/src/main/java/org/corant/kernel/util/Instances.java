@@ -14,11 +14,14 @@
 package org.corant.kernel.util;
 
 import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.asClass;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -51,7 +54,7 @@ public class Instances {
     return object != null && !instance().select(getUserClass(object), qualifiers).isUnsatisfied();
   }
 
-  public static <T> Optional<T> resolvable(Class<T> instanceClass, Annotation... qualifiers) {
+  public static <T> Optional<T> resolve(Class<T> instanceClass, Annotation... qualifiers) {
     Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
     if (instance().select(instCls, qualifiers).isResolvable()) {
       return Optional.of(instance().select(instCls).get());
@@ -60,12 +63,12 @@ public class Instances {
     }
   }
 
-  public static <T> void resolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    shouldNotNull(consumer).accept(resolvable(instanceClass).orElseThrow(
+  public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
+    shouldNotNull(consumer).accept(resolve(instanceClass).orElseThrow(
         () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
   }
 
-  public static <T> T resolvableAnyway(Class<T> instanceClass, Annotation... qualifiers) {
+  public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
     Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
     if (instance().select(instCls, qualifiers).isResolvable()) {
       return instance().select(instCls).get();
@@ -76,7 +79,7 @@ public class Instances {
     }
   }
 
-  public static <T> T resolvableAnyway(T obj, Annotation... qualifiers) {
+  public static <T> T resolveAnyway(T obj, Annotation... qualifiers) {
     if (isManagedBean(obj, qualifiers)) {
       return obj;
     } else if (obj != null) {
@@ -85,9 +88,25 @@ public class Instances {
     return null;
   }
 
-  public static <T, R> R resolvableApply(Class<T> instanceClass, Function<T, R> function) {
-    return shouldNotNull(function).apply(resolvable(instanceClass).orElseThrow(
+  public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function) {
+    return shouldNotNull(function).apply(resolve(instanceClass).orElseThrow(
         () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
+  }
+
+  public static <T> Optional<T> resolveNamed(Class<T> instanceClass, String name) {
+    String useName = defaultTrim(name);
+    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Instance<T> inst = instance().select(instCls);
+    if (inst.isUnsatisfied()) {
+      return Optional.empty();
+    }
+    if (isBlank(useName) && inst.isResolvable()) {
+      return Optional.of(instance().select(instCls).get());
+    } else if (inst.select(resolveNameds(useName)).isResolvable()) {
+      return Optional.of(inst.select(resolveNameds(useName)).get());
+    } else {
+      return Optional.empty();
+    }
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
@@ -95,14 +114,14 @@ public class Instances {
     return instance().select(instCls, qualifiers);
   }
 
-  public static <T> void tryResolvableAccept(Class<T> instanceClass, Consumer<T> consumer) {
+  public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
     Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
     if (instance().select(instCls).isResolvable()) {
       shouldNotNull(consumer).accept(instance().select(instCls).get());
     }
   }
 
-  public static <T, R> R tryResolvableApply(Class<T> instanceClass, Function<T, R> function) {
+  public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function) {
     Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
     if (instance().select(instCls).isResolvable()) {
       return shouldNotNull(function).apply(instance().select(instCls).get());

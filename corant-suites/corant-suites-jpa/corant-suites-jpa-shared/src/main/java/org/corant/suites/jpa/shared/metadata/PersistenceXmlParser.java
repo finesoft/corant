@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.SharedCacheMode;
@@ -54,11 +54,11 @@ public class PersistenceXmlParser {
 
   protected static final Logger logger = Logger.getLogger(PersistenceXmlParser.class.getName());
 
-  public static Map<String, PersistenceUnitInfoMetaData> parse(URL url) {
-    Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
-    doParse(url, map);
+  public static Set<PersistenceUnitInfoMetaData> parse(URL url) {
+    Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
+    doParse(url, cfgs);
     logger.info(() -> String.format("Parsed persistence pu from %s", url.toExternalForm()));
-    return map;
+    return cfgs;
   }
 
   static void doParse(Element element, PersistenceUnitInfoMetaData puimd) {
@@ -110,7 +110,7 @@ public class PersistenceXmlParser {
     puimd.resolvePersistenceProvider();
   }
 
-  static void doParse(URL url, Map<String, PersistenceUnitInfoMetaData> map) {
+  static void doParse(URL url, Set<PersistenceUnitInfoMetaData> cfgs) {
     final Document doc = loadDocument(url);
     final Element top = doc.getDocumentElement();
     final NodeList children = top.getChildNodes();
@@ -122,13 +122,14 @@ public class PersistenceXmlParser {
         final String tag = element.getTagName();
         if (tag.equals(JPAConfig.JCX_TAG)) {
           final String puName = element.getAttribute(JPAConfig.JCX_NME);
-          shouldBeFalse(map.containsKey(puName), "Persistence pu name %s dup!", tag);
+          shouldBeFalse(cfgs.stream().anyMatch(p -> p.getPersistenceUnitName().equals(puName)),
+              "Persistence pu name %s dup!", tag);
           PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(puName);
           puimd.setVersion(version);
           puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
           doParse(element, puimd);
           if (isNotEmpty(puimd.getManagedClassNames())) {
-            map.put(puName, puimd);
+            cfgs.add(puimd);
           }
         }
       }

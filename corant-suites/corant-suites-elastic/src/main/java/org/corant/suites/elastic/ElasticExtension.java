@@ -18,8 +18,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -30,7 +28,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.kernel.util.Qualifiers;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.elasticsearch.client.transport.TransportClient;
@@ -53,16 +51,12 @@ public class ElasticExtension implements Extension {
     System.setProperty("es.set.netty.runtime.available.processors", "false");
   }
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-  protected final Map<String, ElasticConfig> configs = new LinkedHashMap<>();
-
   protected final Map<String, PreBuiltTransportClient> clients = new ConcurrentHashMap<>();
+  private volatile NamedQualifierObjectManager<ElasticConfig> configManager =
+      NamedQualifierObjectManager.empty();
 
-  public ElasticConfig getConfig(String clusterName) {
-    return configs.get(clusterName);
-  }
-
-  public Map<String, ElasticConfig> getConfigs() {
-    return Collections.unmodifiableMap(configs);
+  public NamedQualifierObjectManager<ElasticConfig> getConfigManager() {
+    return configManager;
   }
 
   public PreBuiltTransportClient getTransportClient(String clusterName) {
@@ -70,13 +64,12 @@ public class ElasticExtension implements Extension {
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    configs.clear();
-    ElasticConfig.from(ConfigProvider.getConfig()).forEach(configs::put);
-    if (configs.isEmpty()) {
+    configManager = ElasticConfig.from(ConfigProvider.getConfig());
+    if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {
-      logger.info(() -> String.format("Find elastic cluster names %s",
-          String.join(", ", configs.keySet())));
+      logger.info(() -> String.format("Find %s elastic clusters names %s", configManager.size(),
+          String.join(", ", configManager.getAllDisplayNames())));
     }
   }
 
@@ -86,20 +79,20 @@ public class ElasticExtension implements Extension {
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      for (final String clusterName : configs.keySet()) {
-        event.<PreBuiltTransportClient>addBean().addQualifier(Qualifiers.resolveNamed(clusterName))
+      getConfigManager().getAllWithQualifiers().forEach((c, q) -> {
+        event.<PreBuiltTransportClient>addBean().addQualifiers(q)
             .addQualifier(Default.Literal.INSTANCE).addTransitiveTypeClosure(TransportClient.class)
             .beanClass(PreBuiltTransportClient.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
-              return getTransportClient(clusterName);
+              return getTransportClient(c.getClusterName());
             }).disposeWith((tc, beans) -> tc.close());
-      }
+      });
     }
   }
 
   @SuppressWarnings("resource")
   PreBuiltTransportClient produce(String clusterName) {
-    ElasticConfig cfg = shouldNotNull(configs.get(clusterName));
+    ElasticConfig cfg = shouldNotNull(configManager.get(clusterName));
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());

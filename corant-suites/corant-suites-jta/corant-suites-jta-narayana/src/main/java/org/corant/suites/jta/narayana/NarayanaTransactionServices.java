@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jta.narayana;
 
-import static org.corant.kernel.util.Instances.resolvable;
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import javax.enterprise.context.ApplicationScoped;
@@ -44,12 +44,12 @@ public class NarayanaTransactionServices implements TransactionServices {
   }
 
   public TransactionManager getTransactionManager() {
-    return resolvableApply(NarayanaTransactionService.class, ts -> ts.getTransactionManager());
+    return resolveApply(NarayanaTransactionService.class, ts -> ts.getTransactionManager());
   }
 
   @Override
   public UserTransaction getUserTransaction() {
-    return resolvableApply(NarayanaTransactionService.class, ts -> ts.getUserTransaction());
+    return resolveApply(NarayanaTransactionService.class, ts -> ts.getUserTransaction());
   }
 
   @Override
@@ -75,7 +75,7 @@ public class NarayanaTransactionServices implements TransactionServices {
 
     @Override
     public TransactionManager getTransactionManager() {
-      return resolvable(TransactionManager.class)
+      return resolve(TransactionManager.class)
           .orElse(com.arjuna.ats.jta.TransactionManager.transactionManager());
     }
 

@@ -14,17 +14,15 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
-import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,27 +46,27 @@ public class PersistencePropertiesParser {
 
   private static Logger logger = Logger.getLogger(PersistencePropertiesParser.class.getName());
 
-  public static Map<String, PersistenceUnitInfoMetaData> parse(Config config) {
-    Map<String, PersistenceUnitInfoMetaData> map = new HashMap<>();
+  public static Set<PersistenceUnitInfoMetaData> parse(Config config) {
+    Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = JPAConfig.defaultPropertyNames(config);
     String dfltPuNme = config
         .getOptionalValue(JPAConfig.JC_PREFIX + JPAConfig.JC_PU_NME.substring(1), String.class)
         .orElse(null);
-    doParse(config, dfltPuNme, dfltCfgKeys, map);// defaults
+    doParse(config, dfltPuNme, dfltCfgKeys, cfgs);// defaults
     Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
         s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     namedCfgKeys.forEach((k, v) -> {
-      doParse(config, k, v, map);
+      doParse(config, k, v, cfgs);
       logger.info(() -> String.format("Parsed persistence pu %s from config file.", k));
     });
-    return map;
+    return cfgs;
   }
 
   protected static void doParse(Config config, String key, Collection<String> cfgNmes,
-      Map<String, PersistenceUnitInfoMetaData> map) {
-    final String name = defaultTrim(key);
-    PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(name);
-    final String proPrefix = isNotBlank(name) ? JPAConfig.JC_PREFIX + name + JPAConfig.JC_PRO
+      Set<PersistenceUnitInfoMetaData> cfgs) {
+    PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(key);
+    final String proPrefix = isNotBlank(puimd.getPersistenceUnitName())
+        ? JPAConfig.JC_PREFIX + puimd.getPersistenceUnitName() + JPAConfig.JC_PRO
         : JPAConfig.JC_PREFIX + JPAConfig.JC_PRO.substring(1);
     final int proPrefixLen = proPrefix.length();
     Set<String> proCfgNmes = new HashSet<>();
@@ -122,11 +120,11 @@ public class PersistencePropertiesParser {
       if (isNotEmpty(puimd.getManagedClassNames())) {
         puimd.resolvePersistenceProvider();
         doParseProperties(config, proPrefix, proCfgNmes, puimd);
-        shouldBeNull(map.put(name, puimd),
-            "The jpa configuration error persistence pu name %s dup!", name);
+        shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence pu name %s dup!",
+            puimd.getPersistenceUnitName());
       } else {
-        logger.warning(
-            () -> String.format("Can not find any managed classes for persistence pu %s", name));
+        logger.warning(() -> String.format("Can not find any managed classes for persistence pu %s",
+            puimd.getPersistenceUnitName()));
       }
     }
   }

@@ -145,7 +145,7 @@ public class FlywayMigrator {
   protected Stream<FlywayConfigProvider> getConfigProviders() {
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
-        return streamOf(dse.getDataSourceNames()).map((e) -> {
+        return streamOf(dse.getConfigManager().getAllNames()).map((e) -> {
           try {
             final String name = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e;
             return DefaultFlywayConfigProvider.of(getLocation(e),

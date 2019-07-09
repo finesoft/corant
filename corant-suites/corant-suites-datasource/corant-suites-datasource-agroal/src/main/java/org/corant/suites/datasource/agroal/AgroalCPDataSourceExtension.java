@@ -13,11 +13,10 @@
  */
 package org.corant.suites.datasource.agroal;
 
-import static org.corant.kernel.util.Instances.resolvable;
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -29,7 +28,6 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -50,18 +48,13 @@ import io.agroal.narayana.NarayanaTransactionIntegration;
 public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   /**
-   * When go into this method, the data source configuration have been collected,
-   * {@link #onBeforeBeanDiscovery(javax.enterprise.inject.spi.BeforeBeanDiscovery)}. The jndi
-   * naming context has been initialized,
-   * {@linkplain org.corant.suites.jndi.InitialContextExtension.beforeBeanDiscovery}
    *
-   * @param event afterBeanDiscovery
+   * @param event onAfterBeanDiscovery
    */
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      getDataSourceConfigs().forEach((dsn, dsc) -> {
-        final Annotation[] qualifiers = Qualifiers.resolveNameds(dsn);
-        event.<DataSource>addBean().addQualifiers(qualifiers)
+      getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
+        event.<DataSource>addBean().addQualifiers(dsn)
             .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
               try {
@@ -70,8 +63,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
                 throw new CorantRuntimeException(e);
               }
             }).disposeWith((dataSource, beans) -> dataSource.close());
-        if (isNotBlank(dsn)) {
-          registerJndi(dsn, qualifiers);
+        if (isNotBlank(dsc.getName())) {
+          registerJndi(dsc.getName(), dsn);
         }
       });
     }
@@ -126,15 +119,15 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {
     if (cfg.isJta() || cfg.isXa()) {
-      TransactionManager tm = resolvable(TransactionManager.class).orElse(null);
+      TransactionManager tm = resolve(TransactionManager.class).orElse(null);
       TransactionSynchronizationRegistry tsr =
-          resolvable(TransactionSynchronizationRegistry.class).orElse(null);
+          resolve(TransactionSynchronizationRegistry.class).orElse(null);
       XAResourceRecoveryRegistry xar = null;
       if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-        xar = resolvable(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
+        xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
             .orElse(null);
       } else {
-        xar = resolvable(XAResourceRecoveryRegistry.class).orElse(null);
+        xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
       }
       if (xar != null) {
         cfgs.connectionPoolConfiguration().transactionIntegration(

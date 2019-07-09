@@ -13,13 +13,14 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Any;
@@ -85,12 +86,21 @@ public class JPAService implements PersistenceService {
   public EntityManagerFactory getEntityManagerFactory(PersistenceUnit pu) {
     return emfs.computeIfAbsent(pu, p -> {
       PersistenceUnitInfoMetaData puim =
-          resolvableApply(JPAExtension.class, b -> b.getPersistenceUnitInfoMetaData(pu));
+          resolveApply(JPAExtension.class, b -> b.getPersistenceUnitInfoMetaData(pu));
       Named jp = NamedLiteral.of(puim.getPersistenceProviderClassName());
       Instance<JPAProvider> provider = select(JPAProvider.class, jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
       return provider.get().buildEntityManagerFactory(puim,
           mapOf(PersistenceNames.PU_NME_KEY, pu.unitName()));
+    });
+  }
+
+  @PreDestroy
+  void onPreDestroy() {
+    emfs.values().forEach(emf -> {
+      if (emf.isOpen()) {
+        emf.close();
+      }
     });
   }
 

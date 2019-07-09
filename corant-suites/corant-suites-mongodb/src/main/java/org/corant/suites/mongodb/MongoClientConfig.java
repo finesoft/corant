@@ -14,8 +14,7 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
-import static org.corant.shared.util.Assertions.shouldBeNull;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ConversionUtils.toObject;
@@ -41,6 +40,9 @@ import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.normal.Names;
 import org.corant.kernel.normal.Names.JndiNames;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.kernel.util.Qualifiers.NamedObject;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.eclipse.microprofile.config.Config;
@@ -55,7 +57,7 @@ import com.mongodb.MongoCredential;
  * @author bingo 下午12:10:04
  *
  */
-public class MongoClientConfig {
+public class MongoClientConfig implements NamedObject {
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/MongoClient";
   public static final int DEFAULT_PORT = 27017;
   public static final String DEFAULT_HOST = "localhost";
@@ -89,23 +91,26 @@ public class MongoClientConfig {
 
   private char[] password = new char[0];
 
-  public static Map<String, MongoClientConfig> from(Config config) {
-    Map<String, MongoClientConfig> clients = new HashMap<>();
+  public static NamedQualifierObjectManager<MongoClientConfig> from(Config config) {
+    Set<MongoClientConfig> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = defaultPropertyNames(config);
     // handle named client
     Map<String, List<String>> clientCfgs = getGroupConfigNames(config,
         (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
-      MongoClientConfig client = of(config, k, v);
-      shouldBeNull(clients.put(k, client), "Mongo client name %s dup!", k);
+      MongoClientConfig cfg = of(config, k, v);
+      if (cfg != null) {
+        shouldBeTrue(cfgs.add(cfg), "Mongo client databaseName %s dup!", k);
+      }
     });
     // find default configuration
-    String dfltName = config.getOptionalValue(MC_PREFIX + "name", String.class).orElse(null);
+    String dfltName =
+        config.getOptionalValue(MC_PREFIX + "databaseName", String.class).orElse(null);
     MongoClientConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (isNotEmpty(dfltCfg.getHostAndPorts())) {
-      clients.put(defaultTrim(dfltCfg.getName()), dfltCfg);
+      cfgs.add(dfltCfg);
     }
-    return clients;
+    return new DefaultNamedQualifierObjectManager<>(cfgs);
   }
 
   static Set<String> defaultPropertyNames(Config config) {
@@ -222,6 +227,7 @@ public class MongoClientConfig {
    *
    * @return the clientName
    */
+  @Override
   public String getName() {
     return name;
   }
@@ -321,7 +327,7 @@ public class MongoClientConfig {
 
   /**
    *
-   * @param name the client name to set
+   * @param databaseName the client databaseName to set
    */
   protected void setName(String name) {
     this.name = defaultTrim(name);
@@ -361,23 +367,21 @@ public class MongoClientConfig {
    * @author bingo 下午7:25:05
    *
    */
-  public static class MongodbConfig {
+  public static class MongodbConfig implements NamedObject {
 
-    private String name;
-
-    private String clientName;
-
+    private final String clientName;
     private final MongoClientConfig client;
+    private final String name;
+    private final String databaseName;
 
-    public MongodbConfig(MongoClientConfig client) {
+    public MongodbConfig(MongoClientConfig client, String databaseName) {
       this.client = shouldNotNull(client);
       clientName = client.getName();
-    }
-
-    public MongodbConfig(MongoClientConfig client, String name) {
-      this.client = shouldNotNull(client);
-      clientName = client.getName();
-      this.name = shouldNotBlank(name);
+      this.databaseName = isBlank(databaseName)
+          ? new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase()
+          : defaultTrim(databaseName);
+      name = isBlank(clientName) ? this.databaseName
+          : clientName + Names.NAME_SPACE_SEPARATOR + this.databaseName;
     }
 
     /**
@@ -397,19 +401,20 @@ public class MongoClientConfig {
     }
 
     /**
+     * 
+     * @return the databaseName
+     */
+    public String getDatabaseName() {
+      return databaseName;
+    }
+
+    /**
      *
      * @return the database
      */
+    @Override
     public String getName() {
-      if (name != null) {
-        return name;
-      }
-      return new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase();
-    }
-
-    public String getNameSpace() {
-      return isBlank(getClientName()) ? getName()
-          : getClientName() + Names.NAME_SPACE_SEPARATOR + getName();
+      return name;
     }
 
   }

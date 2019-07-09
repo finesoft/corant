@@ -146,7 +146,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   protected Object wrapUintOfWorksKey(Transaction transaction) {
-    return transaction;// if use narayana arjuna then their TransactionImple hc/eq use Uid.
+    return transaction;// JTA1.3 Spec-> 3.3.4 Transaction Equality and Hash Code
   }
 
   void clearCurrentUnitOfWorks(Object key) {

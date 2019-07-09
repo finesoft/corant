@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.service;
 
-import static org.corant.kernel.util.Instances.resolvableAnyway;
+import static org.corant.kernel.util.Instances.resolveAnyway;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -34,7 +34,7 @@ public interface TransactionService {
 
   static Transaction currentTransaction() {
     try {
-      return resolvableAnyway(TransactionService.class).getTransaction();
+      return resolveAnyway(TransactionService.class).getTransaction();
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }
@@ -42,7 +42,7 @@ public interface TransactionService {
 
   static void delistXAResourceFromCurrentTransaction(XAResource xar, int flag) {
     try {
-      resolvableAnyway(TransactionService.class).delistXAResource(xar, flag);
+      resolveAnyway(TransactionService.class).delistXAResource(xar, flag);
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }
@@ -50,26 +50,26 @@ public interface TransactionService {
 
   static boolean enlistXAResourceToCurrentTransaction(XAResource xar) {
     try {
-      return resolvableAnyway(TransactionService.class).enlistXAResource(xar);
+      return resolveAnyway(TransactionService.class).enlistXAResource(xar);
     } catch (SystemException | RollbackException e) {
       throw new CorantRuntimeException(e);
     }
   }
 
   static boolean isCurrentTransactionActive() {
-    return resolvableAnyway(TransactionService.class).isTransactionActive();
+    return resolveAnyway(TransactionService.class).isTransactionActive();
   }
 
   static void registerSynchronizationToCurrentTransaction(Synchronization synchronization) {
-    resolvableAnyway(TransactionService.class).registerSynchronization(synchronization);
+    resolveAnyway(TransactionService.class).registerSynchronization(synchronization);
   }
 
   static TransactionManager transactionManager() {
-    return resolvableAnyway(TransactionService.class).getTransactionManager();
+    return resolveAnyway(TransactionService.class).getTransactionManager();
   }
 
   static UserTransaction userTransaction() {
-    return resolvableAnyway(TransactionService.class).getUserTransaction();
+    return resolveAnyway(TransactionService.class).getUserTransaction();
   }
 
   default void delistXAResource(XAResource xar, int flag) throws SystemException {

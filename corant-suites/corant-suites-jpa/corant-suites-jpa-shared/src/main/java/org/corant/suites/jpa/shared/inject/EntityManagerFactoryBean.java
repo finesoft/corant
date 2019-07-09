@@ -13,18 +13,17 @@
  */
 package org.corant.suites.jpa.shared.inject;
 
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultBlank;
+import java.lang.annotation.Annotation;
+import java.util.Collections;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import org.corant.kernel.service.PersistenceService;
 import org.corant.kernel.util.AbstractBean;
-import org.corant.kernel.util.Qualifiers;
 
 /**
  * corant-suites-jpa-shared
@@ -40,18 +39,17 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
    * @param beanManager
    * @param pu
    */
-  public EntityManagerFactoryBean(BeanManager beanManager, PersistenceUnit pu) {
+  public EntityManagerFactoryBean(BeanManager beanManager, PersistenceUnit pu,
+      Annotation[] qualifiers) {
     super(beanManager);
     this.pu = shouldNotNull(pu);
-    qualifiers.add(Any.Literal.INSTANCE);
-    qualifiers.add(Default.Literal.INSTANCE);
-    qualifiers.add(Qualifiers.resolveNamed(pu.unitName()));
+    Collections.addAll(this.qualifiers, qualifiers);
     types.add(EntityManagerFactory.class);
   }
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    return resolvableApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu));
+    return resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu));
   }
 
   @Override

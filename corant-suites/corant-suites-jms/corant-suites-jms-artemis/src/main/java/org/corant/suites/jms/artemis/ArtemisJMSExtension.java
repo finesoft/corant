@@ -15,7 +15,7 @@ package org.corant.suites.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.defaultBlank;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,6 @@ import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
@@ -86,9 +85,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      configs.forEach((dsn, dsc) -> {
+      getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
         if (dsc.isEnable()) {
-          event.<ActiveMQConnectionFactory>addBean().addQualifiers(Qualifiers.resolveNameds(dsn))
+          event.<ActiveMQConnectionFactory>addBean().addQualifiers(dsn)
               .addTransitiveTypeClosure(ActiveMQConnectionFactory.class)
               .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {
@@ -105,14 +104,12 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {
-    configs.clear();
-    ArtemisConfig.from(ConfigProvider.getConfig()).forEach(configs::put);
-    if (configs.isEmpty()) {
+    configManager = ArtemisConfig.from(ConfigProvider.getConfig());
+    if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
-      logger.info(() -> String.format("Find %s artemis brokers named %s.", configs.size(),
-          String.join(", ", configs.keySet().stream().map(c -> defaultBlank(c, "[Unnamed]"))
-              .toArray(String[]::new))));
+      logger.info(() -> String.format("Find %s artemis brokers named %s.", configManager.size(),
+          String.join(", ", configManager.getAllDisplayNames())));
     }
   }
 
@@ -163,8 +160,8 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
           } else if (double.class.equals(parameterType)) {
             m.invoke(activeMQConnectionFactory, ConversionUtils.toDouble(v.get()));
           }
-        } catch (Exception e) {
-          e.printStackTrace();
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          throw new CorantRuntimeException(e);
         }
       }
     });

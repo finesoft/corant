@@ -13,11 +13,20 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.trim;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
+import org.corant.shared.util.StringUtils;
 
 /**
  * corant-kernel
@@ -27,13 +36,195 @@ import javax.enterprise.inject.literal.NamedLiteral;
  */
 public class Qualifiers {
 
-  public static final Annotation resolveNamed(String name) {
-    return isBlank(name) ? Unnamed.INST : NamedLiteral.of(trim(name));
+  public static final Map<String, Annotation[]> resolveNameds(Set<String> names) {
+    Map<String, Annotation[]> nameds = new HashMap<>();
+    if (isNotEmpty(names)) {
+      Set<String> tNames = names.stream().map(StringUtils::defaultTrim).collect(Collectors.toSet());
+      if (tNames.size() == 1) {
+        String name = defaultTrim(tNames.iterator().next());
+        if (isBlank(name)) {
+          nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
+        } else {
+          nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
+              NamedLiteral.of(name)});
+        }
+      } else {
+        for (String name : tNames) {
+          if (isBlank(name)) {
+            nameds.put(name, new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE});
+          } else {
+            nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
+                NamedLiteral.of(name)});
+          }
+        }
+      }
+    }
+    return nameds;
   }
 
   public static final Annotation[] resolveNameds(String name) {
-    return isBlank(name) ? new Annotation[] {Unnamed.INST, Default.Literal.INSTANCE}
-        : new Annotation[] {NamedLiteral.of(trim(name)), Default.Literal.INSTANCE};
+    return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
+        : new Annotation[] {NamedLiteral.of(trim(name)), Any.Literal.INSTANCE,
+            Default.Literal.INSTANCE};
+  }
+
+  public static class DefaultNamedQualifierObjectManager<T extends NamedObject>
+      implements NamedQualifierObjectManager<T> {
+
+    protected final Map<String, T> objects;
+    protected final Map<String, Annotation[]> nameAndQualifiers;
+    protected final Map<T, Annotation[]> objectAndQualifiers;
+
+    public DefaultNamedQualifierObjectManager(Iterable<T> configs) {
+      Map<String, T> tmpObjects = new HashMap<>();
+      if (isNotEmpty(configs)) {
+        for (T t : configs) {
+          if (t != null) {
+            tmpObjects.put(defaultTrim(t.getName()), t);
+          }
+        }
+      }
+      this.objects = Collections.unmodifiableMap(tmpObjects);
+      this.nameAndQualifiers = Collections.unmodifiableMap(resolveNameds(tmpObjects.keySet()));
+      Map<T, Annotation[]> tmpObjectAndQualifiers = new HashMap<>();
+      nameAndQualifiers.forEach((k, v) -> tmpObjectAndQualifiers.put(this.objects.get(k), v));
+      this.objectAndQualifiers = Collections.unmodifiableMap(tmpObjectAndQualifiers);
+
+    }
+
+    @Override
+    public T get(String name) {
+      return objects.get(name);
+    }
+
+    @Override
+    public Set<String> getAllDisplayNames() {
+      return objects.keySet().stream().map(n -> isBlank(n) ? "[Unamed]" : n)
+          .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> getAllNames() {
+      return objects.keySet();
+    }
+
+    @Override
+    public Map<String, T> getAllWithNames() {
+      return objects;
+    }
+
+    @Override
+    public Map<T, Annotation[]> getAllWithQualifiers() {
+      return objectAndQualifiers;
+    }
+
+    @Override
+    public Annotation[] getQualifiers(String name) {
+      return nameAndQualifiers.getOrDefault(defaultTrim(name), new Annotation[0]);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return objects.isEmpty();
+    }
+
+    @Override
+    public int size() {
+      return objects.size();
+    }
+  }
+
+  public interface NamedObject {
+    String getName();
+  }
+
+  public interface NamedQualifierObjectManager<T extends NamedObject> {
+
+    @SuppressWarnings("rawtypes")
+    NamedQualifierObjectManager EMPTY = new NamedQualifierObjectManager() {};
+
+    @SuppressWarnings("unchecked")
+    static <X extends NamedObject> NamedQualifierObjectManager<X> empty() {
+      return EMPTY;
+    }
+
+    default T get(String name) {
+      return getAllWithNames().get(defaultTrim(name));
+    }
+
+    default Set<String> getAllDisplayNames() {
+      return Collections.emptySet();
+    }
+
+    default Set<String> getAllNames() {
+      return Collections.emptySet();
+    }
+
+    default Map<String, T> getAllWithNames() {
+      return Collections.emptyMap();
+    }
+
+    default Map<T, Annotation[]> getAllWithQualifiers() {
+      return Collections.emptyMap();
+    }
+
+    default Annotation[] getQualifiers(String name) {
+      return new Annotation[0];
+    }
+
+    default boolean isEmpty() {
+      return getAllWithNames().isEmpty();
+    }
+
+    default int size() {
+      return getAllWithNames().size();
+    }
+
+    public static abstract class AbstractNamedObject implements NamedObject {
+
+      private String name;
+
+      @Override
+      public boolean equals(Object obj) {
+        if (this == obj) {
+          return true;
+        }
+        if (obj == null) {
+          return false;
+        }
+        if (getClass() != obj.getClass()) {
+          return false;
+        }
+        AbstractNamedObject other = (AbstractNamedObject) obj;
+        if (name == null) {
+          if (other.name != null) {
+            return false;
+          }
+        } else if (!name.equals(other.name)) {
+          return false;
+        }
+        return true;
+      }
+
+      @Override
+      public String getName() {
+        return name;
+      }
+
+      @Override
+      public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (name == null ? 0 : name.hashCode());
+        return result;
+      }
+
+      protected void setName(String name) {
+        this.name = defaultTrim(name);
+      }
+
+    }
+
   }
 
 }

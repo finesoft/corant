@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.service;
 
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
@@ -132,7 +132,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
 
   Annotation[] resolveQualifier(Class<?> cls) {
     return puqCached.computeIfAbsent(cls, (c) -> {
-      return resolvableApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(cls));
+      return resolveApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(cls));
     });
   }
 }

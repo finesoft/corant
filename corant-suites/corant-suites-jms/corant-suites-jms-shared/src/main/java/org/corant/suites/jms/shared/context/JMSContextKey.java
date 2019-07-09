@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jms.shared.context;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.io.IOException;
@@ -42,7 +41,9 @@ import org.corant.suites.jms.shared.AbstractJMSExtension;
  *
  */
 public class JMSContextKey implements Serializable {
+
   private static final long serialVersionUID = -9143619854361396089L;
+
   private static final Logger logger = Logger.getLogger(JMSContextKey.class.getName());
   private final String connectionFactoryId;
   private final Integer sessionMode;
@@ -133,36 +134,20 @@ public class JMSContextKey implements Serializable {
       if (connectionFactory != null) {
         return connectionFactory;
       }
-      return shouldNotNull(
-          connectionFactory = AbstractJMSExtension.retriveConnectionFactory(connectionFactoryId));
+      return connectionFactory = AbstractJMSExtension.getConnectionFactory(connectionFactoryId);
     }
   }
 
   boolean isXa() {
-    return AbstractJMSExtension.retrieveConfig(connectionFactoryId).isXa();
+    return AbstractJMSExtension.getConfig(connectionFactoryId).isXa();
   }
 
   // TODO In NO XA
   JMSContext registerToLocaleTransactionSynchronization(JMSContext jmscontext) {
     if (sessionMode == JMSContext.SESSION_TRANSACTED) {
       try {
-        TransactionService.registerSynchronizationToCurrentTransaction(new Synchronization() {
-          @Override
-          public void afterCompletion(int status) {
-            if (status != Status.STATUS_COMMITTED) {
-              jmscontext.rollback();
-            }
-          }
-
-          @Override
-          public void beforeCompletion() {
-            try {
-              jmscontext.commit();
-            } catch (Exception e) {
-              throw new CorantRuntimeException(e);
-            }
-          }
-        });
+        TransactionService.registerSynchronizationToCurrentTransaction(
+            new LocalTransactionSynchronization(jmscontext));
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -177,4 +162,38 @@ public class JMSContextKey implements Serializable {
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
   }
+
+  /**
+   * corant-suites-jms-shared
+   *
+   * @author bingo 下午8:29:15
+   *
+   */
+  static final class LocalTransactionSynchronization implements Synchronization {
+    private final JMSContext jmscontext;
+
+    /**
+     * @param jmscontext
+     */
+    LocalTransactionSynchronization(JMSContext jmscontext) {
+      this.jmscontext = jmscontext;
+    }
+
+    @Override
+    public void afterCompletion(int status) {
+      if (status != Status.STATUS_COMMITTED) {
+        jmscontext.rollback();
+      }
+    }
+
+    @Override
+    public void beforeCompletion() {
+      try {
+        jmscontext.commit();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
 }

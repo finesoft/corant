@@ -14,12 +14,11 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
-import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
@@ -27,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,6 +37,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.util.MethodUtils;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
@@ -98,8 +100,8 @@ public class ArtemisConfig extends AbstractJMSConfig {
     setXa(xa);
   }
 
-  public static Map<String, ArtemisConfig> from(Config config) {
-    Map<String, ArtemisConfig> artMisCfgs = new LinkedHashMap<>();
+  public static NamedQualifierObjectManager<ArtemisConfig> from(Config config) {
+    Set<ArtemisConfig> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = defaultPropertyNames();
     // handle named artemis configuration
     Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
@@ -107,18 +109,18 @@ public class ArtemisConfig extends AbstractJMSConfig {
     namedCfgKeys.forEach((k, v) -> {
       final ArtemisConfig cfg = of(config, k, v);
       if (cfg != null) {
-        shouldBeNull(artMisCfgs.put(defaultTrim(cfg.getConnectionFactoryId()), cfg),
-            "The artemis id %s configuration dup!", cfg.getConnectionFactoryId());
+        shouldBeTrue(cfgs.add(cfg), "The artemis connection factory id %s configuration dup!",
+            cfg.getConnectionFactoryId());
       }
     });
     // handle default configuration
     String dfltName = config.getOptionalValue(ATM_PREFIX + "id", String.class).orElse(null);
     ArtemisConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (dfltCfg != null) {
-      shouldBeNull(artMisCfgs.put(defaultTrim(dfltCfg.getConnectionFactoryId()), dfltCfg),
-          "The artemis id %s configuration dup!", dfltName);
+      shouldBeTrue(cfgs.add(dfltCfg), "The artemis connection factory id %s configuration dup!",
+          dfltName);
     }
-    return artMisCfgs;
+    return new DefaultNamedQualifierObjectManager<>(cfgs);
   }
 
   static Map<String, Method> createSettingsMap() {

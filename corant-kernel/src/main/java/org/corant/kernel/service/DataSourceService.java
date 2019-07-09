@@ -11,26 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.model;
+package org.corant.kernel.service;
 
-import static org.corant.kernel.util.Qualifiers.resolveNameds;
-import java.lang.annotation.Annotation;
-import javax.persistence.PersistenceContext;
-import org.corant.suites.ddd.event.LifecycleManageEvent;
+import javax.sql.DataSource;
 
 /**
- * corant-suites-ddd
+ * corant-kernel
  *
- * @author bingo 上午10:33:56
+ * @author bingo 下午2:43:11
  *
  */
-public interface EntityLifecycleManager {
+public interface DataSourceService {
 
-  PersistenceContext getPersistenceContext(Class<?> cls);
+  DataSource get(String name);
 
-  void on(LifecycleManageEvent e);
-
-  default Annotation[] persistenceQualifiers(Class<?> cls) {
-    return resolveNameds(getPersistenceContext(cls).unitName());
-  }
 }

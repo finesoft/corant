@@ -14,7 +14,7 @@
 package org.corant.suites.elastic;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
-import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.kernel.normal.Names;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.kernel.util.Qualifiers.NamedObject;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -49,7 +52,7 @@ import org.elasticsearch.common.xcontent.XContentType;
  * @author bingo 上午11:54:10
  *
  */
-public class ElasticConfig {
+public class ElasticConfig implements NamedObject {
 
   public static final String EC_PREFIX = "elastic.";
   public static final String EC_CLU_NME = ".cluster-name";
@@ -69,24 +72,24 @@ public class ElasticConfig {
 
   private final Map<String, String> properties = new HashMap<>();
 
-  public static Map<String, ElasticConfig> from(Config config) {
-    Map<String, ElasticConfig> map = new HashMap<>();
+  public static NamedQualifierObjectManager<ElasticConfig> from(Config config) {
+    Set<ElasticConfig> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = defaultPropertyNames(config);
     Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
         (s) -> defaultString(s).startsWith(EC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     namedCfgKeys.forEach((k, v) -> {
       final ElasticConfig cfg = of(config, k, v);
       if (isNoneBlank(cfg.clusterName, cfg.clusterNodes)) {
-        shouldBeNull(map.put(k, cfg), "The elastic cluster name %s dup!", k);
+        shouldBeTrue(cfgs.add(cfg), "The elastic cluster name %s dup!", k);
       }
     });
     String dfltClusterName =
         config.getOptionalValue(EC_PREFIX + EC_CLU_NME.substring(1), String.class).orElse(EMPTY);
     ElasticConfig dfltCfg = of(config, dfltClusterName, dfltCfgKeys);
     if (isNotBlank(dfltCfg.getClusterNodes())) {
-      map.put(dfltClusterName, dfltCfg);
+      cfgs.add(dfltCfg);
     }
-    return map;
+    return new DefaultNamedQualifierObjectManager<ElasticConfig>(cfgs);
   }
 
   public static ElasticConfig of(Config config, String name, Collection<String> propertieNames) {
@@ -198,6 +201,11 @@ public class ElasticConfig {
    */
   public String getIndexVersion() {
     return indexVersion;
+  }
+
+  @Override
+  public String getName() {
+    return clusterName;
   }
 
   /**

@@ -14,22 +14,23 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.config.Configurations.getGroupConfigNames;
-import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.trim;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.kernel.normal.Names.JndiNames;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.kernel.util.Unnamed;
 import org.corant.shared.util.StringUtils;
 import org.eclipse.microprofile.config.Config;
@@ -42,7 +43,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:45:45
  *
  */
-public class DataSourceConfig {
+public class DataSourceConfig extends AbstractNamedObject {
 
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/Datasources";
   public static final String EMPTY_NAME = StringUtils.EMPTY;
@@ -68,7 +69,6 @@ public class DataSourceConfig {
   public static final String DSC_AUTO_COMMIT = ".auto-commit";
 
   private Class<?> driver;
-  private String name;
   private String username;
   private String password;
   private String connectionUrl;
@@ -186,8 +186,8 @@ public class DataSourceConfig {
    * @param config
    * @return from
    */
-  public static Map<String, DataSourceConfig> from(Config config) {
-    Map<String, DataSourceConfig> dataSources = new LinkedHashMap<>();
+  public static NamedQualifierObjectManager<DataSourceConfig> from(Config config) {
+    Set<DataSourceConfig> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = defaultPropertyNames();
     // handle named data source configuration
     Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
@@ -195,8 +195,8 @@ public class DataSourceConfig {
     namedCfgKeys.forEach((k, v) -> {
       final DataSourceConfig cfg = of(config, k, v);
       if (cfg != null) {
-        shouldBeNull(dataSources.put(defaultTrim(cfg.getName()), cfg),
-            "The data source named %s configuration dup!", cfg.getName());
+        shouldBeTrue(cfgs.add(cfg), "The data source named %s configuration dup!",
+            cfg.getName());
       }
     });
     // handle default configuration
@@ -204,10 +204,10 @@ public class DataSourceConfig {
         config.getOptionalValue(DSC_PREFIX + DSC_NAME.substring(1), String.class).orElse(null);
     DataSourceConfig dfltCfg = of(config, dfltName, dfltCfgKeys);
     if (dfltCfg != null) {
-      shouldBeNull(dataSources.put(defaultTrim(dfltCfg.getName()), dfltCfg),
-          "The data source named %s configuration dup!", dfltName);
+      shouldBeTrue(cfgs.add(dfltCfg), "The data source named %s configuration dup!",
+          dfltName);
     }
-    return dataSources;
+    return new DefaultNamedQualifierObjectManager<>(cfgs);
   }
 
   public static DataSourceConfig from(Config config, String name) {
@@ -351,14 +351,6 @@ public class DataSourceConfig {
 
   /**
    *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   *
    * @return the password
    */
   public String getPassword() {
@@ -483,10 +475,6 @@ public class DataSourceConfig {
 
   protected void setMinSize(int minSize) {
     this.minSize = minSize;
-  }
-
-  protected void setName(String name) {
-    this.name = trim(defaultString(name));
   }
 
   protected void setPassword(String password) {

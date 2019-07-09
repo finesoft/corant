@@ -55,6 +55,10 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
     return getUserClass(getClass());
   }
 
+  public BeanManager getBeanManager() {
+    return beanManager;
+  }
+
   @Override
   public String getId() {
     return getBeanClass().getCanonicalName();

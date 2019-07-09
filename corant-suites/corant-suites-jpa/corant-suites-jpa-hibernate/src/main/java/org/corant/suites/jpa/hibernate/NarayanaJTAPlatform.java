@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.kernel.util.Instances.resolvableAnyway;
+import static org.corant.kernel.util.Instances.resolveAnyway;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import org.corant.kernel.service.TransactionService;
@@ -31,12 +31,12 @@ public class NarayanaJTAPlatform extends AbstractJtaPlatform {
 
   @Override
   protected TransactionManager locateTransactionManager() {
-    return resolvableAnyway(TransactionService.class).getTransactionManager();
+    return resolveAnyway(TransactionService.class).getTransactionManager();
   }
 
   @Override
   protected UserTransaction locateUserTransaction() {
-    return resolvableAnyway(TransactionService.class).getUserTransaction();
+    return resolveAnyway(TransactionService.class).getUserTransaction();
   }
 
 }

@@ -15,23 +15,20 @@ package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
 import static org.corant.Corant.instance;
-import static org.corant.kernel.util.Qualifiers.resolveNameds;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.kernel.util.Instances.resolveNamed;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.ConnectionFactory;
+import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
@@ -44,36 +41,27 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
-  protected final Map<String, AbstractJMSConfig> configs = new HashMap<>();
   protected final Set<AnnotatedMethod<?>> receiveMethods = newSetFromMap(new ConcurrentHashMap<>());
   protected final Set<AnnotatedMethod<?>> streamMethods = newSetFromMap(new ConcurrentHashMap<>());
+  protected volatile NamedQualifierObjectManager<? extends AbstractJMSConfig> configManager =
+      NamedQualifierObjectManager.empty();
 
-  public static AbstractJMSConfig retrieveConfig(String connectionFactoryId) {
+  public static AbstractJMSConfig getConfig(String connectionFactoryId) {
     if (instance().select(AbstractJMSExtension.class).isResolvable()) {
-      return instance().select(AbstractJMSExtension.class).get().getConfig(connectionFactoryId);
+      return instance().select(AbstractJMSExtension.class).get().getConfigManager()
+          .get(connectionFactoryId);
     }
     return null;
   }
 
-  public static ConnectionFactory retriveConnectionFactory(String connectionFactoryId) {
-    if (isBlank(connectionFactoryId)) {
-      if (instance().select(ConnectionFactory.class).isResolvable()) {
-        return instance().select(ConnectionFactory.class).get();
-      }
-      return shouldNotNull(
-          instance().select(ConnectionFactory.class, resolveNameds(connectionFactoryId)).get());
-    } else {
-      return shouldNotNull(
-          instance().select(ConnectionFactory.class, NamedLiteral.of(connectionFactoryId)).get());
-    }
+  public static ConnectionFactory getConnectionFactory(String connectionFactoryId) {
+    return resolveNamed(ConnectionFactory.class, connectionFactoryId)
+        .orElseThrow(() -> new CorantRuntimeException("Can not find connection factory for %s",
+            connectionFactoryId));
   }
 
-  public AbstractJMSConfig getConfig(String connectionFactoryId) {
-    return configs.get(connectionFactoryId);
-  }
-
-  public Map<String, ? extends AbstractJMSConfig> getConfigs() {
-    return Collections.unmodifiableMap(configs);
+  public NamedQualifierObjectManager<? extends AbstractJMSConfig> getConfigManager() {
+    return configManager;
   }
 
   public Set<AnnotatedMethod<?>> getReceiveMethods() {

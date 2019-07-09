@@ -13,11 +13,10 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.shared.util.Assertions.shouldBeNull;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -107,11 +106,11 @@ public class JPAConfig {
     return names;
   }
 
-  public static Map<String, PersistenceUnitInfoMetaData> from(Config config) {
-    Map<String, PersistenceUnitInfoMetaData> metaDatas = new LinkedHashMap<>();
-    generateFromXml().forEach(metaDatas::put);
-    generateFromConfig(config).forEach(
-        (n, u) -> shouldBeNull(metaDatas.put(n, u), "The persistence pu name %s is dup!", n));
+  public static Set<PersistenceUnitInfoMetaData> from(Config config) {
+    Set<PersistenceUnitInfoMetaData> metaDatas = new HashSet<>();
+    generateFromXml().forEach(metaDatas::add);
+    generateFromConfig(config).forEach(u -> shouldBeTrue(metaDatas.add(u),
+        "The persistence pu name %s is dup!", u.getPersistenceUnitName()));
     return metaDatas;
   }
 
@@ -120,22 +119,23 @@ public class JPAConfig {
         .getPersistenceProviders().stream().findFirst();
   }
 
-  private static Map<String, PersistenceUnitInfoMetaData> generateFromConfig(Config config) {
+  private static Set<PersistenceUnitInfoMetaData> generateFromConfig(Config config) {
     return PersistencePropertiesParser.parse(config);
   }
 
-  private static Map<String, PersistenceUnitInfoMetaData> generateFromXml() {
-    Map<String, PersistenceUnitInfoMetaData> map = new LinkedHashMap<>();
+  private static Set<PersistenceUnitInfoMetaData> generateFromXml() {
+    Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     try {
       Resources.from(DFLT_PU_XML_LOCATION).map(r -> r.getUrl()).map(PersistenceXmlParser::parse)
-          .forEach(m -> {
-            map.putAll(m);
+          .flatMap(m -> m.stream()).forEach(m -> {
+            shouldBeTrue(cfgs.add(m), "The persistence pu name %s is dup!",
+                m.getPersistenceUnitName());
           });
     } catch (IOException e) {
       logger.warning(() -> String.format("Parse persistence pu meta data from %s error %s",
           DFLT_PU_XML_LOCATION, e.getMessage()));
     }
-    return map;
+    return cfgs;
   }
 
 }

@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.domain.model;
 
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
@@ -46,9 +46,9 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
 
   protected static <T> T retrieve(Serializable id, Class<T> cls) {
     if (id != null && cls != null) {
-      T persistObj = obtainRepo(
-          resolvableApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(cls))).get(cls,
-              id);
+      T persistObj =
+          obtainRepo(resolveApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(cls)))
+              .get(cls, id);
       return persistObj;
     }
     return null;
@@ -92,8 +92,7 @@ public abstract class AbstractEntityReference<T extends Entity> extends Abstract
   }
 
   protected Annotation[] obtainRepoQualifiers() {
-    return resolvableApply(EntityLifecycleManager.class,
-        b -> b.persistenceQualifiers(resolveClass()));
+    return resolveApply(EntityLifecycleManager.class, b -> b.persistenceQualifiers(resolveClass()));
   }
 
   @SuppressWarnings("unchecked")

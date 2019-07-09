@@ -15,22 +15,14 @@ package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import org.corant.Corant;
-import org.corant.kernel.util.Qualifiers;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.datasource.shared.DataSourceConfig;
+import org.corant.kernel.service.DataSourceService;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
@@ -50,32 +42,18 @@ public class HibernateJPAOrmProvider implements JPAProvider {
       new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
   @Inject
-  Instance<DataSource> datasources;
+  DataSourceService dataSourceService;
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
       Map<String, Object> additionalProperties) {
-    shouldNotNull(metaData).configDataSource(this::resolveDataSource);
+    shouldNotNull(metaData).configDataSource(dataSourceService::get);
     Map<String, Object> properties = new HashMap<>(PROPERTIES);
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         properties);
-  }
-
-  protected DataSource resolveDataSource(String dataSourceName) {
-    if (isNotBlank(dataSourceName)
-        && dataSourceName.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
-      try {
-        return forceCast(new InitialContext().lookup(dataSourceName));
-      } catch (NamingException e) {
-        throw new CorantRuntimeException(e);
-      }
-    } else if (!datasources.isUnsatisfied()) {
-      return datasources.select(Qualifiers.resolveNamed(dataSourceName)).get();
-    }
-    throw new CorantRuntimeException("Can not find any data source named %s", dataSourceName);
   }
 
 }

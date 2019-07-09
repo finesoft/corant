@@ -45,7 +45,7 @@ public class MessageReceiverMetaData {
 
   private final AnnotatedMethod<?> method;
   private final int acknowledge;
-  private final String clientId;
+  private final String clientID;
   private final String connectionFactoryId;
   private final String destination;
   private final boolean multicast;
@@ -69,7 +69,7 @@ public class MessageReceiverMetaData {
     shouldBeTrue(method.isAnnotationPresent(MessageReceive.class));
     final MessageReceive ann = method.getAnnotation(MessageReceive.class);
     acknowledge = ann.acknowledge();
-    clientId = ann.clientId();
+    clientID = ann.clientId();
     connectionFactoryId = defaultTrim(ann.connectionFactoryId());
     destination = destinationName;
     multicast = ann.multicast();
@@ -163,10 +163,10 @@ public class MessageReceiverMetaData {
 
   /**
    *
-   * @return the clientId
+   * @return the clientID
    */
-  public String getClientId() {
-    return clientId;
+  public String getClientID() {
+    return clientID;
   }
 
   /**
@@ -271,7 +271,7 @@ public class MessageReceiverMetaData {
   @Override
   public String toString() {
     return "MessageReceiverMetaData [method=" + method + ", acknowledge=" + acknowledge
-        + ", clientId=" + clientId + ", connectionFactoryId=" + connectionFactoryId
+        + ", clientID=" + clientID + ", connectionFactoryId=" + connectionFactoryId
         + ", destination=" + destination + ", multicast=" + multicast + ", selector=" + selector
         + ", subscriptionDurable=" + subscriptionDurable + ", type=" + type + ", cacheLevel="
         + cacheLevel + ", receiveTimeout=" + receiveTimeout + ", receiveThreshold="
@@ -281,7 +281,7 @@ public class MessageReceiverMetaData {
   }
 
   ConnectionFactory connectionFactory() {
-    return AbstractJMSExtension.retriveConnectionFactory(getConnectionFactoryId());
+    return AbstractJMSExtension.getConnectionFactory(connectionFactoryId);
 
   }
 
@@ -291,6 +291,6 @@ public class MessageReceiverMetaData {
   }
 
   boolean xa() {
-    return AbstractJMSExtension.retrieveConfig(getConnectionFactoryId()).isXa();
+    return AbstractJMSExtension.getConfig(getConnectionFactoryId()).isXa();
   }
 }

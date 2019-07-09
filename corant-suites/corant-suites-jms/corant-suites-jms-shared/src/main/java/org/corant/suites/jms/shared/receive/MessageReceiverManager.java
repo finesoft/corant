@@ -58,7 +58,8 @@ public class MessageReceiverManager {
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
-      final AbstractJMSConfig cfg = extesion.getConfig(metaData.getConnectionFactoryId());
+      final AbstractJMSConfig cfg =
+          AbstractJMSExtension.getConfig(metaData.getConnectionFactoryId());
       if (cfg != null && cfg.isEnable()) {
         ScheduledExecutorService ses =
             shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
@@ -74,13 +75,13 @@ public class MessageReceiverManager {
   void postConstruct() {
     extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
         .forEach(receiveMetaDatas::addAll);
-    extesion.getConfigs().values().forEach(cfg -> {
-      if (cfg != null && cfg.isEnable()) {
-        executorServices.put(cfg.getConnectionFactoryId(),
-            Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
-      }
-    });
     if (receiveMetaDatas.size() > 0) {
+      extesion.getConfigManager().getAllWithNames().values().forEach(cfg -> {
+        if (cfg != null && cfg.isEnable()) {
+          executorServices.put(cfg.getConnectionFactoryId(),
+              Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
+        }
+      });
       logger.info(
           () -> String.format("Find %s message receivers that involving %s connection factories.",
               receiveMetaDatas.size(), executorServices.size()));

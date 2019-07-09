@@ -13,7 +13,7 @@
  */
 package org.corant.asosat.ddd.pattern.concurrent;
 
-import static org.corant.kernel.util.Instances.resolvableAnyway;
+import static org.corant.kernel.util.Instances.resolveAnyway;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.ArrayList;
@@ -119,7 +119,7 @@ public class AsynchronousExecutor {
   }
 
   public static AsynchronousExecutor instance() {
-    return resolvableAnyway(AsynchronousExecutor.class);
+    return resolveAnyway(AsynchronousExecutor.class);
   }
 
   public ExecutorService getArrayExecutorService() {
@@ -251,11 +251,11 @@ public class AsynchronousExecutor {
   private void initExecutorJsr236() {
     if (tryAsClass("javax.enterprise.concurrent.ManagedExecutorService") != null
         && linkedExecutorService == null) {
-      linkedExecutorService = resolvableAnyway(ManagedExecutorService.class);
+      linkedExecutorService = resolveAnyway(ManagedExecutorService.class);
     }
     if (tryAsClass("javax.enterprise.concurrent.ManagedScheduledExecutorService") != null
         && shceduledExecutorService == null) {
-      shceduledExecutorService = resolvableAnyway(ManagedScheduledExecutorService.class);
+      shceduledExecutorService = resolveAnyway(ManagedScheduledExecutorService.class);
     }
   }
 

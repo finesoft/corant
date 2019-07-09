@@ -15,6 +15,7 @@ package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.defaultTrim;
+import org.corant.kernel.util.Qualifiers.NamedObject;
 import org.corant.shared.util.StringUtils;
 
 /**
@@ -23,7 +24,7 @@ import org.corant.shared.util.StringUtils;
  * @author bingo 上午10:30:53
  *
  */
-public abstract class AbstractJMSConfig {
+public abstract class AbstractJMSConfig implements NamedObject {
 
   public static final String JMS_ENABLE = ".enable";
   public static final String JMS_XA = ".xa";
@@ -40,11 +41,38 @@ public abstract class AbstractJMSConfig {
   private long receiveTaskDelayMs = 1000L;
   private int receiveTaskThreads = max(2, Runtime.getRuntime().availableProcessors());
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    AbstractJMSConfig other = (AbstractJMSConfig) obj;
+    if (connectionFactoryId == null) {
+      if (other.connectionFactoryId != null) {
+        return false;
+      }
+    } else if (!connectionFactoryId.equals(other.connectionFactoryId)) {
+      return false;
+    }
+    return true;
+  }
+
   /**
    *
    * @return the connectionFactoryId
    */
   public String getConnectionFactoryId() {
+    return connectionFactoryId;
+  }
+
+  @Override
+  public String getName() {
     return connectionFactoryId;
   }
 
@@ -70,6 +98,14 @@ public abstract class AbstractJMSConfig {
    */
   public int getReceiveTaskThreads() {
     return receiveTaskThreads;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (connectionFactoryId == null ? 0 : connectionFactoryId.hashCode());
+    return result;
   }
 
   /**

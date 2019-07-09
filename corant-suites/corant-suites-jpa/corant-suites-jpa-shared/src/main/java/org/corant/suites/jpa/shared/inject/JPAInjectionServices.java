@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared.inject;
 
-import static org.corant.kernel.util.Instances.resolvableApply;
+import static org.corant.kernel.util.Instances.resolveApply;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -27,10 +27,7 @@ import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
- * The JPAInjectionServices implemention, we don't use it by default. We use JPAProvider by
- * default, because it support scope. If you're going to use it, the new subclasses, and set in the
- * meta-inf/services corresponding "org. jboss.Weld.bootstrap.api.Service" interface description
- * file.
+ * The JPAInjectionServices implemention
  *
  * @see JPAProvider
  * @author bingo 下午4:18:45
@@ -49,7 +46,7 @@ public class JPAInjectionServices implements JpaInjectionServices {
     final PersistenceContext pc =
         CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
     return ResourceReferences
-        .refac(() -> resolvableApply(PersistenceService.class, b -> b.getEntityManager(pc)));
+        .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManager(pc)));
   }
 
   @Override
@@ -57,7 +54,7 @@ public class JPAInjectionServices implements JpaInjectionServices {
       InjectionPoint injectionPoint) {
     PersistenceUnit pu = CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
     return ResourceReferences
-        .refac(() -> resolvableApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)));
+        .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)));
   }
 
 }

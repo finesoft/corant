@@ -208,7 +208,7 @@ public class MongoClientExtension implements Extension {
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
     MongoClient mc = beans.select(MongoClient.class, NamedLiteral.of(cfg.getClientName())).get();
-    return mc.getDatabase(cfg.getName());
+    return mc.getDatabase(cfg.getDatabaseName());
   }
 
   protected GridFSBucket produceGridFSBucket(String bucketNamespace) {

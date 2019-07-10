@@ -101,7 +101,7 @@
 		<version.junit>4.12</version.junit>
 		<version.arquillian-core>1.2.1.Final</version.arquillian-core>
 		<version.testng>6.9.9</version.testng>
-		<version.rest-assured>3.0.6</version.rest-assured>
+		<version.rest-assured>4.0.0</version.rest-assured>
 		<version.org.openjdk.jmh>1.21</version.org.openjdk.jmh>
 
 		<version.groovy>2.5.6</version.groovy>

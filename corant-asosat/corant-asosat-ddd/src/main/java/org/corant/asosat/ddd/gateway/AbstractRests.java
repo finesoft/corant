@@ -124,15 +124,19 @@ public abstract class AbstractRests {
       return new LinkedHashMap<>();
     }
     Map<String, Object> map = new LinkedHashMap<>(uploadForm.size());
-    for (String fileName : fieldNames) {
+    for (String fieldName : fieldNames) {
       List<String> lp = new ArrayList<>();
-      for (InputPart ip : uploadForm.get(fileName)) {
-        lp.add(ip.getBodyAsString());
+      for (InputPart ip : uploadForm.get(fieldName)) {
+        if (ip != null) {
+          lp.add(ip.getBodyAsString());
+        }
       }
       if (lp.size() > 1) {
-        map.put(fileName, lp);
+        map.put(fieldName, lp);
       } else if (lp.size() == 1) {
-        map.put(fileName, lp.get(0));
+        map.put(fieldName, lp.get(0));
+      } else {
+        map.put(fieldName, null);
       }
     }
     return map;

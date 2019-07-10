@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
@@ -83,7 +84,8 @@ public class JarLauncher {
       System.setProperty(APP_NME_KEY, appName);
       log(true, "Find %s main class %s, the application is starting...", mainClass, appName);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
-    } catch (Exception e) {
+    } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchMethodException
+        | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
   }
@@ -93,9 +95,14 @@ public class JarLauncher {
       log(true, "Clearing archives from workspace %s ...", workPath);
       File file = workPath.toFile();
       if (file != null && file.exists()) {
-        for (File archive : file.listFiles()) {
-          if (archive != null) {
-            archive.delete();
+        File[] files = file.listFiles();
+        if (files != null) {
+          for (File archive : files) {
+            if (archive != null) {
+              if (!archive.delete()) {
+                log(true, "[WARNING] Can not clear archive %s.", archive.getPath());
+              }
+            }
           }
         }
       }

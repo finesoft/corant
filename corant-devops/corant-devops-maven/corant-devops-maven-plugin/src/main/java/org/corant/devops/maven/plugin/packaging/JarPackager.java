@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.jar.Attributes;
 import java.util.stream.Collectors;
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
@@ -76,10 +77,11 @@ public class JarPackager implements Packager {
   }
 
   protected void doPack(Archive root) throws IOException {
-    Path destPath = resolvePath();
-    Files.createDirectories(destPath.getParent());
+    final Path destPath = Objects.requireNonNull(resolvePath());
+    final Path parentPath = Objects.requireNonNull(destPath.getParent());
+    Files.createDirectories(parentPath);
     log.debug(String.format("(corant) created destination dir %s for packaging.",
-        destPath.getParent().toUri().getPath()));
+        parentPath.toUri().getPath()));
     try (JarArchiveOutputStream jos =
         new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries

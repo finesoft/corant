@@ -51,6 +51,7 @@ import org.corant.devops.maven.plugin.archive.FileEntry;
 public class DistPackager implements Packager {
 
   public static final Charset CHARSET = StandardCharsets.UTF_8;
+
   public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
   public static final String RUN_SH = "run.sh";
@@ -62,8 +63,8 @@ public class DistPackager implements Packager {
   public static final String JAR_CFG_DIR = "cfg";
   public static final String JAR_BIN_DIR = "bin";
   public static final String LOG_BIN_DIR = "log";
-
   private final PackageMojo mojo;
+
   private final Log log;
 
   DistPackager(PackageMojo mojo) {
@@ -87,10 +88,11 @@ public class DistPackager implements Packager {
   }
 
   protected void doPack(Archive root) throws IOException {
-    Path destPath = resolvePath();
-    Files.createDirectories(destPath.getParent());
+    final Path destPath = Objects.requireNonNull(resolvePath());
+    final Path parentPath = Objects.requireNonNull(destPath.getParent());
+    Files.createDirectories(parentPath);
     log.debug(String.format("(corant) created destination dir %s for packaging.",
-        destPath.getParent().toUri().getPath()));
+        parentPath.toUri().getPath()));
     try (ZipArchiveOutputStream zos =
         new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
@@ -189,33 +191,42 @@ public class DistPackager implements Packager {
     String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
     final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
-    return new Entry() {
-      @Override
-      public InputStream getInputStream() throws IOException {
-        return IOUtils.toInputStream(usebat, CHARSET);
-      }
-
-      @Override
-      public String getName() {
-        return RUN_BAT;
-      }
-    };
+    return new ScriptEntry(RUN_BAT, usebat);
   }
 
   Entry resolveRunsh() throws IOException {
     String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
     final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
-    return new Entry() {
-      @Override
-      public InputStream getInputStream() throws IOException {
-        return IOUtils.toInputStream(usesh, CHARSET);
-      }
+    return new ScriptEntry(RUN_SH, usesh);
+  }
 
-      @Override
-      public String getName() {
-        return RUN_SH;
-      }
-    };
+  /**
+   * corant-devops-maven-plugin
+   *
+   * @author bingo 下午12:09:52
+   *
+   */
+  static final class ScriptEntry implements Entry {
+    private final String script;
+    private final String name;
+
+    /**
+     * @param usebat
+     */
+    ScriptEntry(String name, String script) {
+      this.name = name;
+      this.script = script;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+      return IOUtils.toInputStream(script, CHARSET);
+    }
+
+    @Override
+    public String getName() {
+      return name;
+    }
   }
 }

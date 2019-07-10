@@ -126,9 +126,11 @@ public abstract class AbstractRests {
     Map<String, Object> map = new LinkedHashMap<>(uploadForm.size());
     for (String fieldName : fieldNames) {
       List<String> lp = new ArrayList<>();
-      for (InputPart ip : uploadForm.get(fieldName)) {
-        if (ip != null) {
-          lp.add(ip.getBodyAsString());
+      if (uploadForm.get(fieldName) != null) {
+        for (InputPart ip : uploadForm.get(fieldName)) {
+          if (ip != null) {
+            lp.add(ip.getBodyAsString());
+          }
         }
       }
       if (lp.size() > 1) {

@@ -64,10 +64,11 @@ public class StringInstantConverter extends AbstractConverter<String, Instant> {
       return getDefaultValue();
     }
     DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null
-        && ConverterHints.containsKeyWithNnv(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY)) {
-      dtf = DateTimeFormatter
-          .ofPattern(ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY));
+    if (dtf == null) {
+      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
+      if (hintPtn != null) {
+        dtf = DateTimeFormatter.ofPattern(hintPtn);
+      }
     }
     if (dtf != null) {
       return dtf.parse(value, Instant::from);

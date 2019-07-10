@@ -50,12 +50,7 @@ public class Qualifiers {
         }
       } else {
         for (String name : tNames) {
-          if (isBlank(name)) {
-            nameds.put(name, new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE});
-          } else {
-            nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
-                NamedLiteral.of(name)});
-          }
+          nameds.put(name, resolveNameds(name));
         }
       }
     }

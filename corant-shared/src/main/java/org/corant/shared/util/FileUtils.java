@@ -52,7 +52,7 @@ import org.corant.shared.util.PathUtils.GlobPatterns;
  */
 public class FileUtils {
 
-  public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16;
+  public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16L;
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());
@@ -209,13 +209,16 @@ public class FileUtils {
       return files;
     }
     List<File> tmp = new LinkedList<>();
-    tmp.addAll(listOf(directory.listFiles()));
-    while (!tmp.isEmpty()) {
-      File f = tmp.remove(0);
-      if (f.isFile() && up.test(f)) {
-        files.add(f);
-      } else if (f.isDirectory()) {
-        tmp.addAll(listOf(f.listFiles()));
+    File[] dirFiles = directory.listFiles();
+    if (dirFiles != null) {
+      tmp.addAll(listOf(dirFiles));
+      while (!tmp.isEmpty()) {
+        File f = tmp.remove(0);
+        if (f.isFile() && up.test(f)) {
+          files.add(f);
+        } else if (f.isDirectory() && (dirFiles = f.listFiles()) != null) {
+          tmp.addAll(listOf(dirFiles));
+        }
       }
     }
     return files;

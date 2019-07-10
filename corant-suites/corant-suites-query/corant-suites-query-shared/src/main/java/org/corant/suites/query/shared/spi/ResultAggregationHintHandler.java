@@ -81,8 +81,8 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_AGGS_FIELD_NME = "aggs-field-names";
   public static final String HNIT_PARA_AGGS_NME = "aggs-name";
 
-  static final Map<QueryHint, Consumer<List<Map<?, ?>>>> caches = new ConcurrentHashMap<>();
-  static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
+  static final Map<String, Consumer<List<Map<?, ?>>>> caches = new ConcurrentHashMap<>();
+  static final Set<String> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
   Logger logger;
@@ -97,7 +97,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Consumer<List<Map<?, ?>>> handler = null;
-    if (brokens.contains(qh) || (handler = resolveHint(qh)) == null) {
+    if (brokens.contains(qh.getId()) || (handler = resolveHint(qh)) == null) {
       return;
     }
     List<Map<?, ?>> list = null;
@@ -114,8 +114,8 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   }
 
   protected Consumer<List<Map<?, ?>>> resolveHint(QueryHint qh) {
-    if (caches.containsKey(qh)) {
-      return caches.get(qh);
+    if (caches.containsKey(qh.getId())) {
+      return caches.get(qh.getId());
     } else {
       List<QueryHintParameter> aggNames = qh.getParameters(HNIT_PARA_AGGS_NME);
       List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
@@ -126,17 +126,17 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
             && isNotBlank(aggName = aggNames.get(0).getValue()) && isNotEmpty(fieldNames =
                 linkedHashSetOf(split(aggFieldNames.get(0).getValue(), ",", true, true)))) {
           final String useAggName = aggName;
-          return caches.computeIfAbsent(qh, (k) -> (list) -> {
+          return caches.computeIfAbsent(qh.getId(), (k) -> (list) -> {
             Map<Map<Object, Object>, List<Map<Object, Object>>> temp =
                 new LinkedHashMap<>(list.size());
             for (Map<?, ?> src : list) {
               Map<Object, Object> key = new LinkedHashMap<>();
               Map<Object, Object> val = new LinkedHashMap<>();
-              for (Object fn : src.keySet()) {
-                if (!fieldNames.contains(fn)) {
-                  val.put(fn, src.get(fn));
+              for (Map.Entry<?, ?> e : src.entrySet()) {
+                if (!fieldNames.contains(e.getKey())) {
+                  val.put(e.getKey(), e.getValue());
                 } else {
-                  key.put(fn, src.get(fn));
+                  key.put(e.getKey(), e.getValue());
                 }
               }
               temp.computeIfAbsent(key, vk -> new ArrayList<>()).add(val);
@@ -153,7 +153,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
         logger.log(Level.WARNING, e, () -> "The query hint has some error!");
       }
     }
-    brokens.add(qh);
+    brokens.add(qh.getId());
     return null;
   }
 }

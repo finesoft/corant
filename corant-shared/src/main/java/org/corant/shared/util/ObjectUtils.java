@@ -61,7 +61,7 @@ public class ObjectUtils {
   }
 
   public static <T> T defaultObject(T obj, T altObj) {
-    return defaultObject(obj, () -> altObj);
+    return obj != null ? obj : altObj;
   }
 
   @SuppressWarnings("unchecked")

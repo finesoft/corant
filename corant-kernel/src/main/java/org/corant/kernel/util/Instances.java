@@ -55,7 +55,7 @@ public class Instances {
   }
 
   public static <T> Optional<T> resolve(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     if (instance().select(instCls, qualifiers).isResolvable()) {
       return Optional.of(instance().select(instCls).get());
     } else {
@@ -69,7 +69,7 @@ public class Instances {
   }
 
   public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     if (instance().select(instCls, qualifiers).isResolvable()) {
       return instance().select(instCls).get();
     } else if (instance().select(instCls).isUnsatisfied()) {
@@ -94,12 +94,12 @@ public class Instances {
   }
 
   public static <T> Optional<T> resolveNamed(Class<T> instanceClass, String name) {
-    String useName = defaultTrim(name);
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     Instance<T> inst = instance().select(instCls);
     if (inst.isUnsatisfied()) {
       return Optional.empty();
     }
+    String useName = defaultTrim(name);
     if (isBlank(useName) && inst.isResolvable()) {
       return Optional.of(instance().select(instCls).get());
     } else if (inst.select(resolveNameds(useName)).isResolvable()) {
@@ -110,19 +110,19 @@ public class Instances {
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     return instance().select(instCls, qualifiers);
   }
 
   public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     if (instance().select(instCls).isResolvable()) {
       shouldNotNull(consumer).accept(instance().select(instCls).get());
     }
   }
 
   public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function) {
-    Class<T> instCls = forceCast(getUserClass(shouldNotNull(instanceClass)));
+    Class<T> instCls = shouldNotNull(instanceClass);
     if (instance().select(instCls).isResolvable()) {
       return shouldNotNull(function).apply(instance().select(instCls).get());
     }

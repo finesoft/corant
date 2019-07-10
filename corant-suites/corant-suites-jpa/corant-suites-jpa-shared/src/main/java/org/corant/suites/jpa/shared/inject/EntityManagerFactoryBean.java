@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.logging.Logger;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,6 +33,8 @@ import org.corant.kernel.util.AbstractBean;
  *
  */
 public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory> {
+
+  final Logger logger = Logger.getLogger(getClass().getName());
 
   final PersistenceUnit pu;
 

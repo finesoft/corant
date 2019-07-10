@@ -111,6 +111,9 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> Set<T> linkedHashSetOf(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return new LinkedHashSet<>();
+    }
     Set<T> set = new LinkedHashSet<>(objects.length);
     for (T obj : objects) {
       set.add(obj);
@@ -152,6 +155,9 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> List<T> listOf(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return new ArrayList<>();
+    }
     ArrayList<T> list = new ArrayList<>(objects.length);
     for (T obj : objects) {
       list.add(obj);
@@ -188,6 +194,9 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return new HashSet<>();
+    }
     Set<T> set = new HashSet<>(objects.length);
     for (T obj : objects) {
       set.add(obj);

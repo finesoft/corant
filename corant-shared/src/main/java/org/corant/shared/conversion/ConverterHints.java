@@ -39,10 +39,6 @@ public class ConverterHints {
     return hints != null && hints.containsKey(key);
   }
 
-  public static boolean containsKeyWithNnv(Map<String, ?> hints, String key) {
-    return hints != null && hints.containsKey(key) && hints.get(key) != null;
-  }
-
   public static <T> T getHint(Map<String, ?> hints, String key) {
     return getHint(hints, key, null);
   }
@@ -50,7 +46,7 @@ public class ConverterHints {
   @SuppressWarnings("unchecked")
   public static <T> T getHint(Map<String, ?> hints, String key, T altVal) {
     T hint = null;
-    if (key != null && hints != null && hints.containsKey(key)) {
+    if (key != null && hints != null) {
       Object obj = hints.get(key);
       if (obj != null) {
         hint = (T) obj;

@@ -99,9 +99,7 @@ public class MongoClientConfig implements NamedObject {
         (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig cfg = of(config, k, v);
-      if (cfg != null) {
-        shouldBeTrue(cfgs.add(cfg), "Mongo client databaseName %s dup!", k);
-      }
+      shouldBeTrue(cfgs.add(cfg), "Mongo client databaseName %s dup!", k);
     });
     // find default configuration
     String dfltName =
@@ -401,7 +399,7 @@ public class MongoClientConfig implements NamedObject {
     }
 
     /**
-     * 
+     *
      * @return the databaseName
      */
     public String getDatabaseName() {

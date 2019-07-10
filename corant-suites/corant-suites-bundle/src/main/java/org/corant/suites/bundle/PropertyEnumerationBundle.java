@@ -110,7 +110,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
                 EnumLiteralsObject obj =
                     holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
                 res.dump().forEach((k, v) -> {
-                  int i = k.lastIndexOf(".");
+                  int i = k.lastIndexOf('.');
                   String enumClsName = k.substring(0, i);
                   String enumItemKey = null;
                   Class enumCls = null;

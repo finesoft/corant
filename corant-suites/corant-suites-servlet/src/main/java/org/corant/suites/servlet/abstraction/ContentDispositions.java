@@ -38,8 +38,8 @@ public class ContentDispositions {
 
   public static String decodeHeaderFieldParam(String input) {
     shouldNotNull(input, "Input String should not be null");
-    int firstQuoteIndex = input.indexOf("'");
-    int secondQuoteIndex = input.indexOf("'", firstQuoteIndex + 1);
+    int firstQuoteIndex = input.indexOf(0x27);
+    int secondQuoteIndex = input.indexOf(0x27, firstQuoteIndex + 1);
     // US_ASCII
     if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
       return input;
@@ -122,7 +122,7 @@ public class ContentDispositions {
           name = value;
         } else if ("filename*".equals(attribute)) {
           filename = decodeHeaderFieldParam(value);
-          charset = Charset.forName(value.substring(0, value.indexOf("'")));
+          charset = Charset.forName(value.substring(0, value.indexOf(0x27)));
           shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
               "Charset should be UTF-8 or ISO-8859-1");
         } else if ("filename".equals(attribute) && filename == null) {

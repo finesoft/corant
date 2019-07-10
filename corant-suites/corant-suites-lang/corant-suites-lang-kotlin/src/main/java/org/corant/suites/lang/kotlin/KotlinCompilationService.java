@@ -78,7 +78,7 @@ public class KotlinCompilationService implements CompilationService {
         CompilerMessageLocation location) {
       if (severity.isError()) {
         if (location != null && location.getLineContent() != null) {
-          errors.add(String.format("%s\n%s:%d:%d", location.getLineContent(), location.getPath(),
+          errors.add(String.format("%sn%s:%d:%d", location.getLineContent(), location.getPath(),
               location.getLine(), location.getColumn()));
         } else {
           errors.add(error);

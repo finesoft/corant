@@ -93,8 +93,8 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static final String HINT_SCRIPT_RESU = "r";
 
   static final ScriptEngineManager sm = new ScriptEngineManager();
-  static final Map<QueryHint, ScriptConsumer> mappers = new ConcurrentHashMap<>();
-  static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
+  static final Map<String, ScriptConsumer> mappers = new ConcurrentHashMap<>();
+  static final Set<String> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
   @Any
@@ -108,7 +108,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     ScriptConsumer func = null;
-    if (brokens.contains(qh) || (func = resolveMapper(qh)) == null) {
+    if (brokens.contains(qh.getId()) || (func = resolveMapper(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
@@ -133,7 +133,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   }
 
   protected ScriptConsumer resolveMapper(QueryHint qh) {
-    return mappers.computeIfAbsent(qh, (k) -> {
+    return mappers.computeIfAbsent(qh.getId(), (k) -> {
       if (!mapperResolvers.isUnsatisfied()) {
         Optional<ResultMapperResolver> op =
             mapperResolvers.stream().filter(rmr -> rmr.accept(qh)).findFirst();
@@ -141,12 +141,12 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
           try {
             return op.get().resolve(qh);
           } catch (Exception e) {
-            brokens.add(qh);
+            brokens.add(qh.getId());
             throw new CorantRuntimeException(e);
           }
         }
       }
-      brokens.add(qh);
+      brokens.add(qh.getId());
       return (ps) -> {
       };
     });

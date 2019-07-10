@@ -98,11 +98,7 @@ public class Throwables {
             }
           }
         });
-        if (e instanceof RuntimeException) { // FIXME
-          throw (RuntimeException) e;
-        } else {
-          throw new CorantRuntimeException(e);
-        }
+        throw new CorantRuntimeException(e);
       } finally {
         cases.clear();
       }

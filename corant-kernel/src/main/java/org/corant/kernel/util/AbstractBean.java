@@ -19,7 +19,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -34,7 +33,6 @@ import javax.enterprise.inject.spi.PassivationCapable;
  */
 public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
 
-  protected final Logger logger = Logger.getLogger(getClass().getName());
   protected final Set<Annotation> qualifiers = new HashSet<>();
   protected final Set<Type> types = new HashSet<>();
   protected final Set<Class<? extends Annotation>> stereotypes = new HashSet<>();

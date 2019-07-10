@@ -83,9 +83,9 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
   public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
-  static final Map<QueryHint, Pair<String[], Pair<Class<?>, Object[]>>> caches =
+  static final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches =
       new ConcurrentHashMap<>();
-  static final Set<QueryHint> brokens = new CopyOnWriteArraySet<>();
+  static final Set<String> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
   Logger logger;
@@ -142,7 +142,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Pair<String[], Pair<Class<?>, Object[]>> hint = null;
-    if (brokens.contains(qh) || (hint = resolveHint(qh)) == null) {
+    if (brokens.contains(qh.getId()) || (hint = resolveHint(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
@@ -194,8 +194,8 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   }
 
   protected Pair<String[], Pair<Class<?>, Object[]>> resolveHint(QueryHint qh) {
-    if (caches.containsKey(qh)) {
-      return caches.get(qh);
+    if (caches.containsKey(qh.getId())) {
+      return caches.get(qh.getId());
     } else {
       List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_FIELD_NME);
       List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_TARGET_TYP);
@@ -209,7 +209,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
             Class<?> targetClass = tryAsClass(propertyType);
             if (targetClass != null) {
               Pair<Class<?>, Object[]> converterParam = Pair.of(targetClass, new Object[0]);
-              return caches.computeIfAbsent(qh,
+              return caches.computeIfAbsent(qh.getId(),
                   (k) -> Pair.of(split(propertyName, ".", true, true),
                       isNotEmpty(pthk) && isNotEmpty(pthv)
                           ? converterParam.withRight(
@@ -222,7 +222,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
         logger.log(Level.WARNING, e, () -> "The query hint has some error!");
       }
     }
-    brokens.add(qh);
+    brokens.add(qh.getId());
     return null;
   }
 }

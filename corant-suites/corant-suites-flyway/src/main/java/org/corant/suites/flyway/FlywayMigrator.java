@@ -15,6 +15,7 @@ package org.corant.suites.flyway;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -32,6 +33,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.service.DataSourceService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources;
@@ -74,6 +76,10 @@ public class FlywayMigrator {
   @Inject
   @Any
   Instance<Callback> callbacks;
+
+  @Inject
+  @Any
+  Instance<DataSourceService> dataSourceService;
 
   @Inject
   @Any
@@ -145,15 +151,7 @@ public class FlywayMigrator {
   protected Stream<FlywayConfigProvider> getConfigProviders() {
     if (!dataSourceExtensions.isUnsatisfied()) {
       return dataSourceExtensions.stream().flatMap(dse -> {
-        return streamOf(dse.getConfigManager().getAllNames()).map((e) -> {
-          try {
-            final String name = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + e;
-            return DefaultFlywayConfigProvider.of(getLocation(e),
-                forceCast(new InitialContext().lookup(name)));
-          } catch (NamingException ex) {
-            throw new CorantRuntimeException(ex);
-          }
-        });
+        return streamOf(dse.getConfigManager().getAllNames()).map(this::resolveConfigProvider);
       });
     } else {
       return Stream.empty();
@@ -166,5 +164,21 @@ public class FlywayMigrator {
     } else {
       return "META-INF/dbmigration/" + name;
     }
+  }
+
+  protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {
+    if (defaultString(name).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
+      try {
+        return DefaultFlywayConfigProvider.of(
+            getLocation(name.substring(name.indexOf(DataSourceConfig.JNDI_SUBCTX_NAME))),
+            forceCast(new InitialContext().lookup(name)));
+      } catch (NamingException ex) {
+        throw new CorantRuntimeException(ex);
+      }
+    } else if (dataSourceService.isResolvable()) {
+      return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().get(name));
+    }
+    throw new CorantRuntimeException("Can not found any data source named %s", name);
+
   }
 }

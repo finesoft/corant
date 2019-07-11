@@ -13,6 +13,7 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -207,7 +208,10 @@ public class MongoClientExtension implements Extension {
   }
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
-    MongoClient mc = beans.select(MongoClient.class, NamedLiteral.of(cfg.getClientName())).get();
+    MongoClient mc =
+        resolve(MongoClient.class, clientConfigManager.getQualifiers(cfg.getClientName()))
+            .orElseThrow(() -> new CorantRuntimeException(
+                "Can not find mongo data base with client name %s", cfg.getClientName()));
     return mc.getDatabase(cfg.getDatabaseName());
   }
 

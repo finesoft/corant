@@ -94,6 +94,19 @@ public class AggregateLifecycleMessage implements MergableMessage {
       versionNumber = aggregate.getVn();
     }
 
+    /**
+     * @param source
+     * @param versionNumber
+     * @param sequenceNumber
+     */
+    public AggregateLifecycleMessageMetadata(DefaultAggregateIdentifier source, long versionNumber,
+        long sequenceNumber) {
+      super();
+      this.source = source;
+      this.versionNumber = versionNumber;
+      this.sequenceNumber = sequenceNumber;
+    }
+
     @Override
     public Map<String, Object> getAttributes() {
       return mapOf("versionNumber", versionNumber);

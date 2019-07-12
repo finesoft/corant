@@ -26,8 +26,10 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
@@ -81,6 +83,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         "Enforce entity managers flush to collect the messages, before %s completion.",
         transaction.toString()));
     entityManagers.values().forEach(EntityManager::flush);
+    registration.forEach((k, v) -> {
+      v.forEach(ai -> Corant.fireEvent(new LifecycleEvent(ai, k)));
+    });
     handleMessage();
   }
 

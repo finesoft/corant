@@ -13,9 +13,10 @@
  */
 package org.corant.suites.ddd.event;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
+import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
 /**
  * Every aggregate that extends AbstractAggregate when life cycle change then will fire
@@ -29,31 +30,20 @@ public class LifecycleEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
-  private final LifecyclePhase phase;
+  private final Lifecycle lifecycle;
 
-  private final boolean effectImmediately;
-
-  public LifecycleEvent(Aggregate source, LifecyclePhase lifcyclehase) {
-    this(source, lifcyclehase, false);
-  }
-
-  public LifecycleEvent(Aggregate source, LifecyclePhase lifcyclehase, boolean effectImmediately) {
+  public LifecycleEvent(AggregateIdentifier source, Lifecycle lifecycle) {
     super(source);
-    phase = lifcyclehase;
-    this.effectImmediately = effectImmediately;
+    this.lifecycle = lifecycle;
   }
 
-  public LifecyclePhase getPhase() {
-    return phase;
-  }
-
-  public boolean isEffectImmediately() {
-    return effectImmediately;
+  public Lifecycle getLifecycle() {
+    return lifecycle;
   }
 
   @Override
-  public String toString() {
-    return "LifecycleEvent [phase=" + phase + ", effectImmediately=" + effectImmediately + "]";
+  public AggregateIdentifier getSource() {
+    return forceCast(super.getSource());
   }
 
 }

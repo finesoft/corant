@@ -23,10 +23,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.Corant;
-import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
-import org.corant.suites.ddd.model.Aggregate.LifecyclePhase;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
@@ -47,16 +45,19 @@ public class DefaultAggregateListener {
   protected void handlePostPersist(AbstractAggregate o) {
     registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     registerToUnitOfWork(o.withLifecycle(Lifecycle.ENABLED));
-    o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());// FIXME
+    // o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());//
+    // FIXME
   }
 
   protected void handlePostRemove(AbstractAggregate o) {
     registerToUnitOfWork(o.withLifecycle(Lifecycle.DESTROYED));
-    o.raise(new LifecycleEvent(o, LifecyclePhase.DESTROYED), o.lifecycleServiceQualifier());// FIXME
+    // o.raise(new LifecycleEvent(o, LifecyclePhase.DESTROYED), o.lifecycleServiceQualifier());//
+    // FIXME
   }
 
   protected void handlePostUpdate(AbstractAggregate o) {
-    o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());// FIXME
+    // o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());//
+    // FIXME
   }
 
   protected void handlePrePersist(AbstractAggregate o) {

@@ -118,17 +118,17 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
   /**
    * The current unit of work or null
-   * 
+   *
    * @return currentUnitOfWork
    */
   @Transient
   @javax.persistence.Transient
-  protected UnitOfWork currentUnitOfWork() {
+  protected Optional<UnitOfWork> currentUnitOfWork() {
     Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class);
     if (uowm.isPresent()) {
-      return uowm.get().getCurrentUnitOfWork();
+      return Optional.ofNullable(uowm.get().getCurrentUnitOfWork());
     }
-    return null;
+    return Optional.empty();
   }
 
   /**

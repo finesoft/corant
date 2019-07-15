@@ -30,6 +30,7 @@ import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleManageEvent;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 
 /**
  * @author bingo 下午3:25:51
@@ -57,6 +58,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Identifies whether the aggregate has been persisted or deleted.
    * <li>INITIAL: Just created</li>
    * <li>ENABLED: Has been persisted</li>
+   * <li>REENABLED: Just loaded from persistence</li>
    * <li>DESTROYED: If already persisted, the representation is removed from the persistence
    * facility; otherwise it is just a token</li>
    */
@@ -74,16 +76,6 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Override
   public synchronized Long getVn() {
     return vn;
-  }
-
-  /**
-   * Identifies whether the aggregate has been deleted or just built
-   */
-  @Override
-  @Transient
-  @javax.persistence.Transient
-  public synchronized Boolean isPhantom() {
-    return getId() == null || lifecycle != Lifecycle.ENABLED;
   }
 
   /**
@@ -125,7 +117,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * destroyed
    */
   protected synchronized void destroy(boolean immediately) {
-    this.raise(new LifecycleManageEvent(this, true, immediately));
+    this.raise(new LifecycleManageEvent(this, LifecycleAction.DESTROY, immediately));
   }
 
   /**
@@ -133,7 +125,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   protected synchronized AbstractAggregate enable(boolean immediately) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new LifecycleManageEvent(this, false, immediately));
+    this.raise(new LifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
     return this;
   }
 
@@ -152,17 +144,21 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    *
    * preDestroy
    */
-  protected void preDestroy() {
-
-  }
+  protected void preDestroy() {}
 
   /**
    * enable preconditions, validate the aggregate consistency
    *
    * preEnable
    */
-  protected void preEnable() {
+  protected void preEnable() {}
 
+  /**
+   * recover from persistence
+   */
+  protected synchronized void recover() {
+    requireFalse(!isEnabled(), PkgMsgCds.ERR_AGG_LC);
+    this.raise(new LifecycleManageEvent(this, LifecycleAction.RECOVER, true));
   }
 
   protected synchronized void setVn(long vn) {

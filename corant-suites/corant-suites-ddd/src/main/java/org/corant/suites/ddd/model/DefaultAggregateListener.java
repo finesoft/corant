@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.kernel.util.Instances.select;
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.persistence.PostLoad;
@@ -22,7 +23,6 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-import org.corant.Corant;
 import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
@@ -38,26 +38,22 @@ public class DefaultAggregateListener {
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected void handlePostLoad(AbstractAggregate o) {
-    o.withLifecycle(Lifecycle.ENABLED).callAssistant().clearMessages();
+    o.withLifecycle(Lifecycle.REENABLED).callAssistant().clearMessages();
     registerToUnitOfWork(o);
   }
 
   protected void handlePostPersist(AbstractAggregate o) {
     registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
     registerToUnitOfWork(o.withLifecycle(Lifecycle.ENABLED));
-    // o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());//
-    // FIXME
   }
 
   protected void handlePostRemove(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.DESTROYED));
     registerToUnitOfWork(o.withLifecycle(Lifecycle.DESTROYED));
-    // o.raise(new LifecycleEvent(o, LifecyclePhase.DESTROYED), o.lifecycleServiceQualifier());//
-    // FIXME
   }
 
   protected void handlePostUpdate(AbstractAggregate o) {
-    // o.raise(new LifecycleEvent(o, LifecyclePhase.ENABLED), o.lifecycleServiceQualifier());//
-    // FIXME
+    handlePostPersist(o);
   }
 
   protected void handlePrePersist(AbstractAggregate o) {
@@ -66,13 +62,10 @@ public class DefaultAggregateListener {
 
   protected void handlePreRemove(AbstractAggregate o) {
     o.preDestroy();
-    o.raise(new AggregateLifecycleMessage(o, Lifecycle.DESTROYED));
   }
 
   protected void handlePreUpdate(AbstractAggregate o) {
     o.preEnable();
-    o.raise(new AggregateLifecycleMessage(o, Lifecycle.ENABLED));
-    registerToUnitOfWork(o.withLifecycle(Lifecycle.ENABLED));
   }
 
   @PostLoad
@@ -125,7 +118,7 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(Object o) {
-    Instance<UnitOfWorksManager> um = Corant.instance().select(UnitOfWorksManager.class);
+    Instance<UnitOfWorksManager> um = select(UnitOfWorksManager.class);
     if (um.isResolvable()) {
       um.get().getCurrentUnitOfWork().register(o);
     } else {

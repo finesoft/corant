@@ -16,6 +16,7 @@ package org.corant.suites.ddd.event;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 
 /**
  * The lifecycle manage event, the infrastructure service will listen this event and do persist or
@@ -28,27 +29,27 @@ public class LifecycleManageEvent extends AbstractEvent {
 
   private static final long serialVersionUID = 2441297731044122118L;
 
-  private final boolean destroy;
+  private final LifecycleAction action;
 
   private final boolean effectImmediately;
 
-  public LifecycleManageEvent(Aggregate source, boolean destroy) {
-    this(source, destroy, false);
+  public LifecycleManageEvent(Aggregate source, LifecycleAction action) {
+    this(source, action, false);
   }
 
-  public LifecycleManageEvent(Aggregate source, boolean destroy, boolean effectImmediately) {
+  public LifecycleManageEvent(Aggregate source, LifecycleAction action, boolean effectImmediately) {
     super(source);
-    this.destroy = destroy;
+    this.action = action;
     this.effectImmediately = effectImmediately;
+  }
+
+  public LifecycleAction getAction() {
+    return action;
   }
 
   @Override
   public Aggregate getSource() {
     return forceCast(super.getSource());
-  }
-
-  public boolean isDestroy() {
-    return destroy;
   }
 
   public boolean isEffectImmediately() {
@@ -57,7 +58,9 @@ public class LifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "LifecycleEvent [destroy=" + destroy + ", effectImmediately=" + effectImmediately + "]";
+    return "LifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
+        + (getSource() == null ? null : getSource().getId()) + ", isEffectImmediately()="
+        + isEffectImmediately() + "]";
   }
 
 }

@@ -51,6 +51,14 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
  */
 public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
+
+  static final String LOG_BEGIN_UOW_FMT = "Begin unit of work [%s].";
+  static final String LOG_END_UOW_FMT = "End unit of work [%s].";
+  static final String LOG_BEF_UOW_CMP_FMT =
+      "Enforce entity managers flush to collect the messages, before %s completion.";
+  static final String LOG_HDL_MSG_FMT = "Sorted the flushed messages and store them if nessuary,"
+      + " dispatch them to the message dispatcher, before %s completion.";
+
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
@@ -59,7 +67,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     super(manager);
     this.transaction = transaction;
     Arrays.stream(Lifecycle.values()).forEach(e -> registration.put(e, new LinkedHashSet<>()));
-    logger.fine(() -> String.format("Begin unit of work [%s]", transaction.toString()));
+    logger.fine(() -> String.format(LOG_BEGIN_UOW_FMT, transaction.toString()));
   }
 
   @Override
@@ -71,7 +79,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       registers.putAll(getRegisters());
     } finally {
       clear();
-      logger.fine(() -> String.format("End unit of work [%s].", transaction.toString()));
+      logger.fine(() -> String.format(LOG_END_UOW_FMT, transaction.toString()));
       handlePostCompleted(registers, success);
     }
   }
@@ -79,12 +87,12 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     handlePreComplete();
-    logger.fine(() -> String.format(
-        "Enforce entity managers flush to collect the messages, before %s completion.",
-        transaction.toString()));
+    logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
     entityManagers.values().forEach(EntityManager::flush);
     registration.forEach((k, v) -> {
-      v.forEach(ai -> Corant.fireEvent(new LifecycleEvent(ai, k)));
+      if (k == Lifecycle.ENABLED || k == Lifecycle.DESTROYED) {
+        v.forEach(ai -> Corant.fireEvent(new LifecycleEvent(ai, k)));
+      }
     });
     handleMessage();
   }
@@ -192,9 +200,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   protected void handleMessage() {
-    logger.fine(() -> String.format(
-        "Sorted the flushed messages and store them if nessuary and dispatch them to the message dispatcher, before %s completion.",
-        transaction.toString()));
+    logger.fine(() -> String.format(LOG_HDL_MSG_FMT, transaction.toString()));
     messages.stream().sorted(Message::compare).forEach(msg -> {
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?

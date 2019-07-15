@@ -33,4 +33,8 @@ public interface EntityLifecycleManager {
   default Annotation[] persistenceQualifiers(Class<?> cls) {
     return resolveNameds(getPersistenceContext(cls).unitName());
   }
+
+  public enum LifecycleAction {
+    PERSIST, RECOVER, DESTROY
+  }
 }

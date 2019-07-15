@@ -74,22 +74,16 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, e.isDestroy(), effectImmediately,
-          getPersistenceContext(entity.getClass()));
-      logger.fine(() -> String.format("Handle %s %s", entity.getClass().getName(),
-          e.isDestroy() ? "destroy" : "persist"));
+      handle(entity, e.getAction(), effectImmediately, getPersistenceContext(entity.getClass()));
+      logger.fine(
+          () -> String.format("Handle %s %s", entity.getClass().getName(), e.getAction().name()));
     }
   }
 
-  protected void handle(Entity entity, boolean destroy, boolean effectImmediately,
+  protected void handle(Entity entity, LifecycleAction action, boolean effectImmediately,
       PersistenceContext pc) {
     EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(pc);
-    if (destroy) {
-      em.remove(entity);
-      if (effectImmediately) {
-        em.flush();
-      }
-    } else {
+    if (action == LifecycleAction.PERSIST) {
       if (entity.getId() == null) {
         em.persist(entity);
         if (effectImmediately) {
@@ -101,6 +95,13 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
           em.flush();
         }
       }
+    } else if (action == LifecycleAction.DESTROY) {
+      em.remove(entity);
+      if (effectImmediately) {
+        em.flush();
+      }
+    } else {
+      em.refresh(entity);
     }
   }
 

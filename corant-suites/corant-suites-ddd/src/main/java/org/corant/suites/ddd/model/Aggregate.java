@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.model;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -34,6 +35,8 @@ public interface Aggregate extends Entity {
   /**
    * the lifeCycle of being
    */
+  @Transient
+  @javax.persistence.Transient
   Lifecycle getLifecycle();
 
   /**
@@ -44,14 +47,20 @@ public interface Aggregate extends Entity {
   /**
    * In this case, it means whether it is persisted or not
    */
+  @Transient
+  @javax.persistence.Transient
   default boolean isEnabled() {
-    return getLifecycle() == Lifecycle.ENABLED;
+    return getLifecycle() != null && getLifecycle().getSign() > 0;
   }
 
   /**
    * The aggregate isn't persisted, or is destroyed, but still live in memory until the GC recycle.
    */
-  Boolean isPhantom();
+  @Transient
+  @javax.persistence.Transient
+  default Boolean isPhantom() {
+    return getId() == null || !isEnabled();
+  }
 
   /**
    * Raise events.
@@ -108,10 +117,16 @@ public interface Aggregate extends Entity {
   }
 
   public enum Lifecycle {
-    INITIAL, ENABLED, DESTROYED
+    INITIAL(0), ENABLED(1), REENABLED(2), DESTROYED(-1);
+    int sign;
+
+    private Lifecycle(int sign) {
+      this.sign = sign;
+    }
+
+    public int getSign() {
+      return sign;
+    }
   }
 
-  public enum LifecyclePhase {
-    ENABLED, DESTROYED
-  }
 }

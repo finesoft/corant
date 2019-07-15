@@ -14,8 +14,10 @@
 package org.corant.shared.util;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +27,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
- * @author bingo 下午2:51:32
+ * corant-shared
+ *
+ * @author bingo 下午11:26:00
  *
  */
 public class ObjectUtils {
@@ -161,6 +165,12 @@ public class ObjectUtils {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午11:26:10
+   *
+   */
   public static class Pair<L, R> implements Map.Entry<L, R>, Serializable {
     private static final long serialVersionUID = -474294448204498274L;
     private final L left;
@@ -246,6 +256,66 @@ public class ObjectUtils {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午11:26:17
+   *
+   */
+  public static class ThreadLocalStack<T> {
+
+    private final ThreadLocal<Deque<T>> local = new ThreadLocal<>();
+
+    public void clear() {
+      local.set(null);
+    }
+
+    public boolean isEmpty() {
+      Deque<T> stack = stack(false);
+      return stack == null || stack.isEmpty();
+    }
+
+    public T peek() {
+      Deque<T> stack = local.get();
+      if (stack == null || stack.isEmpty()) {
+        return null;
+      }
+      return stack.peek();
+    }
+
+    public T pop() {
+      Deque<T> stack = local.get();
+      if (stack == null || stack.isEmpty()) {
+        return null;
+      }
+      return stack.pop();
+    }
+
+    public void push(T obj) {
+      stack(true).push(obj);
+    }
+
+    public int size() {
+      Deque<T> stack = stack(false);
+      return stack == null ? 0 : stack.size();
+    }
+
+    private Deque<T> stack(boolean create) {
+      Deque<T> stack = local.get();
+      if (stack == null && create) {
+        stack = new ArrayDeque<>();
+        local.set(stack);
+      }
+      return stack;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午11:26:23
+   *
+   */
   public static class Triple<L, M, R> implements Serializable {
 
     private static final long serialVersionUID = 6441751980847755625L;

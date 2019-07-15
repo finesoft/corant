@@ -44,7 +44,7 @@ public interface Message extends Serializable {
   Object getPayload();
 
   default Instant occurredTime() {
-    return getMetadata() == null ? null : getMetadata().getOccurredTime();
+    return getMetadata() == null ? Instant.MIN : getMetadata().getOccurredTime();
   }
 
   default long sequenceNumber() {

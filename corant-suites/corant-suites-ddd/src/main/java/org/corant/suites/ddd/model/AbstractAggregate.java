@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Preconditions.requireFalse;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import java.beans.Transient;
@@ -22,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
@@ -31,6 +33,8 @@ import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.event.LifecycleManageEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
+import org.corant.suites.ddd.unitwork.UnitOfWork;
+import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
  * @author bingo 下午3:25:51
@@ -111,6 +115,21 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Obtain an assistant for the aggregate, subclass can rewrite this method for supply an assistant
    */
   protected abstract AggregateAssistant callAssistant();
+
+  /**
+   * The current unit of work or null
+   * 
+   * @return currentUnitOfWork
+   */
+  @Transient
+  @javax.persistence.Transient
+  protected UnitOfWork currentUnitOfWork() {
+    Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class);
+    if (uowm.isPresent()) {
+      return uowm.get().getCurrentUnitOfWork();
+    }
+    return null;
+  }
 
   /**
    * Destroy the aggregate if is persisted then remove it from entity manager else just mark

@@ -214,6 +214,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   void extractMessages(LinkedList<Message> messages) {
     if (!this.messages.isEmpty()) {
       this.messages.stream().sorted(Message::compare).forEach(messages::offer);
+      this.messages.clear();
     }
   }
 }

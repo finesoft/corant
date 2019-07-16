@@ -80,7 +80,7 @@ public class JsonDynamicQueryFmTplMmResolver
   boolean isSimpleType(Object arg) {
     Class<?> cls = getComponentClass(arg);
     return String.class.equals(cls) || Number.class.isAssignableFrom(cls)
-        || Temporal.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls)
-        || Enum.class.isAssignableFrom(cls);
+        || Boolean.class.isAssignableFrom(cls) || Temporal.class.isAssignableFrom(cls)
+        || Date.class.isAssignableFrom(cls) || Enum.class.isAssignableFrom(cls);
   }
 }

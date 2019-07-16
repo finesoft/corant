@@ -36,7 +36,7 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 public class HibernateJPAOgmProvider implements JPAProvider {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
+      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,

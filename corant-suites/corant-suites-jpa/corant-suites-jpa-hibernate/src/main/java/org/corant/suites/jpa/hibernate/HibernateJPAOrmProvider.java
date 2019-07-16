@@ -39,7 +39,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 public class HibernateJPAOrmProvider implements JPAProvider {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new NarayanaJTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
+      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
   @Inject
   DataSourceService dataSourceService;

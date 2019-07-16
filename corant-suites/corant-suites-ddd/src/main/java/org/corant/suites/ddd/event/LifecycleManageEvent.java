@@ -15,12 +15,12 @@ package org.corant.suites.ddd.event;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 
 /**
  * The lifecycle manage event, the infrastructure service will listen this event and do persist or
- * destroy the aggregate.
+ * destroy the aggregation.
  *
  * @author bingo 上午9:39:28
  */
@@ -33,11 +33,12 @@ public class LifecycleManageEvent extends AbstractEvent {
 
   private final boolean effectImmediately;
 
-  public LifecycleManageEvent(Aggregate source, LifecycleAction action) {
+  public LifecycleManageEvent(Aggregation source, LifecycleAction action) {
     this(source, action, false);
   }
 
-  public LifecycleManageEvent(Aggregate source, LifecycleAction action, boolean effectImmediately) {
+  public LifecycleManageEvent(Aggregation source, LifecycleAction action,
+      boolean effectImmediately) {
     super(source);
     this.action = action;
     this.effectImmediately = effectImmediately;
@@ -48,7 +49,7 @@ public class LifecycleManageEvent extends AbstractEvent {
   }
 
   @Override
-  public Aggregate getSource() {
+  public Aggregation getSource() {
     return forceCast(super.getSource());
   }
 

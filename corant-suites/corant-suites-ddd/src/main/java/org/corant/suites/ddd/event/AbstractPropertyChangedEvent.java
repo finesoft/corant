@@ -16,7 +16,7 @@ package org.corant.suites.ddd.event;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.time.Instant;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregation;
 
 /**
  * corant-suites-ddd
@@ -25,7 +25,7 @@ import org.corant.suites.ddd.model.Aggregate;
  *
  */
 @Events
-public abstract class AbstractPropertyChangedEvent<T extends Aggregate, PT> extends AbstractEvent {
+public abstract class AbstractPropertyChangedEvent<T extends Aggregation, PT> extends AbstractEvent {
 
   private static final long serialVersionUID = 6311499831097921960L;
 

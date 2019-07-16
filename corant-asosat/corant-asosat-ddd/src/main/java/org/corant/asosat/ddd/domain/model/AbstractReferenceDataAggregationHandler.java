@@ -18,8 +18,8 @@ package org.corant.asosat.ddd.domain.model;
 import org.corant.asosat.ddd.domain.shared.Archivable.ArchiveHandler;
 import org.corant.asosat.ddd.domain.shared.Archivable.RevokeArchiveHandler;
 import org.corant.asosat.ddd.domain.shared.Param;
-import org.corant.suites.ddd.model.Aggregate.DestroyHandler;
-import org.corant.suites.ddd.model.Aggregate.EnablingHandler;
+import org.corant.suites.ddd.model.Aggregation.DestroyHandler;
+import org.corant.suites.ddd.model.Aggregation.EnablingHandler;
 
 /**
  * corant-asosat-ddd
@@ -27,7 +27,7 @@ import org.corant.suites.ddd.model.Aggregate.EnablingHandler;
  * @author bingo 下午5:14:26
  *
  */
-public abstract class AbstractReferenceDataAggregateHandler<T extends AbstractReferenceDataAggregate<Param, T>>
+public abstract class AbstractReferenceDataAggregationHandler<T extends AbstractReferenceDataAggregation<Param, T>>
     implements EnablingHandler<Param, T>, DestroyHandler<Param, T>, ArchiveHandler<Param, T>,
     RevokeArchiveHandler<Param, T> {
 

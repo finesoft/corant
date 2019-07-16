@@ -28,8 +28,8 @@ import javax.persistence.MappedSuperclass;
 @SuppressWarnings("rawtypes")
 @Embeddable
 @MappedSuperclass
-public abstract class AbstractReferenceDataAggregateReference<T extends AbstractReferenceDataAggregate>
-    extends AbstractVersionedAggregateReference<T> {
+public abstract class AbstractReferenceDataAggregationReference<T extends AbstractReferenceDataAggregation>
+    extends AbstractVersionedAggregationReference<T> {
 
   private static final long serialVersionUID = -7976294790832075954L;
 
@@ -39,13 +39,13 @@ public abstract class AbstractReferenceDataAggregateReference<T extends Abstract
   @Column(name = "refNumber")
   private String number;
 
-  public AbstractReferenceDataAggregateReference(T agg) {
+  public AbstractReferenceDataAggregationReference(T agg) {
     super(agg);
     this.setName(agg.getName());
     this.setNumber(agg.getNumber());
   }
 
-  protected AbstractReferenceDataAggregateReference() {
+  protected AbstractReferenceDataAggregationReference() {
     super();
   }
 

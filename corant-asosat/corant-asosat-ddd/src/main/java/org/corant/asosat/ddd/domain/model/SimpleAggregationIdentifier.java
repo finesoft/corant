@@ -19,8 +19,8 @@ import static org.corant.kernel.util.Preconditions.requireNotNull;
 import javax.persistence.Embeddable;
 import javax.persistence.MappedSuperclass;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
 
 /**
  * @author bingo 下午4:06:08
@@ -28,7 +28,7 @@ import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
  */
 @MappedSuperclass
 @Embeddable
-public class SimpleAggregateIdentifier implements AggregateIdentifier {
+public class SimpleAggregationIdentifier implements AggregationIdentifier {
 
   private static final long serialVersionUID = -370892872702435387L;
 
@@ -36,25 +36,25 @@ public class SimpleAggregateIdentifier implements AggregateIdentifier {
 
   private Long id;
 
-  protected SimpleAggregateIdentifier() {}
+  protected SimpleAggregationIdentifier() {}
 
-  protected SimpleAggregateIdentifier(Aggregate aggregate) {
-    type = requireNotNull(aggregate.getClass().getName(), GlobalMessageCodes.ERR_PARAM);
-    id = (Long) requireNotNull(aggregate.getId(), GlobalMessageCodes.ERR_PARAM);
+  protected SimpleAggregationIdentifier(Aggregation aggregation) {
+    type = requireNotNull(aggregation.getClass().getName(), GlobalMessageCodes.ERR_PARAM);
+    id = (Long) requireNotNull(aggregation.getId(), GlobalMessageCodes.ERR_PARAM);
   }
 
-  protected SimpleAggregateIdentifier(String type, Long id) {
+  protected SimpleAggregationIdentifier(String type, Long id) {
     super();
     this.type = requireNotNull(type, GlobalMessageCodes.ERR_PARAM);
     this.id = requireNotNull(id, GlobalMessageCodes.ERR_PARAM);
   }
 
-  public static SimpleAggregateIdentifier of(Aggregate aggregate) {
-    return new SimpleAggregateIdentifier(aggregate);
+  public static SimpleAggregationIdentifier of(Aggregation aggregation) {
+    return new SimpleAggregationIdentifier(aggregation);
   }
 
-  public static SimpleAggregateIdentifier of(String type, Long id) {
-    return new SimpleAggregateIdentifier(type, id);
+  public static SimpleAggregationIdentifier of(String type, Long id) {
+    return new SimpleAggregationIdentifier(type, id);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class SimpleAggregateIdentifier implements AggregateIdentifier {
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    SimpleAggregateIdentifier other = (SimpleAggregateIdentifier) obj;
+    SimpleAggregationIdentifier other = (SimpleAggregationIdentifier) obj;
     if (id == null) {
       if (other.id != null) {
         return false;

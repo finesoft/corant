@@ -29,9 +29,9 @@ import org.corant.asosat.ddd.domain.shared.Participator;
  *
  */
 @MappedSuperclass
-@EntityListeners(value = {MannedAggregateEntityListener.class})
-public abstract class AbstractMannedAggregate<P, T extends AbstractMannedAggregate<P, T>>
-    extends AbstractGenericAggregate<P, T> implements Manned {
+@EntityListeners(value = {MannedAggregationEntityListener.class})
+public abstract class AbstractMannedAggregation<P, T extends AbstractMannedAggregation<P, T>>
+    extends AbstractGenericAggregation<P, T> implements Manned {
 
   private static final long serialVersionUID = 4296767808160742486L;
 
@@ -41,9 +41,9 @@ public abstract class AbstractMannedAggregate<P, T extends AbstractMannedAggrega
   @Embedded
   private ModificationInfo modificationInfo = ModificationInfo.empty();
 
-  public AbstractMannedAggregate() {}
+  public AbstractMannedAggregation() {}
 
-  public AbstractMannedAggregate(Participator creator) {
+  public AbstractMannedAggregation(Participator creator) {
     this.initCreationInfo(creator);
   }
 

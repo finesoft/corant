@@ -21,7 +21,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.model.AbstractDefaultGenericAggregate;
+import org.corant.suites.ddd.model.AbstractDefaultGenericAggregation;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -31,8 +31,8 @@ import org.hibernate.annotations.GenericGenerator;
  *
  */
 @MappedSuperclass
-public abstract class AbstractGenericAggregate<P, T extends AbstractGenericAggregate<P, T>>
-    extends AbstractDefaultGenericAggregate<P, T> {
+public abstract class AbstractGenericAggregation<P, T extends AbstractGenericAggregation<P, T>>
+    extends AbstractDefaultGenericAggregation<P, T> {
 
   private static final long serialVersionUID = -4395445831789674052L;
 
@@ -42,7 +42,7 @@ public abstract class AbstractGenericAggregate<P, T extends AbstractGenericAggre
       strategy = "org.corant.suites.jpa.hibernate.HibernateSnowflakeIdGenerator")
   private Long id;
 
-  public AbstractGenericAggregate() {}
+  public AbstractGenericAggregation() {}
 
   @Override
   public Long getId() {

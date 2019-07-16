@@ -27,8 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import javax.json.JsonObject;
-import org.corant.asosat.ddd.domain.model.AbstractVersionedAggregateReference;
-import org.corant.asosat.ddd.domain.model.AbstractGenericAggregate;
+import org.corant.asosat.ddd.domain.model.AbstractVersionedAggregationReference;
+import org.corant.asosat.ddd.domain.model.AbstractGenericAggregation;
 import org.corant.asosat.ddd.domain.model.AbstractValueObject;
 import org.corant.suites.ddd.model.Readable;
 
@@ -47,12 +47,12 @@ public class MaintainReturns extends AbstractValueObject
     this.vn = vn;
   }
 
-  public static MaintainReturns of(AbstractVersionedAggregateReference<?> ref) {
+  public static MaintainReturns of(AbstractVersionedAggregationReference<?> ref) {
     return new MaintainReturns(ref.getId(), ref.getVn());
   }
 
-  public static MaintainReturns of(AbstractGenericAggregate<?, ?> aggregate) {
-    return new MaintainReturns(aggregate.getId(), aggregate.getVn());
+  public static MaintainReturns of(AbstractGenericAggregation<?, ?> aggregation) {
+    return new MaintainReturns(aggregation.getId(), aggregation.getVn());
   }
 
   public static MaintainReturns of(Long id, long vn) {

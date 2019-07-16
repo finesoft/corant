@@ -22,10 +22,10 @@ package org.corant.suites.ddd.model;
 import org.corant.suites.bundle.GlobalMessageCodes;
 
 class PkgMsgCds implements GlobalMessageCodes {
-  static final String ERR_AGG_LC = "aggregate.lifecycle_state_error";
-  static final String ERR_AGG_AST_INSTAL = "aggregate.assistant_install_error";
-  static final String ERR_AGG_MSG_SEQ = "aggregate.msgSeqNum_error";
-  static final String ERR_AGG_ID = "aggregate.identifier_error";
+  static final String ERR_AGG_LC = "aggregation.lifecycle_state_error";
+  static final String ERR_AGG_AST_INSTAL = "aggregation.assistant_install_error";
+  static final String ERR_AGG_MSG_SEQ = "aggregation.msgSeqNum_error";
+  static final String ERR_AGG_ID = "aggregation.identifier_error";
 
   private PkgMsgCds() {}
 

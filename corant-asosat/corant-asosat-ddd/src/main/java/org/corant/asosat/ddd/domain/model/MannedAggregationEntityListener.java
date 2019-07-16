@@ -25,13 +25,13 @@ import org.corant.asosat.ddd.domain.shared.Participator;
  * @author bingo 下午1:27:26
  *
  */
-public class MannedAggregateEntityListener {
+public class MannedAggregationEntityListener {
 
   @SuppressWarnings("rawtypes")
   @PrePersist
   void onPrePersist(Object o) {
-    if (o instanceof AbstractMannedAggregate) {
-      AbstractMannedAggregate obj = AbstractMannedAggregate.class.cast(o);
+    if (o instanceof AbstractMannedAggregation) {
+      AbstractMannedAggregation obj = AbstractMannedAggregation.class.cast(o);
       if (obj.getCreator() == null) {
         obj.initCreationInfo(Participator.currentUser());
       }
@@ -40,8 +40,8 @@ public class MannedAggregateEntityListener {
 
   @PreUpdate
   void onPreUpdate(Object o) {
-    if (o instanceof AbstractMannedAggregate) {
-      AbstractMannedAggregate.class.cast(o).initModificationInfo(Participator.currentUser());
+    if (o instanceof AbstractMannedAggregation) {
+      AbstractMannedAggregation.class.cast(o).initModificationInfo(Participator.currentUser());
     }
   }
 }

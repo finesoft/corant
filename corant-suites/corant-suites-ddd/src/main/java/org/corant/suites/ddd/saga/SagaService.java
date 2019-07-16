@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
 
 /**
  * corant-suites-ddd
@@ -74,6 +74,6 @@ public interface SagaService {
 
     Saga get(String queue, String trackingToken);
 
-    List<Saga> select(AggregateIdentifier aggregateIdentifier);
+    List<Saga> select(AggregationIdentifier aggregationIdentifier);
   }
 }

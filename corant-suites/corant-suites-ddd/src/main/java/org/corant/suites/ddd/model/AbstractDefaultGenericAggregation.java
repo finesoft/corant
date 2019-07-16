@@ -16,20 +16,20 @@ package org.corant.suites.ddd.model;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.persistence.MappedSuperclass;
-import org.corant.suites.ddd.model.Aggregate.Destroyable;
-import org.corant.suites.ddd.model.Aggregate.Enabling;
+import org.corant.suites.ddd.model.Aggregation.Destroyable;
+import org.corant.suites.ddd.model.Aggregation.Enabling;
 
 /**
  * @author bingo 下午7:42:44
  *
  */
 @MappedSuperclass
-public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefaultAggregate>
-    extends AbstractDefaultAggregate implements Enabling<P, T>, Destroyable<P, T> {
+public abstract class AbstractDefaultGenericAggregation<P, T extends AbstractDefaultAggregation>
+    extends AbstractDefaultAggregation implements Enabling<P, T>, Destroyable<P, T> {
 
   private static final long serialVersionUID = 3815839476729207935L;
 
-  public AbstractDefaultGenericAggregate() {
+  public AbstractDefaultGenericAggregation() {
     super();
   }
 
@@ -69,7 +69,7 @@ public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefau
   }
 
   /**
-   * Changed the aggregate's property value and return self for lambda use case, Example:
+   * Changed the aggregation's property value and return self for lambda use case, Example:
    *
    * <pre>
    * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)

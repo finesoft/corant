@@ -15,7 +15,7 @@ package org.corant.suites.ddd.message;
 
 /**
  * Marking a integration message object can be merged. Imagine that in the transaction unit of works
- * if an aggregate property value from '1' change to '2' and finally change to '1' then it should
+ * if an aggregation property value from '1' change to '2' and finally change to '1' then it should
  * not raise property changed message, this is experimental.
  *
  * @author bingo 下午3:37:07

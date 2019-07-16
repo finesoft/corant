@@ -40,8 +40,8 @@ import org.corant.shared.util.IterableUtils;
  *
  */
 @MappedSuperclass
-public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAggregate<P, T>>
-    extends AbstractMannedAggregate<P, T> implements TreeNode, Iterable<T> {
+public abstract class AbstractTreeNodeAggregation<P, T extends AbstractTreeNodeAggregation<P, T>>
+    extends AbstractMannedAggregation<P, T> implements TreeNode, Iterable<T> {
 
   private static final long serialVersionUID = -1269961652281852569L;
 
@@ -53,11 +53,11 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
   @Column(length = 2048)
   private String pathIndex;
 
-  public AbstractTreeNodeAggregate() {
+  public AbstractTreeNodeAggregation() {
     super();
   }
 
-  public AbstractTreeNodeAggregate(Participator creator) {
+  public AbstractTreeNodeAggregation(Participator creator) {
     super(creator);
   }
 
@@ -151,7 +151,7 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
   }
 
   @Transient
-  public boolean isPathParentOf(AbstractTreeNodeAggregate<P, T> node) {
+  public boolean isPathParentOf(AbstractTreeNodeAggregation<P, T> node) {
     return node == null || node.getParent() == null ? false
         : getId() == null ? this.tmpChilds().contains(node)
             : node.getPathIndex().indexOf(getId().toString() + TREE_PATHINFO_SEPARATOR) != -1;
@@ -215,7 +215,7 @@ public abstract class AbstractTreeNodeAggregate<P, T extends AbstractTreeNodeAgg
     return this.tmpChilds;
   }
 
-  protected abstract AbstractTreeNodeAggregateReference<T> toReference();
+  protected abstract AbstractTreeNodeAggregationReference<T> toReference();
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();

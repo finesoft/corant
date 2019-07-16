@@ -17,10 +17,10 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.time.Instant;
 import java.util.Map;
-import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
-import org.corant.suites.ddd.model.AbstractDefaultAggregate;
-import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.Lifecycle;
+import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
+import org.corant.suites.ddd.model.AbstractDefaultAggregation;
+import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregation.Lifecycle;
 import org.corant.suites.ddd.model.Value.SimpleValueMap;
 
 /**
@@ -29,26 +29,26 @@ import org.corant.suites.ddd.model.Value.SimpleValueMap;
  * @author bingo 下午5:48:49
  *
  */
-public class AggregateLifecycleMessage implements MergableMessage {
+public class LifecycleMessage implements MergableMessage {
 
   private static final long serialVersionUID = -5988315884617833263L;
-  private final AggregateLifecycleMessageMetadata metadata;
+  private final LifecycleMessageMetadata metadata;
   private final Lifecycle lifecycle;
   private final SimpleValueMap payload;
 
-  public AggregateLifecycleMessage(Aggregate aggregate, Lifecycle lifecycle) {
-    metadata = new AggregateLifecycleMessageMetadata(aggregate);
+  public LifecycleMessage(Aggregation aggregation, Lifecycle lifecycle) {
+    metadata = new LifecycleMessageMetadata(aggregation);
     this.lifecycle = lifecycle;
-    if (aggregate instanceof AggregateLifecycleMessageBuilder) {
-      payload = ((AggregateLifecycleMessageBuilder) aggregate).buildLifecycleMessagePayload();
+    if (aggregation instanceof LifecycleMessageBuilder) {
+      payload = ((LifecycleMessageBuilder) aggregation).buildLifecycleMessagePayload();
     } else {
       payload = SimpleValueMap.empty();
     }
   }
 
-  public AggregateLifecycleMessage(Aggregate aggregate, Lifecycle lifecycle,
+  public LifecycleMessage(Aggregation aggregation, Lifecycle lifecycle,
       SimpleValueMap payload) {
-    metadata = new AggregateLifecycleMessageMetadata(aggregate);
+    metadata = new LifecycleMessageMetadata(aggregation);
     this.lifecycle = lifecycle;
     this.payload = defaultObject(payload, SimpleValueMap.empty());
   }
@@ -58,7 +58,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
    * @param lifecycle
    * @param payload
    */
-  public AggregateLifecycleMessage(AggregateLifecycleMessageMetadata metadata, Lifecycle lifecycle,
+  public LifecycleMessage(LifecycleMessageMetadata metadata, Lifecycle lifecycle,
       SimpleValueMap payload) {
     super();
     this.metadata = metadata;
@@ -71,7 +71,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
   }
 
   @Override
-  public AggregateLifecycleMessageMetadata getMetadata() {
+  public LifecycleMessageMetadata getMetadata() {
     return metadata;
   }
 
@@ -81,30 +81,30 @@ public class AggregateLifecycleMessage implements MergableMessage {
   }
 
   @Override
-  public AggregateLifecycleMessage merge(MergableMessage other) {
+  public LifecycleMessage merge(MergableMessage other) {
     return this;
   }
 
   @FunctionalInterface
-  public interface AggregateLifecycleMessageBuilder {
+  public interface LifecycleMessageBuilder {
     SimpleValueMap buildLifecycleMessagePayload();
   }
 
-  public static class AggregateLifecycleMessageMetadata implements MessageMetadata {
+  public static class LifecycleMessageMetadata implements MessageMetadata {
 
     private static final long serialVersionUID = 5896162140881655490L;
 
-    private final DefaultAggregateIdentifier source;
+    private final DefaultAggregationIdentifier source;
     private final Instant occurredTime = Instant.now();
     private final long versionNumber;
     private long sequenceNumber = 0;
 
-    public AggregateLifecycleMessageMetadata(Aggregate aggregate) {
-      source = new DefaultAggregateIdentifier(aggregate);
-      if (aggregate instanceof AbstractDefaultAggregate) {
-        sequenceNumber = AbstractDefaultAggregate.class.cast(aggregate).getMn();
+    public LifecycleMessageMetadata(Aggregation aggregation) {
+      source = new DefaultAggregationIdentifier(aggregation);
+      if (aggregation instanceof AbstractDefaultAggregation) {
+        sequenceNumber = AbstractDefaultAggregation.class.cast(aggregation).getMn();
       }
-      versionNumber = aggregate.getVn();
+      versionNumber = aggregation.getVn();
     }
 
     /**
@@ -112,7 +112,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
      * @param versionNumber
      * @param sequenceNumber
      */
-    public AggregateLifecycleMessageMetadata(DefaultAggregateIdentifier source, long versionNumber,
+    public LifecycleMessageMetadata(DefaultAggregationIdentifier source, long versionNumber,
         long sequenceNumber) {
       super();
       this.source = source;
@@ -136,7 +136,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
     }
 
     @Override
-    public DefaultAggregateIdentifier getSource() {
+    public DefaultAggregationIdentifier getSource() {
       return source;
     }
 

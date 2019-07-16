@@ -36,7 +36,7 @@ import org.corant.shared.util.ConversionUtils;
  */
 @SuppressWarnings("rawtypes")
 @MappedSuperclass
-public abstract class AbstractAggregateReference<T extends AbstractGenericAggregate>
+public abstract class AbstractAggregationReference<T extends AbstractGenericAggregation>
     extends AbstractEntityReference<T> {
 
   private static final long serialVersionUID = -2281612710734427143L;
@@ -50,16 +50,16 @@ public abstract class AbstractAggregateReference<T extends AbstractGenericAggreg
   @Column(name = "referenceId")
   private Long id;
 
-  protected AbstractAggregateReference() {}
+  protected AbstractAggregationReference() {}
 
-  protected AbstractAggregateReference(T agg) {
+  protected AbstractAggregationReference(T agg) {
     this.setId(requireNotNull(agg, ERR_OBJ_NON_FUD, "").getId());
     if (this.holdReferred) {
       this.referred = agg;
     }
   }
 
-  protected static <A extends AbstractGenericAggregate, T extends AbstractAggregateReference<A>> T of(
+  protected static <A extends AbstractGenericAggregation, T extends AbstractAggregationReference<A>> T of(
       Object param, Class<T> cls) {
     if (param == null) {
       return null; // FIXME like c++ reference
@@ -74,8 +74,8 @@ public abstract class AbstractAggregateReference<T extends AbstractGenericAggreg
           return ConstructorUtils.invokeExactConstructor(cls, new Object[] {id},
               new Class<?>[] {Long.class});
         }
-      } else if (param instanceof AbstractVersionedAggregateReference
-          || param instanceof AbstractGenericAggregate) {
+      } else if (param instanceof AbstractVersionedAggregationReference
+          || param instanceof AbstractGenericAggregation) {
         return ConstructorUtils.invokeExactConstructor(cls, new Object[] {param},
             new Class<?>[] {param.getClass()});
       }
@@ -97,7 +97,7 @@ public abstract class AbstractAggregateReference<T extends AbstractGenericAggreg
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    AbstractAggregateReference other = (AbstractAggregateReference) obj;
+    AbstractAggregationReference other = (AbstractAggregationReference) obj;
     if (this.id == null) {
       if (other.id != null) {
         return false;

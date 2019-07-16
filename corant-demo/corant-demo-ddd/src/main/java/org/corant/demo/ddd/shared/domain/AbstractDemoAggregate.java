@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
-import org.corant.asosat.ddd.domain.model.AbstractGenericAggregate;
+import org.corant.asosat.ddd.domain.model.AbstractGenericAggregation;
 import org.corant.asosat.ddd.domain.shared.Param;
 
 /**
@@ -28,7 +28,7 @@ import org.corant.asosat.ddd.domain.shared.Param;
  */
 @MappedSuperclass
 public abstract class AbstractDemoAggregate
-    extends AbstractGenericAggregate<Param, AbstractDemoAggregate> {
+    extends AbstractGenericAggregation<Param, AbstractDemoAggregate> {
 
   private static final long serialVersionUID = 4067385038399832270L;
 

@@ -33,11 +33,11 @@ import javax.enterprise.util.AnnotationLiteral;
 @Target({TYPE, FIELD, METHOD})
 @Inherited
 @Stereotype
-public @interface Aggregates {
+public @interface Aggregations {
 
-  final static AggregatesLiteral INST = new AggregatesLiteral();
+  final static AggregationsLiteral INST = new AggregationsLiteral();
 
-  public static class AggregatesLiteral extends AnnotationLiteral<Aggregates> {
+  public static class AggregationsLiteral extends AnnotationLiteral<Aggregations> {
     private static final long serialVersionUID = -6257574375065504422L;
   }
 }

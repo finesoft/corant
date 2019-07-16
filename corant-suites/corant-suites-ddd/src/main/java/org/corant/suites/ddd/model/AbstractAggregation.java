@@ -44,8 +44,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
  *
  */
 @MappedSuperclass
-@EntityListeners(value = {DefaultAggregateListener.class})
-public abstract class AbstractAggregate extends AbstractEntity implements Aggregate {
+@EntityListeners(value = {DefaultAggregationListener.class})
+public abstract class AbstractAggregation extends AbstractEntity implements Aggregation {
 
   private static final long serialVersionUID = -9184534676784775644L;
 
@@ -61,7 +61,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Identifies whether the aggregate has been persisted or deleted.
+   * Identifies whether the aggregation has been persisted or deleted.
    * <li>INITIAL: Just created</li>
    * <li>ENABLED: Has been persisted</li>
    * <li>REENABLED: Just loaded from persistence</li>
@@ -76,7 +76,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Return an aggregate evolutionary version number, this is equivalent to
+   * Return an aggregation evolutionary version number, this is equivalent to
    * {@link javax.persistence.Version} in JPA
    */
   @Override
@@ -114,9 +114,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Obtain an assistant for the aggregate, subclass can rewrite this method for supply an assistant
+   * Obtain an assistant for the aggregation, subclass can rewrite this method for supply an
+   * assistant
    */
-  protected abstract AggregateAssistant callAssistant();
+  protected abstract AggregationAssistant callAssistant();
 
   /**
    * The current unit of work or null
@@ -130,7 +131,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Destroy the aggregate if is persisted then remove it from entity manager else just mark
+   * Destroy the aggregation if is persisted then remove it from entity manager else just mark
    * destroyed
    */
   protected synchronized void destroy(boolean immediately) {
@@ -138,9 +139,9 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Enable the aggregate if is not persisted then persist it else merge it.
+   * Enable the aggregation if is not persisted then persist it else merge it.
    */
-  protected synchronized AbstractAggregate enable(boolean immediately) {
+  protected synchronized AbstractAggregation enable(boolean immediately) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
     this.raise(new LifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
     return this;
@@ -152,24 +153,24 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return getId() != null;
   }
 
-  protected synchronized AbstractAggregate lifecycle(Lifecycle lifecycle) {
+  protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
     this.lifecycle = lifecycle;
     return this;
   }
 
   /**
-   * Destroy preconditions, validate the aggregate consistency
+   * Destroy preconditions, validate the aggregation consistency
    *
-   * @see DefaultAggregateListener
+   * @see DefaultAggregationListener
    * @see PreRemove
    */
   protected void preDestroy() {}
 
   /**
-   * Enable preconditions, validate the aggregate consistency,EntityListener callback
+   * Enable preconditions, validate the aggregation consistency,EntityListener callback
    *
-   * @see DefaultAggregateListener
+   * @see DefaultAggregationListener
    * @see PrePersist
    * @see PreUpdate
    */
@@ -180,7 +181,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    *
    * @see EntityManager#refresh(Object)
    */
-  protected synchronized AbstractAggregate recover() {
+  protected synchronized AbstractAggregation recover() {
     requireFalse(!isEnabled(), PkgMsgCds.ERR_AGG_LC);
     this.raise(new LifecycleManageEvent(this, LifecycleAction.RECOVER, true));
     return this;
@@ -198,7 +199,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     stream.defaultWriteObject();
   }
 
-  public static final class DefaultAggregateIdentifier implements AggregateIdentifier {
+  public static final class DefaultAggregationIdentifier implements AggregationIdentifier {
 
     private static final long serialVersionUID = -930151000998600572L;
 
@@ -208,10 +209,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
     private final int hash;
 
-    public DefaultAggregateIdentifier(Aggregate aggregate) {
-      id = requireNotNull(requireNotNull(aggregate, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
+    public DefaultAggregationIdentifier(Aggregation aggregation) {
+      id = requireNotNull(requireNotNull(aggregation, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
           GlobalMessageCodes.ERR_SYS);
-      typeCls = requireNotNull(aggregate.getClass(), GlobalMessageCodes.ERR_SYS);
+      typeCls = requireNotNull(aggregation.getClass(), GlobalMessageCodes.ERR_SYS);
       hash = calHash(id, typeCls);
     }
 
@@ -226,7 +227,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
       if (getClass() != obj.getClass()) {
         return false;
       }
-      DefaultAggregateIdentifier other = (DefaultAggregateIdentifier) obj;
+      DefaultAggregationIdentifier other = (DefaultAggregationIdentifier) obj;
       if (id == null) {
         if (other.id != null) {
           return false;

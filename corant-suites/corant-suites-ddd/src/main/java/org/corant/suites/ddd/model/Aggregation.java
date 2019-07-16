@@ -25,7 +25,7 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午4:23:02
  * @since
  */
-public interface Aggregate extends Entity {
+public interface Aggregation extends Entity {
 
   /**
    * If flush is true then the integration event queue will be clear
@@ -54,7 +54,8 @@ public interface Aggregate extends Entity {
   }
 
   /**
-   * The aggregate isn't persisted, or is destroyed, but still live in memory until the GC recycle.
+   * The aggregation isn't persisted, or is destroyed, but still live in memory until the GC
+   * recycle.
    */
   @Transient
   @javax.persistence.Transient
@@ -77,7 +78,29 @@ public interface Aggregate extends Entity {
    */
   void raiseAsync(Event event, Annotation... qualifiers);
 
-  interface AggregateIdentifier extends EntityIdentifier {
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:04:45
+   *
+   */
+  public static abstract class AggregationHandlerAdapter<P, T> extends EnablingHandlerAdapter<P, T>
+      implements DestroyHandler<P, T> {
+
+    @Override
+    public void preDestroy(P param, T destroyable) {
+
+    }
+
+  }
+
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:04:52
+   *
+   */
+  interface AggregationIdentifier extends EntityIdentifier {
 
     @Override
     Serializable getId();
@@ -90,22 +113,46 @@ public interface Aggregate extends Entity {
     }
   }
 
-  interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:04:55
+   *
+   */
+  interface AggregationReference<T extends Aggregation> extends EntityReference<T> {
 
     Long getVn();
 
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:04:58
+   *
+   */
   @FunctionalInterface
   interface Destroyable<P, T> {
     void destroy(P param, DestroyHandler<P, T> handler);
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:02
+   *
+   */
   @FunctionalInterface
   interface DestroyHandler<P, T> {
     void preDestroy(P param, T destroyable);
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:06:04
+   *
+   */
   public static abstract class DestroyHandlerAdapter<P, T> implements DestroyHandler<P, T> {
     @Override
     public void preDestroy(P param, T destroyable) {
@@ -113,16 +160,34 @@ public interface Aggregate extends Entity {
     }
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:07
+   *
+   */
   @FunctionalInterface
   interface Enabling<P, T> {
     T enable(P param, EnablingHandler<P, T> handler);
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:13
+   *
+   */
   @FunctionalInterface
   interface EnablingHandler<P, T> {
     void preEnable(P param, T enabling);
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:19
+   *
+   */
   public static abstract class EnablingHandlerAdapter<P, T> implements EnablingHandler<P, T> {
     @Override
     public void preEnable(P param, T destroyable) {
@@ -130,6 +195,13 @@ public interface Aggregate extends Entity {
     }
   }
 
+  /**
+   *
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:24
+   *
+   */
   public enum Lifecycle {
     INITIAL(0), ENABLED(1), REENABLED(2), DESTROYED(-1);
     int sign;

@@ -14,14 +14,21 @@
 package org.corant.suites.ddd.event;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import javax.persistence.EntityManager;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
-import org.corant.suites.ddd.model.Aggregate.Lifecycle;
+import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
+import org.corant.suites.ddd.model.Aggregation.Lifecycle;
 
 /**
- * Every aggregate that extends AbstractAggregate when life cycle change then will fire
- * LifecycleEvent, the infrastructure service will listen this event and do persist or remove the
- * aggregate.
+ * Every aggregation that extends AbstractAggregation when life cycle change then will fire
+ * LifecycleEvent. The Event triggers occur when the aggregation is persisted/deleted/updated and
+ * has been updated to the persistence layer and the JTA transaction has not yet finished.
+ *
+ * @see EntityManager#flush()
+ * @see TransactionSynchronizationRegistry
+ * @see Synchronization#beforeCompletion()
  *
  * @author bingo 上午9:39:28
  */
@@ -32,7 +39,7 @@ public class LifecycleEvent extends AbstractEvent {
 
   private final Lifecycle lifecycle;
 
-  public LifecycleEvent(AggregateIdentifier source, Lifecycle lifecycle) {
+  public LifecycleEvent(AggregationIdentifier source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }
@@ -42,7 +49,7 @@ public class LifecycleEvent extends AbstractEvent {
   }
 
   @Override
-  public AggregateIdentifier getSource() {
+  public AggregationIdentifier getSource() {
     return forceCast(super.getSource());
   }
 

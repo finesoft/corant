@@ -24,7 +24,7 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午3:11:06
  *
  */
-public interface AggregateAssistant {
+public interface AggregationAssistant {
 
   /**
    * Clear the message queue.
@@ -37,24 +37,24 @@ public interface AggregateAssistant {
   List<Message> dequeueMessages(boolean flush);
 
   /**
-   * enqueue aggregate message to queue
+   * enqueue aggregation message to queue
    */
   void enqueueMessages(Message... messages);
 
   /**
-   * fire aggregate asynchronous event
+   * fire aggregation asynchronous event
    */
   void fireAsyncEvent(Event event, Annotation... qualifiers);
 
   /**
-   * fire aggregate event
+   * fire aggregation event
    */
   void fireEvent(Event event, Annotation... qualifiers);
 
   /**
-   * The aggregate which it serve
+   * The aggregation which it serve
    */
-  Aggregate getAggregate();
+  Aggregation getAggregation();
 
   /**
    * Obtain the message serial number

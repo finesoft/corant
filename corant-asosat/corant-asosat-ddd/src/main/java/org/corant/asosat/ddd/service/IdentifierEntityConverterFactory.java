@@ -30,7 +30,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.transaction.Transactional;
 import org.corant.Corant;
-import org.corant.asosat.ddd.domain.model.SimpleAggregateIdentifier;
+import org.corant.asosat.ddd.domain.model.SimpleAggregationIdentifier;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
@@ -100,8 +100,8 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
       id = Long.class.cast(value);
     } else if (value instanceof String) {
       id = Long.valueOf(value.toString());
-    } else if (value instanceof SimpleAggregateIdentifier) {
-      id = SimpleAggregateIdentifier.class.cast(value).getId();
+    } else if (value instanceof SimpleAggregationIdentifier) {
+      id = SimpleAggregationIdentifier.class.cast(value).getId();
     }
     T entity = null;
     if (id != null) {

@@ -33,8 +33,8 @@ import javax.persistence.Query;
 import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
 import org.corant.shared.util.StringUtils;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
-import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
 import org.corant.suites.ddd.model.Entity;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
@@ -99,7 +99,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T get(AggregateIdentifier identifier) {
+  public <T> T get(AggregationIdentifier identifier) {
     if (identifier != null) {
       Class<?> cls = tryAsClass(identifier.getType());
       return (T) getEntityManager().find(cls, identifier.getId());
@@ -121,7 +121,7 @@ public abstract class AbstractJPARepository implements JPARepository {
     return getEntityManager().find(entityClass, id, lockMode, properties);
   }
 
-  public <T extends Aggregate> T get(Class<T> entityClass, Serializable id, long vn) {
+  public <T extends Aggregation> T get(Class<T> entityClass, Serializable id, long vn) {
     T entity = this.get(entityClass, id);
     return entity != null && entity.getVn().longValue() == vn ? entity : null;
   }

@@ -33,8 +33,8 @@ import org.corant.shared.exception.NotSupportedException;
  *
  */
 @MappedSuperclass
-public abstract class AbstractReferenceDataAggregate<P, T extends AbstractReferenceDataAggregate<P, T>>
-    extends AbstractMannedAggregate<P, T> implements Nameable, Numbered, Archivable<P, T> {
+public abstract class AbstractReferenceDataAggregation<P, T extends AbstractReferenceDataAggregation<P, T>>
+    extends AbstractMannedAggregation<P, T> implements Nameable, Numbered, Archivable<P, T> {
 
   private static final long serialVersionUID = 7969451042668674966L;
 
@@ -50,25 +50,25 @@ public abstract class AbstractReferenceDataAggregate<P, T extends AbstractRefere
   @Embedded
   private ArchiveInfo archiveInfo = ArchiveInfo.empty();
 
-  public AbstractReferenceDataAggregate() {
+  public AbstractReferenceDataAggregation() {
     super();
   }
 
-  public AbstractReferenceDataAggregate(Participator creator) {
+  public AbstractReferenceDataAggregation(Participator creator) {
     super(creator);
   }
 
-  public AbstractReferenceDataAggregate(Participator creator, String name) {
+  public AbstractReferenceDataAggregation(Participator creator, String name) {
     this(creator);
     this.setName(name);
   }
 
-  public AbstractReferenceDataAggregate(Participator creator, String name, String number) {
+  public AbstractReferenceDataAggregation(Participator creator, String name, String number) {
     this(creator, name);
     this.setNumber(number);
   }
 
-  public AbstractReferenceDataAggregate(Participator creator, String name, String number,
+  public AbstractReferenceDataAggregation(Participator creator, String name, String number,
       String description) {
     this(creator, name, number);
     this.setRemark(description);

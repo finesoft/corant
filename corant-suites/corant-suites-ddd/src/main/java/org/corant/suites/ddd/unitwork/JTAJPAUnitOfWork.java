@@ -34,10 +34,10 @@ import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
-import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
-import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
-import org.corant.suites.ddd.model.Aggregate.Lifecycle;
+import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
+import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
+import org.corant.suites.ddd.model.Aggregation.Lifecycle;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
@@ -64,7 +64,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  final Map<Lifecycle, Set<AggregateIdentifier>> registration = new EnumMap<>(Lifecycle.class);
+  final Map<Lifecycle, Set<AggregationIdentifier>> registration = new EnumMap<>(Lifecycle.class);
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager);
@@ -76,7 +76,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void afterCompletion(int status) {
     final boolean success = status == Status.STATUS_COMMITTED;
-    final Map<Lifecycle, Set<AggregateIdentifier>> registers = new EnumMap<>(Lifecycle.class);
+    final Map<Lifecycle, Set<AggregationIdentifier>> registers = new EnumMap<>(Lifecycle.class);
     try {
       complete(success);
       registers.putAll(getRegisters());
@@ -103,10 +103,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void deregister(Object obj) {
     if (activated) {
-      if (obj instanceof Aggregate) {
-        Aggregate aggregate = (Aggregate) obj;
-        if (aggregate.getId() != null) {
-          AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
+      if (obj instanceof Aggregation) {
+        Aggregation aggregation = (Aggregation) obj;
+        if (aggregation.getId() != null) {
+          AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
           registration.values().forEach(v -> v.remove(ai));
           messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
         }
@@ -129,8 +129,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public Map<Lifecycle, Set<AggregateIdentifier>> getRegisters() {
-    Map<Lifecycle, Set<AggregateIdentifier>> clone = new EnumMap<>(Lifecycle.class);
+  public Map<Lifecycle, Set<AggregationIdentifier>> getRegisters() {
+    Map<Lifecycle, Set<AggregationIdentifier>> clone = new EnumMap<>(Lifecycle.class);
     registration.forEach((k, v) -> {
       clone.put(k, Collections.unmodifiableSet(new LinkedHashSet<>(v)));
     });
@@ -155,17 +155,17 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void register(Object obj) {
     if (activated && isInTransaction()) {
-      if (obj instanceof Aggregate) {
-        Aggregate aggregate = (Aggregate) obj;
-        if (aggregate.getId() != null) {
-          AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
+      if (obj instanceof Aggregation) {
+        Aggregation aggregation = (Aggregation) obj;
+        if (aggregation.getId() != null) {
+          AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
           registration.forEach((k, v) -> {
-            if (k != aggregate.getLifecycle()) {
+            if (k != aggregation.getLifecycle()) {
               v.remove(ai);
             }
           });
-          registration.get(aggregate.getLifecycle()).add(ai);
-          aggregate.extractMessages(true)
+          registration.get(aggregation.getLifecycle()).add(ai);
+          aggregation.extractMessages(true)
               .forEach(message -> MessageUtils.mergeToQueue(messages, message));
         }
       } else if (obj instanceof Message) {

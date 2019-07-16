@@ -32,17 +32,17 @@ import javax.persistence.MappedSuperclass;
 @SuppressWarnings("rawtypes")
 @Embeddable
 @MappedSuperclass
-public abstract class AbstractVersionedAggregateReference<T extends AbstractGenericAggregate>
-    extends AbstractAggregateReference<T> {
+public abstract class AbstractVersionedAggregationReference<T extends AbstractGenericAggregation>
+    extends AbstractAggregationReference<T> {
 
   private static final long serialVersionUID = -3880835071968870788L;
 
   @Column(name = "referenceVn")
   private long vn;
 
-  protected AbstractVersionedAggregateReference() {}
+  protected AbstractVersionedAggregationReference() {}
 
-  protected AbstractVersionedAggregateReference(T agg) {
+  protected AbstractVersionedAggregationReference(T agg) {
     setId(requireNotNull(agg, ERR_OBJ_NON_FUD, "").getId());
     this.setVn(agg.getVn());
     if (holdReferred) {
@@ -61,7 +61,7 @@ public abstract class AbstractVersionedAggregateReference<T extends AbstractGene
     if (getClass() != obj.getClass()) {
       return false;
     }
-    AbstractVersionedAggregateReference other = (AbstractVersionedAggregateReference) obj;
+    AbstractVersionedAggregationReference other = (AbstractVersionedAggregationReference) obj;
     return vn == other.vn;
   }
 

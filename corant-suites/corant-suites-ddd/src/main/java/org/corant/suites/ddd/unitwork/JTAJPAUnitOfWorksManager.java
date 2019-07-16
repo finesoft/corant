@@ -13,9 +13,9 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.Corant.instance;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -29,6 +29,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import org.corant.kernel.service.PersistenceService;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
@@ -64,10 +65,6 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Any
   Instance<SagaService> sagaService;
 
-  public static JTAJPAUnitOfWork curUow() {
-    return instance().select(JTAJPAUnitOfWorksManager.class).get().getCurrentUnitOfWork();
-  }
-
   public static int getTxStatusFromCurUow() {
     try {
       return curUow().transaction.getStatus();
@@ -89,6 +86,15 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
       curUow().transaction.registerSynchronization(sync);
     } catch (IllegalStateException | RollbackException | SystemException e) {
       throw new CorantRuntimeException(e);
+    }
+  }
+
+  static JTAJPAUnitOfWork curUow() {
+    Optional<UnitOfWork> curuow = UnitOfWorksManager.currentUnitOfWork();
+    if (curuow.isPresent() && curuow.get() instanceof JTAJPAUnitOfWork) {
+      return (JTAJPAUnitOfWork) curuow.get();
+    } else {
+      throw new NotSupportedException();
     }
   }
 

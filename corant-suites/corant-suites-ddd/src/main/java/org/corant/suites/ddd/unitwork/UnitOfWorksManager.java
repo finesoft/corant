@@ -13,6 +13,9 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.kernel.util.Instances.resolve;
+import java.lang.annotation.Annotation;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.corant.kernel.service.PersistenceService;
 import org.corant.suites.ddd.message.MessageDispatcher;
@@ -25,6 +28,11 @@ import org.corant.suites.ddd.saga.SagaService;
  * @author bingo 上午11:51:01
  */
 public interface UnitOfWorksManager {
+
+  static Optional<UnitOfWork> currentUnitOfWork(Annotation... annotations) {
+    Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class, annotations);
+    return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
+  }
 
   UnitOfWork getCurrentUnitOfWork();
 

@@ -27,6 +27,8 @@ public abstract class AbstractDefaultAggregate extends AbstractAggregate {
 
   private static final long serialVersionUID = -1347035224644784732L;
 
+  protected transient volatile AggregateAssistant assistant;
+
   /**
    * Message sequence number
    */

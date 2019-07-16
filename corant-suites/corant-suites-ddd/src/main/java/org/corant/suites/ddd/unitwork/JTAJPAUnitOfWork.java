@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManager;
@@ -162,12 +163,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
             }
           });
           registration.get(aggregate.getLifecycle()).add(ai);
-          // handleMessage(aggregate.extractMessages(true).stream().toArray(Message[]::new));
           aggregate.extractMessages(true)
               .forEach(message -> MessageUtils.mergeToQueue(messages, message));
         }
       } else if (obj instanceof Message) {
-        // handleMessage(Message.class.cast(obj));
         MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
       }
     } else {
@@ -201,11 +200,20 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   protected void handleMessage() {
     logger.fine(() -> String.format(LOG_HDL_MSG_FMT, transaction.toString()));
-    messages.stream().sorted(Message::compare).forEach(msg -> {
+    LinkedList<Message> messages = new LinkedList<>();
+    extractMessages(messages);
+    while (!messages.isEmpty()) {
+      Message msg = messages.pop();
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
       messageDispatcher.accept(new Message[] {msg});
-    });
+      extractMessages(messages);
+    }
   }
 
+  void extractMessages(LinkedList<Message> messages) {
+    if (!this.messages.isEmpty()) {
+      this.messages.stream().sorted(Message::compare).forEach(messages::offer);
+    }
+  }
 }

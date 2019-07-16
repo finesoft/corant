@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Preconditions.requireFalse;
 import static org.corant.kernel.util.Preconditions.requireNotNull;
 import java.beans.Transient;
@@ -26,7 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
+import javax.persistence.EntityManager;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
@@ -47,7 +50,6 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   private static final long serialVersionUID = -9184534676784775644L;
 
   protected transient volatile Lifecycle lifecycle = Lifecycle.INITIAL;
-  protected transient volatile AggregateAssistant assistant;
 
   @Version
   @Column(name = "vn")
@@ -83,7 +85,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Arise event
+   * Arise event, use CDI events
    */
   @Override
   public void raise(Event event, Annotation... qualifiers) {
@@ -99,7 +101,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Arise event.
+   * Arise event, use CDI events
    */
   @Override
   public void raiseAsync(Event event, Annotation... qualifiers) {
@@ -124,11 +126,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Transient
   @javax.persistence.Transient
   protected Optional<UnitOfWork> currentUnitOfWork() {
-    Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class);
-    if (uowm.isPresent()) {
-      return Optional.ofNullable(uowm.get().getCurrentUnitOfWork());
-    }
-    return Optional.empty();
+    return UnitOfWorksManager.currentUnitOfWork();
   }
 
   /**
@@ -154,40 +152,42 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return getId() != null;
   }
 
-  protected Annotation[] lifecycleServiceQualifier() {
-    return new Annotation[0];
+  protected synchronized AbstractAggregate lifecycle(Lifecycle lifecycle) {
+    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
+    this.lifecycle = lifecycle;
+    return this;
   }
 
   /**
-   * destroy preconditions, validate the aggregate consistency
+   * Destroy preconditions, validate the aggregate consistency
    *
-   * preDestroy
+   * @see DefaultAggregateListener
+   * @see PreRemove
    */
   protected void preDestroy() {}
 
   /**
-   * enable preconditions, validate the aggregate consistency
+   * Enable preconditions, validate the aggregate consistency,EntityListener callback
    *
-   * preEnable
+   * @see DefaultAggregateListener
+   * @see PrePersist
+   * @see PreUpdate
    */
   protected void preEnable() {}
 
   /**
    * recover from persistence
+   *
+   * @see EntityManager#refresh(Object)
    */
-  protected synchronized void recover() {
+  protected synchronized AbstractAggregate recover() {
     requireFalse(!isEnabled(), PkgMsgCds.ERR_AGG_LC);
     this.raise(new LifecycleManageEvent(this, LifecycleAction.RECOVER, true));
+    return this;
   }
 
   protected synchronized void setVn(long vn) {
     this.vn = vn;
-  }
-
-  protected synchronized AbstractAggregate withLifecycle(Lifecycle lifecycle) {
-    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.lifecycle = lifecycle;
-    return this;
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

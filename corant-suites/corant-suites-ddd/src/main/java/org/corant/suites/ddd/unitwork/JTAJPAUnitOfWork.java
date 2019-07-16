@@ -29,6 +29,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.event.LifecycleEvent;
 import org.corant.suites.ddd.message.Message;
@@ -59,6 +60,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       "Enforce entity managers flush to collect the messages, before %s completion.";
   static final String LOG_HDL_MSG_FMT = "Sorted the flushed messages and store them if nessuary,"
       + " dispatch them to the message dispatcher, before %s completion.";
+  static final String LOG_MSG_CYCLE_FMT = "Can not handle messages!";
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
@@ -202,19 +204,26 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     logger.fine(() -> String.format(LOG_HDL_MSG_FMT, transaction.toString()));
     LinkedList<Message> messages = new LinkedList<>();
     extractMessages(messages);
+    int safeExtracts = 128;
     while (!messages.isEmpty()) {
       Message msg = messages.pop();
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
       messageDispatcher.accept(new Message[] {msg});
-      extractMessages(messages);
+      if (extractMessages(messages)) {
+        if (--safeExtracts < 0) {
+          throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
+        }
+      }
     }
   }
 
-  void extractMessages(LinkedList<Message> messages) {
+  boolean extractMessages(LinkedList<Message> messages) {
     if (!this.messages.isEmpty()) {
       this.messages.stream().sorted(Message::compare).forEach(messages::offer);
       this.messages.clear();
+      return true;
     }
+    return false;
   }
 }

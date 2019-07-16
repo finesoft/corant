@@ -53,6 +53,19 @@ public class AggregateLifecycleMessage implements MergableMessage {
     this.payload = defaultObject(payload, SimpleValueMap.empty());
   }
 
+  /**
+   * @param metadata
+   * @param lifecycle
+   * @param payload
+   */
+  public AggregateLifecycleMessage(AggregateLifecycleMessageMetadata metadata, Lifecycle lifecycle,
+      SimpleValueMap payload) {
+    super();
+    this.metadata = metadata;
+    this.lifecycle = lifecycle;
+    this.payload = payload;
+  }
+
   public Lifecycle getLifecycle() {
     return lifecycle;
   }

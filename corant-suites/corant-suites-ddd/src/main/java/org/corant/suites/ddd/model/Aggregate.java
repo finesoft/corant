@@ -106,6 +106,13 @@ public interface Aggregate extends Entity {
     void preDestroy(P param, T destroyable);
   }
 
+  public static abstract class DestroyHandlerAdapter<P, T> implements DestroyHandler<P, T> {
+    @Override
+    public void preDestroy(P param, T destroyable) {
+
+    }
+  }
+
   @FunctionalInterface
   interface Enabling<P, T> {
     T enable(P param, EnablingHandler<P, T> handler);
@@ -114,6 +121,13 @@ public interface Aggregate extends Entity {
   @FunctionalInterface
   interface EnablingHandler<P, T> {
     void preEnable(P param, T enabling);
+  }
+
+  public static abstract class EnablingHandlerAdapter<P, T> implements EnablingHandler<P, T> {
+    @Override
+    public void preEnable(P param, T destroyable) {
+
+    }
   }
 
   public enum Lifecycle {

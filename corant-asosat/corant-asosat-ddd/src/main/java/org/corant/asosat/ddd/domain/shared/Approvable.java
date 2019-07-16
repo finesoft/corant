@@ -44,14 +44,33 @@ public interface Approvable<P, T> {
   @FunctionalInterface
   public interface ApproveHandler<P, T> {
 
-    void preApprove(P cmd, T archivable);
+    void preApprove(P cmd, T approvable);
+
+  }
+
+  public static abstract class ApproveHandlerAdapter<P, T> implements ApproveHandler<P, T> {
+
+    @Override
+    public void preApprove(P cmd, T approvable) {
+
+    }
 
   }
 
   @FunctionalInterface
   public interface RevokeApproveHandler<P, T> {
 
-    void preRevokeApprove(P cmd, T archivable);
+    void preRevokeApprove(P cmd, T approvable);
+
+  }
+
+  public static abstract class RevokeApproveHandlerAdapter<P, T>
+      implements RevokeApproveHandler<P, T> {
+
+    @Override
+    public void preRevokeApprove(P cmd, T approvable) {
+
+    }
 
   }
 }

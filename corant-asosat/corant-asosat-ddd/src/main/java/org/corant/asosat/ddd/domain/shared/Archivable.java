@@ -15,6 +15,7 @@ package org.corant.asosat.ddd.domain.shared;
 
 import java.time.Instant;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
@@ -89,7 +90,7 @@ public interface Archivable<P, T extends Archivable<P, T>> {
    * @author bingo 下午12:19:11
    *
    */
-  public static abstract class ArchiableAggregationHandlerAdapter<P, T extends Archivable<P, T>, Aggregation>
+  public static abstract class ArchiableAggregationHandlerAdapter<P, T extends Archivable<P, T> & Aggregation>
       extends AggregationHandlerAdapter<P, T>
       implements ArchiveHandler<P, T>, RevokeArchiveHandler<P, T> {
 
@@ -131,6 +132,10 @@ public interface Archivable<P, T extends Archivable<P, T>> {
   @FunctionalInterface
   public interface ArchiveHandler<P, T extends Archivable<P, T>> {
 
+    @SuppressWarnings("rawtypes")
+    ArchiveHandler EMPTY_INST = (p, t) -> {
+    };
+
     /**
      * 归档之前执行
      *
@@ -165,6 +170,10 @@ public interface Archivable<P, T extends Archivable<P, T>> {
    */
   @FunctionalInterface
   public interface RevokeArchiveHandler<P, T extends Archivable<P, T>> {
+
+    @SuppressWarnings("rawtypes")
+    RevokeArchiveHandler EMPTY_INST = (p, t) -> {
+    };
 
     /**
      * 撤销归档之前执行

@@ -121,7 +121,8 @@ public class ArchiveInfo extends AbstractValueObject implements OperationInfo {
     return getArchivist().getId();
   }
 
-  void init(Participator archivist, boolean archived, String archivedLog, Instant archivedTime) {
+  protected void init(Participator archivist, boolean archived, String archivedLog,
+      Instant archivedTime) {
     this.archived = archived;
     if (archived) {
       this.archivist = archivist;

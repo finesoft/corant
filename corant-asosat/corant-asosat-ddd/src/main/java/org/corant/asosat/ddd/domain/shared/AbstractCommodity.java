@@ -33,12 +33,39 @@ public abstract class AbstractCommodity extends AbstractPPTReference {
     this.remark = remark;
   }
 
+  /**
+   * @param obj
+   */
+  protected AbstractCommodity(Object obj) {
+    super(obj);
+  }
+
   public String getRemark() {
     return remark;
   }
 
+  @Override
+  protected void setId(Long id) {
+    super.setId(id);
+  }
+
+  @Override
+  protected void setName(String name) {
+    super.setName(name);
+  }
+
+  @Override
+  protected void setNumber(String number) {
+    super.setNumber(number);
+  }
+
   protected void setRemark(String remark) {
     this.remark = remark;
+  }
+
+  @Override
+  protected void setVn(Long vn) {
+    super.setVn(vn);
   }
 
 }

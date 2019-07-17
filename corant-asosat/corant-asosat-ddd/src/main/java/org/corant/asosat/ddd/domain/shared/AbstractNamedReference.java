@@ -83,8 +83,18 @@ public abstract class AbstractNamedReference extends AbstractReference implement
     return result;
   }
 
+  @Override
+  protected void setId(Long id) {
+    super.setId(id);
+  }
+
   protected void setName(String name) {
     this.name = name;
+  }
+
+  @Override
+  protected void setVn(Long vn) {
+    super.setVn(vn);
   }
 
 }

@@ -28,4 +28,36 @@ public class SellerOrg extends Participator {
 
   private static final long serialVersionUID = 2482047799269041296L;
 
+  /**
+   * @param obj
+   */
+  public SellerOrg(Object obj) {
+    super(obj);
+  }
+
+  /**
+   * @param id
+   * @param name
+   */
+  public SellerOrg(String id, String name) {
+    super(id, name);
+  }
+
+  /**
+   *
+   */
+  protected SellerOrg() {
+    super();
+  }
+
+  @Override
+  protected void setId(String id) {
+    super.setId(id);
+  }
+
+  @Override
+  protected void setName(String name) {
+    super.setName(name);
+  }
+
 }

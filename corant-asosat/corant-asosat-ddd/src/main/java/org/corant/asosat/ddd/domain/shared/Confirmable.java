@@ -16,6 +16,7 @@ package org.corant.asosat.ddd.domain.shared;
 import java.beans.Transient;
 import java.time.Instant;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
@@ -99,7 +100,7 @@ public interface Confirmable<P, T extends Confirmable<P, T>> {
    * @author bingo 下午12:22:16
    *
    */
-  public static abstract class ConfirmableAggregationHandlerAdapter<P, T extends Confirmable<P, T>, Aggregation>
+  public static abstract class ConfirmableAggregationHandlerAdapter<P, T extends Confirmable<P, T> & Aggregation>
       extends AggregationHandlerAdapter<P, T>
       implements RevokeConfirmHandler<P, T>, ConfirmHandler<P, T> {
 
@@ -156,6 +157,9 @@ public interface Confirmable<P, T extends Confirmable<P, T>> {
    */
   @FunctionalInterface
   public interface ConfirmHandler<P, T extends Confirmable<P, T>> {
+    @SuppressWarnings("rawtypes")
+    ConfirmHandler EMPTY_INST = (t, p, c) -> {
+    };
 
     /**
      * 确认之前执行
@@ -190,6 +194,9 @@ public interface Confirmable<P, T extends Confirmable<P, T>> {
    */
   @FunctionalInterface
   public interface RevokeConfirmHandler<P, T extends Confirmable<P, T>> {
+    @SuppressWarnings("rawtypes")
+    RevokeConfirmHandler EMPTY_INST = (t, p) -> {
+    };
 
     /**
      * 撤销确认之前执行

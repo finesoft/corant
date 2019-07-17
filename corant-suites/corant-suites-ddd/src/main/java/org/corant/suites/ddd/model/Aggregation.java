@@ -84,8 +84,8 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:04:45
    *
    */
-  public static abstract class AggregationHandlerAdapter<P, T> extends EnablingHandlerAdapter<P, T>
-      implements DestroyHandler<P, T> {
+  public static abstract class AggregationHandlerAdapter<P, T extends Aggregation>
+      extends EnablingHandlerAdapter<P, T> implements DestroyHandler<P, T> {
 
     @Override
     public void preDestroy(P param, T destroyable) {
@@ -144,6 +144,11 @@ public interface Aggregation extends Entity {
    */
   @FunctionalInterface
   interface DestroyHandler<P, T> {
+
+    @SuppressWarnings("rawtypes")
+    DestroyHandler EMPTY_INST = (p, t) -> {
+    };
+
     void preDestroy(P param, T destroyable);
   }
 
@@ -179,6 +184,10 @@ public interface Aggregation extends Entity {
    */
   @FunctionalInterface
   interface EnablingHandler<P, T> {
+    @SuppressWarnings("rawtypes")
+    EnablingHandler EMPTY_INST = (p, t) -> {
+    };
+
     void preEnable(P param, T enabling);
   }
 

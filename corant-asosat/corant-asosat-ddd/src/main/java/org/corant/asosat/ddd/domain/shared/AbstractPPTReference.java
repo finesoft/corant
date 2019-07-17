@@ -109,12 +109,22 @@ public abstract class AbstractPPTReference extends AbstractReference implements 
         + ", getVn()=" + getVn() + "]";
   }
 
+  @Override
+  protected void setId(Long id) {
+    super.setId(id);
+  }
+
   protected void setName(String name) {
     this.name = name;
   }
 
   protected void setNumber(String number) {
     this.number = number;
+  }
+
+  @Override
+  protected void setVn(Long vn) {
+    super.setVn(vn);
   }
 
 }

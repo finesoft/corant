@@ -14,6 +14,7 @@
 package org.corant.asosat.ddd.domain.shared;
 
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
@@ -38,7 +39,7 @@ public interface Approvable<P, T extends Approvable<P, T>> {
    * @author bingo 下午12:51:14
    *
    */
-  public static abstract class ApprovableAggregationHandlerAdapter<P, T extends Approvable<P, T>, Aggregation>
+  public static abstract class ApprovableAggregationHandlerAdapter<P, T extends Approvable<P, T> & Aggregation>
       extends AggregationHandlerAdapter<P, T>
       implements ApproveHandler<P, T>, RevokeApproveHandler<P, T> {
 
@@ -83,6 +84,10 @@ public interface Approvable<P, T extends Approvable<P, T>> {
   @FunctionalInterface
   public interface ApproveHandler<P, T extends Approvable<P, T>> {
 
+    @SuppressWarnings("rawtypes")
+    ApproveHandler EMPTY_INST = (p, t) -> {
+    };
+
     void preApprove(P cmd, T approvable);
 
   }
@@ -105,6 +110,10 @@ public interface Approvable<P, T extends Approvable<P, T>> {
 
   @FunctionalInterface
   public interface RevokeApproveHandler<P, T extends Approvable<P, T>> {
+
+    @SuppressWarnings("rawtypes")
+    RevokeApproveHandler EMPTY_INST = (p, t) -> {
+    };
 
     void preRevokeApprove(P cmd, T approvable);
 

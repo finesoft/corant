@@ -71,6 +71,11 @@ public abstract class AbstractNumberedReference extends AbstractReference implem
   }
 
   @Override
+  public String getNumber() {
+    return number;
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -78,8 +83,18 @@ public abstract class AbstractNumberedReference extends AbstractReference implem
     return result;
   }
 
+  @Override
+  protected void setId(Long id) {
+    super.setId(id);
+  }
+
   protected void setNumber(String number) {
     this.number = number;
+  }
+
+  @Override
+  protected void setVn(Long vn) {
+    super.setVn(vn);
   }
 
 }

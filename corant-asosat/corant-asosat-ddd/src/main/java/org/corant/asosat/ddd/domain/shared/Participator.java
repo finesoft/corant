@@ -47,6 +47,22 @@ public class Participator extends AbstractValueObject implements Principal {
   @Column(name = "participatorName")
   private String name;
 
+  public Participator(Object obj) {
+    if (obj instanceof Map) {
+      Map<?, ?> mapObj = Map.class.cast(obj);
+      setId(getMapString(mapObj, "id"));
+      setName(getMapString(mapObj, "name"));
+    } else if (obj instanceof Participator) {
+      Participator other = Participator.class.cast(obj);
+      setId(other.getId());
+      setName(other.getName());
+    } else if (obj instanceof Party) {
+      Party party = Party.class.cast(obj);
+      setId(asString(party.getId()));
+      setName(party.getName());
+    }
+  }
+
   public Participator(String id, String name) {
     super();
     setId(id);
@@ -76,17 +92,7 @@ public class Participator extends AbstractValueObject implements Principal {
   }
 
   public static Participator of(Object obj) {
-    if (obj instanceof Map) {
-      Map<?, ?> mapObj = Map.class.cast(obj);
-      return new Participator(getMapString(mapObj, "id"), getMapString(mapObj, "name"));
-    } else if (obj instanceof Party) {
-      Party party = Party.class.cast(obj);
-      return new Participator(asString(party.getId()), party.getName());
-    } else if (obj instanceof Participator) {
-      Participator other = Participator.class.cast(obj);
-      return new Participator(other.getId(), other.getName());
-    }
-    return null;
+    return new Participator(obj);
   }
 
   @Override

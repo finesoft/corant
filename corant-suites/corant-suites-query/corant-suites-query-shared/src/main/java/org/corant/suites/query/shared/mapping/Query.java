@@ -34,7 +34,7 @@ public class Query implements Serializable {
   private static final long serialVersionUID = -2142303696673387541L;
 
   private String name;
-  private Class<?> resultClass = java.util.Map.class;
+  private Class<?> resultClass = Map.class;
   private Class<?> resultSetMapping;
   private boolean cache = true;
   private boolean cacheResultSetMetadata = true;

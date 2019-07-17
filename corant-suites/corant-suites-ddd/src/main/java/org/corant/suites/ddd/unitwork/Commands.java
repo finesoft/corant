@@ -23,9 +23,7 @@ import java.lang.annotation.Annotation;
  */
 public interface Commands {
 
-  static <C> void accept(C command, Annotation... annotations) {
-    return;
-  }
+  static <C> void accept(C command, Annotation... annotations) {}
 
   static <C, R> R apply(C command, Annotation... annotations) {
     return null;

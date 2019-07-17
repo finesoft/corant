@@ -168,7 +168,7 @@ public class PackagingLayout extends AbstractValueObject {
     }
 
     public static RegularPackagingLayout single(String unit) {
-      return new RegularPackagingLayout(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, unit);
+      return new RegularPackagingLayout(ONE, ONE, ONE, unit);
     }
 
     public String asDescription() {

@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.bson.Document;
 import org.corant.shared.util.Identifiers;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -56,10 +55,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static Map<Class<?>, Supplier<?>> timeSuppliers = new ConcurrentHashMap<>();
 
   static {
-    DATA_CENTER_ID =
-        ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
-    WORKER_ID =
-        ConfigProvider.getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElse(0);
+    DATA_CENTER_ID = getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
+    WORKER_ID = getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElse(0);
     logger.info(() -> String.format(
         "Use Snowflake id generator for hibernate data center id is %s, worker id is %s.",
         DATA_CENTER_ID, WORKER_ID));

@@ -210,10 +210,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
       messageDispatcher.accept(new Message[] {msg});
-      if (extractMessages(messages)) {
-        if (--safeExtracts < 0) {
-          throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
-        }
+      if (extractMessages(messages) && --safeExtracts < 0) {
+        throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
       }
     }
   }

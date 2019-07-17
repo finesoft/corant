@@ -121,9 +121,7 @@ public class IdentifierEntityConverterFactory implements ConverterFactory<Object
   }
 
   // FIXME touch
-  void onPostContainerStartedEvent(@Observes PostContainerStartedEvent e) {
-    return;
-  }
+  void onPostContainerStartedEvent(@Observes PostContainerStartedEvent e) {}
 
   @PreDestroy
   void onPreDestroy() {

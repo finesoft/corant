@@ -32,7 +32,7 @@ public class LoggerFactory {
 
   public static void disableLogger() {
     LogManager.getLogManager().reset();
-    Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
+    Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     globalLogger.setLevel(java.util.logging.Level.OFF);
     Handler[] handlers = globalLogger.getHandlers();
     for (Handler handler : handlers) {

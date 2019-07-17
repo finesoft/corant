@@ -14,6 +14,7 @@
 package org.corant.asosat.ddd.domain.shared;
 
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
  * corant-asosat-ddd
@@ -21,7 +22,7 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 下午7:22:44
  *
  */
-public interface Approvable<P, T> {
+public interface Approvable<P, T extends Approvable<P, T>> {
 
   void approve(P param, ApproveHandler<P, T> handler);
 
@@ -29,6 +30,44 @@ public interface Approvable<P, T> {
 
   default T revokeApprove(P cmd, RevokeApproveHandler<P, T> handler) {
     throw new NotSupportedException();
+  }
+
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:51:14
+   *
+   */
+  public static abstract class ApprovableAggregationHandlerAdapter<P, T extends Approvable<P, T>, Aggregation>
+      extends AggregationHandlerAdapter<P, T>
+      implements ApproveHandler<P, T>, RevokeApproveHandler<P, T> {
+
+    @Override
+    public void preApprove(P cmd, T approvable) {
+
+    }
+
+    @Override
+    public void preRevokeApprove(P cmd, T approvable) {
+
+    }
+
+  }
+
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:51:14
+   *
+   */
+  public static abstract class ApprovableHandlerAdapter<P, T extends Approvable<P, T>>
+      extends ApproveHandlerAdapter<P, T> implements RevokeApproveHandler<P, T> {
+
+    @Override
+    public void preRevokeApprove(P cmd, T approvable) {
+
+    }
+
   }
 
   public enum ApprovalStatus {
@@ -42,13 +81,20 @@ public interface Approvable<P, T> {
   }
 
   @FunctionalInterface
-  public interface ApproveHandler<P, T> {
+  public interface ApproveHandler<P, T extends Approvable<P, T>> {
 
     void preApprove(P cmd, T approvable);
 
   }
 
-  public static abstract class ApproveHandlerAdapter<P, T> implements ApproveHandler<P, T> {
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:25:30
+   *
+   */
+  public static abstract class ApproveHandlerAdapter<P, T extends Approvable<P, T>>
+      implements ApproveHandler<P, T> {
 
     @Override
     public void preApprove(P cmd, T approvable) {
@@ -58,13 +104,19 @@ public interface Approvable<P, T> {
   }
 
   @FunctionalInterface
-  public interface RevokeApproveHandler<P, T> {
+  public interface RevokeApproveHandler<P, T extends Approvable<P, T>> {
 
     void preRevokeApprove(P cmd, T approvable);
 
   }
 
-  public static abstract class RevokeApproveHandlerAdapter<P, T>
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:25:35
+   *
+   */
+  public static abstract class RevokeApproveHandlerAdapter<P, T extends Approvable<P, T>>
       implements RevokeApproveHandler<P, T> {
 
     @Override

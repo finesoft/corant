@@ -16,12 +16,13 @@ package org.corant.asosat.ddd.domain.shared;
 import java.beans.Transient;
 import java.time.Instant;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
  * @author bingo 下午6:45:49
  *
  */
-public interface Confirmable<P, T> {
+public interface Confirmable<P, T extends Confirmable<P, T>> {
 
   /**
    * 确认
@@ -93,6 +94,44 @@ public interface Confirmable<P, T> {
   }
 
   /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:22:16
+   *
+   */
+  public static abstract class ConfirmableAggregationHandlerAdapter<P, T extends Confirmable<P, T>, Aggregation>
+      extends AggregationHandlerAdapter<P, T>
+      implements RevokeConfirmHandler<P, T>, ConfirmHandler<P, T> {
+
+    @Override
+    public void preConfirm(T confirmable, P param, ConfirmationStatus confirmStatus) {
+
+    }
+
+    @Override
+    public void preRevokeConfirm(T confirmable, P param) {
+
+    }
+
+  }
+
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:22:16
+   *
+   */
+  public static abstract class ConfirmableHandlerAdapter<P, T extends Confirmable<P, T>>
+      extends ConfirmHandlerAdapter<P, T> implements RevokeConfirmHandler<P, T> {
+
+    @Override
+    public void preRevokeConfirm(T confirmable, P param) {
+
+    }
+
+  }
+
+  /**
    *
    * @author bingo 下午7:00:22
    *
@@ -116,7 +155,7 @@ public interface Confirmable<P, T> {
    * @version
    */
   @FunctionalInterface
-  public interface ConfirmHandler<P, T> {
+  public interface ConfirmHandler<P, T extends Confirmable<P, T>> {
 
     /**
      * 确认之前执行
@@ -127,7 +166,14 @@ public interface Confirmable<P, T> {
 
   }
 
-  public static abstract class ConfirmHandlerAdapter<P, T> implements ConfirmHandler<P, T> {
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:20:34
+   *
+   */
+  public static abstract class ConfirmHandlerAdapter<P, T extends Confirmable<P, T>>
+      implements ConfirmHandler<P, T> {
 
     @Override
     public void preConfirm(T confirmable, P param, ConfirmationStatus confirmStatus) {
@@ -143,7 +189,7 @@ public interface Confirmable<P, T> {
    * @since
    */
   @FunctionalInterface
-  public interface RevokeConfirmHandler<P, T> {
+  public interface RevokeConfirmHandler<P, T extends Confirmable<P, T>> {
 
     /**
      * 撤销确认之前执行
@@ -154,7 +200,13 @@ public interface Confirmable<P, T> {
 
   }
 
-  public static abstract class RevokeConfirmHandlerAdapter<P, T>
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:20:39
+   *
+   */
+  public static abstract class RevokeConfirmHandlerAdapter<P, T extends Confirmable<P, T>>
       implements RevokeConfirmHandler<P, T> {
 
     @Override

@@ -15,12 +15,13 @@ package org.corant.asosat.ddd.domain.shared;
 
 import java.time.Instant;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.ddd.model.Aggregation.AggregationHandlerAdapter;
 
 /**
  * @author bingo 下午6:48:19
  *
  */
-public interface Archivable<P, T> {
+public interface Archivable<P, T extends Archivable<P, T>> {
 
   /**
    * 归档
@@ -83,6 +84,44 @@ public interface Archivable<P, T> {
   }
 
   /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:19:11
+   *
+   */
+  public static abstract class ArchiableAggregationHandlerAdapter<P, T extends Archivable<P, T>, Aggregation>
+      extends AggregationHandlerAdapter<P, T>
+      implements ArchiveHandler<P, T>, RevokeArchiveHandler<P, T> {
+
+    @Override
+    public void preArchive(P cmd, T archivable) {
+
+    }
+
+    @Override
+    public void preRevokeArchive(P cmd, T archivable) {
+
+    }
+
+  }
+
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:22:16
+   *
+   */
+  public static abstract class ArchiableHandlerAdapter<P, T extends Archivable<P, T>>
+      extends ArchiveHandlerAdapter<P, T> implements RevokeArchiveHandler<P, T> {
+
+    @Override
+    public void preRevokeArchive(P cmd, T archivable) {
+
+    }
+
+  }
+
+  /**
    * 归档处理器
    *
    * @author bingo
@@ -90,7 +129,7 @@ public interface Archivable<P, T> {
    * @param <T>
    */
   @FunctionalInterface
-  public interface ArchiveHandler<P, T> {
+  public interface ArchiveHandler<P, T extends Archivable<P, T>> {
 
     /**
      * 归档之前执行
@@ -102,7 +141,14 @@ public interface Archivable<P, T> {
 
   }
 
-  public static abstract class ArchiveHandlerAdapter<P, T> implements ArchiveHandler<P, T> {
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:16:55
+   *
+   */
+  public static abstract class ArchiveHandlerAdapter<P, T extends Archivable<P, T>>
+      implements ArchiveHandler<P, T> {
 
     @Override
     public void preArchive(P cmd, T archivable) {
@@ -118,7 +164,7 @@ public interface Archivable<P, T> {
    * @since
    */
   @FunctionalInterface
-  public interface RevokeArchiveHandler<P, T> {
+  public interface RevokeArchiveHandler<P, T extends Archivable<P, T>> {
 
     /**
      * 撤销归档之前执行
@@ -130,7 +176,13 @@ public interface Archivable<P, T> {
 
   }
 
-  public static abstract class RevokeArchiveHandlerAdapter<P, T>
+  /**
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午12:17:00
+   *
+   */
+  public static abstract class RevokeArchiveHandlerAdapter<P, T extends Archivable<P, T>>
       implements RevokeArchiveHandler<P, T> {
 
     @Override

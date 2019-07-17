@@ -31,7 +31,7 @@ import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
-import org.corant.suites.ddd.event.LifecycleEvent;
+import org.corant.suites.ddd.event.AggregationLifecycleEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
@@ -94,7 +94,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     entityManagers.values().forEach(EntityManager::flush);
     registration.forEach((k, v) -> {
       if (k == Lifecycle.ENABLED || k == Lifecycle.DESTROYED) {
-        v.forEach(ai -> Corant.fireEvent(new LifecycleEvent(ai, k)));
+        v.forEach(ai -> Corant.fireEvent(new AggregationLifecycleEvent(ai, k)));
       }
     });
     handleMessage();

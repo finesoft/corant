@@ -25,7 +25,7 @@ import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
  * @author bingo 上午9:39:28
  */
 @Events
-public class LifecycleManageEvent extends AbstractEvent {
+public class AggregationLifecycleManageEvent extends AbstractEvent {
 
   private static final long serialVersionUID = 2441297731044122118L;
 
@@ -33,11 +33,11 @@ public class LifecycleManageEvent extends AbstractEvent {
 
   private final boolean effectImmediately;
 
-  public LifecycleManageEvent(Aggregation source, LifecycleAction action) {
+  public AggregationLifecycleManageEvent(Aggregation source, LifecycleAction action) {
     this(source, action, false);
   }
 
-  public LifecycleManageEvent(Aggregation source, LifecycleAction action,
+  public AggregationLifecycleManageEvent(Aggregation source, LifecycleAction action,
       boolean effectImmediately) {
     super(source);
     this.action = action;
@@ -59,7 +59,7 @@ public class LifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "LifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
+    return "AggregationLifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
         + (getSource() == null ? null : getSource().getId()) + ", isEffectImmediately()="
         + isEffectImmediately() + "]";
   }

@@ -16,7 +16,7 @@ package org.corant.suites.ddd.model;
 import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import java.lang.annotation.Annotation;
 import javax.persistence.PersistenceContext;
-import org.corant.suites.ddd.event.LifecycleManageEvent;
+import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
 
 /**
  * corant-suites-ddd
@@ -28,7 +28,7 @@ public interface EntityLifecycleManager {
 
   PersistenceContext getPersistenceContext(Class<?> cls);
 
-  void on(LifecycleManageEvent e);
+  void on(AggregationLifecycleManageEvent e);
 
   default Annotation[] persistenceQualifiers(Class<?> cls) {
     return resolveNameds(getPersistenceContext(cls).unitName());

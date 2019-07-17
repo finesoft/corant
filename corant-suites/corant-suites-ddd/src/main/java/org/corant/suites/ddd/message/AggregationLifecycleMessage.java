@@ -29,14 +29,14 @@ import org.corant.suites.ddd.model.Value.SimpleValueMap;
  * @author bingo 下午5:48:49
  *
  */
-public class LifecycleMessage implements MergableMessage {
+public class AggregationLifecycleMessage implements MergableMessage {
 
   private static final long serialVersionUID = -5988315884617833263L;
   private final LifecycleMessageMetadata metadata;
   private final Lifecycle lifecycle;
   private final SimpleValueMap payload;
 
-  public LifecycleMessage(Aggregation aggregation, Lifecycle lifecycle) {
+  public AggregationLifecycleMessage(Aggregation aggregation, Lifecycle lifecycle) {
     metadata = new LifecycleMessageMetadata(aggregation);
     this.lifecycle = lifecycle;
     if (aggregation instanceof LifecycleMessageBuilder) {
@@ -46,7 +46,7 @@ public class LifecycleMessage implements MergableMessage {
     }
   }
 
-  public LifecycleMessage(Aggregation aggregation, Lifecycle lifecycle,
+  public AggregationLifecycleMessage(Aggregation aggregation, Lifecycle lifecycle,
       SimpleValueMap payload) {
     metadata = new LifecycleMessageMetadata(aggregation);
     this.lifecycle = lifecycle;
@@ -58,7 +58,7 @@ public class LifecycleMessage implements MergableMessage {
    * @param lifecycle
    * @param payload
    */
-  public LifecycleMessage(LifecycleMessageMetadata metadata, Lifecycle lifecycle,
+  public AggregationLifecycleMessage(LifecycleMessageMetadata metadata, Lifecycle lifecycle,
       SimpleValueMap payload) {
     super();
     this.metadata = metadata;
@@ -81,7 +81,7 @@ public class LifecycleMessage implements MergableMessage {
   }
 
   @Override
-  public LifecycleMessage merge(MergableMessage other) {
+  public AggregationLifecycleMessage merge(MergableMessage other) {
     return this;
   }
 

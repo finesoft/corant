@@ -33,7 +33,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
-import org.corant.suites.ddd.event.LifecycleManageEvent;
+import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
@@ -135,7 +135,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    * destroyed
    */
   protected synchronized void destroy(boolean immediately) {
-    this.raise(new LifecycleManageEvent(this, LifecycleAction.DESTROY, immediately));
+    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.DESTROY, immediately));
   }
 
   /**
@@ -143,7 +143,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    */
   protected synchronized AbstractAggregation enable(boolean immediately) {
     requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new LifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
+    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
     return this;
   }
 
@@ -183,7 +183,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    */
   protected synchronized AbstractAggregation recover() {
     requireFalse(!isEnabled(), PkgMsgCds.ERR_AGG_LC);
-    this.raise(new LifecycleManageEvent(this, LifecycleAction.RECOVER, true));
+    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
     return this;
   }
 

@@ -36,7 +36,7 @@ import javax.transaction.Transactional;
  */
 @ApplicationScoped
 @Transactional
-public abstract class AbstractJmsMessageDispatcher implements MessageDispatcher {
+public abstract class AbstractJMSMessageDispatcher implements MessageDispatcher {
 
   @Override
   public void prepare() {

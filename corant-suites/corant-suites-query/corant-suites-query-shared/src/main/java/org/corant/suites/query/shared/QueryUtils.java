@@ -121,7 +121,7 @@ public class QueryUtils {
       ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
       if (sf != null) {
         Boolean b = toBoolean(sf.apply(new Object[] {param, obj}));
-        if (b == null || b.booleanValue() == false) {
+        if (b == null || !b.booleanValue()) {
           return false;
         }
       }

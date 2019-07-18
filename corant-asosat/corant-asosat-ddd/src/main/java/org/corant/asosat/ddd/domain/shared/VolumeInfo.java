@@ -43,7 +43,7 @@ public class VolumeInfo extends AbstractValueObject implements Comparable<Volume
    */
   public VolumeInfo(BigDecimal volume, MeasureUnit unit) {
     super();
-    this.volume = volume;
+    setVolume(volume);
     this.unit = unit;
   }
 
@@ -107,8 +107,12 @@ public class VolumeInfo extends AbstractValueObject implements Comparable<Volume
     this.unit = unit;
   }
 
+  protected BigDecimal scaleValue(BigDecimal value) {
+    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
+  }
+
   protected void setVolume(BigDecimal volume) {
-    this.volume = volume;
+    this.volume = scaleValue(volume);
   }
 
 }

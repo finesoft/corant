@@ -43,7 +43,7 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
    */
   public WeightInfo(BigDecimal weight, MeasureUnit unit) {
     super();
-    this.weight = weight;
+    setWeight(weight);
     this.unit = unit;
   }
 
@@ -107,8 +107,12 @@ public class WeightInfo extends AbstractValueObject implements Comparable<Weight
     this.unit = unit;
   }
 
+  protected BigDecimal scaleValue(BigDecimal value) {
+    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
+  }
+
   protected void setWeight(BigDecimal weight) {
-    this.weight = weight;
+    this.weight = scaleValue(weight);
   }
 
 }

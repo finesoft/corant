@@ -13,106 +13,55 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.kernel.util.Preconditions.requireTrue;
 import java.math.BigDecimal;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
-import org.corant.asosat.ddd.domain.model.AbstractValueObject;
+import org.corant.asosat.ddd.domain.shared.Measurables.MeasuredInfo;
+import org.corant.suites.bundle.GlobalMessageCodes;
 
 @Embeddable
 @MappedSuperclass
-public class WeightInfo extends AbstractValueObject implements Comparable<WeightInfo> {
+public class WeightInfo extends MeasuredInfo<WeightInfo> {
 
   private static final long serialVersionUID = 6145301734319644562L;
 
-  static final WeightInfo WI0 = new WeightInfo(BigDecimal.ZERO, MeasureUnit.KG);
-
-  @Column
-  private BigDecimal weight;
-
-  @Column(length = 8)
-  @Enumerated(EnumType.STRING)
-  private MeasureUnit unit;
+  public static final WeightInfo WI0 = new WeightInfo(BigDecimal.ZERO, MeasureUnit.KG);
 
   /**
-   * @param weight
-   * @param pu
+   * @param value
+   * @param unit
    */
-  public WeightInfo(BigDecimal weight, MeasureUnit unit) {
-    super();
-    setWeight(weight);
-    this.unit = unit;
+  public WeightInfo(BigDecimal value, MeasureUnit unit) {
+    super(value, unit);
   }
 
+  /**
+   * @param value
+   * @param unit
+   */
+  public WeightInfo(Number value, MeasureUnit unit) {
+    super(value, unit);
+  }
+
+  /**
+   *
+   */
   protected WeightInfo() {
     super();
   }
 
-  public static WeightInfo of(BigDecimal weight, MeasureUnit unit) {
-    return new WeightInfo(weight, unit);
-  }
-
   @Override
-  public int compareTo(WeightInfo o) {
-    return defaultObject(weight, BigDecimal.ZERO)
-        .compareTo(defaultObject(o.weight, BigDecimal.ZERO));
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
+  protected MeasureUnit checkUnitType(MeasureUnit unit) {
+    if (unit != null) {
+      requireTrue(unit.isWeight(), GlobalMessageCodes.ERR_PARAM);
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    WeightInfo other = (WeightInfo) obj;
-    if (unit != other.unit) {
-      return false;
-    }
-    if (weight == null) {
-      if (other.weight != null) {
-        return false;
-      }
-    } else if (!weight.equals(other.weight)) {
-      return false;
-    }
-    return true;
-  }
-
-  public MeasureUnit getUnit() {
     return unit;
   }
 
-  public BigDecimal getWeight() {
-    return weight;
-  }
-
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (unit == null ? 0 : unit.hashCode());
-    result = prime * result + (weight == null ? 0 : weight.hashCode());
-    return result;
-  }
-
-  protected void setUnit(MeasureUnit unit) {
-    this.unit = unit;
-  }
-
-  protected BigDecimal scaleValue(BigDecimal value) {
-    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
-  }
-
-  protected void setWeight(BigDecimal weight) {
-    this.weight = scaleValue(weight);
+  protected WeightInfo with(BigDecimal value, MeasureUnit unit) {
+    return new WeightInfo(value, unit);
   }
 
 }

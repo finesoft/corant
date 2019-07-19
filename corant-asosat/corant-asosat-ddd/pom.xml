@@ -65,6 +65,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-mp-jwt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jaxrs-resteasy</artifactId>
 		</dependency>
 		<dependency>

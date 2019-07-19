@@ -115,11 +115,7 @@ public class PackagingLayout extends AbstractValueObject {
    * @param qty the qty to set
    */
   protected void setQty(BigDecimal qty) {
-    this.qty = scaleValue(qty);
-  }
-
-  protected BigDecimal scaleValue(BigDecimal value) {
-    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
+    this.qty = Measurables.defaultScale(qty);
   }
 
   /**
@@ -284,7 +280,7 @@ public class PackagingLayout extends AbstractValueObject {
      * @param heightQty the heightQty to set
      */
     protected void setHeightQty(BigDecimal heightQty) {
-      this.heightQty = scaleValue(heightQty);
+      this.heightQty = Measurables.defaultScale(heightQty);
       initQty();
     }
 
@@ -293,7 +289,7 @@ public class PackagingLayout extends AbstractValueObject {
      * @param lengthQty the lengthQty to set
      */
     protected void setLengthQty(BigDecimal lengthQty) {
-      this.lengthQty = scaleValue(lengthQty);
+      this.lengthQty = Measurables.defaultScale(lengthQty);
       initQty();
     }
 
@@ -302,7 +298,7 @@ public class PackagingLayout extends AbstractValueObject {
      * @param widthQty the widthQty to set
      */
     protected void setWidthQty(BigDecimal widthQty) {
-      this.widthQty = scaleValue(widthQty);
+      this.widthQty = Measurables.defaultScale(widthQty);
       initQty();
     }
 

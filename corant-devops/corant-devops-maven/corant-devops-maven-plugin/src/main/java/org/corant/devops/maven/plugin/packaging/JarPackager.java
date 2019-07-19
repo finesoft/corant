@@ -45,10 +45,6 @@ import bin.JarLauncher;
  */
 public class JarPackager implements Packager {
 
-  public static final String JAR_LIB_DIR = "lib";
-  public static final String JAR_APP_DIR = "app";
-  public static final String JAR_CFG_DIR = "cfg";
-  public static final String JAR_BIN_DIR = "bin";
   public static final String JAR_LAU_PATH =
       JarLauncher.class.getName().replaceAll("\\.", "/") + ".class";
   public static final String JAR_LAU_NME = JarLauncher.class.getSimpleName() + ".class";
@@ -116,11 +112,11 @@ public class JarPackager implements Packager {
 
   Archive buildArchive() {
     Archive root = DefaultArchive.root();
-    DefaultArchive.of(JAR_LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
+    DefaultArchive.of(LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
-    DefaultArchive.of(JAR_APP_DIR, root)
+    DefaultArchive.of(APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-    DefaultArchive.of(JAR_BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
+    DefaultArchive.of(BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
       // The application main class and runner class
       attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());

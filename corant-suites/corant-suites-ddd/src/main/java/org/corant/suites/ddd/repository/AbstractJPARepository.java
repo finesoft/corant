@@ -161,8 +161,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   @Override
   public EntityManager getEntityManager() {
     // FIXME TODO CHECK THE REPO NAMES AND EMF NAMES
-    return unitOfWorkManager.getCurrentUnitOfWork()
-        .getEntityManager(PersistenceContextLiteral.of(persistenceContext));
+    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(persistenceContext);
   }
 
   public EntityManagerFactory getEntityManagerFactory() {

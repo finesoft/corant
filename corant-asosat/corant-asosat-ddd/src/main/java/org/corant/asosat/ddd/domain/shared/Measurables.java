@@ -47,7 +47,7 @@ public class Measurables {
 
   public static void validateComparables(Measured<?>... measurables) {
     for (Measured<?> m : measurables) {
-      if (m == null || !m.isComparable()) {
+      if (m == null || !m.canComparable()) {
         throw new NotComparableException();
       }
     }
@@ -71,7 +71,7 @@ public class Measurables {
 
     @Transient
     @javax.persistence.Transient
-    default boolean isComparable() {
+    default boolean canComparable() {
       return false;
     }
 
@@ -185,7 +185,7 @@ public class Measurables {
     }
 
     @Override
-    public boolean isComparable() {
+    public boolean canComparable() {
       return value != null && getUnit() != null;
     }
 

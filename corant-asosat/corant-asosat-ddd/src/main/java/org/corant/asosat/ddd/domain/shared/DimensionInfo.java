@@ -220,21 +220,23 @@ public class DimensionInfo extends AbstractValueObject {
   }
 
   protected BigDecimal scaleValue(BigDecimal value) {
-    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
+    return Measurables.defaultScale(value);
   }
 
   protected void setHeight(BigDecimal height) {
     if (height != null) {
-      requireGt(scaleValue(height), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+      this.height = requireGt(scaleValue(height), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+    } else {
+      this.height = null;
     }
-    this.height = scaleValue(height);
   }
 
   protected void setLength(BigDecimal length) {
     if (length != null) {
-      requireGt(scaleValue(length), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+      this.length = requireGt(scaleValue(length), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+    } else {
+      this.length = null;
     }
-    this.length = scaleValue(length);
   }
 
   protected void setUnit(MeasureUnit unit) {
@@ -246,8 +248,9 @@ public class DimensionInfo extends AbstractValueObject {
 
   protected void setWidth(BigDecimal width) {
     if (width != null) {
-      requireGt(scaleValue(width), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+      this.width = requireGt(scaleValue(width), BigDecimal.ZERO, "DimensionInfo.len_error_null");
+    } else {
+      this.width = null;
     }
-    this.width = scaleValue(width);
   }
 }

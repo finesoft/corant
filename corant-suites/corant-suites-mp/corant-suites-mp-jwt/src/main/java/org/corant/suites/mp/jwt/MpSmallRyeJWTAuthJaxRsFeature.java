@@ -13,23 +13,18 @@
  */
 package org.corant.suites.mp.jwt;
 
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.ext.Provider;
-import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
+import io.smallrye.jwt.auth.jaxrs.SmallRyeJWTAuthJaxRsFeature;
 
 /**
  * corant-suites-mp-jwt
  *
- * @author bingo 下午1:55:10
+ * @author bingo 下午6:10:57
  *
  */
-@PreMatching
-@Priority(Priorities.AUTHENTICATION)
-@Provider
 @ApplicationScoped
-public class MpDenyAllFilter extends DenyAllFilter {
+@Provider
+public class MpSmallRyeJWTAuthJaxRsFeature extends SmallRyeJWTAuthJaxRsFeature {
 
 }

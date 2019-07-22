@@ -13,30 +13,16 @@
  */
 package org.corant.suites.mp.jwt;
 
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.ext.Provider;
-import io.smallrye.jwt.auth.jaxrs.RolesAllowedFilter;
+import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
 
 /**
  * corant-suites-mp-jwt
  *
- * @author bingo 下午1:56:40
+ * @author bingo 下午7:07:18
  *
  */
-@PreMatching
-@Priority(Priorities.AUTHENTICATION)
-@Provider
 @ApplicationScoped
-public class MpRolesAllowedFilter extends RolesAllowedFilter {
-
-  /**
-   * @param allowedRoles
-   */
-  public MpRolesAllowedFilter(String[] allowedRoles) {
-    super(allowedRoles);
-  }
+public class MpJWTHttpAuthenticationMechanism extends JWTHttpAuthenticationMechanism {
 
 }

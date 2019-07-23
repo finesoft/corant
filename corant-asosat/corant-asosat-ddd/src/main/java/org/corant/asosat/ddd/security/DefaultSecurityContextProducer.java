@@ -16,8 +16,6 @@ package org.corant.asosat.ddd.security;
 import static org.corant.kernel.util.Instances.resolve;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Produces;
 import org.corant.asosat.ddd.domain.shared.Participator;
 import org.corant.shared.util.ConversionUtils;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -31,8 +29,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @ApplicationScoped
 public class DefaultSecurityContextProducer implements SecurityContextProducer {
 
-  @Produces
-  @RequestScoped
   @Override
   public DefaultSecurityContext get() {
     Optional<JsonWebToken> jwto = resolve(JsonWebToken.class);

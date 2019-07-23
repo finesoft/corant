@@ -16,6 +16,8 @@ package org.corant.suites.query.sql.dialect;
 /**
  * corant-suites-query
  *
+ * When OFFSET is 0, then no rows are skipped.
+ *
  * @author bingo 上午11:44:38
  *
  */

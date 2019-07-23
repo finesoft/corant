@@ -103,7 +103,7 @@ public class SqlHelper {
   // }
 
   public static String removeOrderBy(String sql) {
-    if (sql != null && !sql.contains("?")) {
+    if (sql != null) {
       int pos = shallowIndexOfPattern(sql, ORDER_BY_PATTERN, 0);
       if (pos > 0) {
         return sql.substring(0, pos);

@@ -98,11 +98,6 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jpa-hibernate</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-security-keycloak</artifactId>
-			<optional>true</optional>
-		</dependency>
 
 		<!-- Test -->
 		<dependency>

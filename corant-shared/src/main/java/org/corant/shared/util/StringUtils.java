@@ -16,6 +16,12 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -125,6 +131,24 @@ public class StringUtils {
    */
   public static String defaultTrim(String str) {
     return str == null ? EMPTY : str.trim();
+  }
+
+  /**
+   * Convert input stream to string
+   *
+   * @param is
+   * @return
+   * @throws IOException fromInputStream
+   */
+  public static String fromInputStream(InputStream is) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    try (Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+      int c = 0;
+      while ((c = reader.read()) != -1) {
+        sb.append((char) c);
+      }
+    }
+    return sb.toString();
   }
 
   /**
@@ -535,6 +559,20 @@ public class StringUtils {
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();
+  }
+
+  /**
+   * Convert input stream to String
+   *
+   * @param is
+   * @return tryFromInputStream
+   */
+  public static String tryFromInputStream(InputStream is) {
+    try {
+      return fromInputStream(is);
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   /**

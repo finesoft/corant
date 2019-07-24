@@ -101,7 +101,7 @@ public interface Query<Q, P> {
     }
 
     public boolean hasNext() {
-      return false;
+      return hasNext;
     }
 
     /**

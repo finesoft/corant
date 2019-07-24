@@ -15,12 +15,21 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.fromInputStream;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.trim;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Resources.SourceType;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
@@ -236,7 +245,7 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       nameStack.push(qName);
     } else {
-      String script = charStack.toString();
+      String script = handleScript(charStack.toString());
       charStack.delete(0, charStack.length());
       FetchQuery q = this.currentObject();
       if (q == null || isBlank(script)) {
@@ -390,7 +399,7 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       nameStack.push(qName);
     } else {
-      String script = charStack.toString();
+      String script = handleScript(charStack.toString());
       charStack.delete(0, charStack.length());
       QueryHint q = this.currentObject();
       if (q == null || isBlank(script)) {
@@ -422,7 +431,7 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       nameStack.push(qName);
     } else {
-      String script = charStack.toString();
+      String script = handleScript(charStack.toString());
       charStack.delete(0, charStack.length());
       Query q = this.currentObject();
       if (q == null || isBlank(script)) {
@@ -432,6 +441,23 @@ public class QueryParseHandler extends DefaultHandler {
       q.setScript(script.trim());
       nameStack.pop();
     }
+  }
+
+  String handleScript(String script) {
+    Optional<SourceType> st = SourceType.decide(trim(script));
+    if (st.isPresent()) {
+      try {
+        Optional<Resource> or = Resources.from(trim(script)).findFirst();
+        if (or.isPresent()) {
+          try (InputStream is = or.get().openStream()) {
+            return fromInputStream(is);
+          }
+        }
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return script;
   }
 
   @SuppressWarnings("unchecked")

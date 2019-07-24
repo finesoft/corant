@@ -17,11 +17,10 @@ import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,11 +51,11 @@ public class QueryParser {
   static Logger logger = Logger.getLogger(QueryParser.class.getName());
 
   public List<QueryMapping> parse(String pathExpress) {
-    List<QueryMapping> qmList = new ArrayList<>();
+    List<QueryMapping> qmList = new CopyOnWriteArrayList<>();
     final QueryParserErrorHandler errHdl = new QueryParserErrorHandler();
     final SAXParserFactory factory = createSAXParserFactory();
     final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpress);
-    for (Entry<String, Resource> entry : fileMap.entrySet()) {
+    fileMap.entrySet().stream().parallel().forEach(entry -> {
       logger.info(() -> String.format("Parse query mapping file %s.", entry.getKey()));
       try (InputStream is = entry.getValue().openStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
@@ -69,7 +68,7 @@ public class QueryParser {
         String errMsg = String.format("Parse query mapping file [%s] error!", entry.getKey());
         throw new QueryRuntimeException(ex, errMsg);
       }
-    }
+    });
     return qmList;
   }
 
@@ -82,7 +81,7 @@ public class QueryParser {
   }
 
   Map<String, Resource> getQueryMappingFiles(String pathExpress) {
-    Map<String, Resource> map = new HashMap<>();
+    Map<String, Resource> map = new ConcurrentHashMap<>();
     setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
       try {
         Resources.from(path).forEach(f -> map.put(f.getLocation(), f));

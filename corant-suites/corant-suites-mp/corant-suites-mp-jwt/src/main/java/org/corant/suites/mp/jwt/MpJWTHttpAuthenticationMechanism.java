@@ -11,18 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.service;
+package org.corant.suites.mp.jwt;
 
-import org.corant.asosat.ddd.security.DefaultSecurityContext;
+import javax.enterprise.context.ApplicationScoped;
+import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-mp-jwt
  *
- * @author bingo 上午11:24:10
+ * @author bingo 下午7:07:18
  *
  */
-public interface SecurityContextProducer {
-
-  DefaultSecurityContext get();
+@ApplicationScoped
+public class MpJWTHttpAuthenticationMechanism extends JWTHttpAuthenticationMechanism {
 
 }

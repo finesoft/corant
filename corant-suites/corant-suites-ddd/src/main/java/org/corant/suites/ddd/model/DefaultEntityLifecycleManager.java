@@ -69,14 +69,14 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   }
 
   @Override
-  public void on(@Observes(
-      during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION + 1000) AggregationLifecycleManageEvent e) {
+  public void on(@Observes(during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION
+      + 1000) AggregationLifecycleManageEvent e) {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
       boolean effectImmediately = e.isEffectImmediately();
       handle(entity, e.getAction(), effectImmediately, getPersistenceContext(entity.getClass()));
-      logger.fine(
-          () -> String.format("Handle %s %s", entity.getClass().getName(), e.getAction().name()));
+      logger.fine(() -> String.format("Handle %s %s %s", entity.getClass().getName(),
+          e.getAction().name(), entity.getId()));
     }
   }
 

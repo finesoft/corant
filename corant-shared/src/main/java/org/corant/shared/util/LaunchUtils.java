@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
  *
  */
 public class LaunchUtils {
+
+  private final static Pattern debugPattern = Pattern.compile("-Xdebug|jdwp");
 
   private LaunchUtils() {
     super();
@@ -104,6 +107,15 @@ public class LaunchUtils {
   public static Long getUsedMemoryMb() {
     return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())
         / Defaults.ONE_MB;
+  }
+
+  public static boolean isDebugging() {
+    for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+      if (debugPattern.matcher(arg).find()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static void runAs() throws IOException, InterruptedException {

@@ -22,17 +22,17 @@ import org.corant.suites.bundle.GlobalMessageCodes;
 
 @Embeddable
 @MappedSuperclass
-public class WeightInfo extends MeasuredInfo<WeightInfo> {
+public class LengthInfo extends MeasuredInfo<LengthInfo> {
 
   private static final long serialVersionUID = 6145301734319644562L;
 
-  public static final WeightInfo WI0 = new WeightInfo(BigDecimal.ZERO, MeasureUnit.KG);
+  public static final LengthInfo WI0 = new LengthInfo(BigDecimal.ZERO, MeasureUnit.MM);
 
   /**
    * @param value
    * @param unit
    */
-  public WeightInfo(BigDecimal value, MeasureUnit unit) {
+  public LengthInfo(BigDecimal value, MeasureUnit unit) {
     super(value, unit);
   }
 
@@ -40,28 +40,28 @@ public class WeightInfo extends MeasuredInfo<WeightInfo> {
    * @param value
    * @param unit
    */
-  public WeightInfo(Number value, MeasureUnit unit) {
+  public LengthInfo(Number value, MeasureUnit unit) {
     super(value, unit);
   }
 
   /**
    *
    */
-  protected WeightInfo() {
+  protected LengthInfo() {
     super();
   }
 
   @Override
   protected MeasureUnit checkUnitType(MeasureUnit unit) {
     if (unit != null) {
-      requireTrue(unit.isWeight(), GlobalMessageCodes.ERR_PARAM);
+      requireTrue(unit.isLength(), GlobalMessageCodes.ERR_PARAM);
     }
     return unit;
   }
 
   @Override
-  protected WeightInfo with(BigDecimal value, MeasureUnit unit) {
-    return new WeightInfo(value, unit);
+  protected LengthInfo with(BigDecimal value, MeasureUnit unit) {
+    return new LengthInfo(value, unit);
   }
 
 }

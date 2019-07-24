@@ -13,16 +13,18 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import java.security.Principal;
 import java.util.Map;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.MappedSuperclass;
-import org.corant.Corant;
 import org.corant.asosat.ddd.domain.model.AbstractValueObject;
-import org.corant.asosat.ddd.security.DefaultSecurityContextHolder;
+import org.corant.asosat.ddd.security.DefaultSecurityContext;
+import org.corant.asosat.ddd.security.SecurityContextProducer;
 
 /**
  * @author bingo 上午10:11:36
@@ -72,19 +74,13 @@ public class Participator extends AbstractValueObject implements Principal {
   protected Participator() {}
 
   public static Participator currentOrg() {
-    if (Corant.me() != null
-        && Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
-      return Corant.instance().select(DefaultSecurityContextHolder.class).get().getCurrentOrg();
-    }
-    return empty();
+    Optional<SecurityContextProducer> scp = resolve(SecurityContextProducer.class);
+    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentUser();
   }
 
   public static Participator currentUser() {
-    if (Corant.me() != null
-        && Corant.instance().select(DefaultSecurityContextHolder.class).isResolvable()) {
-      return Corant.instance().select(DefaultSecurityContextHolder.class).get().getCurrentUser();
-    }
-    return empty();
+    Optional<SecurityContextProducer> scp = resolve(SecurityContextProducer.class);
+    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentOrg();
   }
 
   public static Participator empty() {

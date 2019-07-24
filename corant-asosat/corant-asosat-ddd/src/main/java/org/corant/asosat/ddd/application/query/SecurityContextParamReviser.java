@@ -15,10 +15,7 @@ package org.corant.asosat.ddd.application.query;
 
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.asosat.ddd.domain.shared.Participator;
-import org.corant.asosat.ddd.security.DefaultSecurityContext;
-import org.corant.asosat.ddd.security.DefaultSecurityContextHolder;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.query.shared.spi.ParamReviser;
 
@@ -32,20 +29,16 @@ import org.corant.suites.query.shared.spi.ParamReviser;
 @InfrastructureServices
 public class SecurityContextParamReviser implements ParamReviser {
 
-  @Inject
-  DefaultSecurityContextHolder dscHolder;
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void accept(Object queryName, Object param) {
-    DefaultSecurityContext sctx = null;
-    if (param instanceof Map && (sctx = dscHolder.get()) != null) {
-      Map mapParam = Map.class.cast(param);
-      if (sctx.getUserPrincipal() != null && sctx.getUserPrincipal().getId() != null) {
-        mapParam.putIfAbsent(Participator.CURRENT_USER_ID_KEY, sctx.getUserPrincipal().getId());
+    if (param instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<Object, Object> mapParam = Map.class.cast(param);
+      if (Participator.currentUser().getId() != null) {
+        mapParam.putIfAbsent(Participator.CURRENT_USER_ID_KEY, Participator.currentUser().getId());
       }
-      if (sctx.getOrgPrincipal() != null && sctx.getOrgPrincipal().getId() != null) {
-        mapParam.putIfAbsent(Participator.CURRENT_ORG_ID_KEY, sctx.getOrgPrincipal().getId());
+      if (Participator.currentOrg().getId() != null) {
+        mapParam.putIfAbsent(Participator.CURRENT_ORG_ID_KEY, Participator.currentOrg().getId());
       }
     }
   }

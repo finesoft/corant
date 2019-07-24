@@ -221,7 +221,7 @@ public abstract class AbstractSqlNamedQuery extends AbstractNamedQuery {
     return getExecutor().getDialect();
   }
 
-  protected abstract SqlQueryExecutor getExecutor();
+  protected abstract SqlQueryExecutor getExecutor();// FIXME use one connection for one method stack
 
   protected SqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
     return resolver;

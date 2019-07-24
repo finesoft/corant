@@ -17,8 +17,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,21 +48,14 @@ import org.corant.devops.maven.plugin.archive.FileEntry;
  */
 public class DistPackager implements Packager {
 
-  public static final Charset CHARSET = StandardCharsets.UTF_8;
-
   public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
   public static final String RUN_SH = "run.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String DIST_NAME_SUF = "-dist.zip";
-  public static final String JAR_LIB_DIR = "lib";
-  public static final String JAR_APP_DIR = "app";
-  public static final String JAR_CFG_DIR = "cfg";
-  public static final String JAR_BIN_DIR = "bin";
-  public static final String LOG_BIN_DIR = "log";
-  private final PackageMojo mojo;
 
+  private final PackageMojo mojo;
   private final Log log;
 
   DistPackager(PackageMojo mojo) {
@@ -129,12 +120,12 @@ public class DistPackager implements Packager {
     Archive root = DefaultArchive.root();
     // LICENE README NOTICE
     resolveRootResources().forEach(root::addEntry);
-    DefaultArchive.of(JAR_LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
+    DefaultArchive.of(LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
-    DefaultArchive.of(JAR_APP_DIR, root)
+    DefaultArchive.of(APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-    DefaultArchive.of(JAR_CFG_DIR, root).addEntries(resolveConfigFiles());
-    DefaultArchive.of(JAR_BIN_DIR, root).addEntries(resolveBinFiles());
+    DefaultArchive.of(CFG_DIR, root).addEntries(resolveConfigFiles());
+    DefaultArchive.of(BIN_DIR, root).addEntries(resolveBinFiles());
     log.debug("(corant) built archive for packaging.");
     return root;
   }

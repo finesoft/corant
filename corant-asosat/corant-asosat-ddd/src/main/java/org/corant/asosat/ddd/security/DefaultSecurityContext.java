@@ -13,6 +13,7 @@
  */
 package org.corant.asosat.ddd.security;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.SecurityContext;
@@ -26,8 +27,12 @@ import org.corant.asosat.ddd.domain.shared.Participator;
  */
 public class DefaultSecurityContext implements SecurityContext {
 
-  private final Participator userPrincipal;
-  private final Participator orgPrincipal;
+  public static final DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null,
+      null, Participator.empty(), Participator.empty(), false, null, null);
+
+  private final Principal userPrincipal;
+  private final Participator currentUser;
+  private final Participator currentOrg;
   private final boolean secure;
   private final Set<String> userRoles = new HashSet<>();
   private final String authenticationScheme;
@@ -38,19 +43,21 @@ public class DefaultSecurityContext implements SecurityContext {
    * @param accessToken
    * @param refreshToken
    * @param userPrincipal
-   * @param orgPrincipal
+   * @param currentUser
+   * @param currentOrg
    * @param secure
    * @param authenticationScheme
    * @param userRoles
    */
-  public DefaultSecurityContext(String accessToken, String refreshToken, Participator userPrincipal,
-      Participator orgPrincipal, boolean secure, String authenticationScheme,
-      Set<String> userRoles) {
+  public DefaultSecurityContext(String accessToken, String refreshToken, Principal userPrincipal,
+      Participator currentUser, Participator currentOrg, boolean secure,
+      String authenticationScheme, Set<String> userRoles) {
     super();
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.userPrincipal = userPrincipal;
-    this.orgPrincipal = orgPrincipal;
+    this.currentOrg = currentOrg;
+    this.currentUser = currentUser;
     this.secure = secure;
     this.authenticationScheme = authenticationScheme;
     if (userRoles != null) {
@@ -67,8 +74,12 @@ public class DefaultSecurityContext implements SecurityContext {
     return authenticationScheme;
   }
 
-  public Participator getOrgPrincipal() {
-    return orgPrincipal;
+  public Participator getCurrentOrg() {
+    return currentOrg;
+  }
+
+  public Participator getCurrentUser() {
+    return currentUser;
   }
 
   public String getRefreshToken() {
@@ -76,7 +87,7 @@ public class DefaultSecurityContext implements SecurityContext {
   }
 
   @Override
-  public Participator getUserPrincipal() {
+  public Principal getUserPrincipal() {
     return userPrincipal;
   }
 

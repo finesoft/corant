@@ -11,27 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.asosat.ddd.service;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Produces;
-import org.corant.asosat.ddd.security.DefaultSecurityContext;
-
 /**
- * corant-asosat-ddd
- *
- * @author bingo 上午11:34:06
+ * corant-suites-mp-jwt
+ * 
+ * @author bingo 下午7:35:49
  *
  */
-@ApplicationScoped
-public class DefaultSecurityContextProducer implements SecurityContextProducer {
-
-  @Produces
-  @RequestScoped
-  @Override
-  public DefaultSecurityContext get() {
-    return null;
-  }
-
-}
+package org.corant.suites.mp.jwt;

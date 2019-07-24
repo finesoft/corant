@@ -14,6 +14,8 @@
 package org.corant.devops.maven.plugin.packaging;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.jar.Attributes;
@@ -26,10 +28,16 @@ import bin.JarLauncher;
  *
  */
 public interface Packager {
-
+  Charset CHARSET = StandardCharsets.UTF_8;
   String META_INF_DIR = "META-INF";
   String MF_NME = "MANIFEST.MF";
   String FW_NME = "corant-kernel";
+  String LIB_DIR = "lib";
+  String APP_DIR = "app";
+  String CFG_DIR = "cfg";
+  String BIN_DIR = "bin";
+  String LOG_DIR = "log";
+
   Attributes.Name FW_VER_KEY = new Attributes.Name("Corant-Kernel-Version");
 
   PackageMojo getMojo();

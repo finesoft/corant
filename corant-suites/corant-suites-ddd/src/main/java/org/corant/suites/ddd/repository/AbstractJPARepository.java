@@ -17,21 +17,24 @@ import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
-import org.corant.shared.util.StringUtils;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
@@ -53,7 +56,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   @Inject
   JTAJPAUnitOfWorksManager unitOfWorkManager;
 
-  protected volatile String persistenceUnitName;
+  protected volatile PersistenceContext persistenceContext;
 
   @Override
   public void clear() {
@@ -158,20 +161,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   @Override
   public EntityManager getEntityManager() {
     // FIXME TODO CHECK THE REPO NAMES AND EMF NAMES
-    if (persistenceUnitName == null) {
-      synchronized (this) {
-        if (persistenceUnitName == null) {
-          Named name = findAnnotation(getUserClass(this.getClass()), Named.class);
-          if (name != null) {
-            persistenceUnitName = name.value();
-          } else {
-            persistenceUnitName = StringUtils.EMPTY;
-          }
-        }
-      }
-    }
-    return unitOfWorkManager.getCurrentUnitOfWork()
-        .getEntityManager(PersistenceContextLiteral.of(persistenceUnitName));
+    return unitOfWorkManager.getCurrentUnitOfWork().getEntityManager(persistenceContext);
   }
 
   public EntityManagerFactory getEntityManagerFactory() {
@@ -238,4 +228,16 @@ public abstract class AbstractJPARepository implements JPARepository {
     return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
   }
 
+  @PostConstruct
+  void onPostConstruct() {
+    if (persistenceContext == null) {
+      synchronized (this) {
+        if (persistenceContext == null) {
+          Named name = defaultObject(findAnnotation(getUserClass(this.getClass()), Named.class),
+              NamedLiteral.INSTANCE);
+          persistenceContext = PersistenceContextLiteral.of(name.value());
+        }
+      }
+    }
+  }
 }

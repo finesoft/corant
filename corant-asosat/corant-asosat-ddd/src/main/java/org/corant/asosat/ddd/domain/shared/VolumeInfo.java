@@ -13,106 +13,47 @@
  */
 package org.corant.asosat.ddd.domain.shared;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.kernel.util.Preconditions.requireTrue;
 import java.math.BigDecimal;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
-import org.corant.asosat.ddd.domain.model.AbstractValueObject;
+import org.corant.asosat.ddd.domain.shared.Measurables.MeasuredInfo;
+import org.corant.suites.bundle.GlobalMessageCodes;
 
 @Embeddable
 @MappedSuperclass
-public class VolumeInfo extends AbstractValueObject implements Comparable<VolumeInfo> {
+public class VolumeInfo extends MeasuredInfo<VolumeInfo> {
 
   private static final long serialVersionUID = 6145301734319644562L;
 
-  static final VolumeInfo VI0 = new VolumeInfo(BigDecimal.ZERO, MeasureUnit.KG);
-
-  @Column
-  private BigDecimal volume;
-
-  @Column(length = 8)
-  @Enumerated(EnumType.STRING)
-  private MeasureUnit unit;
+  public static final VolumeInfo VI0 = new VolumeInfo(BigDecimal.ZERO, MeasureUnit.CBM);
 
   /**
-   * @param volume
-   * @param pu
+   * @param value
+   * @param unit
    */
-  public VolumeInfo(BigDecimal volume, MeasureUnit unit) {
-    super();
-    setVolume(volume);
-    this.unit = unit;
+  public VolumeInfo(BigDecimal value, MeasureUnit unit) {
+    super(value, unit);
   }
 
+  /**
+   *
+   */
   protected VolumeInfo() {
     super();
   }
 
-  public static VolumeInfo of(BigDecimal volume, MeasureUnit unit) {
-    return new VolumeInfo(volume, unit);
-  }
-
   @Override
-  public int compareTo(VolumeInfo o) {
-    return defaultObject(volume, BigDecimal.ZERO)
-        .compareTo(defaultObject(o.volume, BigDecimal.ZERO));
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
+  protected MeasureUnit checkUnitType(MeasureUnit unit) {
+    if (unit != null) {
+      requireTrue(unit.isVolume(), GlobalMessageCodes.ERR_PARAM);
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    VolumeInfo other = (VolumeInfo) obj;
-    if (unit != other.unit) {
-      return false;
-    }
-    if (volume == null) {
-      if (other.volume != null) {
-        return false;
-      }
-    } else if (!volume.equals(other.volume)) {
-      return false;
-    }
-    return true;
-  }
-
-  public MeasureUnit getUnit() {
     return unit;
   }
 
-  public BigDecimal getVolume() {
-    return volume;
-  }
-
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (unit == null ? 0 : unit.hashCode());
-    result = prime * result + (volume == null ? 0 : volume.hashCode());
-    return result;
-  }
-
-  protected void setUnit(MeasureUnit unit) {
-    this.unit = unit;
-  }
-
-  protected BigDecimal scaleValue(BigDecimal value) {
-    return value == null ? null : value.setScale(2, BigDecimal.ROUND_HALF_UP);
-  }
-
-  protected void setVolume(BigDecimal volume) {
-    this.volume = scaleValue(volume);
+  protected VolumeInfo with(BigDecimal value, MeasureUnit unit) {
+    return new VolumeInfo(value, unit);
   }
 
 }

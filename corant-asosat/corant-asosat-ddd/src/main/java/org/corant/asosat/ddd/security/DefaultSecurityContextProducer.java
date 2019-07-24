@@ -16,9 +16,12 @@ package org.corant.asosat.ddd.security;
 import static org.corant.kernel.util.Instances.resolve;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import org.corant.asosat.ddd.domain.shared.Participator;
 import org.corant.shared.util.ConversionUtils;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-asosat-ddd
@@ -29,25 +32,31 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @ApplicationScoped
 public class DefaultSecurityContextProducer implements SecurityContextProducer {
 
+  @Inject
+  WeldManager wm;
+
   @Override
   public DefaultSecurityContext get() {
-    Optional<JsonWebToken> jwto = resolve(JsonWebToken.class);
-    if (jwto.isPresent()) {
-      JsonWebToken jwt = jwto.get();
-      Participator currentUser = Participator.empty();
-      Participator currentOrg = Participator.empty();
-      if (jwt.containsClaim("userId")) {
-        String userId = ConversionUtils.toString(jwt.getClaim("userId"));
-        String userName = ConversionUtils.toString(jwt.getClaim("preferred_username"));
-        currentUser = new Participator(userId, userName);
+    if (wm.getActiveContexts().stream().map(c -> c.getScope())
+        .anyMatch(c -> c.equals(RequestScoped.class))) {
+      Optional<JsonWebToken> jwto = resolve(JsonWebToken.class);
+      if (jwto.isPresent()) {
+        JsonWebToken jwt = jwto.get();
+        Participator currentUser = Participator.empty();
+        Participator currentOrg = Participator.empty();
+        if (jwt.containsClaim("userId")) {
+          String userId = ConversionUtils.toString(jwt.getClaim("userId"));
+          String userName = ConversionUtils.toString(jwt.getClaim("preferred_username"));
+          currentUser = new Participator(userId, userName);
+        }
+        if (jwt.containsClaim("orgId")) {
+          String orgId = ConversionUtils.toString(jwt.getClaim("orgId"));
+          String orgName = ConversionUtils.toString(jwt.getClaim("orgName"));
+          currentOrg = new Participator(orgId, orgName);
+        }
+        return new DefaultSecurityContext(jwt.getRawToken(), null, jwt, currentUser, currentOrg,
+            true, "MP-JWT", jwt.getGroups());
       }
-      if (jwt.containsClaim("orgId")) {
-        String orgId = ConversionUtils.toString(jwt.getClaim("orgId"));
-        String orgName = ConversionUtils.toString(jwt.getClaim("orgName"));
-        currentOrg = new Participator(orgId, orgName);
-      }
-      return new DefaultSecurityContext(jwt.getRawToken(), null, jwt, currentUser, currentOrg, true,
-          "MP-JWT", jwt.getGroups());
     }
     return DefaultSecurityContext.EMPTY_INST;
   }

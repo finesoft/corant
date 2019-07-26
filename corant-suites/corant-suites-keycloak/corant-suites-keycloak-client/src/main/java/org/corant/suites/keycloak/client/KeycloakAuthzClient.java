@@ -52,7 +52,7 @@ public class KeycloakAuthzClient {
     return authzClient.obtainAccessToken(userName, password);
   }
 
-  public AccessTokenResponse grantRefreshToken(String refreshToken) {
+  public AccessTokenResponse refreshAccessToken(String refreshToken) {
     RequestBuilder builder = RequestBuilder.post().setUri(serverConfiguration.getTokenEndpoint())
         .addHeader("Authorization", BasicAuthHelper.createHeader(configuration.getResource(),
             (String) configuration.getCredentials().get("secret")));

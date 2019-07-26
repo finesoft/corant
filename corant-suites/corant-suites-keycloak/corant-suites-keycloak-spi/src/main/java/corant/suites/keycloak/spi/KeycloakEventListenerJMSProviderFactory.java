@@ -25,7 +25,7 @@ import org.keycloak.models.KeycloakSessionFactory;
  * @author bingo 上午10:19:05
  *
  */
-public class KeycloakEventListenerProviderFactory implements EventListenerProviderFactory {
+public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
 
   final String id = "corant-keycloak-event-listener";
 
@@ -36,7 +36,7 @@ public class KeycloakEventListenerProviderFactory implements EventListenerProvid
 
   @Override
   public EventListenerProvider create(KeycloakSession session) {
-    KeycloakEventListenerProvider provider = new KeycloakEventListenerProvider((t) -> true);
+    KeycloakEventListenerJMSProvider provider = new KeycloakEventListenerJMSProvider((t) -> true);
     session.enlistForClose(provider);
     return provider;
   }

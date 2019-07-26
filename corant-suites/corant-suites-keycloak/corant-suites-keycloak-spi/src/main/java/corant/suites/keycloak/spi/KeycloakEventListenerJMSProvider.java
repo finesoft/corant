@@ -25,14 +25,14 @@ import org.keycloak.events.admin.AdminEvent;
  * @author bingo 上午10:16:59
  *
  */
-public class KeycloakEventListenerProvider implements EventListenerProvider {
+public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
-  static final Logger logger = Logger.getLogger(KeycloakEventListenerProvider.class);
+  static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
 
   final KeycloakJMSSender jmsSender = new KeycloakJMSSender();
   final Predicate<Object> filter;
 
-  public KeycloakEventListenerProvider(Predicate<Object> filter) {
+  public KeycloakEventListenerJMSProvider(Predicate<Object> filter) {
     this.filter = filter == null ? (t) -> true : filter;
   }
 

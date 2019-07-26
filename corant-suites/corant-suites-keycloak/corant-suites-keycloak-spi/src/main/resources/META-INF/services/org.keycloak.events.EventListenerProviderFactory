@@ -1,1 +1,1 @@
-corant.suites.keycloak.spi.KeycloakEventListenerProviderFactory
+corant.suites.keycloak.spi.KeycloakEventListenerJMSProviderFactory

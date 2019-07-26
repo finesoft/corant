@@ -26,7 +26,6 @@ import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.ClientAuthenticator;
 import org.keycloak.authorization.client.Configuration;
 import org.keycloak.authorization.client.representation.ServerConfiguration;
-import org.keycloak.authorization.client.util.Http;
 import org.keycloak.authorization.client.util.HttpMethod;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.util.BasicAuthHelper;
@@ -43,10 +42,14 @@ public class KeycloakAuthzClient {
   @Inject
   @ConfigProperty(name = "keycloak.json.path", defaultValue = "META-INF/keycloak.json")
   protected String keycloakJsonPath;
-  protected Http http;
+  // protected Http http;
   protected AuthzClient authzClient;
   protected ServerConfiguration serverConfiguration;
   protected Configuration configuration;
+
+  public AuthzClient getAuthzClient() {
+    return authzClient;
+  }
 
   public AccessTokenResponse grantAccessToken(String userName, String password) {
     return authzClient.obtainAccessToken(userName, password);
@@ -82,7 +85,7 @@ public class KeycloakAuthzClient {
           .create(Resources.fromClassPath(keycloakJsonPath).findFirst().get().openStream());
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
-      http = new Http(configuration, createDefaultClientAuthenticator(configuration));
+      // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
       throw new CorantRuntimeException("Can't find keycloak.json from %", keycloakJsonPath);
     }

@@ -45,6 +45,7 @@
 		<module>corant-suites-beanvalidation</module>
 		<module>corant-suites-concurrency</module>
 		<module>corant-suites-lang</module>
+		<module>corant-suites-keycloak</module>
 	</modules>
 	<build>
 		<plugins>

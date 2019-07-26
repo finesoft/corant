@@ -718,8 +718,6 @@
 				<version>${version.kotlin}</version>
 			</dependency>
 
-
-
 			<!-- CDI -->
 			<dependency>
 				<groupId>org.jboss.weld.se</groupId>
@@ -885,9 +883,18 @@
 			</dependency>
 			<dependency>
 				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-services</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-server-spi</artifactId>
 				<version>${version.keycloak}</version>
-				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-server-spi-private</artifactId>
+				<version>${version.keycloak}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.keycloak</groupId>
@@ -899,6 +906,12 @@
 				<artifactId>keycloak-undertow-adapter-spi</artifactId>
 				<version>${version.keycloak}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-installed-adapter</artifactId>
+				<version>${version.keycloak}</version>
+			</dependency>
+
 
 
 			<!-- Corant -->
@@ -1065,6 +1078,11 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-ddd</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-keycloak-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

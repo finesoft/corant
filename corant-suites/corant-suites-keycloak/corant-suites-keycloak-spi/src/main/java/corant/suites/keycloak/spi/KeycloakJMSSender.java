@@ -22,7 +22,6 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import org.corant.shared.exception.CorantRuntimeException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -35,8 +34,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class KeycloakJMSSender {
   private static final String MESSAGE_TYPE = "messageType";
   private static final String KEYCLOAK_EVENT = "keycloakEvent";
-  private static final String JMS_CONNECTION_FACTORY_JNDI_NAME = "java:/jms/ConnectionFactory";
-  private static final String EVENT_DESTINATION_JNDI_NAME = "java:/jms/topic/KeyCloakEvent";
+  private static final String JMS_CONNECTION_FACTORY_JNDI_NAME =
+      "java:jboss/exported/jms/remoteArtemis";
+  private static final String EVENT_DESTINATION_JNDI_NAME =
+      "java:jboss/exported/jms/topic/KeycloakEventTopic";
   private final Destination destination;
   private final ConnectionFactory connectionFactory;
   private final ObjectMapper objectMapper;
@@ -50,7 +51,7 @@ public class KeycloakJMSSender {
       destination = (Destination) ctx.lookup(EVENT_DESTINATION_JNDI_NAME);
       connectionFactory = (ConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI_NAME);
     } catch (NamingException e) {
-      throw new CorantRuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
+      throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
     }
   }
 

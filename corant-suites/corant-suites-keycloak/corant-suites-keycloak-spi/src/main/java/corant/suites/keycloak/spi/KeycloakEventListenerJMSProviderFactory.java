@@ -41,7 +41,6 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
   public EventListenerProvider create(KeycloakSession session) {
     KeycloakEventListenerJMSProvider provider =
         new KeycloakEventListenerJMSProvider(eventSelector, adminEventSelector);
-    session.enlistForClose(provider);
     return provider;
   }
 

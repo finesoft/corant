@@ -13,7 +13,6 @@
  */
 package corant.suites.keycloak.spi;
 
-import javax.enterprise.inject.spi.CDI;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -30,11 +29,13 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
   final EventSelector eventSelector;
   final AdminEventSelector adminEventSelector;
+  final KeycloakJMSSender jmsSender;
 
   public KeycloakEventListenerJMSProvider(EventSelector eventSelector,
       AdminEventSelector adminEventSelector) {
     this.eventSelector = eventSelector;
     this.adminEventSelector = adminEventSelector;
+    jmsSender = new KeycloakJMSSender();
   }
 
   @Override
@@ -45,12 +46,11 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
   @Override
   public void onEvent(AdminEvent event, boolean includeRepresentation) {
     logger.infof("Resend admin event to jms!");
-    if (!adminEventSelector.test(event)
-        && !CDI.current().select(KeycloakJMSSender.class).isResolvable()) {
+    if (!adminEventSelector.test(event) && jmsSender != null) {
       return;
     }
     try {
-      CDI.current().select(KeycloakJMSSender.class).get().send(event);
+      jmsSender.send(event);
     } catch (Exception e) {
       logger.warn("Can't send admin event to jms broker!", e);
     }
@@ -59,12 +59,11 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
   @Override
   public void onEvent(Event event) {
     logger.infof("Resend event to jms!");
-    if (!eventSelector.test(event)
-        && !CDI.current().select(KeycloakJMSSender.class).isResolvable()) {
+    if (!eventSelector.test(event) && jmsSender != null) {
       return;
     }
     try {
-      CDI.current().select(KeycloakJMSSender.class).get().send(event);
+      jmsSender.send(event);
     } catch (Exception e) {
       logger.warn("Can't send event to jms broker!", e);
     }

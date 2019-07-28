@@ -35,7 +35,7 @@
         <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
         <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
         <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
-        <pooled-connection-factory name="remote-artemis" entries="java:/jms/remoteArtemis java:jboss/exported/jms/remoteArtemis" connectors="remote-artemis" user="sa" password="cn.cps"/>
+        <pooled-connection-factory name="remote-artemis" entries="java:/jms/remoteArtemis java:jboss/exported/jms/remoteArtemis" connectors="remote-artemis" user="x" password="xx"/>
     </server>
 </subsystem>
   ```
@@ -48,3 +48,22 @@
         </outbound-socket-binding>    
    </socket-binding>
     ```
+  # 4.provider module.xml
+  ```
+	  <module name="org.corant" slot="main" xmlns="urn:jboss:module:1.3">
+	    <resources>
+	        <resource-root path="corant-suites-keycloak-spi.jar"/>
+	    </resources>
+	    <dependencies>
+	        <module name="org.jboss.logging"/>
+	        <module name="javax.jms.api"/>
+		      <module name="org.keycloak.keycloak-core"/>
+	        <module name="org.keycloak.keycloak-server-spi"/>
+		      <module name="org.keycloak.keycloak-server-spi-private"/>
+	        <module name="org.keycloak.keycloak-services"/>
+	        <module name="com.fasterxml.jackson.core.jackson-core"/>
+	        <module name="com.fasterxml.jackson.core.jackson-annotations"/>
+	        <module name="com.fasterxml.jackson.core.jackson-databind"/>
+	        <module name="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
+	    </dependencies>
+	</module>

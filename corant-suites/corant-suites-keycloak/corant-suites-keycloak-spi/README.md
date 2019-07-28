@@ -47,8 +47,8 @@
             <remote-destination host="localhost" port="61616"/><!--host and port is outside jms server host and port-->
         </outbound-socket-binding>    
    </socket-binding>
-    ```
-  # 4.provider module.xml
+  ```
+# 4. provider module.xml
   ```
 	  <module name="org.corant" slot="main" xmlns="urn:jboss:module:1.3">
 	    <resources>

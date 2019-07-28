@@ -13,6 +13,7 @@
  */
 package corant.suites.keycloak.spi;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -26,8 +27,10 @@ import org.keycloak.models.KeycloakSessionFactory;
  *
  */
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
-
+  static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
   final String id = "corant-keycloak-event-listener";
+  EventSelector eventSelector;
+  AdminEventSelector adminEventSelector;
 
   @Override
   public void close() {
@@ -36,7 +39,8 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
 
   @Override
   public EventListenerProvider create(KeycloakSession session) {
-    KeycloakEventListenerJMSProvider provider = new KeycloakEventListenerJMSProvider((t) -> true);
+    KeycloakEventListenerJMSProvider provider =
+        new KeycloakEventListenerJMSProvider(eventSelector, adminEventSelector);
     session.enlistForClose(provider);
     return provider;
   }
@@ -48,12 +52,12 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
 
   @Override
   public void init(Scope config) {
-
+    eventSelector = new EventSelector(config);
+    adminEventSelector = new AdminEventSelector(config);
+    logger.infof("Initialize %s with id %s.", this.getClass().getName(), getId());
   }
 
   @Override
-  public void postInit(KeycloakSessionFactory factory) {
-
-  }
+  public void postInit(KeycloakSessionFactory factory) {}
 
 }

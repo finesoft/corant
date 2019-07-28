@@ -13,15 +13,14 @@
  */
 package corant.suites.keycloak.spi;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.jms.Destination;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.jms.JMSConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -31,41 +30,38 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author bingo 上午11:34:49
  *
  */
+@ApplicationScoped
 public class KeycloakJMSSender {
-  private static final String MESSAGE_TYPE = "messageType";
-  private static final String KEYCLOAK_EVENT = "keycloakEvent";
-  private static final String JMS_CONNECTION_FACTORY_JNDI_NAME =
-      "java:jboss/exported/jms/remoteArtemis";
-  private static final String EVENT_DESTINATION_JNDI_NAME =
-      "java:jboss/exported/jms/topic/KeycloakEventTopic";
-  private final Destination destination;
-  private final ConnectionFactory connectionFactory;
-  private final ObjectMapper objectMapper;
 
-  public KeycloakJMSSender() {
-    try {
-      objectMapper = new ObjectMapper();
-      objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-      objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      Context ctx = new InitialContext();
-      destination = (Destination) ctx.lookup(EVENT_DESTINATION_JNDI_NAME);
-      connectionFactory = (ConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI_NAME);
-    } catch (NamingException e) {
-      throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
-    }
-  }
+  public static final String MESSAGE_TYPE = "messageType";
+  public static final String KEYCLOAK_EVENT = "keycloakEvent";
 
-  void send(Object event) throws Exception {
-    if (connectionFactory == null || destination == null || event == null) {
+  @Inject
+  @JMSConnectionFactory("java:/jms/remoteArtemis")
+  JMSContext context;
+  Destination destination;
+  ObjectMapper objectMapper = new ObjectMapper();
+
+  public void send(Object event) throws Exception {
+    if (context == null || destination == null || event == null) {
       return;
     }
-    try (Connection connection = connectionFactory.createConnection();
-        Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
-        MessageProducer messageProducer = session.createProducer(destination)) {
-      String text = objectMapper.writeValueAsString(event);
-      TextMessage textMessage = session.createTextMessage(text);
-      textMessage.setStringProperty(MESSAGE_TYPE, KEYCLOAK_EVENT);
-      messageProducer.send(textMessage);
+    JMSProducer jmsProducer = context.createProducer();
+    String text = objectMapper.writeValueAsString(event);
+    jmsProducer.send(destination, text);
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    destination = context.createTopic("keycloakEvent");
+    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+  }
+
+  @PreDestroy
+  void onPreDestroy() {
+    if (context != null) {
+      context.close();
     }
   }
 }

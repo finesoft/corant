@@ -13,7 +13,7 @@
  */
 package corant.suites.keycloak.spi;
 
-import java.util.function.Predicate;
+import javax.enterprise.inject.spi.CDI;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -28,12 +28,13 @@ import org.keycloak.events.admin.AdminEvent;
 public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
+  final EventSelector eventSelector;
+  final AdminEventSelector adminEventSelector;
 
-  final KeycloakJMSSender jmsSender = new KeycloakJMSSender();
-  final Predicate<Object> filter;
-
-  public KeycloakEventListenerJMSProvider(Predicate<Object> filter) {
-    this.filter = filter == null ? (t) -> true : filter;
+  public KeycloakEventListenerJMSProvider(EventSelector eventSelector,
+      AdminEventSelector adminEventSelector) {
+    this.eventSelector = eventSelector;
+    this.adminEventSelector = adminEventSelector;
   }
 
   @Override
@@ -43,11 +44,13 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   @Override
   public void onEvent(AdminEvent event, boolean includeRepresentation) {
-    if (!filter.test(event)) {
+    logger.infof("Resend admin event to jms!");
+    if (!adminEventSelector.test(event)
+        && !CDI.current().select(KeycloakJMSSender.class).isResolvable()) {
       return;
     }
     try {
-      jmsSender.send(event);
+      CDI.current().select(KeycloakJMSSender.class).get().send(event);
     } catch (Exception e) {
       logger.warn("Can't send admin event to jms broker!", e);
     }
@@ -55,11 +58,13 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   @Override
   public void onEvent(Event event) {
-    if (!filter.test(event)) {
+    logger.infof("Resend event to jms!");
+    if (!eventSelector.test(event)
+        && !CDI.current().select(KeycloakJMSSender.class).isResolvable()) {
       return;
     }
     try {
-      jmsSender.send(event);
+      CDI.current().select(KeycloakJMSSender.class).get().send(event);
     } catch (Exception e) {
       logger.warn("Can't send event to jms broker!", e);
     }

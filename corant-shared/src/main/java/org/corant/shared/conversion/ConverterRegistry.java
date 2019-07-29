@@ -21,7 +21,6 @@ import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
@@ -113,7 +112,8 @@ public class ConverterRegistry {
   }
 
   static Set<ConverterType<?, ?>> getNotSyntheticConverterTypes() {
-    Set<ConverterType<?, ?>> types = new HashSet<>(SUPPORT_CONVERTERS.keySet());
+    Set<ConverterType<?, ?>> types = SUPPORT_CONVERTERS.entrySet().stream()
+        .filter(e -> e.getValue().isComposable()).map(e -> e.getKey()).collect(Collectors.toSet());
     types.removeAll(SUPPORT_CONVERTER_PIPE_TYPES.keySet());
     return types;
   }

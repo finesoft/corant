@@ -44,6 +44,10 @@ public interface Converter<S, T> {
     return 0;
   }
 
+  default boolean isComposable() {
+    return true;
+  }
+
   default boolean isPossibleDistortion() {
     return false;
   }

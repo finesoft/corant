@@ -137,6 +137,11 @@ public class Converters {
     }
   }
 
+  static <S, T> Converter<S, T> getMatchedConverterx(Class<S> sourceClass, Class<T> targetClass,
+      Consumer<Set<ConverterType<?, ?>>> consumer) {
+    return null;
+  }
+
   static void loop(Set<ConverterType<?, ?>> converterTypes, Class<?> src,
       Queue<ConverterPipe> pipes, Queue<ConverterPipe> matchedPipes, int nestingDepth) {
     ConverterPipe pipe = null;
@@ -205,7 +210,7 @@ public class Converters {
         Class<?> targetClass) {
       Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses = new HashMap<>();
       Map<Class<?>, Set<Class<?>>> tagClassMappedSrcClasses = new HashMap<>();
-      ConverterRegistry.SUPPORT_CONVERTERS.keySet().forEach((ct) -> {
+      ConverterRegistry.getNotSyntheticConverterTypes().forEach((ct) -> {
         srcClassMappedTagClasses.computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
             .add(ct.getTargetClass());
         tagClassMappedSrcClasses.computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())

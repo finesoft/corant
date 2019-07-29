@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
@@ -29,6 +31,8 @@ import com.google.common.base.Objects;
  *
  */
 public class EventSelector implements Predicate<Event> {
+
+  static final Logger logger = Logger.getLogger(EventSelector.class);
 
   private Set<EventType> types = new HashSet<>();
 
@@ -44,16 +48,17 @@ public class EventSelector implements Predicate<Event> {
 
   public EventSelector(Scope scope) {
     if (scope != null) {
-      String[] typArr = scope.getArray("event.type");
+      String[] typArr = scope.getArray("event-type");
       if (typArr != null) {
         Arrays.stream(typArr).map(EventType::valueOf).forEach(types::add);
       }
-      realmId = scope.get("event.realmId");
-      clientId = scope.get("event.clientId");
-      userId = scope.get("event.userId");
-      sessionId = scope.get("event.sessionId");
-      ipAddress = scope.get("event.ipAddress");
+      realmId = scope.get("event-realmId");
+      clientId = scope.get("event-clientId");
+      userId = scope.get("event-userId");
+      sessionId = scope.get("event-sessionId");
+      ipAddress = scope.get("event-ipAddress");
     }
+    logger.infof("The event selector is %s", this);
   }
 
   @Override
@@ -78,6 +83,14 @@ public class EventSelector implements Predicate<Event> {
       forward &= Objects.equal(sessionId, t.getSessionId());
     }
     return forward;
+  }
+
+  @Override
+  public String toString() {
+    return "EventSelector [types=["
+        + String.join(",", types.stream().map(t -> t.name()).collect(Collectors.toList()))
+        + "], realmId=" + realmId + ", clientId=" + clientId + ", userId=" + userId + ", sessionId="
+        + sessionId + ", ipAddress=" + ipAddress + "]";
   }
 
 }

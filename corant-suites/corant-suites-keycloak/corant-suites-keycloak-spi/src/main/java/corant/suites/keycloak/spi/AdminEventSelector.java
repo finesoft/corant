@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.admin.AdminEvent;
 import com.google.common.base.Objects;
@@ -28,7 +29,7 @@ import com.google.common.base.Objects;
  *
  */
 public class AdminEventSelector implements Predicate<AdminEvent> {
-
+  static final Logger logger = Logger.getLogger(AdminEventSelector.class);
   private String realmId;
   private Set<String> types = new HashSet<>();
   private Set<String> resourcePaths = new HashSet<>();
@@ -39,16 +40,17 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
 
   public AdminEventSelector(Scope scope) {
     if (scope != null) {
-      String[] typArr = scope.getArray("adminEvent.type");
+      String[] typArr = scope.getArray("admin-event-type");
       if (typArr != null) {
         Arrays.stream(typArr).forEach(types::add);
       }
-      realmId = scope.get("adminEvent.realmId");
-      authDetailsClientId = scope.get("adminEvent.authdetails.clientId");
-      authDetailsUserId = scope.get("adminEvent.authdetails.userId");
-      authDetailsRealmId = scope.get("adminEvent.authdetails.realmId");
-      authDetailsIpAddress = scope.get("adminEvent.authdetails.ipAddress");
+      realmId = scope.get("admin-event-realmId");
+      authDetailsClientId = scope.get("admin-event-authdetails-clientId");
+      authDetailsUserId = scope.get("admin-event-authdetails-userId");
+      authDetailsRealmId = scope.get("admin-event-authdetails-realmId");
+      authDetailsIpAddress = scope.get("admin-event-authdetails-ipAddress");
     }
+    logger.infof("The admin event selector is %s", this);
   }
 
   @Override
@@ -80,6 +82,15 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
       forward &= resourcePaths.contains(t.getResourcePath());
     }
     return forward;
+  }
+
+  @Override
+  public String toString() {
+    return "AdminEventSelector [realmId=" + realmId + ", types=[" + String.join(",", types)
+        + "], resourcePaths=[" + String.join(",", resourcePaths) + "], authDetailsRealmId="
+        + authDetailsRealmId + ", authDetailsClientId=" + authDetailsClientId
+        + ", authDetailsUserId=" + authDetailsUserId + ", authDetailsIpAddress="
+        + authDetailsIpAddress + "]";
   }
 
 }

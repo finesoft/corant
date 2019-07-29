@@ -27,10 +27,11 @@ import org.keycloak.models.KeycloakSessionFactory;
  *
  */
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
-  static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
-  final String id = "corant-keycloak-event-listener";
+  static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProviderFactory.class);
+  static final String id = "corant-keycloak-event-listener";
   EventSelector eventSelector;
   AdminEventSelector adminEventSelector;
+  KeycloakJMSSender jmsSender;
 
   @Override
   public void close() {
@@ -39,9 +40,7 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
 
   @Override
   public EventListenerProvider create(KeycloakSession session) {
-    KeycloakEventListenerJMSProvider provider =
-        new KeycloakEventListenerJMSProvider(eventSelector, adminEventSelector);
-    return provider;
+    return new KeycloakEventListenerJMSProvider(eventSelector, adminEventSelector, jmsSender);
   }
 
   @Override
@@ -53,6 +52,7 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
   public void init(Scope config) {
     eventSelector = new EventSelector(config);
     adminEventSelector = new AdminEventSelector(config);
+    jmsSender = new KeycloakJMSSender(config);
     logger.infof("Initialize %s with id %s.", this.getClass().getName(), getId());
   }
 

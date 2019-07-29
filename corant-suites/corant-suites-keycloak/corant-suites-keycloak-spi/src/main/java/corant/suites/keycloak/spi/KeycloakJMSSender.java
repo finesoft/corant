@@ -22,6 +22,8 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import org.jboss.logging.Logger;
+import org.keycloak.Config.Scope;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -33,24 +35,28 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class KeycloakJMSSender {
 
-  private static final String MESSAGE_TYPE = "messageType";
-  private static final String KEYCLOAK_EVENT = "keycloakEvent";
-  private static final String JMS_CONNECTION_FACTORY_JNDI_NAME =
-      "java:jboss/exported/jms/remoteArtemis";
-  private static final String EVENT_DESTINATION_JNDI_NAME =
-      "java:jboss/exported/jms/topic/KeycloakEventTopic";
+  static final Logger logger = Logger.getLogger(EventSelector.class);
+  static final String MESSAGE_TYPE = "messageType";
+  static final String KEYCLOAK_EVENT = "keycloakEvent";
+  static final String JMS_CONN_FACTORY_JNDI_NAME = "java:jboss/exported/jms/remoteArtemis";
+  static final String JMS_DEST_JNDI_NAME = "java:jboss/exported/jms/queue/KeycloakEventQueue";
+
   private final Destination destination;
   private final ConnectionFactory connectionFactory;
   private final ObjectMapper objectMapper;
 
-  public KeycloakJMSSender() {
+  public KeycloakJMSSender(Scope config) {
     try {
+      String cf = config.get("jms-connecionFactory-jndi-name", JMS_CONN_FACTORY_JNDI_NAME);
+      String dt = config.get("jms-destination-name", JMS_DEST_JNDI_NAME);
+      logger.infof("The jms cf jndi name is %s", cf);
+      logger.infof("The jms dest jndi name is %s", dt);
+      Context ctx = new InitialContext();
+      connectionFactory = (ConnectionFactory) ctx.lookup(cf);
+      destination = (Destination) ctx.lookup(dt);
       objectMapper = new ObjectMapper();
       objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
       objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      Context ctx = new InitialContext();
-      destination = (Destination) ctx.lookup(EVENT_DESTINATION_JNDI_NAME);
-      connectionFactory = (ConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI_NAME);
     } catch (NamingException e) {
       throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
     }

@@ -32,10 +32,10 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
   final KeycloakJMSSender jmsSender;
 
   public KeycloakEventListenerJMSProvider(EventSelector eventSelector,
-      AdminEventSelector adminEventSelector) {
+      AdminEventSelector adminEventSelector, KeycloakJMSSender jmsSender) {
     this.eventSelector = eventSelector;
     this.adminEventSelector = adminEventSelector;
-    jmsSender = new KeycloakJMSSender();
+    this.jmsSender = jmsSender;
   }
 
   @Override

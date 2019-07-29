@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-suites-security-keycloak
+ * corant-suites-keycloak-spi
  * 
- * @author bingo 下午7:40:02
+ * @author bingo 上午11:05:37
  *
  */
-package org.corant.suites.security.keycloak;
+package corant.suites.keycloak.spi;

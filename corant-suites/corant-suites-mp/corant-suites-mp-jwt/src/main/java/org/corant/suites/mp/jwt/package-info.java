@@ -13,7 +13,9 @@
  */
 /**
  * corant-suites-mp-jwt
- * 
+ *
+ * All of those implementions are base on SmallRyeJWT
+ *
  * @author bingo 下午7:35:49
  *
  */

@@ -11,22 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.keycloak;
-
-import java.util.Set;
-import javax.ws.rs.core.SecurityContext;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-
 /**
- * corant-suites-security-keycloak
- *
- * @author bingo 上午10:50:35
+ * corant-suites-keycloak-client
+ * 
+ * @author bingo 上午11:32:20
  *
  */
-public interface KeycloakJaxrsSecurityContextResolver {
-
-  SecurityContext resolve(KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal,
-      boolean isSecure, String authenticationScheme, Set<String> roles);
-
-}
+package org.corant.suites.keycloak.client;

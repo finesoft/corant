@@ -14,6 +14,7 @@
 package corant.suites.keycloak.spi;
 
 import org.jboss.logging.Logger;
+import org.keycloak.Config;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -28,7 +29,7 @@ import org.keycloak.models.KeycloakSessionFactory;
  */
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProviderFactory.class);
-  static final String id = "corant-keycloak-event-listener";
+  static final String id = "corantKeycloakEventListener";
   EventSelector eventSelector;
   AdminEventSelector adminEventSelector;
   KeycloakJMSSender jmsSender;
@@ -50,9 +51,10 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
 
   @Override
   public void init(Scope config) {
-    eventSelector = new EventSelector(config);
-    adminEventSelector = new AdminEventSelector(config);
-    jmsSender = new KeycloakJMSSender(config);
+    Scope s = Config.scope("eventListener", id);
+    eventSelector = new EventSelector(s);
+    adminEventSelector = new AdminEventSelector(s);
+    jmsSender = new KeycloakJMSSender(s);
     logger.infof("Initialize %s with id %s.", this.getClass().getName(), getId());
   }
 

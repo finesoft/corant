@@ -48,9 +48,9 @@ public class EventSelector implements Predicate<Event> {
 
   public EventSelector(Scope scope) {
     if (scope != null) {
-      String[] typArr = scope.getArray("event-type");
-      if (typArr != null) {
-        Arrays.stream(typArr).map(EventType::valueOf).forEach(types::add);
+      String ts = scope.get("event-types");
+      if (ts != null) {
+        Arrays.stream(ts.split(",")).map(EventType::valueOf).forEach(types::add);
       }
       realmId = scope.get("event-realmId");
       clientId = scope.get("event-clientId");

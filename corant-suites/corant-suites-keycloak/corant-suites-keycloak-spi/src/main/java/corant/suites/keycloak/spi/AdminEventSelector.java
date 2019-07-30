@@ -40,9 +40,9 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
 
   public AdminEventSelector(Scope scope) {
     if (scope != null) {
-      String[] typArr = scope.getArray("admin-event-type");
-      if (typArr != null) {
-        Arrays.stream(typArr).forEach(types::add);
+      String ts = scope.get("admin-event-types");
+      if (ts != null) {
+        Arrays.stream(ts.split(",")).forEach(types::add);
       }
       realmId = scope.get("admin-event-realmId");
       authDetailsClientId = scope.get("admin-event-authdetails-clientId");

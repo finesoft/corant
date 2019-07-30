@@ -13,19 +13,29 @@
  */
 package org.corant.shared.conversion;
 
-import org.corant.shared.conversion.converter.IdentityConverter;
-
-import java.util.*;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.min;
+import static org.corant.shared.util.ObjectUtils.optional;
+import static org.corant.shared.util.StreamUtils.streamOf;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.*;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import org.corant.shared.conversion.converter.IdentityConverter;
 
 /**
  * corant-shared
@@ -48,8 +58,8 @@ public class Converters {
 
   private static final Logger LOGGER = Logger.getLogger(Converters.class.getName());
 
-  public static <S, T> Optional<Converter<S, T>> lookup(
-      Class<S> sourceClass, Class<T> targetClass, int maxNestingDepth) {
+  public static <S, T> Optional<Converter<S, T>> lookup(Class<S> sourceClass, Class<T> targetClass,
+      int maxNestingDepth) {
     if (targetClass.isAssignableFrom(sourceClass)) {
       return optional((Converter<S, T>) IdentityConverter.INSTANCE);
     } else if (ConverterRegistry.isSupportType(sourceClass, targetClass)) {
@@ -61,15 +71,11 @@ public class Converters {
       Set<ConverterType<?, ?>> pipeConverterTypes = new LinkedHashSet<>();
       if (converter == null) {
         // indirect
-        converter =
-            getMatchedConverter(
-                sourceClass, targetClass, maxNestingDepth, pipeConverterTypes::addAll);
+        converter = getMatchedConverterx(sourceClass, targetClass, /* maxNestingDepth, */
+            pipeConverterTypes::addAll);
       }
       if (converter != null) {
-        ConverterRegistry.register(
-            sourceClass,
-            targetClass,
-            (Converter<S, T>) converter,
+        ConverterRegistry.register(sourceClass, targetClass, (Converter<S, T>) converter,
             pipeConverterTypes.toArray(new ConverterType[pipeConverterTypes.size()]));
         return optional(forceCast(converter));
       } else {
@@ -81,17 +87,12 @@ public class Converters {
 
   static synchronized Converter getMatchedConverter(Class<?> sourceClass, Class<?> targetClass) {
     return streamOf(ConverterRegistry.getConverters())
-        .filter(e -> match(e.getKey(), sourceClass, targetClass))
-        .map(Entry::getValue)
-        .findFirst()
+        .filter(e -> match(e.getKey(), sourceClass, targetClass)).map(Entry::getValue).findFirst()
         .orElse(getMatchedConverterFromFactory(sourceClass, targetClass));
   }
 
-  static <S, T> Converter<S, T> getMatchedConverter(
-      Class<S> sourceClass,
-      Class<T> targetClass,
-      int maxNestingDepth,
-      Consumer<Set<ConverterType<?, ?>>> consumer) {
+  static <S, T> Converter<S, T> getMatchedConverter(Class<S> sourceClass, Class<T> targetClass,
+      int maxNestingDepth, Consumer<Set<ConverterType<?, ?>>> consumer) {
     // Only original converter type to compose
     Set<ConverterType<?, ?>> converterTypes = ConverterRegistry.getNotSyntheticConverterTypes();
     Queue<ConverterPipe> candidatedPipes = new LinkedList<>();
@@ -104,28 +105,19 @@ public class Converters {
       }
       loop(converterTypes, sourceClass, candidatedPipes, matchedPipes, maxNestingDepth);
       ConverterPipe matchedPipe =
-          matchedPipes.stream()
-              .map(cp -> cp.complete(ConverterRegistry.getConverters()::get))
+          matchedPipes.stream().map(cp -> cp.complete(ConverterRegistry.getConverters()::get))
               .sorted((cp1, cp2) -> Integer.compare(cp1.getMatchedScore(), cp2.getMatchedScore()))
-              .findFirst()
-              .orElse(null);
+              .findFirst().orElse(null);
       if (matchedPipe != null) {
         Converter converter = IdentityConverter.INSTANCE;
         while (!matchedPipe.getConverters().isEmpty()) {
           converter = converter.compose(matchedPipe.getConverters().remove(0));
         }
         consumer.accept(matchedPipe.getStack());
-        LOGGER.fine(
-            () ->
-                String.format(
-                    "Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
-                    sourceClass,
-                    targetClass,
-                    String.join(
-                        "->",
-                        matchedPipe.getStack().stream()
-                            .map(ct -> ct.toString())
-                            .toArray(String[]::new))));
+        LOGGER.fine(() -> String.format(
+            "Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
+            sourceClass, targetClass, String.join("->",
+                matchedPipe.getStack().stream().map(ct -> ct.toString()).toArray(String[]::new))));
         return converter;
       }
     }
@@ -133,11 +125,9 @@ public class Converters {
   }
 
   static Converter getMatchedConverterFromFactory(Class<?> sourceClass, Class<?> targetClass) {
-    ConverterFactory factory =
-        ConverterRegistry.getConverterFactories().values().stream()
-            .filter(f -> f.isSupportSourceClass(sourceClass) && f.isSupportTargetClass(targetClass))
-            .findFirst()
-            .orElse(null);
+    ConverterFactory factory = ConverterRegistry.getConverterFactories().values().stream()
+        .filter(f -> f.isSupportSourceClass(sourceClass) && f.isSupportTargetClass(targetClass))
+        .findFirst().orElse(null);
 
     if (factory != null) {
       // FIXME initialize parameter
@@ -147,11 +137,13 @@ public class Converters {
     }
   }
 
-  static <S, T> Converter<S, T> getMatchedConverterx(
-      Class<S> sourceClass, Class<T> targetClass, Consumer<Set<ConverterType<?, ?>>> consumer) {
+  static <S, T> Converter<S, T> getMatchedConverterx(Class<S> sourceClass, Class<T> targetClass,
+      Consumer<Set<ConverterType<?, ?>>> consumer) {
     Stack<Class<?>> convertibleClasses =
         ConverterHunt.getConvertibleClasses(sourceClass, targetClass);
-    if (convertibleClasses == null || convertibleClasses.size() <= 0) return null;
+    if (convertibleClasses == null || convertibleClasses.size() <= 0) {
+      return null;
+    }
     Stack<Converter> converters = ConverterHunt.transformConverterStack(convertibleClasses);
     Set<ConverterType<?, ?>> converterTypes =
         ConverterHunt.transformConverterTypeSet(convertibleClasses);
@@ -160,24 +152,15 @@ public class Converters {
       converter = converter.compose(converters.pop());
     }
     consumer.accept(converterTypes);
-    LOGGER.fine(
-        () ->
-            String.format(
-                "Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
-                sourceClass,
-                targetClass,
-                String.join(
-                    "->",
-                    converterTypes.stream().map(ct -> ct.toString()).toArray(String[]::new))));
+    LOGGER.fine(() -> String.format(
+        "Can not find the direct converter for %s -> %s, use converter pipe [%s] !", sourceClass,
+        targetClass, String.join("->",
+            converterTypes.stream().map(ct -> ct.toString()).toArray(String[]::new))));
     return converter;
   }
 
-  static void loop(
-      Set<ConverterType<?, ?>> converterTypes,
-      Class<?> src,
-      Queue<ConverterPipe> pipes,
-      Queue<ConverterPipe> matchedPipes,
-      int nestingDepth) {
+  static void loop(Set<ConverterType<?, ?>> converterTypes, Class<?> src,
+      Queue<ConverterPipe> pipes, Queue<ConverterPipe> matchedPipes, int nestingDepth) {
     ConverterPipe pipe = null;
     int maxNestingDepth = nestingDepth;
     while ((pipe = pipes.poll()) != null) {
@@ -225,57 +208,43 @@ public class Converters {
     return a.isAssignableFrom(b);
   }
 
-  static boolean match(
-      ConverterType<?, ?> converterType, Class<?> sourceClass, Class<?> targetClass) {
+  static boolean match(ConverterType<?, ?> converterType, Class<?> sourceClass,
+      Class<?> targetClass) {
     return targetClass.isAssignableFrom(converterType.getTargetClass())
         && converterType.getSourceClass().isAssignableFrom(sourceClass);
   }
 
   static boolean quickMatch(Set<ConverterType<?, ?>> converterTypes, Class<?> src, Class<?> tag) {
-    return converterTypes.stream()
-            .map(ConverterType::getSourceClass)
-            .anyMatch(supportSourceClass -> match(supportSourceClass, src))
-        && converterTypes.stream()
-            .map(ConverterType::getTargetClass)
+    return converterTypes.stream().map(ConverterType::getSourceClass)
+        .anyMatch(supportSourceClass -> match(supportSourceClass, src))
+        && converterTypes.stream().map(ConverterType::getTargetClass)
             .anyMatch(supportTargetClass -> match(tag, supportTargetClass));
   }
 
   public static class ConverterHunt {
 
-    public static Stack<Class<?>> getConvertibleClasses(
-        Class<?> sourceClass, Class<?> targetClass) {
+    public static Stack<Class<?>> getConvertibleClasses(Class<?> sourceClass,
+        Class<?> targetClass) {
       Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses = new HashMap<>();
       Map<Class<?>, Set<Class<?>>> tagClassMappedSrcClasses = new HashMap<>();
-      ConverterRegistry.getNotSyntheticConverterTypes()
-          .forEach(
-              (ct) -> {
-                srcClassMappedTagClasses
-                    .computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
-                    .add(ct.getTargetClass());
-                tagClassMappedSrcClasses
-                    .computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())
-                    .add(ct.getSourceClass());
-              });
+      ConverterRegistry.getNotSyntheticConverterTypes().forEach((ct) -> {
+        srcClassMappedTagClasses.computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
+            .add(ct.getTargetClass());
+        tagClassMappedSrcClasses.computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())
+            .add(ct.getSourceClass());
+      });
 
-      List<Class<?>> srcMatchedList =
-          srcClassMappedTagClasses.keySet().stream()
-              .filter(src -> match(src, sourceClass))
-              .collect(Collectors.toList());
-      List<Class<?>> tagMatchedList =
-          tagClassMappedSrcClasses.keySet().stream()
-              .filter(tag -> match(targetClass, tag))
-              .collect(Collectors.toList());
+      List<Class<?>> srcMatchedList = srcClassMappedTagClasses.keySet().stream()
+          .filter(src -> match(src, sourceClass)).collect(Collectors.toList());
+      List<Class<?>> tagMatchedList = tagClassMappedSrcClasses.keySet().stream()
+          .filter(tag -> match(targetClass, tag)).collect(Collectors.toList());
       for (Class<?> tagCls : tagMatchedList) {
         Set<Class<?>> endClassesCanConvertTargetClass = tagClassMappedSrcClasses.get(tagCls);
         for (Class<?> srcCls : srcMatchedList) {
           Set<Class<?>> classesCanBeConvertedBySrcClass = srcClassMappedTagClasses.get(srcCls);
           for (Class<?> canBeConvertedBySrcClass : classesCanBeConvertedBySrcClass) {
-            Stack classesPipe =
-                searchMatchedClass(
-                    srcClassMappedTagClasses,
-                    canBeConvertedBySrcClass,
-                    endClassesCanConvertTargetClass,
-                    new Stack());
+            Stack classesPipe = searchMatchedClass(srcClassMappedTagClasses,
+                canBeConvertedBySrcClass, endClassesCanConvertTargetClass, new Stack());
             if (classesPipe.size() > 0) {
               Stack<Class<?>> stack = new Stack();
               stack.push(srcCls);
@@ -289,34 +258,8 @@ public class Converters {
       return null;
     }
 
-    static Stack<Converter> transformConverterStack(Stack<Class<?>> stack) {
-      if (stack == null || stack.size() == 0) return null;
-      Stack<Converter> converters = new Stack();
-      for (int i = 1; i <= stack.size() - 1; i++) {
-        Class<?> tag = stack.get(i);
-        Class<?> src = stack.get(i - 1);
-        Converter converter = getMatchedConverter(src, tag);
-        converters.push(converter);
-      }
-      return converters;
-    }
-
-    static Set<ConverterType<?, ?>> transformConverterTypeSet(Stack<Class<?>> stack) {
-      if (stack == null || stack.size() == 0) return null;
-      Set<ConverterType<?, ?>> converters = new LinkedHashSet();
-      for (int i = stack.size() - 1; i > 0; i--) {
-        Class<?> tag = stack.get(i);
-        Class<?> src = stack.get(i - 1);
-        ConverterType<?, ?> converterType = ConverterType.of(src, tag);
-        converters.add(converterType);
-      }
-      return converters;
-    }
-
-    static Stack searchMatchedClass(
-        Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses,
-        Class<?> classCanBeConvertedBySrcClass,
-        Set<Class<?>> endClassesSetCanConvertTargetClass,
+    static Stack searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses,
+        Class<?> classCanBeConvertedBySrcClass, Set<Class<?>> endClassesSetCanConvertTargetClass,
         Stack stack) {
       Stack classSurvival = new Stack();
       classSurvival.addAll(stack);
@@ -335,12 +278,8 @@ public class Converters {
           Stack childSurvivalStack = new Stack<>();
           boolean childFound = false;
           for (Class<?> child : children) {
-            childSurvivalStack =
-                searchMatchedClass(
-                    srcClassMappedTagClasses,
-                    child,
-                    endClassesSetCanConvertTargetClass,
-                    classSurvival);
+            childSurvivalStack = searchMatchedClass(srcClassMappedTagClasses, child,
+                endClassesSetCanConvertTargetClass, classSurvival);
             if (childSurvivalStack.size() > classSurvival.size()) {
               childFound = true;
               break;
@@ -354,6 +293,34 @@ public class Converters {
         }
         return classSurvival;
       }
+    }
+
+    static Stack<Converter> transformConverterStack(Stack<Class<?>> stack) {
+      if (stack == null || stack.size() == 0) {
+        return null;
+      }
+      Stack<Converter> converters = new Stack();
+      for (int i = 1; i <= stack.size() - 1; i++) {
+        Class<?> tag = stack.get(i);
+        Class<?> src = stack.get(i - 1);
+        Converter converter = getMatchedConverter(src, tag);
+        converters.push(converter);
+      }
+      return converters;
+    }
+
+    static Set<ConverterType<?, ?>> transformConverterTypeSet(Stack<Class<?>> stack) {
+      if (stack == null || stack.size() == 0) {
+        return null;
+      }
+      Set<ConverterType<?, ?>> converters = new LinkedHashSet();
+      for (int i = stack.size() - 1; i > 0; i--) {
+        Class<?> tag = stack.get(i);
+        Class<?> src = stack.get(i - 1);
+        ConverterType<?, ?> converterType = ConverterType.of(src, tag);
+        converters.add(converterType);
+      }
+      return converters;
     }
   }
 

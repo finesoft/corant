@@ -13,11 +13,10 @@
  */
 package corant.suites.keycloak.spi;
 
-import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,41 +37,60 @@ public class KeycloakJMSSender {
   static final Logger logger = Logger.getLogger(EventSelector.class);
   static final String MESSAGE_TYPE = "messageType";
   static final String KEYCLOAK_EVENT = "keycloakEvent";
-  static final String JMS_CONN_FACTORY_JNDI_NAME = "java:jboss/exported/jms/remoteArtemis";
+  static final String JMS_CONN_FACTORY_JNDI_NAME = "java:jboss/exported/jms/RemoteArtemis";
   static final String JMS_DEST_JNDI_NAME = "java:jboss/exported/jms/queue/KeycloakEventQueue";
 
-  private final Destination destination;
-  private final ConnectionFactory connectionFactory;
+  private final Scope config;
   private final ObjectMapper objectMapper;
+  private final String jmsUser;
+  private final String jmsPassword;
+  private volatile boolean initialized = false;
+  private volatile Destination destination;
+  private volatile ConnectionFactory connectionFactory;
 
   public KeycloakJMSSender(Scope config) {
-    try {
-      String cf = config.get("jms-connecionFactory-jndi-name", JMS_CONN_FACTORY_JNDI_NAME);
-      String dt = config.get("jms-destination-name", JMS_DEST_JNDI_NAME);
-      logger.infof("The jms cf jndi name is %s", cf);
-      logger.infof("The jms dest jndi name is %s", dt);
-      Context ctx = new InitialContext();
-      connectionFactory = (ConnectionFactory) ctx.lookup(cf);
-      destination = (Destination) ctx.lookup(dt);
-      objectMapper = new ObjectMapper();
-      objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-      objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    } catch (NamingException e) {
-      throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
+    this.config = config;
+    objectMapper = new ObjectMapper();
+    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    jmsUser = config.get("jms-user");
+    jmsPassword = config.get("jms-password");
+  }
+
+  void send(Object event) {
+    if (!initialize() || event == null) {
+      return;
+    }
+    try (JMSContext ctx = connectionFactory.createContext(jmsUser, jmsPassword)) {
+      String text = objectMapper.writeValueAsString(event);
+      JMSProducer jp = ctx.createProducer();
+      TextMessage textMessage = ctx.createTextMessage(text);
+      textMessage.setStringProperty(MESSAGE_TYPE, KEYCLOAK_EVENT);
+      jp.send(destination, textMessage);
+      logger.debugf("Sent keycloak event %s", text);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
-  void send(Object event) throws Exception {
-    if (connectionFactory == null || destination == null || event == null) {
-      return;
+  private boolean initialize() {
+    if (!initialized) {
+      synchronized (this) {
+        if (!initialized) {
+          try {
+            String cf = config.get("jms-connecionFactory-jndi-name", JMS_CONN_FACTORY_JNDI_NAME);
+            String dt = config.get("jms-destination-name", JMS_DEST_JNDI_NAME);
+            Context ctx = new InitialContext();
+            connectionFactory = (ConnectionFactory) ctx.lookup(cf);
+            destination = (Destination) ctx.lookup(dt);
+            initialized = true;
+            logger.infof("Initialize keycloak event message sender %s : %s", cf, dt);
+          } catch (NamingException e) {
+            throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
+          }
+        }
+      }
     }
-    try (Connection connection = connectionFactory.createConnection();
-        Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
-        MessageProducer messageProducer = session.createProducer(destination)) {
-      String text = objectMapper.writeValueAsString(event);
-      TextMessage textMessage = session.createTextMessage(text);
-      textMessage.setStringProperty(MESSAGE_TYPE, KEYCLOAK_EVENT);
-      messageProducer.send(textMessage);
-    }
+    return initialized;
   }
 }

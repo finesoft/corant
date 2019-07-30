@@ -103,7 +103,6 @@ public class Converters {
         }
       }
       loop(converterTypes, sourceClass, candidatedPipes, matchedPipes, maxNestingDepth);
-      System.out.println("matchedPipes = " + matchedPipes);
       ConverterPipe matchedPipe =
           matchedPipes.stream()
               .map(cp -> cp.complete(ConverterRegistry.getConverters()::get))
@@ -112,8 +111,6 @@ public class Converters {
               .orElse(null);
       if (matchedPipe != null) {
         Converter converter = IdentityConverter.INSTANCE;
-        Set<ConverterType<?, ?>> matchedPipeStack = matchedPipe.getStack();
-        System.out.println("matchedPipeStack = " + matchedPipeStack);
         while (!matchedPipe.getConverters().isEmpty()) {
           converter = converter.compose(matchedPipe.getConverters().remove(0));
         }

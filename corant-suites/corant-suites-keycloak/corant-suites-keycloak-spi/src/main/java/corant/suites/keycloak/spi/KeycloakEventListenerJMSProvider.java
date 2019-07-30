@@ -45,8 +45,8 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   @Override
   public void onEvent(AdminEvent event, boolean includeRepresentation) {
-    logger.infof("Resend admin event to jms!");
-    if (!adminEventSelector.test(event) && jmsSender != null) {
+    logger.debugf("Resend admin event to jms!");
+    if (!adminEventSelector.test(event) && jmsSender == null) {
       return;
     }
     try {
@@ -58,8 +58,8 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   @Override
   public void onEvent(Event event) {
-    logger.infof("Resend event to jms!");
-    if (!eventSelector.test(event) && jmsSender != null) {
+    logger.debugf("Resend event to jms!");
+    if (!eventSelector.test(event) && jmsSender == null) {
       return;
     }
     try {

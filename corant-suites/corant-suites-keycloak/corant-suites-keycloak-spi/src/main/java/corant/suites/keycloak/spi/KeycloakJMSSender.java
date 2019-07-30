@@ -61,6 +61,7 @@ public class KeycloakJMSSender {
     if (!initialize() || event == null) {
       return;
     }
+    logger.debugf("Prepare send keycloak event.");
     try (JMSContext ctx = connectionFactory.createContext(jmsUser, jmsPassword)) {
       String text = objectMapper.writeValueAsString(event);
       JMSProducer jp = ctx.createProducer();

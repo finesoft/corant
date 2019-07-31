@@ -14,6 +14,7 @@
 package org.corant.asosat.ddd.domain.model;
 
 import static org.corant.kernel.util.Preconditions.requireNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.suites.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.suites.bundle.GlobalMessageCodes.ERR_SYS;
 import java.io.IOException;
@@ -123,6 +124,11 @@ public abstract class AbstractAggregationReference<T extends AbstractGenericAggr
 
   public Optional<T> optional() {
     return Optional.ofNullable(this.retrieve());
+  }
+
+  @SuppressWarnings("unchecked")
+  public T refresh() {
+    return forceCast(of(getId(), getClass()).retrieve());
   }
 
   @Override

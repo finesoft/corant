@@ -13,12 +13,13 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManager;
@@ -64,26 +65,24 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  final Map<Lifecycle, Set<AggregationIdentifier>> registration = new EnumMap<>(Lifecycle.class);
+  final Map<AggregationIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
+  final Set<AggregationIdentifier> aggregations = new LinkedHashSet<>();
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager);
     this.transaction = transaction;
-    Arrays.stream(Lifecycle.values()).forEach(e -> registration.put(e, new LinkedHashSet<>()));
     logger.fine(() -> String.format(LOG_BEGIN_UOW_FMT, transaction.toString()));
   }
 
   @Override
   public void afterCompletion(int status) {
     final boolean success = status == Status.STATUS_COMMITTED;
-    final Map<Lifecycle, Set<AggregationIdentifier>> registers = new EnumMap<>(Lifecycle.class);
     try {
       complete(success);
-      registers.putAll(getRegisters());
     } finally {
       clear();
       logger.fine(() -> String.format(LOG_END_UOW_FMT, transaction.toString()));
-      handlePostCompleted(registers, success);
+      handlePostCompleted(new LinkedHashMap<>(registrations), success);
     }
   }
 
@@ -91,12 +90,28 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   public void beforeCompletion() {
     handlePreComplete();
     logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
+    // flush to dump dirty
     entityManagers.values().forEach(EntityManager::flush);
-    registration.forEach((k, v) -> {
-      if (k == Lifecycle.ENABLED || k == Lifecycle.DESTROYED) {
-        v.forEach(ai -> Corant.fireEvent(new AggregationLifecycleEvent(ai, k)));
+    int cycles = 128;
+    while (!aggregations.isEmpty()) {
+      List<AggregationIdentifier> caches = new ArrayList<>(aggregations);
+      aggregations.clear();
+      boolean influence = false;
+      for (AggregationIdentifier ai : caches) {
+        Lifecycle v = registrations.get(ai);
+        if (v == Lifecycle.ENABLED || v == Lifecycle.DESTROYED) {
+          Corant.fireEvent(new AggregationLifecycleEvent(ai, v));
+          influence = true;
+        }
       }
-    });
+      if (influence) {
+        // flush again to find dirty
+        entityManagers.values().forEach(EntityManager::flush);
+      }
+      if (--cycles < 0) {
+        throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
+      }
+    }
     handleMessage();
   }
 
@@ -107,7 +122,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         Aggregation aggregation = (Aggregation) obj;
         if (aggregation.getId() != null) {
           AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
-          registration.values().forEach(v -> v.remove(ai));
+          registrations.remove(ai);
+          aggregations.remove(ai);
           messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
@@ -129,12 +145,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public Map<Lifecycle, Set<AggregationIdentifier>> getRegisters() {
-    Map<Lifecycle, Set<AggregationIdentifier>> clone = new EnumMap<>(Lifecycle.class);
-    registration.forEach((k, v) -> {
-      clone.put(k, Collections.unmodifiableSet(new LinkedHashSet<>(v)));
-    });
-    return Collections.unmodifiableMap(clone);
+  public Map<AggregationIdentifier, Lifecycle> getRegisters() {
+    return Collections.unmodifiableMap(registrations);
   }
 
   public boolean isInTransaction() {
@@ -159,14 +171,12 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         Aggregation aggregation = (Aggregation) obj;
         if (aggregation.getId() != null) {
           AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
-          registration.forEach((k, v) -> {
-            if (k != aggregation.getLifecycle()) {
-              v.remove(ai);
-            }
-          });
-          registration.get(aggregation.getLifecycle()).add(ai);
-          aggregation.extractMessages(true)
-              .forEach(message -> MessageUtils.mergeToQueue(messages, message));
+          Lifecycle al = aggregation.getLifecycle();
+          registrations.put(ai, al);
+          aggregations.add(ai);
+          for (Message message : aggregation.extractMessages(true)) {
+            MessageUtils.mergeToQueue(messages, message);
+          }
         }
       } else if (obj instanceof Message) {
         MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
@@ -189,7 +199,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           em.close();
         }
       });
-      registration.clear();
+      registrations.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
     }
@@ -204,13 +214,13 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     logger.fine(() -> String.format(LOG_HDL_MSG_FMT, transaction.toString()));
     LinkedList<Message> messages = new LinkedList<>();
     extractMessages(messages);
-    int safeExtracts = 128;
+    int cycles = 128;
     while (!messages.isEmpty()) {
       Message msg = messages.pop();
       messageStorage.apply(msg);
       sagaService.trigger(msg);// FIXME Is it right to do so?
       messageDispatcher.accept(new Message[] {msg});
-      if (extractMessages(messages) && --safeExtracts < 0) {
+      if (extractMessages(messages) && --cycles < 0) {
         throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
       }
     }

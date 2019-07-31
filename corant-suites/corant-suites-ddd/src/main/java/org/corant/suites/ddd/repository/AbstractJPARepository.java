@@ -16,6 +16,7 @@ package org.corant.suites.ddd.repository;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
@@ -35,6 +37,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
+import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregation;
 import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
@@ -206,6 +209,15 @@ public abstract class AbstractJPARepository implements JPARepository {
       return true;
     }
     return false;
+  }
+
+  public <T extends Entity> List<T> select(Class<T> entityClass, Serializable... ids) {
+    if (isEmpty(ids)) {
+      return new ArrayList<>();
+    } else {
+      return linkedHashSetOf(ids).stream().map(i -> get(entityClass, i))
+          .filter(ObjectUtils::isNotNull).collect(Collectors.toList());
+    }
   }
 
   @SuppressWarnings("unchecked")

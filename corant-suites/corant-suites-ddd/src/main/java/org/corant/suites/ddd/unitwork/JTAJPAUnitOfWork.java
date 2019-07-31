@@ -67,6 +67,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   final Map<AggregationIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
   final Set<AggregationIdentifier> aggregations = new LinkedHashSet<>();
+  final LinkedList<Message> messages = new LinkedList<>();
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager);
@@ -144,6 +145,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     return transaction;
   }
 
+  public List<Message> getMessages() {
+    return Collections.unmodifiableList(messages);
+  }
+
   @Override
   public Map<AggregationIdentifier, Lifecycle> getRegisters() {
     return Collections.unmodifiableMap(registrations);
@@ -191,7 +196,6 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     return transaction.toString();
   }
 
-  @Override
   protected void clear() {
     try {
       entityManagers.values().forEach(em -> {
@@ -202,6 +206,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       registrations.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
+      messages.clear();
     }
   }
 

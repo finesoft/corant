@@ -150,7 +150,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public Map<AggregationIdentifier, Lifecycle> getRegisters() {
+  public Map<AggregationIdentifier, Lifecycle> getRegistrations() {
     return Collections.unmodifiableMap(registrations);
   }
 
@@ -204,9 +204,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         }
       });
       registrations.clear();
+      messages.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
-      messages.clear();
     }
   }
 

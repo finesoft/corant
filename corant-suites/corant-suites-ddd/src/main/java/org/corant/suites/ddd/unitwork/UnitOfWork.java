@@ -43,7 +43,7 @@ public interface UnitOfWork {
   /**
    * The registers in this unit of works
    */
-  Object getRegisters();
+  Object getRegistrations();
 
   /**
    * Register an object to this unit of works

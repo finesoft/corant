@@ -90,6 +90,11 @@ public class JsonUtils {
     return copy;
   }
 
+  public static ObjectMapper copyMapperForRpc() {
+    return copyMapper();
+  }
+
+
   /**
    * Convert bytes to object
    *

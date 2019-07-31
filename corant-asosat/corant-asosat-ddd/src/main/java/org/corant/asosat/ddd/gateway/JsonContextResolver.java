@@ -22,35 +22,39 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+
 import org.corant.suites.json.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-asosat-ddd
- *
  * @author bingo 下午4:49:32
- *
  */
 @ApplicationScoped
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
 public class JsonContextResolver implements ContextResolver<ObjectMapper> {
 
-  private final ObjectMapper objectMapper = JsonUtils.copyMapperForJs();
+    private final ObjectMapper objectMapperJs = JsonUtils.copyMapperForJs();
 
-  @Inject
-  @Any
-  Instance<JsonContextResolverConfigurator> configurator;
+    private final ObjectMapper objectMapperRpc = JsonUtils.copyMapperForRpc();
 
-  @Override
-  public ObjectMapper getContext(Class<?> objectType) {
-    return objectMapper;
-  }
+    @Inject
+    @Any
+    Instance<JsonContextResolverConfigurator> configurator;
 
-  @PostConstruct
-  void onPostConstruct() {
-    if (!configurator.isUnsatisfied()) {
-      configurator.forEach(cfg -> cfg.config(objectMapper));
+    @Override
+    public ObjectMapper getContext(Class<?> objectType) {
+        if (objectType.getName().endsWith("DTO")) {//FIXME DON 临时判断
+            return objectMapperRpc;
+        }
+        return objectMapperJs;
     }
-  }
+
+    @PostConstruct
+    void onPostConstruct() {
+        if (!configurator.isUnsatisfied()) {
+            configurator.forEach(cfg -> cfg.config(objectMapperJs));
+        }
+    }
 }

@@ -86,7 +86,7 @@ public abstract class AbstractReferenceDataAggregation<P, T extends AbstractRefe
   }
 
   @Override
-  public void destroy(P param, DestroyHandler<P, T> handler) {
+  public void disable(P param, DisablingHandler<P, T> handler) {
     throw new NotSupportedException();
   }
 

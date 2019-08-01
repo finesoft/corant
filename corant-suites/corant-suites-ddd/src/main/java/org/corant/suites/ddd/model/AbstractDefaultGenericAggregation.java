@@ -16,7 +16,6 @@ package org.corant.suites.ddd.model;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.persistence.MappedSuperclass;
-import org.corant.suites.ddd.model.Aggregation.Destroyable;
 import org.corant.suites.ddd.model.Aggregation.Enabling;
 
 /**
@@ -25,7 +24,7 @@ import org.corant.suites.ddd.model.Aggregation.Enabling;
  */
 @MappedSuperclass
 public abstract class AbstractDefaultGenericAggregation<P, T extends AbstractDefaultAggregation>
-    extends AbstractDefaultAggregation implements Enabling<P, T>, Destroyable<P, T> {
+    extends AbstractDefaultAggregation implements Enabling<P, T> {
 
   private static final long serialVersionUID = 3815839476729207935L;
 
@@ -52,11 +51,11 @@ public abstract class AbstractDefaultGenericAggregation<P, T extends AbstractDef
 
   @SuppressWarnings("unchecked")
   @Override
-  public void destroy(P param, DestroyHandler<P, T> handler) {
+  public void disable(P param, DisablingHandler<P, T> handler) {
     if (handler != null) {
-      handler.preDestroy(param, (T) this);
+      handler.preDisable(param, (T) this);
     }
-    this.destroy(false);
+    this.disable(false);
   }
 
   @SuppressWarnings("unchecked")

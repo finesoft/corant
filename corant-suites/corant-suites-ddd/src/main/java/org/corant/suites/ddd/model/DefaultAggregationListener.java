@@ -38,13 +38,13 @@ public class DefaultAggregationListener {
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected void handlePostLoad(AbstractAggregation o) {
-    o.lifecycle(Lifecycle.REENABLED).callAssistant().clearMessages();
+    o.lifecycle(Lifecycle.ENABLED).callAssistant().clearMessages();
     registerToUnitOfWork(o);
   }
 
   protected void handlePostPersist(AbstractAggregation o) {
-    registerToUnitOfWork(new AggregationLifecycleMessage(o, Lifecycle.ENABLED));
-    registerToUnitOfWork(o.lifecycle(Lifecycle.ENABLED));
+    registerToUnitOfWork(new AggregationLifecycleMessage(o, Lifecycle.PERSISTED));
+    registerToUnitOfWork(o.lifecycle(Lifecycle.PERSISTED));
   }
 
   protected void handlePostRemove(AbstractAggregation o) {
@@ -61,7 +61,7 @@ public class DefaultAggregationListener {
   }
 
   protected void handlePreRemove(AbstractAggregation o) {
-    o.preDestroy();
+    o.preDisable();
   }
 
   protected void handlePreUpdate(AbstractAggregation o) {

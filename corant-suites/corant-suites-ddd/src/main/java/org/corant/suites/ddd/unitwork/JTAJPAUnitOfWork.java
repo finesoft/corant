@@ -13,15 +13,13 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Status;
@@ -66,7 +64,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   final Map<AggregationIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
-  final Set<AggregationIdentifier> aggregations = new LinkedHashSet<>();
+  final Map<AggregationIdentifier, Lifecycle> evolutions = new LinkedHashMap<>();
   final LinkedList<Message> messages = new LinkedList<>();
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
@@ -81,9 +79,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     try {
       complete(success);
     } finally {
-      clear();
       logger.fine(() -> String.format(LOG_END_UOW_FMT, transaction.toString()));
-      handlePostCompleted(new LinkedHashMap<>(registrations), success);
+      handlePostCompleted(success);
+      clear();
     }
   }
 
@@ -93,26 +91,6 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
     // flush to dump dirty
     entityManagers.values().forEach(EntityManager::flush);
-    int cycles = 128;
-    while (!aggregations.isEmpty()) {
-      List<AggregationIdentifier> caches = new ArrayList<>(aggregations);
-      aggregations.clear();
-      boolean influence = false;
-      for (AggregationIdentifier ai : caches) {
-        Lifecycle v = registrations.get(ai);
-        if (v == Lifecycle.ENABLED || v == Lifecycle.DESTROYED) {
-          Corant.fireEvent(new AggregationLifecycleEvent(ai, v));
-          influence = true;
-        }
-      }
-      if (influence) {
-        // flush again to find dirty
-        entityManagers.values().forEach(EntityManager::flush);
-      }
-      if (--cycles < 0) {
-        throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
-      }
-    }
     handleMessage();
   }
 
@@ -124,7 +102,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         if (aggregation.getId() != null) {
           AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
           registrations.remove(ai);
-          aggregations.remove(ai);
+          evolutions.remove(ai);
           messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
@@ -178,7 +156,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
           Lifecycle al = aggregation.getLifecycle();
           registrations.put(ai, al);
-          aggregations.add(ai);
+          if (al == Lifecycle.DESTROYED || al == Lifecycle.PERSISTED) {
+            evolutions.put(ai, al);
+          }
           for (Message message : aggregation.extractMessages(true)) {
             MessageUtils.mergeToQueue(messages, message);
           }
@@ -203,6 +183,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           em.close();
         }
       });
+      evolutions.clear();
       registrations.clear();
       messages.clear();
     } finally {
@@ -228,6 +209,27 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       if (extractMessages(messages) && --cycles < 0) {
         throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
       }
+    }
+  }
+
+  protected void handlePostCompleted(final boolean success) {
+    manager.getListeners().forEach(listener -> {
+      try {
+        listener.onCompleted(new LinkedHashMap<>(registrations), success);
+      } catch (Exception ex) {
+        logger.log(Level.WARNING, ex, () -> "Handle UOW post-completed occurred error!");
+      }
+    });
+    if (success) {
+      evolutions.forEach((k, v) -> {
+        if (v == Lifecycle.PERSISTED || v == Lifecycle.DESTROYED) {
+          try {
+            Corant.fireAsyncEvent(new AggregationLifecycleEvent(k, v));
+          } catch (Exception ex) {
+            logger.log(Level.WARNING, ex, () -> "Fire lifecycle event occurred error!");
+          }
+        }
+      });
     }
   }
 

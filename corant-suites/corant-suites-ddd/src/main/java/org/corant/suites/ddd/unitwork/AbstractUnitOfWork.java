@@ -55,16 +55,6 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
     return manager;
   }
 
-  protected void handlePostCompleted(final Object registration, final boolean success) {
-    manager.getListeners().forEach(listener -> {
-      try {
-        listener.onCompleted(registration, success);
-      } catch (Exception ex) {
-        logger.log(Level.WARNING, ex, () -> "Handle UOW post-completed occurred error!");
-      }
-    });
-  }
-
   protected void handlePreComplete() {
     manager.getHandlers().forEach(handler -> {
       try {

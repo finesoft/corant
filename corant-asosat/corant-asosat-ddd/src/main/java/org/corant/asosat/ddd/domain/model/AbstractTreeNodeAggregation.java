@@ -63,12 +63,12 @@ public abstract class AbstractTreeNodeAggregation<P, T extends AbstractTreeNodeA
 
   @SuppressWarnings("unchecked")
   @Override
-  public void destroy(P param, DestroyHandler<P, T> handler) {
+  public void disable(P param, DisablingHandler<P, T> handler) {
     requireTrue(isEmpty(this.getChilds()), "");
     if (handler != null) {
-      handler.preDestroy(param, (T) this);
+      handler.preDisable(param, (T) this);
     }
-    super.destroy(false);
+    super.disable(false);
   }
 
   @SuppressWarnings("unchecked")

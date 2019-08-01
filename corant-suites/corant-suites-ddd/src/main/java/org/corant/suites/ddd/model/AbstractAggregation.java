@@ -32,8 +32,9 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.event.Event;
+import org.corant.suites.ddd.event.AggregationLifecycleEvent;
 import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
+import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
@@ -62,11 +63,11 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
 
   /**
    * Identifies whether the aggregation has been persisted or deleted.
-   * <li>INITIAL: Just created</li>
-   * <li>ENABLED: Has been persisted</li>
-   * <li>REENABLED: Just loaded from persistence</li>
-   * <li>DESTROYED: If already persisted, the representation is removed from the persistence
-   * facility; otherwise it is just a token</li>
+   * <li>INITIAL: Aggregation has just been created.</li>
+   * <li>ENABLED: Aggregation has been joined persistence context.</li>
+   * <li>DISABLED: Aggregation has been removed from persistence context.</li>
+   * <li>DESTROYED: If aggregation has already been persisted, the representation is removed from
+   * the persistence facility; otherwise it is just a token</li>
    */
   @Override
   @Transient
@@ -134,17 +135,19 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    * Destroy the aggregation if is persisted then remove it from entity manager else just mark
    * destroyed
    */
-  protected synchronized void destroy(boolean immediately) {
+  protected synchronized void disable(boolean immediately) {
+    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.DESTROY, immediately));
+    lifecycle(Lifecycle.DISABLED);
   }
 
   /**
    * Enable the aggregation if is not persisted then persist it else merge it.
    */
   protected synchronized AbstractAggregation enable(boolean immediately) {
-    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
+    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
-    return this;
+    return lifecycle(Lifecycle.ENABLED);
   }
 
   @Transient
@@ -154,21 +157,29 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   }
 
   protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
-    requireFalse(getLifecycle() == Lifecycle.DESTROYED, PkgMsgCds.ERR_AGG_LC);
-    this.lifecycle = lifecycle;
+    if (this.lifecycle != lifecycle) {
+      this.lifecycle = lifecycle;
+      if (lifecycle != Lifecycle.DESTROYED && lifecycle != Lifecycle.PERSISTED) {
+        this.raise(new AggregationLifecycleEvent(this), lifecycleEventQualifiers());
+      }
+    }
     return this;
   }
 
+  protected Annotation[] lifecycleEventQualifiers() {
+    return new Annotation[0];
+  }
+
   /**
-   * Destroy preconditions, validate the aggregation consistency
+   * Disable preconditions, validate the aggregation consistency, EntityListener callback.
    *
    * @see DefaultAggregationListener
    * @see PreRemove
    */
-  protected void preDestroy() {}
+  protected void preDisable() {}
 
   /**
-   * Enable preconditions, validate the aggregation consistency,EntityListener callback
+   * Enable preconditions, validate the aggregation consistency, EntityListener callback.
    *
    * @see DefaultAggregationListener
    * @see PrePersist

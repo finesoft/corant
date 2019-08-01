@@ -85,10 +85,10 @@ public interface Aggregation extends Entity {
    *
    */
   public static abstract class AggregationHandlerAdapter<P, T extends Aggregation>
-      extends EnablingHandlerAdapter<P, T> implements DestroyHandler<P, T> {
+      extends EnablingHandlerAdapter<P, T> implements DisablingHandler<P, T> {
 
     @Override
-    public void preDestroy(P param, T destroyable) {
+    public void preDisable(P param, T destroyable) {
 
     }
 
@@ -128,41 +128,16 @@ public interface Aggregation extends Entity {
   /**
    * corant-suites-ddd
    *
-   * @author bingo 下午9:04:58
+   * @author bingo 下午9:05:13
    *
    */
   @FunctionalInterface
-  interface Destroyable<P, T> {
-    void destroy(P param, DestroyHandler<P, T> handler);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:02
-   *
-   */
-  @FunctionalInterface
-  interface DestroyHandler<P, T> {
-
+  interface DisablingHandler<P, T> {
     @SuppressWarnings("rawtypes")
-    DestroyHandler EMPTY_INST = (p, t) -> {
+    DisablingHandler EMPTY_INST = (p, t) -> {
     };
 
-    void preDestroy(P param, T destroyable);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:06:04
-   *
-   */
-  public static abstract class DestroyHandlerAdapter<P, T> implements DestroyHandler<P, T> {
-    @Override
-    public void preDestroy(P param, T destroyable) {
-
-    }
+    void preDisable(P param, T enabling);
   }
 
   /**
@@ -171,8 +146,10 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:05:07
    *
    */
-  @FunctionalInterface
   interface Enabling<P, T> {
+
+    void disable(P Param, DisablingHandler<P, T> handler);
+
     T enable(P param, EnablingHandler<P, T> handler);
   }
 
@@ -212,7 +189,7 @@ public interface Aggregation extends Entity {
    *
    */
   public enum Lifecycle {
-    INITIAL(0), ENABLED(1), REENABLED(2), DESTROYED(-1);
+    INITIAL(0), ENABLED(1), PERSISTED(2), DISABLED(-1), DESTROYED(-2);
     int sign;
 
     private Lifecycle(int sign) {

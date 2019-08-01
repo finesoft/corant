@@ -53,31 +53,6 @@ public interface Party extends Nameable, Entity {
       boolean includeHierarchy);
 
   /**
-   *
-   * @author bingo 下午7:23:43
-   *
-   */
-  public interface AccountabilityType extends Nameable {
-
-    /**
-     * 是否含有该类型的委托责任关系
-     *
-     * @param entrustingParty
-     * @param responsibleParty
-     * @return
-     */
-    boolean hasConnection(final Party entrustingParty, final Party responsibleParty);
-
-    /**
-     * 检查是否可以建立委托责任关系
-     *
-     * @param entrustingParty
-     * @param responsibleParty
-     */
-    void verifyConnection(final Party entrustingParty, final Party responsibleParty);
-  }
-
-  /**
    * 法人
    *
    * @author bingo 2016年9月21日
@@ -125,8 +100,47 @@ public interface Party extends Nameable, Entity {
      *
      * @return getType
      */
-    AccountabilityType getType();
+    PartyAccountabilityType getType();
 
+  }
+
+  /**
+   *
+   * @author bingo 下午7:23:43
+   *
+   */
+  public interface PartyAccountabilityType extends Nameable {
+
+    /**
+     *
+     *
+     * @param entrustingParty
+     * @param entrustingPartyRole
+     * @param responsibleParty
+     * @param responsiblePartyRole
+     * @return buildAccountability
+     */
+    PartyAccountability buildAccountability(final Party entrustingParty,
+        final PartyRole entrustingPartyRole, final Party responsibleParty,
+        final PartyRole responsiblePartyRole);
+
+    /**
+     * 是否含有该类型的委托责任关系
+     *
+     * @param entrustingParty
+     * @param responsibleParty
+     * @return
+     */
+    boolean hasConnection(final Party entrustingParty, final Party responsibleParty);
+
+    /**
+     * 检查是否可以建立委托责任关系
+     *
+     * @param entrustingParty
+     * @param responsibleParty
+     */
+    void verifyConnection(final Party entrustingParty, final PartyRole entrustingPartyRole,
+        final Party responsibleParty, final PartyRole responsiblePartyRole);
   }
 
   /**
@@ -139,4 +153,15 @@ public interface Party extends Nameable, Entity {
 
   }
 
+  /**
+   * 业务角色
+   *
+   * corant-asosat-ddd
+   *
+   * @author bingo 下午3:54:56
+   *
+   */
+  public interface PartyRole extends Nameable {
+
+  }
 }

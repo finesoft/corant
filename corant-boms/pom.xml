@@ -35,6 +35,8 @@
 		<version.javax.enterprise.concurrent>1.1</version.javax.enterprise.concurrent>
 		<version.weld>3.1.1.Final</version.weld>
 
+		<version.lombok>1.18.8</version.lombok>
+
 		<version.commons-lang3>3.8</version.commons-lang3>
 		<version.commons-io>2.6</version.commons-io>
 		<version.commons-beanutils>1.9.3</version.commons-beanutils>
@@ -107,6 +109,7 @@
 
 		<version.groovy>2.5.6</version.groovy>
 
+		<version.swagger>2.0.8</version.swagger>
 	</properties>
 
 	<dependencyManagement>
@@ -787,6 +790,12 @@
 				<version>${version.javax.enterprise.concurrent}</version>
 				<scope>provided</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${version.lombok}</version>
+				<scope>provided</scope>
+			</dependency>
 
 			<!-- glass fish -->
 			<dependency>
@@ -1146,6 +1155,17 @@
 				<version>${project.version}</version>
 			</dependency>
 
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2</artifactId>
+				<version>${version.swagger}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
+				<version>${version.swagger}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

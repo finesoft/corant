@@ -24,33 +24,33 @@ import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
 import org.corant.suites.ddd.model.Aggregation.Lifecycle;
 
 /**
- * Every aggregation that extends AbstractAggregation when life cycle change then will fire
- * AggregationLifecycleEvent. The Event triggers occur when the aggregation is
- * persisted/deleted/updated and has been propagated to the persistence context and the JTA
- * transaction has not yet finished.
+ * Every aggregation that extends AbstractAggregation when life cycle on persistence change then
+ * will asynchronous fire AggregationPersistEvent . The Event triggers occur when the aggregation is
+ * persisted/deleted/updated and has been updated to the persistence layer and the JTA transaction
+ * has been finished successfully.
  *
  * @see EntityManager#flush()
  * @see TransactionSynchronizationRegistry
- * @see Synchronization#beforeCompletion()
+ * @see Synchronization#afterCompletion()
  *
  * @author bingo 上午9:39:28
  */
 @Events
-public class AggregationLifecycleEvent extends AbstractEvent {
+public class AggregationPersistEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
   private final Lifecycle lifecycle;
 
-  public AggregationLifecycleEvent(Aggregation source) {
+  public AggregationPersistEvent(Aggregation source) {
     this(source, source.getLifecycle());
   }
 
-  public AggregationLifecycleEvent(Aggregation source, Lifecycle lifecycle) {
+  public AggregationPersistEvent(Aggregation source, Lifecycle lifecycle) {
     this(new DefaultAggregationIdentifier(source), lifecycle);
   }
 
-  public AggregationLifecycleEvent(AggregationIdentifier source, Lifecycle lifecycle) {
+  public AggregationPersistEvent(AggregationIdentifier source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }

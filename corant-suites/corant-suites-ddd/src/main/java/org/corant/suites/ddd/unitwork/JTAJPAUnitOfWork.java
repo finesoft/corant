@@ -13,12 +13,15 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.Corant.fireEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,11 +29,10 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import org.corant.Corant;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
-import org.corant.suites.ddd.event.AggregationLifecycleEvent;
+import org.corant.suites.ddd.event.AggregationPersistEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
@@ -53,6 +55,7 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
 
+  static final ExecutorService executorService = Executors.newSingleThreadExecutor();
   static final String LOG_BEGIN_UOW_FMT = "Begin unit of work [%s].";
   static final String LOG_END_UOW_FMT = "End unit of work [%s].";
   static final String LOG_BEF_UOW_CMP_FMT =
@@ -224,7 +227,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       evolutions.forEach((k, v) -> {
         if (v == Lifecycle.PERSISTED || v == Lifecycle.DESTROYED) {
           try {
-            Corant.fireAsyncEvent(new AggregationLifecycleEvent(k, v));
+            executorService.execute(() -> fireEvent(new AggregationPersistEvent(k, v)));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire lifecycle event occurred error!");
           }

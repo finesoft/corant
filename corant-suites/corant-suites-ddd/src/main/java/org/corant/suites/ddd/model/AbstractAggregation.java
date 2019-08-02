@@ -32,6 +32,7 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
+import org.corant.suites.ddd.annotation.qualifier.AggregationType.AggregationTypeLiteral;
 import org.corant.suites.ddd.event.AggregationLifecycleEvent;
 import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
 import org.corant.suites.ddd.event.Event;
@@ -62,12 +63,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   }
 
   /**
-   * Identifies whether the aggregation has been persisted or deleted.
-   * <li>INITIAL: Aggregation has just been created.</li>
-   * <li>ENABLED: Aggregation has been joined persistence context.</li>
-   * <li>DISABLED: Aggregation has been removed from persistence context.</li>
-   * <li>DESTROYED: If aggregation has already been persisted, the representation is removed from
-   * the persistence facility; otherwise it is just a token</li>
+   * @see Lifecycle
    */
   @Override
   @Transient
@@ -137,7 +133,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    */
   protected synchronized void disable(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.DESTROY, immediately));
+    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
     lifecycle(Lifecycle.DISABLED);
   }
 
@@ -159,15 +155,9 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
-      if (lifecycle != Lifecycle.DESTROYED && lifecycle != Lifecycle.PERSISTED) {
-        this.raise(new AggregationLifecycleEvent(this), lifecycleEventQualifiers());
-      }
+      this.raise(new AggregationLifecycleEvent(this), AggregationTypeLiteral.of(getClass()));
     }
     return this;
-  }
-
-  protected Annotation[] lifecycleEventQualifiers() {
-    return new Annotation[0];
   }
 
   /**

@@ -95,7 +95,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
           em.flush();
         }
       }
-    } else if (action == LifecycleAction.DESTROY) {
+    } else if (action == LifecycleAction.REMOVE) {
       em.remove(entity);
       if (effectImmediately) {
         em.flush();

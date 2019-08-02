@@ -18,6 +18,12 @@ import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 
@@ -50,7 +56,7 @@ public interface Aggregation extends Entity {
   @Transient
   @javax.persistence.Transient
   default boolean isEnabled() {
-    return getLifecycle() != null && getLifecycle().getSign() > 0;
+    return getLifecycle() != null && getLifecycle().signEnabled();
   }
 
   /**
@@ -88,9 +94,7 @@ public interface Aggregation extends Entity {
       extends EnablingHandlerAdapter<P, T> implements DisablingHandler<P, T> {
 
     @Override
-    public void preDisable(P param, T destroyable) {
-
-    }
+    public void preDisable(P param, T destroyable) {}
 
   }
 
@@ -176,9 +180,7 @@ public interface Aggregation extends Entity {
    */
   public static abstract class EnablingHandlerAdapter<P, T> implements EnablingHandler<P, T> {
     @Override
-    public void preEnable(P param, T destroyable) {
-
-    }
+    public void preEnable(P param, T destroyable) {}
   }
 
   /**
@@ -189,7 +191,60 @@ public interface Aggregation extends Entity {
    *
    */
   public enum Lifecycle {
-    INITIAL(0), ENABLED(1), PERSISTED(2), DISABLED(-1), DESTROYED(-2);
+    /**
+     * Aggregation has just been created.
+     */
+    INITIAL(0),
+    /**
+     * Aggregation has been joined persistence context.
+     */
+    ENABLED(2),
+    /**
+     * Aggregation retrieve from storage and has been joined persistence context.
+     */
+    LOADED(4),
+    /**
+     * Aggregation will be persist to storage
+     *
+     * @see PrePersist
+     */
+    PRE_PERSIST(8),
+    /**
+     * Aggregation will be update to storage
+     *
+     * @see PreUpdate
+     */
+    PRE_UPDATE(16),
+    /**
+     * Aggregation will be remove from storage
+     *
+     * @see PreRemove
+     */
+    PRE_REMOVE(32),
+    /**
+     * Aggregation has been persisted to storage
+     *
+     * @see PostPersist
+     */
+    POST_PERSISTED(64),
+    /**
+     * Aggregation has been update to storage
+     *
+     * @see PostUpdate
+     */
+    POST_UPDATED(128),
+    /**
+     * Aggregation has been removed from storage
+     *
+     * @see PostRemove
+     */
+    POST_REMOVED(256),
+    /**
+     * If aggregation has already been persisted, the representation is removed from the persistence
+     * facility; otherwise it is just a token.
+     */
+    DISABLED(512);
+
     int sign;
 
     private Lifecycle(int sign) {
@@ -198,6 +253,35 @@ public interface Aggregation extends Entity {
 
     public int getSign() {
       return sign;
+    }
+
+    /**
+     * The aggregation remove from persistence context if has been persisted before, otherwise the
+     * aggregation has been created and marked disable means it can't not participate in any domain
+     * logic.
+     *
+     * @return signDisabled
+     */
+    public boolean signDisabled() {
+      return (sign & 768) > 0;
+    }
+
+    /**
+     * The aggregation has been joined persistence context and has identity.
+     *
+     * @return signEnabled
+     */
+    public boolean signEnabled() {
+      return (sign & 254) > 0;
+    }
+
+    /**
+     * The aggregation status have been synchronized to underling storage.
+     *
+     * @return signFlushed
+     */
+    public boolean signFlushed() {
+      return (sign & 448) > 0;
     }
   }
 

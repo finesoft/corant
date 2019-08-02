@@ -35,6 +35,6 @@ public interface EntityLifecycleManager {
   }
 
   public enum LifecycleAction {
-    PERSIST, RECOVER, DESTROY
+    PERSIST, RECOVER, REMOVE
   }
 }

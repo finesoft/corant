@@ -18,9 +18,7 @@ import javax.persistence.EntityManager;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
 import org.corant.suites.ddd.model.Aggregation;
-import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
 import org.corant.suites.ddd.model.Aggregation.Lifecycle;
 
 /**
@@ -47,10 +45,6 @@ public class AggregationLifecycleEvent extends AbstractEvent {
   }
 
   public AggregationLifecycleEvent(Aggregation source, Lifecycle lifecycle) {
-    this(new DefaultAggregationIdentifier(source), lifecycle);
-  }
-
-  public AggregationLifecycleEvent(AggregationIdentifier source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }
@@ -60,8 +54,11 @@ public class AggregationLifecycleEvent extends AbstractEvent {
   }
 
   @Override
-  public AggregationIdentifier getSource() {
+  public Aggregation getSource() {
     return forceCast(super.getSource());
   }
 
+  public <T extends Aggregation> T getSourceAggregation() {
+    return forceCast(super.getSource());
+  }
 }

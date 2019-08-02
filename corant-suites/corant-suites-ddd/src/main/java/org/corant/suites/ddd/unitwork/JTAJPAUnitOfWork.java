@@ -159,7 +159,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
           Lifecycle al = aggregation.getLifecycle();
           registrations.put(ai, al);
-          if (al == Lifecycle.DESTROYED || al == Lifecycle.PERSISTED) {
+          if (al.signFlushed()) {
             evolutions.put(ai, al);
           }
           for (Message message : aggregation.extractMessages(true)) {
@@ -225,7 +225,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     });
     if (success) {
       evolutions.forEach((k, v) -> {
-        if (v == Lifecycle.PERSISTED || v == Lifecycle.DESTROYED) {
+        if (v.signFlushed()) {
           try {
             executorService.execute(() -> fireEvent(new AggregationPersistEvent(k, v)));
           } catch (Exception ex) {

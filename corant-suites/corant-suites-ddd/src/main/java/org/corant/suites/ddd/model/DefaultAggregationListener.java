@@ -58,17 +58,17 @@ public class DefaultAggregationListener {
   }
 
   protected void handlePrePersist(AbstractAggregation o) {
-    o.preEnable();
+    o.onPreEnable();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_PERSIST));
   }
 
   protected void handlePreRemove(AbstractAggregation o) {
-    o.preDisable();
+    o.onPreDisable();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_REMOVE));
   }
 
   protected void handlePreUpdate(AbstractAggregation o) {
-    o.preEnable();
+    o.onPreEnable();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_UPDATE));
   }
 

@@ -166,7 +166,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    * @see DefaultAggregationListener
    * @see PreRemove
    */
-  protected void preDisable() {}
+  protected void onPreDisable() {}
 
   /**
    * Enable preconditions, validate the aggregation consistency, EntityListener callback.
@@ -175,7 +175,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    * @see PrePersist
    * @see PreUpdate
    */
-  protected void preEnable() {}
+  protected void onPreEnable() {}
 
   /**
    * recover from persistence

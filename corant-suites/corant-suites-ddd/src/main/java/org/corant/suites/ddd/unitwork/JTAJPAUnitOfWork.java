@@ -13,15 +13,13 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.Corant.fireEvent;
+import static org.corant.Corant.fireAsyncEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -55,7 +53,6 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     implements Synchronization, EntityManagerProvider {
 
-  static final ExecutorService executorService = Executors.newSingleThreadExecutor();
   static final String LOG_BEGIN_UOW_FMT = "Begin unit of work [%s].";
   static final String LOG_END_UOW_FMT = "End unit of work [%s].";
   static final String LOG_BEF_UOW_CMP_FMT =
@@ -227,9 +224,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       evolutions.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
-            executorService.execute(() -> fireEvent(new AggregationPersistEvent(k, v)));
+            fireAsyncEvent(new AggregationPersistEvent(k, v));
           } catch (Exception ex) {
-            logger.log(Level.WARNING, ex, () -> "Fire lifecycle event occurred error!");
+            logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");
           }
         }
       });

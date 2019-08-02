@@ -147,6 +147,17 @@ public interface Aggregation extends Entity {
   /**
    * corant-suites-ddd
    *
+   * @author bingo 下午9:05:19
+   *
+   */
+  public static abstract class DisablingHandlerAdapter<P, T> implements DisablingHandler<P, T> {
+    @Override
+    public void preDisable(P param, T enabling) {}
+  }
+
+  /**
+   * corant-suites-ddd
+   *
    * @author bingo 下午9:05:07
    *
    */
@@ -180,7 +191,7 @@ public interface Aggregation extends Entity {
    */
   public static abstract class EnablingHandlerAdapter<P, T> implements EnablingHandler<P, T> {
     @Override
-    public void preEnable(P param, T destroyable) {}
+    public void preEnable(P param, T enabling) {}
   }
 
   /**
@@ -263,7 +274,7 @@ public interface Aggregation extends Entity {
      * @return signDisabled
      */
     public boolean signDisabled() {
-      return (sign & 768) > 0;
+      return (sign & 768) != 0;
     }
 
     /**
@@ -272,7 +283,7 @@ public interface Aggregation extends Entity {
      * @return signEnabled
      */
     public boolean signEnabled() {
-      return (sign & 254) > 0;
+      return (sign & 254) != 0;
     }
 
     /**
@@ -281,7 +292,7 @@ public interface Aggregation extends Entity {
      * @return signFlushed
      */
     public boolean signFlushed() {
-      return (sign & 448) > 0;
+      return (sign & 448) != 0;
     }
   }
 

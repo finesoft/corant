@@ -294,6 +294,10 @@ public interface Aggregation extends Entity {
     public boolean signFlushed() {
       return (sign & 448) != 0;
     }
+
+    public boolean signRefreshable() {
+      return (sign & 30) != 0 || (sign & 192) != 0;
+    }
   }
 
 }

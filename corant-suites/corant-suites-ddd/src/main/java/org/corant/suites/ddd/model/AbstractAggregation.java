@@ -146,12 +146,6 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
     return lifecycle(Lifecycle.ENABLED);
   }
 
-  @Transient
-  @javax.persistence.Transient
-  protected boolean isPersisted() {
-    return getId() != null;
-  }
-
   protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
@@ -183,7 +177,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
    * @see EntityManager#refresh(Object)
    */
   protected synchronized AbstractAggregation recover() {
-    requireFalse(!isEnabled(), PkgMsgCds.ERR_AGG_LC);
+    requireFalse(lifecycle == null || !lifecycle.signRefreshable(), PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
     return this;
   }

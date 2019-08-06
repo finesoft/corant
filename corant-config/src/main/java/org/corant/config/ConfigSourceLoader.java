@@ -16,8 +16,7 @@ package org.corant.config;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StringUtils.defaultString;
-import java.io.File;
-import java.io.FileInputStream;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,10 +24,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.Resource;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -53,36 +56,35 @@ public class ConfigSourceLoader {
         .collect(Collectors.toList());
   }
 
-  public static List<ConfigSource> load(int ordinal, Predicate<URL> filter, String... filePaths)
+  public static List<ConfigSource> load(int ordinal, Predicate<URL> filter, String... locations)
       throws IOException {
     List<ConfigSource> sources = new ArrayList<>();
-    for (String path : setOf(filePaths)) {
-      File file = new File(path);
-      if (file.canRead() && filter.test(file.toURI().toURL())) {
-        sources.add(load(new File(path), ordinal));
-      }
+    for (String path : setOf(locations)) {
+      Resources.from(path).findFirst()
+          .ifPresent(r -> load(filter, r, ordinal).ifPresent(sources::add));
     }
     return sources;
   }
 
-  static AbstractConfigSource load(File fo, int ordinal) throws IOException {
-    if (fo != null && fo.canRead()) {
-      String fileName = fo.getName().toLowerCase(Locale.ROOT);
-      try (InputStream is = new FileInputStream(fo)) {
-        if (fileName.endsWith(".properties")) {
-          return new PropertiesConfigSource(fo.getCanonicalPath(), ordinal, is);
-        } else if (fileName.endsWith(".yml") || fileName.endsWith(".yaml")) {
-          return new YamlConfigSource(is, ordinal);
-        } else if (fileName.endsWith(".json")) {
-          return new JsonConfigSource(null, ordinal);
-        } else if (fileName.endsWith(".xml")) {
-          return new XmlConfigSource(null, ordinal);
+  static Optional<AbstractConfigSource> load(Predicate<URL> filter, Resource resource,
+      int ordinal) {
+    if (resource != null && filter.test(resource.getUrl())) {
+      String location = defaultTrim(resource.getLocation());
+      try (InputStream is = resource.openStream()) {
+        if (location.endsWith(".properties")) {
+          return Optional.of(new PropertiesConfigSource(location, ordinal, is));
+        } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
+          return Optional.of(new YamlConfigSource(is, ordinal));
+        } else if (location.endsWith(".json")) {
+          return Optional.of(new JsonConfigSource(null, ordinal));
+        } else if (location.endsWith(".xml")) {
+          return Optional.of(new XmlConfigSource(null, ordinal));
         }
       } catch (IOException e) {
-        throw e;
+        throw new CorantRuntimeException(e);
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   static AbstractConfigSource load(URL resourceUrl, int ordinal) {

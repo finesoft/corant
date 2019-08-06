@@ -702,12 +702,26 @@ public class Resources {
       return Optional.ofNullable(ps);
     }
 
+    public static String decideSeparator(String path) {
+      return decide(path).orElse(UNKNOW).getSeparator();
+    }
+
     public String getPrefix() {
       return prefix;
     }
 
     public int getPrefixLength() {
       return prefixLength;
+    }
+
+    public String getSeparator() {
+      if (this == CLASS_PATH || this == URL) {
+        return "/";
+      } else if (this == FILE_SYSTEM) {
+        return File.separator;
+      } else {
+        return "";
+      }
     }
 
     public boolean match(String path) {

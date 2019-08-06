@@ -13,11 +13,10 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import org.corant.kernel.normal.Names.ConfigNames;
 import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils;
+import org.corant.shared.util.Resources.SourceType;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
@@ -52,8 +52,9 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
-  static String[] filePaths = isBlank(locationDir) ? new String[0]
-      : Arrays.stream(appExtName).map(e -> locationDir + File.separator + appBaseName + e)
+  static String[] locations = isBlank(locationDir) ? new String[0]
+      : Arrays.stream(appExtName)
+          .map(e -> locationDir + SourceType.decideSeparator(e) + appBaseName + e)
           .toArray(String[]::new);
 
   static Predicate<URL> filter = u -> isBlank(cfgUrlExPattern)
@@ -65,8 +66,11 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
     list.add(new SystemPropertiesConfigSource());// system.properties
     list.add(new SystemEnvironmentConfigSource());// system.environment
     try {
-      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filter, filePaths));
-      if (isEmpty(filePaths)) {
+      if (isNotEmpty(locations)) {
+        // first find locations that designated in system properties or system environment
+        list.addAll(
+            ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filter, locations));
+      } else {
         list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL,
             filter, classPaths));
       }

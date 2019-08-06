@@ -14,18 +14,18 @@
 package org.corant.config;
 
 import static org.corant.kernel.normal.Names.ConfigNames.CFG_PROFILE_KEY;
-import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Resources.SourceType;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -44,19 +44,21 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
       .flatMap(p -> Arrays.stream(appExtName).map(e -> metaInf + appBaseName + "-" + p + e))
       .toArray(String[]::new);
 
-  static String[] pfFilePaths = isBlank(locationDir) ? new String[0]
+  static String[] pfLocations = isBlank(locationDir) ? new String[0]
       : Arrays.stream(profiles)
           .flatMap(p -> Arrays.stream(appExtName)
-              .map(e -> locationDir + File.separator + appBaseName + "-" + p + e))
+              .map(e -> locationDir + SourceType.decideSeparator(e) + appBaseName + "-" + p + e))
           .toArray(String[]::new);
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
     try {
-      list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter,
-          pfFilePaths));
-      if (isEmpty(pfFilePaths)) {
+      if (isNotEmpty(pfLocations)) {
+        // first find locations that designated in system properties or system environment
+        list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter,
+            pfLocations));
+      } else {
         list.addAll(ConfigSourceLoader.load(classLoader,
             ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter, pfClassPaths));
       }

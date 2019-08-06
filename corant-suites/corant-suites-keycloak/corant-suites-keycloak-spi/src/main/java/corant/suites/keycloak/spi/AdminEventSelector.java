@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.admin.AdminEvent;
@@ -33,10 +34,12 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
   private String realmId;
   private Set<String> types = new HashSet<>();
   private Set<String> resourcePaths = new HashSet<>();
+  private String resourcePathRegex;
   private String authDetailsRealmId;
   private String authDetailsClientId;
   private String authDetailsUserId;
   private String authDetailsIpAddress;
+  private Pattern resourcePathPattern;
 
   public AdminEventSelector(Scope scope) {
     if (scope != null) {
@@ -49,6 +52,10 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
       authDetailsUserId = scope.get("admin-event-authdetails-userId");
       authDetailsRealmId = scope.get("admin-event-authdetails-realmId");
       authDetailsIpAddress = scope.get("admin-event-authdetails-ipAddress");
+      resourcePathRegex = scope.get("admin-event-resourcePathRegex");
+      if (resourcePathRegex != null && resourcePathRegex.trim().length() > 0) {
+        resourcePathPattern = Pattern.compile(resourcePathRegex, Pattern.CASE_INSENSITIVE);
+      }
     }
     logger.infof("The admin event selector is %s", this);
   }
@@ -81,6 +88,9 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
     if (forward && !resourcePaths.isEmpty()) {
       forward &= resourcePaths.contains(t.getResourcePath());
     }
+    if (forward && resourcePathPattern != null) {
+      forward &= resourcePathPattern.matcher(t.getResourcePath()).matches();
+    }
     return forward;
   }
 
@@ -89,8 +99,8 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
     return "AdminEventSelector [realmId=" + realmId + ", types=[" + String.join(",", types)
         + "], resourcePaths=[" + String.join(",", resourcePaths) + "], authDetailsRealmId="
         + authDetailsRealmId + ", authDetailsClientId=" + authDetailsClientId
-        + ", authDetailsUserId=" + authDetailsUserId + ", authDetailsIpAddress="
-        + authDetailsIpAddress + "]";
+        + ", authDetailsUserId=" + authDetailsUserId + ", resourcePathRegex=" + resourcePathRegex
+        + ", authDetailsIpAddress=" + authDetailsIpAddress + "]";
   }
 
 }

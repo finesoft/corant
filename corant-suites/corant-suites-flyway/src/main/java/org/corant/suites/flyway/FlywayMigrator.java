@@ -87,7 +87,7 @@ public class FlywayMigrator {
 
   public void migrate(@Observes PostCorantReadyEvent e) {
     if (enable.booleanValue()) {
-      logger.info(() -> "Perform migrate process if nessary...");
+      logger.info(() -> "Perform migrate process if necessary...");
       getConfigProviders().map(this::build).filter(ObjectUtils::isNotNull).forEach(this::doMigrate);
       logger.info(() -> "Finished migrate process.");
     } else {

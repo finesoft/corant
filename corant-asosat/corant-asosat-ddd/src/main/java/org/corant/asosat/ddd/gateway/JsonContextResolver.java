@@ -45,7 +45,8 @@ public class JsonContextResolver implements ContextResolver<ObjectMapper> {
 
     @Override
     public ObjectMapper getContext(Class<?> objectType) {
-        if (objectType != null && objectType.getName().endsWith("DTO")) {//FIXME DON 临时判断
+        //FIXME DON 临时判断
+        if (objectType != null && objectType.getName().endsWith("DTO")) {
             return objectMapperRpc;
         }
         return objectMapperJs;

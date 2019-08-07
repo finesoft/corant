@@ -46,8 +46,8 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
 
   static String[] pfLocations = isBlank(locationDir) ? new String[0]
       : Arrays.stream(profiles)
-          .flatMap(p -> Arrays.stream(appExtName)
-              .map(e -> locationDir + SourceType.decideSeparator(e) + appBaseName + "-" + p + e))
+          .flatMap(p -> Arrays.stream(appExtName).map(e -> locationDir
+              + SourceType.decideSeparator(locationDir) + appBaseName + "-" + p + e))
           .toArray(String[]::new);
 
   @Override

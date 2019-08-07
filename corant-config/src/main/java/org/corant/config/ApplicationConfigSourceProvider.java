@@ -54,7 +54,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
 
   static String[] locations = isBlank(locationDir) ? new String[0]
       : Arrays.stream(appExtName)
-          .map(e -> locationDir + SourceType.decideSeparator(e) + appBaseName + e)
+          .map(e -> locationDir + SourceType.decideSeparator(locationDir) + appBaseName + e)
           .toArray(String[]::new);
 
   static Predicate<URL> filter = u -> isBlank(cfgUrlExPattern)

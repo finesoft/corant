@@ -13,6 +13,8 @@
  */
 package corant.suites.keycloak.spi;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
@@ -63,6 +65,9 @@ public class KeycloakJMSSender {
     }
     logger.debugf("Prepare send keycloak event.");
     try (JMSContext ctx = connectionFactory.createContext(jmsUser, jmsPassword)) {
+      Map<String, Object> eventMap = new HashMap<>();
+      eventMap.put("type", event.getClass().getSimpleName());
+      eventMap.put("event", event);
       String text = objectMapper.writeValueAsString(event);
       JMSProducer jp = ctx.createProducer();
       TextMessage textMessage = ctx.createTextMessage(text);

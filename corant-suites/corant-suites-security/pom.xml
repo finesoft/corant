@@ -10,5 +10,6 @@
   <modules>
   	<module>corant-suites-security-keycloak</module>
   	<module>corant-suites-security-shared</module>
+  	<module>corant-suites-security-jwt</module>
   </modules>
 </project>

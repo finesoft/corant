@@ -1,1 +1,1 @@
-io.smallrye.jwt.auth.cdi.SmallRyeJWTAuthCDIExtension
+org.corant.suites.mp.jwt.MpSmallRyeJWTAuthCDIExtension

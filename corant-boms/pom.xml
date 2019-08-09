@@ -61,7 +61,7 @@
 		<version.microprofile-opentracing-api>1.3.1</version.microprofile-opentracing-api>
 		<version.microprofile-fault-tolerance-api>2.0</version.microprofile-fault-tolerance-api>
 		<version.microprofile-health-api>1.0</version.microprofile-health-api>
-		<version.microprofile-jwt-auth-api>1.1</version.microprofile-jwt-auth-api>
+		<version.microprofile-jwt-auth-api>1.1.1</version.microprofile-jwt-auth-api>
 
 		<version.smallrye-config>1.3.5</version.smallrye-config>
 		<version.smallrye-open-api>1.1.1</version.smallrye-open-api>

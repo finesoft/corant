@@ -55,12 +55,12 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
         .equals(requestContext.getProperty(MpPermitAllFilter.PERMITALL_KEY))) {
       final SecurityContext securityContext = requestContext.getSecurityContext();
       final Principal principal = securityContext.getUserPrincipal();
-      if (!(principal instanceof JsonWebToken)) {
-        AbstractBearerTokenExtractor extractor =
-            new BearerTokenExtractor(requestContext, authContextInfo());
-        String bearerToken = extractor.getBearerToken();
-        if (bearerToken != null) {
-          try {
+      try {
+        if (!(principal instanceof JsonWebToken)) {
+          AbstractBearerTokenExtractor extractor =
+              new BearerTokenExtractor(requestContext, authContextInfo());
+          String bearerToken = extractor.getBearerToken();
+          if (bearerToken != null) {
             JsonWebToken jwtPrincipal = extractor.validate(bearerToken);
             principalProducer().setJsonWebToken(jwtPrincipal);
             // Install the JWT principal as the caller
@@ -68,11 +68,13 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
                 new MpJWTSecurityContext(securityContext, jwtPrincipal);
             requestContext.setSecurityContext(jwtSecurityContext);
             logger.debugf("Success");
-          } catch (Exception e) {
-            logger.warnf(e, "Unable to parse/validate JWT: %s", e.getMessage());
-            requestContext.abortWith(Response.status(Status.UNAUTHORIZED).build());
           }
         }
+      } catch (Exception e) {
+        logger.warnf(e, "Unable to parse/validate JWT: %s", e.getMessage());
+        requestContext.abortWith(Response.status(Status.UNAUTHORIZED).build());
+      } finally {
+        requestContext.removeProperty(MpPermitAllFilter.PERMITALL_KEY);
       }
     } else {
       requestContext.removeProperty(MpPermitAllFilter.PERMITALL_KEY);

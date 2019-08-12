@@ -13,6 +13,7 @@
  */
 package corant.suites.keycloak.spi;
 
+import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -27,12 +28,12 @@ import org.keycloak.events.admin.AdminEvent;
 public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
-  final EventSelector eventSelector;
-  final AdminEventSelector adminEventSelector;
+  final Predicate<Event> eventSelector;
+  final Predicate<AdminEvent> adminEventSelector;
   final KeycloakJMSSender jmsSender;
 
-  public KeycloakEventListenerJMSProvider(EventSelector eventSelector,
-      AdminEventSelector adminEventSelector, KeycloakJMSSender jmsSender) {
+  public KeycloakEventListenerJMSProvider(Predicate<Event> eventSelector,
+      Predicate<AdminEvent> adminEventSelector, KeycloakJMSSender jmsSender) {
     this.eventSelector = eventSelector;
     this.adminEventSelector = adminEventSelector;
     this.jmsSender = jmsSender;

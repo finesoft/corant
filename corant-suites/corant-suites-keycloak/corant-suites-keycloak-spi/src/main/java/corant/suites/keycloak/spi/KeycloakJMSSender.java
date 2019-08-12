@@ -68,7 +68,7 @@ public class KeycloakJMSSender {
       Map<String, Object> eventMap = new HashMap<>();
       eventMap.put("type", event.getClass().getSimpleName());
       eventMap.put("event", event);
-      String text = objectMapper.writeValueAsString(event);
+      String text = objectMapper.writeValueAsString(eventMap);
       JMSProducer jp = ctx.createProducer();
       TextMessage textMessage = ctx.createTextMessage(text);
       textMessage.setStringProperty(MESSAGE_TYPE, KEYCLOAK_EVENT);

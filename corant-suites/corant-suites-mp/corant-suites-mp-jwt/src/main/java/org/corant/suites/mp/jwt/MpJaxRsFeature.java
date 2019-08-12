@@ -98,7 +98,7 @@ public class MpJaxRsFeature implements Feature {
 
     Consumer<FeatureContext> buildHandler(ResourceInfo resourceInfo) {
       return new Consumer<FeatureContext>() {
-        final boolean hasSecurityAnnotations =
+        private final boolean hasSecurityAnnotations =
             hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied();
 
         @Override
@@ -119,6 +119,20 @@ public class MpJaxRsFeature implements Feature {
           }
         }
       };
+    }
+
+    boolean hasSecurityAnnotations(ResourceInfo resource) {
+      // resource methods are inherited (see JAX-RS spec, chapter 3.6)
+      // resource methods must be `public` (see JAX-RS spec, chapter 3.3.1)
+      // hence `resourceClass.getMethods` -- returns public methods, including inherited ones
+      return Stream.of(resource.getResourceClass().getMethods()).filter(this::isResourceMethod)
+          .anyMatch(this::hasSecurityAnnotations);
+    }
+
+    boolean shouldNonannotatedMethodsBeDenied() {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      URL resource = loader.getResource("/META-INF/MP-JWT-DENY-NONANNOTATED-METHODS");
+      return resource != null;
     }
 
     private void configureDenyAll(FeatureContext context) {
@@ -169,26 +183,12 @@ public class MpJaxRsFeature implements Feature {
           .anyMatch(annotation -> mpJwtAnnotations.contains(annotation.annotationType()));
     }
 
-    private boolean hasSecurityAnnotations(ResourceInfo resource) {
-      // resource methods are inherited (see JAX-RS spec, chapter 3.6)
-      // resource methods must be `public` (see JAX-RS spec, chapter 3.3.1)
-      // hence `resourceClass.getMethods` -- returns public methods, including inherited ones
-      return Stream.of(resource.getResourceClass().getMethods()).filter(this::isResourceMethod)
-          .anyMatch(this::hasSecurityAnnotations);
-    }
-
     private boolean isResourceMethod(Method method) {
       // resource methods are methods annotated with an annotation that is itself annotated with
       // @HttpMethod
       // (see JAX-RS spec, chapter 3.3)
       return Stream.of(method.getAnnotations()).anyMatch(
           annotation -> annotation.annotationType().getAnnotation(HttpMethod.class) != null);
-    }
-
-    private boolean shouldNonannotatedMethodsBeDenied() {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      URL resource = loader.getResource("/META-INF/MP-JWT-DENY-NONANNOTATED-METHODS");
-      return resource != null;
     }
 
   }
@@ -235,6 +235,10 @@ public class MpJaxRsFeature implements Feature {
         return false;
       }
       return true;
+    }
+
+    public ResourceInfo getDelegation() {
+      return delegation;
     }
 
     @Override

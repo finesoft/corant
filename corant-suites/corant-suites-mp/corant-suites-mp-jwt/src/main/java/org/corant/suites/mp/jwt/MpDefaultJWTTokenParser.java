@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.eclipse.microprofile.jwt.Claims;
@@ -65,9 +66,9 @@ public class MpDefaultJWTTokenParser {
         builder.setJwsAlgorithmConstraints(new AlgorithmConstraints(
             AlgorithmConstraints.ConstraintType.WHITELIST, AlgorithmIdentifiers.RSA_USING_SHA256));
       } else {
-        builder.setJwsAlgorithmConstraints(
-            new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST,
-                authContextInfo.getWhitelistAlgorithms().toArray(new String[0])));
+        builder.setJwsAlgorithmConstraints(new AlgorithmConstraints(
+            AlgorithmConstraints.ConstraintType.WHITELIST, authContextInfo.getWhitelistAlgorithms()
+                .toArray(new String[authContextInfo.getWhitelistAlgorithms().size()])));
       }
 
       if (authContextInfo.isRequireIssuer()) {
@@ -116,11 +117,10 @@ public class MpDefaultJWTTokenParser {
           Map<String, String> rolesMapping = claimsSet.getClaimValue(ROLE_MAPPINGS, Map.class);
           List<String> groups = claimsSet.getStringListClaimValue(Claims.groups.name());
           List<String> allGroups = new ArrayList<>(groups);
-          for (String key : rolesMapping.keySet()) {
+          for (Entry<String, String> entry : rolesMapping.entrySet()) {
             // If the key group is in groups list, add the mapped role
-            if (groups.contains(key)) {
-              String toRole = rolesMapping.get(key);
-              allGroups.add(toRole);
+            if (groups.contains(entry.getKey())) {
+              allGroups.add(entry.getValue());
             }
           }
           // Replace the groups with the original groups + mapped roles

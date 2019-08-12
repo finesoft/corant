@@ -43,9 +43,9 @@ public class KeycloakAuthzClient {
   @ConfigProperty(name = "keycloak.json.path", defaultValue = "META-INF/keycloak.json")
   protected String keycloakJsonPath;
   // protected Http http;
-  protected AuthzClient authzClient;
-  protected ServerConfiguration serverConfiguration;
-  protected Configuration configuration;
+  protected AuthzClient authzClient = null;
+  protected ServerConfiguration serverConfiguration = null;
+  protected Configuration configuration = null;
 
   public AuthzClient getAuthzClient() {
     return authzClient;

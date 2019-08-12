@@ -16,10 +16,13 @@ package corant.suites.keycloak.spi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.keycloak.Config.Scope;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
@@ -31,7 +34,9 @@ import com.google.common.base.Objects;
  *
  */
 public class AbstactSelector {
-  static final String REG_CHARS = ".^$+{[]|()";
+
+  static final Set<Integer> REG_CHARS =
+      ".^$+{[]|()".chars().mapToObj(Integer::valueOf).collect(Collectors.toSet());
   static final Map<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
   final List<Map<String, Object>> conditions = new ArrayList<>();
   final ObjectMapper objectMapper = new ObjectMapper();
@@ -56,10 +61,10 @@ public class AbstactSelector {
 
   Boolean getMapBoolean(Map<?, ?> cmd, String key) {
     if (cmd == null) {
-      return null;
+      return Boolean.FALSE;
     }
     Object obj = cmd.get(key);
-    return obj == null ? false : Boolean.valueOf(obj.toString());
+    return obj == null ? Boolean.FALSE : Boolean.valueOf(obj.toString());
   }
 
   Long getMapLong(Map<?, ?> cmd, String key) {
@@ -78,31 +83,36 @@ public class AbstactSelector {
     return obj == null ? null : obj.toString();
   }
 
+  boolean hasRegexChar(String cond) {
+    return cond != null && cond.trim().length() > 0 && cond.chars().anyMatch(REG_CHARS::contains);
+  }
+
   boolean matchLong(Supplier<Long> supplier, Map<?, ?> cmd, String key) {
     Long cand = supplier.get();
     String conds = getMapString(cmd, key);
     NumAndCmpr nac = NumCmpr.parse(conds);
-    if (nac == null || nac.num == null) {
+    if (nac.num == null) {
       return true;
     }
     return nac.cmpr.match(cand, nac.num);
   }
 
-  boolean matchString(Supplier<String> supplier, Map<?, ?> cmd, String key) {
-    String cand = supplier.get();
+  boolean matchString(String cand, Map<?, ?> cmd, String key) {
     String cond = getMapString(cmd, key);
     if (cond == null || Objects.equal(cand, cond)) {
       return true;
     } else if (cand == null) {
       return false;
-    } else {
+    } else if (hasRegexChar(cond)) {
       Pattern p = PATTERNS.computeIfAbsent(cond,
           c -> Pattern.compile(cond, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
       if (p != null) {
         return p.matcher(cand).matches();
       } else {
-        return cand.equalsIgnoreCase(cond);
+        return false;
       }
+    } else {
+      return cand.equalsIgnoreCase(cond);
     }
   }
 
@@ -117,7 +127,7 @@ public class AbstactSelector {
       for (NumCmpr nc : NumCmpr.values()) {
         String exp = nc.express();
         int expLen = exp.length();
-        if (conds.toLowerCase().startsWith(exp) && conds.length() > expLen) {
+        if (conds.toLowerCase(Locale.ROOT).startsWith(exp) && conds.length() > expLen) {
           return new NumAndCmpr(Long.valueOf(conds.substring(expLen)), nc);
         }
       }
@@ -142,7 +152,7 @@ public class AbstactSelector {
           case GTE:
             return cand.longValue() >= cond.longValue();
           case LTE:
-            return cand.longValue() >= cond.longValue();
+            return cand.longValue() <= cond.longValue();
           default:
             return cand.equals(cond);
         }

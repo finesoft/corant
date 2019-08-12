@@ -13,11 +13,14 @@
  */
 package corant.suites.keycloak.spi;
 
+import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.Config.Scope;
+import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
+import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
@@ -30,8 +33,8 @@ import org.keycloak.models.KeycloakSessionFactory;
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProviderFactory.class);
   static final String id = "corantKeycloakEventListener";
-  EventSelector eventSelector;
-  AdminEventSelector adminEventSelector;
+  Predicate<Event> eventSelector;
+  Predicate<AdminEvent> adminEventSelector;
   KeycloakJMSSender jmsSender;
 
   @Override
@@ -52,8 +55,13 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
   @Override
   public void init(Scope config) {
     Scope s = Config.scope("eventListener", id);
-    eventSelector = new EventSelector(s);
-    adminEventSelector = new AdminEventSelector(s);
+    if (s.getBoolean("composition-selector")) {
+      eventSelector = new CompositionEventSelector(s);
+      adminEventSelector = new CompositionAdminEventSelector(s);
+    } else {
+      eventSelector = new EventSelector(s);
+      adminEventSelector = new AdminEventSelector(s);
+    }
     jmsSender = new KeycloakJMSSender(s);
     logger.infof("Initialize %s with id %s.", this.getClass().getName(), getId());
   }

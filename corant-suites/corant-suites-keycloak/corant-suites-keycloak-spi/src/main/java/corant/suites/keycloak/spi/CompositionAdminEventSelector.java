@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
-import org.keycloak.events.Event;
+import org.keycloak.events.admin.AdminEvent;
 
 /**
  * corant-suites-keycloak-spi
@@ -25,26 +25,31 @@ import org.keycloak.events.Event;
  * @author bingo 下午8:12:00
  *
  */
-public class MappedEventSelector extends AbstactSelector implements Predicate<Event> {
+public class CompositionAdminEventSelector extends AbstactSelector implements Predicate<AdminEvent> {
 
-  static final Logger logger = Logger.getLogger(MappedEventSelector.class);
+  static final Logger logger = Logger.getLogger(CompositionAdminEventSelector.class);
 
-  public MappedEventSelector(Scope scope) {
+  public CompositionAdminEventSelector(Scope scope) {
     super(scope);
   }
 
   @Override
-  public boolean test(Event t) {
+  public boolean test(AdminEvent t) {
     boolean forward = false;
     if (!conditions.isEmpty()) {
       for (Map<?, ?> cmd : conditions) {
         boolean forwardx = true;
-        forwardx &= matchString(() -> t.getType().name(), cmd, "type");
-        forwardx &= matchString(() -> t.getClientId(), cmd, "clientId");
-        forwardx &= matchString(() -> t.getRealmId(), cmd, "realmId");
-        forwardx &= matchString(() -> t.getUserId(), cmd, "userId");
-        forwardx &= matchString(() -> t.getSessionId(), cmd, "sessionId");
-        forwardx &= matchString(() -> t.getIpAddress(), cmd, "ipAddress");
+        forwardx &= matchString(t.getRepresentation(), cmd, "representation");
+        forwardx &= matchString(t.getResourcePath(), cmd, "resourcePath");
+        forwardx &= matchString(t.getOperationType().name(), cmd, "operationType");
+        forwardx &= matchString(t.getResourceType().name(), cmd, "resourceType");
+        if (t.getAuthDetails() != null) {
+          forwardx &= matchString(t.getAuthDetails().getClientId(), cmd, "authDetails.clientId");
+          forwardx &= matchString(t.getAuthDetails().getIpAddress(), cmd, "authDetails.ipAddress");
+          forwardx &= matchString(t.getAuthDetails().getRealmId(), cmd, "authDetails.realmId");
+          forwardx &= matchString(t.getAuthDetails().getUserId(), cmd, "authDetails.userId");
+        }
+        forwardx &= matchString(t.getRealmId(), cmd, "realmId");
         forwardx &= matchLong(() -> t.getTime(), cmd, "time");
         if (forward |= forwardx) {
           break;

@@ -13,7 +13,8 @@
  */
 package org.corant.suites.mp.jwt;
 
-import static java.util.Arrays.asList;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Priority;
@@ -23,6 +24,8 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.SecurityContext;
+import org.corant.shared.util.StringUtils.WildcardMatcher;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
  * corant-suites-mp-jwt
@@ -32,12 +35,25 @@ import javax.ws.rs.core.SecurityContext;
  */
 @Priority(Priorities.AUTHORIZATION)
 public class MpRolesAllowedFilter implements ContainerRequestFilter {
-  private final Set<String> allowedRoles;
+  private final Set<String> allowedRoles = new HashSet<>();
+  private final Set<WildcardMatcher> allowedRoleWildcards = new HashSet<>();
   private final boolean allRolesAllowed;
 
   public MpRolesAllowedFilter(String[] allowedRoles) {
-    this.allowedRoles = new HashSet<>(asList(allowedRoles));
-    allRolesAllowed = this.allowedRoles.stream().anyMatch("*"::equals);
+    boolean allRolesAllowed = false;
+    for (String allowedRole : allowedRoles) {
+      if (isNotBlank(allowedRole)) {
+        if ("*".equals(allowedRole)) {
+          allRolesAllowed = true;
+          break;
+        } else if (WildcardMatcher.hasWildcard(allowedRole)) {
+          allowedRoleWildcards.add(WildcardMatcher.of(true, allowedRole));
+        } else {
+          this.allowedRoles.add(allowedRole);
+        }
+      }
+    }
+    this.allRolesAllowed = allRolesAllowed;
   }
 
   @Override
@@ -47,7 +63,17 @@ public class MpRolesAllowedFilter implements ContainerRequestFilter {
     if (allRolesAllowed) {
       isForbidden = securityContext.getUserPrincipal() == null;
     } else {
+
       isForbidden = allowedRoles.stream().noneMatch(securityContext::isUserInRole);
+
+      if (isForbidden && securityContext.getUserPrincipal() instanceof JsonWebToken
+          && !allowedRoleWildcards.isEmpty()) {
+        JsonWebToken jwt = JsonWebToken.class.cast(securityContext.getUserPrincipal());
+        if (isNotEmpty(jwt.getGroups())) {
+          isForbidden = jwt.getGroups().stream()
+              .noneMatch(g -> allowedRoleWildcards.stream().anyMatch(p -> p.test(g)));
+        }
+      }
     }
     if (isForbidden) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {

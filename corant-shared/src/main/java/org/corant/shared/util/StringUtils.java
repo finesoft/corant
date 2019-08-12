@@ -608,12 +608,46 @@ public class StringUtils {
       return new WildcardMatcher(ignoreCase, wildcardExpress);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      WildcardMatcher other = (WildcardMatcher) obj;
+      if (ignoreCase != other.ignoreCase) {
+        return false;
+      }
+      if (wildcardExpress == null) {
+        if (other.wildcardExpress != null) {
+          return false;
+        }
+      } else if (!wildcardExpress.equals(other.wildcardExpress)) {
+        return false;
+      }
+      return true;
+    }
+
     public String[] getTokens() {
       return Arrays.copyOf(tokens, tokens.length);
     }
 
     public String getWildcardExpress() {
       return wildcardExpress;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (ignoreCase ? 1231 : 1237);
+      result = prime * result + (wildcardExpress == null ? 0 : wildcardExpress.hashCode());
+      return result;
     }
 
     public boolean isIgnoreCase() {

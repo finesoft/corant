@@ -7,6 +7,7 @@ function join() {
 }
 
 MAIN_CLASS=#MAIN_CLASS#
+USED_CONFIG_LOCATION=#USED_CONFIG_LOCATION#
 
 BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

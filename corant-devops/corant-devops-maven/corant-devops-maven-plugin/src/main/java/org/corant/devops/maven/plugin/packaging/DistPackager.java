@@ -53,6 +53,7 @@ public class DistPackager implements Packager {
   public static final String RUN_SH = "run.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
+  public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
   public static final String DIST_NAME_SUF = "-dist.zip";
 
   private final PackageMojo mojo;
@@ -139,7 +140,7 @@ public class DistPackager implements Packager {
 
   List<Entry> resolveConfigFiles() {
     List<Entry> entries = new ArrayList<>();
-    String regex = getMojo().getConfigPaths();
+    String regex = getMojo().getDistConfigPaths();
     List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
         .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
     final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
@@ -163,7 +164,7 @@ public class DistPackager implements Packager {
 
   List<Entry> resolveRootResources() throws IOException {
     List<Entry> entries = new ArrayList<>();
-    String regex = getMojo().getResourcePaths();
+    String regex = getMojo().getDistResourcePaths();
     List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
         .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
     final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
@@ -181,14 +182,16 @@ public class DistPackager implements Packager {
   Entry resolveRunbat() throws IOException {
     String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
     final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
+        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
+        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation());
     return new ScriptEntry(RUN_BAT, usebat);
   }
 
   Entry resolveRunsh() throws IOException {
     String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
     final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName());
+        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
+        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation());
     return new ScriptEntry(RUN_SH, usesh);
   }
 

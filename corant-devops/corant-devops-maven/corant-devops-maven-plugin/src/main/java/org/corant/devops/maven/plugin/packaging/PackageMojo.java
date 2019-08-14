@@ -52,12 +52,15 @@ public class PackageMojo extends AbstractMojo {
   protected String mainClass;
 
   @Parameter(defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,**log*.*",
-      property = "corant.maven-mojo.config-paths")
-  protected String configPaths;
+      property = "corant.maven-mojo.dist-config-paths")
+  protected String distConfigPaths;
 
   @Parameter(defaultValue = "**README*,**LICENSE*,**NOTICE*",
-      property = "corant.maven-mojo.resource-paths")
-  protected String resourcePaths;
+      property = "corant.maven-mojo.dist-resource-paths")
+  protected String distResourcePaths;
+
+  @Parameter(defaultValue = "", property = "corant.maven-mojo.used-config-location")
+  protected String usedConfigLocation;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -85,8 +88,12 @@ public class PackageMojo extends AbstractMojo {
     return classifier;
   }
 
-  public String getConfigPaths() {
-    return configPaths;
+  public String getDistConfigPaths() {
+    return distConfigPaths;
+  }
+
+  public String getDistResourcePaths() {
+    return distResourcePaths;
   }
 
   public String getFinalName() {
@@ -101,8 +108,8 @@ public class PackageMojo extends AbstractMojo {
     return project;
   }
 
-  public String getResourcePaths() {
-    return resourcePaths;
+  public String getUsedConfigLocation() {
+    return usedConfigLocation == null ? "" : usedConfigLocation;
   }
 
   public boolean isJar() {

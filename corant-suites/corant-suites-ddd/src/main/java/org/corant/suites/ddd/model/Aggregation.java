@@ -120,18 +120,6 @@ public interface Aggregation extends Entity {
   /**
    * corant-suites-ddd
    *
-   * @author bingo 下午9:04:55
-   *
-   */
-  interface AggregationReference<T extends Aggregation> extends EntityReference<T> {
-
-    Long getVn();
-
-  }
-
-  /**
-   * corant-suites-ddd
-   *
    * @author bingo 下午9:05:13
    *
    */

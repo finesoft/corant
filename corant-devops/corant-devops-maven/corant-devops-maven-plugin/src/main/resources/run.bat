@@ -5,6 +5,7 @@ setlocal enabledelayedexpansion
 TITLE #APPLICATION_NAME#
 
 set MAIN_CLASS=#MAIN_CLASS#
+set USED_CONFIG_LOCATION=#USED_CONFIG_LOCATION#
 
 if "%OS%" == "Windows_NT" (
   set "DIR_PATH=%~dp0%"
@@ -45,9 +46,12 @@ rem such options are the lines beginning with '-', thus "findstr /b"
 for /F "usebackq delims=" %%a in (`findstr /b \- "%CFG_JVM_OPTS%"`) do set JVM_OPTIONS=!JVM_OPTIONS! %%a
 @endlocal & set CORANT_JVM_OPTS=%JVM_OPTIONS% %CORANT_JVM_OPTS%
 
+if "%USED_CONFIG_LOCATION%" == "" set USED_CONFIG_LOCATION = filesystem:%CFG_DIR%
 
 set CORANT_JVM_OPTS=%CORANT_JVM_OPTS% -classpath %CLASS_PATH%
-set CORANT_JVM_OPTS=%CORANT_JVM_OPTS% -Dcorant.config.location=%CFG_DIR%
+set CORANT_JVM_OPTS=%CORANT_JVM_OPTS% -Dcorant.config.location=%USED_CONFIG_LOCATION%
+
+
 
 if not "%DEBUG_ARGS%"=="" set JVM_ARGS=%JVM_ARGS% %DEBUG_ARGS%
 

@@ -75,12 +75,12 @@ public class Participator extends AbstractValueObject implements Principal {
 
   public static Participator currentOrg() {
     Optional<SecurityContextProducer> scp = resolve(SecurityContextProducer.class);
-    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentUser();
+    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentOrg();
   }
 
   public static Participator currentUser() {
     Optional<SecurityContextProducer> scp = resolve(SecurityContextProducer.class);
-    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentOrg();
+    return (scp.isPresent() ? scp.get().get() : DefaultSecurityContext.EMPTY_INST).getCurrentUser();
   }
 
   public static Participator empty() {

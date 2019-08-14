@@ -56,9 +56,13 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
     try {
       if (isNotEmpty(pfLocations)) {
         // first find locations that designated in system properties or system environment
+        logger.info(String.format("Load profile config source from designated locations %s",
+            String.join(",", pfLocations)));
         list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter,
             pfLocations));
       } else {
+        logger.info(String.format("Load profile config source from class paths %s",
+            String.join(",", pfClassPaths)));
         list.addAll(ConfigSourceLoader.load(classLoader,
             ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter, pfClassPaths));
       }

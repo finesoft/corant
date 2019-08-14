@@ -149,7 +149,9 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
-      this.raise(new AggregationLifecycleEvent(this), AggregationTypeLiteral.of(getClass()));
+      if (lifecycle != Lifecycle.LOADED) {
+        this.raise(new AggregationLifecycleEvent(this), AggregationTypeLiteral.of(getClass()));
+      }
     }
     return this;
   }

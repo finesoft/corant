@@ -7,6 +7,7 @@ function join() {
 }
 
 MAIN_CLASS=#MAIN_CLASS#
+USED_CONFIG_LOCATION=#USED_CONFIG_LOCATION#
 
 BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -50,5 +51,9 @@ do
     shift
 done
 
-SERVER_OPTS="$SERVER_OPTS -cp $CLASSPATH -Dcorant.config.location=$CFG_DIR"
+if [ "x$USED_CONFIG_LOCATION" = "x" ]; then
+	USED_CONFIG_LOCATION="filesystem:$CFG_DIR"
+fi
+
+SERVER_OPTS="$SERVER_OPTS -cp $CLASSPATH -Dcorant.config.location=$USED_CONFIG_LOCATION"
 exec $JAVA $SERVER_OPTS $MAIN_CLASS $*

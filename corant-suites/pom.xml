@@ -5,20 +5,10 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-root</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-suites</artifactId>
 	<packaging>pom</packaging>
-	<scm>
-		<url>https://github.com/finesoft/corant</url>
-		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
-		<developerConnection>scm:git:git@github.com:finesoft/corant.git</developerConnection>
-	</scm>
-	<licenses>
-		<license>
-			<name>AL2</name>
-		</license>
-	</licenses>
 	<modules>
 		<module>corant-suites-servlet</module>
 		<module>corant-suites-jpa</module>
@@ -47,20 +37,33 @@
 		<module>corant-suites-lang</module>
 		<module>corant-suites-keycloak</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-boms</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xsd</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-devops-maven-jandex</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>jandex</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

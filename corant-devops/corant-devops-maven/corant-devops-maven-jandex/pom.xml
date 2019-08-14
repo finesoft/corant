@@ -5,20 +5,10 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-devops-maven</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-devops-maven-jandex</artifactId>
 	<packaging>maven-plugin</packaging>
-	<scm>
-		<url>https://github.com/finesoft/corant</url>
-		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
-		<developerConnection>scm:git:git@github.com:finesoft/corant.git</developerConnection>
-	</scm>
-	<licenses>
-		<license>
-			<name>AL2</name>
-		</license>
-	</licenses>
 	<properties>
 		<version.maven-plugin-plugin>3.5.1</version.maven-plugin-plugin>
 		<version.maven-plugin-api>3.2.5</version.maven-plugin-api>
@@ -55,6 +45,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${version.maven-surefire-plugin}</version>
 				<configuration>
 					<forkCount>0</forkCount>
 					<forkMode>never</forkMode>

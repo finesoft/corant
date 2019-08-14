@@ -5,30 +5,29 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-root</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-demo</artifactId>
 	<packaging>pom</packaging>
 	<modules>
 		<module>corant-demo-ddd</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-boms</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-devops-maven-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>package</goal>
-						</goals>
-						<configuration>
-							<mainClass>org.corant.demo.ddd.App</mainClass>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

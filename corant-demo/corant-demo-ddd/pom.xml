@@ -19,6 +19,11 @@
 			<optional>false</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-ddd</artifactId>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate.ogm</groupId>
 			<artifactId>hibernate-ogm-mongodb</artifactId>
 		</dependency>

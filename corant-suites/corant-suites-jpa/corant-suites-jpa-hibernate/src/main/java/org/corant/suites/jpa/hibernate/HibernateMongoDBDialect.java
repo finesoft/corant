@@ -1,5 +1,6 @@
 package org.corant.suites.jpa.hibernate;
 
+import org.corant.suites.jpa.hibernate.type.BigDecimalType;
 import org.corant.suites.jpa.hibernate.type.InstantType;
 import org.hibernate.ogm.datastore.mongodb.MongoDBDialect;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
@@ -25,6 +26,8 @@ public class HibernateMongoDBDialect extends MongoDBDialect {
     GridType gt = super.overrideType(type);
     if (gt == null && type == org.hibernate.type.InstantType.INSTANCE) {
       return InstantType.INSTANCE;
+    } else if (type == org.hibernate.type.BigDecimalType.INSTANCE) {
+      return BigDecimalType.INSTANCE;
     }
     return null;
   }

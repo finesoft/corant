@@ -8,9 +8,6 @@
 	<packaging>pom</packaging>
 	<name>corant root</name>
 	<description>Microservice stack with CDI MicroProfile.</description>
-	<properties>
-
-	</properties>
 	<scm>
 		<url>https://github.com/finesoft/corant</url>
 		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
@@ -62,24 +59,6 @@
 							<!--<goal>jar-no-fork</goal>
 							<goal>test-jar-no-fork</goal>-->
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/it/java</source>
-							</sources>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

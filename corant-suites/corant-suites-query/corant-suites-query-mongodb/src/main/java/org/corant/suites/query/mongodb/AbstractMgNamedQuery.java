@@ -107,7 +107,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     ForwardList<T> result = ForwardList.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
     int size = getSize(list);
     if (size > 0) {
       this.fetch(list, fetchQueries, param);
@@ -128,7 +128,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     List<QueryHint> hints = querier.getHints();
     log(q, param, querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result = fi.iterator().tryNext();
+    Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
     this.fetch(result, fetchQueries, param);
     handleResultHints(resultClass, hints, param, result);
     return convert(result, resultClass);
@@ -146,7 +146,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     log(q, param, querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
-        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
     int size = getSize(list);
     if (size > 0) {
       if (size < limit) {
@@ -169,7 +169,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     log(q, param, querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
     List<Map<String, Object>> result =
-        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
     int size = getSize(result);
     if (size > 0) {
       this.fetch(result, fetchQueries, param);
@@ -186,7 +186,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     List<QueryHint> hints = querier.getHints();
     log(q, param, querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
-      this.fetch(result, fetchQueries, param);
+      this.fetch(Decimal128Utils.convert(result), fetchQueries, param);
       handleResultHints(resultClass, hints, param, result);
       return convert(result, resultClass);
     });

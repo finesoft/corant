@@ -12,6 +12,9 @@
 	<modules>
 		<module>corant-demo-ddd</module>
 	</modules>
+	<properties>
+		<runner-class>org.corant.demo.ddd.App</runner-class>
+	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

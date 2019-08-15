@@ -1,12 +1,11 @@
 package org.corant.suites.jpa.hibernate.type;
 
+import java.math.BigDecimal;
 import org.corant.suites.jpa.hibernate.type.descriptor.BigDecimalGridTypeDescriptor;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.Mapping;
 import org.hibernate.ogm.type.impl.AbstractGenericBasicType;
 import org.hibernate.type.descriptor.java.BigDecimalTypeDescriptor;
-
-import java.math.BigDecimal;
 
 /**
  * cps-m2b <br>

@@ -19,13 +19,19 @@ import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
  */
 public class InstantGridTypeDescriptor implements GridTypeDescriptor {
 
-  private static final long serialVersionUID = 991665264844086431L;
-
   public static final InstantGridTypeDescriptor INSTANCE = new InstantGridTypeDescriptor();
+
+  private static final long serialVersionUID = 991665264844086431L;
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new InstantGridBinder<>(javaTypeDescriptor, this, javaTypeDescriptor);
+    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
+      @Override
+      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+        Instant unwrap = javaTypeDescriptor.unwrap(value, Instant.class, options);
+        resultset.put(names[0], unwrap);
+      }
+    };
   }
 
   @Override
@@ -39,30 +45,4 @@ public class InstantGridTypeDescriptor implements GridTypeDescriptor {
     };
   }
 
-  /**
-   * corant-suites-jpa-hibernate
-   *
-   * @author bingo 下午8:31:02
-   *
-   */
-  static final class InstantGridBinder<X> extends BasicGridBinder<X> {
-    private final JavaTypeDescriptor<X> javaTypeDescriptor;
-
-    /**
-     * @param javaDescriptor
-     * @param gridDescriptor
-     * @param javaTypeDescriptor
-     */
-    InstantGridBinder(JavaTypeDescriptor<X> javaDescriptor, GridTypeDescriptor gridDescriptor,
-        JavaTypeDescriptor<X> javaTypeDescriptor) {
-      super(javaDescriptor, gridDescriptor);
-      this.javaTypeDescriptor = javaTypeDescriptor;
-    }
-
-    @Override
-    protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-      Instant unwrap = javaTypeDescriptor.unwrap(value, Instant.class, options);
-      resultset.put(names[0], unwrap);
-    }
-  }
 }

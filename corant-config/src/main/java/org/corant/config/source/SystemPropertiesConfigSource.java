@@ -11,8 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.config.source;
 
+import static org.corant.shared.util.MapUtils.toMap;
 import java.util.Collections;
 import java.util.Map;
 import org.corant.kernel.normal.Priorities;
@@ -24,14 +25,14 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 上午11:04:36
  *
  */
-public class SystemEnvironmentConfigSource extends AbstractConfigSource {
+public class SystemPropertiesConfigSource extends AbstractConfigSource {
 
-  final Map<String, String> sysPros = Collections.unmodifiableMap(System.getenv());
+  final Map<String, String> sysPros = Collections.unmodifiableMap(toMap(System.getProperties()));
 
-  public SystemEnvironmentConfigSource() {
+  public SystemPropertiesConfigSource() {
     super();
-    name = "System.environment";
-    ordinal = Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
+    name = "System.properties";
+    ordinal = Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
   }
 
   @Override
@@ -41,7 +42,7 @@ public class SystemEnvironmentConfigSource extends AbstractConfigSource {
 
   @Override
   AbstractConfigSource withProperties(Map<String, String> properties) {
-    throw new NotSupportedException("Can not adjust system environment!");
+    throw new NotSupportedException("Can not adjust system properties!");
   }
 
 }

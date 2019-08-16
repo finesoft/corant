@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.config.Configurations.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;

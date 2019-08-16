@@ -13,7 +13,7 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.config.Configurations.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;

@@ -22,7 +22,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
-import org.corant.config.Configurations;
+import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.service.DataSourceService;
 import org.corant.kernel.service.PersistenceService.PersistenceUnitLiteral;
@@ -182,7 +182,7 @@ public class HibernateOrmSchemaUtils {
 
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
-    Configurations.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
+    ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
     return Corant.run(HibernateOrmSchemaUtils.class, "-disable_boost_line");
   }
 

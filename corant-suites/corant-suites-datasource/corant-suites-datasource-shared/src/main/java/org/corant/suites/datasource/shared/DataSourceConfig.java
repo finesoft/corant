@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.shared;
 
-import static org.corant.config.Configurations.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StreamUtils.streamOf;

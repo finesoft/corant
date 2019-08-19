@@ -11,29 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.config.resolve;
 
-import java.net.URL;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * corant-config
  *
- * @author bingo 上午10:11:23
+ * @author bingo 下午7:42:56
  *
  */
-public class XmlConfigSource extends AbstractConfigSource {
+public class DeclarativeConfigResolver {
 
-  XmlConfigSource(URL resourceUrl, int ordinal) {}
-
-  @Override
-  public Map<String, String> getProperties() {
-    return null;
-  }
-
-  @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
-    return null;
+  public static <T extends DeclarativeConfig> List<T> resolve(Class<T> cls) {
+    List<T> configList = new ArrayList<>();
+    return configList;
   }
 
 }

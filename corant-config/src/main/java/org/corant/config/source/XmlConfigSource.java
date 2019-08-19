@@ -11,38 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.config.source;
 
-import static org.corant.shared.util.MapUtils.toMap;
-import java.util.Collections;
+import java.net.URL;
 import java.util.Map;
-import org.corant.kernel.normal.Priorities;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-config
  *
- * @author bingo 上午11:04:36
+ * @author bingo 上午10:11:23
  *
  */
-public class SystemPropertiesConfigSource extends AbstractConfigSource {
+public class XmlConfigSource extends AbstractConfigSource {
 
-  final Map<String, String> sysPros = Collections.unmodifiableMap(toMap(System.getProperties()));
-
-  public SystemPropertiesConfigSource() {
-    super();
-    name = "System.properties";
-    ordinal = Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
-  }
+  XmlConfigSource(URL resourceUrl, int ordinal) {}
 
   @Override
   public Map<String, String> getProperties() {
-    return sysPros;
+    return null;
   }
 
   @Override
   AbstractConfigSource withProperties(Map<String, String> properties) {
-    throw new NotSupportedException("Can not adjust system properties!");
+    return null;
   }
 
 }

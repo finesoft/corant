@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.artemis;
 
-import static org.corant.config.Configurations.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isNotEmpty;

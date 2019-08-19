@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
-import static org.corant.config.Configurations.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;

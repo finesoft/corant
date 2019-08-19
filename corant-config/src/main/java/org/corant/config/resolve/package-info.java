@@ -11,33 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
-
-import java.net.URL;
-import java.util.Map;
-
 /**
  * corant-config
- *
- * @author bingo 上午10:10:55
+ * 
+ * @author bingo 下午7:37:19
  *
  */
-public class JsonConfigSource extends AbstractConfigSource {
-
-  JsonConfigSource(URL resourceUrl, int ordinal) {
-    // TODO
-  }
-
-  @Override
-  public Map<String, String> getProperties() {
-    // TODO
-    return null;
-  }
-
-  @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
-    // TODO
-    return null;
-  }
-
-}
+package org.corant.config.resolve;

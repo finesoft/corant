@@ -31,7 +31,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:23:28
  *
  */
-public class Configurations {
+public class ConfigUtils {
 
   public static final String SEPARATOR = String.valueOf(Names.NAME_SPACE_SEPARATOR);
 

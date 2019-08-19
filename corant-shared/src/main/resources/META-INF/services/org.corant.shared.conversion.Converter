@@ -25,6 +25,7 @@ org.corant.shared.conversion.converter.StringByteConverter
 org.corant.shared.conversion.converter.StringCharacterConveter
 org.corant.shared.conversion.converter.StringCurrencyConverter
 org.corant.shared.conversion.converter.StringDoubleConveter
+org.corant.shared.conversion.converter.StringDurationConveter
 org.corant.shared.conversion.converter.StringFloatConveter
 org.corant.shared.conversion.converter.StringInstantConverter
 org.corant.shared.conversion.converter.StringIntegerConverter

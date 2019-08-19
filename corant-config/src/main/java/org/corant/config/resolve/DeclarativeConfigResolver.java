@@ -54,13 +54,13 @@ public class DeclarativeConfigResolver {
     ConfigClass<T> configClass = resolveClass(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
-      Set<String> keys = getMatchedKeys(configClass, config);
-      configMaps.putAll(handle(config, keys, configClass));
+      Set<String> keys = resolveKeys(configClass, config);
+      configMaps.putAll(resolve(config, keys, configClass));
     }
     return configMaps;
   }
 
-  static Set<String> getMatchedKeys(ConfigClass<?> configClass, Config config) {
+  static Set<String> resolveKeys(ConfigClass<?> configClass, Config config) {
     final String prefix = ConfigUtils.regulerKeyPrefix(configClass.keyRoot);
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();
@@ -82,7 +82,7 @@ public class DeclarativeConfigResolver {
     return keys;
   }
 
-  static <T extends DeclarativeConfig> Map<String, T> handle(Config config, Set<String> keys,
+  static <T extends DeclarativeConfig> Map<String, T> resolve(Config config, Set<String> keys,
       ConfigClass<T> configClass) throws InstantiationException, IllegalAccessException {
     Map<String, T> configMaps = new HashMap<>();
     if (isNotEmpty(keys)) {
@@ -100,7 +100,7 @@ public class DeclarativeConfigResolver {
     return configMaps;
   }
 
-  static <T extends DeclarativeConfig> T handle(Config config, String infix, T configObject,
+  static <T extends DeclarativeConfig> T resolve(Config config, String infix, T configObject,
       ConfigClass<T> configClass) throws IllegalArgumentException, IllegalAccessException {
     for (ConfigField cf : configClass.fields) {
       handle(config, infix, configObject, cf);

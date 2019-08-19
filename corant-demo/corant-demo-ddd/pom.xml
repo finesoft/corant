@@ -5,20 +5,9 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-demo</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-demo-ddd</artifactId>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-boms</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
@@ -26,11 +15,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-asosat-ddd</artifactId>
+			<artifactId>corant-suites-security-keycloak</artifactId>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-security-keycloak</artifactId>
+			<artifactId>corant-suites-ddd</artifactId>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
@@ -58,23 +48,8 @@
 		</dependency>
 		<!-- Standard JEE -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>javax.jms-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

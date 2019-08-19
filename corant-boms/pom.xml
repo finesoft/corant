@@ -5,23 +5,11 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-root</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<packaging>pom</packaging>
-	<scm>
-		<url>https://github.com/finesoft/corant</url>
-		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
-		<developerConnection>scm:git:git@github.com:finesoft/corant.git</developerConnection>
-	</scm>
-	<licenses>
-		<license>
-			<name>AL2</name>
-		</license>
-	</licenses>
-
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<version.javaee-api>8.0</version.javaee-api>
 		<version.javax.servlet-api>3.1.0</version.javax.servlet-api>
@@ -386,6 +374,12 @@
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
 				<version>${version.undertow}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.logging</groupId>
+						<artifactId>jboss-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
@@ -708,6 +702,12 @@
 				<groupId>net.sf.jasperreports</groupId>
 				<artifactId>jasperreports</artifactId>
 				<version>${version.jasperreports}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.lowagie</groupId>
+						<artifactId>itext</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- LANG -->
@@ -1176,5 +1176,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 
 </project>

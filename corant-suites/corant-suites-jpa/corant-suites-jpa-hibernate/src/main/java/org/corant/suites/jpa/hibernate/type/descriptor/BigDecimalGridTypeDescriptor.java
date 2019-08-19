@@ -19,38 +19,38 @@ import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
  */
 public class BigDecimalGridTypeDescriptor implements GridTypeDescriptor {
 
-  public static final BigDecimalGridTypeDescriptor INSTANCE = new BigDecimalGridTypeDescriptor();
+    public static final BigDecimalGridTypeDescriptor INSTANCE = new BigDecimalGridTypeDescriptor();
 
-  private static final long serialVersionUID = -3323272062776948180L;
+    private static final long serialVersionUID = -3323272062776948180L;
 
-  @Override
-  public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
-      @Override
-      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-        BigDecimal unwrap = javaTypeDescriptor.unwrap(value, BigDecimal.class, options);
-        resultset.put(names[0], unwrap);
-      }
-    };
-  }
+    @Override
+    public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
+        return new BasicGridBinder<X>(javaTypeDescriptor, this) {
+            @Override
+            protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+                BigDecimal unwrap = javaTypeDescriptor.unwrap(value, BigDecimal.class, options);
+                resultset.put(names[0], unwrap);
+            }
+        };
+    }
 
-  @Override
-  public <X> GridValueExtractor<X> getExtractor(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return (resultSet, name) -> {
-      Object document = resultSet.get(name);
-      if (document == null) {
-        return null;
-      } else if (document instanceof Decimal128) {
-        return javaTypeDescriptor
-            .wrap(toBigDecimal(Decimal128.class.cast(document).bigDecimalValue()), null);
-      } else if (Double.class.isInstance(document)) {
-        return javaTypeDescriptor.wrap(toBigDecimal(document), null);
-      } else if (BigDecimal.class.isInstance(document)) {
-        return javaTypeDescriptor.wrap(toBigDecimal(document), null);
-      } else {
-        return javaTypeDescriptor.wrap(toBigDecimal(document.toString()), null);
-      }
-    };
-  }
+    @Override
+    public <X> GridValueExtractor<X> getExtractor(JavaTypeDescriptor<X> javaTypeDescriptor) {
+        return (resultSet, name) -> {
+            Object document = resultSet.get(name);
+            if (document == null) {
+                return null;
+            } else if (document instanceof Decimal128) {
+                return javaTypeDescriptor
+                        .wrap(toBigDecimal(Decimal128.class.cast(document).bigDecimalValue()), null);
+            } else if (Double.class.isInstance(document)) {
+                return javaTypeDescriptor.wrap(toBigDecimal(document), null);
+            } else if (BigDecimal.class.isInstance(document)) {
+                return javaTypeDescriptor.wrap(toBigDecimal(document), null);
+            } else {
+                return javaTypeDescriptor.wrap(toBigDecimal(document.toString()), null);
+            }
+        };
+    }
 
 }

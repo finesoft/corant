@@ -5,30 +5,9 @@
 	<parent>
 		<groupId>org.corant</groupId>
 		<artifactId>corant-suites</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-suites-mongodb</artifactId>
-	<scm>
-		<url>https://github.com/finesoft/corant</url>
-		<connection>scm:git:git@github.com:finesoft/corant.git</connection>
-		<developerConnection>scm:git:git@github.com:finesoft/corant.git</developerConnection>
-	</scm>
-	<licenses>
-		<license>
-			<name>AL2</name>
-		</license>
-	</licenses>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-boms</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
@@ -41,11 +20,6 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongodb-driver</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax</groupId>

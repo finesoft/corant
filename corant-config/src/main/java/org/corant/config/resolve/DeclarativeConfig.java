@@ -15,10 +15,17 @@ package org.corant.config.resolve;
 
 /**
  * corant-config
- * 
+ *
  * @author bingo 下午7:43:15
  *
  */
 public interface DeclarativeConfig {
 
+  default boolean isValid() {
+    return true;
+  }
+
+  default void onPostConstruct() {
+
+  }
 }

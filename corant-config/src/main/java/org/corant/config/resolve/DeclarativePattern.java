@@ -59,10 +59,11 @@ public enum DeclarativePattern {
         Optional<?> val = config.getOptionalValue(key, fieldType);
         if (val.isPresent()) {
           field.set(configObject, toObject(val.get(), fieldType));
-        } else {
+          nocfg = false;
+        } else if (configField.getDefaultValue() == null) {
           field.set(configObject, Boolean.FALSE);
+          nocfg = false;
         }
-        nocfg = false;
       } else if (fieldType.equals(Optional.class)) {
         Class<?> fieldValueType = ConfigUtils.getFieldActualTypeArguments(field, 0);
         Optional<?> val = config.getOptionalValue(key, fieldValueType);

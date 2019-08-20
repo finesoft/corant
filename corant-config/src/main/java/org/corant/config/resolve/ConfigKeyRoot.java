@@ -31,5 +31,8 @@ import java.lang.annotation.Target;
  *
  */
 public @interface ConfigKeyRoot {
+
+  int keyIndex() default 1;
+
   String value();
 }

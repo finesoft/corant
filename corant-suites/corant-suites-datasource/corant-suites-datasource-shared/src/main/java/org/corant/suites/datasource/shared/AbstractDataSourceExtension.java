@@ -15,6 +15,7 @@ package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -22,10 +23,11 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.corant.config.resolve.DeclarativeConfigResolver;
 import org.corant.kernel.util.Instances.NamingReference;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-suites-datasource-shared
@@ -44,7 +46,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected volatile InitialContext jndi;
 
   /**
-   * 
+   *
    * @return the configManager
    */
   public NamedQualifierObjectManager<DataSourceConfig> getConfigManager() {
@@ -57,7 +59,9 @@ public abstract class AbstractDataSourceExtension implements Extension {
    * @param bbd onBeforeBeanDiscovery
    */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    configManager = DataSourceConfig.from(ConfigProvider.getConfig());
+    Map<String, DataSourceConfig> configs =
+        DeclarativeConfigResolver.resolveMulti(DataSourceConfig.class);
+    configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {

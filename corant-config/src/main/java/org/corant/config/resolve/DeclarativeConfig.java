@@ -13,6 +13,8 @@
  */
 package org.corant.config.resolve;
 
+import org.eclipse.microprofile.config.Config;
+
 /**
  * corant-config
  *
@@ -25,7 +27,7 @@ public interface DeclarativeConfig {
     return true;
   }
 
-  default void onPostConstruct() {
+  default void onPostConstruct(Config config, String key) {
 
   }
 }

@@ -27,10 +27,11 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import org.corant.config.resolve.DeclarativeConfigResolver;
 import org.corant.kernel.event.PreContainerStopEvent;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
@@ -64,7 +65,9 @@ public class ElasticExtension implements Extension {
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    configManager = ElasticConfig.from(ConfigProvider.getConfig());
+    Map<String, ElasticConfig> configs =
+        DeclarativeConfigResolver.resolveMulti(ElasticConfig.class);
+    configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {

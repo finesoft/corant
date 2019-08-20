@@ -30,7 +30,6 @@ import org.eclipse.microprofile.config.Config;
 /**
  * corant-suites-datasource-shared
  *
- * @see DataSourceConfig#from(Config)
  * @see Unnamed
  * @author bingo 下午3:45:45
  *
@@ -104,7 +103,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   }
 
   /**
-   * 
+   *
    * @return the additionProperties
    */
   public Map<String, Object> getAdditionProperties() {

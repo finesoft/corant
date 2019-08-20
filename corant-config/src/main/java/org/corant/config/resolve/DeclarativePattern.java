@@ -47,12 +47,21 @@ public enum DeclarativePattern {
     @Override
     public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
         ConfigField configField) throws Exception {
-      Class<?> filedType = configField.getType();
+      Class<?> fieldType = configField.getType();
+      Class<?> fieldValueType = fieldType;
       Field field = configField.getField();
+      if (field.getType().equals(Optional.class)) {
+        fieldValueType =
+            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+      }
       String key = configField.getKey(infix);
-      Optional<?> val = config.getOptionalValue(key, filedType);
+      Optional<?> val = config.getOptionalValue(key, fieldValueType);
       if (val.isPresent()) {
-        field.set(configObject, val.get());
+        if (field.getType().equals(Optional.class)) {
+          field.set(configObject, Optional.of(toObject(val.get(), fieldValueType)));
+        } else {
+          field.set(configObject, val.get());
+        }
       } else {
         resolveNoConfig(config, configObject, configField);
       }

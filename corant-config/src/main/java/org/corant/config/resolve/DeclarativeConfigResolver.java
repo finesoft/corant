@@ -103,8 +103,8 @@ public class DeclarativeConfigResolver {
         for (ConfigField cf : configClass.getFields()) {
           cf.getPattern().resolve(config, key, configObject, cf);
         }
+        configObject.onPostConstruct(config, key);
         if (configObject.isValid()) {
-          configObject.onPostConstruct(config, key);
           configMaps.put(key, configObject);
         }
       }
@@ -196,13 +196,18 @@ public class DeclarativeConfigResolver {
       defaultValue = cki.defaultValue();
       defaultKey = ConfigUtils.concatKey(configClass.getKeyRoot(), getKeyItem());
       if (pattern == DeclarativePattern.PREFIX) {
-        shouldBeTrue(type.equals(Map.class), "We only support Map field type for PREFIX pattern");
+        shouldBeTrue(type.equals(Map.class),
+            "We only support Map field type for PREFIX pattern %s %s.",
+            configClass.getClazz().getName(), field.getName());
         Class<?> mapKeyType =
             (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
         Class<?> mapValType =
             (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
-        shouldBeTrue(mapKeyType.equals(String.class) && mapValType.equals(Object.class),
-            "We only support Map<String,Object> field type for PREFIX pattern.");
+        shouldBeTrue(
+            mapKeyType.equals(String.class)
+                && (mapValType.equals(Object.class) || mapValType.equals(String.class)),
+            "We only support Map<String,Object> or Map<String,String> field type for PREFIX pattern %s %s.",
+            configClass.getClazz().getName(), field.getName());
       }
     }
 
@@ -219,11 +224,8 @@ public class DeclarativeConfigResolver {
     }
 
     public String getKey(String infix) {
-      if (isBlank(infix)) {
-        return getDefaultKey();
-      } else {
-        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
-      }
+      return isBlank(infix) ? getDefaultKey()
+          : ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
     }
 
     public String getKeyItem() {

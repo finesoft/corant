@@ -19,8 +19,8 @@ package org.corant.config.resolve;
  * @author bingo 下午8:05:35
  *
  */
-public enum ConfigKeyItemType {
+public enum DeclarativePattern {
 
-  PREFIX, INFIX, SUFFIX, WILDCARD, REGEX
+  SUFFIX, PREFIX
 
 }

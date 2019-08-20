@@ -30,9 +30,11 @@ import java.lang.annotation.Target;
  */
 public @interface ConfigKeyItem {
 
-  String defaultValue() default "";
+  public static final String NO_DFLT_VALUE = "$no_default_value$";
 
-  ConfigKeyItemType type() default ConfigKeyItemType.SUFFIX;
+  String defaultValue() default NO_DFLT_VALUE;
 
-  String value();
+  DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
+
+  String value() default "";
 }

@@ -16,6 +16,7 @@ package org.corant.config;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
@@ -33,11 +34,34 @@ import org.eclipse.microprofile.config.Config;
  */
 public class ConfigUtils {
 
-  public static final String SEPARATOR = String.valueOf(Names.NAME_SPACE_SEPARATOR);
+  public static final String SEPARATOR = Names.NAME_SPACE_SEPARATORS;
+  public static final int SEPARATOR_LEN = SEPARATOR.length();
+
+  private static final String VALUE_DELIMITER = "(?<!\\\\),";
+  private static final String KEY_DELIMITER = "(?<!\\\\)\\.";
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
     map.forEach((k, v) -> System.setProperty(ConfigNames.CFG_ADJUST_PREFIX + defaultString(k), v));
+  }
+
+  public static String concatKey(String... keys) {
+    String concats = "";
+    for (String key : keys) {
+      concats = removeSplitor(concats).concat(SEPARATOR).concat(removeSplitor(defaultTrim(key)));
+    }
+    return removeSplitor(concats);
+  }
+
+  public static String dashify(String substring) {
+    StringBuilder ret = new StringBuilder();
+    for (char i : substring.toCharArray()) {
+      if (i >= 'A' && i <= 'Z') {
+        ret.append('-');
+      }
+      ret.append(Character.toLowerCase(i));
+    }
+    return ret.toString();
   }
 
   public static Map<String, List<String>> getGroupConfigNames(Config config,
@@ -67,4 +91,45 @@ public class ConfigUtils {
     return getGroupConfigNames(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
+  public static String regulerKeyPrefix(String prefix) {
+    String rs = defaultTrim(prefix);
+    if (rs.length() == 0) {
+      return rs;
+    }
+    return removeSplitor(prefix).concat(SEPARATOR);
+  }
+
+  public static String removeSplitor(final String str) {
+    String rs = defaultTrim(str);
+    if (rs.length() == 0) {
+      return rs;
+    }
+    while (rs.endsWith(SEPARATOR)) {
+      rs = defaultTrim(rs.substring(0, rs.length() - SEPARATOR_LEN));
+    }
+    while (rs.startsWith(SEPARATOR)) {
+      rs = defaultTrim(rs.substring(SEPARATOR_LEN));
+    }
+    return rs;
+  }
+
+  public static String[] splitKey(String text) {
+    return splitProperties(text, KEY_DELIMITER);
+  }
+
+  public static String[] splitProperties(String text, String regex) {
+    if (text == null) {
+      return new String[0];
+    }
+    String splitor = regex.substring(regex.length() - 1);
+    String[] split = text.split(regex);
+    for (int i = 0; i < split.length; i++) {
+      split[i] = split[i].replace("\\" + splitor, splitor);
+    }
+    return split;
+  }
+
+  public static String[] splitValue(String text) {
+    return splitProperties(text, VALUE_DELIMITER);
+  }
 }

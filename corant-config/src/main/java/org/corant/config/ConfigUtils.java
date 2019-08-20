@@ -19,6 +19,8 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.split;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -62,6 +64,10 @@ public class ConfigUtils {
       ret.append(Character.toLowerCase(i));
     }
     return ret.toString();
+  }
+
+  public static Class<?> getFieldActualTypeArguments(Field field, int index) {
+    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
   }
 
   public static Map<String, List<String>> getGroupConfigNames(Config config,

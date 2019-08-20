@@ -13,12 +13,16 @@
  */
 package org.corant.config.resolve;
 
+import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.split;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.config.ConfigUtils;
 import org.corant.config.resolve.DeclarativeConfigResolver.ConfigField;
+import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -43,33 +48,60 @@ import org.eclipse.microprofile.config.Config;
 public enum DeclarativePattern {
 
   SUFFIX() {
-
     @Override
     public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
         ConfigField configField) throws Exception {
       Class<?> fieldType = configField.getType();
-      Class<?> fieldValueType = fieldType;
       Field field = configField.getField();
-      if (field.getType().equals(Optional.class)) {
-        fieldValueType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-      }
       String key = configField.getKey(infix);
-      Optional<?> val = config.getOptionalValue(key, fieldValueType);
-      if (val.isPresent()) {
-        if (field.getType().equals(Optional.class)) {
-          field.set(configObject, Optional.of(toObject(val.get(), fieldValueType)));
+      boolean nocfg = true;
+      if (fieldType.equals(Boolean.class) || fieldType.equals(Boolean.TYPE)) {
+        Optional<?> val = config.getOptionalValue(key, fieldType);
+        if (val.isPresent()) {
+          field.set(configObject, toObject(val.get(), fieldType));
         } else {
-          field.set(configObject, val.get());
+          field.set(configObject, Boolean.FALSE);
+        }
+        nocfg = false;
+      } else if (fieldType.equals(Optional.class)) {
+        Class<?> fieldValueType = ConfigUtils.getFieldActualTypeArguments(field, 0);
+        Optional<?> val = config.getOptionalValue(key, fieldValueType);
+        if (val.isPresent()) {
+          field.set(configObject, Optional.of(toObject(val.get(), fieldValueType)));
+          nocfg = false;
+        }
+      } else if (Collection.class.isAssignableFrom(fieldType)) {
+        Class<?> fieldValueType = ConfigUtils.getFieldActualTypeArguments(field, 0);
+        Optional<String> val = config.getOptionalValue(key, String.class);
+        if (val.isPresent()) {
+          List<?> vals = toList(listOf(split(val.get(), ",", true, true)), fieldValueType);
+          if (isNotEmpty(vals)) {
+            if (fieldType.equals(List.class)) {
+              field.set(configObject, vals);
+            } else if (fieldType.equals(Set.class)) {
+              field.set(configObject, new HashSet<>(vals));
+            } else {
+              throw new NotSupportedException("Can not resolve config field %s %s %s %s.",
+                  configObject.getClass().getName(), field.getName(), fieldType.getName(),
+                  fieldValueType.getName());
+            }
+            nocfg = false;
+          }
         }
       } else {
+        Optional<?> val = config.getOptionalValue(key, String.class);
+        if (val.isPresent()) {
+          field.set(configObject, toObject(val.get(), fieldType));
+          nocfg = false;
+        }
+      }
+      if (nocfg) {
         resolveNoConfig(config, configObject, configField);
       }
     }
-
   },
-  PREFIX() {
 
+  PREFIX() {
     @Override
     public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
         ConfigField configField) throws Exception {
@@ -106,8 +138,7 @@ public enum DeclarativePattern {
     Field field = configField.getField();
     if (defaultValue != null) {
       if (filedType.equals(List.class)) {
-        Class<?> listType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+        Class<?> listType = ConfigUtils.getFieldActualTypeArguments(field, 0);
         String[] parts = ConfigUtils.splitValue(defaultValue);
         List<Object> list = new ArrayList<>();
         for (String i : parts) {
@@ -115,8 +146,7 @@ public enum DeclarativePattern {
         }
         field.set(configObject, list);
       } else if (filedType.equals(Set.class)) {
-        Class<?> listType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+        Class<?> listType = ConfigUtils.getFieldActualTypeArguments(field, 0);
         String[] parts = ConfigUtils.splitValue(defaultValue);
         Set<Object> list = new HashSet<>();
         for (String i : parts) {
@@ -124,8 +154,7 @@ public enum DeclarativePattern {
         }
         field.set(configObject, list);
       } else if (field.getType().equals(Optional.class)) {
-        Class<?> optionalType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+        Class<?> optionalType = ConfigUtils.getFieldActualTypeArguments(field, 0);
         field.set(configObject, Optional.of(toObject(defaultValue, optionalType)));
       } else {
         field.set(configObject, toObject(defaultValue, field.getType()));

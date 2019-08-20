@@ -25,7 +25,6 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -199,10 +198,8 @@ public class DeclarativeConfigResolver {
         shouldBeTrue(type.equals(Map.class),
             "We only support Map field type for PREFIX pattern %s %s.",
             configClass.getClazz().getName(), field.getName());
-        Class<?> mapKeyType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-        Class<?> mapValType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
+        Class<?> mapKeyType = ConfigUtils.getFieldActualTypeArguments(field, 0);
+        Class<?> mapValType = ConfigUtils.getFieldActualTypeArguments(field, 1);
         shouldBeTrue(
             mapKeyType.equals(String.class)
                 && (mapValType.equals(Object.class) || mapValType.equals(String.class)),

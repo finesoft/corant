@@ -31,11 +31,12 @@ import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.corant.config.resolve.DeclarativeConfigResolver;
+import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-suites-jms-artemis
@@ -104,7 +105,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
 
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {
-    configManager = ArtemisConfig.from(ConfigProvider.getConfig());
+    Map<String, ArtemisConfig> configs =
+        DeclarativeConfigResolver.resolveMulti(ArtemisConfig.class);
+    configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
@@ -124,7 +127,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
       List<TransportConfiguration> tcs = new ArrayList<>();
       if (isNotEmpty(cfg.getHostPorts())) {
         int seq = 0;
-        for (Pair<String, Integer> hp : cfg.getHostPorts()) {
+        for (Pair<String, Integer> hp : cfg.getHostPortPairs()) {
           Map<String, Object> params = new HashMap<>();
           params.put("serverId", ++seq);
           params.put(TransportConstants.HOST_PROP_NAME, hp.getLeft());

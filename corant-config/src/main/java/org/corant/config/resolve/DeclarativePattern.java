@@ -60,7 +60,7 @@ public enum DeclarativePattern {
         if (val.isPresent()) {
           field.set(configObject, toObject(val.get(), fieldType));
           nocfg = false;
-        } else if (configField.getDefaultValue() == null) {
+        } else if (configField.getDefaultValue() == null && field.get(configObject) == null) {
           field.set(configObject, Boolean.FALSE);
           nocfg = false;
         }

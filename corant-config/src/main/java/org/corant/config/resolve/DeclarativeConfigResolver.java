@@ -171,6 +171,12 @@ public class DeclarativeConfigResolver {
     public String getKeyRoot() {
       return keyRoot;
     }
+
+    @Override
+    public String toString() {
+      return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
+          + ", fields=" + fields + "]";
+    }
   }
 
   public static class ConfigField {
@@ -241,6 +247,13 @@ public class DeclarativeConfigResolver {
 
     public Class<?> getType() {
       return type;
+    }
+
+    @Override
+    public String toString() {
+      return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
+          + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
+          + ", type=" + type + "]";
     }
   }
 }

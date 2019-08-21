@@ -14,7 +14,9 @@
 package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import org.corant.config.resolve.ConfigKeyItem;
+import org.corant.config.resolve.ConfigKeyRoot;
+import org.corant.config.resolve.DeclarativeConfig;
 import org.corant.kernel.util.Qualifiers.NamedObject;
 import org.corant.shared.util.StringUtils;
 
@@ -24,22 +26,29 @@ import org.corant.shared.util.StringUtils;
  * @author bingo 上午10:30:53
  *
  */
-public abstract class AbstractJMSConfig implements NamedObject {
-
-  public static final String JMS_ENABLE = ".enable";
-  public static final String JMS_XA = ".xa";
-  public static final String JMS_REC_TSK_INIT_DELAYMS = ".receiver-task-initial-delayMs";
-  public static final String JMS_REC_TSK_DELAYMS = ".receiver-task-delayMs";
-  public static final String JMS_REC_TSK_THREADS = ".receiver-task-threads";
+@ConfigKeyRoot("jms")
+public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfig {
 
   public final static AbstractJMSConfig DFLT_INSTANCE = new AbstractJMSConfig() {};
+
   // the connection factory id means a artemis server or cluster
-  private String connectionFactoryId = StringUtils.EMPTY;
-  private boolean enable = true;
-  private boolean xa = true;
-  private long receiveTaskInitialDelayMs = 0;
-  private long receiveTaskDelayMs = 1000L;
-  private int receiveTaskThreads = max(2, Runtime.getRuntime().availableProcessors());
+  @ConfigKeyItem
+  protected String connectionFactoryId = StringUtils.EMPTY;
+
+  @ConfigKeyItem
+  protected Boolean enable = true;
+
+  @ConfigKeyItem
+  protected Boolean xa = true;
+
+  @ConfigKeyItem(defaultValue = "0")
+  protected Long receiveTaskInitialDelayMs = 0L;
+
+  @ConfigKeyItem(defaultValue = "1000")
+  protected Long receiveTaskDelayMs = 1000L;
+
+  @ConfigKeyItem(defaultValue = "2")
+  protected Integer receiveTaskThreads = max(2, Runtime.getRuntime().availableProcessors());
 
   @Override
   public boolean equals(Object obj) {
@@ -80,7 +89,7 @@ public abstract class AbstractJMSConfig implements NamedObject {
    *
    * @return the receiveTaskDelayMs
    */
-  public long getReceiveTaskDelayMs() {
+  public Long getReceiveTaskDelayMs() {
     return receiveTaskDelayMs;
   }
 
@@ -88,7 +97,7 @@ public abstract class AbstractJMSConfig implements NamedObject {
    *
    * @return the receiveTaskInitialDelayMs
    */
-  public long getReceiveTaskInitialDelayMs() {
+  public Long getReceiveTaskInitialDelayMs() {
     return receiveTaskInitialDelayMs;
   }
 
@@ -96,7 +105,7 @@ public abstract class AbstractJMSConfig implements NamedObject {
    *
    * @return the receiveTaskThreads
    */
-  public int getReceiveTaskThreads() {
+  public Integer getReceiveTaskThreads() {
     return receiveTaskThreads;
   }
 
@@ -112,7 +121,7 @@ public abstract class AbstractJMSConfig implements NamedObject {
    *
    * @return the enable
    */
-  public boolean isEnable() {
+  public Boolean isEnable() {
     return enable;
   }
 
@@ -120,56 +129,8 @@ public abstract class AbstractJMSConfig implements NamedObject {
    *
    * @return the xa
    */
-  public boolean isXa() {
+  public Boolean isXa() {
     return xa;
-  }
-
-  /**
-   *
-   * @param connectionFactoryId the connectionFactoryId to set
-   */
-  protected void setConnectionFactoryId(String connectionFactoryId) {
-    this.connectionFactoryId = defaultTrim(connectionFactoryId);
-  }
-
-  /**
-   *
-   * @param enable the enable to set
-   */
-  protected void setEnable(boolean enable) {
-    this.enable = enable;
-  }
-
-  /**
-   *
-   * @param receiveTaskDelayMs the receiveTaskDelayMs to set
-   */
-  protected void setReceiveTaskDelayMs(long receiveTaskDelayMs) {
-    this.receiveTaskDelayMs = receiveTaskDelayMs;
-  }
-
-  /**
-   *
-   * @param receiveTaskInitialDelayMs the receiveTaskInitialDelayMs to set
-   */
-  protected void setReceiveTaskInitialDelayMs(long receiveTaskInitialDelayMs) {
-    this.receiveTaskInitialDelayMs = receiveTaskInitialDelayMs;
-  }
-
-  /**
-   *
-   * @param receiveTaskThreads the receiveTaskThreads to set
-   */
-  protected void setReceiveTaskThreads(int receiveTaskThreads) {
-    this.receiveTaskThreads = receiveTaskThreads;
-  }
-
-  /**
-   *
-   * @param xa the xa to set
-   */
-  protected void setXa(boolean xa) {
-    this.xa = xa;
   }
 
 }

@@ -25,7 +25,6 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -172,6 +171,12 @@ public class DeclarativeConfigResolver {
     public String getKeyRoot() {
       return keyRoot;
     }
+
+    @Override
+    public String toString() {
+      return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
+          + ", fields=" + fields + "]";
+    }
   }
 
   public static class ConfigField {
@@ -199,10 +204,8 @@ public class DeclarativeConfigResolver {
         shouldBeTrue(type.equals(Map.class),
             "We only support Map field type for PREFIX pattern %s %s.",
             configClass.getClazz().getName(), field.getName());
-        Class<?> mapKeyType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-        Class<?> mapValType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
+        Class<?> mapKeyType = ConfigUtils.getFieldActualTypeArguments(field, 0);
+        Class<?> mapValType = ConfigUtils.getFieldActualTypeArguments(field, 1);
         shouldBeTrue(
             mapKeyType.equals(String.class)
                 && (mapValType.equals(Object.class) || mapValType.equals(String.class)),
@@ -224,8 +227,14 @@ public class DeclarativeConfigResolver {
     }
 
     public String getKey(String infix) {
-      return isBlank(infix) ? getDefaultKey()
-          : ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+      if (isBlank(infix)) {
+        return getDefaultKey();
+      } else if (infix.contains(ConfigUtils.SEPARATOR)) {
+        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix.replaceAll("\\.", "\\\\."),
+            getKeyItem());
+      } else {
+        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+      }
     }
 
     public String getKeyItem() {
@@ -238,6 +247,13 @@ public class DeclarativeConfigResolver {
 
     public Class<?> getType() {
       return type;
+    }
+
+    @Override
+    public String toString() {
+      return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
+          + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
+          + ", type=" + type + "]";
     }
   }
 }

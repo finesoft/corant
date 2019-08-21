@@ -18,9 +18,10 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -84,7 +85,7 @@ public class ConfigUtils {
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
     return group(configs, s -> filter.test(s), s -> {
-      String[] arr = split(s, SEPARATOR, true, true);
+      String[] arr = splitKey(s);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};
       }
@@ -120,22 +121,29 @@ public class ConfigUtils {
   }
 
   public static String[] splitKey(String text) {
-    return splitProperties(text, KEY_DELIMITER);
+    return splitProperties(text, KEY_DELIMITER, true);
   }
 
-  public static String[] splitProperties(String text, String regex) {
+  public static String[] splitValue(String text) {
+    return splitProperties(text, VALUE_DELIMITER, false);
+  }
+
+  static String[] splitProperties(String text, String regex, boolean trim) {
     if (text == null) {
       return new String[0];
     }
     String splitor = regex.substring(regex.length() - 1);
     String[] split = text.split(regex);
-    for (int i = 0; i < split.length; i++) {
+    int spLen = split.length;
+    String[] result = new String[spLen];
+    int reLen = 0;
+    for (int i = 0; i < spLen; i++) {
       split[i] = split[i].replace("\\" + splitor, splitor);
+      if (isNotBlank(split[i])) {
+        result[reLen] = trim ? split[i].trim() : split[i];
+        reLen++;
+      }
     }
-    return split;
-  }
-
-  public static String[] splitValue(String text) {
-    return splitProperties(text, VALUE_DELIMITER);
+    return Arrays.copyOf(result, reLen);
   }
 }

@@ -221,8 +221,14 @@ public class DeclarativeConfigResolver {
     }
 
     public String getKey(String infix) {
-      return isBlank(infix) ? getDefaultKey()
-          : ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+      if (isBlank(infix)) {
+        return getDefaultKey();
+      } else if (infix.contains(ConfigUtils.SEPARATOR)) {
+        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix.replaceAll("\\.", "\\\\."),
+            getKeyItem());
+      } else {
+        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+      }
     }
 
     public String getKeyItem() {

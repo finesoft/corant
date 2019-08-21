@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" 
-  attributeFormDefault="unqualified">
-
+<xsd:schema targetNamespace="http://corant.org/schema/nqms"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
   <xsd:element name="query-mappings">
     <xsd:annotation>
     	<xsd:documentation>The root query mapping with at least one query element.</xsd:documentation>

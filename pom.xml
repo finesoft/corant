@@ -42,7 +42,6 @@
         <module>corant-kernel</module>
         <module>corant-config</module>
         <module>corant-suites</module>
-        <module>corant-demo</module>
     </modules>
     <build>
         <pluginManagement>

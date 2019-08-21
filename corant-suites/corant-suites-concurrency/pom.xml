@@ -8,6 +8,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-suites-concurrency</artifactId>
+	<!-- Unfinish yet -->
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>

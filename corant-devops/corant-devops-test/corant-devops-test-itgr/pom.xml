@@ -8,4 +8,5 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>corant-devops-test-itgr</artifactId>
+	<!-- Unfinish yet -->
 </project>

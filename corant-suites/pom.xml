@@ -36,6 +36,7 @@
 		<module>corant-suites-concurrency</module>
 		<module>corant-suites-lang</module>
 		<module>corant-suites-keycloak</module>
+		<module>corant-suites-shell</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

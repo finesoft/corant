@@ -5,6 +5,6 @@
     <artifactId>corant-suites</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>corant-suites-cassandra</artifactId>
+  <artifactId>corant-suites-shell</artifactId>
   <!-- Unfinish yet -->
 </project>

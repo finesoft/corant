@@ -76,13 +76,17 @@ public abstract class AbstractJMSExtension implements Extension {
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
     logger.info(() -> String.format("Scanning message consumer type: %s",
         pat.getAnnotatedType().getJavaClass().getName()));
-    final AnnotatedType<?> annotatedType = pat.getAnnotatedType();
-    for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
+    final AnnotatedType<?> at = pat.getAnnotatedType();
+    for (AnnotatedMethod<?> am : at.getMethods()) {
       if (am.isAnnotationPresent(MessageReceive.class)) {
-        logger.info(() -> "Found annotated message consumer method, adding for further processing");
+        logger.info(() -> String.format(
+            "Found annotated message consumer method %s %s, adding for further processing.",
+            at.getJavaClass().getName(), am.getJavaMember().getName()));
         receiveMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
-        logger.info(() -> "Found annotated message stream method, adding for further processing");
+        logger.info(() -> String.format(
+            "Found annotated message stream method %s %s, adding for further processing,",
+            at.getJavaClass().getName(), am.getJavaMember().getName()));
         streamMethods.add(am);
       }
     }

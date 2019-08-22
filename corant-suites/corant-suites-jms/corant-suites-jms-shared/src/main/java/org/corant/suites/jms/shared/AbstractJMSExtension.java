@@ -85,7 +85,7 @@ public abstract class AbstractJMSExtension implements Extension {
         receiveMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
         logger.info(() -> String.format(
-            "Found annotated message stream method %s %s, adding for further processing,",
+            "Found annotated message stream method %s %s, adding for further processing.",
             at.getJavaClass().getName(), am.getJavaMember().getName()));
         streamMethods.add(am);
       }

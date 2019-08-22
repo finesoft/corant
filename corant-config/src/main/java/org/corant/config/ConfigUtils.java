@@ -13,6 +13,8 @@
  */
 package org.corant.config;
 
+import static org.corant.kernel.normal.Names.NAME_SPACE_SEPARATORS;
+import static org.corant.kernel.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -25,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import org.corant.kernel.normal.Names;
-import org.corant.kernel.normal.Names.ConfigNames;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -37,21 +37,20 @@ import org.eclipse.microprofile.config.Config;
  */
 public class ConfigUtils {
 
-  public static final String SEPARATOR = Names.NAME_SPACE_SEPARATORS;
-  public static final int SEPARATOR_LEN = SEPARATOR.length();
-
-  private static final String VALUE_DELIMITER = "(?<!\\\\),";
-  private static final String KEY_DELIMITER = "(?<!\\\\)\\.";
+  public static final int SEPARATOR_LEN = NAME_SPACE_SEPARATORS.length();
+  public static final String VALUE_DELIMITER = "(?<!\\\\),";
+  public static final String KEY_DELIMITER = "(?<!\\\\)\\.";
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
-    map.forEach((k, v) -> System.setProperty(ConfigNames.CFG_ADJUST_PREFIX + defaultString(k), v));
+    map.forEach((k, v) -> System.setProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
   }
 
   public static String concatKey(String... keys) {
     String concats = "";
     for (String key : keys) {
-      concats = removeSplitor(concats).concat(SEPARATOR).concat(removeSplitor(defaultTrim(key)));
+      concats = removeSplitor(concats).concat(NAME_SPACE_SEPARATORS)
+          .concat(removeSplitor(defaultTrim(key)));
     }
     return removeSplitor(concats);
   }
@@ -98,12 +97,16 @@ public class ConfigUtils {
     return getGroupConfigNames(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
+  public static String hanleInfixKey(String key) {
+    return key.contains(NAME_SPACE_SEPARATORS) ? key.replaceAll("\\.", "\\\\.") : key;
+  }
+
   public static String regulerKeyPrefix(String prefix) {
     String rs = defaultTrim(prefix);
     if (rs.length() == 0) {
       return rs;
     }
-    return removeSplitor(prefix).concat(SEPARATOR);
+    return removeSplitor(prefix).concat(NAME_SPACE_SEPARATORS);
   }
 
   public static String removeSplitor(final String str) {
@@ -111,10 +114,10 @@ public class ConfigUtils {
     if (rs.length() == 0) {
       return rs;
     }
-    while (rs.endsWith(SEPARATOR)) {
+    while (rs.endsWith(NAME_SPACE_SEPARATORS) && !rs.endsWith("\\.")) {
       rs = defaultTrim(rs.substring(0, rs.length() - SEPARATOR_LEN));
     }
-    while (rs.startsWith(SEPARATOR)) {
+    while (rs.startsWith(NAME_SPACE_SEPARATORS)) {
       rs = defaultTrim(rs.substring(SEPARATOR_LEN));
     }
     return rs;

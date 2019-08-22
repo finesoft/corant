@@ -229,7 +229,7 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Use wildcards for filtering, algorithm from apache.org.
+   * Use glob express for filtering.
    *
    * @author bingo 下午8:32:50
    *

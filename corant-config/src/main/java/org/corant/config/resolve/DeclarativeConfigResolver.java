@@ -13,7 +13,12 @@
  */
 package org.corant.config.resolve;
 
+import static org.corant.config.ConfigUtils.concatKey;
+import static org.corant.config.ConfigUtils.dashify;
+import static org.corant.config.ConfigUtils.getFieldActualTypeArguments;
 import static org.corant.config.ConfigUtils.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.hanleInfixKey;
+import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
@@ -35,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -112,7 +116,7 @@ public class DeclarativeConfigResolver {
   }
 
   static Set<String> resolveKeys(ConfigClass<?> configClass, Config config) {
-    final String prefix = ConfigUtils.regulerKeyPrefix(configClass.getKeyRoot());
+    final String prefix = regulerKeyPrefix(configClass.getKeyRoot());
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();
     for (String itemKey : config.getPropertyNames()) {
@@ -196,16 +200,16 @@ public class DeclarativeConfigResolver {
         return field;
       });
       type = field.getType();
-      keyItem = isBlank(cki.value()) ? ConfigUtils.dashify(field.getName()) : cki.value();
+      keyItem = isBlank(cki.value()) ? dashify(field.getName()) : cki.value();
       pattern = defaultObject(cki.pattern(), DeclarativePattern.SUFFIX);
       defaultValue = cki.defaultValue();
-      defaultKey = ConfigUtils.concatKey(configClass.getKeyRoot(), getKeyItem());
+      defaultKey = concatKey(configClass.getKeyRoot(), getKeyItem());
       if (pattern == DeclarativePattern.PREFIX) {
         shouldBeTrue(type.equals(Map.class),
             "We only support Map field type for PREFIX pattern %s %s.",
             configClass.getClazz().getName(), field.getName());
-        Class<?> mapKeyType = ConfigUtils.getFieldActualTypeArguments(field, 0);
-        Class<?> mapValType = ConfigUtils.getFieldActualTypeArguments(field, 1);
+        Class<?> mapKeyType = getFieldActualTypeArguments(field, 0);
+        Class<?> mapValType = getFieldActualTypeArguments(field, 1);
         shouldBeTrue(
             mapKeyType.equals(String.class)
                 && (mapValType.equals(Object.class) || mapValType.equals(String.class)),
@@ -229,11 +233,8 @@ public class DeclarativeConfigResolver {
     public String getKey(String infix) {
       if (isBlank(infix)) {
         return getDefaultKey();
-      } else if (infix.contains(ConfigUtils.SEPARATOR)) {
-        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix.replaceAll("\\.", "\\\\."),
-            getKeyItem());
       } else {
-        return ConfigUtils.concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+        return concatKey(configClass.getKeyRoot(), hanleInfixKey(infix), getKeyItem());
       }
     }
 

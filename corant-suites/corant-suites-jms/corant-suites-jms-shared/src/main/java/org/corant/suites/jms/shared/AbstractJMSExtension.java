@@ -55,8 +55,8 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   public static ConnectionFactory getConnectionFactory(String connectionFactoryId) {
-    return resolveNamed(ConnectionFactory.class, connectionFactoryId)
-        .orElseThrow(() -> new CorantRuntimeException("Can not find connection factory for %s",
+    return resolveNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
+        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
             connectionFactoryId));
   }
 
@@ -74,18 +74,18 @@ public abstract class AbstractJMSExtension implements Extension {
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
-    logger.info(() -> String.format("Scanning message consumer type: %s",
+    logger.info(() -> String.format("Scanning JMS message consumer type: %s",
         pat.getAnnotatedType().getJavaClass().getName()));
     final AnnotatedType<?> at = pat.getAnnotatedType();
     for (AnnotatedMethod<?> am : at.getMethods()) {
       if (am.isAnnotationPresent(MessageReceive.class)) {
         logger.info(() -> String.format(
-            "Found annotated message consumer method %s %s, adding for further processing.",
+            "Found annotated JMS message consumer method %s.%s, adding for further processing.",
             at.getJavaClass().getName(), am.getJavaMember().getName()));
         receiveMethods.add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
-        logger.info(() -> String.format(
-            "Found annotated message stream method %s %s, adding for further processing.",
+        logger.warning(() -> String.format(
+            "Found annotated JMS message stream method %s.%s, for now we do not support it.",
             at.getJavaClass().getName(), am.getJavaMember().getName()));
         streamMethods.add(am);
       }

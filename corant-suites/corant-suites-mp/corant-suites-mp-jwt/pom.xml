@@ -28,8 +28,12 @@
 			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-bundle</artifactId>
+			<groupId>org.eclipse</groupId>
+			<artifactId>yasson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax</groupId>

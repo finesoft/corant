@@ -16,11 +16,12 @@
 		<version.javax.jms-api>2.0.1</version.javax.jms-api>
 		<version.javax.jaxb-api>2.2.8</version.javax.jaxb-api>
 		<version.javax.activation>1.1.1</version.javax.activation>
-		<version.javax.json-api>1.1.2</version.javax.json-api>
+		<version.javax.json-api>1.1.4</version.javax.json-api>
 		<version.javax.ws.rs-api>2.1</version.javax.ws.rs-api>
 		<version.javax.validation-api>2.0.1.Final</version.javax.validation-api>
 		<version.javax.cdi-api>2.0</version.javax.cdi-api>
 		<version.javax.enterprise.concurrent>1.1</version.javax.enterprise.concurrent>
+		<version.javax.json.bind-api>1.0</version.javax.json.bind-api>
 		<version.weld>3.1.1.Final</version.weld>
 
 		<version.lombok>1.18.8</version.lombok>
@@ -33,6 +34,8 @@
 		<version.commons-vfs2>2.2</version.commons-vfs2>
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.apache-poi>4.0.1</version.apache-poi>
+		<version.apache.johnzon-core>1.1.13</version.apache.johnzon-core>
+		<version.apache.geronimo-json>1.2</version.apache.geronimo-json>
 		<version.log4j2>2.11.1</version.log4j2>
 		<version.calcite>1.17.0</version.calcite>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
@@ -52,6 +55,8 @@
 		<version.microprofile-fault-tolerance-api>2.0</version.microprofile-fault-tolerance-api>
 		<version.microprofile-health-api>1.0</version.microprofile-health-api>
 		<version.microprofile-jwt-auth-api>1.1.1</version.microprofile-jwt-auth-api>
+		
+		<version.eclipse.yasson>1.0.4</version.eclipse.yasson>
 
 		<version.smallrye-config>1.3.5</version.smallrye-config>
 		<version.smallrye-open-api>1.1.1</version.smallrye-open-api>
@@ -211,6 +216,17 @@
 				<artifactId>snakeyaml</artifactId>
 				<version>${version.snakeyaml}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.johnzon</groupId>
+				<artifactId>johnzon-core</artifactId>
+				<version>${version.apache.johnzon-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-json_1.1_spec</artifactId>
+				<version>${version.apache.geronimo-json}</version>
+			</dependency>
+
 
 			<!-- MicroProfile integration -->
 			<dependency>
@@ -543,6 +559,11 @@
 				<artifactId>jackson-datatype-jsr353</artifactId>
 				<version>${version.com.fasterxml.jackson}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>yasson</artifactId>
+				<version>${version.eclipse.yasson}</version>
+			</dependency>
 
 			<!-- DataSource -->
 			<dependency>
@@ -649,11 +670,6 @@
 			<dependency>
 				<groupId>org.hibernate.ogm</groupId>
 				<artifactId>hibernate-ogm-neo4j</artifactId>
-				<version>${version.hibernate-ogm-core}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-infinispan</artifactId>
 				<version>${version.hibernate-ogm-core}</version>
 			</dependency>
 			<dependency>
@@ -789,14 +805,19 @@
 				<version>${version.javax.jaxb-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>${version.javax.ws.rs-api}</version>
+				<groupId>javax.json.bind</groupId>
+				<artifactId>javax.json.bind-api</artifactId>
+				<version>${version.javax.json.bind-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
 				<version>${version.javax.json-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>${version.javax.ws.rs-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.validation</groupId>
@@ -821,6 +842,11 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.enterprise.concurrent</artifactId>
 				<version>${version.javax.enterprise.concurrent}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>${version.javax.json-api}</version>
 			</dependency>
 
 			<!-- Testing -->
@@ -902,11 +928,6 @@
 			<dependency>
 				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-admin-client</artifactId>
-				<version>${version.keycloak}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>keycloak-authz-client</artifactId>
 				<version>${version.keycloak}</version>
 			</dependency>
 			<dependency>
@@ -1135,11 +1156,6 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

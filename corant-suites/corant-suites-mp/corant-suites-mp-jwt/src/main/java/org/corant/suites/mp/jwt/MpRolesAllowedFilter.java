@@ -61,7 +61,7 @@ public class MpRolesAllowedFilter implements ContainerRequestFilter {
     SecurityContext securityContext = requestContext.getSecurityContext();
     boolean isForbidden;
     if (allRolesAllowed) {
-      isForbidden = securityContext.getUserPrincipal() == null;
+      isForbidden = securityContext.getUserPrincipal() != null;
     } else {
 
       isForbidden = allowedRoles.stream().noneMatch(securityContext::isUserInRole);

@@ -114,6 +114,14 @@ public class Instances {
     return instance().select(instCls, qualifiers);
   }
 
+  public static <T> T tryResolve(Class<T> instanceClass, Annotation... qualifiers) {
+    return resolve(instanceClass, qualifiers).orElse(null);
+  }
+
+  public static <T> T tryResolve(Instance<T> instance) {
+    return instance != null && instance.isResolvable() ? instance.get() : null;
+  }
+
   public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
     Class<T> instCls = shouldNotNull(instanceClass);
     if (instance().select(instCls).isResolvable()) {

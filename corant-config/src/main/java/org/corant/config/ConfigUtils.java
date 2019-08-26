@@ -56,14 +56,24 @@ public class ConfigUtils {
   }
 
   public static String dashify(String substring) {
-    StringBuilder ret = new StringBuilder();
-    for (char i : substring.toCharArray()) {
-      if (i >= 'A' && i <= 'Z') {
-        ret.append('-');
+    /*
+     * StringBuilder ret = new StringBuilder(); for (char i : substring.toCharArray()) { if (i >=
+     * 'A' && i <= 'Z') { ret.append('-'); } ret.append(Character.toLowerCase(i)); }
+     */
+    StringBuilder sb = new StringBuilder();
+    boolean puc = false;
+    boolean cuc = false;
+    boolean suc = false;
+    for (char i : defaultTrim(substring).toCharArray()) {
+      cuc = i >= 'A' && i <= 'Z';
+      if (cuc && !puc || puc && suc && !cuc) {
+        sb.append('-');
       }
-      ret.append(Character.toLowerCase(i));
+      sb.append(Character.toLowerCase(i));
+      suc = puc == cuc;
+      puc = cuc;
     }
-    return ret.toString();
+    return sb.toString();// FIXME
   }
 
   public static Class<?> getFieldActualTypeArguments(Field field, int index) {

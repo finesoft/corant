@@ -14,15 +14,33 @@
 package org.corant.suites.ddd.model;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * corant-suites-ddd
+ *
+ * The object reference. Usually used for reference between aggregates or entities, it usually holds
+ * the id of the aggregate or entity to which it points, and is an immutable object that can be
+ * retrieved from the persistence layer by holding the id.
  *
  * @author bingo 上午10:31:05
  *
  */
 public interface Reference<T> extends Serializable {
 
+  /**
+   * Retrieve the object to which the reference refers, and throws an exception if it is not found.
+   *
+   * @return
+   */
   T retrieve();
 
+  /**
+   * Try to retrive the object
+   *
+   * @return tryRetrieve
+   */
+  default Optional<T> tryRetrieve() {
+    return Optional.empty();
+  }
 }

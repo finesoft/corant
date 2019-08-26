@@ -24,6 +24,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * corant-suites-ddd
+ *
+ * The value objects are things like numbers, dates, monies and strings. Usually, they are small
+ * objects which are used quite widely. Their identity is based on their state rather than on their
+ * object identity.
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Value_object"> Value Object</a>
+ * @see <a href="http://martinfowler.com/eaaCatalog/valueObject.html">MF Value Object</a>
+ * @see <a href="http://openjdk.java.net/jeps/169">JEP169</a>
+ * @see <a href="http://c2.com/cgi/wiki?ValueObject">ValueObject</a>
+ * @author bingo 上午12:36:15
+ *
+ */
 public interface Value extends Serializable {
 
   /**

@@ -62,6 +62,10 @@ public class ConverterRegistry {
     }
   }
 
+  public static Map<ConverterType<?, ?>, Converter<?, ?>> getSupportConverters() {
+    return Collections.unmodifiableMap(SUPPORT_CONVERTERS);
+  }
+
   public synchronized static <S, T> void register(Converter<S, T> converter) {
     Type[] types =
         TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);

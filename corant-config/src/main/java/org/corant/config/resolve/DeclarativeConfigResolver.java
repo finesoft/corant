@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -40,7 +41,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ClassUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -51,6 +54,15 @@ import org.eclipse.microprofile.config.ConfigProvider;
  *
  */
 public class DeclarativeConfigResolver {
+
+  static final Set<Class<?>> SuppoertTypes =
+      new HashSet<>(ClassUtils.WRAPPER_PRIMITIVE_MAP.keySet());
+
+  static {
+    ConverterRegistry.getSupportConverters().keySet().stream()
+        .filter(ct -> String.class.equals(ct.getSourceClass())).map(ct -> ct.getSourceClass())
+        .forEach(SuppoertTypes::add);
+  }
 
   public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
     Map<String, T> configMaps = new HashMap<>();
@@ -143,15 +155,25 @@ public class DeclarativeConfigResolver {
     private final int keyIndex;
     private final Class<T> clazz;
     private final List<ConfigField> fields = new ArrayList<>();
+    private final boolean ignoreNoAnnotatedItem;
 
     public ConfigClass(Class<T> cls) {
       ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
       keyRoot = ckr.value();
       clazz = cls;
       keyIndex = ckr.keyIndex();
+      ignoreNoAnnotatedItem = ckr.ignoreNoAnnotatedItem();
       traverseFields(cls, (f) -> {
         if (f.isAnnotationPresent(ConfigKeyItem.class)) {
           getFields().add(new ConfigField(this, f));
+        } else if (!ignoreNoAnnotatedItem) {
+          Class<?> ft = ClassUtils.primitiveToWrapper(f.getType());
+          if (Collection.class.isAssignableFrom(ft)) {
+            ft = getFieldActualTypeArguments(f, 0);
+          }
+          if (SuppoertTypes.contains(ft)) {
+            getFields().add(new ConfigField(this, f));
+          }
         }
       });
     }
@@ -176,11 +198,16 @@ public class DeclarativeConfigResolver {
       return keyRoot;
     }
 
+    public boolean isIgnoreNoAnnotatedItem() {
+      return ignoreNoAnnotatedItem;
+    }
+
     @Override
     public String toString() {
       return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
-          + ", fields=" + fields + "]";
+          + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
     }
+
   }
 
   public static class ConfigField {
@@ -194,7 +221,8 @@ public class DeclarativeConfigResolver {
 
     ConfigField(ConfigClass<?> configClass, Field field) {
       this.configClass = configClass;
-      ConfigKeyItem cki = field.getAnnotation(ConfigKeyItem.class);
+      ConfigKeyItem cki =
+          defaultObject(field.getAnnotation(ConfigKeyItem.class), ConfigKeyItem.EMPTY);
       this.field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
         field.setAccessible(true);
         return field;

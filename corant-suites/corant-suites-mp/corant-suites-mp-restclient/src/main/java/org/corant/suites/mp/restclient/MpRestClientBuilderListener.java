@@ -11,30 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config.resolve;
+package org.corant.suites.mp.restclient;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.util.logging.Logger;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
+import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;
 
-@Documented
-@Retention(RUNTIME)
-@Target(TYPE)
-@Inherited
 /**
- * corant-config
+ * corant-suites-mp-restclient
  *
- * @author bingo 下午7:39:01
+ * @author bingo 下午2:35:41
  *
  */
-public @interface ConfigKeyRoot {
+public class MpRestClientBuilderListener implements RestClientBuilderListener {
 
-  boolean ignoreNoAnnotatedItem() default true;
+  transient Logger logger = Logger.getLogger(this.getClass().toString());
 
-  int keyIndex() default 1;
+  @Override
+  public void onNewBuilder(RestClientBuilder builder) {
+    // TODO config builder
+  }
 
-  String value();
 }

@@ -18,6 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 
 @Documented
 @Retention(RUNTIME)
@@ -32,9 +33,33 @@ public @interface ConfigKeyItem {
 
   public static final String NO_DFLT_VALUE = "$no_default_value$";
 
+  public static final ConfigKeyItem EMPTY = new ConfigKeyItemLiteral();
+
   String defaultValue() default NO_DFLT_VALUE;
 
   DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
 
   String value() default "";
+
+  public static class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem>
+      implements ConfigKeyItem {
+
+    private static final long serialVersionUID = -6856666130654737130L;
+
+    @Override
+    public String defaultValue() {
+      return NO_DFLT_VALUE;
+    }
+
+    @Override
+    public DeclarativePattern pattern() {
+      return DeclarativePattern.SUFFIX;
+    }
+
+    @Override
+    public String value() {
+      return "";
+    }
+
+  }
 }

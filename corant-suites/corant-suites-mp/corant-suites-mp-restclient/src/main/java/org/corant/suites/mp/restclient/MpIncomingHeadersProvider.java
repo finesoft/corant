@@ -13,16 +13,13 @@
  */
 package org.corant.suites.mp.restclient;
 
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import javax.enterprise.context.RequestScoped;
+import java.util.logging.Logger;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.resteasy.microprofile.client.header.IncomingHeadersProvider;
-import org.jboss.resteasy.util.HttpHeaderNames;
-import org.jboss.weld.manager.api.WeldManager;
+import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
+import org.jboss.resteasy.spi.HttpRequest;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 /**
  * corant-suites-mp-restclient
@@ -32,24 +29,20 @@ import org.jboss.weld.manager.api.WeldManager;
  */
 public class MpIncomingHeadersProvider implements IncomingHeadersProvider {
 
-  public static final String HEADER_AUTHORIZATION_NAME = "Authorization";
-  public static final String HEADER_AUTHORIZATION_VALUE = "Bearer ";
+  static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
+      new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());
+
+  transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public MultivaluedMap<String, String> getIncomingHeaders() {
-    MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
-    resolve(WeldManager.class).ifPresent(wm -> {
-      if (wm.getActiveContexts().stream().map(c -> c.getScope())
-          .anyMatch(c -> c.equals(RequestScoped.class))) {
-        resolve(JsonWebToken.class).ifPresent(jwto -> {
-          if (isNotBlank(jwto.getRawToken())) {
-            headers.put(HttpHeaderNames.AUTHORIZATION,
-                listOf(HEADER_AUTHORIZATION_VALUE.concat(jwto.getRawToken())));
-          }
-        });
-      }
-    });
-    return headers;
+    MultivaluedMap<String, String> headers = null;
+    HttpRequest request = ResteasyProviderFactory.getContextData(HttpRequest.class);
+    if (request != null) {
+      logger.fine(() -> "Propagates current header information to outgoing request.");
+      headers = request.getHttpHeaders().getRequestHeaders();
+    }
+    return headers == null ? EMPTY_MAP : headers;
   }
 
 }

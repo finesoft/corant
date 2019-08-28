@@ -18,7 +18,7 @@ import static org.corant.shared.util.ObjectUtils.max;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.corant.kernel.service.ConversionService;
+import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.AbstractNamedQuery;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryUtils;

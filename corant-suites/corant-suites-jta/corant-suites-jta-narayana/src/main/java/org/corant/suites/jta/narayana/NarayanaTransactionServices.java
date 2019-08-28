@@ -25,7 +25,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
-import org.corant.kernel.service.TransactionService;
+import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jboss.weld.transaction.spi.TransactionServices;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;

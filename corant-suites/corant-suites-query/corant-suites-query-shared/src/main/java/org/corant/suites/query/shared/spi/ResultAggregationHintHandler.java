@@ -32,7 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.kernel.service.ConversionService;
+import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.Query.ForwardList;
 import org.corant.suites.query.shared.Query.PagedList;
 import org.corant.suites.query.shared.mapping.QueryHint;

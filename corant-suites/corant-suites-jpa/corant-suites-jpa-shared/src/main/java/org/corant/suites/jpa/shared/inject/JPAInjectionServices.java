@@ -19,7 +19,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.service.PersistenceService;
+import org.corant.kernel.api.PersistenceService;
 import org.corant.kernel.util.CDIs;
 import org.corant.kernel.util.ResourceReferences;
 import org.corant.suites.jpa.shared.JPAProvider;

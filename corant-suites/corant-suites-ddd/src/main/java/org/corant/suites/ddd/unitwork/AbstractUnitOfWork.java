@@ -16,7 +16,7 @@ package org.corant.suites.ddd.unitwork;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.corant.kernel.service.PersistenceService;
+import org.corant.kernel.api.PersistenceService;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;

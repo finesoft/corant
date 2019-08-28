@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import org.corant.Corant;
-import org.corant.kernel.service.DataSourceService;
+import org.corant.kernel.api.DataSourceService;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;

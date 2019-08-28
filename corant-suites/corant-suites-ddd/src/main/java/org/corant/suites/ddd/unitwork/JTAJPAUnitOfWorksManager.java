@@ -17,17 +17,19 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import org.corant.kernel.service.PersistenceService;
+import org.corant.kernel.api.PersistenceService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
@@ -65,7 +67,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Any
   Instance<SagaService> sagaService;
 
-  public static int getTxStatusFromCurUow() {
+  public static int getTxStatus() {
     try {
       return curUow().transaction.getStatus();
     } catch (SystemException e) {
@@ -73,7 +75,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     }
   }
 
-  public static void makeCurUowTxRollbackOnly() {
+  public static void makeTxRollbackOnly() {
     try {
       curUow().transaction.setRollbackOnly();
     } catch (IllegalStateException | SystemException e) {
@@ -81,7 +83,29 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     }
   }
 
-  public static void registerTxSyncToCurUow(Synchronization sync) {
+  public static void registerAfterCompletion(final Consumer<Boolean> consumer) {
+    if (consumer != null) {
+      registerTxSynchronization(new SynchronizationAdapter() {
+        @Override
+        public void afterCompletion(int status) {
+          consumer.accept(status == Status.STATUS_COMMITTED);
+        }
+      });
+    }
+  }
+
+  public static void registerBeforeCompletion(final Runnable runner) {
+    if (runner != null) {
+      registerTxSynchronization(new SynchronizationAdapter() {
+        @Override
+        public void beforeCompletion() {
+          runner.run();
+        }
+      });
+    }
+  }
+
+  public static void registerTxSynchronization(Synchronization sync) {
     try {
       curUow().transaction.registerSynchronization(sync);
     } catch (IllegalStateException | RollbackException | SystemException e) {
@@ -165,4 +189,15 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     uows.clear();
   }
 
+  static abstract class SynchronizationAdapter implements Synchronization {
+    @Override
+    public void afterCompletion(int status) {
+      // NOOP!
+    }
+
+    @Override
+    public void beforeCompletion() {
+      // NOOP!
+    }
+  }
 }

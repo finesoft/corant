@@ -16,7 +16,7 @@ package org.corant.suites.jpa.hibernate;
 import static org.corant.kernel.util.Instances.resolveAnyway;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
-import org.corant.kernel.service.TransactionService;
+import org.corant.kernel.api.TransactionService;
 import org.hibernate.engine.transaction.jta.platform.internal.AbstractJtaPlatform;
 
 /**

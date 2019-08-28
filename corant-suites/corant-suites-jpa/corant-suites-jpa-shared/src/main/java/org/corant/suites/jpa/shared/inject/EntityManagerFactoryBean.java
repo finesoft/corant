@@ -23,7 +23,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.service.PersistenceService;
+import org.corant.kernel.api.PersistenceService;
 import org.corant.kernel.util.AbstractBean;
 
 /**

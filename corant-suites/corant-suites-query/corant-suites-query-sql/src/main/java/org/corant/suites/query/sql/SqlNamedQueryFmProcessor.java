@@ -14,7 +14,7 @@
 package org.corant.suites.query.sql;
 
 import java.util.Map;
-import org.corant.kernel.service.ConversionService;
+import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;

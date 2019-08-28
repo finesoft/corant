@@ -36,7 +36,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import org.corant.kernel.service.PersistenceService.PersistenceContextLiteral;
+import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.Aggregation;

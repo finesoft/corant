@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.kernel.service.CompilationService;
+import org.corant.kernel.api.CompilationService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jetbrains.kotlin.cli.common.ExitCode;
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments;

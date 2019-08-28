@@ -37,10 +37,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.TransactionScoped;
+import org.corant.kernel.api.PersistenceService;
+import org.corant.kernel.api.TransactionService;
+import org.corant.kernel.api.ComponentManager.AbstractComponentManager;
 import org.corant.kernel.normal.Names.PersistenceNames;
-import org.corant.kernel.service.ComponentManager.AbstractComponentManager;
-import org.corant.kernel.service.PersistenceService;
-import org.corant.kernel.service.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 

@@ -16,7 +16,7 @@ package org.corant.suites.query.mongodb;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.corant.kernel.service.ConversionService;
+import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQueryProcessor;

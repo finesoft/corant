@@ -29,7 +29,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.service.PersistenceService.PersistenceUnitLiteral;
+import org.corant.kernel.api.PersistenceService.PersistenceUnitLiteral;
 import org.corant.kernel.util.Instances.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;

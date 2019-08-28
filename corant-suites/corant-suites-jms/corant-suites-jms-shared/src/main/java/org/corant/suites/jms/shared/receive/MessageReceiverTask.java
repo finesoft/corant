@@ -44,7 +44,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.Corant;
 import org.corant.config.ComparableConfigurator;
-import org.corant.kernel.service.TransactionService;
+import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**

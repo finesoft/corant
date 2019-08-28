@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.service;
+package org.corant.kernel.api;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -70,7 +70,7 @@ public interface PersistenceService {
   }
 
   /**
-   * corant-suites-ddd
+   * corant-kernel
    *
    * @author bingo 下午12:01:07
    *
@@ -204,7 +204,7 @@ public interface PersistenceService {
   }
 
   /**
-   * corant-suites-ddd
+   * corant-kernel
    *
    * @author bingo 下午12:04:52
    *

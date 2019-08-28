@@ -13,36 +13,25 @@
  */
 package org.corant.kernel.api;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Locale;
+import java.util.function.Function;
+import javax.json.JsonObject;
 
 /**
  * corant-kernel
  *
- * @author bingo 下午9:28:49
+ * @author bingo 下午8:16:35
  *
  */
-public interface MessageSource {
+public interface Readable<T> {
 
-  Object[] EMPTY_PARAM = new Object[0];
-
-  Object getCodes();
-
-  String getMessage(Locale locale, MessageResolver resolver);
-
-  default Object[] getParameters() {
-    return EMPTY_PARAM;
+  default String toHumanReader(Locale locale) {
+    return toString();
   }
 
-  interface MessageResolver {
-
-    String getMessage(Locale locale, MessageSource messageSource);
-
-    String getMessage(Locale locale, Object codes, Object... params);
-
-  }
-
-  enum MessageSeverity {
-    INF, ERR
+  default JsonObject toJsonReader(Function<T, JsonObject> provider) {
+    return provider.apply(forceCast(this));
   }
 
 }

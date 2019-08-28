@@ -13,6 +13,7 @@
  */
 package org.corant.kernel.exception;
 
+import static org.corant.kernel.util.Instances.resolveAnyway;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -23,15 +24,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
+import org.corant.kernel.api.MessageSource;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * @author bingo 下午6:19:52
  *
  */
-public class GeneralRuntimeException extends CorantRuntimeException {
+public class GeneralRuntimeException extends CorantRuntimeException implements MessageSource {
 
   private static final long serialVersionUID = -3720369148530068164L;
 
@@ -116,25 +116,38 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   }
 
   @Override
+  public Object getCodes() {
+    StringBuilder sb = new StringBuilder(MessageSeverity.ERR.name());
+    if (code != null) {
+      sb.append(".").append(code.toString());
+    }
+    if (subCode != null) {
+      sb.append(".").append(subCode.toString());
+    }
+    return sb.toString();
+  }
+
+  @Override
   public String getLocalizedMessage() {
-    Instance<GeneralRuntimeExceptionMessager> msger =
-        CDI.current().select(GeneralRuntimeExceptionMessager.class);
-    if (msger.isResolvable()) {
-      return this.getLocalizedMessage(Locale.getDefault(), msger.get());
+    MessageResolver msger = resolveAnyway(MessageResolver.class);
+    if (msger != null) {
+      return getMessage(Locale.getDefault(), msger);
     } else {
       return defaultString(super.getMessage()) + " " + asDefaultString(getCode());
     }
   }
 
-  public String getLocalizedMessage(Locale locale, GeneralRuntimeExceptionMessager messager) {
-    return messager.getMessage(locale, this);
+  @Override
+  public String getMessage() {
+    return getLocalizedMessage();
   }
 
   @Override
-  public String getMessage() {
-    return this.getLocalizedMessage();
+  public String getMessage(Locale locale, MessageResolver resolver) {
+    return resolver.getMessage(locale, this);
   }
 
+  @Override
   public Object[] getParameters() {
     return Arrays.copyOf(parameters, parameters.length);
   }

@@ -11,38 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.api;
+package org.corant.suites.bundle;
 
-import java.util.Locale;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Qualifier;
 
 /**
- * corant-kernel
+ * corant-suites-bundle
  *
- * @author bingo 下午9:28:49
+ * @author bingo 下午8:44:38
  *
  */
-public interface MessageSource {
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
+public @interface MessageCodes {
+  @Nonbinding
+  String locale() default "zh_CN";
 
-  Object[] EMPTY_PARAM = new Object[0];
-
-  Object getCodes();
-
-  String getMessage(Locale locale, MessageResolver resolver);
-
-  default Object[] getParameters() {
-    return EMPTY_PARAM;
-  }
-
-  interface MessageResolver {
-
-    String getMessage(Locale locale, MessageSource messageSource);
-
-    String getMessage(Locale locale, Object codes, Object... params);
-
-  }
-
-  enum MessageSeverity {
-    INF, ERR
-  }
-
+  @Nonbinding
+  String value() default "";
 }

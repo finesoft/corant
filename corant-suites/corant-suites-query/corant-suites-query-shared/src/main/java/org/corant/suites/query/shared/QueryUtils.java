@@ -58,17 +58,20 @@ public class QueryUtils {
   public static final int LIMIT_PARAM_VAL = 16;
 
   public static final ObjectMapper ESJOM = new ObjectMapper().registerModule(new JavaTimeModule())
-      .registerModule(new SimpleModule()
+          .registerModule(new SimpleModule()
           .addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_LOCAL_DATE))
           .addSerializer(new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
           .addSerializer(new LocalTimeSerializer(DateTimeFormatter.ISO_LOCAL_TIME)))
-      .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-      .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+          .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+          .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
 
   public static final ObjectMapper RCJOM =
       new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new SimpleModule())
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+              .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+              .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   public static <T> T converEsData(String str, Class<T> cls) {
     if (str == null) {

@@ -97,15 +97,7 @@ public class NamingContext implements Context {
 
   @Override
   public void close() throws NamingException {
-    if (!closed) {
-      try {
-        RWL.writeLock().lock();
-        closed = true;
-        environment.clear();
-      } finally {
-        RWL.writeLock().unlock();
-      }
-    }
+    // We are in memory so wo don't close, bind some object may throw exception.
   }
 
   @Override
@@ -299,6 +291,18 @@ public class NamingContext implements Context {
   @Override
   public void rebind(String name, Object obj) throws NamingException {
     rebind(new CompositeName(name), obj);
+  }
+
+  public void release() {
+    if (!closed) {
+      try {
+        RWL.writeLock().lock();
+        closed = true;
+        environment.clear();
+      } finally {
+        RWL.writeLock().unlock();
+      }
+    }
   }
 
   @Override

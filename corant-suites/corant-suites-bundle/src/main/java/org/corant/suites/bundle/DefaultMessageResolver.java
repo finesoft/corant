@@ -23,8 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import org.corant.kernel.api.MessageSource;
-import org.corant.kernel.api.MessageSource.MessageResolver;
+import org.corant.kernel.api.MessageResolver;
 import org.corant.kernel.api.Readable;
 
 /**
@@ -56,26 +55,24 @@ public class DefaultMessageResolver implements MessageResolver {
     if (messageSource == null) {
       return null;
     }
-    String key = asDefaultString(messageSource.getCodes());
+    String codes = asDefaultString(messageSource.getCodes());
     Locale localeToUse = locale == null ? Locale.getDefault() : locale;
     Object[] parameters = genParameters(localeToUse, messageSource.getParameters());
-    return getMessage(localeToUse, key, parameters, true);
+    return messageBundle.getMessage(locale, codes, parameters,
+        (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
-    return getMessage(locale, asDefaultString(codes), params, false);
+    return messageBundle.getMessage(locale, codes, params, (l) -> null);
   }
 
-  public String getMessage(Locale locale, String codes, Object[] parameters, boolean useAltMsg) {
-    return messageBundle.getMessage(locale, codes, parameters,
-        useAltMsg ? (l) -> getUnknowMessage(l) : (l) -> null);
-  }
-
-  public String getUnknowMessage(Locale locale) {
-    return messageBundle.getMessage(locale,
-        GlobalMessageCodes.genMessageCode(MessageSeverity.ERR, GlobalMessageCodes.ERR_UNKNOW),
-        EMPTY_ARGS);
+  public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
+    if (ser == MessageSeverity.INF) {
+      return messageBundle.getMessage(locale, MessageSource.UNKNOW_INF_CODE, new Object[] {code});
+    } else {
+      return messageBundle.getMessage(locale, MessageSource.UNKNOW_ERR_CODE, new Object[] {code});
+    }
   }
 
   @Produces
@@ -94,7 +91,7 @@ public class DefaultMessageResolver implements MessageResolver {
       }
     }
     if (isNotBlank(codes)) {
-      return getMessage(locale, codes, MessageSource.EMPTY_PARAM, false);
+      return getMessage(locale, codes, MessageResolver.EMPTY_PARAM);
     }
     return null;
   }

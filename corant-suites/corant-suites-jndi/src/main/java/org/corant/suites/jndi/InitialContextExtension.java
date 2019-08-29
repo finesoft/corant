@@ -21,6 +21,7 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -100,6 +101,12 @@ public class InitialContextExtension implements Extension {
     }
 
     bm.fireEvent(new PostCorantJNDIReadyEvent(useCorantContext, context));
+  }
+
+  void onBeforeShutdown(@Observes BeforeShutdown bs) {
+    if (DefaultInitialContextFactory.initialContext != null) {
+      ((NamingContext) DefaultInitialContextFactory.initialContext).release();
+    }
   }
 
 }

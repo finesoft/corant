@@ -18,14 +18,18 @@ import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.asClass;
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
@@ -75,7 +79,8 @@ public class Instances {
     } else if (instance().select(instCls).isUnsatisfied()) {
       return UnmanageableInstance.of(instCls).produce().inject().postConstruct().get();
     } else {
-      return null;
+      List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
+      return list != null && list.size() == 1 ? list.get(0) : null;
     }
   }
 

@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
-import org.corant.kernel.api.MessageSource;
+import org.corant.kernel.api.MessageResolver;
+import org.corant.kernel.api.MessageResolver.MessageSeverity;
+import org.corant.kernel.api.MessageResolver.MessageSource;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -117,21 +119,14 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
 
   @Override
   public Object getCodes() {
-    StringBuilder sb = new StringBuilder(MessageSeverity.ERR.name());
-    if (code != null) {
-      sb.append(".").append(code.toString());
-    }
-    if (subCode != null) {
-      sb.append(".").append(subCode.toString());
-    }
-    return sb.toString();
+    return getMessageSeverity().genMessageCode(code, subCode);
   }
 
   @Override
   public String getLocalizedMessage() {
-    MessageResolver msger = resolveAnyway(MessageResolver.class);
-    if (msger != null) {
-      return getMessage(Locale.getDefault(), msger);
+    MessageResolver resolver = resolveAnyway(MessageResolver.class);
+    if (resolver != null) {
+      return resolver.getMessage(Locale.getDefault(), this);
     } else {
       return defaultString(super.getMessage()) + " " + asDefaultString(getCode());
     }
@@ -143,8 +138,8 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   }
 
   @Override
-  public String getMessage(Locale locale, MessageResolver resolver) {
-    return resolver.getMessage(locale, this);
+  public MessageSeverity getMessageSeverity() {
+    return MessageSeverity.ERR;
   }
 
   @Override

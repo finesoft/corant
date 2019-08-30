@@ -13,23 +13,33 @@
  */
 package org.corant.suites.mp.restclient;
 
-import java.util.logging.Logger;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;
+
+import javax.ws.rs.Priorities;
+import java.util.logging.Logger;
 
 /**
  * corant-suites-mp-restclient
  *
  * @author bingo 下午2:35:41
- *
  */
 public class MpRestClientBuilderListener implements RestClientBuilderListener {
+
+  public static final String DFLT_CTX_RESOLER_KEY = "mp.restclient.default-context-resolver.enable";
+  public static final boolean enableDefaultContextResolver =
+      ConfigProvider.getConfig()
+          .getOptionalValue(DFLT_CTX_RESOLER_KEY, Boolean.class)
+          .orElse(Boolean.TRUE);
 
   transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public void onNewBuilder(RestClientBuilder builder) {
-    // TODO config builder
+    if (enableDefaultContextResolver){
+      logger.info("Register default mp context resolver to RestClientBuilder");
+      builder.register(MpDefaultContextResolver.class, Priorities.USER);
+    }
   }
-
 }

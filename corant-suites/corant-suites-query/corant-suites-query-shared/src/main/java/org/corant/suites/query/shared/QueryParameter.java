@@ -21,9 +21,13 @@ import java.io.Serializable;
  * @author bingo 下午9:16:07
  *
  */
-public interface QueryCriteria extends Serializable {
+public interface QueryParameter extends Serializable {
 
-  interface QueryConfig extends Serializable {
+  QueryContext getContext();
+
+  Object getCriteria();
+
+  interface QueryContext extends Serializable {
 
     default int getLimit() {
       return -1;

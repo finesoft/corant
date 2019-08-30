@@ -101,16 +101,15 @@ public class Instances {
   }
 
   public static <T> Optional<T> resolveNamed(Class<T> instanceClass, String name) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    Instance<T> inst = instance().select(instCls);
+    Instance<T> inst = select(instanceClass);
     if (inst.isUnsatisfied()) {
       return Optional.empty();
     }
     String useName = defaultTrim(name);
     if (isBlank(useName) && inst.isResolvable()) {
-      return Optional.of(instance().select(instCls).get());
-    } else if (inst.select(resolveNameds(useName)).isResolvable()) {
-      return Optional.of(inst.select(resolveNameds(useName)).get());
+      return Optional.of(inst.get());
+    } else if ((inst = inst.select(resolveNameds(useName))).isResolvable()) {
+      return Optional.of(inst.get());
     } else {
       return Optional.empty();
     }

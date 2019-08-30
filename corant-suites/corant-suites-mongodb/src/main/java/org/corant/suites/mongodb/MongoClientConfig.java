@@ -16,7 +16,6 @@ package org.corant.suites.mongodb;
 import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -215,9 +214,10 @@ public class MongoClientConfig implements NamedObject {
    * @return the hostAndPorts
    */
   public List<Pair<String, Integer>> getHostAndPorts() {
-    if (isEmpty(hostAndPorts)) {
-      return Collections.unmodifiableList(listOf(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
-    }
+    // FIXME
+    // if (isEmpty(hostAndPorts)) {
+    // return Collections.unmodifiableList(listOf(Pair.of(DEFAULT_HOST, DEFAULT_PORT)));
+    // }
     return Collections.unmodifiableList(hostAndPorts);
   }
 

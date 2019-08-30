@@ -59,25 +59,26 @@ public class Instances {
   }
 
   public static <T> Optional<T> resolve(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    if (instance().select(instCls, qualifiers).isResolvable()) {
-      return Optional.of(instance().select(instCls).get());
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      return Optional.of(inst.get());
     } else {
       return Optional.empty();
     }
   }
 
-  public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    shouldNotNull(consumer).accept(resolve(instanceClass).orElseThrow(
+  public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer,
+      Annotation... qualifiers) {
+    shouldNotNull(consumer).accept(resolve(instanceClass, qualifiers).orElseThrow(
         () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
   }
 
   public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    if (instance().select(instCls, qualifiers).isResolvable()) {
-      return instance().select(instCls).get();
-    } else if (instance().select(instCls).isUnsatisfied()) {
-      return UnmanageableInstance.of(instCls).produce().inject().postConstruct().get();
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      return inst.get();
+    } else if (inst.isUnsatisfied()) {
+      return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
     } else {
       List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
       return list != null && list.size() == 1 ? list.get(0) : null;
@@ -93,8 +94,9 @@ public class Instances {
     return null;
   }
 
-  public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function) {
-    return shouldNotNull(function).apply(resolve(instanceClass).orElseThrow(
+  public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function,
+      Annotation... qualifiers) {
+    return shouldNotNull(function).apply(resolve(instanceClass, qualifiers).orElseThrow(
         () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
   }
 
@@ -127,17 +129,19 @@ public class Instances {
     return instance != null && instance.isResolvable() ? instance.get() : null;
   }
 
-  public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    if (instance().select(instCls).isResolvable()) {
-      shouldNotNull(consumer).accept(instance().select(instCls).get());
+  public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer,
+      Annotation... qualifiers) {
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      shouldNotNull(consumer).accept(inst.get());
     }
   }
 
-  public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    if (instance().select(instCls).isResolvable()) {
-      return shouldNotNull(function).apply(instance().select(instCls).get());
+  public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function,
+      Annotation... qualifiers) {
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      return shouldNotNull(function).apply(inst.get());
     }
     return null;
   }

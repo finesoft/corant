@@ -15,6 +15,7 @@ package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.ObjectUtils.optional;
@@ -141,7 +142,7 @@ public class Converters {
       Consumer<Set<ConverterType<?, ?>>> consumer) {
     Stack<Class<?>> convertibleClasses =
         ConverterHunt.getConvertibleClasses(sourceClass, targetClass);
-    if (convertibleClasses == null || convertibleClasses.size() <= 0) {
+    if (isEmpty(convertibleClasses)) {
       return null;
     }
     Stack<Converter> converters = ConverterHunt.transformConverterStack(convertibleClasses);
@@ -296,9 +297,6 @@ public class Converters {
     }
 
     static Stack<Converter> transformConverterStack(Stack<Class<?>> stack) {
-      if (stack == null || stack.size() == 0) {
-        return null;
-      }
       Stack<Converter> converters = new Stack();
       for (int i = 1; i <= stack.size() - 1; i++) {
         Class<?> tag = stack.get(i);
@@ -310,9 +308,6 @@ public class Converters {
     }
 
     static Set<ConverterType<?, ?>> transformConverterTypeSet(Stack<Class<?>> stack) {
-      if (stack == null || stack.size() == 0) {
-        return null;
-      }
       Set<ConverterType<?, ?>> converters = new LinkedHashSet();
       for (int i = stack.size() - 1; i > 0; i--) {
         Class<?> tag = stack.get(i);

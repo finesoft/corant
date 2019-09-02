@@ -61,10 +61,9 @@ public class MessageReceiverMetaData {
   private final Duration breakedDuration;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
-    this.method = shouldNotNull(method);
-    AccessController.doPrivileged((PrivilegedAction<?>) () -> {
-      method.getJavaMember().setAccessible(true);
-      return null;
+    this.method = AccessController.doPrivileged((PrivilegedAction<AnnotatedMethod<?>>) () -> {
+      shouldNotNull(method).getJavaMember().setAccessible(true);
+      return method;
     });
     shouldBeTrue(method.isAnnotationPresent(MessageReceive.class));
     final MessageReceive ann = method.getAnnotation(MessageReceive.class);

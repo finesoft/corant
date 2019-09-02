@@ -55,13 +55,13 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class DeclarativeConfigResolver {
 
-  static final Set<Class<?>> SuppoertTypes =
+  static final Set<Class<?>> supportTypes =
       new HashSet<>(ClassUtils.WRAPPER_PRIMITIVE_MAP.keySet());
 
   static {
     ConverterRegistry.getSupportConverters().keySet().stream()
         .filter(ct -> String.class.equals(ct.getSourceClass())).map(ct -> ct.getSourceClass())
-        .forEach(SuppoertTypes::add);
+        .forEach(supportTypes::add);
   }
 
   public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
@@ -171,7 +171,7 @@ public class DeclarativeConfigResolver {
           if (Collection.class.isAssignableFrom(ft)) {
             ft = getFieldActualTypeArguments(f, 0);
           }
-          if (SuppoertTypes.contains(ft)) {
+          if (supportTypes.contains(ft)) {
             getFields().add(new ConfigField(this, f));
           }
         }

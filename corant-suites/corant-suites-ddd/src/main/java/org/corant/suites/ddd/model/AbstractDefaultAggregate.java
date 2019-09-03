@@ -17,17 +17,17 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
- * An abstract aggregation that part of the implementation of event processing and other related
+ * An abstract aggregate that part of the implementation of event processing and other related
  * functions, use JPA.
  *
  * @author bingo 下午3:43:12
  */
 @MappedSuperclass
-public abstract class AbstractDefaultAggregation extends AbstractAggregation {
+public abstract class AbstractDefaultAggregate extends AbstractAggregate {
 
   private static final long serialVersionUID = -1347035224644784732L;
 
-  protected transient volatile AggregationAssistant assistant;
+  protected transient volatile AggregateAssistant assistant;
 
   /**
    * Message sequence number
@@ -35,7 +35,7 @@ public abstract class AbstractDefaultAggregation extends AbstractAggregation {
   @Column(name = "mn")
   private volatile long mn = 1L;
 
-  protected AbstractDefaultAggregation() {
+  protected AbstractDefaultAggregate() {
     super();
   }
 
@@ -47,9 +47,9 @@ public abstract class AbstractDefaultAggregation extends AbstractAggregation {
   }
 
   @Override
-  protected synchronized AggregationAssistant callAssistant() {
+  protected synchronized AggregateAssistant callAssistant() {
     if (assistant == null) {
-      assistant = new DefaultAggregationAssistant(this, mn);
+      assistant = new DefaultAggregateAssistant(this, mn);
     }
     return assistant;
   }

@@ -23,8 +23,8 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-import org.corant.suites.ddd.message.AggregationLifecycleMessage;
-import org.corant.suites.ddd.model.Aggregation.Lifecycle;
+import org.corant.suites.ddd.message.AggregateLifecycleMessage;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
@@ -33,91 +33,91 @@ import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
  * @author bingo 下午3:35:44
  *
  */
-public class DefaultAggregationListener {
+public class DefaultAggregateListener {
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
-  protected void handlePostLoad(AbstractAggregation o) {
+  protected void handlePostLoad(AbstractAggregate o) {
     o.lifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
     registerToUnitOfWork(o);
   }
 
-  protected void handlePostPersist(AbstractAggregation o) {
-    registerToUnitOfWork(new AggregationLifecycleMessage(o, Lifecycle.POST_PERSISTED));
+  protected void handlePostPersist(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_PERSISTED));
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_PERSISTED));
   }
 
-  protected void handlePostRemove(AbstractAggregation o) {
-    registerToUnitOfWork(new AggregationLifecycleMessage(o, Lifecycle.POST_REMOVED));
+  protected void handlePostRemove(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_REMOVED));
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_REMOVED));
   }
 
-  protected void handlePostUpdate(AbstractAggregation o) {
-    registerToUnitOfWork(new AggregationLifecycleMessage(o, Lifecycle.POST_UPDATED));
+  protected void handlePostUpdate(AbstractAggregate o) {
+    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_UPDATED));
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_UPDATED));
   }
 
-  protected void handlePrePersist(AbstractAggregation o) {
-    o.onPreEnable();
+  protected void handlePrePersist(AbstractAggregate o) {
+    o.onPrePreserve();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_PERSIST));
   }
 
-  protected void handlePreRemove(AbstractAggregation o) {
-    o.onPreDisable();
+  protected void handlePreRemove(AbstractAggregate o) {
+    o.onPreDestroy();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_REMOVE));
   }
 
-  protected void handlePreUpdate(AbstractAggregation o) {
-    o.onPreEnable();
+  protected void handlePreUpdate(AbstractAggregate o) {
+    o.onPrePreserve();
     registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_UPDATE));
   }
 
   @PostLoad
   protected void onPostLoad(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePostLoad((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePostLoad((AbstractAggregate) o);
     }
   }
 
   @PostPersist
   protected void onPostPersist(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePostPersist((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePostPersist((AbstractAggregate) o);
     }
   }
 
   @PostRemove
   protected void onPostRemove(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePostRemove((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePostRemove((AbstractAggregate) o);
     }
   }
 
   @PostUpdate
   protected void onPostUpdate(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePostUpdate((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePostUpdate((AbstractAggregate) o);
     }
   }
 
   @PrePersist
   protected void onPrePersist(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePrePersist((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePrePersist((AbstractAggregate) o);
     }
   }
 
   @PreRemove
   protected void onPreRemove(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePreRemove((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePreRemove((AbstractAggregate) o);
     }
   }
 
   @PreUpdate
   protected void onPreUpdate(Object o) {
-    if (o instanceof AbstractAggregation) {
-      handlePreUpdate((AbstractAggregation) o);
+    if (o instanceof AbstractAggregate) {
+      handlePreUpdate((AbstractAggregate) o);
     }
   }
 

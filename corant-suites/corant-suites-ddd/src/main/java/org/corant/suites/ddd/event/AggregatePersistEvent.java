@@ -18,14 +18,14 @@ import javax.persistence.EntityManager;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
-import org.corant.suites.ddd.model.Aggregation;
-import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
-import org.corant.suites.ddd.model.Aggregation.Lifecycle;
+import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
 /**
- * Every aggregation that extends AbstractAggregation when life cycle on persistence change then
- * will asynchronous fire AggregationPersistEvent . The Event triggers occur when the aggregation is
+ * Every aggregate that extends AbstractAggregate when life cycle on persistence change then
+ * will asynchronous fire AggregatePersistEvent . The Event triggers occur when the aggregate is
  * persisted/deleted/updated and has been updated to the persistence layer and the JTA transaction
  * has been finished successfully.
  *
@@ -36,21 +36,21 @@ import org.corant.suites.ddd.model.Aggregation.Lifecycle;
  * @author bingo 上午9:39:28
  */
 @Events
-public class AggregationPersistEvent extends AbstractEvent {
+public class AggregatePersistEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
   private final Lifecycle lifecycle;
 
-  public AggregationPersistEvent(Aggregation source) {
+  public AggregatePersistEvent(Aggregate source) {
     this(source, source.getLifecycle());
   }
 
-  public AggregationPersistEvent(Aggregation source, Lifecycle lifecycle) {
-    this(new DefaultAggregationIdentifier(source), lifecycle);
+  public AggregatePersistEvent(Aggregate source, Lifecycle lifecycle) {
+    this(new DefaultAggregateIdentifier(source), lifecycle);
   }
 
-  public AggregationPersistEvent(AggregationIdentifier source, Lifecycle lifecycle) {
+  public AggregatePersistEvent(AggregateIdentifier source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }
@@ -60,7 +60,7 @@ public class AggregationPersistEvent extends AbstractEvent {
   }
 
   @Override
-  public AggregationIdentifier getSource() {
+  public AggregateIdentifier getSource() {
     return forceCast(super.getSource());
   }
 

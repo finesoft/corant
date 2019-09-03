@@ -30,13 +30,13 @@ import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
-import org.corant.suites.ddd.event.AggregationPersistEvent;
+import org.corant.suites.ddd.event.AggregatePersistEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
-import org.corant.suites.ddd.model.AbstractAggregation.DefaultAggregationIdentifier;
-import org.corant.suites.ddd.model.Aggregation;
-import org.corant.suites.ddd.model.Aggregation.AggregationIdentifier;
-import org.corant.suites.ddd.model.Aggregation.Lifecycle;
+import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 
 /**
@@ -63,8 +63,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  final Map<AggregationIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
-  final Map<AggregationIdentifier, Lifecycle> evolutions = new LinkedHashMap<>();
+  final Map<AggregateIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
+  final Map<AggregateIdentifier, Lifecycle> evolutions = new LinkedHashMap<>();
   final LinkedList<Message> messages = new LinkedList<>();
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
@@ -97,10 +97,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void deregister(Object obj) {
     if (activated) {
-      if (obj instanceof Aggregation) {
-        Aggregation aggregation = (Aggregation) obj;
-        if (aggregation.getId() != null) {
-          AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
+      if (obj instanceof Aggregate) {
+        Aggregate aggregate = (Aggregate) obj;
+        if (aggregate.getId() != null) {
+          AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registrations.remove(ai);
           evolutions.remove(ai);
           messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
@@ -128,7 +128,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   @Override
-  public Map<AggregationIdentifier, Lifecycle> getRegistrations() {
+  public Map<AggregateIdentifier, Lifecycle> getRegistrations() {
     return Collections.unmodifiableMap(registrations);
   }
 
@@ -150,16 +150,16 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void register(Object obj) {
     if (activated && isInTransaction()) {
-      if (obj instanceof Aggregation) {
-        Aggregation aggregation = (Aggregation) obj;
-        if (aggregation.getId() != null) {
-          AggregationIdentifier ai = new DefaultAggregationIdentifier(aggregation);
-          Lifecycle al = aggregation.getLifecycle();
+      if (obj instanceof Aggregate) {
+        Aggregate aggregate = (Aggregate) obj;
+        if (aggregate.getId() != null) {
+          AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
+          Lifecycle al = aggregate.getLifecycle();
           registrations.put(ai, al);
           if (al.signFlushed()) {
             evolutions.put(ai, al);
           }
-          for (Message message : aggregation.extractMessages(true)) {
+          for (Message message : aggregate.extractMessages(true)) {
             MessageUtils.mergeToQueue(messages, message);
           }
         }
@@ -224,7 +224,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       evolutions.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
-            fireAsyncEvent(new AggregationPersistEvent(k, v));
+            fireAsyncEvent(new AggregatePersistEvent(k, v));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");
           }

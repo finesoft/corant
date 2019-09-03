@@ -31,7 +31,7 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午4:23:02
  * @since
  */
-public interface Aggregation extends Entity {
+public interface Aggregate extends Entity {
 
   /**
    * If flush is true then the integration event queue will be clear
@@ -51,22 +51,21 @@ public interface Aggregation extends Entity {
   Long getVn();
 
   /**
-   * In this case, it means whether it is persisted or not
-   */
-  @Transient
-  @javax.persistence.Transient
-  default boolean isEnabled() {
-    return getLifecycle() != null && getLifecycle().signEnabled();
-  }
-
-  /**
-   * The aggregation isn't persisted, or is destroyed, but still live in memory until the GC
-   * recycle.
+   * The aggregate isn't persisted, or is destroyed, but still live in memory until the GC recycle.
    */
   @Transient
   @javax.persistence.Transient
   default Boolean isPhantom() {
-    return getId() == null || !isEnabled();
+    return getId() == null || !isPreserved();
+  }
+
+  /**
+   * In this case, it means whether it is persisted or not
+   */
+  @Transient
+  @javax.persistence.Transient
+  default boolean isPreserved() {
+    return getLifecycle() != null && getLifecycle().signPreserved();
   }
 
   /**
@@ -90,11 +89,11 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:04:45
    *
    */
-  public static abstract class AggregationHandlerAdapter<P, T extends Aggregation>
-      extends EnablingHandlerAdapter<P, T> implements DisablingHandler<P, T> {
+  public static abstract class AggregateHandlerAdapter<P, T extends Aggregate>
+      extends PreservingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
 
     @Override
-    public void preDisable(P param, T destroyable) {}
+    public void preDestroy(P param, T destroyable) {}
 
   }
 
@@ -104,7 +103,7 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:04:52
    *
    */
-  interface AggregationIdentifier extends EntityIdentifier {
+  interface AggregateIdentifier extends EntityIdentifier {
 
     @Override
     Serializable getId();
@@ -124,12 +123,12 @@ public interface Aggregation extends Entity {
    *
    */
   @FunctionalInterface
-  interface DisablingHandler<P, T> {
+  interface DestroyingHandler<P, T> {
     @SuppressWarnings("rawtypes")
-    DisablingHandler EMPTY_INST = (p, t) -> {
+    DestroyingHandler EMPTY_INST = (p, t) -> {
     };
 
-    void preDisable(P param, T enabling);
+    void preDestroy(P param, T enabling);
   }
 
   /**
@@ -138,9 +137,9 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:05:19
    *
    */
-  public static abstract class DisablingHandlerAdapter<P, T> implements DisablingHandler<P, T> {
+  public static abstract class DestroyingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
     @Override
-    public void preDisable(P param, T enabling) {}
+    public void preDestroy(P param, T enabling) {}
   }
 
   /**
@@ -149,37 +148,11 @@ public interface Aggregation extends Entity {
    * @author bingo 下午9:05:07
    *
    */
-  interface Enabling<P, T> {
+  interface Evolution<P, T> {
 
-    void disable(P Param, DisablingHandler<P, T> handler);
+    void destroy(P Param, DestroyingHandler<P, T> handler);
 
-    T enable(P param, EnablingHandler<P, T> handler);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:13
-   *
-   */
-  @FunctionalInterface
-  interface EnablingHandler<P, T> {
-    @SuppressWarnings("rawtypes")
-    EnablingHandler EMPTY_INST = (p, t) -> {
-    };
-
-    void preEnable(P param, T enabling);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:19
-   *
-   */
-  public static abstract class EnablingHandlerAdapter<P, T> implements EnablingHandler<P, T> {
-    @Override
-    public void preEnable(P param, T enabling) {}
+    T preserve(P param, PreservingHandler<P, T> handler);
   }
 
   /**
@@ -191,58 +164,58 @@ public interface Aggregation extends Entity {
    */
   public enum Lifecycle {
     /**
-     * Aggregation has just been created.
+     * Aggregate has just been created.
      */
     INITIAL(0),
     /**
-     * Aggregation has been joined persistence context.
+     * Aggregate has been joined persistence context.
      */
-    ENABLED(2),
+    PRESERVED(2),
     /**
-     * Aggregation retrieve from storage and has been joined persistence context.
+     * Aggregate retrieve from storage and has been joined persistence context.
      */
     LOADED(4),
     /**
-     * Aggregation will be persist to storage
+     * Aggregate will be persist to storage
      *
      * @see PrePersist
      */
     PRE_PERSIST(8),
     /**
-     * Aggregation will be update to storage
+     * Aggregate will be update to storage
      *
      * @see PreUpdate
      */
     PRE_UPDATE(16),
     /**
-     * Aggregation will be remove from storage
+     * Aggregate will be remove from storage
      *
      * @see PreRemove
      */
     PRE_REMOVE(32),
     /**
-     * Aggregation has been persisted to storage
+     * Aggregate has been persisted to storage
      *
      * @see PostPersist
      */
     POST_PERSISTED(64),
     /**
-     * Aggregation has been update to storage
+     * Aggregate has been update to storage
      *
      * @see PostUpdate
      */
     POST_UPDATED(128),
     /**
-     * Aggregation has been removed from storage
+     * Aggregate has been removed from storage
      *
      * @see PostRemove
      */
     POST_REMOVED(256),
     /**
-     * If aggregation has already been persisted, the representation is removed from the persistence
+     * If aggregate has already been persisted, the representation is removed from the persistence
      * facility; otherwise it is just a token.
      */
-    DISABLED(512);
+    DESTROYED(512);
 
     int sign;
 
@@ -255,27 +228,18 @@ public interface Aggregation extends Entity {
     }
 
     /**
-     * The aggregation remove from persistence context if has been persisted before, otherwise the
-     * aggregation has been created and marked disable means it can't not participate in any domain
+     * The aggregate remove from persistence context if has been persisted before, otherwise the
+     * aggregate has been created and marked destroyed means it can't not participate in any domain
      * logic.
      *
      * @return signDisabled
      */
-    public boolean signDisabled() {
+    public boolean signDestroyed() {
       return (sign & 768) != 0;
     }
 
     /**
-     * The aggregation has been joined persistence context and has identity.
-     *
-     * @return signEnabled
-     */
-    public boolean signEnabled() {
-      return (sign & 254) != 0;
-    }
-
-    /**
-     * The aggregation status have been synchronized to underling storage.
+     * The aggregate status have been synchronized to underling storage.
      *
      * @return signFlushed
      */
@@ -283,9 +247,44 @@ public interface Aggregation extends Entity {
       return (sign & 448) != 0;
     }
 
+    /**
+     * The aggregate has been joined persistence context and has identity.
+     *
+     * @return signPreserved
+     */
+    public boolean signPreserved() {
+      return (sign & 254) != 0;
+    }
+
     public boolean signRefreshable() {
       return (sign & 30) != 0 || (sign & 192) != 0;
     }
+  }
+
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:13
+   *
+   */
+  @FunctionalInterface
+  interface PreservingHandler<P, T> {
+    @SuppressWarnings("rawtypes")
+    PreservingHandler EMPTY_INST = (p, t) -> {
+    };
+
+    void prePreserve(P param, T enabling);
+  }
+
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午9:05:19
+   *
+   */
+  public static abstract class PreservingHandlerAdapter<P, T> implements PreservingHandler<P, T> {
+    @Override
+    public void prePreserve(P param, T enabling) {}
   }
 
 }

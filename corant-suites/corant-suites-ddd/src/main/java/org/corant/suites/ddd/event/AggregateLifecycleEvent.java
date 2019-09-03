@@ -18,12 +18,12 @@ import javax.persistence.EntityManager;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregation;
-import org.corant.suites.ddd.model.Aggregation.Lifecycle;
+import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
 /**
- * Every aggregation that extends AbstractAggregation when life cycle change then will fire
- * AggregationLifecycleEvent. The Event triggers occur when the aggregation is
+ * Every aggregate that extends AbstractAggregate when life cycle change then will fire
+ * AggregateLifecycleEvent. The Event triggers occur when the aggregate is
  * persisted/deleted/updated and has been propagated to the persistence context and the JTA
  * transaction has not yet finished.
  *
@@ -34,17 +34,17 @@ import org.corant.suites.ddd.model.Aggregation.Lifecycle;
  * @author bingo 上午9:39:28
  */
 @Events
-public class AggregationLifecycleEvent extends AbstractEvent {
+public class AggregateLifecycleEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
   private final Lifecycle lifecycle;
 
-  public AggregationLifecycleEvent(Aggregation source) {
+  public AggregateLifecycleEvent(Aggregate source) {
     this(source, source.getLifecycle());
   }
 
-  public AggregationLifecycleEvent(Aggregation source, Lifecycle lifecycle) {
+  public AggregateLifecycleEvent(Aggregate source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }
@@ -54,11 +54,11 @@ public class AggregationLifecycleEvent extends AbstractEvent {
   }
 
   @Override
-  public Aggregation getSource() {
+  public Aggregate getSource() {
     return forceCast(super.getSource());
   }
 
-  public <T extends Aggregation> T getSourceAggregation() {
+  public <T extends Aggregate> T getSourceAggregate() {
     return forceCast(super.getSource());
   }
 }

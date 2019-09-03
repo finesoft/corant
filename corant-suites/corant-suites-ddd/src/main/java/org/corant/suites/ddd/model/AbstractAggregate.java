@@ -32,9 +32,9 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.ddd.annotation.qualifier.AggregationType.AggregationTypeLiteral;
-import org.corant.suites.ddd.event.AggregationLifecycleEvent;
-import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
+import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
+import org.corant.suites.ddd.event.AggregateLifecycleEvent;
+import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
@@ -46,8 +46,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
  *
  */
 @MappedSuperclass
-@EntityListeners(value = {DefaultAggregationListener.class})
-public abstract class AbstractAggregation extends AbstractEntity implements Aggregation {
+@EntityListeners(value = {DefaultAggregateListener.class})
+public abstract class AbstractAggregate extends AbstractEntity implements Aggregate {
 
   private static final long serialVersionUID = -9184534676784775644L;
 
@@ -73,7 +73,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   }
 
   /**
-   * Return an aggregation evolutionary version number, this is equivalent to
+   * Return an aggregate evolutionary version number, this is equivalent to
    * {@link javax.persistence.Version} in JPA
    */
   @Override
@@ -111,10 +111,9 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   }
 
   /**
-   * Obtain an assistant for the aggregation, subclass can rewrite this method for supply an
-   * assistant
+   * Obtain an assistant for the aggregate, subclass can rewrite this method for supply an assistant
    */
-  protected abstract AggregationAssistant callAssistant();
+  protected abstract AggregateAssistant callAssistant();
 
   /**
    * The current unit of work or null
@@ -128,59 +127,59 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
   }
 
   /**
-   * Destroy the aggregation if is persisted then remove it from entity manager else just mark
+   * Destroy the aggregate if is persisted then remove it from entity manager else just mark
    * destroyed
    */
-  protected synchronized void disable(boolean immediately) {
+  protected synchronized void destroy(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
-    lifecycle(Lifecycle.DISABLED);
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
+    lifecycle(Lifecycle.DESTROYED);
   }
 
-  /**
-   * Enable the aggregation if is not persisted then persist it else merge it.
-   */
-  protected synchronized AbstractAggregation enable(boolean immediately) {
-    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
-    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
-    return lifecycle(Lifecycle.ENABLED);
-  }
-
-  protected synchronized AbstractAggregation lifecycle(Lifecycle lifecycle) {
+  protected synchronized AbstractAggregate lifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
       if (lifecycle != Lifecycle.LOADED) {
-        this.raise(new AggregationLifecycleEvent(this), AggregationTypeLiteral.of(getClass()));
+        this.raise(new AggregateLifecycleEvent(this), AggregateTypeLiteral.of(getClass()));
       }
     }
     return this;
   }
 
   /**
-   * Disable preconditions, validate the aggregation consistency, EntityListener callback.
+   * Disable preconditions, validate the aggregate consistency, EntityListener callback.
    *
-   * @see DefaultAggregationListener
+   * @see DefaultAggregateListener
    * @see PreRemove
    */
-  protected void onPreDisable() {}
+  protected void onPreDestroy() {}
 
   /**
-   * Enable preconditions, validate the aggregation consistency, EntityListener callback.
+   * Preserve preconditions, validate the aggregate consistency, EntityListener callback.
    *
-   * @see DefaultAggregationListener
+   * @see DefaultAggregateListener
    * @see PrePersist
    * @see PreUpdate
    */
-  protected void onPreEnable() {}
+  protected void onPrePreserve() {}
+
+  /**
+   * Preserve the aggregate if is not persisted then persist it else merge it.
+   */
+  protected synchronized AbstractAggregate preserve(boolean immediately) {
+    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
+    return lifecycle(Lifecycle.PRESERVED);
+  }
 
   /**
    * recover from persistence
    *
    * @see EntityManager#refresh(Object)
    */
-  protected synchronized AbstractAggregation recover() {
+  protected synchronized AbstractAggregate recover() {
     requireFalse(lifecycle == null || !lifecycle.signRefreshable(), PkgMsgCds.ERR_AGG_LC);
-    this.raise(new AggregationLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
     return this;
   }
 
@@ -196,7 +195,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
     stream.defaultWriteObject();
   }
 
-  public static final class DefaultAggregationIdentifier implements AggregationIdentifier {
+  public static final class DefaultAggregateIdentifier implements AggregateIdentifier {
 
     private static final long serialVersionUID = -930151000998600572L;
 
@@ -206,10 +205,10 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
 
     private final int hash;
 
-    public DefaultAggregationIdentifier(Aggregation aggregation) {
-      id = requireNotNull(requireNotNull(aggregation, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
+    public DefaultAggregateIdentifier(Aggregate aggregate) {
+      id = requireNotNull(requireNotNull(aggregate, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
           GlobalMessageCodes.ERR_SYS);
-      typeCls = requireNotNull(aggregation.getClass(), GlobalMessageCodes.ERR_SYS);
+      typeCls = requireNotNull(aggregate.getClass(), GlobalMessageCodes.ERR_SYS);
       hash = calHash(id, typeCls);
     }
 
@@ -224,7 +223,7 @@ public abstract class AbstractAggregation extends AbstractEntity implements Aggr
       if (getClass() != obj.getClass()) {
         return false;
       }
-      DefaultAggregationIdentifier other = (DefaultAggregationIdentifier) obj;
+      DefaultAggregateIdentifier other = (DefaultAggregateIdentifier) obj;
       if (id == null) {
         if (other.id != null) {
           return false;

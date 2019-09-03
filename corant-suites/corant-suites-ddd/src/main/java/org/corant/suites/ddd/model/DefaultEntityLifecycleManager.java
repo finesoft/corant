@@ -36,7 +36,7 @@ import javax.persistence.metamodel.ManagedType;
 import org.corant.kernel.api.PersistenceService;
 import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
-import org.corant.suites.ddd.event.AggregationLifecycleManageEvent;
+import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
@@ -70,7 +70,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   @Override
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION
-      + 1000) AggregationLifecycleManageEvent e) {
+      + 1000) AggregateLifecycleManageEvent e) {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
       boolean effectImmediately = e.isEffectImmediately();

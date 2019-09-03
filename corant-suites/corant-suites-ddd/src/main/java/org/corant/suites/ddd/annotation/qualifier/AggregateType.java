@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 import java.util.Arrays;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
-import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregate;
 
 /**
  * @author bingo 下午9:05:13
@@ -34,33 +34,33 @@ import org.corant.suites.ddd.model.Aggregation;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface AggregationType {
+public @interface AggregateType {
 
-  Class<? extends Aggregation> value();
+  Class<? extends Aggregate> value();
 
-  public static class AggregationTypeLiteral extends AnnotationLiteral<AggregationType>
-      implements AggregationType {
+  public static class AggregateTypeLiteral extends AnnotationLiteral<AggregateType>
+      implements AggregateType {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
-    private final Class<? extends Aggregation> value;
+    private final Class<? extends Aggregate> value;
 
-    private AggregationTypeLiteral(Class<? extends Aggregation> value) {
+    private AggregateTypeLiteral(Class<? extends Aggregate> value) {
       this.value = value;
     }
 
     @SuppressWarnings("unchecked")
-    public static AggregationTypeLiteral[] from(Class<? extends Aggregation>... values) {
-      return Arrays.stream(values).map(AggregationTypeLiteral::of)
-          .toArray(AggregationTypeLiteral[]::new);
+    public static AggregateTypeLiteral[] from(Class<? extends Aggregate>... values) {
+      return Arrays.stream(values).map(AggregateTypeLiteral::of)
+          .toArray(AggregateTypeLiteral[]::new);
     }
 
-    public static AggregationTypeLiteral of(Class<? extends Aggregation> value) {
-      return new AggregationTypeLiteral(value);
+    public static AggregateTypeLiteral of(Class<? extends Aggregate> value) {
+      return new AggregateTypeLiteral(value);
     }
 
     @Override
-    public Class<? extends Aggregation> value() {
+    public Class<? extends Aggregate> value() {
       return value;
     }
   }

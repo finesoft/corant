@@ -16,19 +16,19 @@ package org.corant.suites.ddd.model;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.persistence.MappedSuperclass;
-import org.corant.suites.ddd.model.Aggregation.Enabling;
+import org.corant.suites.ddd.model.Aggregate.Evolution;
 
 /**
  * @author bingo 下午7:42:44
  *
  */
 @MappedSuperclass
-public abstract class AbstractDefaultGenericAggregation<P, T extends AbstractDefaultAggregation>
-    extends AbstractDefaultAggregation implements Enabling<P, T> {
+public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefaultAggregate>
+    extends AbstractDefaultAggregate implements Evolution<P, T> {
 
   private static final long serialVersionUID = 3815839476729207935L;
 
-  public AbstractDefaultGenericAggregation() {
+  public AbstractDefaultGenericAggregate() {
     super();
   }
 
@@ -51,24 +51,24 @@ public abstract class AbstractDefaultGenericAggregation<P, T extends AbstractDef
 
   @SuppressWarnings("unchecked")
   @Override
-  public void disable(P param, DisablingHandler<P, T> handler) {
+  public void destroy(P param, DestroyingHandler<P, T> handler) {
     if (handler != null) {
-      handler.preDisable(param, (T) this);
+      handler.preDestroy(param, (T) this);
     }
-    this.disable(false);
+    this.destroy(false);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public T enable(P param, EnablingHandler<P, T> handler) {
+  public T preserve(P param, PreservingHandler<P, T> handler) {
     if (handler != null) {
-      handler.preEnable(param, (T) this);
+      handler.prePreserve(param, (T) this);
     }
-    return (T) this.enable(false);
+    return (T) this.preserve(false);
   }
 
   /**
-   * Changed the aggregation's property value and return self for lambda use case, Example:
+   * Changed the aggregate's property value and return self for lambda use case, Example:
    *
    * <pre>
    * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)

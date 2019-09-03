@@ -15,17 +15,17 @@ package org.corant.suites.ddd.event;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
-import org.corant.suites.ddd.model.Aggregation;
+import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 
 /**
  * The lifecycle manage event, the infrastructure service will listen this event and do persist or
- * destroy the aggregation.
+ * destroy the aggregate.
  *
  * @author bingo 上午9:39:28
  */
 @Events
-public class AggregationLifecycleManageEvent extends AbstractEvent {
+public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   private static final long serialVersionUID = 2441297731044122118L;
 
@@ -33,11 +33,11 @@ public class AggregationLifecycleManageEvent extends AbstractEvent {
 
   private final boolean effectImmediately;
 
-  public AggregationLifecycleManageEvent(Aggregation source, LifecycleAction action) {
+  public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action) {
     this(source, action, false);
   }
 
-  public AggregationLifecycleManageEvent(Aggregation source, LifecycleAction action,
+  public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action,
       boolean effectImmediately) {
     super(source);
     this.action = action;
@@ -49,7 +49,7 @@ public class AggregationLifecycleManageEvent extends AbstractEvent {
   }
 
   @Override
-  public Aggregation getSource() {
+  public Aggregate getSource() {
     return forceCast(super.getSource());
   }
 
@@ -59,7 +59,7 @@ public class AggregationLifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "AggregationLifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
+    return "AggregateLifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
         + (getSource() == null ? null : getSource().getId()) + ", isEffectImmediately()="
         + isEffectImmediately() + "]";
   }

@@ -23,13 +23,13 @@ import org.corant.suites.ddd.message.Message;
  * @author bingo 下午2:05:56
  *
  */
-public abstract class AbstractAuditableAggregation extends AbstractAggregation {
+public abstract class AbstractAuditableAggregate extends AbstractAggregate {
 
   private static final long serialVersionUID = 3636641230618671037L;
 
-  public AbstractAuditableAggregation() {}
+  public AbstractAuditableAggregate() {}
 
-  public AbstractAuditableAggregation(Stream<? extends Message> messageStream) {}
+  public AbstractAuditableAggregate(Stream<? extends Message> messageStream) {}
 
   @Override
   public synchronized List<Message> extractMessages(boolean flush) {

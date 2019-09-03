@@ -31,23 +31,23 @@ import org.corant.suites.ddd.message.MessageUtils;
 /**
  * @author bingo 上午10:57:03
  */
-public class DefaultAggregationAssistant implements AggregationAssistant {
+public class DefaultAggregateAssistant implements AggregateAssistant {
 
   private static final String FIRE_LOG = "Fire event [%s] to event listener!";
   private static final String RISE_LOG = "Register integration message [%s] to message queue!";
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-  protected transient final Aggregation aggregation;
+  protected transient final Aggregate aggregate;
 
   protected transient final Queue<Message> messages = new LinkedList<>();
   protected transient volatile long lastMessageSequenceNumber = 1L;
 
-  public DefaultAggregationAssistant(Aggregation aggregation) {
-    this.aggregation = requireNotNull(aggregation, GlobalMessageCodes.ERR_PARAM);
+  public DefaultAggregateAssistant(Aggregate aggregate) {
+    this.aggregate = requireNotNull(aggregate, GlobalMessageCodes.ERR_PARAM);
   }
 
-  public DefaultAggregationAssistant(Aggregation aggregation, long lastMessageSequenceNumber) {
-    this(aggregation);
+  public DefaultAggregateAssistant(Aggregate aggregate, long lastMessageSequenceNumber) {
+    this(aggregate);
     this.lastMessageSequenceNumber =
         requireGaet(lastMessageSequenceNumber, 0L, GlobalMessageCodes.ERR_PARAM);
   }
@@ -72,7 +72,7 @@ public class DefaultAggregationAssistant implements AggregationAssistant {
 
   @Override
   public void enqueueMessages(Message... messages) {
-    if (aggregation.getId() != null) {
+    if (aggregate.getId() != null) {
       for (Message msg : messages) {
         if (msg != null) {
           logger.fine(() -> String.format(RISE_LOG, msg.toString()));
@@ -80,8 +80,8 @@ public class DefaultAggregationAssistant implements AggregationAssistant {
         }
       }
       // FIXME
-      if (aggregation instanceof AbstractDefaultAggregation) {
-        AbstractDefaultAggregation.class.cast(aggregation)
+      if (aggregate instanceof AbstractDefaultAggregate) {
+        AbstractDefaultAggregate.class.cast(aggregate)
             .setMn(lastMessageSequenceNumber + this.messages.size());
       }
     }
@@ -98,12 +98,12 @@ public class DefaultAggregationAssistant implements AggregationAssistant {
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    DefaultAggregationAssistant other = (DefaultAggregationAssistant) obj;
-    if (aggregation == null) {
-      if (other.aggregation != null) {
+    DefaultAggregateAssistant other = (DefaultAggregateAssistant) obj;
+    if (aggregate == null) {
+      if (other.aggregate != null) {
         return false;
       }
-    } else if (!aggregation.equals(other.aggregation)) {
+    } else if (!aggregate.equals(other.aggregate)) {
       return false;
     }
     return true;
@@ -126,8 +126,8 @@ public class DefaultAggregationAssistant implements AggregationAssistant {
   }
 
   @Override
-  public Aggregation getAggregation() {
-    return aggregation;
+  public Aggregate getAggregate() {
+    return aggregate;
   }
 
   public long getLastMessageSequenceNumber() {
@@ -143,7 +143,7 @@ public class DefaultAggregationAssistant implements AggregationAssistant {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (aggregation == null ? 0 : aggregation.hashCode());
+    result = prime * result + (aggregate == null ? 0 : aggregate.hashCode());
     return result;
   }
 

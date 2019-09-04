@@ -13,6 +13,7 @@
  */
 package org.corant.suites.bundle;
 
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Instant;
@@ -28,8 +29,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FilenameUtils;
 import org.corant.kernel.normal.Defaults;
+import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.Resource;
 
@@ -87,10 +88,9 @@ public class PropertyResourceBundle extends ResourceBundle {
   }
 
   protected static Locale detectLocaleByName(String name) {
-    int f = name != null ? name.indexOf(LOCALE_SPT_CHAR) : -1;
-    if (f > 0) {
-      return LocaleUtils.langToLocale(FilenameUtils.getBaseName(name.substring(f + 1)),
-          LOCALE_SPT_CHAR);
+    String useName = FileUtils.getFileBaseName(name);
+    if (isNotBlank(useName)) {
+      return LocaleUtils.langToLocale(useName, LOCALE_SPT_CHAR);
     } else {
       return Locale.getDefault();
     }

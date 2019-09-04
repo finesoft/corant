@@ -16,7 +16,6 @@ package org.corant.suites.ddd.model;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.persistence.MappedSuperclass;
-import org.corant.suites.ddd.model.Aggregate.Evolution;
 
 /**
  * @author bingo 下午7:42:44
@@ -24,7 +23,7 @@ import org.corant.suites.ddd.model.Aggregate.Evolution;
  */
 @MappedSuperclass
 public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefaultAggregate>
-    extends AbstractDefaultAggregate implements Evolution<P, T> {
+    extends AbstractDefaultAggregate implements Evolvable<P, T> {
 
   private static final long serialVersionUID = 3815839476729207935L;
 

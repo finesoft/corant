@@ -41,6 +41,8 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
  * corant-asosat-ddd
+ * <p>
+ * The default entity life cycle manager, use EDA mechanism.
  *
  * @author bingo 上午10:44:19
  *

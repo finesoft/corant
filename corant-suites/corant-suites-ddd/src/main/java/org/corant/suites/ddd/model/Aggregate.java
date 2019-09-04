@@ -26,32 +26,51 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.UnitOfWork;
 
 /**
+ * Aggregate a cluster of associated objects that are treated as a unit for the purpose of data
+ * changes. External references are restricted to one member of the AGGREGATE, designated as the
+ * root. A set of consistency rules applies within the AGGREGATE’S boundaries.
+ * <p>
+ * Aggregates are the basic element of transfer of data storage - you request to load or save whole
+ * aggregates. Transactions should not cross aggregate boundaries.
+ * <p>
+ * Generally speaking the aggregate is the DDD aggregate root entity.
+ *
  * @author bingo 下午4:23:02
  * @since
  */
 public interface Aggregate extends Entity {
 
   /**
-   * If flush is true then the integration event queue will be clear
+   * Extract the buffered messages that aggregate raised, this method was invoked before unit of
+   * work completed.
+   *
+   * @param flush if true then clear messages buffer
+   * @return extractMessages
    */
   List<Message> extractMessages(boolean flush);
 
   /**
-   * the lifeCycle of being
+   * The lifeCycle of aggregate
+   *
+   * @see Lifecycle
    */
   @Transient
   @javax.persistence.Transient
   Lifecycle getLifecycle();
 
   /**
-   * the evolution version number, use as persistence version
+   * The aggregate evolution version number, use as persistence version
+   * {@link javax.persistence.Version} by default.
    */
   Long getVn();
 
   /**
-   * The aggregate isn't persisted, or is destroyed, but still live in memory until the GC recycle.
+   * If the aggregate isn't persisted, or is destroyed, but still live in memory until the GC
+   * recycle then return true else return false.
    */
   @Transient
   @javax.persistence.Transient
@@ -60,7 +79,7 @@ public interface Aggregate extends Entity {
   }
 
   /**
-   * In this case, it means whether it is persisted or not
+   * Indicates whether the aggregate is persisted or not.
    */
   @Transient
   @javax.persistence.Transient
@@ -69,33 +88,48 @@ public interface Aggregate extends Entity {
   }
 
   /**
-   * Raise events.
+   * Raise event, use the CDI event mechanism to emit event.
+   * <p>
+   * Generally speaking the event is not the DDD domain event. It is simply event-driven
+   * architecture for decoupling.
+   *
+   * @param event
+   * @param qualifiers raise
    */
   void raise(Event event, Annotation... qualifiers);
 
   /**
-   * Raise messages
+   * Raise message, add the message to the buffer and do not publish it immediately.
+   * {@link #extractMessages(boolean)}.
+   * <p>
+   *
+   * <pre>
+   * The Message sending timing:
+   *
+   * 1.In JTA JPA JMS environment, the buffered messages sending timing is between the entity
+   * manager flushed and the unit of work completed, this is the default behavior.
+   *
+   * 2.In the other environment, the buffered message must be send after unit of work completed
+   * successfully.
+   * </pre>
+   *
+   * Generally speaking the message is the DDD domain event.
+   *
+   * @param messages
+   *
+   * @see UnitOfWork
+   * @see JTAJPAUnitOfWorksManager
    */
   void raise(Message... messages);
 
   /**
-   * Raise asynchronous events
+   * Raise asynchronous events, {@link #raise(Event, Annotation...)}
+   *
+   * @param event
+   * @param qualifiers raiseAsync
+   *
    */
   void raiseAsync(Event event, Annotation... qualifiers);
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:04:45
-   *
-   */
-  public static abstract class AggregateHandlerAdapter<P, T extends Aggregate>
-      extends PreservingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
-
-    @Override
-    public void preDestroy(P param, T destroyable) {}
-
-  }
 
   /**
    * corant-suites-ddd
@@ -114,45 +148,6 @@ public interface Aggregate extends Entity {
     default Class<?> getTypeCls() {
       return tryAsClass(getType());
     }
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:13
-   *
-   */
-  @FunctionalInterface
-  interface DestroyingHandler<P, T> {
-    @SuppressWarnings("rawtypes")
-    DestroyingHandler EMPTY_INST = (p, t) -> {
-    };
-
-    void preDestroy(P param, T enabling);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:19
-   *
-   */
-  public static abstract class DestroyingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
-    @Override
-    public void preDestroy(P param, T enabling) {}
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:07
-   *
-   */
-  interface Evolution<P, T> {
-
-    void destroy(P Param, DestroyingHandler<P, T> handler);
-
-    T preserve(P param, PreservingHandler<P, T> handler);
   }
 
   /**
@@ -259,32 +254,6 @@ public interface Aggregate extends Entity {
     public boolean signRefreshable() {
       return (sign & 30) != 0 || (sign & 192) != 0;
     }
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:13
-   *
-   */
-  @FunctionalInterface
-  interface PreservingHandler<P, T> {
-    @SuppressWarnings("rawtypes")
-    PreservingHandler EMPTY_INST = (p, t) -> {
-    };
-
-    void prePreserve(P param, T enabling);
-  }
-
-  /**
-   * corant-suites-ddd
-   *
-   * @author bingo 下午9:05:19
-   *
-   */
-  public static abstract class PreservingHandlerAdapter<P, T> implements PreservingHandler<P, T> {
-    @Override
-    public void prePreserve(P param, T enabling) {}
   }
 
 }

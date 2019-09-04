@@ -47,6 +47,6 @@ public class ElasticSchemaUtils {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false",
         "elastic." + clusterName + ".auto-update-schame", "false");
-    return Corant.run(ElasticSchemaUtils.class, "-disable_boost_line");
+    return Corant.run(ElasticSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
 }

@@ -18,7 +18,7 @@ import java.util.Optional;
 
 /**
  * corant-suites-ddd
- *
+ * <p>
  * The object reference. Usually used for reference between aggregates or entities, it usually holds
  * the id of the aggregate or entity to which it points, and is an immutable object that can be
  * retrieved from the persistence layer by holding the id.

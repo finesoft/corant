@@ -113,6 +113,10 @@ import org.jboss.weld.manager.api.WeldManager;
  */
 public class Corant implements AutoCloseable {
 
+  public static final String DISABLE_BOOST_LINE_CMD = "-disable_boost-line";
+  public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
+  public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
+
   private static volatile Corant me;
   private final Class<?> configClass;
   private final String[] args;
@@ -346,12 +350,18 @@ public class Corant implements AutoCloseable {
   }
 
   void doAfterStarted(ClassLoader classLoader) {
+    if (setOf(args).contains(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
+      return;
+    }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
   }
 
   void doBeforeStart(ClassLoader classLoader) {
+    if (setOf(args).contains(DISABLE_BEFORE_START_HANDLER_CMD)) {
+      return;
+    }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
@@ -371,7 +381,7 @@ public class Corant implements AutoCloseable {
   }
 
   private void printBoostLine() {
-    if (!setOf(args).contains("-disable_boost_line")) {
+    if (!setOf(args).contains(DISABLE_BOOST_LINE_CMD)) {
       String spLine = "--------------------------------------------------";
       System.out.println(spLine + spLine + "\n");
     }

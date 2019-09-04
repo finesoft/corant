@@ -183,7 +183,7 @@ public class HibernateOrmSchemaUtils {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(HibernateOrmSchemaUtils.class, "-disable_boost_line");
+    return Corant.run(HibernateOrmSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
 
 }

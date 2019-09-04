@@ -19,7 +19,9 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,6 +54,10 @@ import org.corant.shared.util.PathUtils.GlobPatterns;
  */
 public class FileUtils {
 
+  public static final char EXTENSION_SEPARATOR = '.';
+  public static final String EXTENSION_SEPARATOR_STR = Character.toString(EXTENSION_SEPARATOR);
+  public static final char UNIX_SEPARATOR = '/';
+  public static final char WINDOWS_SEPARATOR = '\\';
   public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16L;
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
@@ -189,6 +195,43 @@ public class FileUtils {
     } catch (IOException e) {
     }
     return null;
+  }
+
+  public static String getFileBaseName(String path) {
+    String fileName = getFileName(path);
+    if (fileName != null) {
+      String ext = getFileNameExtension(path);
+      if (ext == null) {
+        return fileName;
+      } else {
+        return fileName.substring(0, fileName.length() - ext.length() - 1);
+      }
+    }
+    return null;
+  }
+
+  public static String getFileName(String path) {
+    if (isBlank(path)) {
+      return null;
+    } else {
+      shouldBeFalse(path.chars().anyMatch(p -> p == 0));
+      int idx = max(path.lastIndexOf(UNIX_SEPARATOR), path.lastIndexOf(WINDOWS_SEPARATOR));
+      return path.substring(idx + 1);
+    }
+  }
+
+  public static String getFileNameExtension(String path) {
+    if (path == null) {
+      return null;
+    } else {
+      int ep = path.lastIndexOf(EXTENSION_SEPARATOR);
+      int sp = max(path.lastIndexOf(UNIX_SEPARATOR), path.lastIndexOf(WINDOWS_SEPARATOR));
+      if (sp > ep) {
+        return null;
+      } else {
+        return path.substring(ep + 1);
+      }
+    }
   }
 
   public static String resolveGlobPathPrefix(String globExpress) {

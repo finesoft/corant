@@ -17,8 +17,10 @@ import java.util.logging.Logger;
 import javax.persistence.MappedSuperclass;
 
 /**
- * @author bingo 2018年3月28日
- * @since
+ * corant-suites-ddd
+ *
+ * @author bingo 下午12:05:38
+ *
  */
 @MappedSuperclass
 public abstract class AbstractEntity implements Entity {

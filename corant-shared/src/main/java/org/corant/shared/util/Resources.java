@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.MapUtils.immutableMapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.File;
@@ -53,7 +54,7 @@ public class Resources {
       if (st == SourceType.FILE_SYSTEM) {
         return forceCast(fromFileSystem(path));
       } else if (st == SourceType.URL) {
-        return forceCast(fromUrl(path));
+        return forceCast(streamOf(fromUrl(path)));
       } else {
         return forceCast(fromClassPath(path));// default from class path;
       }

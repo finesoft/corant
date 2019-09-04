@@ -29,6 +29,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
  * corant-suites-ddd
+ * <p>
+ * Entity listener, used to coordinate the unit of work.
  *
  * @author bingo 下午3:35:44
  *

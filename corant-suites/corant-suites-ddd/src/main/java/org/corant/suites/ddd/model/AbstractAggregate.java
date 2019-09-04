@@ -72,34 +72,21 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return lifecycle;
   }
 
-  /**
-   * Return an aggregate evolutionary version number, this is equivalent to
-   * {@link javax.persistence.Version} in JPA
-   */
   @Override
   public synchronized Long getVn() {
     return vn;
   }
 
-  /**
-   * Arise event, use CDI events
-   */
   @Override
   public void raise(Event event, Annotation... qualifiers) {
     callAssistant().fireEvent(event, qualifiers);
   }
 
-  /**
-   * Arise message
-   */
   @Override
   public void raise(Message... messages) {
     callAssistant().enqueueMessages(messages);
   }
 
-  /**
-   * Arise event, use CDI events
-   */
   @Override
   public void raiseAsync(Event event, Annotation... qualifiers) {
     callAssistant().fireAsyncEvent(event, qualifiers);
@@ -136,6 +123,14 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     lifecycle(Lifecycle.DESTROYED);
   }
 
+  /**
+   * Set the aggregate lifecycle stage and raise lifecycle event.
+   *
+   * Do not raise Lifecycle.LOAD event by default.
+   *
+   * @param lifecycle
+   * @return lifecycle
+   */
   protected synchronized AbstractAggregate lifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
@@ -147,7 +142,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Disable preconditions, validate the aggregate consistency, EntityListener callback.
+   * Destroy preconditions, validate the aggregate consistency, this method is the EntityListener
+   * callback.
    *
    * @see DefaultAggregateListener
    * @see PreRemove
@@ -155,7 +151,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected void onPreDestroy() {}
 
   /**
-   * Preserve preconditions, validate the aggregate consistency, EntityListener callback.
+   * Preserve preconditions, validate the aggregate consistency, this method is the EntityListener
+   * callback.
    *
    * @see DefaultAggregateListener
    * @see PrePersist
@@ -165,6 +162,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
   /**
    * Preserve the aggregate if is not persisted then persist it else merge it.
+   *
+   * @param immediately flush to stroage immediately
+   *
+   * @see EntityManager#flush()
    */
   protected synchronized AbstractAggregate preserve(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
@@ -195,6 +196,12 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     stream.defaultWriteObject();
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 上午11:58:12
+   *
+   */
   public static final class DefaultAggregateIdentifier implements AggregateIdentifier {
 
     private static final long serialVersionUID = -930151000998600572L;

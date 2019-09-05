@@ -14,6 +14,7 @@
 package org.corant.shared.conversion.converter.factory;
 
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
+import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.split;
@@ -65,6 +66,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     return Enum.class.isAssignableFrom(targetClass);
   }
 
+  @SuppressWarnings("rawtypes")
   protected <T extends Enum<?>> T convert(Object value, Class<T> targetClass, Map<String, ?> hints)
       throws Exception {
     if (value instanceof Enum<?> && value.getClass().isAssignableFrom(targetClass)) {
@@ -72,11 +74,18 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     } else if (value instanceof Number) {
       return targetClass.getEnumConstants()[Number.class.cast(value).intValue()];
     } else {
-      String[] values = split(value.toString(), ".", true, true);
-      String name = values[values.length - 1];
-      for (T t : targetClass.getEnumConstants()) {
-        if (t.name().equalsIgnoreCase(name)) {
-          return t;
+      String name = null;
+      if (value instanceof Map) {
+        name = getMapString((Map) value, "name");
+      } else {
+        String[] values = split(value.toString(), ".", true, true);
+        name = values[values.length - 1];
+      }
+      if (name != null) {
+        for (T t : targetClass.getEnumConstants()) {
+          if (t.name().equalsIgnoreCase(name)) {
+            return t;
+          }
         }
       }
       throw new ConversionException("Can not convert %s -> %s", value.getClass(), targetClass);

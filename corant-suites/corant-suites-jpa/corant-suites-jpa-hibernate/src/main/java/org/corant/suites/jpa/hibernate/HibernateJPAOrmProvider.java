@@ -27,6 +27,7 @@ import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.tool.schema.Action;
 
 /**
  * corant-suites-jpa-hibernate
@@ -41,12 +42,26 @@ public class HibernateJPAOrmProvider implements JPAProvider {
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
       new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
+  static Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
+  static {
+    DEFAULT_PROPERTIES.put("hibernate.show_sql", false);
+    DEFAULT_PROPERTIES.put("hibernate.format_sql", false);
+    DEFAULT_PROPERTIES.put("hibernate.use_sql_comments", false);
+    DEFAULT_PROPERTIES.put("hibernate.connection.autocommit", false);
+    DEFAULT_PROPERTIES.put("hibernate.archive.autodetection", "class, hbm");
+    DEFAULT_PROPERTIES.put("javax.persistence.query.timeout", 100000);
+    DEFAULT_PROPERTIES.put("javax.persistence.schema-generation.database.action", Action.NONE);
+  }
+
   @Inject
   DataSourceService dataSourceService;
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
       Map<String, Object> additionalProperties) {
+    DEFAULT_PROPERTIES.forEach((k, v) -> {
+      metaData.getProperties().putIfAbsent(k, v);
+    });
     shouldNotNull(metaData).configDataSource(dataSourceService::get);
     Map<String, Object> properties = new HashMap<>(PROPERTIES);
     if (additionalProperties != null) {

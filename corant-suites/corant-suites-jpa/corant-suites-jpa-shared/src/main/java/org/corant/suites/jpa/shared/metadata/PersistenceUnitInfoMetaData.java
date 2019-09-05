@@ -255,6 +255,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return excludeUnlistedClasses;
   }
 
+  public void putPropertity(String name, String value) {
+    properties.put(name, value);
+  }
+
   @Override
   public String toString() {
     return "PersistenceUnitInfoMetaData [persistenceUnitName=" + persistenceUnitName
@@ -303,10 +307,6 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     if (transformer != null && !transformers.contains(transformer)) {
       transformers.add(transformer);
     }
-  }
-
-  protected void putPropertity(String name, String value) {
-    properties.put(name, value);
   }
 
   protected void setClassLoader(ClassLoader classLoader) {

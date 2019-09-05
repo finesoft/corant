@@ -62,16 +62,16 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   protected Boolean connectable;
 
   @ConfigKeyItem(defaultValue = "false")
-  protected Boolean xa = false;
+  protected Boolean xa = true;
 
-  @ConfigKeyItem(defaultValue = "2")
-  protected Integer initialSize = 2;
+  @ConfigKeyItem(defaultValue = "4")
+  protected Integer initialSize = 4;
 
   @ConfigKeyItem(defaultValue = "0")
   protected Integer minSize = 0;
 
-  @ConfigKeyItem(defaultValue = "4")
-  protected Integer maxSize = 4;
+  @ConfigKeyItem(defaultValue = "64")
+  protected Integer maxSize = 64;
 
   @ConfigKeyItem(defaultValue = "PT0S")
   protected Duration leakTimeout = Duration.ZERO;

@@ -16,11 +16,13 @@ package org.corant.devops.maven.plugin.packaging;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * corant-devops-maven
@@ -32,6 +34,9 @@ import org.apache.maven.project.MavenProject;
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class PackageMojo extends AbstractMojo {
+
+  @Component
+  MavenProjectHelper projectHelper;
 
   @Parameter(defaultValue = "${project}", readonly = true)
   protected MavenProject project;

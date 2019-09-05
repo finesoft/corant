@@ -74,10 +74,10 @@ public class JarPackager implements Packager {
 
   protected void doPack(Archive root) throws IOException {
     final Path destPath = Objects.requireNonNull(resolvePath());
+    log.debug(String.format("(corant) created destination dir %s for packaging.",
+        destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
-    log.debug(String.format("(corant) created destination dir %s for packaging.",
-        parentPath.toUri().getPath()));
     try (JarArchiveOutputStream jos =
         new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries

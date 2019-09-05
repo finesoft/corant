@@ -15,6 +15,7 @@ package org.corant.devops.maven.plugin.packaging;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.plugin.logging.Log;
@@ -47,18 +48,21 @@ public class AttachPackager implements Packager {
   @Override
   public void pack() throws Exception {
     log.debug("(corant)----------------------------[pack attach]----------------------------");
+    final Path destPath = Objects.requireNonNull(resolvePath());
+    log.debug(String.format("(corant) created destination url %s for packaging.",
+        destPath.toUri().getPath()));
     DefaultArtifact artifact = new DefaultArtifact(getMojo().getProject().getGroupId(),
         getMojo().getProject().getArtifactId(), getMojo().getProject().getVersion(),
-        getMojo().getProject().getArtifact().getScope(), "jar", getMojo().getClassifier(),
+        getMojo().getProject().getArtifact().getScope(), "jar", null,
         new DefaultArtifactHandler("jar"));
-    artifact.setFile(resolvePath().toFile());
+    artifact.setFile(destPath.toFile());
     getMojo().getProject().addAttachedArtifact(artifact);
     log.debug("(corant) packaged attach!");
   }
 
   Path resolvePath() {
     Path target = Paths.get(getMojo().getProject().getBuild().getDirectory());
-    return target.resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + ".jar");
+    return target.resolve(getMojo().getFinalName() + ".jar");
   }
 
 }

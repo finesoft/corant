@@ -23,6 +23,7 @@ import org.corant.Corant;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.ogm.datastore.mongodb.dialect.impl.AssociationStorageStrategy;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 
 /**
@@ -38,9 +39,28 @@ public class HibernateJPAOgmProvider implements JPAProvider {
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
       new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
 
+  static Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
+  static {
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.create_database", true);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",
+        AssociationStorageStrategy.IN_ENTITY);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.grid_dialect",
+        org.corant.suites.jpa.hibernate.HibernateMongoDBDialect.class);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.maxConnectionIdleTime", 6000);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.socketTimeout", false);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.connectTimeout", 300000);
+    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.autoConnectRetry", true);
+  }
+
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
       Map<String, Object> additionalProperties) {
+    Object provider = metaData.getProperties().get("hibernate.ogm.datastore.provider");
+    if (provider != null && "mongodb".equalsIgnoreCase(provider.toString())) {
+      DEFAULT_MONGODB_PROPERTIES.forEach((k, v) -> {
+        metaData.getProperties().putIfAbsent(k, v);
+      });
+    }
     Map<String, Object> properties = new HashMap<>(PROPERTIES);
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);

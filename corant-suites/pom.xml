@@ -26,7 +26,6 @@
 		<module>corant-suites-ddd</module>
 		<module>corant-suites-elastic</module>
 		<module>corant-suites-mongodb</module>
-		<module>corant-suites-mp</module>
 		<module>corant-suites-cassandra</module>
 		<module>corant-suites-elastic-ext</module>
 		<module>corant-suites-redis</module>

@@ -1079,42 +1079,42 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-healthcheck</artifactId>
+				<artifactId>corant-microprofile-healthcheck</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-faulttolerance</artifactId>
+				<artifactId>corant-microprofile-faulttolerance</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-jwt</artifactId>
+				<artifactId>corant-microprofile-jwt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-metrics</artifactId>
+				<artifactId>corant-microprofile-metrics</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-openapi</artifactId>
+				<artifactId>corant-microprofile-openapi</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-opentracking</artifactId>
+				<artifactId>corant-microprofile-opentracking</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-restclient</artifactId>
+				<artifactId>corant-microprofile-restclient</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-mp-config</artifactId>
+				<artifactId>corant-microprofile-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

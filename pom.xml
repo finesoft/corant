@@ -42,6 +42,8 @@
         <module>corant-kernel</module>
         <module>corant-config</module>
         <module>corant-suites</module>
+        <module>corant-microprofile</module>
+        <module>corant-vertx</module>
     </modules>
     <build>
         <pluginManagement>

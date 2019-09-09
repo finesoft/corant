@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.corant</groupId>
     <artifactId>corant-root</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
   <artifactId>corant-vertx</artifactId>
   <packaging>pom</packaging>

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.corant</groupId>
     <artifactId>corant-suites-jta</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
   <artifactId>corant-suites-jta-atomikos</artifactId>
 </project>

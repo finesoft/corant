@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.corant</groupId>
     <artifactId>corant-root</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>corant root</name>
     <description>Microservice stack with CDI MicroProfile.</description>
@@ -18,23 +18,24 @@
             <name>AL2</name>
         </license>
     </licenses>
-	<properties>
-		<runner-class></runner-class>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.maven-compiler-plugin>3.7.0</version.maven-compiler-plugin>
-		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
-		<version.maven-failsafe-plugin>2.20.1</version.maven-failsafe-plugin>
-		<version.maven-surefire-plugin>3.0.0-M2</version.maven-surefire-plugin>
-		<version.maven-javadoc-plugin>3.0.0</version.maven-javadoc-plugin>
-		<version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
-		<version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
-		<!--3.0.0-M2 -->
-		<verison.maven-enforcer-plugin>1.4.1</verison.maven-enforcer-plugin>
-		<version.build-helper-maven-plugin>3.0.0</version.build-helper-maven-plugin>
-		<version.asciidoctor-maven-plugin>1.5.6</version.asciidoctor-maven-plugin>
-		<version.asciidoctor-pdf>1.5.0-alpha.16</version.asciidoctor-pdf>
-		<version.java>1.8</version.java>
-	</properties>
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.java>1.8</version.java>
+        <version.maven-compiler-plugin>3.7.0</version.maven-compiler-plugin>
+        <version.maven-source-plugin>3.0.1</version.maven-source-plugin>
+        <version.maven-failsafe-plugin>2.20.1</version.maven-failsafe-plugin>
+        <version.maven-surefire-plugin>3.0.0-M2</version.maven-surefire-plugin>
+        <version.maven-javadoc-plugin>3.0.0</version.maven-javadoc-plugin>
+        <version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
+        <version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
+        <version.flatten-maven-plugin>1.1.0</version.flatten-maven-plugin>
+        <verison.maven-enforcer-plugin>1.4.1</verison.maven-enforcer-plugin>
+        <version.build-helper-maven-plugin>3.0.0</version.build-helper-maven-plugin>
+        <version.asciidoctor-maven-plugin>1.5.6</version.asciidoctor-maven-plugin>
+        <version.asciidoctor-pdf>1.5.0-alpha.16</version.asciidoctor-pdf>
+        <runner-class></runner-class>
+    </properties>
     <modules>
         <module>corant-boms</module>
         <module>corant-devops</module>
@@ -180,6 +181,31 @@
                         <mainClass>${runner-class}</mainClass>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${version.flatten-maven-plugin}</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -194,6 +220,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

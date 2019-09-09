@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.util.ClassUtils;
@@ -78,12 +80,18 @@ public class Conversions {
     if (it != null) {
       if (List.class.isAssignableFrom(collectionClass)) {
         return (C) streamOf(it).collect(Collectors.toList());
+      } else if (SortedSet.class.isAssignableFrom(collectionClass)) {
+        TreeSet ts = new TreeSet<>();
+        streamOf(it).forEach(ts::add);// FIXME
+        return (C) ts;
       } else {
         return (C) streamOf(it).collect(Collectors.toSet());
       }
     } else {
       if (List.class.isAssignableFrom(collectionClass)) {
         return (C) new ArrayList<>();
+      } else if (SortedSet.class.isAssignableFrom(collectionClass)) {
+        return (C) new TreeSet<>();
       } else {
         return (C) new HashSet<>();
       }

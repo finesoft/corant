@@ -71,7 +71,7 @@
 		<version.xnio>3.3.8.Final</version.xnio>
 		<version.tomcat>9.0.21</version.tomcat>
 		<version.undertow>2.0.26.Final</version.undertow>
-		<version.resteasy>3.8.0.Final</version.resteasy>
+		<version.resteasy>3.9.0.Final</version.resteasy>
 
 		<version.jackson>2.9.9</version.jackson>
 

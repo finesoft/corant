@@ -13,6 +13,7 @@
  */
 package org.corant.suites.json;
 
+import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
@@ -27,15 +28,25 @@ import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.bundle.EnumerationBundle;
 import org.corant.suites.bundle.GlobalMessageCodes;
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
@@ -48,11 +59,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  *
  */
 public class JsonUtils {
+
   public final static Long BROWSER_SAFE_LONG = 9007199254740991L;
   public final static BigInteger BROWSER_SAFE_BIGINTEGER = BigInteger.valueOf(BROWSER_SAFE_LONG);
-  final static ObjectMapper objectMapper = new ObjectMapper();
   public final static SimpleModule SIMPLE_MODULE =
-      new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null));
+      new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null))
+          .addSerializer(new BigIntegerJsonSerializer()).addSerializer(new LongJsonSerializer())
+          .addSerializer(new EnumJsonSerializer())
+          .setDeserializerModifier(new EnumBeanDeserializerModifier());
+
+  final static ObjectMapper objectMapper = new ObjectMapper();
+
   static {
     objectMapper.registerModules(SIMPLE_MODULE, new JavaTimeModule());
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
@@ -76,24 +93,6 @@ public class JsonUtils {
   public static ObjectMapper copyMapper() {
     return objectMapper.copy();
   }
-
-  /**
-   * @return The ObjectMapper clone that use in this application for java script application
-   */
-  public static ObjectMapper copyMapperForJs() {
-    ObjectMapper copy = copyMapper();
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(new BigIntegerJsonSerializer());
-    module.addSerializer(new LongJsonSerializer());
-    module.addSerializer(new EnumJsonSerializer());
-    copy.registerModule(module);
-    return copy;
-  }
-
-  public static ObjectMapper copyMapperForRpc() {
-    return copyMapper();
-  }
-
 
   /**
    * Convert bytes to object
@@ -258,6 +257,29 @@ public class JsonUtils {
       } else {
         gen.writeNumber(value);
       }
+    }
+  }
+
+  static final class EnumBeanDeserializerModifier extends BeanDeserializerModifier {
+    @SuppressWarnings("rawtypes")
+    @Override
+    public JsonDeserializer<Enum> modifyEnumDeserializer(DeserializationConfig config,
+        final JavaType type, BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
+      return new JsonDeserializer<Enum>() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public Enum deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+          Class<? extends Enum> rawClass = (Class<Enum<?>>) type.getRawClass();
+          if (jp.currentToken() == JsonToken.VALUE_STRING
+              || jp.currentToken() == JsonToken.VALUE_NUMBER_INT) {
+            return toEnum(jp.getValueAsString(), rawClass);
+          } else if (jp.currentToken() == JsonToken.START_OBJECT) {
+            JsonNode node = jp.getCodec().readTree(jp);
+            return toEnum(node.get("name").asText(), rawClass);
+          }
+          return null;
+        }
+      };
     }
   }
 

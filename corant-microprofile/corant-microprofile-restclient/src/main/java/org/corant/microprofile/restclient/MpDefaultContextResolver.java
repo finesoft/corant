@@ -1,9 +1,8 @@
 package org.corant.microprofile.restclient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.corant.suites.json.JsonUtils;
-
 import javax.ws.rs.ext.ContextResolver;
+import org.corant.suites.json.JsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * cps-m2b <br>
@@ -16,7 +15,7 @@ public class MpDefaultContextResolver implements ContextResolver<ObjectMapper> {
   static ObjectMapper om;
 
   static {
-    om = JsonUtils.copyMapperForRpc();
+    om = JsonUtils.copyMapper();
   }
 
   @Override

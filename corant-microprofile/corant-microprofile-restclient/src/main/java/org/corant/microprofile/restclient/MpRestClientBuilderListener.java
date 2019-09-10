@@ -13,12 +13,13 @@
  */
 package org.corant.microprofile.restclient;
 
+import static org.corant.kernel.util.Instances.select;
+import java.util.logging.Logger;
+import javax.ws.rs.Priorities;
+import org.corant.config.ComparableConfigurator;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;
-
-import javax.ws.rs.Priorities;
-import java.util.logging.Logger;
 
 /**
  * corant-suites-mp-restclient
@@ -28,18 +29,18 @@ import java.util.logging.Logger;
 public class MpRestClientBuilderListener implements RestClientBuilderListener {
 
   public static final String DFLT_CTX_RESOLER_KEY = "mp.restclient.default-context-resolver.enable";
-  public static final boolean enableDefaultContextResolver =
-      ConfigProvider.getConfig()
-          .getOptionalValue(DFLT_CTX_RESOLER_KEY, Boolean.class)
-          .orElse(Boolean.TRUE);
+  public static final boolean enableDefaultContextResolver = ConfigProvider.getConfig()
+      .getOptionalValue(DFLT_CTX_RESOLER_KEY, Boolean.class).orElse(Boolean.TRUE);
 
   transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public void onNewBuilder(RestClientBuilder builder) {
-    if (enableDefaultContextResolver){
+    if (enableDefaultContextResolver) {
       logger.info("Register default mp context resolver to RestClientBuilder");
       builder.register(MpDefaultContextResolver.class, Priorities.USER);
     }
+    select(MpRestClientBuilderConfigurator.class).stream().sorted(ComparableConfigurator::compare)
+        .forEach(x -> x.config(builder));
   }
 }

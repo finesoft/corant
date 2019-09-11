@@ -64,7 +64,8 @@ public class QueryUtils {
           .addSerializer(new LocalTimeSerializer(DateTimeFormatter.ISO_LOCAL_TIME)))
           .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
           .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-          .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+          .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   public static final ObjectMapper RCJOM =
       new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new SimpleModule())

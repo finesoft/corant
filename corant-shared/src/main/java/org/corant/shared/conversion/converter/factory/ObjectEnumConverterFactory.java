@@ -14,9 +14,11 @@
 package org.corant.shared.conversion.converter.factory;
 
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +26,7 @@ import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
+import org.corant.shared.util.Empties;
 
 /**
  * corant-shared
@@ -78,7 +81,11 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       if (value instanceof Map) {
         name = getMapString((Map) value, "name");
       } else {
-        String[] values = split(value.toString(), ".", true, true);
+        String valueString= value.toString();
+        if (isBlank(valueString)) {
+          return null;
+        }
+        String[] values = split(valueString, ".", true, true);
         name = values[values.length - 1];
       }
       if (name != null) {
@@ -90,7 +97,5 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       }
       throw new ConversionException("Can not convert %s -> %s", value.getClass(), targetClass);
     }
-
   }
-
 }

@@ -14,11 +14,11 @@
 package org.corant.shared.conversion.converter.factory;
 
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import java.util.Set;
@@ -80,12 +80,10 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       if (value instanceof Map) {
         name = getMapString((Map) value, "name");
       } else {
-        String valueString = asDefaultString(value);
-        if (isBlank(valueString)) {
-          return null;
+        String[] values = split(asDefaultString(value), ".", true, true);
+        if (!isEmpty(values)) {
+          name = values[values.length - 1];
         }
-        String[] values = split(valueString, ".", true, true);
-        name = values[values.length - 1];
       }
       if (name != null) {
         for (T t : targetClass.getEnumConstants()) {

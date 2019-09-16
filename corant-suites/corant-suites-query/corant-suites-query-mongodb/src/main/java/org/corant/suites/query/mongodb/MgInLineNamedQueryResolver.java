@@ -14,8 +14,10 @@ package org.corant.suites.query.mongodb;
  */
 
 import java.util.EnumMap;
+import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.shared.NamedQuerier;
+import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
 /**
  * corant-suites-query
@@ -42,12 +44,9 @@ public interface MgInLineNamedQueryResolver<K, P> {
     }
   }
 
-  interface MgQuerier extends NamedQuerier {
-
+  interface MgQuerier
+      extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>, NamedQuerier {
     String getOriginalScript();
-
-    EnumMap<MgOperator, Bson> getScript();
-
   }
 
 }

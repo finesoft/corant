@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.StreamUtils.AbstractBatchHandlerSpliterator;
-import org.corant.suites.query.shared.AbstractNamedQuery;
+import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
@@ -36,7 +36,7 @@ import org.elasticsearch.search.sort.SortOrder;
  */
 public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map<String, Object>> {
 
-  public static final int DFLT_BATCH_SIZE = AbstractNamedQuery.MAX_SELECT_SIZE;
+  public static final int DFLT_BATCH_SIZE = AbstractNamedQueryService.MAX_SELECT_SIZE;
   private final TimeValue scrollKeepAlive;
   private final TransportClient client;
   private SearchResponse searchResponse;

@@ -13,11 +13,13 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class Query implements Serializable {
 
-  private static final long serialVersionUID = -2142303696673387541L;
+  protected static final long serialVersionUID = -2142303696673387541L;
 
   private String name;
   private Class<?> resultClass = Map.class;
@@ -94,14 +96,14 @@ public class Query implements Serializable {
    * @return the fetchQueries
    */
   public List<FetchQuery> getFetchQueries() {
-    return fetchQueries;
+    return Collections.unmodifiableList(fetchQueries);
   }
 
   /**
    * @return the hints
    */
   public List<QueryHint> getHints() {
-    return hints;
+    return Collections.unmodifiableList(hints);
   }
 
   /**
@@ -111,11 +113,16 @@ public class Query implements Serializable {
     return name;
   }
 
+  public Map<String, Class<?>> getParamConvertSchema() {
+    return Collections.unmodifiableMap(paramMappings.entrySet().stream()
+        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getType())));
+  }
+
   /**
    * @return the paramMappings
    */
   public Map<String, ParameterMapping> getParamMappings() {
-    return paramMappings;
+    return Collections.unmodifiableMap(paramMappings);
   }
 
   /**
@@ -123,14 +130,22 @@ public class Query implements Serializable {
    * @return the properties
    */
   public Map<String, String> getProperties() {
-    return properties;
+    return Collections.unmodifiableMap(properties);
+  }
+
+  public <T> T getProperty(String name, Class<T> cls) {
+    return properties == null ? null : toObject(properties.get(name), cls);
+  }
+
+  public <T> T getProperty(String name, Class<T> cls, T altVal) {
+    return defaultObject(getProperty(name, cls), altVal);
   }
 
   /**
    * @return the resultClass
    */
   public Class<?> getResultClass() {
-    return resultClass;
+    return defaultObject(resultClass, Map.class);
   }
 
   /**
@@ -155,7 +170,7 @@ public class Query implements Serializable {
   }
 
   public List<String> getVersionedFetchQueryNames() {
-    return getFetchQueries().stream().map(f -> f.getVersionedReferenceQueryName())
+    return fetchQueries.stream().map(f -> f.getVersionedReferenceQueryName())
         .collect(Collectors.toList());
   }
 
@@ -175,6 +190,14 @@ public class Query implements Serializable {
    */
   public boolean isCacheResultSetMetadata() {
     return cacheResultSetMetadata;
+  }
+
+  void addFetchQuery(FetchQuery fetchQuery) {
+    fetchQueries.add(fetchQuery);
+  }
+
+  void addHint(QueryHint hint) {
+    hints.add(hint);
   }
 
   void addProperty(String name, String value) {
@@ -197,8 +220,11 @@ public class Query implements Serializable {
     this.name = name;
   }
 
+  void setParamMappings(Map<String, ParameterMapping> paramMappings) {
+    this.paramMappings.putAll(paramMappings);
+  }
+
   /**
-   *
    * @param properties the properties to set
    */
   void setProperties(Map<String, String> properties) {

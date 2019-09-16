@@ -41,7 +41,7 @@
 		<version.commons-dbutils>1.7</version.commons-dbutils>
 		<version.commons-dbcp2>2.0.1</version.commons-dbcp2>
 		<version.commons-pool2>2.6.1</version.commons-pool2>
-		<version.freemarker>2.3.28</version.freemarker>
+		<version.freemarker>2.3.29</version.freemarker>
 		<version.jandex>2.1.1.Final</version.jandex>
 		<version.snakeyaml>1.19</version.snakeyaml>
 		<version.jasperreports>6.8.0</version.jasperreports>

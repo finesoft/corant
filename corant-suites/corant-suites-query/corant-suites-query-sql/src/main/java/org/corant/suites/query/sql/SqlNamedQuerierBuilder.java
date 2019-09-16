@@ -11,16 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.jpql;
+package org.corant.suites.query.sql;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
-import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
+import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**
@@ -29,36 +28,31 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 下午7:46:22
  *
  */
-public class JpqlNamedQueryJsProcessor
-    extends AbstractDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
-
-  final ScriptFunction execution;
+public class SqlNamedQuerierBuilder
+    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultSqlNamedQuerier> {
 
   /**
    * @param query
    * @param parameterResolver
    * @param resultResolver
    */
-  protected JpqlNamedQueryJsProcessor(Query query, QueryParameterResolver parameterResolver,
+  public SqlNamedQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
       QueryResultResolver resultResolver) {
     super(query, parameterResolver, resultResolver);
-    execution = NashornScriptEngines.compileFunction(query.getScript(), "p", "up");
   }
 
   /**
    * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultJpqlNamedQuerier build(Object param) {
-    QueryParameter queryParam = getParameterResolver().resolveQueryParameter(getQuery(), param);
-    List<Object> useParam = new ArrayList<>();
-    Object script = getExecution().apply(new Object[] {queryParam, useParam});
-    return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getParameterResolver(),
-        getResultResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
+  protected DefaultSqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
+    return new DefaultSqlNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
+        getResultResolver(), processed.getMiddle(), processed.getRight());
   }
 
-  public ScriptFunction getExecution() {
-    return execution;
+  @Override
+  protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
+    return new DynamicTemplateMethodModelExSql();
   }
 
 }

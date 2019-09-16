@@ -13,14 +13,11 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.Empties.isEmpty;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
+import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 
 /**
@@ -29,69 +26,28 @@ import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultSqlNamedQuerier implements SqlQuerier {
+public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
+    implements SqlQuerier {
 
-  protected final String script;
-  protected Object[] convertedParams;
-  protected final Class<?> resultClass;
-  protected final List<FetchQuery> fetchQueries;
-  protected final List<QueryHint> hints = new ArrayList<>();
-  protected final Map<String, String> properties = new LinkedHashMap<>();
-  protected final String name;
+  private final String name;
+  private final Object[] scriptParameter;
+  private final String script;
 
   /**
-   * @param name
+   * @param query
+   * @param queryParameter
+   * @param parameterResolver
+   * @param resultResolver
+   * @param scriptParameter
    * @param script
-   * @param resultClass
-   * @param fetchQueries
-   * @param properties
    */
-  public DefaultSqlNamedQuerier(String name, String script, Class<?> resultClass,
-      List<FetchQuery> fetchQueries, Map<String, String> properties) {
-    super();
-    this.name = name;
+  protected DefaultSqlNamedQuerier(Query query, QueryParameter queryParameter,
+      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
+      Object[] scriptParameter, String script) {
+    super(query, queryParameter, parameterResolver, resultResolver);
+    name = query.getName();
+    this.scriptParameter = scriptParameter;
     this.script = script.replaceAll("[\\t\\n\\r]", " ");
-    this.resultClass = resultClass;
-    this.fetchQueries = fetchQueries;
-    if (properties != null) {
-      this.properties.putAll(properties);
-    }
-  }
-
-  /**
-   * @param name
-   * @param script
-   * @param convertedParams
-   * @param resultClass
-   * @param fetchQueries
-   * @param hints
-   * @param properties
-   */
-  public DefaultSqlNamedQuerier(String name, String script, Object[] convertedParams,
-      Class<?> resultClass, List<FetchQuery> fetchQueries, List<QueryHint> hints,
-      Map<String, String> properties) {
-    this(name, script, resultClass, fetchQueries, properties);
-    setConvertedParams(convertedParams);
-    if (!isEmpty(hints)) {
-      for (QueryHint qh : hints) {
-        this.hints.add(qh);
-      }
-    }
-  }
-
-  @Override
-  public Object[] getConvertedParameters() {
-    return Arrays.copyOf(convertedParams, convertedParams.length);
-  }
-
-  @Override
-  public List<FetchQuery> getFetchQueries() {
-    return fetchQueries;
-  }
-
-  @Override
-  public List<QueryHint> getHints() {
-    return hints;
   }
 
   @Override
@@ -99,22 +55,9 @@ public class DefaultSqlNamedQuerier implements SqlQuerier {
     return name;
   }
 
-  /**
-   *
-   * @return the properties
-   */
   @Override
-  public Map<String, String> getProperties() {
-    return properties;
-  }
-
-  /**
-   * @return the resultClass
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> Class<T> getResultClass() {
-    return (Class<T>) resultClass;
+  public QueryParameter getQueryParameter() {
+    return queryParameter;
   }
 
   @Override
@@ -122,12 +65,9 @@ public class DefaultSqlNamedQuerier implements SqlQuerier {
     return script;
   }
 
-  void setConvertedParams(Object[] param) {
-    convertedParams = param == null ? new Object[0] : Arrays.copyOf(param, param.length);
+  @Override
+  public Object[] getScriptParameter() {
+    return scriptParameter;
   }
 
-  DefaultSqlNamedQuerier withParam(Object[] convertedParams) {
-    setConvertedParams(convertedParams);
-    return this;
-  }
 }

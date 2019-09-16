@@ -11,26 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.elastic;
+package org.corant.suites.query.shared;
 
-import java.util.Map;
-import org.corant.suites.query.shared.NamedQuerier;
-import org.corant.suites.query.shared.dynamic.DynamicQuerier;
+import java.util.List;
+import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**
- * corant-suites-query
+ * corant-suites-query-shared
  *
- * @author bingo 下午3:13:37
+ * @author bingo 下午4:56:52
  *
  */
-public interface EsInLineNamedQueryResolver<K, P> {
+public interface QueryResultResolver {
 
-  EsQuerier resolve(K key, P param);
+  <T> List<T> resolve(List<?> results, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter);
 
-  interface EsQuerier extends DynamicQuerier<Map<String, Object>, String>, NamedQuerier {
+  <T> T resolve(Object result, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter);
 
-    @Override
-    String getScript();
-  }
+  void resolveFetchResult(Object result, Object fetchResult, String injectProName);
 
+  void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+      QueryParameter parameter);
 }

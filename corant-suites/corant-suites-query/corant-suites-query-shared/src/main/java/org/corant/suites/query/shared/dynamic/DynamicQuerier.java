@@ -13,35 +13,18 @@
  */
 package org.corant.suites.query.shared.dynamic;
 
-import java.util.List;
-import java.util.Map;
-import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
+import org.corant.suites.query.shared.Querier;
 
 /**
- * corant-suites-query
+ * corant-suites-query-shared
  *
- * @author bingo 上午9:52:43
+ * @author bingo 下午4:37:30
  *
  */
-public interface DynamicQueryProcessor<Q, E> {
+public interface DynamicQuerier<P, S> extends Querier {
 
-  long getCachedTimestemp();
+  P getScriptParameter();
 
-  E getExecution();
-
-  List<FetchQuery> getFetchQueries();
-
-  List<QueryHint> getHints();
-
-  Map<String, Class<?>> getParamConvertSchema();
-
-  Map<String, String> getProperties();
-
-  String getQueryName();
-
-  Class<?> getResultClass();
-
-  Q process(Map<String, Object> param);
+  S getScript();
 
 }

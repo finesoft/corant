@@ -33,8 +33,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.kernel.api.ConversionService;
 import org.corant.shared.util.ObjectUtils.Pair;
-import org.corant.suites.query.shared.Query.ForwardList;
-import org.corant.suites.query.shared.Query.PagedList;
+import org.corant.suites.query.shared.QueryService.ForwardList;
+import org.corant.suites.query.shared.QueryService.PagedList;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
 
@@ -55,7 +55,7 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  * Use case:
  *
  * <pre>
- * &lt;query name="Query.get" result-class="java.util.Map"&gt;
+ * &lt;query name="QueryService.get" result-class="java.util.Map"&gt;
  *       &lt;script&gt;
  *           &lt;![CDATA[
  *               SELECT id,enum FROM Table

@@ -14,6 +14,7 @@
 package org.corant.suites.query.jpql;
 
 import org.corant.suites.query.shared.NamedQuerier;
+import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
 /**
  * corant-suites-query
@@ -25,11 +26,7 @@ public interface JpqlNamedQueryResolver<K, P> {
 
   JpqlQuerier resolve(K key, P param);
 
-  interface JpqlQuerier extends NamedQuerier {
-
-    Object[] getConvertedParameters();
-
-    String getScript();
+  interface JpqlQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
   }
 
 }

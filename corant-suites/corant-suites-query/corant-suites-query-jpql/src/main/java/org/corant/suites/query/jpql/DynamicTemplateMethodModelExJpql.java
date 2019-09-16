@@ -11,11 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.sql;
+package org.corant.suites.query.jpql;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -25,12 +25,14 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class SqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<Object[]> {
+public class DynamicTemplateMethodModelExJpql implements DynamicTemplateMethodModelEx<Object[]> {
 
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
+  public static final String TYPE = "JPQL";
 
   private List<Object> parameters = new ArrayList<>();
+  private int seq = 0;
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -43,12 +45,12 @@ public class SqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<O
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
           parameters.add(argList[i]);
-          placeHolders[i] = SQL_PS_PLACE_HOLDER;
+          placeHolders[i] = getPlaceHolder();
         }
         return new SimpleScalar(String.join(",", placeHolders));
       } else {
         parameters.add(arg);
-        return SQL_SS_PLACE_HOLDER;
+        return getPlaceHolder();
       }
     }
     return arguments;
@@ -60,7 +62,14 @@ public class SqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<O
   }
 
   @Override
-  public QueryTemplateMethodModelType getType() {
-    return QueryTemplateMethodModelType.SP;
+  public String getType() {
+    return TYPE;
   }
+
+  String getPlaceHolder() {
+    String pl = SQL_PS_PLACE_HOLDER + seq;
+    seq++;
+    return pl;
+  }
+
 }

@@ -13,56 +13,45 @@
  */
 package org.corant.suites.query.jpql;
 
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
+import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
-import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**
  * corant-suites-query
  *
- * @author bingo 下午4:35:55
+ * @author bingo 下午7:46:22
  *
  */
-public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
-    implements JpqlQuerier {
-
-  protected final String name;
-  protected final String script;
-  protected final Object[] scriptParameter;
+public class JpqlNamedQuerierBuilder
+    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
 
   /**
    * @param query
-   * @param queryParameter
    * @param parameterResolver
    * @param resultResolver
-   * @param scriptParameter
-   * @param script
    */
-  protected DefaultJpqlNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
-      Object[] scriptParameter, String script) {
-    super(query, queryParameter, parameterResolver, resultResolver);
-    name = query.getName();
-    this.scriptParameter = scriptParameter;
-    this.script = script.replaceAll("[\\t\\n\\r]", " ");
+  public JpqlNamedQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
+      QueryResultResolver resultResolver) {
+    super(query, parameterResolver, resultResolver);
+  }
+
+  /**
+   * Generate JPQL script with placeholder, and converted the parameter to appropriate type.
+   */
+  @Override
+  protected DefaultJpqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
+    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
+        getResultResolver(), processed.getMiddle(), processed.getRight());
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String getScript() {
-    return script;
-  }
-
-  @Override
-  public Object[] getScriptParameter() {
-    return scriptParameter;
+  protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
+    return new DynamicTemplateMethodModelExJpql();
   }
 
 }

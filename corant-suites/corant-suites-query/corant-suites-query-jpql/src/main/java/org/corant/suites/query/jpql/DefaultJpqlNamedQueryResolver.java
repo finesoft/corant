@@ -13,19 +13,15 @@
  */
 package org.corant.suites.query.jpql;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.kernel.api.ConversionService;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.dynamic.DynamicQueryProcessor;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
-import org.corant.suites.query.shared.spi.ParamReviser;
 
 /**
  * corant-suites-query
@@ -35,32 +31,29 @@ import org.corant.suites.query.shared.spi.ParamReviser;
  */
 @ApplicationScoped
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class DefaultJpqlNamedQueryResolver
-    implements JpqlNamedQueryResolver<String, Map<String, Object>> {
+public class DefaultJpqlNamedQueryResolver implements JpqlNamedQueryResolver<String, Object> {
 
-  final Map<String, DynamicQueryProcessor> processors = new ConcurrentHashMap<>();
+  final Map<String, JpqlNamedQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
 
   @Inject
-  protected ConversionService conversionService;
+  protected QueryParameterResolver parameterResolver;
 
   @Inject
-  @Any
-  Instance<ParamReviser> paramRevisers;
+  protected QueryResultResolver resultResolver;
 
   @Override
-  public DefaultJpqlNamedQuerier resolve(String key, Map<String, Object> param) {
-    DynamicQueryProcessor processor = processors.computeIfAbsent(key, this::buildProcessor);
-    handleParamHints(processor, param);
-    return forceCast(processor.process(param));
+  public DefaultJpqlNamedQuerier resolve(String key, Object param) {
+    JpqlNamedQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    return builder.build(param);
   }
 
-  protected DynamicQueryProcessor buildProcessor(String key) {
+  protected JpqlNamedQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found Query for key %s", key);
+      throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
     // FIXME decide script engine
     if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
@@ -70,18 +63,12 @@ public class DefaultJpqlNamedQueryResolver
     }
   }
 
-  protected DynamicQueryProcessor createFmProcessor(Query query) {
-    return new JpqlNamedQueryFmProcessor(query, conversionService);
+  protected JpqlNamedQuerierBuilder createFmProcessor(Query query) {
+    return new JpqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
   }
 
-  protected DynamicQueryProcessor createJsProcessor(Query query) {
-    return new JpqlNamedQueryJsProcessor(query, conversionService);
-  }
-
-  protected void handleParamHints(DynamicQueryProcessor tpl, Map<String, Object> param) {
-    if (!paramRevisers.isUnsatisfied()) {
-      paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
-    }
+  protected JpqlNamedQuerierBuilder createJsProcessor(Query query) {
+    return new JpqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
   }
 
 }

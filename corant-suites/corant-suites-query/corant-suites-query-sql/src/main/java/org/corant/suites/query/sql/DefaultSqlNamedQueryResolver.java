@@ -17,15 +17,13 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.kernel.api.ConversionService;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.dynamic.DynamicQueryProcessor;
+import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
-import org.corant.suites.query.shared.spi.ParamReviser;
 
 /**
  * corant-suites-query
@@ -34,54 +32,45 @@ import org.corant.suites.query.shared.spi.ParamReviser;
  *
  */
 @ApplicationScoped
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class DefaultSqlNamedQueryResolver
-    implements SqlNamedQueryResolver<String, Map<String, Object>> {
+@SuppressWarnings({"rawtypes"})
+public class DefaultSqlNamedQueryResolver implements SqlNamedQueryResolver<String, Object> {
 
-  final Map<String, DynamicQueryProcessor> processors = new ConcurrentHashMap<>();
+  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
 
   @Inject
-  protected ConversionService conversionService;
+  protected QueryParameterResolver parameterResolver;
 
   @Inject
-  @Any
-  Instance<ParamReviser> paramRevisers;
+  protected QueryResultResolver resultResolver;
 
   @Override
-  public DefaultSqlNamedQuerier resolve(String key, Map<String, Object> param) {
-    DynamicQueryProcessor processor = processors.computeIfAbsent(key, this::buildProcessor);
-    handleParamHints(processor, param);
-    return forceCast(processor.process(param));
+  public DefaultSqlNamedQuerier resolve(String key, Object param) {
+    DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    return forceCast(builder.build(param));
   }
 
-  protected DynamicQueryProcessor buildProcessor(String key) {
+  protected DynamicQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found Query for key %s", key);
+      throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
     // FIXME decide script engine
     if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
-      return createJsProcessor(query);
+      return createJsBuilder(query);
     } else {
-      return createFmProcessor(query);
+      return createFmBuilder(query);
     }
   }
 
-  protected DynamicQueryProcessor createFmProcessor(Query query) {
-    return new SqlNamedQueryFmProcessor(query, conversionService);
+  protected DynamicQuerierBuilder createFmBuilder(Query query) {
+    return new SqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
   }
 
-  protected DynamicQueryProcessor createJsProcessor(Query query) {
-    return new SqlNamedQueryJsProcessor(query, conversionService);
-  }
-
-  protected void handleParamHints(DynamicQueryProcessor tpl, Map<String, Object> param) {
-    if (!paramRevisers.isUnsatisfied()) {
-      paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
-    }
+  protected DynamicQuerierBuilder createJsBuilder(Query query) {
+    return new SqlNamedQuerierJsBuilder(query, parameterResolver, resultResolver);
   }
 
 }

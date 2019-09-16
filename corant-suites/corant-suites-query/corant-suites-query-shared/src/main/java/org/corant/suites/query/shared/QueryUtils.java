@@ -21,6 +21,10 @@ import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
+import static org.corant.suites.query.shared.QueryService.LIMIT_PARAM_NME;
+import static org.corant.suites.query.shared.QueryService.LIMIT_PARAM_VAL;
+import static org.corant.suites.query.shared.QueryService.OFFSET_PARAM_NME;
+import static org.corant.suites.query.shared.QueryService.OFFSET_PARAM_VAL;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.format.DateTimeFormatter;
@@ -52,27 +56,21 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
  */
 public class QueryUtils {
 
-  public static final String OFFSET_PARAM_NME = "_offset";
-  public static final String LIMIT_PARAM_NME = "_limit";
-  public static final int OFFSET_PARAM_VAL = 0;
-  public static final int LIMIT_PARAM_VAL = 16;
-
   public static final ObjectMapper ESJOM = new ObjectMapper().registerModule(new JavaTimeModule())
-          .registerModule(new SimpleModule()
+      .registerModule(new SimpleModule()
           .addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_LOCAL_DATE))
           .addSerializer(new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
           .addSerializer(new LocalTimeSerializer(DateTimeFormatter.ISO_LOCAL_TIME)))
-          .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-          .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-          .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+      .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-  public static final ObjectMapper RCJOM =
-      new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new SimpleModule())
-              .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-              .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-              .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  public static final ObjectMapper RCJOM = new ObjectMapper().registerModule(new JavaTimeModule())
+      .registerModule(new SimpleModule()).enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+      .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   public static <T> T converEsData(String str, Class<T> cls) {
     if (str == null) {

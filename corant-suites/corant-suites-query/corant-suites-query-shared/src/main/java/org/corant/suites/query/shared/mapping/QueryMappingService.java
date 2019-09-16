@@ -40,7 +40,7 @@ public class QueryMappingService {
   private volatile boolean initialized = false;
 
   @Inject
-  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
+  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**QueryService.xml")
   String mappingFilePaths;
 
   @Inject
@@ -61,7 +61,7 @@ public class QueryMappingService {
         throw new QueryRuntimeException(String.join("\n", brokens));
       }
       m.getQueries().forEach(q -> {
-        q.getParamMappings().putAll(m.getParaMapping());// copy
+        q.setParamMappings(m.getParaMapping());// copy
         if (queries.containsKey(q.getVersionedName())) {
           throw new QueryRuntimeException(
               "The 'name' [%s] of query element in query file [%s] can not repeat!",

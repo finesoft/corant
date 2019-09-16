@@ -18,6 +18,7 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class FetchQuery implements Serializable {
     super();
     this.referenceQuery = referenceQuery;
     this.injectPropertyName = injectPropertyName;
-    this.setResultClass(resultClass);
+    setResultClass(resultClass);
     this.maxSize = maxSize;
     this.parameters = parameters;
     this.referenceQueryversion = referenceQueryversion;
@@ -85,7 +86,7 @@ public class FetchQuery implements Serializable {
    * @return the parameters
    */
   public List<FetchQueryParameter> getParameters() {
-    return parameters;
+    return Collections.unmodifiableList(parameters);
   }
 
   /**
@@ -120,6 +121,10 @@ public class FetchQuery implements Serializable {
 
   public boolean isMultiRecords() {
     return multiRecords;
+  }
+
+  void addParameter(FetchQueryParameter parameter) {
+    parameters.add(parameter);
   }
 
   void setInjectPropertyName(String injectPropertyName) {

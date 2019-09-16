@@ -31,11 +31,12 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class JsonDynamicQueryFmTplMmResolver
-    implements DynamicQueryTplMmResolver<Map<String, Object>> {
+public class DynamicTemplateMethodModelExJson
+    implements DynamicTemplateMethodModelEx<Map<String, Object>> {
 
-  public final static ObjectMapper OM = new ObjectMapper();
-  final Map<String, Object> parameters = new HashMap<>();
+  public static final String TYPE = "JP";
+  public static final ObjectMapper OM = new ObjectMapper();
+  private final Map<String, Object> parameters = new HashMap<>();
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -66,15 +67,8 @@ public class JsonDynamicQueryFmTplMmResolver
   }
 
   @Override
-  public QueryTemplateMethodModelType getType() {
-    return QueryTemplateMethodModelType.JP;
-  }
-
-  @Override
-  public DynamicQueryTplMmResolver<Map<String, Object>> injectTo(Map<String, Object> parameters) {
-    this.parameters.putAll(parameters);
-    DynamicQueryTplMmResolver.super.injectTo(parameters);
-    return this;
+  public String getType() {
+    return TYPE;
   }
 
   boolean isSimpleType(Object arg) {

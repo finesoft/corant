@@ -19,8 +19,6 @@ import static org.corant.shared.util.MapUtils.getMapBoolean;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
-import static org.corant.suites.query.shared.QueryUtils.getLimit;
-import static org.corant.suites.query.shared.QueryUtils.getOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,9 +34,9 @@ import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
-import org.corant.suites.query.shared.AbstractNamedQuery;
+import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**
  * corant-suites-query
@@ -47,7 +45,7 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  *
  */
 @ApplicationScoped
-public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
+public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQueryService {
 
   public static final String PRO_KEY_FLUSH_MODE_TYPE = "jpa.query.flushModeType";
   public static final String PRO_KEY_LOCK_MODE_TYPE = "jpa.query.lockModeType";
@@ -56,25 +54,24 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
   @Inject
-  protected JpqlNamedQueryResolver<String, Map<String, Object>> resolver;
+  protected JpqlNamedQueryResolver<String, Object> resolver;
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
+  public <T> ForwardList<T> forward(String q, Object param) {
     JpqlQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    Object[] queryParam = querier.getConvertedParameters();
-    List<QueryHint> hints = querier.getHints();
-    Map<String, String> properties = querier.getProperties();
+    Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
+    Object[] queryParam = querier.getScriptParameter();
+    Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
-    int offset = getOffset(param);
-    int limit = getLimit(param);
+    int offset = querier.getQueryParameter().getOffset();
+    int limit = querier.getQueryParameter().getLimit();
     log(q, queryParam, ql);
     EntityManager em = getEntityManager();
     try {
       ForwardList<T> result = ForwardList.inst();
       Query query = createQuery(em, ql, properties, resultClass, queryParam);
       query.setFirstResult(offset).setMaxResults(limit + 1);
-      @SuppressWarnings("unchecked")
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
       int size = getSize(list);
       if (size > 0) {
@@ -82,7 +79,6 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
           list.remove(size - 1);
           result.withHasNext(true);
         }
-        handleResultHints(resultClass, hints, param, list);
       }
       return result.withResults(list);
     } finally {
@@ -92,24 +88,22 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(String q, Map<String, Object> param) {
+  public <T> T get(String q, Object param) {
     JpqlQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    Object[] queryParam = querier.getConvertedParameters();
-    List<QueryHint> hints = querier.getHints();
-    Map<String, String> properties = querier.getProperties();
+    Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
+    Object[] queryParam = querier.getScriptParameter();
+    Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
     log(q, queryParam, ql);
     T result = null;
     EntityManager em = getEntityManager();
     try {
-      @SuppressWarnings("unchecked")
       List<T> list = createQuery(em, ql, properties, resultClass, queryParam).getResultList();
       if (!isEmpty(list)) {
         result = list.get(0);
       }
-      handleResultHints(resultClass, hints, param, result);
       return result;
     } finally {
       if (em.isOpen()) {
@@ -118,22 +112,21 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> PagedList<T> page(String q, Map<String, Object> param) {
+  public <T> PagedList<T> page(String q, Object param) {
     JpqlQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    Object[] queryParam = querier.getConvertedParameters();
-    List<QueryHint> hints = querier.getHints();
-    Map<String, String> properties = querier.getProperties();
+    Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
+    Object[] queryParam = querier.getScriptParameter();
+    Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
-    int offset = getOffset(param);
-    int limit = getLimit(param);
+    int offset = querier.getQueryParameter().getOffset();
+    int limit = querier.getQueryParameter().getLimit();
     log(q, queryParam, ql);
     EntityManager em = getEntityManager();
     try {
       Query query = createQuery(em, ql, properties, resultClass, queryParam);
       query.setFirstResult(offset).setMaxResults(limit);
-      @SuppressWarnings("unchecked")
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
       PagedList<T> result = PagedList.of(offset, limit);
       int size = getSize(list);
@@ -146,7 +139,6 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
           result.withTotal(((Number) createQuery(em, totalSql, properties, resultClass, queryParam)
               .getSingleResult()).intValue());
         }
-        handleResultHints(resultClass, hints, param, list);
       }
       return result.withResults(list);
     } finally {
@@ -156,25 +148,20 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> select(String q, Map<String, Object> param) {
+  public <T> List<T> select(String q, Object param) {
     JpqlQuerier querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    Object[] queryParam = querier.getConvertedParameters();
-    List<QueryHint> hints = querier.getHints();
-    Map<String, String> properties = querier.getProperties();
+    Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
+    Object[] queryParam = querier.getScriptParameter();
+    Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
     log(q, queryParam, ql);
     EntityManager em = getEntityManager();
     try {
-      Query query = createQuery(em, ql, properties, rcls, queryParam)
+      Query query = createQuery(em, ql, properties, resultClass, queryParam)
           .setMaxResults(getMaxSelectSize(querier));
-      @SuppressWarnings("unchecked")
       List<T> result = query.getResultList();
-      int size = getSize(result);
-      if (size > 0) {
-        handleResultHints(rcls, hints, param, result);
-      }
       return result;
     } finally {
       if (em.isOpen()) {
@@ -185,18 +172,14 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
 
   @SuppressWarnings({"unchecked", "restriction"})
   @Override
-  public <T> Stream<T> stream(String q, Map<String, Object> param) {
+  public <T> Stream<T> stream(String q, Object param) {
     JpqlQuerier querier = getResolver().resolve(q, param);
-    Class<T> rcls = querier.getResultClass();
-    Object[] queryParam = querier.getConvertedParameters();
-    List<QueryHint> hints = querier.getHints();
-    Map<String, String> properties = querier.getProperties();
+    Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
+    Object[] queryParam = querier.getScriptParameter();
+    Map<String, String> properties = querier.getQuery().getProperties();
+    String ql = querier.getScript();
     final EntityManager em = getEntityManager(); // FIXME close
-    Stream<T> stream = createQuery(em, querier.getScript(), properties, rcls, queryParam)
-        .getResultStream().map(r -> {
-          handleResultHints(rcls, hints, param, r);
-          return r;
-        });
+    Stream<T> stream = createQuery(em, ql, properties, resultClass, queryParam).getResultStream();
     sun.misc.Cleaner.create(stream, em::close);
     return stream;
   }
@@ -238,7 +221,7 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
+  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
     throw new NotSupportedException();
   }
 
@@ -248,7 +231,7 @@ public abstract class AbstractJpqlNamedQuery extends AbstractNamedQuery {
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected JpqlNamedQueryResolver<String, Map<String, Object>> getResolver() {
+  protected JpqlNamedQueryResolver<String, Object> getResolver() {
     return resolver;
   }
 

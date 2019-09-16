@@ -24,9 +24,7 @@ import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.suites.query.shared.QueryUtils.convert;
-import static org.corant.suites.query.shared.QueryUtils.getLimit;
-import static org.corant.suites.query.shared.QueryUtils.getOffset;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +39,10 @@ import org.bson.conversions.Bson;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
-import org.corant.suites.query.shared.AbstractNamedQuery;
+import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.FindIterable;
@@ -63,7 +61,7 @@ import com.mongodb.client.model.CountOptions;
  *
  */
 @ApplicationScoped
-public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
+public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService {
 
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
@@ -93,60 +91,52 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
   public static final String PRO_KEY_CO_COLA_BACKWORDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Inject
-  protected MgInLineNamedQueryResolver<String, Map<String, Object>> resolver;
+  protected MgInLineNamedQueryResolver<String, Object> resolver;
 
   @Override
-  public <T> ForwardList<T> forward(String q, Map<String, Object> param) {
-    int offset = getOffset(param);
-    int limit = getLimit(param);
+  public <T> ForwardList<T> forward(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    List<QueryHint> hints = querier.getHints();
-    log(q, param, querier.getOriginalScript());
+    int offset = querier.getQueryParameter().getOffset();
+    int limit = querier.getQueryParameter().getLimit();
+    log(q, querier.getScriptParameter(), querier.getOriginalScript());
     ForwardList<T> result = ForwardList.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
+    List<T> resolvedList = new ArrayList<>();
     int size = getSize(list);
     if (size > 0) {
-      this.fetch(list, fetchQueries, param);
+      this.fetch(list, querier);
       if (size > limit) {
         list.remove(size - 1);
         result.withHasNext(true);
       }
-      handleResultHints(resultClass, hints, param, list);
+      resolvedList = querier.resolve(list);
     }
-    return result.withResults(convert(list, resultClass));
+    return result.withResults(resolvedList);
   }
 
   @Override
-  public <T> T get(String q, Map<String, Object> param) {
+  public <T> T get(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    List<QueryHint> hints = querier.getHints();
-    log(q, param, querier.getOriginalScript());
+    log(q, querier.getScriptParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
-    this.fetch(result, fetchQueries, param);
-    handleResultHints(resultClass, hints, param, result);
-    return convert(result, resultClass);
+    this.fetch(result, querier);
+    return querier.resolve(result);
   }
 
   @Override
-  public <T> PagedList<T> page(String q, Map<String, Object> param) {
-    int offset = getOffset(param);
-    int limit = getLimit(param);
+  public <T> PagedList<T> page(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    List<QueryHint> hints = querier.getHints();
+    int offset = querier.getQueryParameter().getOffset();
+    int limit = querier.getQueryParameter().getLimit();
     PagedList<T> result = PagedList.of(offset, limit);
-    log(q, param, querier.getOriginalScript());
+    log(q, querier.getScriptParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
+    List<T> resolvedList = new ArrayList<>();
     int size = getSize(list);
     if (size > 0) {
       if (size < limit) {
@@ -154,50 +144,44 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
       } else {
         result.withTotal(Long.valueOf(queryCount(querier)).intValue());
       }
-      this.fetch(list, fetchQueries, param);
-      handleResultHints(resultClass, hints, param, list);
+      this.fetch(list, querier);
+      resolvedList = querier.resolve(list);
     }
-    return result.withResults(convert(list, resultClass));
+    return result.withResults(resolvedList);
   }
 
   @Override
-  public <T> List<T> select(String q, Map<String, Object> param) {
+  public <T> List<T> select(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    List<QueryHint> hints = querier.getHints();
-    log(q, param, querier.getOriginalScript());
+    log(q, querier.getScriptParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
-    List<Map<String, Object>> result =
+    List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    int size = getSize(result);
+    List<T> resolvedList = new ArrayList<>();
+    int size = getSize(list);
     if (size > 0) {
-      this.fetch(result, fetchQueries, param);
-      handleResultHints(resultClass, hints, param, result);
+      this.fetch(list, querier);
+      resolvedList = querier.resolve(list);
     }
-    return convert(result, resultClass);
+    return resolvedList;
   }
 
   @Override
-  public <T> Stream<T> stream(String q, Map<String, Object> param) {
+  public <T> Stream<T> stream(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    Class<T> resultClass = querier.getResultClass();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    List<QueryHint> hints = querier.getHints();
-    log(q, param, querier.getOriginalScript());
+    log(q, querier.getScriptParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
-      this.fetch(Decimal128Utils.convert(result), fetchQueries, param);
-      handleResultHints(resultClass, hints, param, result);
-      return convert(result, resultClass);
+      this.fetch(Decimal128Utils.convert(result), querier);
+      return querier.resolve(result);
     });
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Map<String, Object> param) {
+  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
     if (null == obj || fetchQuery == null) {
       return;
     }
-    Map<String, Object> fetchParam = QueryUtils.resolveFetchParam(obj, fetchQuery, param);
+    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(obj, fetchQuery);
     if (!QueryUtils.decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }
@@ -205,9 +189,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     MgQuerier querier = resolver.resolve(refQueryName, fetchParam);
-    List<QueryHint> hints = querier.getHints();
-    List<FetchQuery> fetchQueries = querier.getFetchQueries();
-    log(refQueryName, param, querier.getOriginalScript());
+    log(refQueryName, querier.getScriptParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(128);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
@@ -218,14 +200,14 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
       fetchedResult = fetchedList.get(0);
       fetchedList = fetchedList.subList(0, 1);
     }
-    QueryUtils.resolveFetchResult(obj, fetchedResult, injectProName);
-    this.fetch(fetchedList, fetchQueries, fetchParam);
-    handleResultHints(Map.class, hints, fetchParam, fetchedList);
+    this.fetch(fetchedList, querier);
+    querier.resolveResultHints(fetchedResult);
+    querier.resolveFetchResult(obj, fetchedResult, injectProName);
   }
 
   protected abstract MongoDatabase getDataBase();
 
-  protected MgInLineNamedQueryResolver<String, Map<String, Object>> getResolver() {
+  protected MgInLineNamedQueryResolver<String, Object> getResolver() {
     return resolver;
   }
 
@@ -257,7 +239,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
           break;
       }
     }
-    Map<String, String> pros = querier.getProperties();
+    Map<String, String> pros = querier.getQuery().getProperties();
     // handle properties
     getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(fi::batchSize);
     getOptMapObject(pros, PRO_KEY_COMMENT, ConversionUtils::toString).ifPresent(fi::comment);
@@ -286,7 +268,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
     if (querier.getScript().get(MgOperator.HINT) != null) {
       co.hint(querier.getScript().get(MgOperator.HINT));
     }
-    Map<String, String> pros = querier.getProperties();
+    Map<String, String> pros = querier.getQuery().getProperties();
     getOptMapObject(pros, PRO_KEY_CO_LIMIT, ConversionUtils::toInteger).ifPresent(co::limit);
     getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, ConversionUtils::toLong)
         .ifPresent(t -> co.maxTime(t, TimeUnit.MILLISECONDS));
@@ -311,7 +293,7 @@ public abstract class AbstractMgNamedQuery extends AbstractNamedQuery {
   }
 
   protected Optional<Collation> resovleCollation(MgQuerier querier) {
-    Map<String, String> pros = querier.getProperties();
+    Map<String, String> pros = querier.getQuery().getProperties();
     if (pros.keySet().stream().anyMatch(t -> t.startsWith(PRO_KEY_CO_COLA))) {
       Collation.Builder b = Collation.builder();
       getOptMapObject(pros, PRO_KEY_CO_COLA_ALTERNATE, t -> toEnum(t, CollationAlternate.class))

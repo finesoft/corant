@@ -207,7 +207,7 @@ public class QueryParseHandler extends DefaultHandler {
       if (q == null) {
         throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
       }
-      q.getFetchQueries().add((FetchQuery) obj);
+      q.addFetchQuery((FetchQuery) obj);
       nameStack.pop();
     }
   }
@@ -236,7 +236,7 @@ public class QueryParseHandler extends DefaultHandler {
         throw new QueryRuntimeException(
             "Parse error the fetch query parameter must be in fetch query element!");
       }
-      q.getParameters().add((FetchQueryParameter) obj);
+      q.addParameter((FetchQueryParameter) obj);
       nameStack.pop();
     }
   }
@@ -360,7 +360,7 @@ public class QueryParseHandler extends DefaultHandler {
       if (q == null) {
         throw new QueryRuntimeException("Parse error the query hit must be in query element!");
       }
-      q.getHints().add((QueryHint) obj);
+      q.addHint((QueryHint) obj);
       nameStack.pop();
     }
   }

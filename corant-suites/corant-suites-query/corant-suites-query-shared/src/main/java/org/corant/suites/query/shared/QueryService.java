@@ -25,11 +25,16 @@ import java.util.stream.Stream;
  * @author bingo 下午10:33:30
  *
  */
-public interface Query<Q, P> {
+public interface QueryService<Q, P> {
+
+  String OFFSET_PARAM_NME = "_offset";
+  String LIMIT_PARAM_NME = "_limit";
+  int OFFSET_PARAM_VAL = 0;
+  int LIMIT_PARAM_VAL = 16;
 
   <T> ForwardList<T> forward(Q q, P param);
 
-  default <R, T> ForwardList<T> forward(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
+  default <R, T> ForwardList<T> forward(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
     ForwardList<R> raw = forward(q, param);
     if (raw == null) {
       return ForwardList.inst();
@@ -44,14 +49,14 @@ public interface Query<Q, P> {
 
   <T> T get(Q q, P param);
 
-  default <R, T> T get(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
+  default <R, T> T get(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
     R t = get(q, param);
     return func.apply(t, this);
   }
 
   <T> PagedList<T> page(Q q, P param);
 
-  default <R, T> PagedList<T> page(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
+  default <R, T> PagedList<T> page(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
     PagedList<R> raw = page(q, param);
     if (raw == null) {
       return PagedList.inst();
@@ -66,7 +71,7 @@ public interface Query<Q, P> {
 
   <T> List<T> select(Q q, P param);
 
-  default <R, T> List<T> select(Q q, P param, BiFunction<R, Query<Q, P>, T> func) {
+  default <R, T> List<T> select(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
     List<R> raw = select(q, param);
     if (raw == null) {
       return new ArrayList<>();

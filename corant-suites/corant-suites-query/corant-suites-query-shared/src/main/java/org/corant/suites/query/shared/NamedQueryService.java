@@ -13,14 +13,12 @@
  */
 package org.corant.suites.query.shared;
 
-import java.util.Map;
-
 /**
  * corant-suites-query
  *
  * @author bingo 上午9:54:08
  *
  */
-public interface NamedQuery extends Query<String, Map<String, Object>> {
+public interface NamedQueryService extends QueryService<String, Object> {
 
 }

@@ -15,9 +15,10 @@ package org.corant.suites.query.sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.corant.kernel.api.ConversionService;
-import org.corant.suites.query.shared.dynamic.AbstractDynamicQueryProcessor;
+import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.mapping.Query;
@@ -28,32 +29,32 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 下午7:46:22
  *
  */
-public class SqlNamedQueryJsProcessor
-    extends AbstractDynamicQueryProcessor<DefaultSqlNamedQuerier, Object[], ScriptFunction> {
+public class SqlNamedQuerierJsBuilder
+    extends AbstractDynamicQuerierBuilder<Object[], String, DefaultSqlNamedQuerier> {
 
   final ScriptFunction execution;
 
-  public SqlNamedQueryJsProcessor(Query query, ConversionService conversionService) {
-    super(query, conversionService);
+  /**
+   * @param query
+   * @param parameterResolver
+   * @param resultResolver
+   */
+  public SqlNamedQuerierJsBuilder(Query query, QueryParameterResolver parameterResolver,
+      QueryResultResolver resultResolver) {
+    super(query, parameterResolver, resultResolver);
     execution = NashornScriptEngines.compileFunction(query.getScript(), "p", "up");
-  }
-
-  @Override
-  public ScriptFunction getExecution() {
-    return execution;
   }
 
   /**
    * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultSqlNamedQuerier process(Map<String, Object> param) {
-    Map<String, Object> convertedParam = convertParameter(param);// convert parameter
+  public DefaultSqlNamedQuerier build(Object param) {
+    QueryParameter queryParameter = resolveParameter(param);// convert parameter
     List<Object> useParam = new ArrayList<>();
-    Object script = getExecution().apply(new Object[] {convertedParam, useParam});
-    return new DefaultSqlNamedQuerier(getQueryName(), script.toString(),
-        useParam.toArray(new Object[useParam.size()]), getResultClass(), getFetchQueries(),
-        getHints(), getProperties());
+    Object script = execution.apply(new Object[] {queryParameter, useParam});
+    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getParameterResolver(),
+        getResultResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
   }
 
 }

@@ -16,14 +16,12 @@ package org.corant.suites.query.elastic;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.kernel.api.ConversionService;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
-import org.corant.suites.query.shared.spi.ParamReviser;
 
 /**
  * corant-suites-query
@@ -32,40 +30,31 @@ import org.corant.suites.query.shared.spi.ParamReviser;
  *
  */
 @ApplicationScoped
-public class DefaultEsNamedQueryResolver
-    implements EsInLineNamedQueryResolver<String, Map<String, Object>> {
+public class DefaultEsNamedQueryResolver implements EsInLineNamedQueryResolver<String, Object> {
 
-  final Map<String, DefaultEsNamedQueryProcessor> processors = new ConcurrentHashMap<>();
+  final Map<String, DefaultEsNamedQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
 
   @Inject
-  protected ConversionService conversionService;
+  protected QueryParameterResolver parameterResolver;
 
   @Inject
-  @Any
-  Instance<ParamReviser> paramRevisers;
+  protected QueryResultResolver resultResolver;
 
   @Override
-  public DefaultEsNamedQuerier resolve(String key, Map<String, Object> param) {
-    DefaultEsNamedQueryProcessor processor = processors.computeIfAbsent(key, this::buildProcessor);
-    handleParamHints(processor, param);
-    return processor.process(param);
+  public DefaultEsNamedQuerier resolve(String key, Object param) {
+    DefaultEsNamedQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    return builder.build(param);
   }
 
-  protected DefaultEsNamedQueryProcessor buildProcessor(String key) {
+  protected DefaultEsNamedQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found Query for key %s", key);
+      throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
-    return new DefaultEsNamedQueryProcessor(query, conversionService);
-  }
-
-  protected void handleParamHints(DefaultEsNamedQueryProcessor tpl, Map<String, Object> param) {
-    if (!paramRevisers.isUnsatisfied()) {
-      paramRevisers.stream().sorted().forEach(pr -> pr.accept(tpl.getQueryName(), param));
-    }
+    return new DefaultEsNamedQuerierBuilder(query, parameterResolver, resultResolver);
   }
 
 }

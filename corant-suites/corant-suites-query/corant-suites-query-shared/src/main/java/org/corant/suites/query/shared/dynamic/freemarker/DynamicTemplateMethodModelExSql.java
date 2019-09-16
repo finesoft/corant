@@ -11,11 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.jpql;
+package org.corant.suites.query.shared.dynamic.freemarker;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicQueryTplMmResolver;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -25,31 +24,30 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<Object[]> {
+public class DynamicTemplateMethodModelExSql implements DynamicTemplateMethodModelEx<Object[]> {
 
+  public static final String TYPE = "SP";
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
-
-  private List<Object> parameters = new ArrayList<>();
-  private int seq = 0;
+  private final List<Object> parameters = new ArrayList<>();
 
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
     if (arguments != null && arguments.size() == 1) {
       Object arg = getParamValue(arguments.get(0));
-      if (arg instanceof Object[]) {
-        Object[] argList = (Object[]) arg;
-        int argSize = argList.length;
+      if (arg instanceof List) {
+        List argList = (List) arg;
+        int argSize = argList.size();
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
-          parameters.add(argList[i]);
-          placeHolders[i] = getPlaceHolder();
+          parameters.add(argList.get(i));
+          placeHolders[i] = SQL_PS_PLACE_HOLDER;
         }
         return new SimpleScalar(String.join(",", placeHolders));
       } else {
         parameters.add(arg);
-        return getPlaceHolder();
+        return SQL_SS_PLACE_HOLDER;
       }
     }
     return arguments;
@@ -61,14 +59,7 @@ public class JpqlNamedQueryFmTplMmResolver implements DynamicQueryTplMmResolver<
   }
 
   @Override
-  public QueryTemplateMethodModelType getType() {
-    return QueryTemplateMethodModelType.SP;
+  public String getType() {
+    return TYPE;
   }
-
-  String getPlaceHolder() {
-    String pl = SQL_PS_PLACE_HOLDER + seq;
-    seq++;
-    return pl;
-  }
-
 }

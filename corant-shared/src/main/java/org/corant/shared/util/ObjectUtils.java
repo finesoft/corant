@@ -334,6 +334,10 @@ public class ObjectUtils {
       return new Triple<>(null, null, null);
     }
 
+    public static <L, M, R> Triple<L, M, R> of(L left, M middle, R right) {
+      return new Triple<>(left, middle, right);
+    }
+
     public String asString(final String format) {
       return String.format(format, getLeft(), getMiddle(), getRight());
     }

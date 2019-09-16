@@ -13,13 +13,10 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
+import org.corant.suites.query.shared.mapping.Query;
 
 /**
  * corant-suites-query-shared
@@ -29,21 +26,17 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  */
 public interface Querier {
 
-  List<FetchQuery> getFetchQueries();
+  Query getQuery();
 
-  List<QueryHint> getHints();
+  QueryParameter getQueryParameter();
 
-  default Map<String, String> getProperties() {
-    return Collections.emptyMap();
-  }
+  <T> List<T> resolve(List<?> results);
 
-  default <T> T getProperty(String name, Class<T> cls) {
-    return getProperties() == null ? null : toObject(getProperties().get(name), cls);
-  }
+  <T> T resolve(Object result);
 
-  default <T> T getProperty(String name, Class<T> cls, T altVal) {
-    return defaultObject(getProperty(name, cls), altVal);
-  }
+  Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery);
 
-  <T> Class<T> getResultClass();
+  void resolveFetchResult(Object result, Object fetchResult, String injectProName);
+
+  void resolveResultHints(Object result);
 }

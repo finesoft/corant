@@ -13,14 +13,19 @@
  */
 package org.corant.suites.query.shared.dynamic.freemarker;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
-import java.util.Map;
+import static org.corant.shared.util.CollectionUtils.listOf;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
@@ -31,12 +36,14 @@ import freemarker.template.TemplateSequenceModel;
  * @author bingo 下午5:40:20
  *
  */
-public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
+public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
 
   P getParameters();
 
   default Object getParamValue(Object arg) throws TemplateModelException {
-    if (arg instanceof TemplateScalarModel) {
+    if (arg instanceof WrapperTemplateModel) {
+      return ((WrapperTemplateModel) arg).getWrappedObject();
+    } else if (arg instanceof TemplateScalarModel) {
       return ((TemplateScalarModel) arg).getAsString().trim();
     } else if (arg instanceof TemplateDateModel) {
       return ((TemplateDateModel) arg).getAsDate();
@@ -47,37 +54,44 @@ public interface DynamicQueryTplMmResolver<P> extends TemplateMethodModelEx {
     } else if (arg instanceof TemplateSequenceModel) {
       TemplateSequenceModel tsm = (TemplateSequenceModel) arg;
       int size = tsm.size();
-      Object[] list = new Object[size];
+      List<Object> list = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-        list[i] = getParamValue(tsm.get(i));
+        list.add(getParamValue(tsm.get(i)));
       }
       return list;
-    } else if (arg instanceof WrapperTemplateModel) {
-      return ((WrapperTemplateModel) arg).getWrappedObject();
+    } else if (arg instanceof TemplateCollectionModel) {
+      final TemplateModelIterator it = ((TemplateCollectionModel) arg).iterator();
+      List<TemplateModel> tsm = listOf(new Iterator<TemplateModel>() {
+        @Override
+        public boolean hasNext() {
+          try {
+            return it.hasNext();
+          } catch (TemplateModelException e) {
+            throw new QueryRuntimeException(e);
+          }
+        }
+
+        @Override
+        public TemplateModel next() {
+          try {
+            return it.next();
+          } catch (TemplateModelException e) {
+            throw new QueryRuntimeException(e);
+          }
+        }
+      });
+      int size = tsm.size();
+      List<Object> list = new ArrayList<>(size);
+      for (int i = 0; i < size; i++) {
+        list.add(getParamValue(tsm.get(i)));
+      }
+      return list;
     } else {
       throw new QueryRuntimeException("Unknow arguement,the class is %s",
           arg == null ? "null" : arg.getClass());
     }
   }
 
-  QueryTemplateMethodModelType getType();
+  String getType();
 
-  default DynamicQueryTplMmResolver<P> injectTo(Map<String, Object> parameters) {
-    if (parameters != null) {
-      String tmmName = resolveTmmExName();
-      shouldBeFalse(parameters.containsKey(tmmName),
-          "The key named \"%s\" in the parameter is system reserved, please choose another.",
-          tmmName);
-      parameters.put(tmmName, this);
-    }
-    return this;
-  }
-
-  default String resolveTmmExName() {
-    return getType().name();
-  }
-
-  public enum QueryTemplateMethodModelType {
-    SP, JP
-  }
 }

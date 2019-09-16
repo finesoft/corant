@@ -13,17 +13,17 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
+import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryParameterResolver;
+import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.QueryHint;
+import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.suites.query.shared.mapping.Query;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
@@ -34,53 +34,30 @@ import com.mongodb.BasicDBObject;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultMgNamedQuerier implements MgQuerier {
+public class DefaultMgNamedQuerier extends
+    AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>> implements MgQuerier {
 
   public static final ObjectMapper OM = new ObjectMapper();
 
   protected final String name;
   protected final EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
-  protected final Class<?> resultClass;
-  protected final List<FetchQuery> fetchQueries;
-  protected final List<QueryHint> hints = new ArrayList<>();
-  protected final Map<String, String> properties = new HashMap<>();
   protected final String originalScript;
 
   /**
-   * @param name
-   * @param script
+   * @param query
+   * @param queryParameter
+   * @param parameterResolver
+   * @param resultResolver
+   * @param mgQuery
    * @param originalScript
-   * @param resultClass
-   * @param hints
-   * @param fetchQueries
-   * @param properties
    */
-  public DefaultMgNamedQuerier(String name, Map<?, ?> mgQuery, String originalScript,
-      Class<?> resultClass, List<QueryHint> hints, List<FetchQuery> fetchQueries,
-      Map<String, String> properties) {
-    super();
-
-    this.name = name;
-    this.resultClass = resultClass;
-    this.fetchQueries = fetchQueries;
-    if (hints != null) {
-      this.hints.addAll(hints);
-    }
-    if (properties != null) {
-      this.properties.putAll(properties);
-    }
-    init(mgQuery);
+  protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
+      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
+      Map<?, ?> mgQuery, String originalScript) {
+    super(query, queryParameter, parameterResolver, resultResolver);
+    name = query.getName();
     this.originalScript = originalScript;
-  }
-
-  @Override
-  public List<FetchQuery> getFetchQueries() {
-    return fetchQueries;
-  }
-
-  @Override
-  public List<QueryHint> getHints() {
-    return hints;
+    init(mgQuery);
   }
 
   @Override
@@ -94,19 +71,12 @@ public class DefaultMgNamedQuerier implements MgQuerier {
   }
 
   @Override
-  public Map<String, String> getProperties() {
-    return properties;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> Class<T> getResultClass() {
-    return (Class<T>) resultClass;
-  }
-
-  @Override
   public EnumMap<MgOperator, Bson> getScript() {
     return script;
+  }
+
+  public Map<String, Object> getScriptParameter() {
+    return null;
   }
 
   protected void init(Map<?, ?> mgQuery) {

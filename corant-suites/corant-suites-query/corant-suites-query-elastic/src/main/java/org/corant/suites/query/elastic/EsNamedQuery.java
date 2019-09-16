@@ -14,7 +14,7 @@
 package org.corant.suites.query.elastic;
 
 import java.util.Map;
-import org.corant.suites.query.shared.NamedQuery;
+import org.corant.suites.query.shared.NamedQueryService;
 
 /**
  * corant-suites-query
@@ -22,10 +22,10 @@ import org.corant.suites.query.shared.NamedQuery;
  * @author bingo 下午3:07:55
  *
  */
-public interface EsNamedQuery extends NamedQuery {
+public interface EsNamedQuery extends NamedQueryService {
 
-  Map<String, Object> aggregate(String q, Map<String, Object> param);
+  Map<String, Object> aggregate(String q, Object param);
 
-  Map<String, Object> search(String q, Map<String, Object> param);
+  Map<String, Object> search(String q, Object param);
 
 }

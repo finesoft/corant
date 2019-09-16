@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -32,4 +33,12 @@ public class QueryObjectMapper {
       .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
       .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+  public static String toString(Object obj) {
+    try {
+      return OM.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      return null;
+    }
+  }
 }

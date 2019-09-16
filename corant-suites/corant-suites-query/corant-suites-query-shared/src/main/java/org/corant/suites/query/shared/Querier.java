@@ -26,17 +26,60 @@ import org.corant.suites.query.shared.mapping.Query;
  */
 public interface Querier {
 
+  /**
+   * The query object that this querier bind, the Query object define execution plan.
+   *
+   * @return getQuery
+   */
   Query getQuery();
 
+  /**
+   * The query parameter that this querier bind.
+   *
+   * @return getQueryParameter
+   */
   QueryParameter getQueryParameter();
 
-  <T> List<T> resolve(List<?> results);
+  /**
+   * Inject the fetched result to result
+   *
+   * @param result
+   * @param fetchResult
+   * @param injectProName
+   * @see QueryResultResolver#resolveFetchedResult(Object, Object, String)
+   */
+  void resolveFetchedResult(Object result, Object fetchedResult, String injectProName);
 
-  <T> T resolve(Object result);
-
+  /**
+   * Resolve fetch query criteria, merge parent querier criteria.
+   *
+   * @param result
+   * @param fetchQuery
+   * @see QueryParameterResolver#resolveFetchQueryCriteria(Object, FetchQuery, QueryParameter)
+   */
   Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery);
 
-  void resolveFetchResult(Object result, Object fetchResult, String injectProName);
+  /**
+   * Resolve result, handle hints and conversions.
+   *
+   * @param <T>
+   * @param results
+   * @see QueryResultResolver#resolve(List, Class, List, QueryParameter)
+   */
+  <T> List<T> resolveResult(List<?> results);
 
+  /**
+   * Resolve result, handle hints and conversions.
+   *
+   * @param <T>
+   * @param result
+   * @see QueryResultResolver#resolve(Object, Class, List, QueryParameter)
+   */
+  <T> T resolveResult(Object result);
+
+  /**
+   * @param result resolveResultHints
+   * @see QueryResultResolver#resolveResultHints(Object, Class, List, QueryParameter)
+   */
   void resolveResultHints(Object result);
 }

@@ -13,9 +13,11 @@
  */
 package org.corant.suites.query.shared;
 
+import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -23,6 +25,8 @@ import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
+import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
 /**
@@ -40,26 +44,38 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   @Inject
   protected Logger logger;
 
-  @Inject
-  protected QueryParameterResolver parameterResolver;
-
   @Override
   public <T> Stream<T> stream(String q, Object param) {
     throw new NotSupportedException();
   }
 
-  protected <T> void fetch(List<T> list, Querier parentQuerier) {
-    if (!isEmpty(list) && !isEmpty(parentQuerier.getQuery().getFetchQueries())) {
-      list.forEach(e -> parentQuerier.getQuery().getFetchQueries()
-          .forEach(f -> this.fetch(e, f, parentQuerier)));
+  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Map<String, Object> param) {
+    // precondition to decide whether execute fetch.
+    if (isNotBlank(fetchQuery.getScript())) {
+      ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
+      if (sf != null) {
+        Boolean b = toBoolean(sf.apply(new Object[] {param, result}));
+        if (b == null || !b.booleanValue()) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  protected <T> void fetch(List<T> results, Querier querier) {
+    List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
+    if (!isEmpty(results) && !isEmpty(fetchQueries)) {
+      fetchQueries.forEach(f -> results.forEach(e -> this.fetch(e, f, querier)));
     }
   }
 
-  protected abstract <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier);
+  protected abstract <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier);
 
-  protected <T> void fetch(T obj, Querier parentQuerier) {
-    if (obj != null && !isEmpty(parentQuerier.getQuery().getFetchQueries())) {
-      parentQuerier.getQuery().getFetchQueries().forEach(f -> this.fetch(obj, f, parentQuerier));
+  protected <T> void fetch(T result, Querier parentQuerier) {
+    List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
+    if (result != null && !isEmpty(fetchQueries)) {
+      fetchQueries.forEach(f -> this.fetch(result, f, parentQuerier));
     }
   }
 
@@ -69,16 +85,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         Integer.valueOf(1));
   }
 
-  protected void log(String name, Map<String, Object> param, String... script) {
-    logger.fine(
-        () -> String.format("%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", script)));
+  protected void log(String name, Map<?, ?> param, String... script) {
+    logger.fine(() -> String.format(
+        "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
+        name, QueryObjectMapper.toString(param), String.join("; ", script)));
   }
 
   protected void log(String name, Object[] param, String... script) {
-    logger.fine(
-        () -> String.format("%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
-            name, String.join(",", asStrings(param)), String.join("; ", script)));
+    logger.fine(() -> String.format(
+        "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
+        name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
-
 }

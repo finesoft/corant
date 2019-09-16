@@ -24,7 +24,6 @@ import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryUtils;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
@@ -103,7 +101,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    List<T> resolvedList = new ArrayList<>();
     int size = getSize(list);
     if (size > 0) {
       this.fetch(list, querier);
@@ -111,9 +108,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         list.remove(size - 1);
         result.withHasNext(true);
       }
-      resolvedList = querier.resolve(list);
     }
-    return result.withResults(resolvedList);
+    return result.withResults(querier.resolveResult(list));
   }
 
   @Override
@@ -123,7 +119,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
     this.fetch(result, querier);
-    return querier.resolve(result);
+    return querier.resolveResult(result);
   }
 
   @Override
@@ -136,7 +132,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    List<T> resolvedList = new ArrayList<>();
     int size = getSize(list);
     if (size > 0) {
       if (size < limit) {
@@ -145,9 +140,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         result.withTotal(Long.valueOf(queryCount(querier)).intValue());
       }
       this.fetch(list, querier);
-      resolvedList = querier.resolve(list);
     }
-    return result.withResults(resolvedList);
+    return result.withResults(querier.resolveResult(list));
   }
 
   @Override
@@ -157,13 +151,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    List<T> resolvedList = new ArrayList<>();
     int size = getSize(list);
     if (size > 0) {
       this.fetch(list, querier);
-      resolvedList = querier.resolve(list);
     }
-    return resolvedList;
+    return querier.resolveResult(list);
   }
 
   @Override
@@ -172,7 +164,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(q, querier.getScriptParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
       this.fetch(Decimal128Utils.convert(result), querier);
-      return querier.resolve(result);
+      return querier.resolveResult(result);
     });
   }
 
@@ -182,7 +174,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       return;
     }
     Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(obj, fetchQuery);
-    if (!QueryUtils.decideFetch(obj, fetchQuery, fetchParam)) {
+    if (!decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }
     boolean multiRecords = fetchQuery.isMultiRecords();
@@ -196,13 +188,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Object fetchedResult = null;
     if (multiRecords) {
       fetchedResult = fetchedList;
+      this.fetch((List<?>) fetchedResult, querier);
     } else if (!isEmpty(fetchedList)) {
       fetchedResult = fetchedList.get(0);
-      fetchedList = fetchedList.subList(0, 1);
+      this.fetch(fetchedResult, querier);
     }
-    this.fetch(fetchedList, querier);
     querier.resolveResultHints(fetchedResult);
-    querier.resolveFetchResult(obj, fetchedResult, injectProName);
+    querier.resolveFetchedResult(obj, fetchedResult, injectProName);
   }
 
   protected abstract MongoDatabase getDataBase();

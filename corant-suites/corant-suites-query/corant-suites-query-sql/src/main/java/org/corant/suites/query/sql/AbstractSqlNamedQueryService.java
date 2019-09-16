@@ -17,7 +17,6 @@ import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -25,9 +24,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.QueryUtils;
+import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 import org.corant.suites.query.sql.dialect.Dialect;
@@ -45,18 +43,17 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   protected SqlNamedQueryResolver<String, Object> resolver;
 
   @Override
-  public <T> ForwardList<T> forward(String q, Object parameter) {
-    SqlQuerier querier = getResolver().resolve(q, parameter);
+  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+    SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     try {
-      log(q, scriptParameter, sql, "Limit: " + limitSql);
+      log(queryName, scriptParameter, sql, "Limit: " + limitSql);
       ForwardList<T> result = ForwardList.inst();
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
-      List<T> resolvedList = new ArrayList<>();
       int size = getSize(list);
       if (size > 0) {
         this.fetch(list, querier);
@@ -64,28 +61,27 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
           list.remove(size - 1);
           result.withHasNext(true);
         }
-        resolvedList = querier.resolve(list);
       }
-      return result.withResults(resolvedList);
+      return result.withResults(querier.resolveResult(list));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
-          "An error occurred while executing the forward query [%s].", q);
+          "An error occurred while executing the forward query [%s].", queryName);
     }
   }
 
   @Override
-  public <T> T get(String q, Object param) {
-    SqlQuerier querier = getResolver().resolve(q, param);
+  public <T> T get(String queryName, Object parameter) {
+    SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     try {
-      log(q, scriptParameter, sql);
+      log(queryName, scriptParameter, sql);
       Map<String, Object> result = getExecutor().get(sql, scriptParameter);
       this.fetch(result, querier);
-      return querier.resolve(result);
+      return querier.resolveResult(result);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
-          q);
+          queryName);
     }
   }
 
@@ -102,7 +98,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
       PagedList<T> result = PagedList.of(offset, limit);
       int size = getSize(list);
-      List<T> resolvedList = new ArrayList<>();
       if (size > 0) {
         if (size < limit) {
           result.withTotal(offset + size);
@@ -113,9 +108,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
               Dialect.COUNT_FIELD_NAME));
         }
         this.fetch(list, querier);
-        resolvedList = querier.resolve(list);
       }
-      return result.withResults(resolvedList);
+      return result.withResults(querier.resolveResult(list));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
           q);
@@ -129,17 +123,16 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript();
     try {
       if (enableMaxSelect()) {
-        sql = getDialect().getLimitSql(sql, QueryService.OFFSET_PARAM_VAL, getMaxSelectSize(querier));
+        sql =
+            getDialect().getLimitSql(sql, QueryService.OFFSET_PARAM_VAL, getMaxSelectSize(querier));
       }
       log(q, scriptParameter, sql);
       List<Map<String, Object>> results = getExecutor().select(sql, scriptParameter);
-      List<T> resolvedResult = new ArrayList<>();
       int size = getSize(results);
       if (size > 0) {
         this.fetch(results, querier);
-        resolvedResult = querier.resolve(results);
       }
-      return resolvedResult;
+      return querier.resolveResult(results);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
           q);
@@ -153,7 +146,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript();
     return getExecutor().stream(sql, scriptParameter).map(result -> {
       this.fetch(result, querier);
-      return querier.resolve(result);
+      return querier.resolveResult(result);
     });
   }
 
@@ -162,12 +155,12 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (null == obj || fetchQuery == null) {
+  protected <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier) {
+    if (null == result || fetchQuery == null) {
       return;
     }
-    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(obj, fetchQuery);
-    if (!QueryUtils.decideFetch(obj, fetchQuery, fetchParam)) {
+    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(result, fetchQuery);
+    if (!decideFetch(result, fetchQuery, fetchParam)) {
       return;
     }
     int maxSize = fetchQuery.getMaxSize();
@@ -186,13 +179,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       Object fetchedResult = null;
       if (multiRecords) {
         fetchedResult = fetchedList;
+        this.fetch((List<?>) fetchedResult, querier);
       } else if (!isEmpty(fetchedList)) {
         fetchedResult = fetchedList.get(0);
-        fetchedList = fetchedList.subList(0, 1);
+        this.fetch(fetchedResult, querier);
       }
-      this.fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedResult);
-      querier.resolveFetchResult(obj, fetchedResult, injectProName);
+      querier.resolveFetchedResult(result, fetchedResult, injectProName);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

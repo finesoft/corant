@@ -25,8 +25,6 @@ import org.corant.suites.query.shared.mapping.Query;
  */
 public interface QueryParameterResolver {
 
-  Map<String, Object> extractCriterias(QueryParameter parameter);
-
   Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery query,
       QueryParameter parentQueryparam);
 

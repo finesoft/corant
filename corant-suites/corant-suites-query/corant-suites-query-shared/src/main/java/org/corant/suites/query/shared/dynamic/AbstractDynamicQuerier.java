@@ -61,15 +61,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
-  public <T> List<T> resolve(List<?> results) {
-    return resultResolver.resolve(results, forceCast(getQuery().getResultClass()),
-        getQuery().getHints(), getQueryParameter());
-  }
-
-  @Override
-  public <T> T resolve(Object result) {
-    return resultResolver.resolve(result, forceCast(getQuery().getResultClass()),
-        getQuery().getHints(), getQueryParameter());
+  public void resolveFetchedResult(Object result, Object fetchResult, String injectProName) {
+    resultResolver.resolveFetchedResult(result, fetchResult, injectProName);
   }
 
   @Override
@@ -78,14 +71,21 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
-  public void resolveFetchResult(Object result, Object fetchResult, String injectProName) {
-    resultResolver.resolveFetchResult(result, fetchResult, injectProName);
+  public <T> List<T> resolveResult(List<?> results) {
+    return resultResolver.resolve(results, forceCast(getQuery().getResultClass()),
+        getQuery().getHints(), getQueryParameter());
+  }
+
+  @Override
+  public <T> T resolveResult(Object result) {
+    return resultResolver.resolve(result, forceCast(getQuery().getResultClass()),
+        getQuery().getHints(), getQueryParameter());
   }
 
   @Override
   public void resolveResultHints(Object result) {
-    resultResolver.resolveResultHints(result, getQuery().getResultClass(), getQuery().getHints(),
-        getQueryParameter());
+    resultResolver.resolveResultHints(result, Map.class, getQuery().getHints(),
+        getQueryParameter());// FIXME map class
   }
 
 }

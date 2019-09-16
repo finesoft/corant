@@ -13,15 +13,11 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ConversionUtils.toInteger;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.query.shared.QueryService.LIMIT_PARAM_NME;
 import static org.corant.suites.query.shared.QueryService.OFFSET_PARAM_NME;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +29,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
+import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -42,25 +39,6 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
 
   @Inject
   ConversionService conversionService;
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Map<String, Object> extractCriterias(QueryParameter parameter) {
-    Map<String, Object> map = new HashMap<>();
-    if (parameter != null) {
-      Object criteria = parameter.getCriteria();
-      if (criteria instanceof Map) {
-        Map.class.cast(criteria).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      } else if (criteria != null) {
-        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      }
-    }
-    return map;
-  }
 
   @Override
   public Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery query,
@@ -102,75 +80,56 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     return convertedParam;
   }
 
-  protected void extractResult(Object result, String paths, boolean flatList, List<Object> list) {
-    extractResult(result, split(paths, ".", true, false), flatList, list);
+  @SuppressWarnings("unchecked")
+  protected Map<String, Object> extractCriterias(QueryParameter parameter) {
+    Map<String, Object> map = new HashMap<>();
+    if (parameter != null) {
+      Object criteria = parameter.getCriteria();
+      if (criteria instanceof Map) {
+        Map.class.cast(criteria).forEach((k, v) -> {
+          map.put(asDefaultString(k), v);
+        });
+      } else if (criteria != null) {
+        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
+          map.put(asDefaultString(k), v);
+        });
+      }
+    }
+    return map;
   }
 
-  protected void extractResult(Object result, String[] paths, boolean flatList, List<Object> list) {
-    if (!interruptExtract(result, paths, flatList, list)) {
-      if (result instanceof Map) {
-        String path = paths[0];
-        Object next = Map.class.cast(result).get(path);
-        if (next != null) {
-          extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
-        }
-      } else if (result instanceof Iterable) {
-        for (Object next : Iterable.class.cast(result)) {
-          if (next != null) {
-            extractResult(next, paths, flatList, list);
-          }
-        }
+  protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
+      Map<String, Object> criteria) {
+    Map<String, Object> fetchCriteria = new HashMap<>();
+    for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
+      if (parameter.getSource() == FetchQueryParameterSource.C) {
+        fetchCriteria.put(parameter.getName(), parameter.getValue());
+      } else if (parameter.getSource() == FetchQueryParameterSource.P) {
+        fetchCriteria.put(parameter.getName(), criteria.get(parameter.getSourceName()));
       } else if (result != null) {
-        extractResult(listOf((Object[]) result), paths, flatList, list);// may be array
-      }
-    }
-  }
-
-  protected boolean interruptExtract(Object result, String[] paths, boolean flatList,
-      List<Object> list) {
-    if (isEmpty(paths)) {
-      if (result instanceof Iterable && flatList) {
-        listOf((Iterable<?>) result).forEach(list::add);
-      } else {
-        list.add(result);
-      }
-      return true;
-    }
-    return false;
-  }
-
-  Map<String, Object> resolveFetchQueryCriteria(Object obj, FetchQuery fetchQuery,
-      Map<String, Object> param) {
-    Map<String, Object> pmToUse = new HashMap<>();
-    fetchQuery.getParameters().forEach(p -> {
-      if (p.getSource() == FetchQueryParameterSource.C) {
-        pmToUse.put(p.getName(), p.getValue());
-      } else if (p.getSource() == FetchQueryParameterSource.P) {
-        pmToUse.put(p.getName(), param.get(p.getSourceName()));
-      } else if (obj != null) {
-        if (obj instanceof Map) {
-          String paramName = p.getName();
-          String srcName = p.getSourceName();
-          if (srcName.indexOf('.') != -1) {
-            List<Object> srcVal = new ArrayList<>();
-            extractResult(obj, srcName, true, srcVal);
-            pmToUse.put(paramName,
-                srcVal.isEmpty() ? null : srcVal.size() == 1 ? srcVal.get(0) : srcVal);
+        String parameterName = parameter.getName();
+        String sourceName = parameter.getSourceName();
+        if (result instanceof Map) {
+          if (sourceName.indexOf('.') != -1) {
+            List<Object> values = new ArrayList<>();
+            QueryUtils.extractResult(result, sourceName, true, values);
+            Object value = values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
+            fetchCriteria.put(parameterName, value);
           } else {
-            pmToUse.put(paramName, Map.class.cast(obj).get(srcName));
+            fetchCriteria.put(parameterName, Map.class.cast(result).get(sourceName));
           }
         } else {
           try {
-            pmToUse.put(p.getName(), BeanUtils.getProperty(obj, p.getSourceName()));
+            fetchCriteria.put(parameterName, BeanUtils.getProperty(result, sourceName));
           } catch (Exception e) {
             throw new QueryRuntimeException(e,
-                "Can not extract value from query result for fetch query [%s] param!",
+                "Can not extract value from query result for resolve fetch query [%s] parameter!",
                 fetchQuery.getReferenceQuery());
           }
         }
       }
-    });
-    return pmToUse;
+    }
+    return fetchCriteria;
   }
 
 }

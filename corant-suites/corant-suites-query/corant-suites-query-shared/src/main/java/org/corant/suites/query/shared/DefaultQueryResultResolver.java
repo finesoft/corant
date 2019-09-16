@@ -76,7 +76,7 @@ public class DefaultQueryResultResolver implements QueryResultResolver {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void resolveFetchResult(Object result, Object fetchedResult, String injectProName) {
+  public void resolveFetchedResult(Object result, Object fetchedResult, String injectProName) {
     if (isBlank(injectProName)) {
       return;
     }

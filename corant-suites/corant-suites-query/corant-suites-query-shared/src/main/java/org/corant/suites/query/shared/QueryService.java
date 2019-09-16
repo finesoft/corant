@@ -32,55 +32,55 @@ public interface QueryService<Q, P> {
   int OFFSET_PARAM_VAL = 0;
   int LIMIT_PARAM_VAL = 16;
 
-  <T> ForwardList<T> forward(Q q, P param);
+  <T> ForwardList<T> forward(Q q, P p);
 
-  default <R, T> ForwardList<T> forward(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
-    ForwardList<R> raw = forward(q, param);
+  default <R, T> ForwardList<T> forward(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    ForwardList<R> raw = forward(q, p);
     if (raw == null) {
       return ForwardList.inst();
     } else {
       ForwardList<T> result = new ForwardList<>();
       return result
           .withResults(
-              raw.getResults().stream().map(i -> func.apply(i, this)).collect(Collectors.toList()))
+              raw.getResults().stream().map(i -> f.apply(i, this)).collect(Collectors.toList()))
           .withHasNext(raw.hasNext);
     }
   }
 
-  <T> T get(Q q, P param);
+  <T> T get(Q q, P p);
 
-  default <R, T> T get(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
-    R t = get(q, param);
-    return func.apply(t, this);
+  default <R, T> T get(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    R t = get(q, p);
+    return f.apply(t, this);
   }
 
-  <T> PagedList<T> page(Q q, P param);
+  <T> PagedList<T> page(Q q, P p);
 
-  default <R, T> PagedList<T> page(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
-    PagedList<R> raw = page(q, param);
+  default <R, T> PagedList<T> page(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    PagedList<R> raw = page(q, p);
     if (raw == null) {
       return PagedList.inst();
     } else {
       PagedList<T> result = new PagedList<>();
       return result
           .withResults(
-              raw.getResults().stream().map(i -> func.apply(i, this)).collect(Collectors.toList()))
+              raw.getResults().stream().map(i -> f.apply(i, this)).collect(Collectors.toList()))
           .withTotal(raw.total);
     }
   }
 
-  <T> List<T> select(Q q, P param);
+  <T> List<T> select(Q q, P p);
 
-  default <R, T> List<T> select(Q q, P param, BiFunction<R, QueryService<Q, P>, T> func) {
-    List<R> raw = select(q, param);
+  default <R, T> List<T> select(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    List<R> raw = select(q, p);
     if (raw == null) {
       return new ArrayList<>();
     } else {
-      return raw.stream().map(i -> func.apply(i, this)).collect(Collectors.toList());
+      return raw.stream().map(i -> f.apply(i, this)).collect(Collectors.toList());
     }
   }
 
-  <T> Stream<T> stream(Q q, P param);
+  <T> Stream<T> stream(Q q, P p);
 
   public static class ForwardList<T> {
 

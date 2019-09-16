@@ -23,6 +23,8 @@ package org.corant.suites.query.sql.dialect;
  */
 public class MySQLDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new MySQLDialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));

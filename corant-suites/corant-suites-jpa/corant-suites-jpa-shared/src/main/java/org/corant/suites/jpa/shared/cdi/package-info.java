@@ -19,4 +19,4 @@
  * @author bingo 上午10:34:14
  *
  */
-package org.corant.suites.jpa.shared.inject;
+package org.corant.suites.jpa.shared.cdi;

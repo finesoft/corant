@@ -86,15 +86,15 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  public <T> PagedList<T> page(String q, Object param) {
-    SqlQuerier querier = getResolver().resolve(q, param);
+  public <T> PagedList<T> page(String queryName, Object parameter) {
+    SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
-      log(q, scriptParameter, sql, "Limit: " + limitSql);
+      log(queryName, scriptParameter, sql, "Limit: " + limitSql);
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
       PagedList<T> result = PagedList.of(offset, limit);
       int size = getSize(list);
@@ -103,7 +103,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
           result.withTotal(offset + size);
         } else {
           String totalSql = getDialect().getCountSql(sql);
-          log("total-> " + q, scriptParameter, totalSql);
+          log("total-> " + queryName, scriptParameter, totalSql);
           result.withTotal(getMapInteger(getExecutor().get(totalSql, scriptParameter),
               Dialect.COUNT_FIELD_NAME));
         }
@@ -112,13 +112,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       return result.withResults(querier.resolveResult(list));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
-          q);
+          queryName);
     }
   }
 
   @Override
-  public <T> List<T> select(String q, Object param) {
-    SqlQuerier querier = getResolver().resolve(q, param);
+  public <T> List<T> select(String queryName, Object parameter) {
+    SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     try {
@@ -126,7 +126,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
         sql =
             getDialect().getLimitSql(sql, QueryService.OFFSET_PARAM_VAL, getMaxSelectSize(querier));
       }
-      log(q, scriptParameter, sql);
+      log(queryName, scriptParameter, sql);
       List<Map<String, Object>> results = getExecutor().select(sql, scriptParameter);
       int size = getSize(results);
       if (size > 0) {
@@ -135,13 +135,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       return querier.resolveResult(results);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
-          q);
+          queryName);
     }
   }
 
   @Override
-  public <T> Stream<T> stream(String q, Object param) {
-    SqlQuerier querier = getResolver().resolve(q, param);
+  public <T> Stream<T> stream(String queryName, Object parameter) {
+    SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     return getExecutor().stream(sql, scriptParameter).map(result -> {

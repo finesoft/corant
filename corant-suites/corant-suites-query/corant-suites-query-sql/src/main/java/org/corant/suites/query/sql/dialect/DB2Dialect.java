@@ -23,6 +23,8 @@ import org.corant.suites.query.sql.SqlHelper;
  */
 public class DB2Dialect implements Dialect {
 
+  public static final Dialect INSTANCE = new DB2Dialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, limit);

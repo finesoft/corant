@@ -21,6 +21,8 @@ package org.corant.suites.query.sql.dialect;
  */
 public class DerbyDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new DerbyDialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     throw new UnsupportedOperationException("The database Derby limit script not supported");

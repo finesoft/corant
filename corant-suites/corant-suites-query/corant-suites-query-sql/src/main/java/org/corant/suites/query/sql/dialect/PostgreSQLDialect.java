@@ -21,6 +21,8 @@ package org.corant.suites.query.sql.dialect;
  */
 public class PostgreSQLDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new PostgreSQLDialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, limit);

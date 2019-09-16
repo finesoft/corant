@@ -25,6 +25,8 @@ import org.corant.suites.query.sql.SqlHelper;
  */
 public class SQLServer2005Dialect extends SQLServerDialect {
 
+  public static final Dialect INSTANCE = new SQLServer2005Dialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, limit);

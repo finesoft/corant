@@ -23,12 +23,11 @@ import org.corant.suites.query.sql.SqlHelper;
  */
 public interface Dialect {
 
-  public static final String COUNT_FIELD_NAME = "_total";
+  String COUNT_FIELD_NAME = "_total";
 
-  public static String getNonOrderByPart(String sql) {
+  static String getNonOrderByPart(String sql) {
     return SqlHelper.removeOrderBy(sql);
   }
-
 
   /**
    * Convert SQL statement to Count SQL statement
@@ -59,6 +58,77 @@ public interface Dialect {
   boolean supportsLimit();
 
   public enum DBMS {
-    MYSQL, ORACLE, DB2, H2, HSQL, POSTGRE, SQLSERVER, SQLSERVER2005, SYBASE,
+    MYSQL() {
+      @Override
+      public Dialect instance() {
+        return MySQLDialect.INSTANCE;
+      }
+    },
+    ORACLE() {
+      @Override
+      public Dialect instance() {
+        return OracleDialect.INSTANCE;
+      }
+    },
+    DB2() {
+
+      @Override
+      public Dialect instance() {
+        return DB2Dialect.INSTANCE;
+      }
+    },
+    H2() {
+
+      @Override
+      public Dialect instance() {
+        return H2Dialect.INSTANCE;
+      }
+    },
+    HSQL() {
+
+      @Override
+      public Dialect instance() {
+        return HSQLDialect.INSTANCE;
+      }
+    },
+    POSTGRE() {
+
+      @Override
+      public Dialect instance() {
+        return PostgreSQLDialect.INSTANCE;
+      }
+    },
+    SQLSERVER2005() {
+
+      @Override
+      public Dialect instance() {
+        return SQLServer2005Dialect.INSTANCE;
+      }
+    },
+    SQLSERVER2008() {
+
+      @Override
+      public Dialect instance() {
+        return SQLServer2008Dialect.INSTANCE;
+      }
+    },
+    SQLSERVER2012() {
+
+      @Override
+      public Dialect instance() {
+        return SQLServer2012Dialect.INSTANCE;
+      }
+    },
+    SYBASE() {
+
+      @Override
+      public Dialect instance() {
+        return SybaseDialect.INSTANCE;
+      }
+    };
+
+    public Dialect instance() {
+      return null;
+    }
   }
 }

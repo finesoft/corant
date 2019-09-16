@@ -23,6 +23,7 @@ import java.util.Locale;
  */
 public class OracleDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new OracleDialect();
 
   @Override
   public String getLimitSql(String sql, int offset, int limit) {

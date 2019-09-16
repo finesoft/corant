@@ -21,6 +21,8 @@ package org.corant.suites.query.sql.dialect;
  */
 public class SybaseDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new SybaseDialect();
+
   @Override
   public String getCountSql(String sql) {
     return new StringBuilder(sql.length() + 64).append("select count(1) from ( ")

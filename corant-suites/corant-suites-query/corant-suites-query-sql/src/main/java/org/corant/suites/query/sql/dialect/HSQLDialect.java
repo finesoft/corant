@@ -23,6 +23,8 @@ import org.corant.suites.query.sql.SqlHelper;
  */
 public class HSQLDialect implements Dialect {
 
+  public static final Dialect INSTANCE = new HSQLDialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));

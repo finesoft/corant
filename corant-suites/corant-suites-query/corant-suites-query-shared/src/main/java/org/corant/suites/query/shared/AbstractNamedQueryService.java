@@ -45,16 +45,16 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   protected Logger logger;
 
   @Override
-  public <T> Stream<T> stream(String q, Object param) {
+  public <T> Stream<T> stream(String queryName, Object parameter) {
     throw new NotSupportedException();
   }
 
-  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Map<String, Object> param) {
+  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Map<String, Object> criteria) {
     // precondition to decide whether execute fetch.
     if (isNotBlank(fetchQuery.getScript())) {
       ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
       if (sf != null) {
-        Boolean b = toBoolean(sf.apply(new Object[] {param, result}));
+        Boolean b = toBoolean(sf.apply(new Object[] {criteria, result}));
         if (b == null || !b.booleanValue()) {
           return false;
         }

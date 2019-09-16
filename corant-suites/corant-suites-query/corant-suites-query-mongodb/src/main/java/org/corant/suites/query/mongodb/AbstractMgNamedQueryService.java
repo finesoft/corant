@@ -59,7 +59,8 @@ import com.mongodb.client.model.CountOptions;
  *
  */
 @ApplicationScoped
-public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService {
+public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService
+    implements MgNamedQueryService {
 
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";

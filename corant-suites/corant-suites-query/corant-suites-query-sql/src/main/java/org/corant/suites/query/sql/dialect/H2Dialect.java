@@ -21,6 +21,8 @@ package org.corant.suites.query.sql.dialect;
  */
 public class H2Dialect implements Dialect {
 
+  public static final Dialect INSTANCE = new H2Dialect();
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));
@@ -47,6 +49,5 @@ public class H2Dialect implements Dialect {
           .append(limitPlaceholder).toString();
     }
   }
-
 
 }

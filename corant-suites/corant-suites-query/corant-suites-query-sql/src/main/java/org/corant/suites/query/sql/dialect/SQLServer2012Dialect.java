@@ -25,6 +25,8 @@ import org.corant.suites.query.sql.SqlHelper;
  */
 public class SQLServer2012Dialect extends SQLServer2008Dialect {
 
+  public static final Dialect INSTANCE = new SQLServer2012Dialect();
+
   /**
    * Add a LIMIT clause to the given SQL SELECT
    * <p/>

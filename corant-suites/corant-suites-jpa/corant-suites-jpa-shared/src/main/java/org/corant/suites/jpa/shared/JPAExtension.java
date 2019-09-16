@@ -32,7 +32,7 @@ import javax.persistence.PersistenceUnit;
 import org.corant.kernel.api.PersistenceService.PersistenceUnitLiteral;
 import org.corant.kernel.util.Instances.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jpa.shared.inject.EntityManagerFactoryBean;
+import org.corant.suites.jpa.shared.cdi.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.eclipse.microprofile.config.ConfigProvider;
 

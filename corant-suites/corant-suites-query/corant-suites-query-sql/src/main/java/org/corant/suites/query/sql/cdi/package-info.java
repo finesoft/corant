@@ -11,16 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.sql.dialect;
-
 /**
- * corant-suites-query
- *
- * @author bingo 上午11:03:33
+ * corant-suites-query-sql
+ * 
+ * @author bingo 下午6:04:11
  *
  */
-public class SQLServer2008Dialect extends SQLServer2005Dialect {
-
-  public static final Dialect INSTANCE = new SQLServer2008Dialect();
-
-}
+package org.corant.suites.query.sql.cdi;

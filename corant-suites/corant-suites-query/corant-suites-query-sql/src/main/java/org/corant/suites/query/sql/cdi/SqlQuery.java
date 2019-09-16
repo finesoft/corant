@@ -39,7 +39,7 @@ public @interface SqlQuery {
 
   /**
    * The data source dialect
-   * 
+   *
    * @return dialect
    */
   @Nonbinding
@@ -51,6 +51,6 @@ public @interface SqlQuery {
    * @return value
    */
   @Nonbinding
-  String value();
+  String value() default "";
 
 }

@@ -42,6 +42,6 @@ public @interface MgQuery {
    * @return value
    */
   @Nonbinding
-  String value();
+  String value() default "";
 
 }

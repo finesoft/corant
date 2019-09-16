@@ -61,6 +61,14 @@ public abstract class AbstractJPARepository implements JPARepository {
 
   protected volatile PersistenceContext persistenceContext;
 
+  protected AbstractJPARepository() {
+
+  }
+
+  protected AbstractJPARepository(PersistenceContext persistenceContext) {
+    this.persistenceContext = persistenceContext;
+  }
+
   @Override
   public void clear() {
     getEntityManager().clear();

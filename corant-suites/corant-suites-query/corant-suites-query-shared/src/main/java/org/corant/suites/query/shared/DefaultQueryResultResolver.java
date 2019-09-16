@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -32,7 +31,7 @@ import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.spi.ResultHintHandler;
 
 @ApplicationScoped
-@Alternative
+// @Alternative
 public class DefaultQueryResultResolver implements QueryResultResolver {
 
   @Inject

@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.sql.cdi;
 
+import static org.corant.kernel.util.Instances.resolveNamed;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +22,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-import org.corant.kernel.api.DataSourceService;
+import javax.sql.DataSource;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
@@ -40,28 +41,42 @@ public class SqlNamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
-  @Inject
-  DataSourceService dataSourceService;
-
   @Produces
   @ApplicationScoped
-  @SqlQuery("")
+  @SqlQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    final String dataSource = sc.value();
+    final String dataSource = shouldNotBlank(sc.value());
     final DBMS dbms = sc.dialect();
     return services.computeIfAbsent(dataSource, (ds) -> {
-      return new AbstractSqlNamedQueryService() {
-        final SqlQueryExecutor executor =
-            new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
-                .dataSource(dataSourceService.get(dataSource)).dialect(dbms.instance()).build());
-
-        @Override
-        protected SqlQueryExecutor getExecutor() {
-          return executor;
-        }
-      };
+      return new DefaultSqlNamedQueryService(ds, dbms);
     });
+  }
+
+  /**
+   * corant-suites-query-sql
+   *
+   * @author bingo 下午6:54:23
+   *
+   */
+  public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
+
+    private final SqlQueryExecutor executor;
+
+    /**
+     * @param dataSource
+     * @param dbms
+     */
+    protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms) {
+      executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
+          .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
+          .build());
+    }
+
+    @Override
+    protected SqlQueryExecutor getExecutor() {
+      return executor;
+    }
   }
 }

@@ -13,19 +13,19 @@
  */
 package org.corant.suites.query.mongodb.cdi;
 
-import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.kernel.util.Instances.resolveNamed;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.kernel.api.DataSourceService;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
-import org.corant.suites.query.mongodb.MgNamedQueryService;
+import org.corant.suites.query.shared.NamedQueryService;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -37,23 +37,23 @@ import com.mongodb.client.MongoDatabase;
 @ApplicationScoped
 public class MgNamedQueryServiceManager {
 
-  static final Map<String, MgNamedQueryService> services = new ConcurrentHashMap<>();
+  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   DataSourceService dataSourceService;
 
   @Produces
   @ApplicationScoped
-  @MgQuery("")
-  MgNamedQueryService produce(InjectionPoint ip) {
+  @MgQuery
+  NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
-    final String dataBase = sc.value();
+    final String dataBase = shouldNotBlank(sc.value());
     return services.computeIfAbsent(dataBase, (ds) -> {
       return new AbstractMgNamedQueryService() {
         @Override
         protected MongoDatabase getDataBase() {
-          return resolve(MongoDatabase.class, NamedLiteral.of(dataBase)).get();
+          return resolveNamed(MongoDatabase.class, ds).get();
         }
       };
     });

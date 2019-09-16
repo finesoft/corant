@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
 import org.corant.kernel.api.ConversionService;
@@ -34,7 +33,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSour
 import org.corant.suites.query.shared.mapping.Query;
 
 @ApplicationScoped
-@Alternative
+// @Alternative
 public class DefaultQueryParameterResolver implements QueryParameterResolver {
 
   @Inject
@@ -55,8 +54,8 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     } else if (param instanceof Map) {
       Map<?, ?> mp = new HashMap<>(Map.class.cast(param));
       DefaultQueryParameter qp = new DefaultQueryParameter();
-      Optional.of(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, -1)));
-      Optional.of(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, -1)));
+      Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, -1)));
+      Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, -1)));
       queryParameter = qp.criteria(convertParameter(mp, query.getParamConvertSchema()));
     } else if (param != null) {
       queryParameter = new DefaultQueryParameter().criteria(param);

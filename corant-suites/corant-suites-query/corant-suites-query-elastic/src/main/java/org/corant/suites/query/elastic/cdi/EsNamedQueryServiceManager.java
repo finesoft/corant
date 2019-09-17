@@ -43,7 +43,7 @@ import org.elasticsearch.client.transport.TransportClient;
 @Alternative
 public class EsNamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
   @Inject
   protected EsInLineNamedQueryResolver<String, Object> resolver;

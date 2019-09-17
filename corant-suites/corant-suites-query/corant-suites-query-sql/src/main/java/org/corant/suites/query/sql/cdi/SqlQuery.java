@@ -28,6 +28,14 @@ import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 /**
  * corant-suites-query-sql
  *
+ * <P>
+ * Sql name query service qualifier.
+ *
+ * <pre>
+ *  The property value is data source name.
+ *  The dialect is the data source dialect default is MySQL.
+ * </pre>
+ *
  * @author bingo 下午6:05:00
  *
  */

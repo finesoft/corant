@@ -42,7 +42,7 @@ import com.mongodb.client.MongoDatabase;
 @Alternative
 public class MgNamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME scope
 
   @Inject
   protected MgInLineNamedQueryResolver<String, Object> resolver;

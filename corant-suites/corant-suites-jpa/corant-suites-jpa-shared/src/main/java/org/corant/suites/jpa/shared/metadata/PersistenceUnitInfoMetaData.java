@@ -215,9 +215,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   @Override
   public Properties getProperties() {
-    Properties pops = new Properties();
-    properties.forEach(pops::put);
-    return pops;
+    // Properties pops = new Properties();
+    // properties.forEach(pops::put);
+    // return pops;
+    return properties; // FIXME
   }
 
   @Override

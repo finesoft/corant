@@ -42,7 +42,7 @@ import org.corant.suites.query.shared.NamedQueryService;
 @Alternative
 public class JpqlNamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
   @Inject
   PersistenceService persistenceService;

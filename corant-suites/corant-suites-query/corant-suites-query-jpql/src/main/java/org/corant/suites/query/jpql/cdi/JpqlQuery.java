@@ -27,6 +27,13 @@ import javax.inject.Qualifier;
 /**
  * corant-suites-query-sql
  *
+ * <P>
+ * JPQL name query service qualifier.
+ *
+ * <pre>
+ *  The property value is persistence unit name, usually with <b>corant-suites-jpa</b>.
+ * </pre>
+ *
  * @author bingo 下午6:05:00
  *
  */

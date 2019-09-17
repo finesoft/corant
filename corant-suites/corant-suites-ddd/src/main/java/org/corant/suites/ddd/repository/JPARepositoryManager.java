@@ -13,14 +13,19 @@
  */
 package org.corant.suites.ddd.repository;
 
+import static org.corant.shared.util.StringUtils.EMPTY;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Named;
+import javax.inject.Inject;
 import javax.persistence.PersistenceContext;
 import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
+import org.corant.suites.ddd.annotation.qualifier.PU;
+import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
  * corant-suites-ddd
@@ -28,19 +33,38 @@ import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
  * @author bingo 下午7:09:18
  *
  */
+@ApplicationScoped
 public class JPARepositoryManager {
 
   static final Map<PersistenceContext, JPARepository> respositories = new ConcurrentHashMap<>();
 
-  @ApplicationScoped
-  @Named
+  @Inject
+  JTAJPAUnitOfWorksManager unitOfWorkManager;
+
+  @Produces
+  @PU
   JPARepository produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final Named named = annotated.getAnnotation(Named.class);
-    String pun = named == null ? "" : named.value();
-    PersistenceContext pc = PersistenceContextLiteral.of(pun);
+    final PU pu = annotated.getAnnotation(PU.class);
+    PersistenceContext pc = PersistenceContextLiteral.of(pu == null ? EMPTY : pu.value());
     return respositories.computeIfAbsent(pc, (p) -> {
-      return new AbstractJPARepository(pc) {};
+      return new DefaultJPARepository(pc, unitOfWorkManager);
     });
+  }
+
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 下午5:06:40
+   *
+   */
+  public static final class DefaultJPARepository extends AbstractJPARepository {
+
+    protected DefaultJPARepository(PersistenceContext pc, JTAJPAUnitOfWorksManager uofm) {
+      super();
+      logger = Logger.getLogger(this.getClass().getName());
+      persistenceContext = pc;
+      unitOfWorkManager = uofm;
+    }
   }
 }

@@ -46,7 +46,7 @@ import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 @Alternative
 public class SqlNamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
   @Inject
   protected SqlNamedQueryResolver<String, Object> resolver;

@@ -27,6 +27,13 @@ import javax.inject.Qualifier;
 /**
  * corant-suites-query-sql
  *
+ * <P>
+ * MongoDB name query service qualifier.
+ *
+ * <pre>
+ *  The property value is mongo data base name, usually with <b>corant-suites-mongodb</b>.
+ * </pre>
+ *
  * @author bingo 下午6:05:00
  *
  */

@@ -40,6 +40,7 @@ import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
@@ -173,7 +174,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (null == obj || fetchQuery == null) {
       return;
     }
-    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(obj, fetchQuery);
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(obj, fetchQuery);
     if (!decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }

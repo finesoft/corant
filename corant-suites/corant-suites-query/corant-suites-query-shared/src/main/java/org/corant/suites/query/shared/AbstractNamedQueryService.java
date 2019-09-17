@@ -19,7 +19,6 @@ import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
@@ -49,7 +48,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     throw new NotSupportedException();
   }
 
-  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Map<String, Object> criteria) {
+  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Object criteria) {
     // precondition to decide whether execute fetch.
     if (isNotBlank(fetchQuery.getScript())) {
       ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
@@ -85,7 +84,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         Integer.valueOf(1));
   }
 
-  protected void log(String name, Map<?, ?> param, String... script) {
+  protected void log(String name, Object param, String... script) {
     logger.fine(() -> String.format(
         "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
         name, QueryObjectMapper.toString(param), String.join("; ", script)));

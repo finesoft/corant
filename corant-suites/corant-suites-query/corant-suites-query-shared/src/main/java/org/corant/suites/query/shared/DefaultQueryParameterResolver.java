@@ -40,9 +40,10 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
   ConversionService conversionService;
 
   @Override
-  public Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery query,
+  public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparameter) {
-    return resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter));
+    return new DefaultQueryParameter().context(parentQueryparameter.getContext())
+        .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
   }
 
   @SuppressWarnings("unchecked")

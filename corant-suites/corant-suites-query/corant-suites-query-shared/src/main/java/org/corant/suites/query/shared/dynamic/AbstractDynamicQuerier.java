@@ -66,8 +66,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
-  public Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery) {
-    return parameterResolver.resolveFetchQueryCriteria(result, fetchQuery, getQueryParameter());
+  public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery) {
+    return parameterResolver.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
   }
 
   @Override

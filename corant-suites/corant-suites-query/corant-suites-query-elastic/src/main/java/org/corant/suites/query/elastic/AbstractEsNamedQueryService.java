@@ -26,6 +26,7 @@ import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
@@ -127,7 +128,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     if (null == obj || fetchQuery == null) {
       return;
     }
-    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(obj, fetchQuery);
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(obj, fetchQuery);
     if (!decideFetch(obj, fetchQuery, fetchParam)) {
       return;
     }

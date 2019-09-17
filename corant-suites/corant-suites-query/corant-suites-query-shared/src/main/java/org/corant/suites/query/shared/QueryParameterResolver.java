@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.shared;
 
-import java.util.Map;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -25,7 +24,7 @@ import org.corant.suites.query.shared.mapping.Query;
  */
 public interface QueryParameterResolver {
 
-  Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery query,
+  QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparam);
 
   QueryParameter resolveQueryParameter(Query query, Object parameter);

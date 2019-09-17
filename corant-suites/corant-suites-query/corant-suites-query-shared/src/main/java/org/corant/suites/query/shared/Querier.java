@@ -14,7 +14,6 @@
 package org.corant.suites.query.shared;
 
 import java.util.List;
-import java.util.Map;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -51,13 +50,13 @@ public interface Querier {
   void resolveFetchedResult(Object result, Object fetchedResult, String injectProName);
 
   /**
-   * Resolve fetch query criteria, merge parent querier criteria.
+   * Resolve fetch query parameter, merge parent querier criteria.
    *
    * @param result
    * @param fetchQuery
-   * @see QueryParameterResolver#resolveFetchQueryCriteria(Object, FetchQuery, QueryParameter)
+   * @see QueryParameterResolver#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
    */
-  Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery);
+  QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery);
 
   /**
    * Resolve result, handle hints and conversions.

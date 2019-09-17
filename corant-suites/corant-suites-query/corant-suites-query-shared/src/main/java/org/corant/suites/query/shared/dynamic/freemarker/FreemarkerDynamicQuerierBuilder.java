@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.QueryParameter;
@@ -33,6 +34,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 
 /**
  * corant-suites-query
@@ -76,6 +78,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       if (isNotEmpty(param.getContext())) {
         shouldBeFalse(param.getContext().containsKey(tmm.getType()));
         ObjectWrapper ow = execution.getObjectWrapper();
+        setEnvironmentVariables(e, ow);
         for (Entry<String, Object> ctx : param.getContext().entrySet()) {
           e.setVariable(ctx.getKey(),
               ctx.getValue() == null ? new SimpleHash(ow) : ow.wrap(ctx.getValue()));
@@ -84,7 +87,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
     } catch (IOException | TemplateException e) {
-      throw new QueryRuntimeException(e, "Freemarker process stringTemplate occurred and error");
+      throw new QueryRuntimeException(e,
+          "Freemarker dynamic querier builder [%s] execute occurred error!", getQuery().getName());
     }
   }
 
@@ -94,13 +98,27 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected abstract DynamicTemplateMethodModelEx<P> getTemplateMethodModelEx();
 
   /**
-   * @param e
-   * @param param setEnvironmentVariables
+   * @param env
+   * @param ow
    */
-  protected void setEnvironmentVariables(Environment e, QueryParameter param) {
-    select(ParamReviser.class).stream()
+  protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
+    select(ParamReviser.class).stream().filter(r -> r.canHandle(getQuery()))
         .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority())).forEach(r -> {
-          r.accept(e, param);
+          Map<String, Object> vars = r.get();
+          if (vars != null) {
+            for (Entry<String, Object> entry : vars.entrySet()) {
+              try {
+                if (entry.getKey() != null && entry.getValue() != null
+                    && !env.getKnownVariableNames().contains(entry.getKey())) {
+                  env.setVariable(entry.getKey(), ow.wrap(entry.getValue()));
+                }
+              } catch (TemplateModelException e) {
+                throw new QueryRuntimeException(e,
+                    "Freemarker dynamic querier builder handle environment variables [%s] [%s] occurred error!",
+                    getQuery().getName(), entry.getKey());
+              }
+            }
+          }
         });
   }
 

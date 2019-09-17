@@ -24,6 +24,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -159,7 +160,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     if (null == result || fetchQuery == null) {
       return;
     }
-    Map<String, Object> fetchParam = parentQuerier.resolveFetchQueryCriteria(result, fetchQuery);
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     if (!decideFetch(result, fetchQuery, fetchParam)) {
       return;
     }

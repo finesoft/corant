@@ -13,7 +13,9 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.function.Supplier;
+import org.corant.suites.query.shared.mapping.Query;
 
 /**
  * corant-suites-query
@@ -21,7 +23,12 @@ import java.util.function.BiConsumer;
  * @author bingo 上午10:51:35
  *
  */
-public interface ParamReviser extends BiConsumer<Object, Object> {
+public interface ParamReviser extends Supplier<Map<String, Object>> {
+
+  default boolean canHandle(Query query) {
+    return true;
+  }
+
   default int getPriority() {
     return 0;
   }

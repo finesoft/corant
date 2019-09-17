@@ -5,8 +5,8 @@
 
 Microservice stack with CDI MicroProfile.
 
-Corant is a microservice development stack. Use Maven for builds, base on J2SE use CDI/Weld as container.
-We have 6 projects under the corant project.
+Corant is a microservice development stack. Use Maven for builds, base on JDK 8 or above, use CDI/Weld as container.
+The following projects are under the corant project.
 
 # 1. corant-boms 
     Maven dependence descriptions that are used in corant.
@@ -23,4 +23,6 @@ We have 6 projects under the corant project.
 # 6. corant-suites 
     Integration project. This project includes many subprojects that integrate JEE or other open source components
     to make integration and development easier. For now we support JTA/JPA/JMS/JNDI/JAXRS and app-server(Undertow) etc.
+# 7. corant-microprofile 
+    Integration microprofile, include rest client/jwt/faulttolerance/health check/openapi/open tracking/metrics
 

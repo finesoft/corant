@@ -18,7 +18,9 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -34,7 +36,9 @@ import com.mongodb.client.MongoDatabase;
  * @author bingo 下午6:04:28
  *
  */
+@Priority(1)
 @ApplicationScoped
+@Alternative
 public class MgNamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();

@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.sql.cdi;
+package org.corant.suites.query.elastic.cdi;
 
-import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
@@ -24,13 +23,13 @@ import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.sql.DataSource;
+import javax.inject.Inject;
+import org.corant.kernel.api.DataSourceService;
+import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
+import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
+import org.corant.suites.query.elastic.EsQueryExecutor;
 import org.corant.suites.query.shared.NamedQueryService;
-import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
-import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
-import org.corant.suites.query.sql.SqlQueryConfiguration;
-import org.corant.suites.query.sql.SqlQueryExecutor;
-import org.corant.suites.query.sql.dialect.Dialect.DBMS;
+import org.elasticsearch.client.transport.TransportClient;
 
 /**
  * corant-suites-query-sql
@@ -41,45 +40,44 @@ import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 @Priority(1)
 @ApplicationScoped
 @Alternative
-public class SqlNamedQueryServiceManager {
+public class EsNamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
+  @Inject
+  DataSourceService dataSourceService;
+
+  @Inject
+  TransportClientManager transportClientManager;
+
   @Produces
   @ApplicationScoped
-  @SqlQuery
+  @EsQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    final String dataSource = shouldNotBlank(sc.value());
-    final DBMS dbms = sc.dialect();
-    return services.computeIfAbsent(dataSource, (ds) -> {
-      return new DefaultSqlNamedQueryService(ds, dbms);
+    final EsQuery sc = shouldNotNull(annotated.getAnnotation(EsQuery.class));
+    final String dataCenter = shouldNotBlank(sc.value());
+    return services.computeIfAbsent(dataCenter, (dc) -> {
+      return new DefaultEsNamedQueryService(transportClientManager.get(dc));
     });
   }
 
   /**
-   * corant-suites-query-sql
+   * corant-suites-query-elastic
    *
-   * @author bingo 下午6:54:23
+   * @author bingo 上午10:50:50
    *
    */
-  public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
+  public static final class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
-    private final SqlQueryExecutor executor;
+    private final EsQueryExecutor executor;
 
-    /**
-     * @param dataSource
-     * @param dbms
-     */
-    protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms) {
-      executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
-          .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
-          .build());
+    public DefaultEsNamedQueryService(TransportClient transportClient) {
+      executor = new DefaultEsQueryExecutor(transportClient);
     }
 
     @Override
-    protected SqlQueryExecutor getExecutor() {
+    protected EsQueryExecutor getExecutor() {
       return executor;
     }
   }

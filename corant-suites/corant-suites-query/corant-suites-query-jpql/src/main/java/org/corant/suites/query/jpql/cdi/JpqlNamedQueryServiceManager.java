@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.sql.cdi;
+package org.corant.suites.query.jpql.cdi;
 
-import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
@@ -24,13 +23,12 @@ import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.sql.DataSource;
+import javax.inject.Inject;
+import javax.persistence.EntityManagerFactory;
+import org.corant.kernel.api.DataSourceService;
+import org.corant.kernel.api.PersistenceService;
+import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.shared.NamedQueryService;
-import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
-import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
-import org.corant.suites.query.sql.SqlQueryConfiguration;
-import org.corant.suites.query.sql.SqlQueryExecutor;
-import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 
 /**
  * corant-suites-query-sql
@@ -41,46 +39,45 @@ import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 @Priority(1)
 @ApplicationScoped
 @Alternative
-public class SqlNamedQueryServiceManager {
+public class JpqlNamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
+  @Inject
+  DataSourceService dataSourceService;
+
+  @Inject
+  PersistenceService persistenceService;
+
   @Produces
   @ApplicationScoped
-  @SqlQuery
+  @JpqlQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    final String dataSource = shouldNotBlank(sc.value());
-    final DBMS dbms = sc.dialect();
-    return services.computeIfAbsent(dataSource, (ds) -> {
-      return new DefaultSqlNamedQueryService(ds, dbms);
+    final JpqlQuery sc = shouldNotNull(annotated.getAnnotation(JpqlQuery.class));
+    final String pu = shouldNotBlank(sc.value());
+    return services.computeIfAbsent(pu, (dc) -> {
+      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(pu));
     });
   }
 
   /**
-   * corant-suites-query-sql
+   * corant-suites-query-jpql
    *
-   * @author bingo 下午6:54:23
+   * @author bingo 下午12:02:33
    *
    */
-  public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
+  public static final class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
 
-    private final SqlQueryExecutor executor;
+    private final EntityManagerFactory emf;
 
-    /**
-     * @param dataSource
-     * @param dbms
-     */
-    protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms) {
-      executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
-          .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
-          .build());
+    public DefaultJpqlNamedQueryService(EntityManagerFactory emf) {
+      this.emf = emf;
     }
 
     @Override
-    protected SqlQueryExecutor getExecutor() {
-      return executor;
+    protected EntityManagerFactory getEntityManagerFactory() {
+      return emf;
     }
   }
 }

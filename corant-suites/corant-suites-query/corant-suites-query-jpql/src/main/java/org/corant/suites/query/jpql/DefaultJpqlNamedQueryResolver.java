@@ -13,10 +13,12 @@
  */
 package org.corant.suites.query.jpql;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -54,6 +56,9 @@ public class DefaultJpqlNamedQueryResolver implements JpqlNamedQueryResolver<Str
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
+    }
+    if (isNotEmpty(query.getFetchQueries()) || isNotEmpty(query.getHints())) {
+      throw new NotSupportedException();
     }
     // FIXME decide script engine
     if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {

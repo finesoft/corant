@@ -41,6 +41,7 @@ import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
@@ -93,11 +94,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected MgInLineNamedQueryResolver<String, Object> resolver;
 
   @Override
-  public <T> ForwardList<T> forward(String q, Object param) {
-    MgQuerier querier = getResolver().resolve(q, param);
+  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+    MgQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
-    log(q, querier.getQueryParameter(), querier.getOriginalScript());
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     ForwardList<T> result = ForwardList.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
@@ -114,9 +115,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> T get(String q, Object param) {
-    MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getQueryParameter(), querier.getOriginalScript());
+  public <T> T get(String queryName, Object parameter) {
+    MgQuerier querier = getResolver().resolve(queryName, parameter);
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
     this.fetch(result, querier);
@@ -124,12 +125,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> PagedList<T> page(String q, Object param) {
-    MgQuerier querier = getResolver().resolve(q, param);
+  public <T> PagedList<T> page(String queryName, Object parameter) {
+    MgQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
     PagedList<T> result = PagedList.of(offset, limit);
-    log(q, querier.getQueryParameter(), querier.getOriginalScript());
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
@@ -146,23 +147,29 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> List<T> select(String q, Object param) {
-    MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
+  public <T> List<T> select(String queryName, Object parameter) {
+    MgQuerier querier = getResolver().resolve(queryName, parameter);
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    int maxSelectSize = getMaxSelectSize(querier);
+    FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
     int size = getSize(list);
     if (size > 0) {
+      if (size > maxSelectSize) {
+        throw new QueryRuntimeException(
+            "[%s] Result record number overflow, the allowable range is %s.", queryName,
+            maxSelectSize);
+      }
       this.fetch(list, querier);
     }
     return querier.resolveResult(list);
   }
 
   @Override
-  public <T> Stream<T> stream(String q, Object param) {
-    MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getQueryParameter(), querier.getOriginalScript());
+  public <T> Stream<T> stream(String queryName, Object parameter) {
+    MgQuerier querier = getResolver().resolve(queryName, parameter);
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
       this.fetch(Decimal128Utils.convert(result), querier);
       return querier.resolveResult(result);

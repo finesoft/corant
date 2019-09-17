@@ -14,8 +14,8 @@
 package org.corant.suites.query.sql.cdi;
 
 import static org.corant.kernel.util.Instances.resolveNamed;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -56,7 +56,7 @@ public class SqlNamedQueryServiceManager {
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    final String dataSource = shouldNotBlank(sc.value());
+    final String dataSource = defaultString(sc.value());
     final DBMS dbms = sc.dialect();
     return services.computeIfAbsent(dataSource, (ds) -> {
       return new DefaultSqlNamedQueryService(ds, dbms, resolver);

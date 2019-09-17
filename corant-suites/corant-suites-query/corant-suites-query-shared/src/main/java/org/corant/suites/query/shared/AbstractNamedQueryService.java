@@ -16,7 +16,6 @@ package org.corant.suites.query.shared;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
-import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.logging.Logger;
@@ -79,9 +78,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected int getMaxSelectSize(Querier querier) {
-    return max(
-        querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE),
-        Integer.valueOf(1));
+    return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
   }
 
   protected void log(String name, Object param, String... script) {

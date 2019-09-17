@@ -26,7 +26,6 @@ import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 import org.corant.suites.query.sql.dialect.Dialect;
@@ -122,15 +121,18 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
+    int maxSelectSize = getMaxSelectSize(querier);
     try {
-      if (enableMaxSelect()) {
-        sql =
-            getDialect().getLimitSql(sql, QueryService.OFFSET_PARAM_VAL, getMaxSelectSize(querier));
-      }
+      sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
       log(queryName, scriptParameter, sql);
       List<Map<String, Object>> results = getExecutor().select(sql, scriptParameter);
       int size = getSize(results);
       if (size > 0) {
+        if (size > maxSelectSize) {
+          throw new QueryRuntimeException(
+              "[%s] Result record number overflow, the allowable range is %s.", queryName,
+              maxSelectSize);
+        }
         this.fetch(results, querier);
       }
       return querier.resolveResult(results);
@@ -151,10 +153,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     });
   }
 
-  protected boolean enableMaxSelect() {
-    return true;
-  }
-
   @Override
   protected <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier) {
     if (null == result || fetchQuery == null) {
@@ -172,7 +170,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript();
     Object[] scriptParameter = querier.getScriptParameter();
     if (maxSize > 0) {
-      sql = getDialect().getLimitSql(sql, QueryService.OFFSET_PARAM_VAL, maxSize);
+      sql = getDialect().getLimitSql(sql, maxSize);
     }
     try {
       log("fetch-> " + refQueryName, scriptParameter, sql);

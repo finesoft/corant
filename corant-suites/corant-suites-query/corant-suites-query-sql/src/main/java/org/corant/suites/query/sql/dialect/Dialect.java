@@ -42,6 +42,17 @@ public interface Dialect {
   }
 
   /**
+   * Convert SQL statement to Limit SQL default offset is 0
+   *
+   * @param sql
+   * @param limit
+   * @return getLimitSql
+   */
+  default String getLimitSql(String sql, int limit) {
+    return getLimitSql(sql, 0, limit);
+  }
+
+  /**
    * Convert SQL statement to Paging SQL
    *
    * @param sql to convert SQL

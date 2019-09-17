@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.kernel.util.Qualifiers.resolveNameds;
+import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -54,6 +55,9 @@ public class JPAExtension implements Extension {
   volatile InitialContext jndi;
 
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(PersistenceUnit pu) {
+    if (isBlank(pu.unitName()) && persistenceUnitInfoMetaDatas.size() == 1) {
+      return persistenceUnitInfoMetaDatas.values().iterator().next();
+    }
     return persistenceUnitInfoMetaDatas.get(pu);
   }
 

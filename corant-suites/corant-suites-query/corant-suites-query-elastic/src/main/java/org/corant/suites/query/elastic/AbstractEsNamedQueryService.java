@@ -44,33 +44,34 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   protected EsInLineNamedQueryResolver<String, Object> resolver;
 
   @Override
-  public Map<String, Object> aggregate(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
+  public Map<String, Object> aggregate(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
     String script = querier.getScript();
     try {
-      Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(q), script);
+      Map<String, Object> result =
+          getExecutor().searchAggregation(resolveIndexName(queryName), script);
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
-          "An error occurred while executing the aggregate query [%s].", q);
+          "An error occurred while executing the aggregate query [%s].", queryName);
     }
   }
 
   @Override
-  public <T> ForwardList<T> forward(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
+  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
-    Pair<Long, List<T>> hits = searchHits(q, querier);
+    Pair<Long, List<T>> hits = searchHits(queryName, querier);
     List<T> result = hits.getValue();
     return ForwardList.of(result, hits.getLeft() > offset + limit);
   }
 
   @Override
-  public <T> T get(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
-    Pair<Long, List<T>> hits = searchHits(q, querier);
+  public <T> T get(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    Pair<Long, List<T>> hits = searchHits(queryName, querier);
     List<T> result = hits.getValue();
     if (!isEmpty(result)) {
       return result.get(0);
@@ -79,33 +80,33 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> PagedList<T> page(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
+  public <T> PagedList<T> page(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
-    Pair<Long, List<T>> hits = searchHits(q, querier);
+    Pair<Long, List<T>> hits = searchHits(queryName, querier);
     List<T> result = hits.getValue();
     return PagedList.of(hits.getLeft().intValue(), result, offset, limit);
   }
 
   @Override
-  public Map<String, Object> search(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
+  public Map<String, Object> search(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
     String script = querier.getScript();
     try {
-      Map<String, Object> result = getExecutor().search(resolveIndexName(q), script);
+      Map<String, Object> result = getExecutor().search(resolveIndexName(queryName), script);
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the search query [%s].",
-          q);
+          queryName);
     }
   }
 
   @Override
-  public <T> List<T> select(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
-    Pair<Long, List<T>> hits = searchHits(q, querier);
+  public <T> List<T> select(String queryName, Object parameter) {
+    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    Pair<Long, List<T>> hits = searchHits(queryName, querier);
     return hits.getValue();
   }
 

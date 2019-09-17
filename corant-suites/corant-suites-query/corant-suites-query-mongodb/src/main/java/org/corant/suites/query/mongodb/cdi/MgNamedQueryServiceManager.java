@@ -14,8 +14,8 @@
 package org.corant.suites.query.mongodb.cdi;
 
 import static org.corant.kernel.util.Instances.resolveNamed;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -52,7 +52,7 @@ public class MgNamedQueryServiceManager {
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
-    final String dataBase = shouldNotBlank(sc.value());
+    final String dataBase = defaultString(sc.value());
     return services.computeIfAbsent(dataBase, (db) -> {
       return new DefaultMgNamedQueryService(db, resolver);
     });

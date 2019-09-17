@@ -23,7 +23,7 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 上午10:51:35
  *
  */
-public interface ParamReviser extends Supplier<Map<String, Object>> {
+public interface ParameterReviser extends Supplier<Map<String, Object>> {
 
   default boolean canHandle(Query query) {
     return true;

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -24,9 +25,9 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import org.corant.kernel.api.DataSourceService;
 import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
 import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
+import org.corant.suites.query.elastic.EsInLineNamedQueryResolver;
 import org.corant.suites.query.elastic.EsQueryExecutor;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.elasticsearch.client.transport.TransportClient;
@@ -45,20 +46,19 @@ public class EsNamedQueryServiceManager {
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
-  DataSourceService dataSourceService;
+  protected EsInLineNamedQueryResolver<String, Object> resolver;
 
   @Inject
-  TransportClientManager transportClientManager;
+  protected TransportClientManager transportClientManager;
 
   @Produces
-  @ApplicationScoped
   @EsQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final EsQuery sc = shouldNotNull(annotated.getAnnotation(EsQuery.class));
     final String dataCenter = shouldNotBlank(sc.value());
     return services.computeIfAbsent(dataCenter, (dc) -> {
-      return new DefaultEsNamedQueryService(transportClientManager.get(dc));
+      return new DefaultEsNamedQueryService(transportClientManager.get(dc), resolver);
     });
   }
 
@@ -72,8 +72,11 @@ public class EsNamedQueryServiceManager {
 
     private final EsQueryExecutor executor;
 
-    public DefaultEsNamedQueryService(TransportClient transportClient) {
+    public DefaultEsNamedQueryService(TransportClient transportClient,
+        EsInLineNamedQueryResolver<String, Object> resolver) {
       executor = new DefaultEsQueryExecutor(transportClient);
+      logger = Logger.getLogger(this.getClass().getName());
+      this.resolver = resolver;
     }
 
     @Override

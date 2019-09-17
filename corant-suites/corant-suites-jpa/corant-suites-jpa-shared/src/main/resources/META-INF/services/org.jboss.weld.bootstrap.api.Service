@@ -1,1 +1,1 @@
-org.corant.suites.jpa.shared.inject.JPAInjectionServices
+org.corant.suites.jpa.shared.cdi.JPAInjectionServices

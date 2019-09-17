@@ -18,16 +18,19 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
+import org.corant.suites.query.sql.SqlNamedQueryResolver;
 import org.corant.suites.query.sql.SqlQueryConfiguration;
 import org.corant.suites.query.sql.SqlQueryExecutor;
 import org.corant.suites.query.sql.dialect.Dialect.DBMS;
@@ -45,8 +48,10 @@ public class SqlNamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
+  @Inject
+  protected SqlNamedQueryResolver<String, Object> resolver;
+
   @Produces
-  @ApplicationScoped
   @SqlQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
@@ -54,7 +59,7 @@ public class SqlNamedQueryServiceManager {
     final String dataSource = shouldNotBlank(sc.value());
     final DBMS dbms = sc.dialect();
     return services.computeIfAbsent(dataSource, (ds) -> {
-      return new DefaultSqlNamedQueryService(ds, dbms);
+      return new DefaultSqlNamedQueryService(ds, dbms, resolver);
     });
   }
 
@@ -72,7 +77,10 @@ public class SqlNamedQueryServiceManager {
      * @param dataSource
      * @param dbms
      */
-    protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms) {
+    protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms,
+        SqlNamedQueryResolver<String, Object> resolver) {
+      this.resolver = resolver;
+      logger = Logger.getLogger(this.getClass().getName());
       executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
           .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
           .build());

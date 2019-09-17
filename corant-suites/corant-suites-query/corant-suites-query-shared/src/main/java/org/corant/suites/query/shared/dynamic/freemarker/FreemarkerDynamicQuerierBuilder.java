@@ -28,7 +28,7 @@ import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.spi.ParamReviser;
+import org.corant.suites.query.shared.spi.ParameterReviser;
 import freemarker.core.Environment;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
@@ -75,15 +75,15 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       DynamicTemplateMethodModelEx<P> tmm = getTemplateMethodModelEx();
       Environment e = execution.createProcessingEnvironment(param.getCriteria(), sw);
       e.setVariable(tmm.getType(), tmm);
+      ObjectWrapper ow = execution.getObjectWrapper();
       if (isNotEmpty(param.getContext())) {
         shouldBeFalse(param.getContext().containsKey(tmm.getType()));
-        ObjectWrapper ow = execution.getObjectWrapper();
-        setEnvironmentVariables(e, ow);
         for (Entry<String, Object> ctx : param.getContext().entrySet()) {
           e.setVariable(ctx.getKey(),
               ctx.getValue() == null ? new SimpleHash(ow) : ow.wrap(ctx.getValue()));
         }
       }
+      setEnvironmentVariables(e, ow);
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
     } catch (IOException | TemplateException e) {
@@ -102,7 +102,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
    * @param ow
    */
   protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
-    select(ParamReviser.class).stream().filter(r -> r.canHandle(getQuery()))
+    select(ParameterReviser.class).stream().filter(r -> r.canHandle(getQuery()))
         .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority())).forEach(r -> {
           Map<String, Object> vars = r.get();
           if (vars != null) {

@@ -55,8 +55,8 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     } else if (param instanceof Map) {
       Map<?, ?> mp = new HashMap<>(Map.class.cast(param));
       DefaultQueryParameter qp = new DefaultQueryParameter();
-      Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, -1)));
-      Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, -1)));
+      Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, 1)));
+      Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, 0)));
       queryParameter = qp.criteria(convertParameter(mp, query.getParamConvertSchema()));
     } else if (param != null) {
       queryParameter = new DefaultQueryParameter().criteria(param);

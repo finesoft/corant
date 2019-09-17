@@ -51,7 +51,7 @@ public interface QueryParameter extends Serializable {
    * @return getLimit
    */
   default int getLimit() {
-    return -1;
+    return 1;
   }
 
   /**
@@ -61,7 +61,7 @@ public interface QueryParameter extends Serializable {
    * @return getOffset
    */
   default int getOffset() {
-    return -1;
+    return 0;
   }
 
   /**
@@ -77,8 +77,8 @@ public interface QueryParameter extends Serializable {
     public static final DefaultQueryParameter EMPTY_INST = new DefaultQueryParameter();
 
     private Object criteria;
-    private int limit = -1;
-    private int offset = -1;
+    private int limit = 1;
+    private int offset = 0;
     private Map<String, Object> context = new HashMap<>();
 
     /**

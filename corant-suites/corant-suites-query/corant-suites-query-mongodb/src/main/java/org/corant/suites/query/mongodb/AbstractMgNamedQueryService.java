@@ -97,7 +97,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgQuerier querier = getResolver().resolve(q, param);
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
-    log(q, querier.getScriptParameter(), querier.getOriginalScript());
+    log(q, querier.getQueryParameter(), querier.getOriginalScript());
     ForwardList<T> result = ForwardList.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
@@ -116,7 +116,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> T get(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getScriptParameter(), querier.getOriginalScript());
+    log(q, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
     this.fetch(result, querier);
@@ -129,7 +129,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int offset = querier.getQueryParameter().getOffset();
     int limit = querier.getQueryParameter().getLimit();
     PagedList<T> result = PagedList.of(offset, limit);
-    log(q, querier.getScriptParameter(), querier.getOriginalScript());
+    log(q, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
@@ -148,7 +148,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> List<T> select(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getScriptParameter(), querier.getOriginalScript());
+    log(q, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(getMaxSelectSize(querier));
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
@@ -162,7 +162,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Stream<T> stream(String q, Object param) {
     MgQuerier querier = getResolver().resolve(q, param);
-    log(q, querier.getScriptParameter(), querier.getOriginalScript());
+    log(q, querier.getQueryParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
       this.fetch(Decimal128Utils.convert(result), querier);
       return querier.resolveResult(result);
@@ -182,7 +182,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     MgQuerier querier = resolver.resolve(refQueryName, fetchParam);
-    log(refQueryName, querier.getScriptParameter(), querier.getOriginalScript());
+    log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(128);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -25,8 +26,8 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import org.corant.kernel.api.DataSourceService;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
+import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import com.mongodb.client.MongoDatabase;
 
@@ -44,22 +45,42 @@ public class MgNamedQueryServiceManager {
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
-  DataSourceService dataSourceService;
+  protected MgInLineNamedQueryResolver<String, Object> resolver;
 
   @Produces
-  @ApplicationScoped
   @MgQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
     final String dataBase = shouldNotBlank(sc.value());
-    return services.computeIfAbsent(dataBase, (ds) -> {
-      return new AbstractMgNamedQueryService() {
-        @Override
-        protected MongoDatabase getDataBase() {
-          return resolveNamed(MongoDatabase.class, ds).get();
-        }
-      };
+    return services.computeIfAbsent(dataBase, (db) -> {
+      return new DefaultMgNamedQueryService(db, resolver);
     });
+  }
+
+  /**
+   * corant-suites-query-mongodb
+   *
+   * @author bingo 下午3:41:34
+   *
+   */
+  public static final class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
+
+    MongoDatabase dataBase;
+
+    /**
+     * @param dataBase
+     */
+    public DefaultMgNamedQueryService(String dataBase,
+        MgInLineNamedQueryResolver<String, Object> resolver) {
+      this.dataBase = resolveNamed(MongoDatabase.class, dataBase).get();
+      logger = Logger.getLogger(this.getClass().getName());
+      this.resolver = resolver;
+    }
+
+    @Override
+    protected MongoDatabase getDataBase() {
+      return dataBase;
+    }
   }
 }

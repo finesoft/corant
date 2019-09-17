@@ -138,7 +138,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     EsQuerier querier = resolver.resolve(refQueryName, fetchParam);
     String script = querier.getScript();
     try {
-      log("fetch-> " + refQueryName, fetchParam, script);
+      log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList =
           getExecutor().searchHits(resolveIndexName(refQueryName), script).getValue();
       if (!isEmpty(fetchedList)) {
@@ -179,7 +179,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   protected <T> Pair<Long, List<T>> searchHits(String q, EsQuerier querier) {
     String script = querier.getScript();
     try {
-      log(q, querier.getScriptParameter(), script);
+      log(q, querier.getQueryParameter(), script);
       Pair<Long, List<Map<String, Object>>> hits =
           getExecutor().searchHits(resolveIndexName(q), script);
       List<T> result = new ArrayList<>();

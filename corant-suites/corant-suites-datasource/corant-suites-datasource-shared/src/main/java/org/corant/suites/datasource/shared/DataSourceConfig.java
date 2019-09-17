@@ -61,7 +61,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "false")
   protected Boolean connectable;
 
-  @ConfigKeyItem(defaultValue = "false")
+  @ConfigKeyItem(defaultValue = "true")
   protected Boolean xa = true;
 
   @ConfigKeyItem(defaultValue = "4")

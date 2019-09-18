@@ -30,6 +30,8 @@ import org.corant.kernel.api.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQueryResolver;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.corant.suites.query.shared.Querier;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-query-sql
@@ -50,6 +52,10 @@ public class JpqlNamedQueryServiceManager {
   @Inject
   protected JpqlNamedQueryResolver<String, Object> resolver;
 
+  @Inject
+  @ConfigProperty(name = "query.jpa.max-select-size", defaultValue = "128")
+  protected Integer maxSelectSize;
+
   @Produces
   @JpqlQuery
   NamedQueryService produce(InjectionPoint ip) {
@@ -58,7 +64,7 @@ public class JpqlNamedQueryServiceManager {
     final String pu = shouldNotBlank(sc.value());
     return services.computeIfAbsent(pu, (dc) -> {
       return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(pu),
-          resolver);
+          resolver, maxSelectSize);
     });
   }
 
@@ -72,16 +78,25 @@ public class JpqlNamedQueryServiceManager {
 
     private final EntityManagerFactory emf;
 
+    final int defaultMaxSelectSize;
+
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
-        JpqlNamedQueryResolver<String, Object> resolver) {
+        JpqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
       this.emf = emf;
       this.resolver = resolver;
       logger = Logger.getLogger(this.getClass().getName());
+      defaultMaxSelectSize = maxSelectSize;
     }
 
     @Override
     protected EntityManagerFactory getEntityManagerFactory() {
       return emf;
+    }
+
+    @Override
+    protected int getMaxSelectSize(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+          defaultMaxSelectSize);
     }
   }
 }

@@ -29,6 +29,8 @@ import javax.inject.Inject;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.corant.suites.query.shared.Querier;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -47,6 +49,10 @@ public class MgNamedQueryServiceManager {
   @Inject
   protected MgInLineNamedQueryResolver<String, Object> resolver;
 
+  @Inject
+  @ConfigProperty(name = "query.mongodb.max-select-size", defaultValue = "128")
+  protected Integer maxSelectSize;
+
   @Produces
   @MgQuery
   NamedQueryService produce(InjectionPoint ip) {
@@ -54,7 +60,7 @@ public class MgNamedQueryServiceManager {
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
     final String dataBase = defaultString(sc.value());
     return services.computeIfAbsent(dataBase, (db) -> {
-      return new DefaultMgNamedQueryService(db, resolver);
+      return new DefaultMgNamedQueryService(db, resolver, maxSelectSize);
     });
   }
 
@@ -66,21 +72,30 @@ public class MgNamedQueryServiceManager {
    */
   public static final class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
 
-    MongoDatabase dataBase;
+    final MongoDatabase dataBase;
+
+    final int defaultMaxSelectSize;
 
     /**
      * @param dataBase
      */
     public DefaultMgNamedQueryService(String dataBase,
-        MgInLineNamedQueryResolver<String, Object> resolver) {
+        MgInLineNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
       this.dataBase = resolveNamed(MongoDatabase.class, dataBase).get();
       logger = Logger.getLogger(this.getClass().getName());
       this.resolver = resolver;
+      defaultMaxSelectSize = maxSelectSize;
     }
 
     @Override
     protected MongoDatabase getDataBase() {
       return dataBase;
+    }
+
+    @Override
+    protected int getMaxSelectSize(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+          defaultMaxSelectSize);
     }
   }
 }

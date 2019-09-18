@@ -28,12 +28,14 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
 import org.corant.suites.query.sql.SqlNamedQueryResolver;
 import org.corant.suites.query.sql.SqlQueryConfiguration;
 import org.corant.suites.query.sql.SqlQueryExecutor;
 import org.corant.suites.query.sql.dialect.Dialect.DBMS;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-query-sql
@@ -51,6 +53,10 @@ public class SqlNamedQueryServiceManager {
   @Inject
   protected SqlNamedQueryResolver<String, Object> resolver;
 
+  @Inject
+  @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
+  protected Integer maxSelectSize;
+
   @Produces
   @SqlQuery
   NamedQueryService produce(InjectionPoint ip) {
@@ -59,7 +65,7 @@ public class SqlNamedQueryServiceManager {
     final String dataSource = defaultString(sc.value());
     final DBMS dbms = sc.dialect();
     return services.computeIfAbsent(dataSource, (ds) -> {
-      return new DefaultSqlNamedQueryService(ds, dbms, resolver);
+      return new DefaultSqlNamedQueryService(ds, dbms, resolver, maxSelectSize);
     });
   }
 
@@ -72,23 +78,31 @@ public class SqlNamedQueryServiceManager {
   public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
 
     private final SqlQueryExecutor executor;
+    private final int defaultMaxSelectSize;
 
     /**
      * @param dataSource
      * @param dbms
      */
     protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms,
-        SqlNamedQueryResolver<String, Object> resolver) {
+        SqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
       this.resolver = resolver;
       logger = Logger.getLogger(this.getClass().getName());
       executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
           .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
           .build());
+      defaultMaxSelectSize = maxSelectSize;
     }
 
     @Override
     protected SqlQueryExecutor getExecutor() {
       return executor;
+    }
+
+    @Override
+    protected int getMaxSelectSize(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+          defaultMaxSelectSize);
     }
   }
 }

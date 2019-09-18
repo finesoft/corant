@@ -13,8 +13,6 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.kernel.util.Qualifiers.resolveNameds;
-import java.lang.annotation.Annotation;
 import javax.persistence.PersistenceContext;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 
@@ -22,7 +20,7 @@ import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
  * corant-suites-ddd
  * <p>
  * Manages the life cycle of an entity, such as persistent state or deletion
- * 
+ *
  * @author bingo 上午10:33:56
  *
  */
@@ -30,11 +28,11 @@ public interface EntityLifecycleManager {
 
   PersistenceContext getPersistenceContext(Class<?> cls);
 
-  void on(AggregateLifecycleManageEvent e);
-
-  default Annotation[] persistenceQualifiers(Class<?> cls) {
-    return resolveNameds(getPersistenceContext(cls).unitName());
+  default String getPersistenceUnitName(Class<?> cls) {
+    return getPersistenceContext(cls).unitName();
   }
+
+  void on(AggregateLifecycleManageEvent e);
 
   public enum LifecycleAction {
     PERSIST, RECOVER, REMOVE

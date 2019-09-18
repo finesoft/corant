@@ -57,7 +57,7 @@ public class PersistencePropertiesParser {
         s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, cfgs);
-      logger.info(() -> String.format("Parsed persistence pu %s from config file.", k));
+      logger.info(() -> String.format("Parsed persistence unit [%s] from config file.", k));
     });
     return cfgs;
   }
@@ -120,11 +120,12 @@ public class PersistencePropertiesParser {
       if (isNotEmpty(puimd.getManagedClassNames())) {
         puimd.resolvePersistenceProvider();
         doParseProperties(config, proPrefix, proCfgNmes, puimd);
-        shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence pu name %s dup!",
+        shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
             puimd.getPersistenceUnitName());
       } else {
-        logger.warning(() -> String.format("Can not find any managed classes for persistence pu %s",
-            puimd.getPersistenceUnitName()));
+        logger
+            .warning(() -> String.format("Can not find any managed classes for persistence unit %s",
+                puimd.getPersistenceUnitName()));
       }
     }
   }

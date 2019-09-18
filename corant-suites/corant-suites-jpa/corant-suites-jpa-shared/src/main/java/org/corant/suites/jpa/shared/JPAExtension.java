@@ -14,9 +14,11 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.kernel.util.Qualifiers.resolveNameds;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -51,14 +53,19 @@ public class JPAExtension implements Extension {
   protected final Map<PersistenceUnit, PersistenceUnitInfoMetaData> persistenceUnitInfoMetaDatas =
       new ConcurrentHashMap<>();
   protected Logger logger = Logger.getLogger(getClass().getName());
-
   volatile InitialContext jndi;
+  volatile boolean finishedMetadatas = false;
 
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(PersistenceUnit pu) {
     if (isBlank(pu.unitName()) && persistenceUnitInfoMetaDatas.size() == 1) {
-      return persistenceUnitInfoMetaDatas.values().iterator().next();
+      return persistenceUnitInfoMetaDatas.values().iterator().next();// FIXME
     }
     return persistenceUnitInfoMetaDatas.get(pu);
+  }
+
+  public Map<PersistenceUnit, PersistenceUnitInfoMetaData> getPersistenceUnitInfoMetaDatas() {
+    shouldBeTrue(finishedMetadatas, "Persistent unit metadata collection has not been completed!");
+    return Collections.unmodifiableMap(persistenceUnitInfoMetaDatas);
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
@@ -74,6 +81,7 @@ public class JPAExtension implements Extension {
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     JPAConfig.from(ConfigProvider.getConfig()).forEach((pu) -> persistenceUnitInfoMetaDatas
         .put(PersistenceUnitLiteral.of(pu.getPersistenceUnitName()), pu));
+    finishedMetadatas = true;
   }
 
   synchronized void registerJndi(String un, Annotation[] quas) {

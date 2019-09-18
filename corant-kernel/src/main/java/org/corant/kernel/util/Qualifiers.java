@@ -57,7 +57,7 @@ public class Qualifiers {
     return nameds;
   }
 
-  public static final Annotation[] resolveNameds(String name) {
+  static final Annotation[] resolveNameds(String name) {
     return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
         : new Annotation[] {NamedLiteral.of(trim(name)), Any.Literal.INSTANCE,
             Default.Literal.INSTANCE};

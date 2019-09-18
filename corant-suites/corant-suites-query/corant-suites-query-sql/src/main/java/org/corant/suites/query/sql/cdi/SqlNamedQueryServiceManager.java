@@ -57,6 +57,10 @@ public class SqlNamedQueryServiceManager {
   @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
+  @Inject
+  @ConfigProperty(name = "query.sql.fetch-size", defaultValue = "16")
+  protected Integer fetchSize;
+
   @Produces
   @SqlQuery
   NamedQueryService produce(InjectionPoint ip) {
@@ -65,7 +69,7 @@ public class SqlNamedQueryServiceManager {
     final String dataSource = defaultString(sc.value());
     final DBMS dbms = sc.dialect();
     return services.computeIfAbsent(dataSource, (ds) -> {
-      return new DefaultSqlNamedQueryService(ds, dbms, resolver, maxSelectSize);
+      return new DefaultSqlNamedQueryService(ds, dbms, resolver, maxSelectSize, fetchSize);
     });
   }
 
@@ -85,12 +89,12 @@ public class SqlNamedQueryServiceManager {
      * @param dbms
      */
     protected DefaultSqlNamedQueryService(String dataSource, DBMS dbms,
-        SqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
+        SqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize, Integer fetchSize) {
       this.resolver = resolver;
       logger = Logger.getLogger(this.getClass().getName());
       executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
           .dataSource(resolveNamed(DataSource.class, dataSource).get()).dialect(dbms.instance())
-          .build());
+          .fetchSize(fetchSize).build());
       defaultMaxSelectSize = maxSelectSize;
     }
 

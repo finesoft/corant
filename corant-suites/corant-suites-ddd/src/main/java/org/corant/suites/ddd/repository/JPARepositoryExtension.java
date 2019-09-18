@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -79,7 +78,6 @@ public class JPARepositoryExtension implements Extension {
 
     protected DefaultJPARepository(PersistenceContext pc, JTAJPAUnitOfWorksManager uofm) {
       super();
-      logger = Logger.getLogger(this.getClass().getName());
       persistenceContext = pc;
       unitOfWorkManager = uofm;
     }

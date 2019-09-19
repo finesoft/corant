@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.elastic.cdi;
 
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +66,7 @@ public class EsNamedQueryServiceManager {
   EsNamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final EsQuery sc = shouldNotNull(annotated.getAnnotation(EsQuery.class));
-    String dataCenterName = shouldNotBlank(sc.value());
+    String dataCenterName = defaultString(sc.value());
     if (isBlank(dataCenterName) && defaultQualifierValue.isPresent()) {
       dataCenterName = defaultQualifierValue.get();
     }

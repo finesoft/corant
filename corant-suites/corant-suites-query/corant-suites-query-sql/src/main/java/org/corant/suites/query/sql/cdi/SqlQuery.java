@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
-import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 
 /**
  * corant-suites-query-sql
@@ -51,7 +50,7 @@ public @interface SqlQuery {
    * @return dialect
    */
   @Nonbinding
-  DBMS dialect() default DBMS.MYSQL;
+  String dialect() default "";
 
   /**
    * The data source name

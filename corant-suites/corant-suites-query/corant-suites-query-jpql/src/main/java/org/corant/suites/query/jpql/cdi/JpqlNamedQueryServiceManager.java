@@ -15,7 +15,9 @@ package org.corant.suites.query.jpql.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
@@ -47,23 +49,36 @@ public class JpqlNamedQueryServiceManager {
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
   @Inject
-  PersistenceService persistenceService;
+  protected Logger logger;
+
+  @Inject
+  protected PersistenceService persistenceService;
 
   @Inject
   protected JpqlNamedQueryResolver<String, Object> resolver;
 
   @Inject
-  @ConfigProperty(name = "query.jpa.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "query.jpql.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
+
+  @Inject
+  @ConfigProperty(name = "query.jpql.default-qualifier-value")
+  protected Optional<String> defaultQualifierValue;
 
   @Produces
   @JpqlQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final JpqlQuery sc = shouldNotNull(annotated.getAnnotation(JpqlQuery.class));
-    final String pu = shouldNotBlank(sc.value());
-    return services.computeIfAbsent(pu, (dc) -> {
-      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(pu),
+    String pun = shouldNotBlank(sc.value());
+    if (isBlank(pun) && defaultQualifierValue.isPresent()) {
+      pun = defaultQualifierValue.get();
+    }
+    final String pu = pun;
+    return services.computeIfAbsent(pu, (n) -> {
+      logger.info(() -> String
+          .format("Create default jpql named query service, the persistence unit is [%s].", n));
+      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n),
           resolver, maxSelectSize);
     });
   }
@@ -80,6 +95,11 @@ public class JpqlNamedQueryServiceManager {
 
     final int defaultMaxSelectSize;
 
+    /**
+     * @param emf
+     * @param resolver
+     * @param maxSelectSize
+     */
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
         JpqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
       this.emf = emf;

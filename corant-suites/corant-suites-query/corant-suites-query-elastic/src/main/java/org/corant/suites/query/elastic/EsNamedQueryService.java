@@ -22,7 +22,7 @@ import org.corant.suites.query.shared.NamedQueryService;
  * @author bingo 下午3:07:55
  *
  */
-public interface EsNamedQuery extends NamedQueryService {
+public interface EsNamedQueryService extends NamedQueryService {
 
   Map<String, Object> aggregate(String q, Object param);
 

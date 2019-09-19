@@ -16,7 +16,9 @@ package org.corant.suites.query.mongodb.cdi;
 import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
@@ -47,19 +49,32 @@ public class MgNamedQueryServiceManager {
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME scope
 
   @Inject
+  protected Logger logger;
+
+  @Inject
   protected MgInLineNamedQueryResolver<String, Object> resolver;
 
   @Inject
   @ConfigProperty(name = "query.mongodb.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
+  @Inject
+  @ConfigProperty(name = "query.mongodb.default-qualifier-value")
+  protected Optional<String> defaultQualifierValue;
+
   @Produces
   @MgQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
-    final String dataBase = defaultString(sc.value());
+    String dataBaseName = defaultString(sc.value());
+    if (isBlank(dataBaseName) && defaultQualifierValue.isPresent()) {
+      dataBaseName = defaultQualifierValue.get();
+    }
+    final String dataBase = dataBaseName;
     return services.computeIfAbsent(dataBase, (db) -> {
+      logger.info(() -> String
+          .format("Create default mongodb named query service, the data base is [%s].", db));
       return new DefaultMgNamedQueryService(db, resolver, maxSelectSize);
     });
   }
@@ -78,6 +93,8 @@ public class MgNamedQueryServiceManager {
 
     /**
      * @param dataBase
+     * @param resolver
+     * @param maxSelectSize
      */
     public DefaultMgNamedQueryService(String dataBase,
         MgInLineNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {

@@ -41,9 +41,9 @@ import org.corant.suites.jpa.shared.JPAExtension;
  */
 public class JPARepositoryExtension implements Extension {
 
-  final Map<String, Annotation[]> qualifiers = new HashMap<>();
+  static final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
-  public Annotation[] resolveQualifiers(Class<?> cls) {
+  public static Annotation[] resolveQualifiers(Class<?> cls) {
     return qualifiers.get(resolve(EntityLifecycleManager.class).get().getPersistenceUnitName(cls));
   }
 
@@ -57,7 +57,7 @@ public class JPARepositoryExtension implements Extension {
       abd.<JPARepository>addBean().addQualifiers(v).addTransitiveTypeClosure(JPARepository.class)
           .beanClass(JPARepository.class).scope(ApplicationScoped.class).produceWith(beans -> {
             return produce(beans, k);
-          }).disposeWith((dataSource, beans) -> {
+          }).disposeWith((repo, beans) -> {
           });
     });
   }

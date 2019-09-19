@@ -15,7 +15,9 @@ package org.corant.suites.query.elastic.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
@@ -28,8 +30,9 @@ import javax.inject.Inject;
 import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
 import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
 import org.corant.suites.query.elastic.EsInLineNamedQueryResolver;
+import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
-import org.corant.suites.query.shared.NamedQueryService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
 
 /**
@@ -43,7 +46,10 @@ import org.elasticsearch.client.transport.TransportClient;
 @Alternative
 public class EsNamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+  static final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+
+  @Inject
+  protected Logger logger;
 
   @Inject
   protected EsInLineNamedQueryResolver<String, Object> resolver;
@@ -51,13 +57,23 @@ public class EsNamedQueryServiceManager {
   @Inject
   protected TransportClientManager transportClientManager;
 
+  @Inject
+  @ConfigProperty(name = "query.elastic.default-qualifier-value")
+  protected Optional<String> defaultQualifierValue;
+
   @Produces
   @EsQuery
-  NamedQueryService produce(InjectionPoint ip) {
+  EsNamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final EsQuery sc = shouldNotNull(annotated.getAnnotation(EsQuery.class));
-    final String dataCenter = shouldNotBlank(sc.value());
+    String dataCenterName = shouldNotBlank(sc.value());
+    if (isBlank(dataCenterName) && defaultQualifierValue.isPresent()) {
+      dataCenterName = defaultQualifierValue.get();
+    }
+    final String dataCenter = dataCenterName;
     return services.computeIfAbsent(dataCenter, (dc) -> {
+      logger.info(() -> String
+          .format("Create default elastic named query service, the data center is [%s]. ", dc));
       return new DefaultEsNamedQueryService(transportClientManager.get(dc), resolver);
     });
   }
@@ -72,6 +88,10 @@ public class EsNamedQueryServiceManager {
 
     private final EsQueryExecutor executor;
 
+    /**
+     * @param transportClient
+     * @param resolver
+     */
     public DefaultEsNamedQueryService(TransportClient transportClient,
         EsInLineNamedQueryResolver<String, Object> resolver) {
       executor = new DefaultEsQueryExecutor(transportClient);

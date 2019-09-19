@@ -38,7 +38,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  */
 @ApplicationScoped
 public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryService
-    implements EsNamedQuery {
+    implements EsNamedQueryService {
 
   @Inject
   protected EsInLineNamedQueryResolver<String, Object> resolver;

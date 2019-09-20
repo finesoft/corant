@@ -17,7 +17,6 @@ import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.logging.Logger;
@@ -98,7 +97,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
           "Exceeded the maximum number of query [%s] results, limit is [%S].",
           querier.getQuery().getName(), max);
     }
-    return min(querier.getQueryParameter().getLimit(), resolveMaxSelectSize(querier));
+    return querier.getQueryParameter().getLimit();
   }
 
   protected int resolveMaxSelectSize(Querier querier) {

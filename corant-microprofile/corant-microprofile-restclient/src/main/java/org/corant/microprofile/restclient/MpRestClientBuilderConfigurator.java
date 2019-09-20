@@ -13,7 +13,6 @@
  */
 package org.corant.microprofile.restclient;
 
-import javax.enterprise.context.ApplicationScoped;
 import org.corant.config.ComparableConfigurator;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
@@ -23,7 +22,6 @@ import org.eclipse.microprofile.rest.client.RestClientBuilder;
  * @author bingo 上午10:21:26
  *
  */
-@ApplicationScoped
 public interface MpRestClientBuilderConfigurator extends ComparableConfigurator {
 
   void config(RestClientBuilder builder);

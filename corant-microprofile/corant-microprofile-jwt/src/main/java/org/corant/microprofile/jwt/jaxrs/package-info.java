@@ -11,25 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.jwt;
-
-import javax.annotation.Priority;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-
 /**
- * corant-suites-mp-jwt
- *
- * @author bingo 下午7:38:38
+ * corant-microprofile-jwt
+ * 
+ * @author bingo 下午6:03:55
  *
  */
-@Priority(Priorities.AUTHENTICATION - 2)
-public class MpDenyAllFilter implements ContainerRequestFilter {
-
-  @Override
-  public void filter(ContainerRequestContext requestContext) {
-    throw new ForbiddenException();
-  }
-}
+package org.corant.microprofile.jwt.jaxrs;

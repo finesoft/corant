@@ -11,27 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.jwt;
+package org.corant.microprofile.jwt.jaxrs;
 
+import static org.corant.kernel.util.Instances.select;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import org.jboss.logging.Logger;
 
 /**
  * corant-suites-mp-jwt
  *
- * @author bingo 上午10:37:36
+ * @author bingo 上午11:33:50
  *
  */
-@Priority(Priorities.AUTHENTICATION - 1)
-public class MpPermitAllFilter implements ContainerRequestFilter {
+@Priority(Priorities.AUTHENTICATION + 1)
+public class MpBlackListFilter implements ContainerRequestFilter {
 
-  static final String PERMITALL_KEY = "___PERMITALL___";
-  static final String PERMITALL_VAL = "1";
+  private static Logger logger = Logger.getLogger(MpBlackListFilter.class);
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    requestContext.setProperty(PERMITALL_KEY, PERMITALL_VAL);
+    select(MpBlackListFilterHandler.class).forEach(h -> h.handle(requestContext));
+    logger.debugf("Success");
   }
+
 }

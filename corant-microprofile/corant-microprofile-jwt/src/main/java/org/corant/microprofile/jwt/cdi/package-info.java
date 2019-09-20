@@ -11,18 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.jwt;
-
-import javax.ws.rs.container.ContainerRequestContext;
-
 /**
- * corant-suites-mp-jwt
- *
- * @author bingo 下午7:49:14
+ * corant-microprofile-jwt
+ * 
+ * @author bingo 下午6:00:39
  *
  */
-public interface MpBlackListFilterHandler {
-
-  void handle(ContainerRequestContext requestContext);
-
-}
+package org.corant.microprofile.jwt.cdi;

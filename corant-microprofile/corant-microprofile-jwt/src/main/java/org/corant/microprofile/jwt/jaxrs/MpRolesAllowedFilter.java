@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.jwt;
+package org.corant.microprofile.jwt.jaxrs;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -63,9 +63,7 @@ public class MpRolesAllowedFilter implements ContainerRequestFilter {
     if (allRolesAllowed) {
       isForbidden = securityContext.getUserPrincipal() == null;
     } else {
-
       isForbidden = allowedRoles.stream().noneMatch(securityContext::isUserInRole);
-
       if (isForbidden && securityContext.getUserPrincipal() instanceof JsonWebToken
           && !allowedRoleWildcards.isEmpty()) {
         JsonWebToken jwt = JsonWebToken.class.cast(securityContext.getUserPrincipal());

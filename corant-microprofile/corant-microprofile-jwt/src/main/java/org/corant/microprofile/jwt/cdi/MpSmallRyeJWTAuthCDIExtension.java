@@ -11,29 +11,47 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.jwt;
+package org.corant.microprofile.jwt.cdi;
 
+import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.shared.util.ClassUtils.tryAsClass;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import org.corant.microprofile.jwt.jaxrs.MpBlackListFilter;
+import org.corant.microprofile.jwt.jaxrs.MpSmallRyeJWTAuthJaxRsFeature;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
 import io.smallrye.jwt.auth.cdi.CommonJwtProducer;
 import io.smallrye.jwt.auth.cdi.JsonValueProducer;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.cdi.RawClaimTypeProducer;
+import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
+import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
 import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
 
 /**
- * corant-suites-mp-jwt
+ * corant-microprofile-jwt
  *
- * @author bingo 上午10:28:45
+ * @author bingo 下午6:00:57
  *
  */
 public class MpSmallRyeJWTAuthCDIExtension implements Extension {
 
   private static Logger logger = Logger.getLogger(MpSmallRyeJWTAuthCDIExtension.class);
+
+  public static boolean isHttpAuthMechanismEnabled() {
+    if (isEESecurityAvailable()) {
+      return resolve(JWTHttpAuthenticationMechanism.class).isPresent();
+    }
+    return false;
+  }
+
+  private static boolean isEESecurityAvailable() {
+    return tryAsClass(
+        "javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism") != null;
+  }
 
   void addAnnotatedType(BeforeBeanDiscovery event, BeanManager beanManager, Class<?> type) {
     final String id = "SmallRye" + type.getSimpleName();
@@ -45,13 +63,24 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     logger.debugf("beanManager = %s", beanManager);
 
     // TODO: Do not add CDI beans unless @LoginConfig (or other trigger) is configured
-    addAnnotatedType(event, beanManager, MpJaxRsFeature.class);
     addAnnotatedType(event, beanManager, ClaimValueProducer.class);
     addAnnotatedType(event, beanManager, CommonJwtProducer.class);
     addAnnotatedType(event, beanManager, JsonValueProducer.class);
     addAnnotatedType(event, beanManager, JWTAuthContextInfoProvider.class);
+    addAnnotatedType(event, beanManager, JWTAuthenticationFilter.class);
     addAnnotatedType(event, beanManager, PrincipalProducer.class);
-    // addAnnotatedType(event, beanManager, MpJWTAuthenticationFilter.class);
     addAnnotatedType(event, beanManager, RawClaimTypeProducer.class);
+    addAnnotatedType(event, beanManager, ClaimValueProducer.class);
+    addAnnotatedType(event, beanManager, MpSmallRyeJWTAuthJaxRsFeature.class);
+    addAnnotatedType(event, beanManager, MpBlackListFilter.class);
+
+    if (isEESecurityAvailable()) {
+      addAnnotatedType(event, beanManager, JWTHttpAuthenticationMechanism.class);
+      logger.debugf("EE Security is available, JWTHttpAuthenticationMechanism has been registered");
+    } else {
+      // EE Security is not available, register the JAX-RS authentication filter.
+      logger.infof(
+          "EE Security is not available, JWTHttpAuthenticationMechanism will not be registered");
+    }
   }
 }

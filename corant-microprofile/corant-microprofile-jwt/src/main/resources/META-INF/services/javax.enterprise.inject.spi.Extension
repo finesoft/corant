@@ -1,1 +1,1 @@
-org.corant.microprofile.jwt.MpSmallRyeJWTAuthCDIExtension
+org.corant.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension

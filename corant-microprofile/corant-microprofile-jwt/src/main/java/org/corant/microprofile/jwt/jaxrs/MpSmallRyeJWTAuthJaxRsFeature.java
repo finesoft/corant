@@ -17,9 +17,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
+import org.corant.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension;
 import org.eclipse.microprofile.auth.LoginConfig;
 import org.jboss.logging.Logger;
-import io.smallrye.jwt.auth.cdi.SmallRyeJWTAuthCDIExtension;
 import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
 
 /**
@@ -38,38 +38,31 @@ public class MpSmallRyeJWTAuthJaxRsFeature implements Feature {
   @Override
   public boolean configure(FeatureContext context) {
     boolean enabled = mpJwtEnabled();
-
     if (enabled) {
       context.register(MpJWTAuthorizationFilterRegistrar.class);
-
-      if (!SmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
+      context.register(MpBlackListFilter.class);
+      if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
         context.register(JWTAuthenticationFilter.class);
-
         logger.debugf("EE Security is not in use, %s has been registered",
             JWTAuthenticationFilter.class.getSimpleName());
       }
-
       logger.debugf("MP-JWT LoginConfig present, %s is enabled", getClass().getSimpleName());
     } else {
       logger.infof("LoginConfig not found on Application class, %s will not be enabled",
           getClass().getSimpleName());
     }
-
     return enabled;
   }
 
   boolean mpJwtEnabled() {
     boolean enabled = false;
-
     if (restApplication != null) {
       Class<?> applicationClass = restApplication.getClass();
-
       if (applicationClass.isAnnotationPresent(LoginConfig.class)) {
         LoginConfig config = applicationClass.getAnnotation(LoginConfig.class);
         enabled = "MP-JWT".equals(config.authMethod());
       }
     }
-
     return enabled;
   }
 }

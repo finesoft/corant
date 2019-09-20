@@ -19,7 +19,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.microprofile.jwt.jaxrs.MpBlackListFilter;
 import org.corant.microprofile.jwt.jaxrs.MpSmallRyeJWTAuthJaxRsFeature;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
@@ -27,7 +26,6 @@ import io.smallrye.jwt.auth.cdi.CommonJwtProducer;
 import io.smallrye.jwt.auth.cdi.JsonValueProducer;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.cdi.RawClaimTypeProducer;
-import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
 import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
 import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
 
@@ -67,12 +65,10 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     addAnnotatedType(event, beanManager, CommonJwtProducer.class);
     addAnnotatedType(event, beanManager, JsonValueProducer.class);
     addAnnotatedType(event, beanManager, JWTAuthContextInfoProvider.class);
-    addAnnotatedType(event, beanManager, JWTAuthenticationFilter.class);
     addAnnotatedType(event, beanManager, PrincipalProducer.class);
     addAnnotatedType(event, beanManager, RawClaimTypeProducer.class);
     addAnnotatedType(event, beanManager, ClaimValueProducer.class);
     addAnnotatedType(event, beanManager, MpSmallRyeJWTAuthJaxRsFeature.class);
-    addAnnotatedType(event, beanManager, MpBlackListFilter.class);
 
     if (isEESecurityAvailable()) {
       addAnnotatedType(event, beanManager, JWTHttpAuthenticationMechanism.class);

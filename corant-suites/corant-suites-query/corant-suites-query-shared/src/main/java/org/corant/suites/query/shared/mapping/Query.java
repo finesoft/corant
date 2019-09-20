@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -134,7 +135,7 @@ public class Query implements Serializable {
   }
 
   public <T> T getProperty(String name, Class<T> cls) {
-    return properties == null ? null : toObject(properties.get(name), cls);
+    return isEmpty(properties) ? null : toObject(properties.get(name), cls);
   }
 
   public <T> T getProperty(String name, Class<T> cls, T altVal) {

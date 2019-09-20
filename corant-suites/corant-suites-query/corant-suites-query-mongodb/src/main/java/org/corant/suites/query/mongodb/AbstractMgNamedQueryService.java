@@ -96,8 +96,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
     MgQuerier querier = getResolver().resolve(queryName, parameter);
-    int offset = querier.getQueryParameter().getOffset();
-    int limit = querier.getQueryParameter().getLimit();
+    int offset = resolveOffset(querier);
+    int limit = resolveLimit(querier);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     ForwardList<T> result = ForwardList.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
@@ -127,8 +127,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> PagedList<T> page(String queryName, Object parameter) {
     MgQuerier querier = getResolver().resolve(queryName, parameter);
-    int offset = querier.getQueryParameter().getOffset();
-    int limit = querier.getQueryParameter().getLimit();
+    int offset = resolveOffset(querier);
+    int limit = resolveLimit(querier);
     PagedList<T> result = PagedList.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
@@ -150,7 +150,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public <T> List<T> select(String queryName, Object parameter) {
     MgQuerier querier = getResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    int maxSelectSize = getMaxSelectSize(querier);
+    int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
@@ -214,7 +214,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected FindIterable<Document> query(MgQuerier querier) {
     FindIterable<Document> fi =
         getDataBase().getCollection(resolveCollectionName(querier.getName())).find();
-    EnumMap<MgOperator, Bson> script = querier.getScript();
+    EnumMap<MgOperator, Bson> script = querier.getScript(null);
     for (MgOperator op : MgOperator.values()) {
       switch (op) {
         case FILTER:
@@ -265,8 +265,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected long queryCount(MgQuerier querier) {
     CountOptions co = new CountOptions();
-    if (querier.getScript().get(MgOperator.HINT) != null) {
-      co.hint(querier.getScript().get(MgOperator.HINT));
+    if (querier.getScript(null).get(MgOperator.HINT) != null) {
+      co.hint(querier.getScript(null).get(MgOperator.HINT));
     }
     Map<String, String> pros = querier.getQuery().getProperties();
     getOptMapObject(pros, PRO_KEY_CO_LIMIT, ConversionUtils::toInteger).ifPresent(co::limit);
@@ -277,7 +277,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (co.getLimit() <= 0) {
       co.limit(max(resolveCountOptionsLimit(), 1));
     }
-    Bson bson = querier.getScript().getOrDefault(MgOperator.FILTER, new BasicDBObject());
+    Bson bson = querier.getScript(null).getOrDefault(MgOperator.FILTER, new BasicDBObject());
     return getDataBase().getCollection(resolveCollectionName(querier.getName()))
         .countDocuments(bson, co);
   }

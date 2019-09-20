@@ -14,12 +14,12 @@
 package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.kernel.util.Instances.select;
-import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
@@ -34,6 +34,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -46,6 +47,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
   protected final Template execution;
+
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   /**
    * @param query
@@ -73,14 +76,16 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected Triple<QueryParameter, P, String> execute(QueryParameter param) {
     try (StringWriter sw = new StringWriter()) {
       DynamicTemplateMethodModelEx<P> tmm = getTemplateMethodModelEx();
+      String tmmTyp = tmm.getType();
       Environment e = execution.createProcessingEnvironment(param.getCriteria(), sw);
-      e.setVariable(tmm.getType(), tmm);
+      checkVarNames(e, tmmTyp);
+      e.setVariable(tmmTyp, tmm);
       ObjectWrapper ow = execution.getObjectWrapper();
       if (isNotEmpty(param.getContext())) {
-        shouldBeFalse(param.getContext().containsKey(tmm.getType()));
         for (Entry<String, Object> ctx : param.getContext().entrySet()) {
-          e.setVariable(ctx.getKey(),
-              ctx.getValue() == null ? new SimpleHash(ow) : ow.wrap(ctx.getValue()));
+          checkVarNames(e, ctx.getKey());
+          TemplateModel val = ctx.getValue() == null ? new SimpleHash(ow) : ow.wrap(ctx.getValue());
+          e.setVariable(ctx.getKey(), val);
         }
       }
       setEnvironmentVariables(e, ow);
@@ -107,19 +112,34 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
           Map<String, Object> vars = r.get();
           if (vars != null) {
             for (Entry<String, Object> entry : vars.entrySet()) {
+              String key = entry.getKey();
+              Object val = entry.getValue();
               try {
-                if (entry.getKey() != null && entry.getValue() != null
-                    && !env.getKnownVariableNames().contains(entry.getKey())) {
-                  env.setVariable(entry.getKey(), ow.wrap(entry.getValue()));
+                if (key != null && val != null) {
+                  if (!env.getKnownVariableNames().contains(key)) {
+                    env.setVariable(key, ow.wrap(val));
+                  } else {
+                    logger.warning(() -> String.format(
+                        "Query [%s] parameter reviser occurred variable name [%s] conflict.",
+                        getQuery().getName(), key));
+                  }
                 }
               } catch (TemplateModelException e) {
                 throw new QueryRuntimeException(e,
                     "Freemarker dynamic querier builder handle environment variables [%s] [%s] occurred error!",
-                    getQuery().getName(), entry.getKey());
+                    getQuery().getName(), key);
               }
             }
           }
         });
+  }
+
+  void checkVarNames(Environment e, String varName) throws TemplateModelException {
+    if (e.getKnownVariableNames().contains(varName)) {
+      throw new QueryRuntimeException(
+          "Freemarker dynamic querier buildr [%s] error, the key [%s] name conflict.",
+          query.getName(), varName);
+    }
   }
 
 }

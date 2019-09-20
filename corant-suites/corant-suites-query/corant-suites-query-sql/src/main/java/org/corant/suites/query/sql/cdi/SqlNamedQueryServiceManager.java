@@ -132,7 +132,7 @@ public class SqlNamedQueryServiceManager {
     }
 
     @Override
-    protected int getMaxSelectSize(Querier querier) {
+    protected int resolveMaxSelectSize(Querier querier) {
       return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
           defaultMaxSelectSize);
     }

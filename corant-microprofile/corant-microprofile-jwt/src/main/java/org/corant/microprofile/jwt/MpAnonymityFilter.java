@@ -11,27 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.elastic;
+package org.corant.microprofile.jwt;
 
-import java.util.Map;
-import org.corant.suites.query.shared.NamedQuerier;
-import org.corant.suites.query.shared.dynamic.DynamicQuerier;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 
 /**
- * corant-suites-query
+ * corant-microprofile-jwt
  *
- * @author bingo 下午3:13:37
+ * @author bingo 下午6:58:35
  *
  */
-public interface EsInLineNamedQueryResolver<K, P> {
+@Priority(Priorities.AUTHENTICATION - 1)
+public class MpAnonymityFilter implements ContainerRequestFilter {
 
-  EsQuerier resolve(K key, P param);
+  static final String PERMITALL_KEY = "___ANONYMITY___";
+  static final Boolean PERMITALL_VAL = true;
 
-  interface EsQuerier
-      extends DynamicQuerier<Map<String, Object>, Map<Object, Object>>, NamedQuerier {
-
-    @Override
-    Map<Object, Object> getScript(Map<?, ?> additionals);
+  @Override
+  public void filter(ContainerRequestContext requestContext) {
+    requestContext.setProperty(PERMITALL_KEY, PERMITALL_VAL);
   }
-
 }

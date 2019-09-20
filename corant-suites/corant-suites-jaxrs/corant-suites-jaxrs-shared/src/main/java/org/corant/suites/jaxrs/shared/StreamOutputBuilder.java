@@ -18,6 +18,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +30,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
+import org.corant.shared.util.Resources.FileSystemResource;
+import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.StreamUtils;
 import org.corant.suites.servlet.abstraction.ContentDispositions;
 
@@ -56,8 +60,25 @@ public class StreamOutputBuilder {
     this.is = shouldNotNull(is, "The input stream can not null!");
   }
 
+  public static StreamOutputBuilder of(FileSystemResource resources) {
+    try {
+      return new StreamOutputBuilder(resources.openStream())
+          .fileName(resources.getFile().getName());
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   public static StreamOutputBuilder of(InputStream is) {
     return new StreamOutputBuilder(is);
+  }
+
+  public static StreamOutputBuilder of(Resource resources) {
+    try {
+      return new StreamOutputBuilder(resources.openStream()).fileName(resources.getLocation());
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public StreamOutputBuilder additionalHeaders(Map<String, Object> additionalHeaders) {

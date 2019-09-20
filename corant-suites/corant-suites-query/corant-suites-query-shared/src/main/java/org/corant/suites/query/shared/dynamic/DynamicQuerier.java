@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared.dynamic;
 
+import java.util.Map;
 import org.corant.suites.query.shared.Querier;
 
 /**
@@ -23,8 +24,8 @@ import org.corant.suites.query.shared.Querier;
  */
 public interface DynamicQuerier<P, S> extends Querier {
 
-  P getScriptParameter();
+  S getScript(Map<?, ?> additionals);
 
-  S getScript();
+  P getScriptParameter();
 
 }

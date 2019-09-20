@@ -27,10 +27,10 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultEsNamedQuerier extends AbstractDynamicQuerier<Map<String, Object>, String>
-    implements EsQuerier {
+public class DefaultEsNamedQuerier
+    extends AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsQuerier {
 
-  protected final String script;
+  protected final Map<Object, Object> script;
   protected final String name;
 
   /**
@@ -41,7 +41,8 @@ public class DefaultEsNamedQuerier extends AbstractDynamicQuerier<Map<String, Ob
    * @param script
    */
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver, String script) {
+      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
+      Map<Object, Object> script) {
     super(query, queryParameter, parameterResolver, resultResolver);
     name = query.getName();
     this.script = script;
@@ -53,7 +54,7 @@ public class DefaultEsNamedQuerier extends AbstractDynamicQuerier<Map<String, Ob
   }
 
   @Override
-  public String getScript() {
+  public Map<Object, Object> getScript(Map<?, ?> additionals) {
     return script;
   }
 

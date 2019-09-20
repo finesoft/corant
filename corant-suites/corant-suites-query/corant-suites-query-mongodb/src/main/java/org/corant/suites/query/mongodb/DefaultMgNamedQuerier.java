@@ -71,10 +71,11 @@ public class DefaultMgNamedQuerier extends
   }
 
   @Override
-  public EnumMap<MgOperator, Bson> getScript() {
+  public EnumMap<MgOperator, Bson> getScript(Map<?, ?> additionals) {
     return script;
   }
 
+  @Override
   public Map<String, Object> getScriptParameter() {
     return null;
   }

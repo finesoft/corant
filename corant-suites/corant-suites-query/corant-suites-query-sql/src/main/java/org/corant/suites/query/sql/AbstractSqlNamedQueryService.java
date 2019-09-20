@@ -46,9 +46,9 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript();
-    int offset = querier.getQueryParameter().getOffset();
-    int limit = querier.getQueryParameter().getLimit();
+    String sql = querier.getScript(null);
+    int offset = resolveOffset(querier);
+    int limit = resolveLimit(querier);
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
@@ -73,7 +73,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> T get(String queryName, Object parameter) {
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript();
+    String sql = querier.getScript(null);
     try {
       log(queryName, scriptParameter, sql);
       Map<String, Object> result = getExecutor().get(sql, scriptParameter);
@@ -89,9 +89,9 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> PagedList<T> page(String queryName, Object parameter) {
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript();
-    int offset = querier.getQueryParameter().getOffset();
-    int limit = querier.getQueryParameter().getLimit();
+    String sql = querier.getScript(null);
+    int offset = resolveOffset(querier);
+    int limit = resolveLimit(querier);
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
@@ -120,8 +120,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> List<T> select(String queryName, Object parameter) {
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript();
-    int maxSelectSize = getMaxSelectSize(querier);
+    String sql = querier.getScript(null);
+    int maxSelectSize = resolveMaxSelectSize(querier);
     try {
       sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
       log(queryName, scriptParameter, sql);
@@ -146,7 +146,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> Stream<T> stream(String queryName, Object parameter) {
     SqlQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript();
+    String sql = querier.getScript(null);
     return getExecutor().stream(sql, scriptParameter).map(result -> {
       this.fetch(result, querier);
       return querier.resolveResult(result);
@@ -167,7 +167,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     SqlQuerier querier = resolver.resolve(refQueryName, fetchParam);
-    String sql = querier.getScript();
+    String sql = querier.getScript(null);
     Object[] scriptParameter = querier.getScriptParameter();
     if (maxSize > 0) {
       sql = getDialect().getLimitSql(sql, maxSize);

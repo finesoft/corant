@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.ObjectUtils.max;
 import java.io.IOException;
 import java.util.Map;
 import org.corant.shared.util.ObjectUtils.Triple;
@@ -33,8 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author bingo 下午8:25:44
  *
  */
-public class DefaultEsNamedQuerierBuilder
-    extends FreemarkerDynamicQuerierBuilder<Map<String, Object>, String, DefaultEsNamedQuerier> {
+public class DefaultEsNamedQuerierBuilder extends
+    FreemarkerDynamicQuerierBuilder<Map<String, Object>, Map<Object, Object>, DefaultEsNamedQuerier> {
 
   public final static ObjectMapper OM = new ObjectMapper();
 
@@ -48,15 +47,15 @@ public class DefaultEsNamedQuerierBuilder
     super(query, parameterResolver, resultResolver);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   protected DefaultEsNamedQuerier build(
       Triple<QueryParameter, Map<String, Object>, String> processed) {
     try {
       @SuppressWarnings("rawtypes")
       final Map esQuery = OM.readValue(processed.getRight(), Map.class);
-      doSomthing(esQuery, processed.getLeft());
       return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
-          getResultResolver(), processed.getRight());
+          getResultResolver(), esQuery);
     } catch (IOException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }
@@ -67,15 +66,4 @@ public class DefaultEsNamedQuerierBuilder
     return new DynamicTemplateMethodModelExJson();
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  void doSomthing(Map esQuery, QueryParameter param) {
-    Integer from = param.getOffset();
-    if (from != null) {
-      esQuery.put("from", max(from, Integer.valueOf(0)));
-    }
-    Integer size = param.getLimit();
-    if (size != null) {
-      esQuery.put("size", max(size, Integer.valueOf(1)));
-    }
-  }
 }

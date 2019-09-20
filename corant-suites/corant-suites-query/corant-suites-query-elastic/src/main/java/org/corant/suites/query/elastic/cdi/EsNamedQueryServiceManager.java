@@ -32,6 +32,7 @@ import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
 import org.corant.suites.query.elastic.EsInLineNamedQueryResolver;
 import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
+import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
 
@@ -58,6 +59,10 @@ public class EsNamedQueryServiceManager {
   protected TransportClientManager transportClientManager;
 
   @Inject
+  @ConfigProperty(name = "query.elastic.max-select-size", defaultValue = "128")
+  protected Integer maxSelectSize;
+
+  @Inject
   @ConfigProperty(name = "query.elastic.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -74,7 +79,8 @@ public class EsNamedQueryServiceManager {
     return services.computeIfAbsent(dataCenter, (dc) -> {
       logger.info(() -> String
           .format("Create default elastic named query service, the data center is [%s]. ", dc));
-      return new DefaultEsNamedQueryService(transportClientManager.get(dc), resolver);
+      return new DefaultEsNamedQueryService(transportClientManager.get(dc), resolver,
+          maxSelectSize);
     });
   }
 
@@ -87,21 +93,30 @@ public class EsNamedQueryServiceManager {
   public static final class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
     private final EsQueryExecutor executor;
+    final int defaultMaxSelectSize;
 
     /**
      * @param transportClient
      * @param resolver
+     * @param defaultMaxSelectSize
      */
     public DefaultEsNamedQueryService(TransportClient transportClient,
-        EsInLineNamedQueryResolver<String, Object> resolver) {
+        EsInLineNamedQueryResolver<String, Object> resolver, int defaultMaxSelectSize) {
       executor = new DefaultEsQueryExecutor(transportClient);
       logger = Logger.getLogger(this.getClass().getName());
       this.resolver = resolver;
+      this.defaultMaxSelectSize = defaultMaxSelectSize;
     }
 
     @Override
     protected EsQueryExecutor getExecutor() {
       return executor;
+    }
+
+    @Override
+    protected int resolveMaxSelectSize(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+          defaultMaxSelectSize);
     }
   }
 }

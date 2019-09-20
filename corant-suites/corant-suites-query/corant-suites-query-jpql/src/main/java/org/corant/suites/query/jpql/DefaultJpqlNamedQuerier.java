@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.jpql;
 
+import java.util.Map;
 import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
@@ -56,7 +57,7 @@ public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], St
   }
 
   @Override
-  public String getScript() {
+  public String getScript(Map<?, ?> additionals) {
     return script;
   }
 

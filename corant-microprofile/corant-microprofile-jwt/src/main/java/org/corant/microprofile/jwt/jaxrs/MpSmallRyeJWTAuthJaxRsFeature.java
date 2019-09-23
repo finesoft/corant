@@ -17,6 +17,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.ext.Provider;
 import org.corant.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension;
 import org.eclipse.microprofile.auth.LoginConfig;
 import org.jboss.logging.Logger;
@@ -28,6 +29,7 @@ import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
  * @author bingo 下午6:40:31
  *
  */
+@Provider
 public class MpSmallRyeJWTAuthJaxRsFeature implements Feature {
 
   private static Logger logger = Logger.getLogger(MpSmallRyeJWTAuthJaxRsFeature.class);

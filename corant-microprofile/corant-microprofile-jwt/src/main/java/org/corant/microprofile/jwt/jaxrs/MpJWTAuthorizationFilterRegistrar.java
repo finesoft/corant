@@ -81,7 +81,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
         registration = new MpRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
       } else if (mpJwtAnnotation instanceof PermitAll) {
-        registration = new MpRolesAllowedFilter(new String[] {"*"});
+        registration = new MpRolesAllowedFilter(MpRolesAllowedFilter.PERMIT_ALL_ROLES);
       }
     } else {
       if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {

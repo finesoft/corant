@@ -31,15 +31,16 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * corant-suites-mp-jwt
  *
  * @author bingo 下午7:52:30
- * 
+ *
  */
 @Priority(Priorities.AUTHORIZATION)
 public class MpRolesAllowedFilter implements ContainerRequestFilter {
+  public static final String PERMIT_ALL_ROLES = "*";
   private final Set<String> allowedRoles = new HashSet<>();
   private final Set<WildcardMatcher> allowedRoleWildcards = new HashSet<>();
   private final boolean permitAll;
 
-  public MpRolesAllowedFilter(String[] allowedRoles) {
+  public MpRolesAllowedFilter(String... allowedRoles) {
     boolean permitAll = false;
     for (String allowedRole : allowedRoles) {
       if (isNotBlank(allowedRole)) {

@@ -75,18 +75,19 @@
 
 		<version.artemis>2.9.0</version.artemis>
 		<version.keycloak>6.0.1</version.keycloak>
+		<version.glassfish.soteria>1.0</version.glassfish.soteria>
 
 		<version.flyway>5.2.0</version.flyway>
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.5</version.agroal>
-		
+
 		<version.narayana-jta>5.9.8.Final</version.narayana-jta>
 		<version.atomikos>4.0.6</version.atomikos>
 		<version.xadisk>1.2.2</version.xadisk>
-		
+
 		<version.mssql-jdbc>7.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.47</version.mysql>
-		
+
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
@@ -816,6 +817,11 @@
 
 			<!-- Security -->
 			<dependency>
+				<groupId>org.glassfish.soteria</groupId>
+				<artifactId>javax.security.enterprise</artifactId>
+				<version>${version.glassfish.soteria}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-core</artifactId>
 				<version>${version.keycloak}</version>
@@ -1076,6 +1082,11 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-keycloak</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-security-web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

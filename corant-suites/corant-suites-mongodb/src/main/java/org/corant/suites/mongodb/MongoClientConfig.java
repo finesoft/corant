@@ -71,6 +71,7 @@ public class MongoClientConfig implements NamedObject {
   public static final String MC_USER_NAME = ".username";
   public static final String MC_PASSWORD = ".password";
   public static final String MC_DATABASES = ".databases";
+  public static final String MC_BIND_TO_JNDI = ".bind-to-jndi";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
@@ -89,6 +90,8 @@ public class MongoClientConfig implements NamedObject {
   private String username;
 
   private char[] password = new char[0];
+
+  private boolean bindToJndi = false;
 
   public static NamedQualifierObjectManager<MongoClientConfig> from(Config config) {
     Set<MongoClientConfig> cfgs = new HashSet<>();
@@ -121,6 +124,7 @@ public class MongoClientConfig implements NamedObject {
     names.add(dfltPrefix + MC_PASSWORD);
     names.add(dfltPrefix + MC_URI);
     names.add(dfltPrefix + MC_USER_NAME);
+    names.add(dfltPrefix + MC_BIND_TO_JNDI);
     // opt property
     for (String proNme : config.getPropertyNames()) {
       if (proNme.startsWith(dfltOptPrefix)) {
@@ -171,6 +175,8 @@ public class MongoClientConfig implements NamedObject {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setPassword);
       } else if (pn.endsWith(MC_USER_NAME)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUsername);
+      } else if (pn.endsWith(MC_BIND_TO_JNDI)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(mc::setBindToJndi);
       }
     });
     if (!isEmpty(opCfgNmes)) {
@@ -262,6 +268,14 @@ public class MongoClientConfig implements NamedObject {
     return username;
   }
 
+  /**
+   *
+   * @return the bindToJndi
+   */
+  public boolean isBindToJndi() {
+    return bindToJndi;
+  }
+
   public Builder produceBuiler() {
     Map<String, Method> settingsMap = MongoClientConfigurator.createSettingsMap();
     MongoClientOptions.Builder optionsBuilder = MongoClientOptions.builder();
@@ -313,6 +327,14 @@ public class MongoClientConfig implements NamedObject {
    */
   protected void setAuthenticationDatabase(String authenticationDatabase) {
     this.authenticationDatabase = authenticationDatabase;
+  }
+
+  /**
+   *
+   * @param bindToJndi the bindToJndi to set
+   */
+  protected void setBindToJndi(boolean bindToJndi) {
+    this.bindToJndi = bindToJndi;
   }
 
   /**

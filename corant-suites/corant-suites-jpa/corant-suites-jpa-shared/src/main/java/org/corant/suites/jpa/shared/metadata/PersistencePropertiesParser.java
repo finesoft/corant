@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.config.ConfigUtils.getGroupConfigNames;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -137,10 +138,15 @@ public class PersistencePropertiesParser {
       for (String cfgNme : proCfgNmes) {
         config.getOptionalValue(cfgNme, String.class).ifPresent(s -> {
           String proName = cfgNme.substring(len);
-          metaData.putPropertity(proName, s);
+          if (proName.equals(JPAConfig.BIND_JNDI)) {
+            metaData.setBindToJndi(toBoolean(s));
+          } else {
+            metaData.putPropertity(proName, s);
+          }
         });
       }
     }
+
   }
 
   private static URL toUrl(String urlstr) {

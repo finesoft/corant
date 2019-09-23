@@ -35,7 +35,9 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  */
 @Priority(Priorities.AUTHORIZATION)
 public class MpRolesAllowedFilter implements ContainerRequestFilter {
+
   public static final String PERMIT_ALL_ROLES = "*";
+
   private final Set<String> allowedRoles = new HashSet<>();
   private final Set<WildcardMatcher> allowedRoleWildcards = new HashSet<>();
   private final boolean permitAll;
@@ -76,7 +78,13 @@ public class MpRolesAllowedFilter implements ContainerRequestFilter {
     }
     if (isForbidden) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
-        throw new NotAuthorizedException("Bearer");
+        Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
+        if (ex instanceof Exception) {
+          requestContext.removeProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
+          throw new NotAuthorizedException((Exception) ex, "Bearer");
+        } else {
+          throw new NotAuthorizedException("Bearer");
+        }
       } else {
         throw new ForbiddenException();
       }

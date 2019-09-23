@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
@@ -101,7 +102,11 @@ public class PersistenceXmlParser {
               if (isEmpty(propValue)) {
                 propValue = extractContent(propElement, "");
               }
-              puimd.putPropertity(propName, propValue);
+              if (propName.equals(JPAConfig.BIND_JNDI)) {
+                puimd.setBindToJndi(toBoolean(propValue));
+              } else {
+                puimd.putPropertity(propName, propValue);
+              }
             }
           }
         }

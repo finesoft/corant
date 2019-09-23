@@ -78,12 +78,12 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 public class MongoClientExtension implements Extension {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
+  Set<String> gridFSBucketNames = new HashSet<>();
   volatile InitialContext jndi;
   volatile NamedQualifierObjectManager<MongoClientConfig> clientConfigManager =
       NamedQualifierObjectManager.empty();
   volatile NamedQualifierObjectManager<MongodbConfig> databaseConfigManager =
       NamedQualifierObjectManager.empty();
-  Set<String> gridFSBucketNames = new HashSet<>();
 
   public static BsonValue bsonId(Serializable id) {
     if (id == null) {
@@ -154,7 +154,9 @@ public class MongoClientExtension implements Extension {
             .beanClass(MongoClient.class).scope(ApplicationScoped.class).produceWith(beans -> {
               return produceClient(beans, c, n);
             }).disposeWith((mc, beans) -> mc.close());
-        resolveJndi(c.getName(), n);
+        if (c.isBindToJndi()) {
+          resolveJndi(c.getName(), n);
+        }
       });
 
       databaseConfigManager.getAllWithQualifiers().forEach((c, n) -> {

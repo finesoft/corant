@@ -59,6 +59,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   private PersistenceUnitTransactionType persistenceUnitTransactionType =
       PersistenceUnitTransactionType.JTA;
   private ValidationMode validationMode = ValidationMode.NONE;
+  private boolean bindToJndi = true;
 
   /**
    * @param persistenceUnitName
@@ -252,6 +253,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return result;
   }
 
+  public boolean isBindToJndi() {
+    return bindToJndi;
+  }
+
   public boolean isExcludeUnlistedClasses() {
     return excludeUnlistedClasses;
   }
@@ -308,6 +313,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     if (transformer != null && !transformers.contains(transformer)) {
       transformers.add(transformer);
     }
+  }
+
+  protected void setBindToJndi(boolean bindToJndi) {
+    this.bindToJndi = bindToJndi;
   }
 
   protected void setClassLoader(ClassLoader classLoader) {

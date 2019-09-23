@@ -74,7 +74,9 @@ public class JPAExtension implements Extension {
         .stream().map(p -> p.unitName()).collect(Collectors.toSet()));
     persistenceUnitInfoMetaDatas.forEach((pu, puim) -> {
       abd.addBean(new EntityManagerFactoryBean(beanManager, pu, qualifiers.get(pu.unitName())));
-      registerJndi(pu.unitName(), qualifiers.get(pu.unitName()));
+      if (puim.isBindToJndi()) {
+        registerJndi(pu.unitName(), qualifiers.get(pu.unitName()));
+      }
     });
   }
 

@@ -47,7 +47,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
                 throw new CorantRuntimeException(e);
               }
             }).disposeWith((dataSource, beans) -> dataSource.close());
-        if (isNotBlank(dsc.getName())) {
+        if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
           registerJndi(dsc.getName(), dsn);
         }
       });

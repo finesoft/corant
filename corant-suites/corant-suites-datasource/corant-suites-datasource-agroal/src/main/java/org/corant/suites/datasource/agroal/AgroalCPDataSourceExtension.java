@@ -63,7 +63,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
                 throw new CorantRuntimeException(e);
               }
             }).disposeWith((dataSource, beans) -> dataSource.close());
-        if (isNotBlank(dsc.getName())) {
+        if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
           registerJndi(dsc.getName(), dsn);
         }
       });
@@ -124,8 +124,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
           resolve(TransactionSynchronizationRegistry.class).orElse(null);
       XAResourceRecoveryRegistry xar = null;
       if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-        xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
-            .orElse(null);
+        xar =
+            resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta")).orElse(null);
       } else {
         xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
       }

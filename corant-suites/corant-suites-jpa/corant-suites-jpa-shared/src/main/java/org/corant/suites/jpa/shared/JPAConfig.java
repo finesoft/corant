@@ -44,6 +44,8 @@ public class JPAConfig {
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/EntityManagerFactories";
   public static final String EMPTY_PU_NAME = StringUtils.EMPTY;
 
+  public static final String BIND_JNDI = "bind-to-jndi";
+
   public static final String JC_PREFIX = "jpa.";
 
   public static final String JCX_TAG = "persistence-pu";

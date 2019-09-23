@@ -94,6 +94,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, Object> additionProperties = new HashMap<>();
 
+  @ConfigKeyItem(defaultValue = "true")
+  protected Boolean bindToJndi = true;
+
   /**
    *
    * @return the acquisitionTimeout
@@ -196,6 +199,10 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public Boolean isAutoCommit() {
     return autoCommit;
+  }
+
+  public boolean isBindToJndi() {
+    return bindToJndi;
   }
 
   /**

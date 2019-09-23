@@ -44,7 +44,7 @@ public class MpSmallRyeJWTAuthJaxRsFeature implements Feature {
       context.register(MpJWTAuthorizationFilterRegistrar.class);
       context.register(MpBlackListFilter.class);
       if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
-        context.register(JWTAuthenticationFilter.class);
+        context.register(MpJWTAuthenticationFilter.class);
         logger.debugf("EE Security is not in use, %s has been registered",
             JWTAuthenticationFilter.class.getSimpleName());
       }

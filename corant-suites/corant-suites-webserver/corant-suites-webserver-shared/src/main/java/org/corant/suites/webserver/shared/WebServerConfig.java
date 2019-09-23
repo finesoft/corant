@@ -103,14 +103,14 @@ public class WebServerConfig {
 
   public String getDescription() {
     StringBuilder sb = new StringBuilder();
-    sb.append("host: ").append(getHost()).append(";");
-    sb.append(" port: ").append(getPort()).append(";");
-    sb.append(" work-threads: ").append(getWorkThreads()).append(";");
-    getSecuredPort().ifPresent(s -> sb.append("secured port: ").append(s).append(";"));
-    getKeystorePath().ifPresent(s -> sb.append(" keystore path: ").append(s).append(";"));
-    getKeystoreType().ifPresent(s -> sb.append(" keystore type: ").append(s).append(";"));
-    getTruststorePath().ifPresent(s -> sb.append(" truststore path: ").append(s).append(";"));
-    getTruststoreType().ifPresent(s -> sb.append(" truststore type: ").append(s).append(";"));
+    sb.append("host:").append(getHost()).append(",");
+    sb.append(" port:").append(getPort()).append(",");
+    sb.append(" work-threads:").append(getWorkThreads());
+    getSecuredPort().ifPresent(s -> sb.append(",").append("secured port:").append(s));
+    getKeystorePath().ifPresent(s -> sb.append(",").append(" keystore path:").append(s));
+    getKeystoreType().ifPresent(s -> sb.append(",").append(" keystore type:").append(s));
+    getTruststorePath().ifPresent(s -> sb.append(",").append(" truststore path:").append(s));
+    getTruststoreType().ifPresent(s -> sb.append(",").append(" truststore type:").append(s));
     return sb.toString();
   }
 

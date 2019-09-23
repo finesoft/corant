@@ -285,7 +285,7 @@ public class Corant implements AutoCloseable {
     setMe(this);
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
-        "Perform the handler before " + applicationName() + " starting");
+        "Perform the spi handlers before " + applicationName() + " starting");
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
@@ -310,7 +310,7 @@ public class Corant implements AutoCloseable {
     doAfterContainerInitialized();
 
     stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
-        .start("Perform the handler after corant startup");
+        .start("Perform the spi handlers after corant startup");
 
     doAfterStarted(classLoader);
 

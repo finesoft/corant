@@ -14,6 +14,7 @@
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.kernel.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import org.corant.kernel.normal.Names;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.util.StopWatch;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
 import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
@@ -87,12 +89,15 @@ public class UndertowWebServer extends AbstractWebServer {
   @Override
   public void start() {
     try {
+      StopWatch sw = StopWatch.press(getUserClass(getClass()).getSimpleName());
       server = resolveServer();
       if (getPreStartHandlers().map(h -> h.onPreStart(this)).reduce(Boolean::logicalAnd)
           .orElse(Boolean.TRUE)) {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
-        logger.info(() -> String.format("Undertow was started, %s", config.getDescription()));
+        sw.destroy((t) -> logger.info(() -> String.format("%s [%s] was started, takes %s seconds.",
+            t.getLastTaskInfo().getTaskName(), config.getDescription(),
+            t.getLastTaskInfo().getTimeSeconds())));
       } else {
         logger.info(() -> "Undertow can not start, due to some PreStartHandler interruption!");
       }

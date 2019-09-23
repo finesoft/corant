@@ -67,15 +67,20 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  */
 public class NarayanaExtension implements Extension {
 
+  public static final String JTA_BIND_TO_JNDI_CFG = "jta.bind-to-jndi";
+
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   void afterBeanDiscovery(@Observes final AfterBeanDiscovery event, final BeanManager beanManager) {
-    try {
-      JNDIManager.bindJTAImplementation();
-      logger.info(() -> "Bind JTA implementations to Jndi.");
-    } catch (NamingException e) {
-      throw new CorantRuntimeException(e,
-          "An error occurred while registering Transaction Manager to JNDI");
+    if (ConfigProvider.getConfig().getOptionalValue(JTA_BIND_TO_JNDI_CFG, Boolean.class)
+        .orElse(false)) {
+      try {
+        JNDIManager.bindJTAImplementation();
+        logger.info(() -> "Bind JTA implementations to Jndi.");
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e,
+            "An error occurred while registering Transaction Manager to JNDI");
+      }
     }
 
     if (event != null) {

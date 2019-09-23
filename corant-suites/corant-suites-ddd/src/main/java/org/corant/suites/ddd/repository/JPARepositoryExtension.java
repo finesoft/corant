@@ -44,7 +44,8 @@ public class JPARepositoryExtension implements Extension {
   static final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
   public static Annotation[] resolveQualifiers(Class<?> cls) {
-    return qualifiers.get(resolve(EntityLifecycleManager.class).get().getPersistenceUnitName(cls));
+    return qualifiers
+        .get(resolve(EntityLifecycleManager.class).get().getPersistenceContext(cls).unitName());
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {

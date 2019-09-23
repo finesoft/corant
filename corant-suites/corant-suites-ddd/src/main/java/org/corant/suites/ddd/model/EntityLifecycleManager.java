@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 
@@ -26,11 +27,9 @@ import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
  */
 public interface EntityLifecycleManager {
 
-  PersistenceContext getPersistenceContext(Class<?> cls);
+  EntityManager getEntityManager(Class<?> cls);
 
-  default String getPersistenceUnitName(Class<?> cls) {
-    return getPersistenceContext(cls).unitName();
-  }
+  PersistenceContext getPersistenceContext(Class<?> cls);
 
   void on(AggregateLifecycleManageEvent e);
 

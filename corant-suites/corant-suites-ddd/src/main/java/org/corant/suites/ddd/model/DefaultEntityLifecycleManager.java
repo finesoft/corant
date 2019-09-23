@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.model;
 
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
@@ -62,8 +63,10 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   @Inject
   JTAJPAUnitOfWorksManager unitOfWorksManager;
 
-  @Inject
-  PersistenceService jpaService;
+  @Override
+  public EntityManager getEntityManager(Class<?> cls) {
+    return unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(getPersistenceContext(cls));
+  }
 
   @Override
   public PersistenceContext getPersistenceContext(Class<?> cls) {
@@ -76,15 +79,14 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
     if (e.getSource() != null) {
       Entity entity = forceCast(e.getSource());
       boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, e.getAction(), effectImmediately, getPersistenceContext(entity.getClass()));
+      handle(entity, e.getAction(), effectImmediately);
       logger.fine(() -> String.format("Handle %s %s %s", entity.getClass().getName(),
           e.getAction().name(), entity.getId()));
     }
   }
 
-  protected void handle(Entity entity, LifecycleAction action, boolean effectImmediately,
-      PersistenceContext pc) {
-    EntityManager em = unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(pc);
+  protected void handle(Entity entity, LifecycleAction action, boolean effectImmediately) {
+    EntityManager em = getEntityManager(entity.getClass());
     if (action == LifecycleAction.PERSIST) {
       if (entity.getId() == null) {
         em.persist(entity);
@@ -109,11 +111,12 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   @PostConstruct
   void onPostConstruct() {
+    final PersistenceService PersistenceService = resolve(PersistenceService.class).get();
     emfs.forEach(emf -> {
       String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
       Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
       entities.stream().map(ManagedType::getJavaType)
-          .forEach(cls -> clsUns.put(cls, jpaService.getPersistenceContext(puNme)));
+          .forEach(cls -> clsUns.put(cls, PersistenceService.getPersistenceContext(puNme)));
     });
     logger.info(() -> "Initialized JPAPersistenceService.");
   }

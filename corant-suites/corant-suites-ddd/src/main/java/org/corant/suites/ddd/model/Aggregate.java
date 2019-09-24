@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.model;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -145,8 +146,8 @@ public interface Aggregate extends Entity {
     @Override
     String getType();
 
-    default Class<?> getTypeCls() {
-      return tryAsClass(getType());
+    default Class<? extends Aggregate> getTypeCls() {
+      return forceCast(tryAsClass(getType()));
     }
   }
 

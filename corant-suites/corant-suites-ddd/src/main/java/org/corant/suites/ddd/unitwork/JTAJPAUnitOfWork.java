@@ -30,6 +30,7 @@ import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
 import org.corant.suites.ddd.event.AggregatePersistEvent;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
@@ -224,7 +225,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       evolutions.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
-            fireAsyncEvent(new AggregatePersistEvent(k, v));
+            fireAsyncEvent(new AggregatePersistEvent(k, v),
+                AggregateTypeLiteral.of(k.getTypeCls()));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");
           }

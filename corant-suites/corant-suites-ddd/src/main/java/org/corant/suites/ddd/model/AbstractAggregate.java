@@ -115,7 +115,11 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
   /**
    * Destroy the aggregate if is persisted then remove it from entity manager else just mark
-   * destroyed
+   * destroyed, in JPA environment this method will invoke entity manager to remove the aggregate.
+   *
+   * @param immediately In JPA environment, if it true the entity manager will be flushed.
+   * @see EntityLifecycleManager
+   * @see EntityManager#remove(Object)
    */
   protected synchronized void destroy(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
@@ -142,30 +146,46 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Destroy preconditions, validate the aggregate consistency, this method is the EntityListener
-   * callback.
+   * Destroy preconditions, in general use to validate the aggregate internal consistency, in JPA
+   * environment this method is the EntityListener callback.
+   * <p>
+   * <b>Note:</b> In JPA environment, this method should not invoke EntityManager or query
+   * operations, access other aggregate instances, or modify relationships within the same
+   * persistence context.
    *
    * @see DefaultAggregateListener
    * @see PreRemove
+   * @see EntityManager#flush()
+   * @see EntityManager#setFlushMode(javax.persistence.FlushModeType)
    */
   protected void onPreDestroy() {}
 
   /**
-   * Preserve preconditions, validate the aggregate consistency, this method is the EntityListener
-   * callback.
+   * Preserve preconditions, in general use to validate the aggregate internal consistency, in JPA
+   * environment this method is the EntityListener callback.
+   * <p>
+   * <b>Note:</b> In JPA environment, this method should not invoke EntityManager or query
+   * operations, access other aggregate instances, or modify relationships within the same
+   * persistence context, this method may modify the non-relationship state of the aggregate on
+   * which it is invoked.
    *
    * @see DefaultAggregateListener
    * @see PrePersist
    * @see PreUpdate
+   * @see EntityManager#flush()
+   * @see EntityManager#setFlushMode(javax.persistence.FlushModeType)
    */
   protected void onPrePreserve() {}
 
   /**
-   * Preserve the aggregate if is not persisted then persist it else merge it.
+   * Preserve the aggregate if is not persisted then persist it else merge it, in JPA environment
+   * this method will invoke entity manager to persist or merge the aggregate.
    *
-   * @param immediately flush to stroage immediately
-   *
-   * @see EntityManager#flush()
+   * @param immediately flush to stroage immediately, in JPA environment, if it true the entity
+   *        manager will be flushed.
+   * @see EntityLifecycleManager
+   * @see EntityManager#persist(Object)
+   * @see EntityManager#merge(Object)
    */
   protected synchronized AbstractAggregate preserve(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
@@ -174,8 +194,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * recover from persistence
+   * Recover from persistence, in JPA environment this method will invoke entity manager to refresh
+   * the aggregate.
    *
+   * @see EntityLifecycleManager
    * @see EntityManager#refresh(Object)
    */
   protected synchronized AbstractAggregate recover() {
@@ -184,6 +206,11 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     return this;
   }
 
+  /**
+   * This method is not normally invoked manually
+   *
+   * @param vn setVn
+   */
   protected synchronized void setVn(long vn) {
     this.vn = vn;
   }
@@ -208,7 +235,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
     private final Serializable id;
 
-    private final Class<?> typeCls;
+    private final Class<? extends Aggregate> typeCls;
 
     private final int hash;
 
@@ -260,7 +287,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
     @Override
     @Transient
-    public Class<?> getTypeCls() {
+    public Class<? extends Aggregate> getTypeCls() {
       return typeCls;
     }
 

@@ -94,8 +94,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, Object> additionProperties = new HashMap<>();
 
-  @ConfigKeyItem(defaultValue = "true")
-  protected Boolean bindToJndi = true;
+  @ConfigKeyItem(defaultValue = "false")
+  protected Boolean bindToJndi = false;
 
   /**
    *

@@ -61,7 +61,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Inject
   @Any
-  Instance<MessageStorage> messageStroage;
+  Instance<MessageStorage> messageStorage;
 
   @Inject
   @Any
@@ -150,7 +150,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Override
   public MessageStorage getMessageStorage() {
-    return messageStroage.isResolvable() ? messageStroage.get() : MessageStorage.DUMMY_INST;
+    return messageStorage.isResolvable() ? messageStorage.get() : MessageStorage.DUMMY_INST;
   }
 
   @Override

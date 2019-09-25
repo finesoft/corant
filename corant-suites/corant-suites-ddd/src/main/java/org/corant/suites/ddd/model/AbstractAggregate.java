@@ -181,7 +181,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Preserve the aggregate if is not persisted then persist it else merge it, in JPA environment
    * this method will invoke entity manager to persist or merge the aggregate.
    *
-   * @param immediately flush to stroage immediately, in JPA environment, if it true the entity
+   * @param immediately flush to storage immediately, in JPA environment, if it true the entity
    *        manager will be flushed.
    * @see EntityLifecycleManager
    * @see EntityManager#persist(Object)

@@ -102,7 +102,8 @@ public class UndertowWebServer extends AbstractWebServer {
         logger.info(() -> "Undertow can not start, due to some PreStartHandler interruption!");
       }
     } catch (Exception e) {
-      throw new CorantRuntimeException(e, "Unable to launch undertow ");
+      throw new CorantRuntimeException(e, "Unable to launch undertow [%s]",
+          config.getDescription());
     }
   }
 

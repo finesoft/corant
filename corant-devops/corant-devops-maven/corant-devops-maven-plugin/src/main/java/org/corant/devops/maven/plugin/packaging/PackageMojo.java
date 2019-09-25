@@ -67,6 +67,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "", property = "corant.maven-mojo.used-config-location")
   protected String usedConfigLocation;
 
+  @Parameter(defaultValue = "", property = "corant.maven-mojo.used-config-profile")
+  protected String usedConfigProfile;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (isJar()) {
@@ -131,6 +134,10 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isWithDist() {
     return withDist;
+  }
+
+  protected String getUsedConfigProfile() {
+    return usedConfigProfile == null ? "" : usedConfigProfile;
   }
 
 }

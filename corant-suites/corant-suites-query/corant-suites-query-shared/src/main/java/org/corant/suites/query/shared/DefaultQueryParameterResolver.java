@@ -15,8 +15,8 @@ package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.suites.query.shared.QueryService.LIMIT_PARAM_NME;
-import static org.corant.suites.query.shared.QueryService.OFFSET_PARAM_NME;
+import static org.corant.suites.query.shared.QueryParameter.LIMIT_PARAM_NME;
+import static org.corant.suites.query.shared.QueryParameter.OFFSET_PARAM_NME;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

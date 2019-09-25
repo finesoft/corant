@@ -8,6 +8,7 @@ function join() {
 
 MAIN_CLASS=#MAIN_CLASS#
 USED_CONFIG_LOCATION=#USED_CONFIG_LOCATION#
+USED_CONFIG_PROFILE=#USED_CONFIG_PROFILE#
 
 BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -56,4 +57,8 @@ if [ "x$USED_CONFIG_LOCATION" = "x" ]; then
 fi
 
 SERVER_OPTS="$SERVER_OPTS -cp $CLASSPATH -Dcorant.config.location=$USED_CONFIG_LOCATION"
+
+if [ "x$USED_CONFIG_PROFILE" != "x" ]; then
+	SERVER_OPTS="$SERVER_OPTS -Dcorant.config.profile=$USED_CONFIG_PROFILE"
+fi
 exec $JAVA $SERVER_OPTS $MAIN_CLASS $*

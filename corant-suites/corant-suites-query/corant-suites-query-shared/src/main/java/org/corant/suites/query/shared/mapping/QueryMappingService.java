@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -38,6 +39,9 @@ public class QueryMappingService {
 
   private final Map<String, Query> queries = new HashMap<>();
   private volatile boolean initialized = false;
+
+  @Inject
+  Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**QueryService.xml")
@@ -96,6 +100,8 @@ public class QueryMappingService {
       queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
     }
     initialized = true;
+    logger.info(() -> String.format("Find [%s] queries from mapping file path [%s].",
+        queries.size(), mappingFilePaths));
   }
 
   @PostConstruct

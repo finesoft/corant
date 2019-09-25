@@ -26,7 +26,6 @@ import static org.corant.shared.util.StringUtils.replace;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -449,20 +448,17 @@ public class ClassPaths {
 
     protected URI tryExtractFileUri(URI jarUri) {
       try {
-        String specPart = jarUri.getSchemeSpecificPart();
-        while (specPart != null) {
-          URI fileUri = new URL(specPart).toURI();
-          if (FILE_SCHEMA.equals(fileUri.getScheme())) {
-            String fileUrlStr = fileUri.toURL().toExternalForm();
-            int sp = fileUrlStr.indexOf(JAR_URL_SEPARATOR);
-            if (sp != -1) {
-              fileUrlStr = fileUrlStr.substring(0, sp);
-            }
-            return new URI(fileUrlStr);
+        // String specPart = jarUri.getSchemeSpecificPart();
+        URI fileUri = new URI(jarUri.getRawSchemeSpecificPart());
+        if (FILE_SCHEMA.equals(fileUri.getScheme())) {
+          String fileUrlStr = fileUri.toString();
+          int sp = fileUrlStr.indexOf(JAR_URL_SEPARATOR);
+          if (sp != -1) {
+            fileUrlStr = fileUrlStr.substring(0, sp);
           }
-          specPart = fileUri.getSchemeSpecificPart();
+          return new URI(fileUrlStr);
         }
-      } catch (MalformedURLException | URISyntaxException ignore) {
+      } catch (URISyntaxException ignore) {
         logger.warning(() -> String.format("Can not extract file uri from %s.", jarUri.toString()));
       }
       return null;

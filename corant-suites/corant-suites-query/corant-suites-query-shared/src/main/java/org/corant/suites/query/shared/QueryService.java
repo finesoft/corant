@@ -27,11 +27,6 @@ import java.util.stream.Stream;
  */
 public interface QueryService<Q, P> {
 
-  String OFFSET_PARAM_NME = "_offset";
-  String LIMIT_PARAM_NME = "_limit";
-  int OFFSET_PARAM_VAL = 0;
-  int LIMIT_PARAM_VAL = 16;
-
   <T> ForwardList<T> forward(Q q, P p);
 
   default <R, T> ForwardList<T> forward(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {

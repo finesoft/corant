@@ -134,6 +134,9 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
             // TODO validate
           } finally {
             initialized = true;
+            logger.info(() -> String.format("Find [%s] enumeration class literals from path [%s].",
+                holder.values().stream().flatMap(e -> e.classLiteral.keySet().stream()).count(),
+                bundleFilePaths));
           }
         }
       }

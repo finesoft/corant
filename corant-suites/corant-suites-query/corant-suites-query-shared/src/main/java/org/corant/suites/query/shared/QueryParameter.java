@@ -27,6 +27,11 @@ import java.util.Map;
  */
 public interface QueryParameter extends Serializable {
 
+  String OFFSET_PARAM_NME = "_offset";
+  String LIMIT_PARAM_NME = "_limit";
+  int OFFSET_PARAM_VAL = 0;
+  int LIMIT_PARAM_VAL = 16;
+
   /**
    * Return the query context that may be contain current user context or security context.
    *

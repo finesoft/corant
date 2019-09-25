@@ -54,6 +54,7 @@ public class DistPackager implements Packager {
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
+  public static final String RUN_USED_CONFIG_PROFILE = "#USED_CONFIG_PROFILE#";
   public static final String DIST_NAME_SUF = "-dist.zip";
 
   private final PackageMojo mojo;
@@ -183,7 +184,8 @@ public class DistPackager implements Packager {
     String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
     final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
-        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation());
+        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
+        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile());
     return new ScriptEntry(RUN_BAT, usebat);
   }
 
@@ -191,7 +193,8 @@ public class DistPackager implements Packager {
     String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
     final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
-        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation());
+        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
+        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile());
     return new ScriptEntry(RUN_SH, usesh);
   }
 

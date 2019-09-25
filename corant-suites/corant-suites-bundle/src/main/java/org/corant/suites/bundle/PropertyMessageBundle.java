@@ -119,6 +119,9 @@ public class PropertyMessageBundle implements MessageBundle {
 
           } finally {
             initialized = true;
+            logger.info(() -> String.format("Find [%s] message keys from path [%s].",
+                holder.values().stream().flatMap(e -> e.values().stream()).count(),
+                bundleFilePaths));
           }
         }
       }

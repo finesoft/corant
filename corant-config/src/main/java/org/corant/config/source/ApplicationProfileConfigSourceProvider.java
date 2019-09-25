@@ -66,8 +66,9 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
         list.addAll(ConfigSourceLoader.load(classLoader,
             ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter, pfClassPaths));
       }
-      list.forEach(cs -> logger.info(() -> String.format("Loaded profile config source[%s] %s.",
-          cs.getOrdinal(), cs.getName())));
+      list.forEach(cs -> logger.info(
+          () -> String.format("Loaded profile config source[%s], inlcude %s items, location is %s.",
+              cs.getOrdinal(), cs.getProperties().size(), cs.getName())));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

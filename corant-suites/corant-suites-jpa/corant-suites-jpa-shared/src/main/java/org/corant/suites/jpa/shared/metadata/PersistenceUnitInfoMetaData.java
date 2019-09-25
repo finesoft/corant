@@ -59,7 +59,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   private PersistenceUnitTransactionType persistenceUnitTransactionType =
       PersistenceUnitTransactionType.JTA;
   private ValidationMode validationMode = ValidationMode.NONE;
-  private boolean bindToJndi = true;
+  private boolean bindToJndi = false;
 
   /**
    * @param persistenceUnitName

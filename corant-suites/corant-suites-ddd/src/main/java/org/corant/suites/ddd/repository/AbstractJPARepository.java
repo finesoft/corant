@@ -18,7 +18,6 @@ import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.literal.NamedLiteral;
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -33,7 +32,6 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
  */
 public abstract class AbstractJPARepository implements JPARepository {
 
-  @Inject
   protected JTAJPAUnitOfWorksManager unitOfWorkManager;
 
   protected volatile PersistenceContext persistenceContext;

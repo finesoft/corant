@@ -15,6 +15,7 @@ package org.corant.suites.query.shared.dynamic.freemarker;
 
 import java.util.ArrayList;
 import java.util.List;
+import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -61,5 +62,15 @@ public class DynamicTemplateMethodModelExSql implements DynamicTemplateMethodMod
   @Override
   public String getType() {
     return TYPE;
+  }
+
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Object getWrappedParamValue(WrapperTemplateModel arg) {
+    Object obj = DynamicTemplateMethodModelEx.super.getWrappedParamValue(arg);
+    if (Enum.class.isAssignableFrom(obj.getClass())) {
+      return ((Enum) obj).name();
+    }
+    return obj;
   }
 }

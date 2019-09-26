@@ -42,7 +42,7 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
 
   default Object getParamValue(Object arg) throws TemplateModelException {
     if (arg instanceof WrapperTemplateModel) {
-      return ((WrapperTemplateModel) arg).getWrappedObject();
+      return getWrappedParamValue((WrapperTemplateModel) arg);
     } else if (arg instanceof TemplateScalarModel) {
       return ((TemplateScalarModel) arg).getAsString().trim();
     } else if (arg instanceof TemplateDateModel) {
@@ -61,25 +61,7 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
       return list;
     } else if (arg instanceof TemplateCollectionModel) {
       final TemplateModelIterator it = ((TemplateCollectionModel) arg).iterator();
-      List<TemplateModel> tsm = listOf(new Iterator<TemplateModel>() {
-        @Override
-        public boolean hasNext() {
-          try {
-            return it.hasNext();
-          } catch (TemplateModelException e) {
-            throw new QueryRuntimeException(e);
-          }
-        }
-
-        @Override
-        public TemplateModel next() {
-          try {
-            return it.next();
-          } catch (TemplateModelException e) {
-            throw new QueryRuntimeException(e);
-          }
-        }
-      });
+      List<TemplateModel> tsm = listOf(new SimpleTemplateModelIterator(it));
       int size = tsm.size();
       List<Object> list = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
@@ -87,11 +69,49 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
       }
       return list;
     } else {
+      // FIXME Resolve TemplateHashModel
       throw new QueryRuntimeException("Unknow arguement,the class is %s",
           arg == null ? "null" : arg.getClass());
     }
   }
 
   String getType();
+
+  default Object getWrappedParamValue(WrapperTemplateModel arg) {
+    return arg.getWrappedObject();
+  }
+
+  /**
+   * corant-suites-query-shared
+   *
+   * @author bingo 上午9:26:56
+   *
+   */
+  public static final class SimpleTemplateModelIterator implements Iterator<TemplateModel> {
+
+    private final TemplateModelIterator it;
+
+    public SimpleTemplateModelIterator(TemplateModelIterator it) {
+      this.it = it;
+    }
+
+    @Override
+    public boolean hasNext() {
+      try {
+        return it.hasNext();
+      } catch (TemplateModelException e) {
+        throw new QueryRuntimeException(e);
+      }
+    }
+
+    @Override
+    public TemplateModel next() {
+      try {
+        return it.next();
+      } catch (TemplateModelException e) {
+        throw new QueryRuntimeException(e);
+      }
+    }
+  }
 
 }

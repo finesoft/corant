@@ -89,15 +89,10 @@ public class PropertyResourceBundle extends ResourceBundle {
     return map;
   }
 
-  public static void main(String... baseBundleName) {
-    System.out.println(detectLocaleByName("xxxx_zh_CN.properties"));
-  }
-
   protected static Locale detectLocaleByName(String name) {
     String useName = defaultTrim(FileUtils.getFileBaseName(name));
-    int firstSpt = useName.indexOf(LOCALE_SPT_CHAR);
-    if (isNotBlank(useName) && firstSpt != -1) {
-      return LocaleUtils.langToLocale(right(useName, firstSpt + 1), LOCALE_SPT_CHAR);
+    if (isNotBlank(useName) && useName.contains(LOCALE_SPT)) {
+      return LocaleUtils.langToLocale(right(useName, 5), LOCALE_SPT_CHAR);
     } else {
       return Locale.getDefault();
     }

@@ -13,7 +13,9 @@
  */
 package org.corant.suites.bundle;
 
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.right;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Instant;
@@ -87,10 +89,15 @@ public class PropertyResourceBundle extends ResourceBundle {
     return map;
   }
 
+  public static void main(String... baseBundleName) {
+    System.out.println(detectLocaleByName("xxxx_zh_CN.properties"));
+  }
+
   protected static Locale detectLocaleByName(String name) {
-    String useName = FileUtils.getFileBaseName(name);
-    if (isNotBlank(useName)) {
-      return LocaleUtils.langToLocale(useName, LOCALE_SPT_CHAR);
+    String useName = defaultTrim(FileUtils.getFileBaseName(name));
+    int firstSpt = useName.indexOf(LOCALE_SPT_CHAR);
+    if (isNotBlank(useName) && firstSpt != -1) {
+      return LocaleUtils.langToLocale(right(useName, firstSpt + 1), LOCALE_SPT_CHAR);
     } else {
       return Locale.getDefault();
     }

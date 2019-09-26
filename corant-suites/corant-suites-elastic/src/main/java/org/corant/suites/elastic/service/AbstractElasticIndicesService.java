@@ -15,10 +15,7 @@ package org.corant.suites.elastic.service;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.suites.elastic.Elastic6Constants;
-import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
@@ -33,11 +30,7 @@ import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
  * @author bingo 下午6:36:42
  *
  */
-@ApplicationScoped
 public abstract class AbstractElasticIndicesService implements ElasticIndicesService {
-
-  @Inject
-  protected AbstractElasticIndexingResolver indexingResolver;
 
   @Override
   public boolean create(String indexName, Map<String, Object> setting, Map<String, Object> schema) {

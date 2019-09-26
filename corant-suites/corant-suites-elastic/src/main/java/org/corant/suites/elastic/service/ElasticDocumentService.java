@@ -27,6 +27,7 @@ import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.resolver.ResolverUtils;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.corant.suites.elastic.model.ElasticVersionedDocument;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -76,6 +77,8 @@ public interface ElasticDocumentService {
       return null;
     }
   }
+
+  TransportClient getTransportClient();
 
   default boolean index(ElasticDocument document) {
     shouldNotNull(document);

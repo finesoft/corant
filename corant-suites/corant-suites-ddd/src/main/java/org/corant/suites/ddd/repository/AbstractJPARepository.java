@@ -23,7 +23,6 @@ import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
-import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 
 /**
@@ -32,7 +31,6 @@ import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
  * @author bingo 下午9:54:26
  *
  */
-@Repositories
 public abstract class AbstractJPARepository implements JPARepository {
 
   @Inject

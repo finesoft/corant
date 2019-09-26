@@ -43,7 +43,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
 import org.corant.suites.elastic.ElasticConfig;
@@ -82,8 +81,7 @@ import org.elasticsearch.index.VersionType;
 @ApplicationScoped
 public abstract class AbstractElasticIndexingResolver implements ElasticIndexingResolver {
 
-  @Inject
-  protected Logger logger;
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
 
   protected Map<Class<?>, ElasticIndexing> classIndices = new ConcurrentHashMap<>();
 

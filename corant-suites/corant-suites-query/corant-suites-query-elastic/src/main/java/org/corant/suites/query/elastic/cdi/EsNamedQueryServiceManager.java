@@ -13,12 +13,13 @@
  */
 package org.corant.suites.query.elastic.cdi;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -56,7 +57,7 @@ public class EsNamedQueryServiceManager {
   protected EsInLineNamedQueryResolver<String, Object> resolver;
 
   @Inject
-  protected TransportClientManager transportClientManager;
+  protected Function<String, TransportClient> transportClientManager;
 
   @Inject
   @ConfigProperty(name = "query.elastic.max-select-size", defaultValue = "128")
@@ -70,8 +71,8 @@ public class EsNamedQueryServiceManager {
   @EsQuery
   EsNamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final EsQuery sc = shouldNotNull(annotated.getAnnotation(EsQuery.class));
-    String dataCenterName = defaultString(sc.value());
+    final EsQuery sc = annotated.getAnnotation(EsQuery.class);
+    String dataCenterName = sc == null ? EMPTY : defaultString(sc.value());
     if (isBlank(dataCenterName) && defaultQualifierValue.isPresent()) {
       dataCenterName = defaultQualifierValue.get();
     }
@@ -79,7 +80,7 @@ public class EsNamedQueryServiceManager {
     return services.computeIfAbsent(dataCenter, (dc) -> {
       logger.info(() -> String
           .format("Create default elastic named query service, the data center is [%s]. ", dc));
-      return new DefaultEsNamedQueryService(transportClientManager.get(dc), resolver,
+      return new DefaultEsNamedQueryService(transportClientManager.apply(dc), resolver,
           maxSelectSize);
     });
   }

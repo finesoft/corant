@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
@@ -55,10 +53,8 @@ import org.elasticsearch.search.sort.SortBuilder;
  *
  */
 @SuppressWarnings("unchecked")
-@ApplicationScoped
 public abstract class AbstractElasticDocumentService implements ElasticDocumentService {
 
-  @Inject
   protected ElasticIndexingResolver indexingResolver;
 
   @Override
@@ -102,6 +98,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
     }
   }
 
+  @Override
   public abstract TransportClient getTransportClient();
 
   @Override

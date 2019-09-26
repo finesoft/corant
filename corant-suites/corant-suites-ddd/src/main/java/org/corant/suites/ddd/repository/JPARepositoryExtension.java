@@ -15,6 +15,7 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.CollectionUtils.setOf;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
 import org.corant.kernel.util.Qualifiers;
+import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.EntityLifecycleManager;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 import org.corant.suites.jpa.shared.JPAExtension;
@@ -56,7 +58,8 @@ public class JPARepositoryExtension implements Extension {
     qualifiers.putAll(Qualifiers.resolveNameds(names));
     qualifiers.forEach((k, v) -> {
       abd.<JPARepository>addBean().addQualifiers(v).addTransitiveTypeClosure(JPARepository.class)
-          .beanClass(JPARepository.class).scope(ApplicationScoped.class).produceWith(beans -> {
+          .beanClass(JPARepository.class).scope(ApplicationScoped.class)
+          .stereotypes(setOf(Repositories.class)).produceWith(beans -> {
             return produce(beans, k);
           }).disposeWith((repo, beans) -> {
           });

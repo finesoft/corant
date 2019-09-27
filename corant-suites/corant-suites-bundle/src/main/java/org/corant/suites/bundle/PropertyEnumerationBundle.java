@@ -105,7 +105,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
               PropertyResourceBundle.getBundles(path, (r) -> true).forEach((s, res) -> {
-                logger.info(() -> String.format("Find enumeration resource, the path is %s", s));
+                logger.info(() -> String.format("Find enumeration resource from %s", s));
                 Locale locale = res.getLocale();
                 EnumLiteralsObject obj =
                     holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
@@ -134,7 +134,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
             // TODO validate
           } finally {
             initialized = true;
-            logger.info(() -> String.format("Find %s enumeration class literals from path %s.",
+            logger.info(() -> String.format("Find %s enumeration class literals from %s.",
                 holder.values().stream().flatMap(e -> e.classLiteral.keySet().stream()).count(),
                 bundleFilePaths));
           }

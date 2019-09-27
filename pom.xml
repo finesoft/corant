@@ -116,71 +116,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.corant</groupId>
-                    <artifactId>corant-devops-maven-plugin</artifactId>
-                    <version>${project.version}</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>package</goal>
-                            </goals>
-                            <configuration>
-                                <classifier>bin</classifier>
-                                <withDist>true</withDist>
-                                <mainClass>${runner-class}</mainClass>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${version.build-helper-maven-plugin}</version>
-                    <executions>
-                        <execution>
-                            <id>attach-artifact</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>attach-artifact</goal>
-                            </goals>
-                            <configuration>
-                                <artifacts>
-                                    <artifact>
-                                        <file>
-                                            ${project.basedir}/target/${project.artifactId}-${project.version}-bin.jar
-                                        </file>
-                                        <type>jar</type>
-                                        <classifier>bin</classifier>
-                                    </artifact>
-                                    <artifact>
-                                        <file>
-                                            ${project.basedir}/target/${project.artifactId}-${project.version}-bin-dist.zip
-                                        </file>
-                                        <type>zip</type>
-                                        <classifier>bin-dist</classifier>
-                                    </artifact>
-                                </artifacts>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>${version.exec-maven-plugin}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>java</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <mainClass>${runner-class}</mainClass>
-                    </configuration>
-                </plugin>
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>

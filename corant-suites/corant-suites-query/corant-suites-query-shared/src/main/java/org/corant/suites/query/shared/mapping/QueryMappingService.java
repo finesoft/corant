@@ -13,11 +13,17 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -44,12 +50,16 @@ public class QueryMappingService {
   Logger logger;
 
   @Inject
-  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**QueryService.xml")
+  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
   String mappingFilePaths;
 
   @Inject
   @Any
   Instance<QueryProvider> queryProvider;
+
+  @Inject
+  @Any
+  Instance<QueryMappingFilePathResolver> mappingFilePathSupplier;
 
   public Query getQuery(String name) {
     return queries.get(name);
@@ -59,7 +69,7 @@ public class QueryMappingService {
     if (initialized) {
       return;
     }
-    new QueryParser().parse(mappingFilePaths).forEach(m -> {
+    new QueryParser().parse(resolveMappingFilePaths()).forEach(m -> {
       List<String> brokens = m.selfValidate();
       if (!brokens.isEmpty()) {
         throw new QueryRuntimeException(String.join("\n", brokens));
@@ -107,5 +117,33 @@ public class QueryMappingService {
   @PostConstruct
   protected void onPostConstruct() {
     initialize();
+  }
+
+  protected String[] resolveMappingFilePaths() {
+    Set<String> paths = new LinkedHashSet<>();
+    if (!mappingFilePathSupplier.isUnsatisfied()) {
+      mappingFilePathSupplier.forEach(s -> {
+        Set<String> ps = s.getMappingFilePaths();
+        if (isNotEmpty(ps)) {
+          for (String p : ps) {
+            if (isNotBlank(p)) {
+              paths.add(p);
+            }
+          }
+        }
+      });
+    }
+    if (isEmpty(paths)) {
+      for (String p : split(mappingFilePaths, ",", true, true)) {
+        paths.add(p);
+      }
+    }
+    return paths.toArray(new String[paths.size()]);
+  }
+
+  public interface QueryMappingFilePathResolver {
+
+    Set<String> getMappingFilePaths();
+
   }
 }

@@ -50,11 +50,11 @@ public class QueryParser {
 
   static Logger logger = Logger.getLogger(QueryParser.class.getName());
 
-  public List<QueryMapping> parse(String pathExpress) {
+  public List<QueryMapping> parse(String... pathExpresses) {
     List<QueryMapping> qmList = new CopyOnWriteArrayList<>();
     final QueryParserErrorHandler errHdl = new QueryParserErrorHandler();
     final SAXParserFactory factory = createSAXParserFactory();
-    final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpress);
+    final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpresses);
     fileMap.entrySet().stream().parallel().forEach(entry -> {
       logger.info(() -> String.format("Parse query mapping file %s.", entry.getKey()));
       try (InputStream is = entry.getValue().openStream()) {
@@ -80,15 +80,17 @@ public class QueryParser {
     return factory;
   }
 
-  Map<String, Resource> getQueryMappingFiles(String pathExpress) {
+  Map<String, Resource> getQueryMappingFiles(String... pathExpresses) {
     Map<String, Resource> map = new ConcurrentHashMap<>();
-    setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
-      try {
-        Resources.from(path).forEach(f -> map.put(f.getLocation(), f));
-      } catch (Exception e) {
-        throw new QueryRuntimeException(e);
-      }
-    });
+    for (String pathExpress : pathExpresses) {
+      setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
+        try {
+          Resources.from(path).forEach(f -> map.put(f.getLocation(), f));
+        } catch (Exception e) {
+          throw new QueryRuntimeException(e);
+        }
+      });
+    }
     return map;
   }
 

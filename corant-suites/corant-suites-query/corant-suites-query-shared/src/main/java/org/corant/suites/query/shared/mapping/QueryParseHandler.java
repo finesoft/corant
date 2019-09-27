@@ -300,7 +300,7 @@ public class QueryParseHandler extends DefaultHandler {
 
   void handleQuery(boolean start, String qName, Attributes attributes) {
     if (start) {
-      Query q = new Query();
+      Query q = new Query(url);
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {

@@ -17,6 +17,7 @@ import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,9 +49,15 @@ public class Query implements Serializable {
   private String version = "";
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
   private Map<String, String> properties = new HashMap<>();
+  private String mappingFilePath;
 
   public Query() {
     super();
+  }
+
+  public Query(String mappingFilePath) {
+    this();
+    this.mappingFilePath = mappingFilePath;
   }
 
   /**
@@ -66,11 +73,13 @@ public class Query implements Serializable {
    * @param version
    * @param paramMappings
    * @param properties
+   * @param mappingFilePath;
    */
   public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
       boolean cacheResultSetMetadata, String description, String script,
       List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
-      Map<String, ParameterMapping> paramMappings, Map<String, String> properties) {
+      Map<String, ParameterMapping> paramMappings, Map<String, String> properties,
+      String mappingFilePath) {
     super();
     this.name = name;
     setResultClass(resultClass);
@@ -84,6 +93,7 @@ public class Query implements Serializable {
     this.version = version;
     this.paramMappings = paramMappings;
     this.properties = properties;
+    this.mappingFilePath = defaultTrim(mappingFilePath);
   }
 
   /**
@@ -105,6 +115,10 @@ public class Query implements Serializable {
    */
   public List<QueryHint> getHints() {
     return Collections.unmodifiableList(hints);
+  }
+
+  public String getMappingFilePath() {
+    return mappingFilePath;
   }
 
   /**
@@ -217,6 +231,10 @@ public class Query implements Serializable {
     this.description = description;
   }
 
+  void setMappingFilePath(String mappingFilePath) {
+    this.mappingFilePath = mappingFilePath;
+  }
+
   void setName(String name) {
     this.name = name;
   }
@@ -225,9 +243,6 @@ public class Query implements Serializable {
     this.paramMappings.putAll(paramMappings);
   }
 
-  /**
-   * @param properties the properties to set
-   */
   void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }

@@ -111,7 +111,7 @@ public class Resources {
   /**
    * Use file create file system resource.
    *
-   * @param path
+   * @param file
    * @return
    * @throws IOException fromFileSystem
    */
@@ -205,7 +205,7 @@ public class Resources {
   /**
    * Not throw IO exception, just warning
    *
-   * @see from
+   * @see #from
    *
    * @param path
    * @return tryFrom
@@ -577,6 +577,10 @@ public class Resources {
     public File getFile() {
       return file;
     }
+    @Override
+    public String getFilename() {
+      return file.getName();
+    }
 
     @Override
     public String getLocation() {
@@ -590,7 +594,7 @@ public class Resources {
     @Override
     public Map<String, Object> getMetadatas() {
       return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "path",
-          getFile().getPath(), "fileName", getFile().getName(), "lastModified",
+          getFile().getPath(), "fileName", getFilename(), "lastModified",
           getFile().lastModified(), "length", getFile().length());
     }
 
@@ -666,6 +670,10 @@ public class Resources {
   public interface Resource {
 
     String getLocation();
+
+    default String getFilename(){
+      return FileUtils.getFileName(getLocation());
+    }
 
     default Map<String, Object> getMetadatas() {
       return immutableMapOf("location", getLocation(), "sourceType", getSourceType());

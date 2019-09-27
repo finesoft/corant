@@ -60,7 +60,7 @@ public class PropertyResourceBundle extends ResourceBundle {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public PropertyResourceBundle(Resource fo) throws IOException {
-    baseBundleName = fo.getLocation();
+    baseBundleName = fo.getName();
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
     Properties properties = new Properties();
@@ -76,10 +76,10 @@ public class PropertyResourceBundle extends ResourceBundle {
     try {
       Resources.from(path).filter(fs).forEach((fo) -> {
         try {
-          map.putIfAbsent(fo.getLocation(), new PropertyResourceBundle(fo));
+          map.putIfAbsent(fo.getURL().getPath(), new PropertyResourceBundle(fo));
         } catch (IOException e) {
-          logger.log(Level.WARNING, e,
-              () -> String.format("Can not load property resource bundle %s", fo.getLocation()));
+          logger.log(Level.WARNING, e, () -> String
+              .format("Can not load property resource bundle %s", fo.getURL().getPath()));
         }
       });
     } catch (IOException e) {

@@ -85,7 +85,7 @@ public class QueryParser {
     for (String pathExpress : pathExpresses) {
       setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
         try {
-          Resources.from(path).forEach(f -> map.put(f.getLocation(), f));
+          Resources.from(path).forEach(f -> map.put(f.getURL().getPath(), f));
         } catch (Exception e) {
           throw new QueryRuntimeException(e);
         }
@@ -97,7 +97,7 @@ public class QueryParser {
   Schema getSchema() {
     try {
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
-          Resources.fromClassPath(SCHEMA_URL).map(ClassPathResource::getUrl).findFirst().get());
+          Resources.fromClassPath(SCHEMA_URL).map(ClassPathResource::getURL).findFirst().get());
     } catch (SAXException | IOException e) {
       throw new QueryRuntimeException(e);
     }

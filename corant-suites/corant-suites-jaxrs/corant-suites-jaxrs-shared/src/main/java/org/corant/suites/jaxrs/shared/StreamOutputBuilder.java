@@ -75,7 +75,7 @@ public class StreamOutputBuilder {
 
   public static StreamOutputBuilder of(Resource resources) {
     try {
-      return new StreamOutputBuilder(resources.openStream()).fileName(resources.getLocation());
+      return new StreamOutputBuilder(resources.openStream()).fileName(resources.getName());
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

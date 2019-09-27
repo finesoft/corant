@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.util.Resources.URLResource;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
@@ -447,7 +447,7 @@ public class QueryParseHandler extends DefaultHandler {
     Optional<SourceType> st = SourceType.decide(trim(script));
     if (st.isPresent()) {
       try {
-        Optional<Resource> or = Resources.from(trim(script)).findFirst();
+        Optional<URLResource> or = Resources.from(trim(script)).findFirst();
         if (or.isPresent()) {
           try (InputStream is = or.get().openStream()) {
             return fromInputStream(is);

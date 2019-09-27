@@ -70,8 +70,8 @@ public class JPAUtils {
     Set<String> paths = new LinkedHashSet<>();
     try {
       for (String pathExpression : pathExpressions) {
-        Resources.from(pathExpression).filter(r -> !ClassResource.class.isInstance(r))
-            .map(r -> r.getLocation()).forEach(paths::add);
+        Resources.fromClassPath(pathExpression).filter(r -> !ClassResource.class.isInstance(r))
+            .map(r -> r.getClassPath()).forEach(paths::add);
       }
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
@@ -118,8 +118,8 @@ public class JPAUtils {
 
   public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replaceAll("\\.", "/");
-    Resources.from(path).filter(r -> r.getLocation().endsWith("JpaOrm.xml"))
-        .map(r -> r.getLocation()).map(s -> new StringBuilder().append("<mapping-file>")
+    Resources.fromClassPath(path).filter(r -> r.getClassPath().endsWith("JpaOrm.xml"))
+        .map(r -> r.getClassPath()).map(s -> new StringBuilder().append("<mapping-file>")
             .append(s.substring(s.indexOf(path))).append("</mapping-file>"))
         .forEach(ps::println);
   }

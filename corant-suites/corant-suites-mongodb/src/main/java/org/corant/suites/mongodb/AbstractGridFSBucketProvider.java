@@ -14,14 +14,16 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import org.bson.Document;
 import org.corant.kernel.normal.Defaults;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Resources.FileSystemResource;
 import org.corant.shared.util.Resources.Resource;
 import com.mongodb.MongoGridFSException;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -51,10 +53,7 @@ public abstract class AbstractGridFSBucketProvider {
 
   protected void putFile(Serializable id, Resource r) {
     try (InputStream is = r.openStream()) {
-      putFile(id,
-          r instanceof FileSystemResource ? FileSystemResource.class.cast(r).getFile().getName()
-              : r.getLocation(),
-          DFLT_CHUNK_SIZE_BYTES, is, r.getMetadatas());
+      putFile(id, r.getName(), DFLT_CHUNK_SIZE_BYTES, is, r.getMetadata());
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
@@ -63,7 +62,9 @@ public abstract class AbstractGridFSBucketProvider {
   protected void putFile(Serializable id, String filename, int chunkSizeBytes, InputStream is,
       Map<String, Object> metadata) {
     getBucket().uploadFromStream(MongoClientExtension.bsonId(id), filename, shouldNotNull(is),
-        new GridFSUploadOptions().chunkSizeBytes(chunkSizeBytes));
+        new GridFSUploadOptions()
+            .metadata(new Document(defaultObject(metadata, Collections.emptyMap())))
+            .chunkSizeBytes(chunkSizeBytes));
   }
 
   protected void removeFile(Serializable id) {

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Resources.URLResource;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -66,10 +66,10 @@ public class ConfigSourceLoader {
     return sources;
   }
 
-  static Optional<AbstractConfigSource> load(Predicate<URL> filter, Resource resource,
+  static Optional<AbstractConfigSource> load(Predicate<URL> filter, URLResource resource,
       int ordinal) {
-    if (resource != null && filter.test(resource.getUrl())) {
-      String location = defaultTrim(resource.getLocation());
+    if (resource != null && filter.test(resource.getURL())) {
+      String location = defaultTrim(resource.getURL().getPath());
       try (InputStream is = resource.openStream()) {
         if (location.endsWith(".properties")) {
           return Optional.of(new PropertiesConfigSource(location, ordinal, is));

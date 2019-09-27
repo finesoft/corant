@@ -67,7 +67,7 @@ public enum PersistenceSchema {
       String xsdUrlPrefix = replace(getClass().getPackage().getName(), ".", "/") + "/persistence_";
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
           .newSchema(Resources.fromClassPath(xsdUrlPrefix + replace(version, ".", "_") + ".xsd")
-              .map(ClassPathResource::getUrl).findFirst().get());
+              .map(ClassPathResource::getURL).findFirst().get());
     } catch (SAXException | IOException e) {
       throw new CorantRuntimeException(e);
     }

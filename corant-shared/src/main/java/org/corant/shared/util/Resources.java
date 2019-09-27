@@ -48,7 +48,7 @@ public class Resources {
 
   public static final Logger logger = Logger.getLogger(Resources.class.getName());
 
-  public static <T extends Resource> Stream<T> from(String path) throws IOException {
+  public static <T extends URLResource> Stream<T> from(String path) throws IOException {
     if (isNotBlank(path)) {
       SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);
       if (st == SourceType.FILE_SYSTEM) {
@@ -210,7 +210,7 @@ public class Resources {
    * @param path
    * @return tryFrom
    */
-  public static <T extends Resource> Stream<T> tryFrom(final String path) {
+  public static <T extends URLResource> Stream<T> tryFrom(final String path) {
     try {
       return from(path);
     } catch (IOException e) {
@@ -378,21 +378,22 @@ public class Resources {
    * @author bingo 下午2:04:58
    *
    */
-  public static class ClassPathResource implements Resource {
-    final ClassLoader classLoader;
-    final String location;
-    final SourceType sourceType = SourceType.CLASS_PATH;
+  public static class ClassPathResource extends URLResource {
 
-    public ClassPathResource(String location, ClassLoader classLoader) {
-      this.location = shouldNotNull(location);
+    final ClassLoader classLoader;
+    final String classPath;
+
+    public ClassPathResource(String classPath, ClassLoader classLoader) {
+      super(SourceType.CLASS_PATH);
       this.classLoader = shouldNotNull(classLoader);
+      this.classPath = shouldNotNull(classPath);
     }
 
-    public static ClassPathResource of(String location, ClassLoader classLoader) {
-      if (location.endsWith(ClassUtils.CLASS_FILE_NAME_EXTENSION)) {
-        return new ClassResource(location, classLoader);
+    public static ClassPathResource of(String classPath, ClassLoader classLoader) {
+      if (classPath.endsWith(ClassUtils.CLASS_FILE_NAME_EXTENSION)) {
+        return new ClassResource(classPath, classLoader);
       } else {
-        return new ClassPathResource(location, classLoader);
+        return new ClassPathResource(classPath, classLoader);
       }
     }
 
@@ -401,7 +402,7 @@ public class Resources {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
+      if (!super.equals(obj)) {
         return false;
       }
       if (getClass() != obj.getClass()) {
@@ -415,11 +416,11 @@ public class Resources {
       } else if (!classLoader.equals(other.classLoader)) {
         return false;
       }
-      if (location == null) {
-        if (other.location != null) {
+      if (classPath == null) {
+        if (other.classPath != null) {
           return false;
         }
-      } else if (!location.equals(other.location)) {
+      } else if (!classPath.equals(other.classPath)) {
         return false;
       }
       return true;
@@ -429,37 +430,39 @@ public class Resources {
       return classLoader;
     }
 
+    public String getClassPath() {
+      return classPath;
+    }
+
     @Override
     public String getLocation() {
-      return location;
-    }
-
-    public final String getResourceName() {
-      return location;
+      return classPath;
     }
 
     @Override
-    public SourceType getSourceType() {
-      return sourceType;
-    }
-
-    @Override
-    public final URL getUrl() {
-      return classLoader.getResource(location);
+    public final URL getURL() {
+      if (url == null) {
+        synchronized (this) {
+          if (url == null) {
+            url = classLoader.getResource(classPath);
+          }
+        }
+      }
+      return url;
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
-      int result = 1;
+      int result = super.hashCode();
       result = prime * result + (classLoader == null ? 0 : classLoader.hashCode());
-      result = prime * result + (location == null ? 0 : location.hashCode());
+      result = prime * result + (classPath == null ? 0 : classPath.hashCode());
       return result;
     }
 
     @Override
     public final InputStream openStream() throws IOException {
-      URLConnection conn = getUrl().openConnection();
+      URLConnection conn = getURL().openConnection();
       if (System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")) {
         conn.setUseCaches(false);
       }
@@ -480,10 +483,10 @@ public class Resources {
 
     final String className;
 
-    public ClassResource(String name, ClassLoader classLoader) {
-      super(name, classLoader);
-      int classNameEnd = name.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
-      className = name.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
+    public ClassResource(String classPath, ClassLoader classLoader) {
+      super(classPath, classLoader);
+      int classNameEnd = classPath.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
+      className = classPath.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
           ClassUtils.PACKAGE_SEPARATOR_CHAR);
     }
 
@@ -539,85 +542,51 @@ public class Resources {
 
   }
 
-  public static class FileSystemResource implements Resource {
-    final SourceType sourceType = SourceType.FILE_SYSTEM;
+  /**
+   * corant-shared
+   *
+   * Describe system file
+   *
+   * @author bingo 下午6:53:19
+   *
+   */
+  public static class FileSystemResource extends URLResource {
+
     final File file;
 
     public FileSystemResource(File file) {
+      super(SourceType.FILE_SYSTEM);
       this.file = shouldNotNull(file);
-    }
-
-    public FileSystemResource(String location) {
-      super();
-      file = new File(shouldNotNull(location));
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      FileSystemResource other = (FileSystemResource) obj;
-      if (file == null) {
-        if (other.file != null) {
-          return false;
-        }
-      } else if (!file.equals(other.file)) {
-        return false;
-      }
-      return true;
-    }
-
-    public File getFile() {
-      return file;
-    }
-    @Override
-    public String getFilename() {
-      return file.getName();
-    }
-
-    @Override
-    public String getLocation() {
       try {
-        return file.getCanonicalPath();
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-
-    @Override
-    public Map<String, Object> getMetadatas() {
-      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "path",
-          getFile().getPath(), "fileName", getFilename(), "lastModified",
-          getFile().lastModified(), "length", getFile().length());
-    }
-
-    @Override
-    public SourceType getSourceType() {
-      return sourceType;
-    }
-
-    @Override
-    public URL getUrl() {
-      try {
-        return file.toURI().toURL();
+        url = file.toURI().toURL();
       } catch (MalformedURLException e) {
         throw new CorantRuntimeException(e);
       }
     }
 
+    public FileSystemResource(String location) {
+      this(new File(shouldNotNull(location)));
+    }
+
+    public File getFile() {
+      return file;
+    }
+
     @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (file == null ? 0 : file.hashCode());
-      return result;
+    public String getLocation() {
+      return getFile().getAbsolutePath();
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "path",
+          getFile().getPath(), "fileName", getName(), "lastModified", getFile().lastModified(),
+          "length", getFile().length());
+    }
+
+    @Override
+    public String getName() {
+      return file.getName();
     }
 
     @Override
@@ -626,22 +595,55 @@ public class Resources {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * Describe input stream resource, can specify a specific name.
+   *
+   * @author bingo 下午6:54:04
+   *
+   */
   public static class InputStreamResource implements Resource {
+    final String name;
     final String location;
-    final SourceType sourceType = SourceType.UNKNOW;
+    final SourceType sourceType = SourceType.UNKNOWN;
     final InputStream inputStream;
     final URL url;
 
+    /**
+     * @param inputStream
+     * @param name
+     */
+    public InputStreamResource(InputStream inputStream, String name) {
+      super();
+      this.name = name;
+      this.inputStream = inputStream;
+      location = null;
+      url = null;
+    }
+
+    /**
+     * @param location
+     * @param inputStream
+     */
     public InputStreamResource(String location, InputStream inputStream) {
       super();
       this.location = location;
       this.inputStream = inputStream;
       url = null;
+      name = null;
     }
 
+    /**
+     *
+     * @param url
+     * @throws MalformedURLException
+     * @throws IOException
+     */
     public InputStreamResource(URL url) throws MalformedURLException, IOException {
       location = url.toExternalForm();
       inputStream = url.openStream();
+      name = url.getFile();
       this.url = url;
     }
 
@@ -655,7 +657,6 @@ public class Resources {
       return sourceType;
     }
 
-    @Override
     public URL getUrl() {
       return url;
     }
@@ -667,28 +668,102 @@ public class Resources {
 
   }
 
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Object that representation of a resource that can be loaded from URL, class, file system or
+   * inputstream.
+   * </p>
+   *
+   * @author bingo 下午3:19:30
+   *
+   */
   public interface Resource {
 
+    /**
+     * Location of this resource, depends on original source. Depending on source type, this may be:
+     * <ul>
+     * <li>FILE_SYSTEM - absolute path to the file</li>
+     * <li>CLASS_PATH - class resource path</li>
+     * <li>URL - string of the URI</li>
+     * <li>UNKNOWN - whatever location was provided to {@link InputStreamResource}</li>
+     * </ul>
+     */
     String getLocation();
 
-    default String getFilename(){
-      return FileUtils.getFileName(getLocation());
-    }
-
-    default Map<String, Object> getMetadatas() {
+    /**
+     * The informantions of this resource. For example, author, date created and date modified, size
+     * etc.
+     *
+     * @return getMetadata
+     */
+    default Map<String, Object> getMetadata() {
       return immutableMapOf("location", getLocation(), "sourceType", getSourceType());
     }
 
+    /**
+     * The name of this resource. this may be:
+     * <ul>
+     * <li>FILE_SYSTEM - the underlying file name</li>
+     * <li>CLASS_PATH - the underlying class path resource name</li>
+     * <li>URL - the file name of this URL {@link URL#getFile()}</li>
+     * <li>UNKNOWN - whatever name was provided to {@link InputStreamResource}</li>
+     * </ul>
+     *
+     * @return getName
+     */
+    default String getName() {
+      return null;
+    }
+
+    /**
+     * original source type
+     *
+     * @return getSourceType
+     */
     SourceType getSourceType();
 
-    URL getUrl();
-
+    /**
+     * Return an {@link InputStream} for the content of an resource
+     *
+     * @return
+     * @throws IOException openStream
+     */
     InputStream openStream() throws IOException;
   }
 
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Object that representation of a original source of a Resource
+   * </p>
+   *
+   * @author bingo 下午3:31:29
+   *
+   */
   public enum SourceType {
 
-    FILE_SYSTEM("filesystem:"), CLASS_PATH("classpath:"), URL("url:"), UNKNOW("unknow:");
+    /**
+     * load resource from file system
+     */
+    FILE_SYSTEM("filesystem:"),
+
+    /**
+     * load resource from class path
+     */
+    CLASS_PATH("classpath:"),
+
+    /**
+     * load resource from URL
+     */
+    URL("url:"),
+
+    /**
+     * load resource from input stream
+     */
+    UNKNOWN("unknown:");
 
     private final String prefix;
     private final int prefixLength;
@@ -712,7 +787,7 @@ public class Resources {
     }
 
     public static String decideSeparator(String path) {
-      return decide(path).orElse(UNKNOW).getSeparator();
+      return decide(path).orElse(UNKNOWN).getSeparator();
     }
 
     public String getPrefix() {
@@ -755,30 +830,71 @@ public class Resources {
     }
   }
 
+  /**
+   * corant-shared
+   * <p>
+   * A representation of a resource that load from URL
+   *
+   * @author bingo 下午4:06:15
+   *
+   */
   public static class URLResource implements Resource {
-    final String location;
-    final SourceType sourceType = SourceType.URL;
-    final URL url;
+    final SourceType sourceType;
+    volatile URL url;
 
     public URLResource(String url) throws MalformedURLException {
-      this(new URL(url));
+      this(new URL(url), SourceType.URL);
     }
 
     public URLResource(URL url) {
-      super();
-      this.url = url;
-      location = url.toExternalForm();
+      this(url, SourceType.URL);
+    }
+
+    protected URLResource(SourceType sourceType) {
+      this.sourceType = shouldNotNull(sourceType);
+    }
+
+    URLResource(URL url, SourceType sourceType) {
+      this.url = shouldNotNull(url);
+      this.sourceType = shouldNotNull(sourceType);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      URLResource other = (URLResource) obj;
+      if (url == null) {
+        if (other.url != null) {
+          return false;
+        }
+      } else if (!url.equals(other.url)) {
+        return false;
+      }
+      return true;
     }
 
     @Override
     public String getLocation() {
-      return location;
+      return getURL().toExternalForm();
     }
 
     @Override
-    public Map<String, Object> getMetadatas() {
+    public Map<String, Object> getMetadata() {
       return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "url",
           url.toExternalForm());
+    }
+
+    @Override
+    public String getName() {
+      return FileUtils.getFileName(getURL().getPath());
     }
 
     @Override
@@ -786,14 +902,21 @@ public class Resources {
       return sourceType;
     }
 
-    @Override
-    public URL getUrl() {
+    public URL getURL() {
       return url;
     }
 
     @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (getURL() == null ? 0 : getURL().hashCode());
+      return result;
+    }
+
+    @Override
     public InputStream openStream() throws IOException {
-      return url.openStream();
+      return getURL().openStream();
     }
 
   }

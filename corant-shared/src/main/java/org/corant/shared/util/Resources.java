@@ -608,7 +608,6 @@ public class Resources {
     final String location;
     final SourceType sourceType = SourceType.UNKNOWN;
     final InputStream inputStream;
-    final URL url;
 
     /**
      * @param inputStream
@@ -619,7 +618,6 @@ public class Resources {
       this.name = name;
       this.inputStream = inputStream;
       location = null;
-      url = null;
     }
 
     /**
@@ -630,7 +628,6 @@ public class Resources {
       super();
       this.location = location;
       this.inputStream = inputStream;
-      url = null;
       name = null;
     }
 
@@ -644,7 +641,6 @@ public class Resources {
       location = url.toExternalForm();
       inputStream = url.openStream();
       name = url.getFile();
-      this.url = url;
     }
 
     @Override
@@ -653,12 +649,13 @@ public class Resources {
     }
 
     @Override
-    public SourceType getSourceType() {
-      return sourceType;
+    public String getName() {
+      return name;
     }
 
-    public URL getUrl() {
-      return url;
+    @Override
+    public SourceType getSourceType() {
+      return sourceType;
     }
 
     @Override

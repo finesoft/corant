@@ -86,6 +86,8 @@ public class UndertowWebServer extends AbstractWebServer {
 
   private Undertow server;
 
+  private DeploymentManager deploymentManager;
+
   @Override
   public void start() {
     try {
@@ -112,6 +114,8 @@ public class UndertowWebServer extends AbstractWebServer {
     if (server != null) {
       try {
         getPreStopHandlers().forEach(h -> h.onPreStop(this));
+        deploymentManager.stop();
+        deploymentManager.undeploy();
         server.stop();
         getPostStoppedHandlers().forEach(h -> h.onPostStopped(this));
       } catch (Exception e) {
@@ -184,7 +188,7 @@ public class UndertowWebServer extends AbstractWebServer {
       builder.addHttpsListener(config.getSecuredPort().get(), config.getHost(),
           resolveSSLContext());
     }
-    DeploymentManager deploymentManager = resolveServerDeploymentManager();
+    deploymentManager = resolveServerDeploymentManager();
     deploymentManager.deploy();
     try {
       deploymentManager.getDeployment().getSessionManager()

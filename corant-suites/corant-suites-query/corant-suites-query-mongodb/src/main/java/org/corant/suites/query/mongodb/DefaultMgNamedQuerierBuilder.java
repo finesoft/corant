@@ -18,7 +18,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ObjectUtils.Triple;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
+import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;

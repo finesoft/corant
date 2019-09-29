@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -32,8 +33,8 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class DefaultJpqlNamedQueryResolver implements JpqlNamedQueryResolver<String, Object> {
+public class DefaultJpqlNamedQueryResolver
+    implements NamedQueryResolver<String, Object, JpqlNamedQuerier> {
 
   final Map<String, JpqlNamedQuerierBuilder> builders = new ConcurrentHashMap<>();
 

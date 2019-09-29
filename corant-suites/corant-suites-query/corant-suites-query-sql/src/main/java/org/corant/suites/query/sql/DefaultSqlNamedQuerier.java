@@ -19,7 +19,6 @@ import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
 
 /**
  * corant-suites-query
@@ -28,7 +27,7 @@ import org.corant.suites.query.sql.SqlNamedQueryResolver.SqlQuerier;
  *
  */
 public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
-    implements SqlQuerier {
+    implements SqlNamedQuerier {
 
   private final String name;
   private final Object[] scriptParameter;

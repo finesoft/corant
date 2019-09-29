@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.corant.shared.util.ObjectUtils.Pair;
-import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
@@ -42,7 +42,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public Map<String, Object> aggregate(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(null), null, null);
     try {
       Map<String, Object> result =
@@ -57,7 +57,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
@@ -67,7 +67,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> T get(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, 0, 1);
     List<T> result = hits.getValue();
     if (!isEmpty(result)) {
@@ -78,7 +78,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> PagedList<T> page(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
@@ -88,7 +88,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public Map<String, Object> search(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(null), null, null);
     try {
       Map<String, Object> result = getExecutor().search(resolveIndexName(queryName), script);
@@ -102,14 +102,14 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> List<T> select(String queryName, Object parameter) {
-    EsQuerier querier = getResolver().resolve(queryName, parameter);
+    EsNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, null, resolveMaxSelectSize(querier));
     return hits.getValue();
   }
 
   @Override
   public <T> Stream<T> stream(String q, Object param) {
-    EsQuerier querier = getResolver().resolve(q, param);
+    EsNamedQuerier querier = getResolver().resolve(q, param);
     String script = resolveScript(querier.getScript(null), null, null);
     try {
       return getExecutor().stream(resolveIndexName(q), script).map(result -> {
@@ -134,7 +134,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     int maxSize = fetchQuery.getMaxSize();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    EsQuerier querier = getResolver().resolve(refQueryName, fetchParam);
+    EsNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     String script = resolveScript(querier.getScript(null), null, maxSize > 0 ? maxSize : null);
     try {
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
@@ -160,7 +160,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract EsQueryExecutor getExecutor();
 
-  protected abstract EsInLineNamedQueryResolver<String, Object> getResolver();
+  protected abstract NamedQueryResolver<String, Object, EsNamedQuerier> getResolver();
 
   protected String resolveIndexName(String q) {
     int pos = 0;
@@ -182,7 +182,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     }
   }
 
-  protected <T> Pair<Long, List<T>> searchHits(String q, EsQuerier querier, Integer offset,
+  protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,
       Integer limit) {
     String script = resolveScript(querier.getScript(null), offset, limit);
     try {

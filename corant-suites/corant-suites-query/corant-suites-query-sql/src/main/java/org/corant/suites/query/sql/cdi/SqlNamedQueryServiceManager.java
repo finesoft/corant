@@ -30,11 +30,12 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
-import org.corant.suites.query.sql.SqlNamedQueryResolver;
+import org.corant.suites.query.sql.SqlNamedQuerier;
 import org.corant.suites.query.sql.SqlQueryConfiguration;
 import org.corant.suites.query.sql.SqlQueryExecutor;
 import org.corant.suites.query.sql.dialect.Dialect.DBMS;
@@ -57,7 +58,7 @@ public class SqlNamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected SqlNamedQueryResolver<String, Object> resolver;
+  protected NamedQueryResolver<String, Object, SqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
@@ -108,7 +109,7 @@ public class SqlNamedQueryServiceManager {
 
     protected final SqlQueryExecutor executor;
     protected final int defaultMaxSelectSize;
-    protected final SqlNamedQueryResolver<String, Object> resolver;
+    protected final NamedQueryResolver<String, Object, SqlNamedQuerier> resolver;
 
     /**
      * @param dataSourceName
@@ -118,7 +119,8 @@ public class SqlNamedQueryServiceManager {
      * @param fetchSize
      */
     protected DefaultSqlNamedQueryService(String dataSourceName, DBMS dbms,
-        SqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize, Integer fetchSize) {
+        NamedQueryResolver<String, Object, SqlNamedQuerier> resolver, Integer maxSelectSize,
+        Integer fetchSize) {
       this.resolver = resolver;
       logger = Logger.getLogger(this.getClass().getName());
       executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
@@ -133,7 +135,7 @@ public class SqlNamedQueryServiceManager {
     }
 
     @Override
-    protected SqlNamedQueryResolver<String, Object> getResolver() {
+    protected NamedQueryResolver<String, Object, SqlNamedQuerier> getResolver() {
       return getResolver();
     }
 

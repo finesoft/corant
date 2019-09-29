@@ -24,8 +24,27 @@ import org.corant.suites.query.shared.mapping.Query;
  */
 public interface QueryParameterResolver {
 
+  /**
+   * Resolve fetch query parameter. Generally, the fetch query parameters are composed of parent
+   * query parameters, parent query result set and constant. This method is used to parse parent
+   * query result sets or parent query parameters or constants to construct the fetch query
+   * parameter type and expression.
+   *
+   * @param result the parent query result, may be single or multiple
+   * @param query
+   * @param parentQueryparam
+   * @return fetch query parameter
+   * @see FetchQuery
+   */
   QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparam);
 
+  /**
+   * Resolve query parameter.
+   *
+   * @param query
+   * @param parameter
+   * @return query parameter
+   */
   QueryParameter resolveQueryParameter(Query query, Object parameter);
 }

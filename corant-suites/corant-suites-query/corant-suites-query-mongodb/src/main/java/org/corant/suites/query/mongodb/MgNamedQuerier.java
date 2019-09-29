@@ -1,4 +1,3 @@
-package org.corant.suites.query.mongodb;
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
@@ -12,22 +11,18 @@ package org.corant.suites.query.mongodb;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.query.mongodb;
 
 import java.util.EnumMap;
 import java.util.Map;
 import org.bson.conversions.Bson;
+import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.NamedQuerier;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
-/**
- * corant-suites-query
- *
- * @author bingo 下午3:13:37
- *
- */
-public interface MgInLineNamedQueryResolver<K, P> {
-
-  MgQuerier resolve(K key, P param);
+public interface MgNamedQuerier
+    extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>, NamedQuerier {
+  String getOriginalScript();
 
   public enum MgOperator {
 
@@ -43,10 +38,4 @@ public interface MgInLineNamedQueryResolver<K, P> {
       return ops;
     }
   }
-
-  interface MgQuerier
-      extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>, NamedQuerier {
-    String getOriginalScript();
-  }
-
 }

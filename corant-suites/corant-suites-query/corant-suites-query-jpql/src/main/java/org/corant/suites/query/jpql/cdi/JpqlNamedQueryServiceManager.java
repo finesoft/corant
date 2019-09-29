@@ -30,7 +30,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import org.corant.kernel.api.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver;
+import org.corant.suites.query.jpql.JpqlNamedQuerier;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -55,7 +56,7 @@ public class JpqlNamedQueryServiceManager {
   protected PersistenceService persistenceService;
 
   @Inject
-  protected JpqlNamedQueryResolver<String, Object> resolver;
+  protected NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.jpql.max-select-size", defaultValue = "128")
@@ -93,7 +94,7 @@ public class JpqlNamedQueryServiceManager {
 
     protected final EntityManagerFactory emf;
     protected final int defaultMaxSelectSize;
-    protected final JpqlNamedQueryResolver<String, Object> resolver;
+    protected final NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver;
 
     /**
      * @param emf
@@ -101,7 +102,7 @@ public class JpqlNamedQueryServiceManager {
      * @param maxSelectSize
      */
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
-        JpqlNamedQueryResolver<String, Object> resolver, Integer maxSelectSize) {
+        NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver, Integer maxSelectSize) {
       this.emf = emf;
       this.resolver = resolver;
       logger = Logger.getLogger(this.getClass().getName());
@@ -114,7 +115,7 @@ public class JpqlNamedQueryServiceManager {
     }
 
     @Override
-    protected JpqlNamedQueryResolver<String, Object> getResolver() {
+    protected NamedQueryResolver<String, Object, JpqlNamedQuerier> getResolver() {
       return resolver;
     }
 

@@ -16,8 +16,7 @@ package org.corant.suites.query.mongodb;
 import java.util.EnumMap;
 import java.util.Map;
 import org.bson.conversions.Bson;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgOperator;
-import org.corant.suites.query.mongodb.MgInLineNamedQueryResolver.MgQuerier;
+import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -34,8 +33,9 @@ import com.mongodb.BasicDBObject;
  * @author bingo 下午4:35:55
  *
  */
-public class DefaultMgNamedQuerier extends
-    AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>> implements MgQuerier {
+public class DefaultMgNamedQuerier
+    extends AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>
+    implements MgNamedQuerier {
 
   public static final ObjectMapper OM = new ObjectMapper();
 

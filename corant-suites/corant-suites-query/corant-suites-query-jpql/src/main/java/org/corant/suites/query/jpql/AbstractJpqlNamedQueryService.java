@@ -31,8 +31,8 @@ import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -54,7 +54,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   @SuppressWarnings("unchecked")
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
-    JpqlQuerier querier = getResolver().resolve(queryName, parameter);
+    JpqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
@@ -86,7 +86,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   @SuppressWarnings("unchecked")
   @Override
   public <T> T get(String queryName, Object parameter) {
-    JpqlQuerier querier = getResolver().resolve(queryName, parameter);
+    JpqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
@@ -110,7 +110,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   @SuppressWarnings("unchecked")
   @Override
   public <T> PagedList<T> page(String queryName, Object parameter) {
-    JpqlQuerier querier = getResolver().resolve(queryName, parameter);
+    JpqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
@@ -147,7 +147,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> select(String queryName, Object parameter) {
-    JpqlQuerier querier = getResolver().resolve(queryName, parameter);
+    JpqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] queryParam = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
@@ -175,7 +175,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   @SuppressWarnings({"unchecked", "restriction"})
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    JpqlQuerier querier = getResolver().resolve(queryName, parameter);
+    JpqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
@@ -234,7 +234,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected abstract JpqlNamedQueryResolver<String, Object> getResolver();
+  protected abstract NamedQueryResolver<String, Object, JpqlNamedQuerier> getResolver();
 
   protected void handleQuery(Query query, Class<?> cls, Map<String, String> properties) {}
 

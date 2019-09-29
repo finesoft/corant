@@ -61,6 +61,10 @@ public class QueryMappingService {
   @Any
   Instance<QueryMappingFilePathResolver> mappingFilePathSupplier;
 
+  public String getMappingFilePaths() {
+    return mappingFilePaths;
+  }
+
   public Query getQuery(String name) {
     return queries.get(name);
   }
@@ -132,9 +136,9 @@ public class QueryMappingService {
           }
         }
       });
-    }
+    } // FIXME still has not figured out
     if (isEmpty(paths)) {
-      for (String p : split(mappingFilePaths, ",", true, true)) {
+      for (String p : QueryMappingFilePathResolver.resolvePaths(mappingFilePaths)) {
         paths.add(p);
       }
     }
@@ -143,7 +147,16 @@ public class QueryMappingService {
 
   public interface QueryMappingFilePathResolver {
 
-    Set<String> getMappingFilePaths();
+    static Set<String> resolvePaths(String... paths) {
+      Set<String> resolved = new LinkedHashSet<>();
+      for (String path : paths) {
+        for (String r : split(path, ",", true, true)) {
+          resolved.add(r);
+        }
+      }
+      return resolved;
+    }
 
+    Set<String> getMappingFilePaths();
   }
 }

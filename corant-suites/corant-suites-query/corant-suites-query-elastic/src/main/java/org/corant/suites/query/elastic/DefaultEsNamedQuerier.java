@@ -14,7 +14,6 @@
 package org.corant.suites.query.elastic;
 
 import java.util.Map;
-import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -28,7 +27,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class DefaultEsNamedQuerier
-    extends AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsQuerier {
+    extends AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsNamedQuerier {
 
   protected final Map<Object, Object> script;
   protected final String name;

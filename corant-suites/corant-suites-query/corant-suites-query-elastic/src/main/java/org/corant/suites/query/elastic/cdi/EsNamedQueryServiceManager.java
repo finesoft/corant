@@ -30,9 +30,10 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
 import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
-import org.corant.suites.query.elastic.EsInLineNamedQueryResolver;
+import org.corant.suites.query.elastic.EsNamedQuerier;
 import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
@@ -54,7 +55,7 @@ public class EsNamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected EsInLineNamedQueryResolver<String, Object> resolver;
+  protected NamedQueryResolver<String, Object, EsNamedQuerier> resolver;
 
   @Inject
   protected Function<String, TransportClient> transportClientManager;
@@ -95,7 +96,7 @@ public class EsNamedQueryServiceManager {
 
     protected final EsQueryExecutor executor;
     protected final int defaultMaxSelectSize;
-    protected final EsInLineNamedQueryResolver<String, Object> resolver;
+    protected final NamedQueryResolver<String, Object, EsNamedQuerier> resolver;
 
     /**
      * @param transportClient
@@ -103,7 +104,7 @@ public class EsNamedQueryServiceManager {
      * @param defaultMaxSelectSize
      */
     public DefaultEsNamedQueryService(TransportClient transportClient,
-        EsInLineNamedQueryResolver<String, Object> resolver, int defaultMaxSelectSize) {
+        NamedQueryResolver<String, Object, EsNamedQuerier> resolver, int defaultMaxSelectSize) {
       executor = new DefaultEsQueryExecutor(transportClient);
       this.resolver = resolver;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -115,7 +116,7 @@ public class EsNamedQueryServiceManager {
     }
 
     @Override
-    protected EsInLineNamedQueryResolver<String, Object> getResolver() {
+    protected NamedQueryResolver<String, Object, EsNamedQuerier> getResolver() {
       return resolver;
     }
 

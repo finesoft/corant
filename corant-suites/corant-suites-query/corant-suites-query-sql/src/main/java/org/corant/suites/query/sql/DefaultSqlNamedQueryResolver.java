@@ -15,15 +15,18 @@ package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-query
@@ -33,7 +36,8 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
  */
 @ApplicationScoped
 @SuppressWarnings({"rawtypes"})
-public class DefaultSqlNamedQueryResolver implements SqlNamedQueryResolver<String, Object> {
+public class DefaultSqlNamedQueryResolver
+    implements NamedQueryResolver<String, Object, SqlNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
@@ -45,6 +49,10 @@ public class DefaultSqlNamedQueryResolver implements SqlNamedQueryResolver<Strin
 
   @Inject
   protected QueryResultResolver resultResolver;
+
+  @Inject
+  @ConfigProperty(name = "query.sql.mapping-file.paths")
+  protected Optional<String> mappingFilePaths;
 
   @Override
   public DefaultSqlNamedQuerier resolve(String key, Object param) {

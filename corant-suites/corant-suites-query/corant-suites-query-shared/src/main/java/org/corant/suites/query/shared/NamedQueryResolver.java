@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
+import java.util.Set;
 import org.corant.suites.query.shared.mapping.QueryMappingService.QueryMappingFilePathResolver;
 
 /**
@@ -24,6 +25,11 @@ import org.corant.suites.query.shared.mapping.QueryMappingService.QueryMappingFi
  */
 public interface NamedQueryResolver<K, P, Q extends NamedQuerier>
     extends QueryMappingFilePathResolver {
+
+  @Override
+  default Set<String> getMappingFilePaths() {
+    return null;
+  }
 
   Q resolve(K key, P param);
 

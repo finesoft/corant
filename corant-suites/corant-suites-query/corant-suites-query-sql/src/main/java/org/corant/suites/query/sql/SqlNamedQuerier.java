@@ -16,17 +16,5 @@ package org.corant.suites.query.sql;
 import org.corant.suites.query.shared.NamedQuerier;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
-/**
- * corant-suites-query
- *
- * @author bingo 下午3:13:37
- *
- */
-public interface SqlNamedQueryResolver<K, P> {
-
-  SqlQuerier resolve(K key, P param);
-
-  interface SqlQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
-  }
-
+public interface SqlNamedQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
 }

@@ -14,7 +14,6 @@
 package org.corant.suites.query.jpql;
 
 import java.util.Map;
-import org.corant.suites.query.jpql.JpqlNamedQueryResolver.JpqlQuerier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -28,7 +27,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
-    implements JpqlQuerier {
+    implements JpqlNamedQuerier {
 
   protected final String name;
   protected final String script;

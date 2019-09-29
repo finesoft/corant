@@ -65,6 +65,10 @@ public class EsNamedQueryServiceManager {
   protected Integer maxSelectSize;
 
   @Inject
+  @ConfigProperty(name = "query.elastic.limit", defaultValue = "16")
+  protected Integer limit;
+
+  @Inject
   @ConfigProperty(name = "query.elastic.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -73,16 +77,15 @@ public class EsNamedQueryServiceManager {
   EsNamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final EsQuery sc = annotated.getAnnotation(EsQuery.class);
-    String dataCenterName = sc == null ? EMPTY : defaultString(sc.value());
-    if (isBlank(dataCenterName) && defaultQualifierValue.isPresent()) {
-      dataCenterName = defaultQualifierValue.get();
+    String clusterName = sc == null ? EMPTY : defaultString(sc.value());
+    if (isBlank(clusterName) && defaultQualifierValue.isPresent()) {
+      clusterName = defaultQualifierValue.get();
     }
-    final String dataCenter = dataCenterName;
-    return services.computeIfAbsent(dataCenter, (dc) -> {
+    final String useClusterName = clusterName;
+    return services.computeIfAbsent(useClusterName, (cn) -> {
       logger.info(() -> String
-          .format("Create default elastic named query service, the data center is [%s]. ", dc));
-      return new DefaultEsNamedQueryService(transportClientManager.apply(dc), resolver,
-          maxSelectSize);
+          .format("Create default elastic named query service, the data center is [%s]. ", cn));
+      return new DefaultEsNamedQueryService(transportClientManager.apply(cn), this);
     });
   }
 
@@ -96,18 +99,34 @@ public class EsNamedQueryServiceManager {
 
     protected final EsQueryExecutor executor;
     protected final int defaultMaxSelectSize;
+    protected final int defaultLimit;
     protected final NamedQueryResolver<String, Object, EsNamedQuerier> resolver;
 
     /**
      * @param transportClient
-     * @param resolver
-     * @param defaultMaxSelectSize
+     * @param manager
      */
     public DefaultEsNamedQueryService(TransportClient transportClient,
-        NamedQueryResolver<String, Object, EsNamedQuerier> resolver, int defaultMaxSelectSize) {
+        EsNamedQueryServiceManager manager) {
       executor = new DefaultEsQueryExecutor(transportClient);
-      this.resolver = resolver;
+      resolver = manager.resolver;
+      defaultMaxSelectSize = manager.maxSelectSize;
+      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
+    }
+
+    /**
+     * @param executor
+     * @param defaultMaxSelectSize
+     * @param defaultLimit
+     * @param resolver
+     */
+    protected DefaultEsNamedQueryService(EsQueryExecutor executor, int defaultMaxSelectSize,
+        int defaultLimit, NamedQueryResolver<String, Object, EsNamedQuerier> resolver) {
+      super();
+      this.executor = executor;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
+      this.defaultLimit = defaultLimit;
+      this.resolver = resolver;
     }
 
     @Override
@@ -118,6 +137,11 @@ public class EsNamedQueryServiceManager {
     @Override
     protected NamedQueryResolver<String, Object, EsNamedQuerier> getResolver() {
       return resolver;
+    }
+
+    @Override
+    protected int resolveDefaultLimit(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
     }
 
     @Override

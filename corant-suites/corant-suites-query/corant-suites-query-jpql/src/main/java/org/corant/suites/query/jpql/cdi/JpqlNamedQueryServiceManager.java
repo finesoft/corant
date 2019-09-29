@@ -63,6 +63,10 @@ public class JpqlNamedQueryServiceManager {
   protected Integer maxSelectSize;
 
   @Inject
+  @ConfigProperty(name = "query.jpql.limit", defaultValue = "16")
+  protected Integer limit;
+
+  @Inject
   @ConfigProperty(name = "query.jpql.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -79,8 +83,7 @@ public class JpqlNamedQueryServiceManager {
     return services.computeIfAbsent(pu, (n) -> {
       logger.info(() -> String
           .format("Create default jpql named query service, the persistence unit is [%s].", n));
-      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n),
-          resolver, maxSelectSize);
+      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n), this);
     });
   }
 
@@ -94,6 +97,7 @@ public class JpqlNamedQueryServiceManager {
 
     protected final EntityManagerFactory emf;
     protected final int defaultMaxSelectSize;
+    protected final int defaultLimit;
     protected final NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver;
 
     /**
@@ -102,11 +106,26 @@ public class JpqlNamedQueryServiceManager {
      * @param maxSelectSize
      */
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
-        NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver, Integer maxSelectSize) {
+        JpqlNamedQueryServiceManager manager) {
       this.emf = emf;
+      resolver = manager.resolver;
+      defaultMaxSelectSize = manager.maxSelectSize;
+      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
+    }
+
+    /**
+     * @param emf
+     * @param defaultMaxSelectSize
+     * @param defaultLimit
+     * @param resolver
+     */
+    protected DefaultJpqlNamedQueryService(EntityManagerFactory emf, int defaultMaxSelectSize,
+        int defaultLimit, NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver) {
+      super();
+      this.emf = emf;
+      this.defaultMaxSelectSize = defaultMaxSelectSize;
+      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
-      logger = Logger.getLogger(this.getClass().getName());
-      defaultMaxSelectSize = maxSelectSize;
     }
 
     @Override
@@ -117,6 +136,11 @@ public class JpqlNamedQueryServiceManager {
     @Override
     protected NamedQueryResolver<String, Object, JpqlNamedQuerier> getResolver() {
       return resolver;
+    }
+
+    @Override
+    protected int resolveDefaultLimit(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
     }
 
     @Override

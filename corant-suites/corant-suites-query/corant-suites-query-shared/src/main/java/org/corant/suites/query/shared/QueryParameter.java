@@ -54,7 +54,7 @@ public interface QueryParameter extends Serializable {
    * @return getLimit
    */
   default Integer getLimit() {
-    return 1;
+    return null;
   }
 
   /**

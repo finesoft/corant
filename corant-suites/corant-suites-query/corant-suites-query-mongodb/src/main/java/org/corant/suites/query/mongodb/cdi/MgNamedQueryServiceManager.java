@@ -60,6 +60,10 @@ public class MgNamedQueryServiceManager {
   protected Integer maxSelectSize;
 
   @Inject
+  @ConfigProperty(name = "query.mongodb.limit", defaultValue = "16")
+  protected Integer limit;
+
+  @Inject
   @ConfigProperty(name = "query.mongodb.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -76,7 +80,7 @@ public class MgNamedQueryServiceManager {
     return services.computeIfAbsent(dataBase, (db) -> {
       logger.info(() -> String
           .format("Create default mongodb named query service, the data base is [%s].", db));
-      return new DefaultMgNamedQueryService(db, resolver, maxSelectSize);
+      return new DefaultMgNamedQueryService(db, this);
     });
   }
 
@@ -90,19 +94,33 @@ public class MgNamedQueryServiceManager {
 
     protected final MongoDatabase dataBase;
     protected final int defaultMaxSelectSize;
+    protected final int defaultLimit;
     protected final NamedQueryResolver<String, Object, MgNamedQuerier> resolver;
 
     /**
      * @param dataBase
-     * @param resolver
-     * @param maxSelectSize
+     * @param manager
      */
-    public DefaultMgNamedQueryService(String dataBase,
-        NamedQueryResolver<String, Object, MgNamedQuerier> resolver, Integer maxSelectSize) {
+    public DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
       this.dataBase = resolveNamed(MongoDatabase.class, dataBase).get();
-      logger = Logger.getLogger(this.getClass().getName());
+      resolver = manager.resolver;
+      defaultMaxSelectSize = manager.maxSelectSize;
+      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
+    }
+
+    /**
+     * @param dataBase
+     * @param defaultMaxSelectSize
+     * @param defaultLimit
+     * @param resolver
+     */
+    protected DefaultMgNamedQueryService(MongoDatabase dataBase, int defaultMaxSelectSize,
+        int defaultLimit, NamedQueryResolver<String, Object, MgNamedQuerier> resolver) {
+      super();
+      this.dataBase = dataBase;
+      this.defaultMaxSelectSize = defaultMaxSelectSize;
+      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
-      defaultMaxSelectSize = maxSelectSize;
     }
 
     @Override
@@ -113,6 +131,11 @@ public class MgNamedQueryServiceManager {
     @Override
     protected NamedQueryResolver<String, Object, MgNamedQuerier> getResolver() {
       return resolver;
+    }
+
+    @Override
+    protected int resolveDefaultLimit(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
     }
 
     @Override

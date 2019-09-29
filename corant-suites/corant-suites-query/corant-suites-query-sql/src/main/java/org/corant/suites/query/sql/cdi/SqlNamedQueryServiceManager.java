@@ -37,6 +37,7 @@ import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
 import org.corant.suites.query.sql.SqlNamedQuerier;
 import org.corant.suites.query.sql.SqlQueryConfiguration;
+import org.corant.suites.query.sql.SqlQueryConfiguration.Builder;
 import org.corant.suites.query.sql.SqlQueryExecutor;
 import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -65,8 +66,28 @@ public class SqlNamedQueryServiceManager {
   protected Integer maxSelectSize;
 
   @Inject
+  @ConfigProperty(name = "query.sql.limit", defaultValue = "16")
+  protected Integer limit;
+
+  @Inject
   @ConfigProperty(name = "query.sql.fetch-size", defaultValue = "16")
   protected Integer fetchSize;
+
+  @Inject
+  @ConfigProperty(name = "query.sql.fetch-direction")
+  protected Optional<Integer> fetchDirection;
+
+  @Inject
+  @ConfigProperty(name = "query.sql.timeout", defaultValue = "0")
+  protected Integer timeout;
+
+  @Inject
+  @ConfigProperty(name = "query.sql.max-field-size", defaultValue = "0")
+  protected Integer maxFieldSize;
+
+  @Inject
+  @ConfigProperty(name = "query.sql.max-rows", defaultValue = "0")
+  protected Integer maxRows;
 
   @Inject
   @ConfigProperty(name = "query.sql.default-qualifier-value")
@@ -95,7 +116,7 @@ public class SqlNamedQueryServiceManager {
       logger.info(() -> String.format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
           ds, dialect.name()));
-      return new DefaultSqlNamedQueryService(ds, dialect, resolver, maxSelectSize, fetchSize);
+      return new DefaultSqlNamedQueryService(ds, dialect, this);
     });
   }
 
@@ -109,24 +130,40 @@ public class SqlNamedQueryServiceManager {
 
     protected final SqlQueryExecutor executor;
     protected final int defaultMaxSelectSize;
+    protected final int defaultLimit;
     protected final NamedQueryResolver<String, Object, SqlNamedQuerier> resolver;
+
+    /**
+     * @param executor
+     * @param defaultMaxSelectSize
+     * @param defaultLimit
+     * @param resolver
+     */
+    protected DefaultSqlNamedQueryService(SqlQueryExecutor executor, int defaultMaxSelectSize,
+        int defaultLimit, NamedQueryResolver<String, Object, SqlNamedQuerier> resolver) {
+      super();
+      this.executor = executor;
+      this.defaultMaxSelectSize = defaultMaxSelectSize;
+      this.defaultLimit = defaultLimit;
+      this.resolver = resolver;
+    }
 
     /**
      * @param dataSourceName
      * @param dbms
-     * @param resolver
-     * @param maxSelectSize
-     * @param fetchSize
+     * @param manager
      */
     protected DefaultSqlNamedQueryService(String dataSourceName, DBMS dbms,
-        NamedQueryResolver<String, Object, SqlNamedQuerier> resolver, Integer maxSelectSize,
-        Integer fetchSize) {
-      this.resolver = resolver;
-      logger = Logger.getLogger(this.getClass().getName());
-      executor = new DefaultSqlQueryExecutor(SqlQueryConfiguration.defaultBuilder()
+        SqlNamedQueryServiceManager manager) {
+      resolver = manager.resolver;
+      Builder builder = SqlQueryConfiguration.defaultBuilder()
           .dataSource(resolveNamed(DataSource.class, dataSourceName).get()).dialect(dbms.instance())
-          .fetchSize(fetchSize).build());
-      defaultMaxSelectSize = maxSelectSize;
+          .fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize).maxRows(manager.maxRows)
+          .queryTimeout(manager.timeout);
+      manager.fetchDirection.ifPresent(builder::fetchDirection);
+      executor = new DefaultSqlQueryExecutor(builder.build());
+      defaultMaxSelectSize = manager.maxSelectSize;
+      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
     }
 
     @Override
@@ -140,9 +177,15 @@ public class SqlNamedQueryServiceManager {
     }
 
     @Override
+    protected int resolveDefaultLimit(Querier querier) {
+      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
+    }
+
+    @Override
     protected int resolveMaxSelectSize(Querier querier) {
       return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
           defaultMaxSelectSize);
     }
+
   }
 }

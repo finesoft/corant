@@ -35,11 +35,11 @@ public class Properties {
     return map;
   }
 
-  void add(Property p) {
+  protected void add(Property p) {
     entries.add(p);
   }
 
-  void removeIf(Predicate<Property> p) {
+  protected void removeIf(Predicate<Property> p) {
     entries.removeIf(p);
   }
 

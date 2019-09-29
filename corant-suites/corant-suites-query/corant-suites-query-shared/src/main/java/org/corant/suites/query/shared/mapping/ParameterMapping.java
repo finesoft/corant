@@ -56,11 +56,11 @@ public class ParameterMapping implements Serializable {
     return type;
   }
 
-  void setName(String name) {
+  protected void setName(String name) {
     this.name = name;
   }
 
-  void setType(Class<?> type) {
+  protected void setType(Class<?> type) {
     this.type = type;
   }
 

@@ -119,6 +119,10 @@ public class QueryParseHandler extends DefaultHandler {
   }
 
   public QueryMapping getMapping() {
+    mapping.getQueries().forEach(q -> {
+      q.setParamMappings(mapping.getParaMapping());
+      q.immunize();
+    });
     return mapping;
   }
 
@@ -202,13 +206,12 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(fq);
       nameStack.push(qName);
     } else {
-      FetchQuery obj = (FetchQuery) valueStack.pop();
-      obj.immunize();
+      Object obj = valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
       }
-      q.addFetchQuery(obj);
+      q.addFetchQuery((FetchQuery) obj);
       nameStack.pop();
     }
   }
@@ -321,9 +324,8 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(q);
       nameStack.push(qName);
     } else {
-      Query obj = (Query) valueStack.pop();
-      obj.immunize();// make immutable
-      queries.add(obj);
+      Object obj = valueStack.pop();
+      queries.add((Query) obj);
       nameStack.pop();
     }
   }
@@ -357,13 +359,12 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(hit);
       nameStack.push(qName);
     } else {
-      QueryHint obj = (QueryHint) valueStack.pop();
+      Object obj = valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException("Parse error the query hit must be in query element!");
       }
-      obj.immunize();
-      q.addHint(obj);
+      q.addHint((QueryHint) obj);
       nameStack.pop();
     }
   }

@@ -148,7 +148,7 @@ public class QueryHint implements Serializable {
      *
      * @param name the name to set
      */
-    void setName(String name) {
+    protected void setName(String name) {
       this.name = name;
     }
 
@@ -156,7 +156,7 @@ public class QueryHint implements Serializable {
      *
      * @param type the type to set
      */
-    void setType(String type) {
+    protected void setType(String type) {
       this.type = type;
     }
 
@@ -164,7 +164,7 @@ public class QueryHint implements Serializable {
      *
      * @param value the value to set
      */
-    void setValue(String value) {
+    protected void setValue(String value) {
       this.value = value;
     }
 

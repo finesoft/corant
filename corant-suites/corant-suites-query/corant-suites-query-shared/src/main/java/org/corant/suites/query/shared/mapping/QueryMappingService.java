@@ -79,7 +79,7 @@ public class QueryMappingService {
         throw new QueryRuntimeException(String.join("\n", brokens));
       }
       m.getQueries().forEach(q -> {
-        q.setParamMappings(m.getParaMapping());// copy
+        // q.setParamMappings(m.getParaMapping());// copy
         if (queries.containsKey(q.getVersionedName())) {
           throw new QueryRuntimeException(
               "The 'name' [%s] of query element in query file [%s] can not repeat!",

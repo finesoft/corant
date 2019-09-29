@@ -292,9 +292,18 @@ public class Query implements Serializable {
    * Make query immutable
    */
   void immunize() {
-    fetchQueries =
-        fetchQueries == null ? Collections.emptyList() : Collections.unmodifiableList(fetchQueries);
-    hints = hints == null ? Collections.emptyList() : Collections.unmodifiableList(hints);
+    if (fetchQueries != null) {
+      fetchQueries.forEach(fq -> fq.immunize());
+      fetchQueries = Collections.unmodifiableList(fetchQueries);
+    } else {
+      fetchQueries = Collections.emptyList();
+    }
+    if (hints != null) {
+      hints.forEach(h -> h.immunize());
+      hints = Collections.unmodifiableList(hints);
+    } else {
+      hints = Collections.emptyList();
+    }
     paramMappings =
         paramMappings == null ? Collections.emptyMap() : Collections.unmodifiableMap(paramMappings);
     properties =

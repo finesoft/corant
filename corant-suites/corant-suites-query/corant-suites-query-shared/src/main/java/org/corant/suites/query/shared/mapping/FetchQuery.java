@@ -216,19 +216,19 @@ public class FetchQuery implements Serializable {
       return value;
     }
 
-    void setName(String name) {
+    protected void setName(String name) {
       this.name = name;
     }
 
-    void setSource(FetchQueryParameterSource source) {
+    protected void setSource(FetchQueryParameterSource source) {
       this.source = source;
     }
 
-    void setSourceName(String sourceName) {
+    protected void setSourceName(String sourceName) {
       this.sourceName = sourceName;
     }
 
-    void setValue(String value) {
+    protected void setValue(String value) {
       this.value = value;
     }
 

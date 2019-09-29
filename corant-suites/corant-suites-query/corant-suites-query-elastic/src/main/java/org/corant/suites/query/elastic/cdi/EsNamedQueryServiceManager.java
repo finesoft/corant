@@ -92,7 +92,7 @@ public class EsNamedQueryServiceManager {
    * @author bingo 上午10:50:50
    *
    */
-  public static final class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
+  public static class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
     protected final EsQueryExecutor executor;
     protected final int defaultMaxSelectSize;

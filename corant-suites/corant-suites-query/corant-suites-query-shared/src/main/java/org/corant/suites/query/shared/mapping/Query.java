@@ -107,16 +107,21 @@ public class Query implements Serializable {
    * @return the fetchQueries
    */
   public List<FetchQuery> getFetchQueries() {
-    return Collections.unmodifiableList(fetchQueries);
+    return fetchQueries;
   }
 
   /**
    * @return the hints
    */
   public List<QueryHint> getHints() {
-    return Collections.unmodifiableList(hints);
+    return hints;
   }
 
+  /**
+   * The mapping file path where this query come from
+   *
+   * @return getMappingFilePath
+   */
   public String getMappingFilePath() {
     return mappingFilePath;
   }
@@ -137,7 +142,7 @@ public class Query implements Serializable {
    * @return the paramMappings
    */
   public Map<String, ParameterMapping> getParamMappings() {
-    return Collections.unmodifiableMap(paramMappings);
+    return paramMappings;
   }
 
   /**
@@ -145,18 +150,38 @@ public class Query implements Serializable {
    * @return the properties
    */
   public Map<String, String> getProperties() {
-    return Collections.unmodifiableMap(properties);
+    return properties;
   }
 
+  /**
+   * Returns the property value of the specified type
+   *
+   * @param <T> property type
+   * @param name property name
+   * @param cls property type class
+   * @return getProperty
+   */
   public <T> T getProperty(String name, Class<T> cls) {
     return isEmpty(properties) ? null : toObject(properties.get(name), cls);
   }
 
+  /**
+   * Returns the property value of the specified type, if not found or be found is null return
+   * alternative value.
+   *
+   * @param <T>
+   * @param name
+   * @param cls
+   * @param altVal if not found or be found is null return this value
+   * @return getProperty
+   */
   public <T> T getProperty(String name, Class<T> cls, T altVal) {
     return defaultObject(getProperty(name, cls), altVal);
   }
 
   /**
+   * Return the result class, if not setting return java.util.Map.class
+   *
    * @return the resultClass
    */
   public Class<?> getResultClass() {
@@ -207,59 +232,73 @@ public class Query implements Serializable {
     return cacheResultSetMetadata;
   }
 
-  void addFetchQuery(FetchQuery fetchQuery) {
+  protected void addFetchQuery(FetchQuery fetchQuery) {
     fetchQueries.add(fetchQuery);
   }
 
-  void addHint(QueryHint hint) {
+  protected void addHint(QueryHint hint) {
     hints.add(hint);
   }
 
-  void addProperty(String name, String value) {
+  protected void addProperty(String name, String value) {
     properties.put(name, value);
   }
 
-  void setCache(boolean cache) {
+  protected void setCache(boolean cache) {
     this.cache = cache;
   }
 
-  void setCacheResultSetMetadata(boolean cacheResultSetMetadata) {
+  protected void setCacheResultSetMetadata(boolean cacheResultSetMetadata) {
     this.cacheResultSetMetadata = cacheResultSetMetadata;
   }
 
-  void setDescription(String description) {
+  protected void setDescription(String description) {
     this.description = description;
   }
 
-  void setMappingFilePath(String mappingFilePath) {
+  protected void setMappingFilePath(String mappingFilePath) {
     this.mappingFilePath = mappingFilePath;
   }
 
-  void setName(String name) {
+  protected void setName(String name) {
     this.name = name;
   }
 
-  void setParamMappings(Map<String, ParameterMapping> paramMappings) {
+  protected void setParamMappings(Map<String, ParameterMapping> paramMappings) {
     this.paramMappings.putAll(paramMappings);
   }
 
-  void setProperties(Map<String, String> properties) {
+  protected void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }
 
-  void setResultClass(Class<?> resultClass) {
+  protected void setResultClass(Class<?> resultClass) {
     this.resultClass = defaultObject(resultClass, Map.class);
   }
 
-  void setResultSetMapping(Class<?> resultSetMapping) {
+  protected void setResultSetMapping(Class<?> resultSetMapping) {
     this.resultSetMapping = resultSetMapping;
   }
 
-  void setScript(String script) {
+  protected void setScript(String script) {
     this.script = script;
   }
 
-  void setVersion(String version) {
+  protected void setVersion(String version) {
     this.version = version;
+  }
+
+  /**
+   * Make query immutable
+   */
+  void immunize() {
+    fetchQueries =
+        fetchQueries == null ? Collections.emptyList() : Collections.unmodifiableList(fetchQueries);
+    hints = hints == null ? Collections.emptyList() : Collections.unmodifiableList(hints);
+    paramMappings =
+        paramMappings == null ? Collections.emptyMap() : Collections.unmodifiableMap(paramMappings);
+    properties =
+        properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+
   }
 }

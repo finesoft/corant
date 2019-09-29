@@ -86,7 +86,7 @@ public class FetchQuery implements Serializable {
    * @return the parameters
    */
   public List<FetchQueryParameter> getParameters() {
-    return Collections.unmodifiableList(parameters);
+    return parameters;
   }
 
   /**
@@ -123,36 +123,44 @@ public class FetchQuery implements Serializable {
     return multiRecords;
   }
 
-  void addParameter(FetchQueryParameter parameter) {
+  protected void addParameter(FetchQueryParameter parameter) {
     parameters.add(parameter);
   }
 
-  void setInjectPropertyName(String injectPropertyName) {
+  protected void setInjectPropertyName(String injectPropertyName) {
     this.injectPropertyName = injectPropertyName;
   }
 
-  void setMaxSize(int maxSize) {
+  protected void setMaxSize(int maxSize) {
     this.maxSize = maxSize;
   }
 
-  void setMultiRecords(boolean multiRecords) {
+  protected void setMultiRecords(boolean multiRecords) {
     this.multiRecords = multiRecords;
   }
 
-  void setReferenceQuery(String referenceQuery) {
+  protected void setReferenceQuery(String referenceQuery) {
     this.referenceQuery = referenceQuery;
   }
 
-  void setReferenceQueryversion(String referenceQueryversion) {
+  protected void setReferenceQueryversion(String referenceQueryversion) {
     this.referenceQueryversion = referenceQueryversion;
   }
 
-  void setResultClass(Class<?> resultClass) {
+  protected void setResultClass(Class<?> resultClass) {
     this.resultClass = defaultObject(resultClass, Map.class);
   }
 
-  void setScript(String script) {
+  protected void setScript(String script) {
     this.script = script;
+  }
+
+  /**
+   * Make query immutable
+   */
+  void immunize() {
+    parameters =
+        parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
   }
 
   public static class FetchQueryParameter implements Serializable {

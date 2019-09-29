@@ -86,7 +86,7 @@ public class MgNamedQueryServiceManager {
    * @author bingo 下午3:41:34
    *
    */
-  public static final class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
+  public static class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
 
     protected final MongoDatabase dataBase;
     protected final int defaultMaxSelectSize;

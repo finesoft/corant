@@ -61,7 +61,7 @@ public class QueryHint implements Serializable {
   }
 
   public Map<String, List<QueryHintParameter>> getParameters() {
-    return Collections.unmodifiableMap(parameters);
+    return parameters;
   }
 
   public List<QueryHintParameter> getParameters(String name) {
@@ -76,16 +76,24 @@ public class QueryHint implements Serializable {
     return script;
   }
 
-  void addParameter(QueryHintParameter parameter) {
+  protected void addParameter(QueryHintParameter parameter) {
     parameters.computeIfAbsent(parameter.getName(), (n) -> new ArrayList<>()).add(parameter);
   }
 
-  void setKey(String key) {
+  protected void setKey(String key) {
     this.key = key;
   }
 
-  void setScript(String script) {
+  protected void setScript(String script) {
     this.script = script;
+  }
+
+  /**
+   * Make query immutable
+   */
+  void immunize() {
+    parameters =
+        parameters == null ? Collections.emptyMap() : Collections.unmodifiableMap(parameters);
   }
 
   public static class QueryHintParameter implements Serializable {

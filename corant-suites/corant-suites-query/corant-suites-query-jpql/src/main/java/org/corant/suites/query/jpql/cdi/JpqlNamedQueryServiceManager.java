@@ -90,7 +90,7 @@ public class JpqlNamedQueryServiceManager {
    * @author bingo 下午12:02:33
    *
    */
-  public static final class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
+  public static class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
 
     protected final EntityManagerFactory emf;
     protected final int defaultMaxSelectSize;

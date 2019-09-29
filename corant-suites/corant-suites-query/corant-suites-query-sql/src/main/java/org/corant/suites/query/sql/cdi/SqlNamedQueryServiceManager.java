@@ -105,7 +105,7 @@ public class SqlNamedQueryServiceManager {
    * @author bingo 下午6:54:23
    *
    */
-  public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
+  public static class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
 
     protected final SqlQueryExecutor executor;
     protected final int defaultMaxSelectSize;
@@ -136,7 +136,7 @@ public class SqlNamedQueryServiceManager {
 
     @Override
     protected NamedQueryResolver<String, Object, SqlNamedQuerier> getResolver() {
-      return getResolver();
+      return resolver;
     }
 
     @Override

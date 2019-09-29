@@ -202,12 +202,13 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(fq);
       nameStack.push(qName);
     } else {
-      Object obj = valueStack.pop();
+      FetchQuery obj = (FetchQuery) valueStack.pop();
+      obj.immunize();
       Query q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
       }
-      q.addFetchQuery((FetchQuery) obj);
+      q.addFetchQuery(obj);
       nameStack.pop();
     }
   }
@@ -320,8 +321,9 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(q);
       nameStack.push(qName);
     } else {
-      Object obj = valueStack.pop();
-      queries.add((Query) obj);
+      Query obj = (Query) valueStack.pop();
+      obj.immunize();// make immutable
+      queries.add(obj);
       nameStack.pop();
     }
   }
@@ -355,12 +357,13 @@ public class QueryParseHandler extends DefaultHandler {
       valueStack.push(hit);
       nameStack.push(qName);
     } else {
-      Object obj = valueStack.pop();
+      QueryHint obj = (QueryHint) valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException("Parse error the query hit must be in query element!");
       }
-      q.addHint((QueryHint) obj);
+      obj.immunize();
+      q.addHint(obj);
       nameStack.pop();
     }
   }

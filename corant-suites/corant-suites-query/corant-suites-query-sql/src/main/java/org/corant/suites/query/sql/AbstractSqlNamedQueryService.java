@@ -20,8 +20,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
@@ -36,11 +34,7 @@ import org.corant.suites.query.sql.dialect.Dialect;
  * @author bingo 下午5:33:21
  *
  */
-@ApplicationScoped
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
-
-  @Inject
-  protected SqlNamedQueryResolver<String, Object> resolver;
 
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
@@ -166,7 +160,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    SqlQuerier querier = resolver.resolve(refQueryName, fetchParam);
+    SqlQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     String sql = querier.getScript(null);
     Object[] scriptParameter = querier.getScriptParameter();
     if (maxSize > 0) {
@@ -197,7 +191,5 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   protected abstract SqlQueryExecutor getExecutor();// FIXME use one connection for one method stack
 
-  protected SqlNamedQueryResolver<String, Object> getResolver() {
-    return resolver;
-  }
+  protected abstract SqlNamedQueryResolver<String, Object> getResolver();
 }

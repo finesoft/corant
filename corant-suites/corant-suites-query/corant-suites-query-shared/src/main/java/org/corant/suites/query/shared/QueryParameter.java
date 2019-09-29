@@ -29,8 +29,6 @@ public interface QueryParameter extends Serializable {
 
   String OFFSET_PARAM_NME = "_offset";
   String LIMIT_PARAM_NME = "_limit";
-  int OFFSET_PARAM_VAL = 0;
-  int LIMIT_PARAM_VAL = 16;
 
   /**
    * Return the query context that may be contain current user context or security context.
@@ -55,7 +53,7 @@ public interface QueryParameter extends Serializable {
    *
    * @return getLimit
    */
-  default int getLimit() {
+  default Integer getLimit() {
     return 1;
   }
 
@@ -65,7 +63,7 @@ public interface QueryParameter extends Serializable {
    *
    * @return getOffset
    */
-  default int getOffset() {
+  default Integer getOffset() {
     return 0;
   }
 
@@ -82,8 +80,8 @@ public interface QueryParameter extends Serializable {
     public static final DefaultQueryParameter EMPTY_INST = new DefaultQueryParameter();
 
     private Object criteria;
-    private int limit = 1;
-    private int offset = 0;
+    private Integer limit;
+    private Integer offset = 0;
     private Map<String, Object> context = new HashMap<>();
 
     /**
@@ -136,7 +134,7 @@ public interface QueryParameter extends Serializable {
      * @return the limit
      */
     @Override
-    public int getLimit() {
+    public Integer getLimit() {
       return limit;
     }
 
@@ -145,7 +143,7 @@ public interface QueryParameter extends Serializable {
      * @return the offset
      */
     @Override
-    public int getOffset() {
+    public Integer getOffset() {
       return offset;
     }
 
@@ -153,7 +151,7 @@ public interface QueryParameter extends Serializable {
      *
      * @param limit the limit to set
      */
-    public DefaultQueryParameter limit(int limit) {
+    public DefaultQueryParameter limit(Integer limit) {
       this.limit = limit;
       return this;
     }
@@ -162,7 +160,7 @@ public interface QueryParameter extends Serializable {
      *
      * @param offset the offset to set
      */
-    public DefaultQueryParameter offset(int offset) {
+    public DefaultQueryParameter offset(Integer offset) {
       this.offset = offset;
       return this;
     }

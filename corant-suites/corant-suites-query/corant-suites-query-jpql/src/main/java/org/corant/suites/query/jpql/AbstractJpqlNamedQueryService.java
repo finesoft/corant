@@ -24,8 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
@@ -45,7 +43,6 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  * @author bingo 下午5:33:21
  *
  */
-@ApplicationScoped
 public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQueryService {
 
   public static final String PRO_KEY_FLUSH_MODE_TYPE = "jpa.query.flushModeType";
@@ -53,9 +50,6 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   public static final String PRO_KEY_HINT_PREFIX = "jpa.query.hint";
   public static final int PRO_KEY_HINT_PREFIX_LEN = PRO_KEY_HINT_PREFIX.length();
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
-
-  @Inject
-  protected JpqlNamedQueryResolver<String, Object> resolver;
 
   @SuppressWarnings("unchecked")
   @Override
@@ -240,9 +234,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected JpqlNamedQueryResolver<String, Object> getResolver() {
-    return resolver;
-  }
+  protected abstract JpqlNamedQueryResolver<String, Object> getResolver();
 
   protected void handleQuery(Query query, Class<?> cls, Map<String, String> properties) {}
 

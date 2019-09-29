@@ -91,9 +91,9 @@ public class JpqlNamedQueryServiceManager {
    */
   public static final class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
 
-    private final EntityManagerFactory emf;
-
-    final int defaultMaxSelectSize;
+    protected final EntityManagerFactory emf;
+    protected final int defaultMaxSelectSize;
+    protected final JpqlNamedQueryResolver<String, Object> resolver;
 
     /**
      * @param emf
@@ -111,6 +111,11 @@ public class JpqlNamedQueryServiceManager {
     @Override
     protected EntityManagerFactory getEntityManagerFactory() {
       return emf;
+    }
+
+    @Override
+    protected JpqlNamedQueryResolver<String, Object> getResolver() {
+      return resolver;
     }
 
     @Override

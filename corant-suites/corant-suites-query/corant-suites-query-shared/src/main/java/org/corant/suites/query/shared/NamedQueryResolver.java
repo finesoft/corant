@@ -22,8 +22,9 @@ import org.corant.suites.query.shared.mapping.QueryMappingService.QueryMappingFi
  *
  * @author bingo 下午12:07:37
  */
-public interface NamedQueryResolver<K, P> extends QueryMappingFilePathResolver {
+public interface NamedQueryResolver<K, P, Q extends NamedQuerier>
+    extends QueryMappingFilePathResolver {
 
-  <Q extends NamedQuerier> Q resolve(K key, P param);
+  Q resolve(K key, P param);
 
 }

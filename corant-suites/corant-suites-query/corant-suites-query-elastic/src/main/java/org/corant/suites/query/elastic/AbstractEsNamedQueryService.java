@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.elastic.EsInLineNamedQueryResolver.EsQuerier;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
@@ -39,12 +37,8 @@ import com.fasterxml.jackson.core.JsonpCharacterEscapes;
  * @author bingo 下午8:20:43
  *
  */
-@ApplicationScoped
 public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryService
     implements EsNamedQueryService {
-
-  @Inject
-  protected EsInLineNamedQueryResolver<String, Object> resolver;
 
   @Override
   public Map<String, Object> aggregate(String queryName, Object parameter) {
@@ -140,7 +134,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     int maxSize = fetchQuery.getMaxSize();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    EsQuerier querier = resolver.resolve(refQueryName, fetchParam);
+    EsQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     String script = resolveScript(querier.getScript(null), null, maxSize > 0 ? maxSize : null);
     try {
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
@@ -166,9 +160,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract EsQueryExecutor getExecutor();
 
-  protected EsInLineNamedQueryResolver<String, Object> getResolver() {
-    return resolver;
-  }
+  protected abstract EsInLineNamedQueryResolver<String, Object> getResolver();
 
   protected String resolveIndexName(String q) {
     int pos = 0;

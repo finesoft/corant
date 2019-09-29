@@ -106,8 +106,9 @@ public class SqlNamedQueryServiceManager {
    */
   public static final class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
 
-    private final SqlQueryExecutor executor;
-    private final int defaultMaxSelectSize;
+    protected final SqlQueryExecutor executor;
+    protected final int defaultMaxSelectSize;
+    protected final SqlNamedQueryResolver<String, Object> resolver;
 
     /**
      * @param dataSourceName
@@ -129,6 +130,11 @@ public class SqlNamedQueryServiceManager {
     @Override
     protected SqlQueryExecutor getExecutor() {
       return executor;
+    }
+
+    @Override
+    protected SqlNamedQueryResolver<String, Object> getResolver() {
+      return getResolver();
     }
 
     @Override

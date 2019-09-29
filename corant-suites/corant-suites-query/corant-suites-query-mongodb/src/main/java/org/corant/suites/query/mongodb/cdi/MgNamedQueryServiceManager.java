@@ -87,9 +87,9 @@ public class MgNamedQueryServiceManager {
    */
   public static final class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
 
-    final MongoDatabase dataBase;
-
-    final int defaultMaxSelectSize;
+    protected final MongoDatabase dataBase;
+    protected final int defaultMaxSelectSize;
+    protected final MgInLineNamedQueryResolver<String, Object> resolver;
 
     /**
      * @param dataBase
@@ -107,6 +107,11 @@ public class MgNamedQueryServiceManager {
     @Override
     protected MongoDatabase getDataBase() {
       return dataBase;
+    }
+
+    @Override
+    protected MgInLineNamedQueryResolver<String, Object> getResolver() {
+      return resolver;
     }
 
     @Override

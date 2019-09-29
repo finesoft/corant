@@ -93,8 +93,9 @@ public class EsNamedQueryServiceManager {
    */
   public static final class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
-    private final EsQueryExecutor executor;
-    final int defaultMaxSelectSize;
+    protected final EsQueryExecutor executor;
+    protected final int defaultMaxSelectSize;
+    protected final EsInLineNamedQueryResolver<String, Object> resolver;
 
     /**
      * @param transportClient
@@ -104,7 +105,6 @@ public class EsNamedQueryServiceManager {
     public DefaultEsNamedQueryService(TransportClient transportClient,
         EsInLineNamedQueryResolver<String, Object> resolver, int defaultMaxSelectSize) {
       executor = new DefaultEsQueryExecutor(transportClient);
-      logger = Logger.getLogger(this.getClass().getName());
       this.resolver = resolver;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
     }
@@ -112,6 +112,11 @@ public class EsNamedQueryServiceManager {
     @Override
     protected EsQueryExecutor getExecutor() {
       return executor;
+    }
+
+    @Override
+    protected EsInLineNamedQueryResolver<String, Object> getResolver() {
+      return resolver;
     }
 
     @Override

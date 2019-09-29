@@ -16,13 +16,12 @@ package org.corant.suites.query.shared;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
@@ -34,14 +33,14 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  * @author bingo 下午4:08:58
  *
  */
-@ApplicationScoped
 public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   public static final int MAX_SELECT_SIZE = 128;
+  public static final int DEFAULT_LIMIT = 16;
   public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
+  public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
 
-  @Inject
-  protected Logger logger;
+  protected Logger logger = Logger.getLogger(getClass().getName());
 
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
@@ -90,14 +89,19 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         name, String.join(",", asStrings(param)), String.join("; ", script)));
   }
 
+  protected int resolveDefaultLimit(Querier querier) {
+    return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT);
+  }
+
   protected int resolveLimit(Querier querier) {
+    int limit = defaultObject(querier.getQueryParameter().getLimit(), resolveDefaultLimit(querier));
     int max = resolveMaxSelectSize(querier);
-    if (querier.getQueryParameter().getLimit() > max) {
+    if (limit > max) {
       throw new QueryRuntimeException(
           "Exceeded the maximum number of query [%s] results, limit is [%S].",
           querier.getQuery().getName(), max);
     }
-    return querier.getQueryParameter().getLimit();
+    return limit;
   }
 
   protected int resolveMaxSelectSize(Querier querier) {
@@ -105,6 +109,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected int resolveOffset(Querier querier) {
-    return max(querier.getQueryParameter().getOffset(), 0);
+    return max(defaultObject(querier.getQueryParameter().getOffset(), 0), 0);
   }
 }

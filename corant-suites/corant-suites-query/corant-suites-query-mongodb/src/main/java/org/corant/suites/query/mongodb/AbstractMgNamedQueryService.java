@@ -31,8 +31,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ConversionUtils;
@@ -60,7 +58,6 @@ import com.mongodb.client.model.CountOptions;
  * @author bingo 下午8:20:43
  *
  */
-@ApplicationScoped
 public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService {
 
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
@@ -89,9 +86,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_MAXVAR = PRO_KEY_CO_COLA + ".maxVariable";
   public static final String PRO_KEY_CO_COLA_NORMA = PRO_KEY_CO_COLA + ".normalization";
   public static final String PRO_KEY_CO_COLA_BACKWORDS = PRO_KEY_CO_COLA + ".backwards";
-
-  @Inject
-  protected MgInLineNamedQueryResolver<String, Object> resolver;
 
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
@@ -188,7 +182,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    MgQuerier querier = resolver.resolve(refQueryName, fetchParam);
+    MgQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(128);
     List<Map<String, Object>> fetchedList =
@@ -207,9 +201,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract MongoDatabase getDataBase();
 
-  protected MgInLineNamedQueryResolver<String, Object> getResolver() {
-    return resolver;
-  }
+  protected abstract MgInLineNamedQueryResolver<String, Object> getResolver();
 
   protected FindIterable<Document> query(MgQuerier querier) {
     FindIterable<Document> fi =

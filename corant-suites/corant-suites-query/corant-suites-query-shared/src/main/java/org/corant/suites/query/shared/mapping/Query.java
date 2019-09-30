@@ -185,7 +185,7 @@ public class Query implements Serializable {
    * @return the resultClass
    */
   public Class<?> getResultClass() {
-    return defaultObject(resultClass, Map.class);
+    return resultClass;
   }
 
   /**

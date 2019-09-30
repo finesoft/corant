@@ -45,8 +45,6 @@ public class QueryMappingSchemaUtils {
     try (Corant corant = prepare()) {
       final QueryMappingService service = resolve(QueryMappingService.class).get();
       final Map<Object, Object> parameter = mapOf(params);
-      DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
-      DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
       out(true);
       for (Query q : service.getQueries()) {
         System.out.println("[".concat(q.getName()).concat("]:\n"));
@@ -54,6 +52,8 @@ public class QueryMappingSchemaUtils {
           Template tpl = new Template(q.getName(), q.getScript(), FreemarkerConfigurations.FM_CFG);
           tpl.dump(System.out);
           if (isNotEmpty(parameter)) {
+            DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
+            DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
             System.out.println("\n\n[Empty parameter process]:\n");
             Environment e = tpl.createProcessingEnvironment(parameter, sw);
             e.setVariable(sqlTmm.getType(), sqlTmm);

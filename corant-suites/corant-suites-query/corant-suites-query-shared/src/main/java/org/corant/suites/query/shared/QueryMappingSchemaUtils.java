@@ -35,6 +35,8 @@ public class QueryMappingSchemaUtils {
   public static void validate() {
     try (Corant corant = prepare()) {
       final QueryMappingService service = resolve(QueryMappingService.class).get();
+      String line = "--------------------------------------------------";
+      line = "\n" + line + line + "\n\n";
       out(true);
       for (Query q : service.getQueries()) {
         System.out.println(q.getName() + ":\n");
@@ -44,8 +46,7 @@ public class QueryMappingSchemaUtils {
         } catch (IOException e) {
           throw new CorantRuntimeException(e);
         }
-        String spLine = "--------------------------------------------------";
-        System.out.println(spLine + spLine + "\n");
+        System.out.println(line);
       }
       out(false);
     } catch (Exception e) {

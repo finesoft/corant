@@ -41,11 +41,11 @@ public class QueryMappingSchemaUtils {
 
   static final String line = "--------------------------------------------------";
 
-  public static void validate(Object... params) {
+  public static void staticValidate(Object... params) {
     try (Corant corant = prepare()) {
       final QueryMappingService service = resolve(QueryMappingService.class).get();
       final Map<Object, Object> parameter = mapOf(params);
-      out(true);
+      out(false);
       for (Query q : service.getQueries()) {
         System.out.println("[".concat(q.getName()).concat("]:\n"));
         try (StringWriter sw = new StringWriter()) {
@@ -66,7 +66,7 @@ public class QueryMappingSchemaUtils {
         }
         System.out.println("\n\n".concat(line).concat(line).concat("\n\n"));
       }
-      out(false);
+      out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }

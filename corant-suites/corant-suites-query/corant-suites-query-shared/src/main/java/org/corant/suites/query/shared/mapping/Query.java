@@ -273,7 +273,7 @@ public class Query implements Serializable {
   }
 
   protected void setResultClass(Class<?> resultClass) {
-    this.resultClass = defaultObject(resultClass, Map.class);
+    this.resultClass = resultClass;
   }
 
   protected void setResultSetMapping(Class<?> resultSetMapping) {

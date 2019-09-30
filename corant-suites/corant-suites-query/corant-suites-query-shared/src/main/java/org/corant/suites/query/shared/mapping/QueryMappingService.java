@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -63,6 +64,10 @@ public class QueryMappingService {
 
   public String getMappingFilePaths() {
     return mappingFilePaths;
+  }
+
+  public List<Query> getQueries() {
+    return new ArrayList<>(queries.values());
   }
 
   public Query getQuery(String name) {

@@ -47,7 +47,7 @@ import freemarker.template.Configuration;
  */
 public class FreemarkerConfigurations {
 
-  static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_29);
+  public static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_29);
 
   static {
     FM_CFG.setNumberFormat("computer");

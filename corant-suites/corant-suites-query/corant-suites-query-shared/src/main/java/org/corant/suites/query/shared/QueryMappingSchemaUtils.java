@@ -14,14 +14,21 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Map;
 import org.corant.Corant;
 import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerConfigurations;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import freemarker.core.Environment;
 import freemarker.template.Template;
 
 /**
@@ -32,21 +39,32 @@ import freemarker.template.Template;
  */
 public class QueryMappingSchemaUtils {
 
-  public static void validate() {
+  static final String line = "--------------------------------------------------";
+
+  public static void validate(Object... params) {
     try (Corant corant = prepare()) {
       final QueryMappingService service = resolve(QueryMappingService.class).get();
-      String line = "--------------------------------------------------";
-      line = "\n" + line + line + "\n\n";
+      final Map<Object, Object> parameter = mapOf(params);
+      DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
+      DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
       out(true);
       for (Query q : service.getQueries()) {
-        System.out.println(q.getName() + ":\n");
-        try {
-          new Template(q.getName(), q.getScript(), FreemarkerConfigurations.FM_CFG)
-              .dump(System.out);
+        System.out.println("[".concat(q.getName()).concat("]:\n"));
+        try (StringWriter sw = new StringWriter()) {
+          Template tpl = new Template(q.getName(), q.getScript(), FreemarkerConfigurations.FM_CFG);
+          tpl.dump(System.out);
+          if (isNotEmpty(parameter)) {
+            System.out.println("\n\n[Empty parameter process]:\n");
+            Environment e = tpl.createProcessingEnvironment(parameter, sw);
+            e.setVariable(sqlTmm.getType(), sqlTmm);
+            e.setVariable(jsonTmm.getType(), jsonTmm);
+            e.process();
+            System.out.println(sw.toString());
+          }
         } catch (IOException e) {
           throw new CorantRuntimeException(e);
         }
-        System.out.println(line);
+        System.out.println("\n\n".concat(line).concat(line).concat("\n\n"));
       }
       out(false);
     } catch (Exception e) {

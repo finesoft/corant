@@ -53,7 +53,7 @@ public class CollectionUtils {
       throw new IllegalArgumentException("Unsupported object type: null");
     }
     if (object instanceof Iterable<?>) {
-      return get(object, i);
+      return IterableUtils.get((Iterable<?>) object, i);
     } else if (object instanceof Object[]) {
       return ((Object[]) object)[i];
     } else if (object instanceof Iterator<?>) {

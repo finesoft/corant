@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
@@ -568,6 +570,28 @@ public class Resources {
       this(new File(shouldNotNull(location)));
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      FileSystemResource other = (FileSystemResource) obj;
+      if (file == null) {
+        if (other.file != null) {
+          return false;
+        }
+      } else if (!file.equals(other.file)) {
+        return false;
+      }
+      return true;
+    }
+
     public File getFile() {
       return file;
     }
@@ -587,6 +611,14 @@ public class Resources {
     @Override
     public String getName() {
       return file.getName();
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (file == null ? 0 : file.hashCode());
+      return result;
     }
 
     @Override
@@ -868,14 +900,7 @@ public class Resources {
         return false;
       }
       URLResource other = (URLResource) obj;
-      if (url == null) {
-        if (other.url != null) {
-          return false;
-        }
-      } else if (!url.equals(other.url)) {
-        return false;
-      }
-      return true;
+      return getURI().equals(other.getURI()); // FIXME URI hq
     }
 
     @Override
@@ -899,6 +924,14 @@ public class Resources {
       return sourceType;
     }
 
+    public URI getURI() {
+      try {
+        return getURL().toURI();
+      } catch (URISyntaxException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
     public URL getURL() {
       return url;
     }
@@ -907,7 +940,7 @@ public class Resources {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (getURL() == null ? 0 : getURL().hashCode());
+      result = prime * result + getURI().hashCode(); // FIXME URI hq
       return result;
     }
 
@@ -915,6 +948,5 @@ public class Resources {
     public InputStream openStream() throws IOException {
       return getURL().openStream();
     }
-
   }
 }

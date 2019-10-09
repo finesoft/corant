@@ -79,7 +79,7 @@
 
 		<version.flyway>5.2.0</version.flyway>
 		<version.HikariCP>3.2.0</version.HikariCP>
-		<version.agroal>1.5</version.agroal>
+		<version.agroal>1.6</version.agroal>
 
 		<version.narayana-jta>5.9.8.Final</version.narayana-jta>
 		<version.atomikos>4.0.6</version.atomikos>

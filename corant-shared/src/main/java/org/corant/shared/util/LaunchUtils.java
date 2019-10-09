@@ -78,6 +78,10 @@ public class LaunchUtils {
     return Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java").toString();
   }
 
+  public static String getJavaVersion() {
+    return System.getProperty("java.version");
+  }
+
   public static List<String> getJvmArgs() {
     return ManagementFactory.getRuntimeMXBean().getInputArguments();
   }

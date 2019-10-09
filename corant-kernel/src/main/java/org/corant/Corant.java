@@ -327,8 +327,9 @@ public class Corant implements AutoCloseable {
         });
 
     log(logger, "Finished at: %s.", Instant.now());
-    log(logger, "Final memory: %sM/%sM/%sM, process id: %s.", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid());
+    log(logger, "Final memory: %sM/%sM/%sM, process id: %s, java version: %s.",
+        LaunchUtils.getUsedMemoryMb(), LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(),
+        LaunchUtils.getPid(), LaunchUtils.getJavaVersion());
     printBoostLine();
 
     doOnReady();

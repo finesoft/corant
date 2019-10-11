@@ -109,7 +109,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   @Transient
   @javax.persistence.Transient
-  protected Optional<UnitOfWork> currentUnitOfWork() {
+  protected <U extends UnitOfWork> Optional<U> currentUnitOfWork() {
     return UnitOfWorksManager.currentUnitOfWork();
   }
 

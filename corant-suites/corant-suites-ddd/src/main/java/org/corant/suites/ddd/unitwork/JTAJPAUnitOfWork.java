@@ -30,6 +30,7 @@ import javax.transaction.Transaction;
 import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
 import org.corant.suites.ddd.event.AggregatePersistEvent;
 import org.corant.suites.ddd.message.Message;
@@ -64,9 +65,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  final Map<AggregateIdentifier, Lifecycle> registrations = new LinkedHashMap<>();
-  final Map<AggregateIdentifier, Lifecycle> evolutions = new LinkedHashMap<>();
-  final LinkedList<Message> messages = new LinkedList<>();
+  final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
+  final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
+  final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
+  final LinkedList<Message> registeredMessages = new LinkedList<>();
 
   protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager);
@@ -88,13 +90,20 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   @Override
   public void beforeCompletion() {
-    handlePreComplete();
     logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
-    // flush to dump dirty
-    entityManagers.values().forEach(EntityManager::flush);
+    entityManagers.values().forEach(EntityManager::flush); // flush to dump dirty
     handleMessage();
+    handlePreComplete();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * This method must be invoked in a transaction.
+   *
+   * @see #register(Object)
+   */
   @Override
   public void deregister(Object obj) {
     if (activated) {
@@ -102,12 +111,15 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         Aggregate aggregate = (Aggregate) obj;
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
-          registrations.remove(ai);
-          evolutions.remove(ai);
-          messages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
+          registeredAggregates.remove(ai);
+          evolutiveAggregates.remove(ai);
+          registeredMessages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        messages.remove(obj);
+        registeredMessages.remove(obj);
+      } else if (obj instanceof Pair<?, ?>) {
+        Pair<?, ?> p = Pair.class.cast(obj);
+        registeredVariables.remove(p.getKey());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -124,15 +136,34 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     return transaction;
   }
 
+  /**
+   * Message queue collected by the current unit of work.
+   *
+   * @return getMessages
+   */
   public List<Message> getMessages() {
-    return Collections.unmodifiableList(messages);
+    return Collections.unmodifiableList(registeredMessages);
   }
 
   @Override
-  public Map<AggregateIdentifier, Lifecycle> getRegistrations() {
-    return Collections.unmodifiableMap(registrations);
+  public Registration getRegistrations() {
+    return new Registration(this);
   }
 
+  /**
+   * Variables in the scope of the current unit of work.
+   *
+   * @return getVariables
+   */
+  public Map<Object, Object> getVariables() {
+    return registeredVariables;
+  }
+
+  /**
+   * Represents whether the current transaction is still in progress
+   *
+   * @return isInTransaction
+   */
   public boolean isInTransaction() {
     try {
       if (transaction == null) {
@@ -148,6 +179,24 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * This method must be invoked in a transaction.
+   * <ul>
+   * <b>Parameter descriptions</b>
+   * <li>If the parameter is aggregation, the aggregation id and life cycle state, as well as the
+   * message queue in the aggregation, are registered.</li>
+   * <li>If the parameter is a message, the message is merged into a message queue when the message
+   * type is mergeable, and non-mergeable message is added directly to the message queue.</li>
+   * <li>If the parameter is a named object (represented by Pair), the object is added to a Map as a
+   * key-value pair</li>
+   * </ul>
+   *
+   * @see AggregateIdentifier
+   * @see Pair
+   * @see Message
+   */
   @Override
   public void register(Object obj) {
     if (activated && isInTransaction()) {
@@ -156,16 +205,19 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           Lifecycle al = aggregate.getLifecycle();
-          registrations.put(ai, al);
+          registeredAggregates.put(ai, al);
           if (al.signFlushed()) {
-            evolutions.put(ai, al);
+            evolutiveAggregates.put(ai, al);
           }
           for (Message message : aggregate.extractMessages(true)) {
-            MessageUtils.mergeToQueue(messages, message);
+            MessageUtils.mergeToQueue(registeredMessages, message);
           }
         }
       } else if (obj instanceof Message) {
-        MessageUtils.mergeToQueue(messages, Message.class.cast(obj));
+        MessageUtils.mergeToQueue(registeredMessages, Message.class.cast(obj));
+      } else if (obj instanceof Pair<?, ?>) {
+        Pair<?, ?> p = Pair.class.cast(obj);
+        registeredVariables.put(p.getKey(), p.getValue());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -184,9 +236,10 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           em.close();
         }
       });
-      evolutions.clear();
-      registrations.clear();
-      messages.clear();
+      evolutiveAggregates.clear();
+      registeredAggregates.clear();
+      registeredMessages.clear();
+      registeredVariables.clear();
     } finally {
       getManager().clearCurrentUnitOfWorks(transaction);
     }
@@ -214,15 +267,16 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   protected void handlePostCompleted(final boolean success) {
+    final Registration registration = new Registration(this);
     manager.getListeners().forEach(listener -> {
       try {
-        listener.onCompleted(new LinkedHashMap<>(registrations), success);
+        listener.onCompleted(registration, success);
       } catch (Exception ex) {
         logger.log(Level.WARNING, ex, () -> "Handle UOW post-completed occurred error!");
       }
     });
     if (success) {
-      evolutions.forEach((k, v) -> {
+      evolutiveAggregates.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
             fireAsyncEvent(new AggregatePersistEvent(k, v),
@@ -236,11 +290,37 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   }
 
   boolean extractMessages(LinkedList<Message> messages) {
-    if (!this.messages.isEmpty()) {
-      this.messages.stream().sorted(Message::compare).forEach(messages::offer);
-      this.messages.clear();
+    if (!registeredMessages.isEmpty()) {
+      registeredMessages.stream().sorted(Message::compare).forEach(messages::offer);
+      registeredMessages.clear();
       return true;
     }
     return false;
+  }
+
+  /**
+   * corant-suites-ddd
+   *
+   * @author bingo 上午9:50:36
+   *
+   */
+  public static class Registration {
+
+    final Map<AggregateIdentifier, Lifecycle> aggregates;
+    final Map<Object, Object> variables;
+
+    Registration(JTAJPAUnitOfWork uow) {
+      aggregates = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredAggregates));
+      variables = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
+    }
+
+    public Map<AggregateIdentifier, Lifecycle> getAggregates() {
+      return aggregates;
+    }
+
+    public Map<Object, Object> getVariables() {
+      return variables;
+    }
+
   }
 }

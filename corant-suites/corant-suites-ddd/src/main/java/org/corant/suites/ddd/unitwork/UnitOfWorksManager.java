@@ -29,9 +29,10 @@ import org.corant.suites.ddd.saga.SagaService;
  */
 public interface UnitOfWorksManager {
 
-  static Optional<UnitOfWork> currentUnitOfWork(Annotation... annotations) {
+  @SuppressWarnings("unchecked")
+  static <U extends UnitOfWork> Optional<U> currentUnitOfWork(Annotation... annotations) {
     Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class, annotations);
-    return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
+    return Optional.ofNullable(uowm.isPresent() ? (U) uowm.get().getCurrentUnitOfWork() : null);
   }
 
   UnitOfWork getCurrentUnitOfWork();

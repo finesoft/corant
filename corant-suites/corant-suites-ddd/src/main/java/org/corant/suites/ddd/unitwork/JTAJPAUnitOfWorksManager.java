@@ -67,6 +67,15 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   @Any
   Instance<SagaService> sagaService;
 
+  public static JTAJPAUnitOfWork curUow() {
+    Optional<UnitOfWork> curuow = UnitOfWorksManager.currentUnitOfWork();
+    if (curuow.isPresent() && curuow.get() instanceof JTAJPAUnitOfWork) {
+      return (JTAJPAUnitOfWork) curuow.get();
+    } else {
+      throw new NotSupportedException();
+    }
+  }
+
   public static int getTxStatus() {
     try {
       return curUow().transaction.getStatus();
@@ -110,15 +119,6 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
       curUow().transaction.registerSynchronization(sync);
     } catch (IllegalStateException | RollbackException | SystemException e) {
       throw new CorantRuntimeException(e);
-    }
-  }
-
-  static JTAJPAUnitOfWork curUow() {
-    Optional<UnitOfWork> curuow = UnitOfWorksManager.currentUnitOfWork();
-    if (curuow.isPresent() && curuow.get() instanceof JTAJPAUnitOfWork) {
-      return (JTAJPAUnitOfWork) curuow.get();
-    } else {
-      throw new NotSupportedException();
     }
   }
 

@@ -41,12 +41,15 @@ public interface UnitOfWork {
   Object getId();
 
   /**
-   * The registers in this unit of works
+   * The registrations in this unit of works
    */
   Object getRegistrations();
 
   /**
-   * Register an object to this unit of works
+   * Register an object to this unit of works.
+   *
+   * <p>
+   * The object could be an aggregate or a message or a named object (represented by Pair<?,?>).
    *
    * @param obj
    */

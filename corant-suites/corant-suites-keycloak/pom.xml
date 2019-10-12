@@ -9,6 +9,7 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-suites-keycloak-spi</module>
-  	<module>corant-suites-keycloak-client</module>
+  	<module>corant-suites-keycloak-authzclient</module>
+  	<module>corant-suites-keycloak-adminclient</module>
   </modules>
 </project>

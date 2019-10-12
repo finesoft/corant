@@ -11,9 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.keycloak.client;
+package org.corant.suites.keycloak.authzclient;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -40,15 +41,31 @@ import org.keycloak.util.BasicAuthHelper;
 public class KeycloakAuthzClient {
 
   @Inject
-  @ConfigProperty(name = "keycloak.json.path", defaultValue = "META-INF/keycloak.json")
+  Logger logger;
+
+  @Inject
+  @ConfigProperty(name = "keycloak.authz-client.json-path",
+      defaultValue = "META-INF/keycloak-authz-client.json")
   protected String keycloakJsonPath;
-  // protected Http http;
+
   protected AuthzClient authzClient = null;
   protected ServerConfiguration serverConfiguration = null;
   protected Configuration configuration = null;
 
   public AuthzClient getAuthzClient() {
     return authzClient;
+  }
+
+  public Configuration getConfiguration() {
+    return configuration;
+  }
+
+  public String getKeycloakJsonPath() {
+    return keycloakJsonPath;
+  }
+
+  public ServerConfiguration getServerConfiguration() {
+    return serverConfiguration;
   }
 
   public AccessTokenResponse grantAccessToken(String userName, String password) {
@@ -85,6 +102,8 @@ public class KeycloakAuthzClient {
           .create(Resources.fromClassPath(keycloakJsonPath).findFirst().get().openStream());
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
+      logger
+          .info(() -> String.format("Create keycloak authz client instance %s.", keycloakJsonPath));
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
       throw new CorantRuntimeException("Can't find keycloak.json from %", keycloakJsonPath);

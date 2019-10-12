@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-suites-keycloak-client
+ * corant-suites-keycloak-authzclient
  * 
- * @author bingo 上午11:32:20
+ * @author bingo 下午2:12:40
  *
  */
-package org.corant.suites.keycloak.client;
+package org.corant.suites.keycloak.authzclient;

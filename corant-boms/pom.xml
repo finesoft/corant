@@ -1071,7 +1071,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-keycloak-client</artifactId>
+				<artifactId>corant-suites-keycloak-authzclient</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-keycloak-adminclient</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

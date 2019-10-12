@@ -13,44 +13,29 @@
  */
 package org.corant.suites.json;
 
-import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.corant.Corant;
-import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.bundle.EnumerationBundle;
-import org.corant.suites.bundle.GlobalMessageCodes;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NullSerializer;
-import com.fasterxml.jackson.databind.ser.std.SqlDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.bundle.GlobalMessageCodes;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * corant-asosat-ddd
@@ -60,32 +45,22 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  */
 public class JsonUtils {
 
-  public final static Long BROWSER_SAFE_LONG = 9007199254740991L;
-  public final static BigInteger BROWSER_SAFE_BIGINTEGER = BigInteger.valueOf(BROWSER_SAFE_LONG);
-  public final static SimpleModule SIMPLE_MODULE =
-      new SimpleModule().addSerializer(new SqlDateSerializer().withFormat(Boolean.FALSE, null))
-          .addSerializer(new BigIntegerJsonSerializer()).addSerializer(new LongJsonSerializer())
-          .addSerializer(new EnumJsonSerializer())
-          .setDeserializerModifier(new EnumBeanDeserializerModifier());
-
   final static ObjectMapper objectMapper = new ObjectMapper();
 
   static {
-    objectMapper.registerModules(SIMPLE_MODULE, new JavaTimeModule());
+    SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer());
+    objectMapper.registerModules(simpleModule);
+    objectMapper.registerModules(new JavaTimeModule());
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     objectMapper.enable(Feature.ALLOW_COMMENTS);
-    objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+    objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     objectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
     objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
     objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
   }
 
   private JsonUtils() {}
-
-  public static void clearEnumSerials() {
-    EnumJsonSerializer.CACHES.clear();
-  }
 
   /**
    * @return The ObjectMapper clone that use in this application
@@ -181,7 +156,7 @@ public class JsonUtils {
       } catch (IOException e) {
         e.printStackTrace();
         throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd,
-            clazz.getClass().getName());
+            clazz.getName());
       }
     }
     return null;
@@ -243,109 +218,19 @@ public class JsonUtils {
     return null;
   }
 
-  static final class BigIntegerJsonSerializer extends JsonSerializer<BigInteger> {
-    @Override
-    public Class<BigInteger> handledType() {
-      return BigInteger.class;
-    }
+  /**日期转数组*/
+  static class SqlDateSerializer extends JsonSerializer<java.sql.Date> {
 
     @Override
-    public void serialize(BigInteger value, JsonGenerator gen, SerializerProvider serializers)
-        throws IOException, JsonProcessingException {
-      if (value.compareTo(BROWSER_SAFE_BIGINTEGER) > 0) {
-        gen.writeString(value.toString());
-      } else {
-        gen.writeNumber(value);
-      }
-    }
-  }
-
-  static final class EnumBeanDeserializerModifier extends BeanDeserializerModifier {
-    @SuppressWarnings("rawtypes")
-    @Override
-    public JsonDeserializer<Enum> modifyEnumDeserializer(DeserializationConfig config,
-        final JavaType type, BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
-      return new JsonDeserializer<Enum>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public Enum deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-          Class<? extends Enum> rawClass = (Class<Enum<?>>) type.getRawClass();
-          if (jp.currentToken() == JsonToken.VALUE_STRING
-              || jp.currentToken() == JsonToken.VALUE_NUMBER_INT) {
-            return toEnum(jp.getValueAsString(), rawClass);
-          } else if (jp.currentToken() == JsonToken.START_OBJECT) {
-            JsonNode node = jp.getCodec().readTree(jp);
-            return toEnum(node.get("name").asText(), rawClass);
-          }
-          return null;
-        }
-      };
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final class EnumJsonSerializer extends JsonSerializer<Enum> {
-
-    static final Map<Enum, Map<String, Object>> CACHES = new ConcurrentHashMap<>();
-
-    static volatile EnumerationBundle bundle;
-
-    @Override
-    public Class<Enum> handledType() {
-      return Enum.class;
+    public Class<java.sql.Date> handledType() {
+      return java.sql.Date.class;
     }
 
     @Override
-    public void serialize(Enum value, JsonGenerator gen, SerializerProvider serializers)
-        throws IOException {
-      gen.writeObject(resolveEnumLiteral(value));
-    }
-
-    EnumerationBundle resolveBundle() {
-      if (bundle == null) {
-        synchronized (this) {
-          if (bundle == null && Corant.me() != null
-              && Corant.instance().select(EnumerationBundle.class).isResolvable()) {
-            bundle = Corant.instance().select(EnumerationBundle.class).get();
-          } else {
-            bundle = new EnumJsonSerializerBundle();
-          }
-        }
-      }
-      return bundle;
-    }
-
-    Map<String, Object> resolveEnumLiteral(Enum value) {
-      return CACHES.computeIfAbsent(value, (v) -> {
-        String literal = resolveBundle().getEnumItemLiteral(value, Locale.getDefault());
-        return mapOf("name", value.name(), "literal", defaultObject(literal, value.name()), "class",
-            value.getDeclaringClass().getName(), "ordinal", value.ordinal());
-      });
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final class EnumJsonSerializerBundle implements EnumerationBundle {
-    @Override
-    public String getEnumItemLiteral(Enum enumVal, Locale locale) {
-      return enumVal.name();
-    }
-  }
-
-  static final class LongJsonSerializer extends JsonSerializer<Long> {
-    @Override
-    public Class<Long> handledType() {
-      return Long.class;
-    }
-
-    @Override
-    public void serialize(Long value, JsonGenerator gen, SerializerProvider serializers)
-        throws IOException, JsonProcessingException {
-      if (value.compareTo(BROWSER_SAFE_LONG) > 0) {
-        gen.writeString(value.toString());
-      } else {
-        gen.writeNumber(value);
-      }
+    public void serialize(java.sql.Date value, JsonGenerator gen, SerializerProvider provider)
+            throws IOException {
+      LocalDate date = value.toLocalDate();
+      LocalDateSerializer.INSTANCE.serialize(date, gen, provider);
     }
   }
 }

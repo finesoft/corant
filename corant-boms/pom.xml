@@ -77,7 +77,7 @@
 		<version.keycloak>6.0.1</version.keycloak>
 		<version.glassfish.soteria>1.0</version.glassfish.soteria>
 
-		<version.flyway>5.2.0</version.flyway>
+		<version.flyway>6.0.6</version.flyway>
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.6</version.agroal>
 

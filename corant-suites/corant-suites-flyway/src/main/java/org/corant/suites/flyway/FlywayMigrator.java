@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -32,6 +33,7 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.corant.config.resolve.DeclarativeConfigResolver;
 import org.corant.kernel.api.DataSourceService;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -40,35 +42,22 @@ import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.corant.suites.flyway.FlywayConfigProvider.DefaultFlywayConfigProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.api.migration.JavaMigration;
+import org.flywaydb.core.api.resolver.MigrationResolver;
 
 /**
  * corant-suites-flyway
+ *
+ * FIXME
  *
  * @author bingo 下午7:51:13
  *
  */
 @ApplicationScoped
 public class FlywayMigrator {
-
-  @Inject
-  @ConfigProperty(name = "flyway.migrate.enable", defaultValue = "false")
-  Boolean enable;
-
-  @Inject
-  @ConfigProperty(name = "flyway.migrate.cleanOnValidationError", defaultValue = "false")
-  Boolean cleanOnValidationError;
-
-  @Inject
-  @ConfigProperty(name = "flyway.migrate.cleanDisabled", defaultValue = "true")
-  Boolean cleanDisabled;
-
-  @Inject
-  @ConfigProperty(name = "flyway.migrate.file-path")
-  Optional<String> filePath;
 
   @Inject
   Logger logger;
@@ -79,14 +68,24 @@ public class FlywayMigrator {
 
   @Inject
   @Any
+  Instance<JavaMigration> javaMigrations;
+
+  @Inject
+  @Any
+  Instance<MigrationResolver> migrationResolvers;
+
+  @Inject
+  @Any
   Instance<DataSourceService> dataSourceService;
 
   @Inject
   @Any
   Instance<AbstractDataSourceExtension> dataSourceExtensions;
 
+  FlywayConfig globalFlywayConfig;
+
   public void migrate(@Observes PostCorantReadyEvent e) {
-    if (enable.booleanValue()) {
+    if (globalFlywayConfig.isEnable()) {
       logger.info(() -> "Perform migrate process if necessary...");
       getConfigProviders().map(this::build).filter(ObjectUtils::isNotNull).forEach(this::doMigrate);
       logger.info(() -> "Finished migrate process.");
@@ -119,11 +118,16 @@ public class FlywayMigrator {
     if (!locationsToUse.isEmpty()) {
       logger.info(() -> String.format("Build flyway instance from locations [%s]",
           String.join(",", locationsToUse)));
-      FluentConfiguration fc = Flyway.configure().dataSource(ds)
-          .cleanOnValidationError(cleanOnValidationError).cleanDisabled(cleanDisabled)
-          .locations(locationsToUse.toArray(new String[locationsToUse.size()]));
+      FluentConfiguration fc = Flyway.configure().configuration(globalFlywayConfig).dataSource(ds)
+          .cleanDisabled(true).locations(locationsToUse.toArray(new String[locationsToUse.size()]));
       if (!callbacks.isUnsatisfied()) {
         fc.callbacks(callbacks.stream().toArray(Callback[]::new));
+      }
+      if (!javaMigrations.isUnsatisfied()) {
+        fc.javaMigrations(javaMigrations.stream().toArray(JavaMigration[]::new));
+      }
+      if (!migrationResolvers.isUnsatisfied()) {
+        fc.resolvers(migrationResolvers.stream().toArray(MigrationResolver[]::new));
       }
       config(provider, fc);
       return fc.load();
@@ -159,11 +163,7 @@ public class FlywayMigrator {
   }
 
   protected String getLocation(String name) {
-    if (filePath != null && filePath.isPresent()) {
-      return filePath.get() + "/" + name;
-    } else {
-      return "META-INF/dbmigration/" + name;
-    }
+    return globalFlywayConfig.getLocationPrefix() + "/" + name;
   }
 
   protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {
@@ -179,6 +179,10 @@ public class FlywayMigrator {
       return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().get(name));
     }
     throw new CorantRuntimeException("Can not found any data source named %s", name);
+  }
 
+  @PostConstruct
+  void onPostConstruct() {
+    globalFlywayConfig = DeclarativeConfigResolver.resolveSingle(FlywayConfig.class);
   }
 }

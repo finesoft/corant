@@ -59,9 +59,10 @@ public class DeclarativeConfigResolver {
       new HashSet<>(ClassUtils.WRAPPER_PRIMITIVE_MAP.keySet());
 
   static {
+    supportTypes.add(String.class);
     ConverterRegistry.getSupportConverters().keySet().stream()
-        .filter(ct -> String.class.equals(ct.getSourceClass())).map(ct -> ct.getSourceClass())
-        .forEach(supportTypes::add);
+        .filter(ct -> ct.getSourceClass().isAssignableFrom(String.class))
+        .map(ct -> ct.getTargetClass()).forEach(supportTypes::add);
   }
 
   public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
@@ -170,8 +171,10 @@ public class DeclarativeConfigResolver {
           Class<?> ft = ClassUtils.primitiveToWrapper(f.getType());
           if (Collection.class.isAssignableFrom(ft)) {
             ft = getFieldActualTypeArguments(f, 0);
+          } else if (ft.isArray()) {
+            ft = ft.getComponentType();
           }
-          if (supportTypes.contains(ft)) {
+          if (supportTypes.contains(ft) || Map.class.isAssignableFrom(ft)) {
             getFields().add(new ConfigField(this, f));
           }
         }

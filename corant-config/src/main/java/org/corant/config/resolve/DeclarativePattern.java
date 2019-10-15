@@ -22,6 +22,7 @@ import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,6 +87,20 @@ public enum DeclarativePattern {
               throw new NotSupportedException("Can not resolve config field %s.",
                   configField.toString());
             }
+            configNotFound = false;
+          }
+        }
+      } else if (fieldType.isArray()) {
+        Class<?> actualFieldType = fieldType.getComponentType();
+        Optional<String> val = config.getOptionalValue(key, String.class);
+        if (val.isPresent()) {
+          List<?> vals = toList(listOf(splitValue(val.get())), actualFieldType);
+          if (isNotEmpty(vals)) {
+            Object arrayVal = fieldType.cast(Array.newInstance(actualFieldType, vals.size()));
+            for (int i = 0; i < vals.size(); i++) {
+              Array.set(arrayVal, i, vals.get(i));
+            }
+            field.set(configObject, arrayVal);
             configNotFound = false;
           }
         }
@@ -154,6 +169,17 @@ public enum DeclarativePattern {
           set.add(toObject(i, actualFieldType));
         }
         field.set(configObject, set);
+      } else if (filedType.isArray()) {
+        Class<?> actualFieldType = filedType.getComponentType();
+        String[] parts = splitValue(defaultValue);
+        List<?> vals = toList(listOf(parts), actualFieldType);
+        if (isNotEmpty(vals)) {
+          Object arrayVal = filedType.cast(Array.newInstance(actualFieldType, vals.size()));
+          for (int i = 0; i < vals.size(); i++) {
+            Array.set(arrayVal, i, vals.get(i));
+          }
+          field.set(configObject, arrayVal);
+        }
       } else if (field.getType().equals(Optional.class)) {
         Class<?> optionalType = getFieldActualTypeArguments(field, 0);
         field.set(configObject, Optional.of(toObject(defaultValue, optionalType)));

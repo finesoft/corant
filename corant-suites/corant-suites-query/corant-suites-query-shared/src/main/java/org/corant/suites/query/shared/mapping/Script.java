@@ -13,13 +13,18 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.io.Serializable;
+
 /**
  * corant-suites-query-shared
  *
  * @author bingo 上午10:14:58
  *
  */
-public class Script {
+public class Script implements Serializable {
+
+  private static final long serialVersionUID = -8086650413401748374L;
 
   private String code;
 
@@ -49,6 +54,10 @@ public class Script {
    */
   public ScriptType getType() {
     return type;
+  }
+
+  public boolean isValid() {
+    return isNotBlank(code);
   }
 
   /**

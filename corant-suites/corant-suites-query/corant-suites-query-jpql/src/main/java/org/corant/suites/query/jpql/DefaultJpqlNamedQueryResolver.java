@@ -25,6 +25,7 @@ import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
 
 /**
  * corant-suites-query
@@ -62,7 +63,7 @@ public class DefaultJpqlNamedQueryResolver
       throw new NotSupportedException();
     }
     // FIXME decide script engine
-    if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
+    if (query.getScript().getType() == ScriptType.JS) {
       return createJsProcessor(query);
     } else {
       return createFmProcessor(query);

@@ -42,7 +42,7 @@ public class SqlNamedQuerierJsBuilder
   public SqlNamedQuerierJsBuilder(Query query, QueryParameterResolver parameterResolver,
       QueryResultResolver resultResolver) {
     super(query, parameterResolver, resultResolver);
-    execution = NashornScriptEngines.compileFunction(query.getScript(), "p", "up");
+    execution = NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
   }
 
   /**

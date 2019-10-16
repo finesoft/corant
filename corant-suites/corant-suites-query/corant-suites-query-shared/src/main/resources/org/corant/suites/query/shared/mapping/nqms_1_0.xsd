@@ -64,7 +64,7 @@
         <xsd:sequence>
             <xsd:element name="description" type="xsd:string" maxOccurs="1" minOccurs="0"/>
             <xsd:element name="properties" type="nqms:properties" maxOccurs="1" minOccurs="0"/>
-            <xsd:element name="script" type="xsd:string" maxOccurs="1" minOccurs="1">
+            <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>The query script</xsd:documentation>
                 </xsd:annotation>
@@ -112,14 +112,23 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:element name="parameter" type="nqms:fetch-query-parameter" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element name="script" type="xsd:string" maxOccurs="1" minOccurs="0" nillable="false">
+			<xsd:element name="predicate-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
                 <xsd:annotation>
-                    <xsd:documentation>The precondition script for decide execute this fetch query or not,
-                        script may be a function that receive result-record and query param and return bool.
+                    <xsd:documentation>
+                    	The precondition script for decide execute this fetch query or not,
+                        script may be a function that receive result-record and query param and return bool,
+                         the default script type is Java Script.
                     </xsd:documentation>
                 </xsd:annotation>
-            </xsd:element>
+            </xsd:element>        
+            <xsd:element name="parameter" type="nqms:fetch-query-parameter" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="injection-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                    	Scripts for injection processing, the default script type is Java Script.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>    
         </xsd:sequence>
         <xsd:attribute name="reference-query" type="xsd:string" use="required">
             <xsd:annotation>

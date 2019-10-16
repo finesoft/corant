@@ -26,6 +26,7 @@ import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -66,7 +67,7 @@ public class DefaultSqlNamedQueryResolver
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
     // FIXME decide script engine
-    if (query.getScript().startsWith("(function") || query.getScript().startsWith("function")) {
+    if (query.getScript().getType() == ScriptType.JS) {
       return createJsBuilder(query);
     } else {
       return createFmBuilder(query);

@@ -38,7 +38,8 @@ public class FetchQuery implements Serializable {
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private String referenceQueryversion = "";
   private boolean multiRecords = true;
-  private String script;
+  private Script predicate = new Script();
+  private Script injection = new Script();
 
   public FetchQuery() {
     super();
@@ -52,11 +53,12 @@ public class FetchQuery implements Serializable {
    * @param parameters
    * @param referenceQueryversion
    * @param multiRecords
-   * @param script
+   * @param predicate
+   * @param injection
    */
   public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
       int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
-      boolean multiRecords, String script) {
+      boolean multiRecords, Script predicate, Script injection) {
     super();
     this.referenceQuery = referenceQuery;
     this.injectPropertyName = injectPropertyName;
@@ -65,7 +67,16 @@ public class FetchQuery implements Serializable {
     this.parameters = parameters;
     this.referenceQueryversion = referenceQueryversion;
     this.multiRecords = multiRecords;
-    this.script = script;
+    if (predicate != null) {
+      this.predicate = predicate;
+    }
+    if (injection != null) {
+      this.injection = injection;
+    }
+  }
+
+  public Script getInjection() {
+    return injection;
   }
 
   /**
@@ -89,6 +100,10 @@ public class FetchQuery implements Serializable {
     return parameters;
   }
 
+  public Script getPredicate() {
+    return predicate;
+  }
+
   /**
    * @return the referenceQuery
    */
@@ -110,10 +125,6 @@ public class FetchQuery implements Serializable {
     return resultClass;
   }
 
-  public String getScript() {
-    return script;
-  }
-
   public String getVersionedReferenceQueryName() {
     return defaultString(getReferenceQuery())
         + (isNotBlank(getReferenceQueryversion()) ? "_" + getReferenceQueryversion() : "");
@@ -125,6 +136,10 @@ public class FetchQuery implements Serializable {
 
   protected void addParameter(FetchQueryParameter parameter) {
     parameters.add(parameter);
+  }
+
+  protected void setInjection(Script injection) {
+    this.injection = defaultObject(injection, new Script());
   }
 
   protected void setInjectPropertyName(String injectPropertyName) {
@@ -139,6 +154,10 @@ public class FetchQuery implements Serializable {
     this.multiRecords = multiRecords;
   }
 
+  protected void setPredicate(Script predicate) {
+    this.predicate = defaultObject(predicate, new Script());
+  }
+
   protected void setReferenceQuery(String referenceQuery) {
     this.referenceQuery = referenceQuery;
   }
@@ -149,10 +168,6 @@ public class FetchQuery implements Serializable {
 
   protected void setResultClass(Class<?> resultClass) {
     this.resultClass = defaultObject(resultClass, Map.class);
-  }
-
-  protected void setScript(String script) {
-    this.script = script;
   }
 
   /**

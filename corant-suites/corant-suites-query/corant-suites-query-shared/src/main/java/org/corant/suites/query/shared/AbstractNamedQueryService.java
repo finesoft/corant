@@ -18,7 +18,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -49,8 +48,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected boolean decideFetch(Object result, FetchQuery fetchQuery, Object criteria) {
     // precondition to decide whether execute fetch.
-    if (isNotBlank(fetchQuery.getScript())) {
-      ScriptFunction sf = NashornScriptEngines.compileFunction(fetchQuery.getScript(), "p", "r");
+    if (fetchQuery.getPredicate().isValid()) {
+      ScriptFunction sf =
+          NashornScriptEngines.compileFunction(fetchQuery.getPredicate().getCode(), "p", "r");
       if (sf != null) {
         Boolean b = toBoolean(sf.apply(new Object[] {criteria, result}));
         if (b == null || !b.booleanValue()) {

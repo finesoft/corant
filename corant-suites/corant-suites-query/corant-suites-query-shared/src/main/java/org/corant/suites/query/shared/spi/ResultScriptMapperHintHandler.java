@@ -102,7 +102,8 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
-    return hint != null && isEquals(hint.getKey(), HINT_NAME) && isNotBlank(hint.getScript());
+    return hint != null && isEquals(hint.getKey(), HINT_NAME)
+        && isNotBlank(hint.getScript().getCode());
   }
 
   @Override
@@ -159,7 +160,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     @Override
     public boolean accept(QueryHint qh) {
-      return qh != null && isNotBlank(qh.getScript()) && (isEmpty(qh.getParameters())
+      return qh != null && isNotBlank(qh.getScript().getCode()) && (isEmpty(qh.getParameters())
           || isEmpty(qh.getParameters(ResultScriptMapperHintHandler.HNIT_SCRIPT_ENGINE))
           || defaultString(
               qh.getParameters(ResultScriptMapperHintHandler.HNIT_SCRIPT_ENGINE).get(0).getValue(),
@@ -168,7 +169,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     @Override
     public ScriptConsumer resolve(QueryHint qh) throws Exception {
-      return NashornScriptEngines.compileConsumer(qh.getScript(), "p", "r");
+      return NashornScriptEngines.compileConsumer(qh.getScript().getCode(), "p", "r");
     }
 
   }

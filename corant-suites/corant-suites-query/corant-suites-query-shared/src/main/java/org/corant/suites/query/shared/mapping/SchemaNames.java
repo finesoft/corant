@@ -26,6 +26,7 @@ public class SchemaNames {
   public static final String X_NAME = "name";
   public static final String X_VALUE = "value";
   public static final String X_TYPE = "type";
+  public static final String X_SRC = "src";
   public static final String X_PARAM = "parameter";
   public static final String X_SCRIPT = "script";
   public static final String X_ENTRY = "entry";
@@ -48,11 +49,13 @@ public class SchemaNames {
 
   public static final String FQE_ELE_PARAM_ATT_SRC = "source";
   public static final String FQE_ELE_PARAM_ATT_SRC_NME = "source-name";
+  public static final String FQE_ELE_PREDICATE_SCRIPT = "predicate-script";
+  public static final String FQE_ELE_INJECTION_SCRIPT = "injection-script";
   public static final String FQE_ATT_NAME = "reference-query";
   public static final String FQE_ATT_PRO_NAME = "inject-property-name";
   public static final String FQE_ATT_MAX_SIZE = "max-fetch-size";
   public static final String FQE_ATT_VER = "reference-query-version";
-  public static final String FQE_ATT_MULT = "multi-records";
+  public static final String FQE_ATT_MULT_RECORDS = "multi-records";
 
   private SchemaNames() {}
 

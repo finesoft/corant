@@ -104,7 +104,7 @@ public class QueryMapping {
             "The 'result-class' attribute of 'query' element [%s] in query file [%s] can not null!",
             q.getName(), getUrl()));
       }
-      if (isBlank(q.getScript())) {
+      if (!q.getScript().isValid()) {
         brokens.add(String.format(
             "The 'script' element in 'query' element [%s] in query file [%s] can not null!",
             q.getName(), getUrl()));

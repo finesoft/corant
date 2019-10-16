@@ -49,7 +49,8 @@ public class QueryMappingSchemaUtils {
       for (Query q : service.getQueries()) {
         System.out.println("[".concat(q.getName()).concat("]:\n"));
         try (StringWriter sw = new StringWriter()) {
-          Template tpl = new Template(q.getName(), q.getScript(), FreemarkerConfigurations.FM_CFG);
+          Template tpl =
+              new Template(q.getName(), q.getScript().getCode(), FreemarkerConfigurations.FM_CFG);
           tpl.dump(System.out);
           if (isNotEmpty(parameter)) {
             DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();

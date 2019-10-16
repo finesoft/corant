@@ -59,7 +59,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       QueryResultResolver resultResolver) {
     super(query, parameterResolver, resultResolver);
     try {
-      execution = new Template(query.getName(), query.getScript(), FreemarkerConfigurations.FM_CFG);
+      execution = new Template(query.getName(), query.getScript().getCode(),
+          FreemarkerConfigurations.FM_CFG);
     } catch (IOException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the query template [%s].", query.getName());

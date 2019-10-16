@@ -51,7 +51,6 @@ public class QueryParser {
 
   public List<QueryMapping> parse(String... pathExpresses) {
     List<QueryMapping> qmList = new CopyOnWriteArrayList<>();
-    final QueryParserErrorHandler errHdl = new QueryParserErrorHandler();
     final SAXParserFactory factory = createSAXParserFactory();
     final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpresses);
     fileMap.entrySet().stream().parallel().forEach(entry -> {
@@ -59,7 +58,7 @@ public class QueryParser {
       try (InputStream is = entry.getValue().openStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
         XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setErrorHandler(errHdl);
+        reader.setErrorHandler(new QueryParserErrorHandler(entry.getValue().getLocation()));
         reader.setContentHandler(handler);
         reader.parse(new InputSource(is));
         qmList.add(handler.getMapping());
@@ -103,19 +102,27 @@ public class QueryParser {
   }
 
   static class QueryParserErrorHandler implements ErrorHandler {
+
+    final String url;
+
+    QueryParserErrorHandler(String url) {
+      super();
+      this.url = url;
+    }
+
     @Override
     public void error(SAXParseException exception) throws SAXException {
-      throw new QueryRuntimeException(exception);
+      throw new QueryRuntimeException(exception, "Parse %s error!", url);
     }
 
     @Override
     public void fatalError(SAXParseException exception) throws SAXException {
-      throw new QueryRuntimeException(exception);
+      throw new QueryRuntimeException(exception, "Parse %s error!", url);
     }
 
     @Override
     public void warning(SAXParseException exception) throws SAXException {
-      throw new QueryRuntimeException(exception);
+      throw new QueryRuntimeException(exception, "Parse %s error!", url);
     }
   }
 }

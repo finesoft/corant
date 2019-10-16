@@ -43,7 +43,7 @@ public class Query implements Serializable {
   private boolean cache = true;
   private boolean cacheResultSetMetadata = true;
   private String description;
-  private String script;
+  private Script script = new Script();
   private List<FetchQuery> fetchQueries = new ArrayList<>();
   private List<QueryHint> hints = new ArrayList<>();
   private String version = "";
@@ -76,7 +76,7 @@ public class Query implements Serializable {
    * @param mappingFilePath;
    */
   public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
-      boolean cacheResultSetMetadata, String description, String script,
+      boolean cacheResultSetMetadata, String description, Script script,
       List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
       Map<String, ParameterMapping> paramMappings, Map<String, String> properties,
       String mappingFilePath) {
@@ -87,7 +87,9 @@ public class Query implements Serializable {
     this.cache = cache;
     this.cacheResultSetMetadata = cacheResultSetMetadata;
     this.description = description;
-    this.script = script;
+    if (script != null) {
+      this.script = script;
+    }
     this.fetchQueries = fetchQueries;
     this.hints = hints;
     this.version = version;
@@ -198,7 +200,7 @@ public class Query implements Serializable {
   /**
    * @return the script
    */
-  public String getScript() {
+  public Script getScript() {
     return script;
   }
 
@@ -280,8 +282,8 @@ public class Query implements Serializable {
     this.resultSetMapping = resultSetMapping;
   }
 
-  protected void setScript(String script) {
-    this.script = script;
+  protected void setScript(Script script) {
+    this.script = defaultObject(script, new Script());
   }
 
   protected void setVersion(String version) {

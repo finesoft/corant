@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class QueryHint implements Serializable {
 
   private String key;
   private Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
-  private String script;
+  private Script script = new Script();
   private final String id = UUID.randomUUID().toString();
 
   public QueryHint() {
@@ -45,11 +46,13 @@ public class QueryHint implements Serializable {
    * @param parameters
    * @param script
    */
-  public QueryHint(String key, Map<String, List<QueryHintParameter>> parameters, String script) {
+  public QueryHint(String key, Map<String, List<QueryHintParameter>> parameters, Script script) {
     super();
     this.key = key;
     this.parameters = parameters;
-    this.script = script;
+    if (script != null) {
+      this.script = script;
+    }
   }
 
   public String getId() {
@@ -72,7 +75,7 @@ public class QueryHint implements Serializable {
     }
   }
 
-  public String getScript() {
+  public Script getScript() {
     return script;
   }
 
@@ -84,8 +87,8 @@ public class QueryHint implements Serializable {
     this.key = key;
   }
 
-  protected void setScript(String script) {
-    this.script = script;
+  protected void setScript(Script script) {
+    this.script = defaultObject(script, new Script());
   }
 
   /**

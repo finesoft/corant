@@ -14,9 +14,12 @@
 package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.fromInputStream;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.trim;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +38,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.suites.query.shared.mapping.Properties.Property;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -66,7 +70,9 @@ public class QueryParseHandler extends DefaultHandler {
   public void characters(char[] ch, int start, int length) throws SAXException {
     String cqn = currentQName();
     if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(cqn) || SchemaNames.X_DESC.equalsIgnoreCase(cqn)
-        || SchemaNames.X_SCRIPT.equalsIgnoreCase(cqn)) {
+        || SchemaNames.X_SCRIPT.equalsIgnoreCase(cqn)
+        || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(cqn)
+        || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(cqn)) {
       charStack.append(ch, start, length);
     }
   }
@@ -107,14 +113,10 @@ public class QueryParseHandler extends DefaultHandler {
       handleQueryProperties(false, qName, null);
     } else if (SchemaNames.X_PRO.equalsIgnoreCase(qName)) {
       handleProperty(false, qName, null);
-    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
-      if (currentObject() instanceof Query) {
-        handleQueryScript(false, qName, null);
-      } else if (currentObject() instanceof QueryHint) {
-        handleQueryHintScript(false, qName, null);
-      } else if (currentObject() instanceof FetchQuery) {
-        handleFetchQueryScript(false, qName, null);
-      }
+    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)) {
+      handleScript(false, qName, null);
     }
   }
 
@@ -162,14 +164,10 @@ public class QueryParseHandler extends DefaultHandler {
       if (currentObject() instanceof Properties) {
         handleProperty(true, qName, attributes);
       }
-    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
-      if (currentObject() instanceof Query) {
-        handleQueryScript(true, qName, attributes);
-      } else if (currentObject() instanceof QueryHint) {
-        handleQueryHintScript(true, qName, attributes);
-      } else if (currentObject() instanceof FetchQuery) {
-        handleFetchQueryScript(true, qName, attributes);
-      }
+    } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)) {
+      handleScript(true, qName, attributes);
     }
   }
 
@@ -199,7 +197,7 @@ public class QueryParseHandler extends DefaultHandler {
           fq.setReferenceQueryversion(defaultString(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
           fq.setResultClass(isBlank(atv) ? java.util.Map.class : tryAsClass(atv));
-        } else if (SchemaNames.FQE_ATT_MULT.equalsIgnoreCase(aqn)) {
+        } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
           fq.setMultiRecords(isBlank(atv) ? true : ConversionUtils.toBoolean(atv));
         }
       }
@@ -209,7 +207,8 @@ public class QueryParseHandler extends DefaultHandler {
       Object obj = valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
-        throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
+        throw new QueryRuntimeException("Parse %s error the fetch query must be in query element!",
+            url);
       }
       q.addFetchQuery((FetchQuery) obj);
       nameStack.pop();
@@ -238,25 +237,9 @@ public class QueryParseHandler extends DefaultHandler {
       FetchQuery q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException(
-            "Parse error the fetch query parameter must be in fetch query element!");
+            "Parse %s error the fetch query parameter must be in fetch query element!", url);
       }
       q.addParameter((FetchQueryParameter) obj);
-      nameStack.pop();
-    }
-  }
-
-  void handleFetchQueryScript(boolean start, String qName, Attributes attributes) {
-    if (start) {
-      nameStack.push(qName);
-    } else {
-      String script = handleScript(charStack.toString());
-      charStack.delete(0, charStack.length());
-      FetchQuery q = this.currentObject();
-      if (q == null || isBlank(script)) {
-        throw new QueryRuntimeException(
-            "Parse error the query script must be in query element and script can't null!");
-      }
-      q.setScript(script.trim());
       nameStack.pop();
     }
   }
@@ -339,7 +322,7 @@ public class QueryParseHandler extends DefaultHandler {
       Query q = this.currentObject();
       if (q == null) {
         throw new QueryRuntimeException(
-            "Parse error the query description must be in query element!");
+            "Parse %s error the query description must be in query element!", url);
       }
       q.setDescription(desc.trim());
       nameStack.pop();
@@ -362,7 +345,8 @@ public class QueryParseHandler extends DefaultHandler {
       Object obj = valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
-        throw new QueryRuntimeException("Parse error the query hit must be in query element!");
+        throw new QueryRuntimeException("Parse %s error the query hit must be in query element!",
+            url);
       }
       q.addHint((QueryHint) obj);
       nameStack.pop();
@@ -390,27 +374,11 @@ public class QueryParseHandler extends DefaultHandler {
       QueryHint qh = this.currentObject();
       if (qh == null) {
         throw new QueryRuntimeException(
-            "Parse error the query hint parameter must be in query hint element!");
+            "Parse %s error the query hint parameter must be in query hint element!", url);
       }
       if (obj instanceof QueryHintParameter) {
         qh.addParameter(QueryHintParameter.class.cast(obj));
       }
-      nameStack.pop();
-    }
-  }
-
-  void handleQueryHintScript(boolean start, String qName, Attributes attributes) {
-    if (start) {
-      nameStack.push(qName);
-    } else {
-      String script = handleScript(charStack.toString());
-      charStack.delete(0, charStack.length());
-      QueryHint q = this.currentObject();
-      if (q == null || isBlank(script)) {
-        throw new QueryRuntimeException(
-            "Parse error the query hit script must be in query element and script can't null!");
-      }
-      q.setScript(script.trim());
       nameStack.pop();
     }
   }
@@ -424,34 +392,93 @@ public class QueryParseHandler extends DefaultHandler {
       Object obj = valueStack.pop();
       Query q = this.currentObject();
       if (q == null) {
-        throw new QueryRuntimeException("Parse error the fetch query must be in query element!");
+        throw new QueryRuntimeException("Parse %s error the fetch query must be in query element!",
+            url);
       }
       ((Properties) obj).toMap().forEach((k, v) -> q.addProperty(k, v));
       nameStack.pop();
     }
   }
 
-  void handleQueryScript(boolean start, String qName, Attributes attributes) {
+  void handleScript(boolean start, String qName, Attributes attributes) {
     if (start) {
+      Script st = new Script();
+      ScriptType typ = null;
+      String src = null;
+      for (int i = 0; i < attributes.getLength(); i++) {
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
+        if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+          typ = toObject(atv, ScriptType.class);
+        } else if (SchemaNames.X_SRC.equalsIgnoreCase(aqn)) {
+          src = atv;
+        }
+      }
+      st.setType(typ == null ? this.currentObject() instanceof Query ? ScriptType.FM : ScriptType.JS
+          : typ);
+      st.setSrc(src);
+      valueStack.push(st);
       nameStack.push(qName);
     } else {
-      String script = handleScript(charStack.toString());
-      charStack.delete(0, charStack.length());
-      Query q = this.currentObject();
-      if (q == null || isBlank(script)) {
-        throw new QueryRuntimeException(
-            "Parse error the query script must be in query element and script can't null!");
+      Script obj = forceCast(valueStack.pop());
+      String scriptCode = null;
+      if (isNotBlank(obj.getSrc())) {
+        scriptCode = resolveScript(obj.getSrc());
+      } else {
+        scriptCode = charStack.toString();
       }
-      q.setScript(script.trim());
+      if (isBlank(scriptCode)) {
+        throw new QueryRuntimeException("Parse %s error the script code can't null!", url);
+      }
+      charStack.delete(0, charStack.length());
+      obj.setCode(scriptCode);
+      if (qName.equalsIgnoreCase(SchemaNames.X_SCRIPT)) {
+        if (this.currentObject() instanceof Query) {
+          Query q = this.currentObject();
+          if (q == null || !obj.isValid()) {
+            throw new QueryRuntimeException(
+                "Parse %s error the query script must be in query element and script can't null!",
+                url);
+          }
+          q.setScript(obj);
+        } else if (this.currentObject() instanceof QueryHint) {
+          QueryHint q = this.currentObject();
+          if (q == null || !obj.isValid()) {
+            throw new QueryRuntimeException(
+                "Parse %s error the query hit script must be in query element and script can't null!",
+                url);
+          }
+          q.setScript(obj);
+        }
+      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_PREDICATE_SCRIPT)) {
+        if (this.currentObject() instanceof FetchQuery) {
+          FetchQuery q = this.currentObject();
+          if (q == null || !obj.isValid()) {
+            throw new QueryRuntimeException(
+                "Parse %s error the fetch query predicate script must be in predicate-script element and script can't null!");
+          }
+          q.setPredicate(obj);
+        }
+      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_INJECTION_SCRIPT)) {
+        if (this.currentObject() instanceof FetchQuery) {
+          FetchQuery q = this.currentObject();
+          if (q == null || !obj.isValid()) {
+            throw new QueryRuntimeException(
+                "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!");
+          }
+          q.setInjection(obj);
+        }
+      }
+
       nameStack.pop();
     }
   }
 
-  String handleScript(String script) {
-    Optional<SourceType> st = SourceType.decide(trim(script));
+  String resolveScript(String src) {
+    Optional<SourceType> st = SourceType.decide(trim(src));
     if (st.isPresent()) {
       try {
-        Optional<URLResource> or = Resources.from(trim(script)).findFirst();
+        Optional<URLResource> or = Resources.from(trim(src)).findFirst();
         if (or.isPresent()) {
           try (InputStream is = or.get().openStream()) {
             return fromInputStream(is);
@@ -461,7 +488,7 @@ public class QueryParseHandler extends DefaultHandler {
         throw new CorantRuntimeException(e);
       }
     }
-    return script;
+    return null;
   }
 
   @SuppressWarnings("unchecked")

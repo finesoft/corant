@@ -205,6 +205,7 @@
         </xsd:sequence>
         <xsd:attribute name="key" type="xsd:string"></xsd:attribute>
     </xsd:complexType>
+    
     <xsd:complexType name="hint-parameter">
         <xsd:attribute name="name" type="xsd:string"></xsd:attribute>
         <xsd:attribute name="value" type="xsd:string"></xsd:attribute>
@@ -214,4 +215,34 @@
     <xsd:simpleType name="common-segment">
         <xsd:restriction base="xsd:string"></xsd:restriction>
     </xsd:simpleType>
+    
+    <xsd:complexType name="script">
+        <xsd:annotation>
+            <xsd:documentation>
+                The scripts that are used for dynamically generating query statements or handle query parameter or handle query result.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+      		<xsd:extension base="xsd:string">
+         		<xsd:attribute name="type" type="nqms:script-type" use="optional"></xsd:attribute>
+        		<xsd:attribute name="src" type="xsd:string" use="optional"></xsd:attribute>
+      		</xsd:extension>
+    	</xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="script-type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="JS">
+                <xsd:annotation>
+                    <xsd:documentation>Specify that the script language is Java Script.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="FM">
+                <xsd:annotation>
+                    <xsd:documentation>Specify that the script language is Freemarker.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>    
+        
 </xsd:schema>

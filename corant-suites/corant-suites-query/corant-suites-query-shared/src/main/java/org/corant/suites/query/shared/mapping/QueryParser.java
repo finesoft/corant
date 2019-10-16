@@ -30,7 +30,6 @@ import javax.xml.validation.SchemaFactory;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.Resource;
-import org.corant.shared.util.StringUtils;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -83,7 +82,7 @@ public class QueryParser {
   Map<String, Resource> getQueryMappingFiles(String... pathExpresses) {
     Map<String, Resource> map = new ConcurrentHashMap<>();
     for (String pathExpress : pathExpresses) {
-      setOf(split(pathExpress, ",")).stream().filter(StringUtils::isNotBlank).forEach(path -> {
+      setOf(split(pathExpress, ",", true, true)).stream().forEach(path -> {
         try {
           Resources.from(path).forEach(f -> map.put(f.getURL().getPath(), f));
         } catch (Exception e) {

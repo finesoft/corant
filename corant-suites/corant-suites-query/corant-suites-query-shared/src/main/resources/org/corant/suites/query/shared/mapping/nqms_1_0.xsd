@@ -125,7 +125,7 @@
             <xsd:element name="injection-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
                 <xsd:annotation>
                     <xsd:documentation>
-                    	Scripts for injection processing, the default script type is Java Script.
+                    	Reserve zone unfinished yet. Scripts for injection processing, the default script type is Java Script.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>    

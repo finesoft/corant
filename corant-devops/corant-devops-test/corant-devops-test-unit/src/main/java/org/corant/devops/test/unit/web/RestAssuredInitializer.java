@@ -50,6 +50,7 @@ public class RestAssuredInitializer {
   public static RequestSpecification multipartOf(Map<String, Object> params) {
     RequestSpecification rs = RestAssured.given()
         .contentType("multipart/form-data; charset=" + Defaults.DFLT_CHARSET_STR);
+    params.putIfAbsent("_charset_", Defaults.DFLT_CHARSET_STR);
     initializeMultipartFormParam(rs, params);
     return rs;
   }

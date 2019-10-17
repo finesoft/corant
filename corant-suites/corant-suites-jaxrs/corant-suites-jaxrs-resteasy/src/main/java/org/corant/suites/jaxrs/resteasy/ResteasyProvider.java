@@ -93,8 +93,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
   }
 
   private void handle(Application app, ResteasyDeployment deployment, String contextPath) {
-    String pattern = contextPath.endsWith("/") ? contextPath.concat("*")
-        : contextPath + contextPath.concat("/*");
+    String pattern = contextPath.endsWith("/") ? contextPath.concat("*") : contextPath.concat("/*");
     WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
         ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
     servletMetaDatas.add(new WebServletMetaData("ResteasyServlet", new String[] {pattern},

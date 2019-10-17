@@ -70,7 +70,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
   void onPostConstruct() {
     if (applications.isResolvable()) {
       applications.stream().forEach(this::handle);
-      servletContextAttributes.put("resteasy.role.based.security", true);
+      servletContextAttributes.put(ResteasyContextParameters.RESTEASY_ROLE_BASED_SECURITY, true);
     }
   }
 
@@ -93,7 +93,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
   }
 
   private void handle(Application app, ResteasyDeployment deployment, String contextPath) {
-    String pattern = contextPath.endsWith("/") ? contextPath + "*" : contextPath + "/*";
+    String pattern = contextPath.endsWith("/") ? contextPath.concat("*")
+        : contextPath + contextPath.concat("/*");
     WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
         ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
     servletMetaDatas.add(new WebServletMetaData("ResteasyServlet", new String[] {pattern},

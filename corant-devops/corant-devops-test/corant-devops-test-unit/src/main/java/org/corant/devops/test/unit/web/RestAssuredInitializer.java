@@ -99,7 +99,7 @@ public class RestAssuredInitializer {
 
     @Override
     public Map<String, String> getHeaders() {
-      return mapOf("Content-Disposition", new ContentDisposition(getMimeType(), getControlName(),
+      return mapOf("Content-Disposition", new ContentDisposition("form-data", getControlName(),
           getFileName(), Defaults.DFLT_CHARSET, null, ZonedDateTime.now(), null, null).toString());
       // return v instanceof File
       // ? mapOf("Content-Disposition",

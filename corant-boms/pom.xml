@@ -71,7 +71,7 @@
 		<version.xnio>3.3.8.Final</version.xnio>
 		<version.tomcat>9.0.21</version.tomcat>
 		<version.undertow>2.0.26.Final</version.undertow>
-		<version.resteasy>3.9.0.Final</version.resteasy>
+		<version.resteasy>4.3.1.Final</version.resteasy>
 
 		<version.artemis>2.9.0</version.artemis>
 		<version.keycloak>6.0.1</version.keycloak>
@@ -422,7 +422,7 @@
 			<!-- Jaxrs -->
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxrs</artifactId>
+				<artifactId>resteasy-core</artifactId>
 				<version>${version.resteasy}</version>
 			</dependency>
 			<dependency>

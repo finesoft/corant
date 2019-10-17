@@ -11,49 +11,59 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jaxrs.resteasy;
+package org.corant.suites.servlet.abstraction;
 
 import java.io.IOException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.ext.Provider;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import org.corant.kernel.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.resteasy.core.interception.PreMatchContainerRequestContext;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.spi.HttpRequest;
 
 /**
- * corant-suites-jaxrs-resteasy
+ * corant-suites-servlet
  *
- * @author bingo 下午5:49:01
+ * @author bingo 下午10:05:46
  *
  */
 @ApplicationScoped
-@Provider
-@PreMatching
-public class ResteasyCharsetContainerRequestFilter implements ContainerRequestFilter {
+@WebFilter(filterName = "CharacterEncodingFilter", urlPatterns = {"/*"})
+public class CharacterEncodingFilter implements Filter {
 
   @Inject
   @ConfigProperty(name = "servlet.request-charset-filter.enable", defaultValue = "true")
-  boolean enable;
+  boolean enableReq;
+
+  @Inject
+  @ConfigProperty(name = "servlet.response-charset-filter.enable", defaultValue = "true")
+  boolean enableRes;
 
   @Inject
   @ConfigProperty(name = "servlet.request-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
-  String charset;
+  String reqCharset;
+
+  @Inject
+  @ConfigProperty(name = "servlet.response-charset-filter.charset",
+      defaultValue = Defaults.DFLT_CHARSET_STR)
+  String resCharset;
 
   @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
-    if (requestContext instanceof PreMatchContainerRequestContext && enable) {
-      PreMatchContainerRequestContext reqctx =
-          PreMatchContainerRequestContext.class.cast(requestContext);
-      HttpRequest hr = reqctx.getHttpRequest();
-      hr.setAttribute(InputPart.DEFAULT_CHARSET_PROPERTY, charset);
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    // setting the charset
+    if (enableReq) {
+      request.setCharacterEncoding(reqCharset);
     }
+    if (enableRes) {
+      response.setCharacterEncoding(resCharset);
+    }
+    chain.doFilter(request, response);
   }
 
 }

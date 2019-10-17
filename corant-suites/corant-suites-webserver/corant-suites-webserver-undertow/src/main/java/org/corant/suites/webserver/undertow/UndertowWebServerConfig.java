@@ -108,6 +108,14 @@ public class UndertowWebServerConfig {
   @ConfigProperty(name = "webserver.undertow.persistence-session", defaultValue = "false")
   private boolean persistenceSession;
 
+  @Inject
+  @ConfigProperty(name = "webserver.default-request-charset")
+  private Optional<String> defaultRequestCharset;
+
+  @Inject
+  @ConfigProperty(name = "webserver.default-response-charset")
+  private Optional<String> defaultResponseCharset;
+
   /**
    *
    * @return the backLog
@@ -138,6 +146,22 @@ public class UndertowWebServerConfig {
    */
   public int getBufferSize() {
     return bufferSize;
+  }
+
+  /**
+   * 
+   * @return the defaultRequestCharset
+   */
+  public Optional<String> getDefaultRequestCharset() {
+    return defaultRequestCharset;
+  }
+
+  /**
+   * 
+   * @return the defaultResponseCharset
+   */
+  public Optional<String> getDefaultResponseCharset() {
+    return defaultResponseCharset;
   }
 
   /**

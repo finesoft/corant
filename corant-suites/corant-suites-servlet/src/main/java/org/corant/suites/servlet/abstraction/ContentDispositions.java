@@ -14,6 +14,7 @@
 package org.corant.suites.servlet.abstraction;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -217,9 +218,8 @@ public class ContentDispositions {
      * @param modificationDate
      * @param readDate
      */
-    protected ContentDisposition(String type, String name, String filename, Charset charset,
-        Long size, ZonedDateTime creationDate, ZonedDateTime modificationDate,
-        ZonedDateTime readDate) {
+    public ContentDisposition(String type, String name, String filename, Charset charset, Long size,
+        ZonedDateTime creationDate, ZonedDateTime modificationDate, ZonedDateTime readDate) {
       super();
       this.type = type;
       this.name = name;
@@ -263,5 +263,45 @@ public class ContentDispositions {
       return type;
     }
 
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      if (type != null) {
+        sb.append(type);
+      }
+      if (name != null) {
+        sb.append("; name=\"");
+        sb.append(name).append('\"');
+      }
+      if (filename != null) {
+        if (charset == null || US_ASCII.equals(charset)) {
+          sb.append("; filename=\"");
+          sb.append(filename).append('\"');
+        } else {
+          sb.append("; filename*=");
+          sb.append(encodeHeaderFieldParam(filename, charset));
+        }
+      }
+      if (size != null) {
+        sb.append("; size=");
+        sb.append(size);
+      }
+      if (creationDate != null) {
+        sb.append("; creation-date=\"");
+        sb.append(RFC_1123_DATE_TIME.format(creationDate));
+        sb.append('\"');
+      }
+      if (modificationDate != null) {
+        sb.append("; modification-date=\"");
+        sb.append(RFC_1123_DATE_TIME.format(modificationDate));
+        sb.append('\"');
+      }
+      if (readDate != null) {
+        sb.append("; read-date=\"");
+        sb.append(RFC_1123_DATE_TIME.format(readDate));
+        sb.append('\"');
+      }
+      return sb.toString();
+    }
   }
 }

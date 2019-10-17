@@ -15,12 +15,15 @@ package org.corant.devops.test.unit.web;
 
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.io.File;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.corant.devops.test.unit.web.RandomWebServerPortSourceProvider.RandomWebServerPortConfigSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.normal.Defaults;
+import org.corant.suites.servlet.abstraction.ContentDispositions.ContentDisposition;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.restassured.RestAssured;
 import io.restassured.specification.MultiPartSpecification;
@@ -45,7 +48,8 @@ public class RestAssuredInitializer {
   }
 
   public static RequestSpecification multipartOf(Map<String, Object> params) {
-    RequestSpecification rs = RestAssured.given().contentType("multipart/form-data");
+    RequestSpecification rs = RestAssured.given()
+        .contentType("multipart/form-data; charset=" + Defaults.DFLT_CHARSET_STR);
     initializeMultipartFormParam(rs, params);
     return rs;
   }
@@ -75,7 +79,7 @@ public class RestAssuredInitializer {
 
     @Override
     public String getCharset() {
-      return "utf-8";
+      return Defaults.DFLT_CHARSET_STR;
     }
 
     @Override
@@ -95,12 +99,14 @@ public class RestAssuredInitializer {
 
     @Override
     public Map<String, String> getHeaders() {
-      return v instanceof File
-          ? mapOf("Content-Disposition",
-              "form-data; name=\"" + getControlName() + "\"; filename=\"" + getFileName() + "\"",
-              "Content-Type", "application/octet-stream", "Content-Transfer-Encoding", "binary")
-          : mapOf("Content-Disposition", "form-data; name=\"" + k + "\"", "Content-Type",
-              "text/plain; charset=UTF-8", "Content-Transfer-Encoding", "8bit");
+      return mapOf("Content-Disposition", new ContentDisposition(getMimeType(), getControlName(),
+          getFileName(), Defaults.DFLT_CHARSET, null, ZonedDateTime.now(), null, null).toString());
+      // return v instanceof File
+      // ? mapOf("Content-Disposition",
+      // "form-data; name=\"" + getControlName() + "\"; filename=\"" + getFileName() + "\"",
+      // "Content-Type", "application/octet-stream", "Content-Transfer-Encoding", "binary")
+      // : mapOf("Content-Disposition", "form-data; name=\"" + k + "\"", "Content-Type",
+      // "text/plain; charset=UTF-8", "Content-Transfer-Encoding", "8bit");
     }
 
     @Override

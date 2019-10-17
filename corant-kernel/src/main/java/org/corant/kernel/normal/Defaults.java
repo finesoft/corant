@@ -15,6 +15,7 @@ package org.corant.kernel.normal;
 
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -26,9 +27,9 @@ import java.nio.file.Paths;
  */
 public interface Defaults {
 
-  String DFLT_CHARSET_STR = "utf-8";
+  String DFLT_CHARSET_STR = "UTF-8";
 
-  Charset DFLT_CHARSET = Charset.forName(DFLT_CHARSET_STR);
+  Charset DFLT_CHARSET = StandardCharsets.UTF_8;
 
   int ONE_KB = 1024;
 

@@ -210,6 +210,8 @@ public class UndertowWebServer extends AbstractWebServer {
     DeploymentInfo di = new DeploymentInfo();
     di.setContextPath(config.getContextPath());
     di.setDeploymentName(name);
+    di.setDefaultRequestEncoding(specConfig.getDefaultRequestCharset().orElse(DFLT_CHARSET_STR));
+    di.setDefaultResponseEncoding(specConfig.getDefaultResponseCharset().orElse(DFLT_CHARSET_STR));
     di.setDefaultEncoding(config.getDefaultCharset().orElse(DFLT_CHARSET_STR));
     di.setDisplayName(config.getDisplayName().orElse(name));
     di.setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()));

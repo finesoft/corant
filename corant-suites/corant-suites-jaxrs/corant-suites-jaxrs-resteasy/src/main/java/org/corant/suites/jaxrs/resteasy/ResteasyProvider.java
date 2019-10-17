@@ -32,7 +32,9 @@ import org.corant.suites.servlet.metadata.WebInitParamMetaData;
 import org.corant.suites.servlet.metadata.WebServletMetaData;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
+import org.jboss.resteasy.core.ResteasyDeploymentImpl;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
 /**
@@ -79,7 +81,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
     if (!contextPath.startsWith("/")) {
       contextPath = "/" + contextPath;
     }
-    ResteasyDeployment deployment = new ResteasyDeployment();
+    ResteasyDeployment deployment = new ResteasyDeploymentImpl();
+    deployment.setAddCharset(true);
     deployment.setApplication(app);
     deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
     deployment.setScannedResourceClasses(
@@ -91,8 +94,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
   private void handle(Application app, ResteasyDeployment deployment, String contextPath) {
     String pattern = contextPath.endsWith("/") ? contextPath + "*" : contextPath + "/*";
-    WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {
-        new WebInitParamMetaData("resteasy.servlet.mapping.prefix", contextPath, null)};
+    WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
+        ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
     servletMetaDatas.add(new WebServletMetaData("ResteasyServlet", new String[] {pattern},
         new String[] {pattern}, 1, ipmds, true, null, null, null,
         "jaxrs-" + ClassUtils.getShortClassName(app.getClass().getName()),

@@ -37,7 +37,7 @@ public class MpIncomingHeadersProvider implements IncomingHeadersProvider {
   @Override
   public MultivaluedMap<String, String> getIncomingHeaders() {
     MultivaluedMap<String, String> headers = null;
-    HttpRequest request = ResteasyProviderFactory.getContextData(HttpRequest.class);
+    HttpRequest request = ResteasyProviderFactory.getInstance().getContextData(HttpRequest.class);
     if (request != null) {
       logger.fine(() -> "Propagates current header information to outgoing request.");
       headers = request.getHttpHeaders().getRequestHeaders();

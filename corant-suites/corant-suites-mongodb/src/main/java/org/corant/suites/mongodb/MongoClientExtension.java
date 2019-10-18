@@ -90,9 +90,9 @@ public class MongoClientExtension implements Extension {
       return null;
     }
     if (id instanceof Long || Long.TYPE.equals(id.getClass())) {
-      return new BsonInt64(Long.class.cast(id));
+      return new BsonInt64((Long) id);
     } else if (id instanceof Integer || Integer.TYPE.equals(id.getClass())) {
-      return new BsonInt32(Integer.class.cast(id));
+      return new BsonInt32((Integer) id);
     } else {
       return new BsonString(asString(id));
     }

@@ -70,7 +70,7 @@ public class TemporalLocalDateConverter extends AbstractConverter<Temporal, Loca
     }
     if (zoneId != null && value instanceof Instant) {
       // violate JSR-310
-      return Instant.class.cast(value).atZone(zoneId).toLocalDate();
+      return ((Instant) value).atZone(zoneId).toLocalDate();
     }
     return LocalDate.from(value);
   }

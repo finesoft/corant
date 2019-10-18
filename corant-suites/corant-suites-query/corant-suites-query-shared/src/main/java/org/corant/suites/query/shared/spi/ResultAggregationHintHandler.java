@@ -93,7 +93,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
         && isEquals(hint.getKey(), HINT_NAME);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Consumer<List<Map<?, ?>>> handler = null;
@@ -102,11 +102,11 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     }
     List<Map<?, ?>> list = null;
     if (result instanceof ForwardList) {
-      list = ForwardList.class.cast(result).getResults();
+      list = ((ForwardList) result).getResults();
     } else if (result instanceof List) {
-      list = List.class.cast(result);
+      list = (List) result;
     } else if (result instanceof PagedList) {
-      list = PagedList.class.cast(result).getResults();
+      list = ((PagedList) result).getResults();
     }
     if (!isEmpty(list)) {
       handler.accept(list);

@@ -228,7 +228,7 @@ public class NarayanaExtension implements Extension {
         try {
           for (Object item : list.values()) {
             if (item instanceof Thread) {
-              Thread thread = Thread.class.cast(item);
+              Thread thread = (Thread) item;
               try {
                 Throwable t =
                     new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");

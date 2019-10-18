@@ -81,7 +81,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
       }
       // FIXME
       if (aggregate instanceof AbstractDefaultAggregate) {
-        AbstractDefaultAggregate.class.cast(aggregate)
+        ((AbstractDefaultAggregate) aggregate)
             .setMn(lastMessageSequenceNumber + this.messages.size());
       }
     }

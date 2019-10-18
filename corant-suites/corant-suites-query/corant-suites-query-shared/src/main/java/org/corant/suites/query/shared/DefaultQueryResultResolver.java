@@ -73,7 +73,7 @@ public class DefaultQueryResultResolver implements QueryResultResolver {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void resolveFetchedResult(Object result, Object fetchedResult, String injectProName) {
     if (isBlank(injectProName)) {
@@ -81,10 +81,10 @@ public class DefaultQueryResultResolver implements QueryResultResolver {
     }
     if (result instanceof Map) {
       if (injectProName.indexOf('.') != -1) {
-        Map<String, Object> mapResult = Map.class.cast(result);
+        Map<String, Object> mapResult = (Map) result;
         putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
       } else {
-        Map.class.cast(result).put(injectProName, fetchedResult);
+        ((Map) result).put(injectProName, fetchedResult);
       }
     } else if (result != null) {
       try {

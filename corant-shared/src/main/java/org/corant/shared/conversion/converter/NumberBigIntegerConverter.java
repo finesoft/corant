@@ -56,7 +56,7 @@ public class NumberBigIntegerConverter extends AbstractConverter<Number, BigInte
   @Override
   protected BigInteger convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof BigInteger) {
-      return BigInteger.class.cast(value);
+      return (BigInteger) value;
     } else {
       return BigInteger.valueOf(value.longValue());
     }

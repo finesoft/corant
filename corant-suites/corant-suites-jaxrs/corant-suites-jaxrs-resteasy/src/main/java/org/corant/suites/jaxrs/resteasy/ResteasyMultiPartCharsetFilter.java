@@ -54,8 +54,7 @@ public class ResteasyMultiPartCharsetFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     if (requestContext instanceof PreMatchContainerRequestContext && enable) {
-      PreMatchContainerRequestContext reqctx =
-          PreMatchContainerRequestContext.class.cast(requestContext);
+      PreMatchContainerRequestContext reqctx = (PreMatchContainerRequestContext) requestContext;
       HttpRequest hr = reqctx.getHttpRequest();
       hr.setAttribute(InputPart.DEFAULT_CONTENT_TYPE_PROPERTY, contextType);
       hr.setAttribute(InputPart.DEFAULT_CHARSET_PROPERTY, charset);

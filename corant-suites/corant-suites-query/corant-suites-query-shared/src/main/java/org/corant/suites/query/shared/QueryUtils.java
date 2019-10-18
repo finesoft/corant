@@ -33,17 +33,18 @@ public class QueryUtils {
     extractResult(result, split(paths, ".", true, false), flatList, list);
   }
 
+  @SuppressWarnings("rawtypes")
   public static void extractResult(Object result, String[] paths, boolean flatList,
       List<Object> list) {
     if (!interruptExtract(result, paths, flatList, list)) {
       if (result instanceof Map) {
         String path = paths[0];
-        Object next = Map.class.cast(result).get(path);
+        Object next = ((Map) result).get(path);
         if (next != null) {
           extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
         }
       } else if (result instanceof Iterable) {
-        Iterable<?> resultIterable = Iterable.class.cast(result);
+        Iterable<?> resultIterable = (Iterable<?>) result;
         for (Object next : resultIterable) {
           if (next != null) {
             extractResult(next, paths, flatList, list);

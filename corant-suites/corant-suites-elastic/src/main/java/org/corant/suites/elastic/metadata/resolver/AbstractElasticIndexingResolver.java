@@ -226,7 +226,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     Type ft = getCollectionFieldEleType(f, Collection.class);
     boolean handled = false;
     if (ft instanceof Class<?>) {
-      Class<?> fcls = Class.class.cast(ft);
+      Class<?> fcls = (Class<?>) ft;
       if (isSimpleType(fcls)) {
         resolveSimpleFieldSchema(docCls, f, map, new LinkedList<>(path));
         handled = true;

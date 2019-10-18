@@ -90,7 +90,7 @@ public interface ElasticDocumentService {
     ElasticIndexing indexing = shouldNotNull(resolveIndexing(docCls));
     ElasticMapping mapping = shouldNotNull(resolveMapping(docCls));
     if (document instanceof ElasticVersionedDocument) {
-      ElasticVersionedDocument verDoc = ElasticVersionedDocument.class.cast(document);
+      ElasticVersionedDocument verDoc = (ElasticVersionedDocument) document;
       return index(indexing.getName(), document.getId(), document.getRId(), mapping.toMap(verDoc),
           flush, verDoc.getVn(), mapping.getVersionType());
     } else {

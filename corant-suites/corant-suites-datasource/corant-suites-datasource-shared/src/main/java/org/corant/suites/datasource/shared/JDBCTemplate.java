@@ -508,7 +508,7 @@ public class JDBCTemplate {
 
     private void rethrow(Exception e, String sql, Object... params) throws SQLException {
       if (e instanceof SQLException) {
-        super.rethrow(SQLException.class.cast(e), sql, params);
+        super.rethrow((SQLException) e, sql, params);
       } else {
         super.rethrow(new SQLException(e), sql, params);
       }

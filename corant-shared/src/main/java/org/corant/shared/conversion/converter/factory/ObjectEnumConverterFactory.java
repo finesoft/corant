@@ -74,7 +74,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     if (value instanceof Enum<?> && value.getClass().isAssignableFrom(targetClass)) {
       return targetClass.cast(value);
     } else if (value instanceof Number) {
-      return targetClass.getEnumConstants()[Number.class.cast(value).intValue()];
+      return targetClass.getEnumConstants()[((Number)value).intValue()];
     } else {
       String name = null;
       if (value instanceof Map) {

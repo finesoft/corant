@@ -93,7 +93,7 @@ public class MessageReceiverManager {
     executorServices.values().forEach(es -> {
       es.shutdownNow().forEach(r -> {
         if (r instanceof MessageReceiverTask) {
-          MessageReceiverTask.class.cast(r).release(true);
+          ((MessageReceiverTask) r).release(true);
         }
       });
     });

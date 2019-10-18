@@ -114,8 +114,10 @@ public class UndertowWebServer extends AbstractWebServer {
     if (server != null) {
       try {
         getPreStopHandlers().forEach(h -> h.onPreStop(this));
-        deploymentManager.stop();
-        deploymentManager.undeploy();
+        if (deploymentManager != null) {
+          deploymentManager.stop();
+          deploymentManager.undeploy();
+        }
         server.stop();
         getPostStoppedHandlers().forEach(h -> h.onPostStopped(this));
       } catch (Exception e) {

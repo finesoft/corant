@@ -68,10 +68,9 @@ public class TemporalInstantConverter extends AbstractConverter<Temporal, Instan
     if (zoneId != null) {
       // violate JSR-310
       if (value instanceof LocalDateTime) {
-        return LocalDateTime.class.cast(value).atZone(zoneId).toInstant();
+        return ((LocalDateTime) value).atZone(zoneId).toInstant();
       } else if (value instanceof LocalDate) {
-        return LocalDate.class.cast(value).atTime(LocalTime.ofNanoOfDay(0L)).atZone(zoneId)
-            .toInstant();
+        return ((LocalDate) value).atTime(LocalTime.ofNanoOfDay(0L)).atZone(zoneId).toInstant();
       }
     }
     return Instant.from(value);

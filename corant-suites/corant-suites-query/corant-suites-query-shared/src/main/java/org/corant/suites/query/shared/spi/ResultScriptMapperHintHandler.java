@@ -106,6 +106,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
         && isNotBlank(hint.getScript().getCode());
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     ScriptConsumer func = null;
@@ -113,20 +114,20 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       return;
     }
     if (result instanceof Map) {
-      func.accept(new Object[] {parameter, Map.class.cast(result)});
+      func.accept(new Object[] {parameter, (Map) result});
     } else {
       List<?> list = null;
       if (result instanceof ForwardList) {
-        list = ForwardList.class.cast(result).getResults();
+        list = ((ForwardList) result).getResults();
       } else if (result instanceof List) {
-        list = List.class.cast(result);
+        list = (List) result;
       } else if (result instanceof PagedList) {
-        list = PagedList.class.cast(result).getResults();
+        list = ((PagedList) result).getResults();
       }
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            func.accept(new Object[] {parameter, Map.class.cast(item)});
+            func.accept(new Object[] {parameter, (Map) item});
           }
         }
       }

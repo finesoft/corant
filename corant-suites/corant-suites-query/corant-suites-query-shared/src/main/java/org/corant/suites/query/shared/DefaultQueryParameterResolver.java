@@ -46,14 +46,13 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
         .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveQueryParameter(Query query, Object param) {
     QueryParameter queryParameter = DefaultQueryParameter.EMPTY_INST;
     if (param instanceof QueryParameter) {
-      queryParameter = QueryParameter.class.cast(param);
+      queryParameter = (QueryParameter) param;
     } else if (param instanceof Map) {
-      Map<?, ?> mp = new HashMap<>(Map.class.cast(param));
+      Map<?, ?> mp = new HashMap<>((Map<?, ?>) param);
       DefaultQueryParameter qp = new DefaultQueryParameter();
       Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, 1)));
       Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, 0)));
@@ -80,13 +79,13 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     return convertedParam;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   protected Map<String, Object> extractCriterias(QueryParameter parameter) {
     Map<String, Object> map = new HashMap<>();
     if (parameter != null) {
       Object criteria = parameter.getCriteria();
       if (criteria instanceof Map) {
-        Map.class.cast(criteria).forEach((k, v) -> {
+        ((Map) criteria).forEach((k, v) -> {
           map.put(asDefaultString(k), v);
         });
       } else if (criteria != null) {
@@ -98,6 +97,7 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     return map;
   }
 
+  @SuppressWarnings("rawtypes")
   protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
       Map<String, Object> criteria) {
     Map<String, Object> fetchCriteria = new HashMap<>();
@@ -116,7 +116,7 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
             Object value = values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
             fetchCriteria.put(parameterName, value);
           } else {
-            fetchCriteria.put(parameterName, Map.class.cast(result).get(sourceName));
+            fetchCriteria.put(parameterName, ((Map) result).get(sourceName));
           }
         } else {
           try {

@@ -193,7 +193,7 @@ public class TypeUtils {
     Type supTyp = getSupertype(canonicalize(shouldNotNull(clazz)),
         clazz.isArray() ? clazz.getComponentType() : clazz, supertype);
     if (supTyp instanceof ParameterizedType) {
-      return ParameterizedType.class.cast(supTyp).getActualTypeArguments();
+      return ((ParameterizedType) supTyp).getActualTypeArguments();
     }
     return new Type[0];
   }

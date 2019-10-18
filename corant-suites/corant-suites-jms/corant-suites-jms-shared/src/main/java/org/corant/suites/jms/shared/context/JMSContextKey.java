@@ -101,7 +101,7 @@ public class JMSContextKey implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final JMSContextKey key = JMSContextKey.class.cast(o);
+    final JMSContextKey key = (JMSContextKey) o;
     return isEquals(connectionFactoryId, key.connectionFactoryId)
         && isEquals(sessionMode, key.sessionMode);
 

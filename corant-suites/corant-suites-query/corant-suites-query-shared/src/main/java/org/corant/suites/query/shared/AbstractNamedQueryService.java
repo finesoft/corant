@@ -48,9 +48,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected boolean decideFetch(Object result, FetchQuery fetchQuery, Object criteria) {
     // precondition to decide whether execute fetch.
-    if (fetchQuery.getPredicate().isValid()) {
+    if (fetchQuery.getPredicateScript().isValid()) {
       ScriptFunction sf =
-          NashornScriptEngines.compileFunction(fetchQuery.getPredicate().getCode(), "p", "r");
+          NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(), "p", "r");
       if (sf != null) {
         Boolean b = toBoolean(sf.apply(new Object[] {criteria, result}));
         if (b == null || !b.booleanValue()) {

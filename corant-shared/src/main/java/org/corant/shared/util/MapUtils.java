@@ -224,9 +224,9 @@ public class MapUtils {
     return getMapObject(map, key, ConversionUtils::toLong, nvt);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <K, V> Map<K, V> getMapMap(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, (o) -> o instanceof Map ? Map.class.cast(o) : null, null);
+    return getMapObject(map, key, (o) -> o instanceof Map ? (Map) o : null, null);
   }
 
   public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
@@ -428,7 +428,7 @@ public class MapUtils {
     return pops;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   static void doFlatMap(Map<FlatMapKey, Object> resultMap, FlatMapKey key, Object val,
       int maxDepth) {
     if (key == null || key.keys.size() > maxDepth) {
@@ -436,18 +436,18 @@ public class MapUtils {
     }
     if (val instanceof Collection) {
       int idx = 0;
-      Collection<?> vals = Collection.class.cast(val);
+      Collection<?> vals = (Collection<?>) val;
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
     } else if (val instanceof Object[]) {
       int idx = 0;
-      Object[] vals = Object[].class.cast(val);
+      Object[] vals = (Object[]) val;
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
     } else if (val instanceof Map) {
-      Map.class.cast(val).forEach(
+      ((Map) val).forEach(
           (k, nextVal) -> doFlatMap(resultMap, FlatMapKey.of(key).append(k), nextVal, maxDepth));
     } else if (resultMap.put(key, val) != null) {
       throw new CorantRuntimeException("FlatMap with key %s dup!", key);

@@ -147,7 +147,7 @@ public class IterableUtils {
 
   public static int getSize(final Iterable<?> iterable) {
     if (iterable instanceof Collection) {
-      return Collection.class.cast(iterable).size();
+      return ((Collection<?>) iterable).size();
     } else if (iterable != null) {
       getSize(iterable.iterator());
     }

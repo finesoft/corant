@@ -377,7 +377,7 @@ public class QueryParseHandler extends DefaultHandler {
             "Parse %s error the query hint parameter must be in query hint element!", url);
       }
       if (obj instanceof QueryHintParameter) {
-        qh.addParameter(QueryHintParameter.class.cast(obj));
+        qh.addParameter((QueryHintParameter) obj);
       }
       nameStack.pop();
     }
@@ -457,7 +457,7 @@ public class QueryParseHandler extends DefaultHandler {
             throw new QueryRuntimeException(
                 "Parse %s error the fetch query predicate script must be in predicate-script element and script can't null!");
           }
-          q.setPredicate(obj);
+          q.setPredicateScript(obj);
         }
       } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_INJECTION_SCRIPT)) {
         if (this.currentObject() instanceof FetchQuery) {
@@ -466,7 +466,7 @@ public class QueryParseHandler extends DefaultHandler {
             throw new QueryRuntimeException(
                 "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!");
           }
-          q.setInjection(obj);
+          q.setInjectionScript(obj);
         }
       }
 

@@ -93,7 +93,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   @Inject
   ConversionService conversionService;
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static void convertMapValue(Map<Object, Object> map, String[] keyPath,
       Function<Object, Object> func) {
     if (map == null || isEmpty(keyPath)) {
@@ -105,22 +105,22 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     for (int i = 0; i < len; i++) {
       Object pathVal = useMap.get(keyPath[i]);
       if (pathVal instanceof Map) {
-        useMap = Map.class.cast(pathVal);
+        useMap = (Map) pathVal;
       } else {
         useMap = null;
         if (pathVal instanceof Iterable) {
           String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
-          Iterable<?> pathVals = Iterable.class.cast(pathVal);
+          Iterable<?> pathVals = (Iterable) pathVal;
           for (Object ele : pathVals) {
             if (ele instanceof Map) {
-              convertMapValue(Map.class.cast(ele), subKeyPath, func);
+              convertMapValue((Map) ele, subKeyPath, func);
             }
           }
         } else if (pathVal instanceof Object[]) {
           String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
           for (Object ele : (Object[]) pathVal) {
             if (ele instanceof Map) {
-              convertMapValue(Map.class.cast(ele), subKeyPath, func);
+              convertMapValue((Map) ele, subKeyPath, func);
             }
           }
         }
@@ -139,7 +139,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     return conversionService != null && hint != null && isEquals(hint.getKey(), HINT_NAME);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Pair<String[], Pair<Class<?>, Object[]>> hint = null;
@@ -147,21 +147,20 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       return;
     }
     if (result instanceof Map) {
-      handle(Map.class.cast(result), hint.getLeft(), hint.getRight().getKey(),
-          hint.getRight().getRight());
+      handle((Map) result, hint.getLeft(), hint.getRight().getKey(), hint.getRight().getRight());
     } else {
       List<?> list = null;
       if (result instanceof ForwardList) {
-        list = ForwardList.class.cast(result).getResults();
+        list = ((ForwardList) result).getResults();
       } else if (result instanceof List) {
-        list = List.class.cast(result);
+        list = (List) result;
       } else if (result instanceof PagedList) {
-        list = PagedList.class.cast(result).getResults();
+        list = ((PagedList) result).getResults();
       }
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            handle(Map.class.cast(item), hint.getLeft(), hint.getRight().getKey(),
+            handle((Map) item, hint.getLeft(), hint.getRight().getKey(),
                 hint.getRight().getRight());
           }
         }

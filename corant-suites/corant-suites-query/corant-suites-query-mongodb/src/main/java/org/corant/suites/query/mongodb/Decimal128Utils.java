@@ -46,11 +46,11 @@ public class Decimal128Utils {
     int dept = 0;
     for (Entry<String, Object> e : doc.entrySet()) {
       if (e.getValue() instanceof Decimal128) {
-        e.setValue(Decimal128.class.cast(e.getValue()).bigDecimalValue());
+        e.setValue(((Decimal128) e.getValue()).bigDecimalValue());
       } else if (e.getValue() instanceof Map) {
         e.setValue(convert(new Document((Map<String, Object>) e.getValue()), dept));
       } else if (e.getValue() instanceof Document) {
-        e.setValue(convert(Document.class.cast(e.getValue()), dept));
+        e.setValue(convert((Document) e.getValue(), dept));
       } else if (e.getValue() instanceof Collection) {
         e.setValue(convert((Collection) e.getValue(), dept));
       }
@@ -66,13 +66,13 @@ public class Decimal128Utils {
     List list = new ArrayList<>(collection.size());
     for (Object o : collection) {
       if (o instanceof Decimal128) {
-        list.add(Decimal128.class.cast(o).bigDecimalValue());
+        list.add(((Decimal128) o).bigDecimalValue());
       } else if (o instanceof Map) {
         list.add(convert(new Document((Map<String, Object>) o), dp));
       } else if (o instanceof Document) {
-        list.add(convert(Document.class.cast(o), dp));
+        list.add(convert((Document) o, dp));
       } else if (o instanceof Collection) {
-        list.add(convert(Collection.class.cast(o), dp));
+        list.add(convert((Collection) o, dp));
       } else {
         list.add(o);
       }
@@ -87,11 +87,11 @@ public class Decimal128Utils {
     }
     for (Entry<String, Object> e : doc.entrySet()) {
       if (e.getValue() instanceof Decimal128) {
-        e.setValue(Decimal128.class.cast(e.getValue()).bigDecimalValue());
+        e.setValue(((Decimal128) e.getValue()).bigDecimalValue());
       } else if (e.getValue() instanceof Map) {
         e.setValue(convert(new Document((Map<String, Object>) e.getValue()), dp));
       } else if (e.getValue() instanceof Document) {
-        e.setValue(convert(Document.class.cast(e.getValue()), dp));
+        e.setValue(convert((Document) e.getValue(), dp));
       } else if (e.getValue() instanceof Collection) {
         e.setValue(convert((Collection) e.getValue(), dp));
       }

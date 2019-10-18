@@ -33,7 +33,7 @@ public class LoggerFactory {
   public static void disableLogger() {
     LogManager.getLogManager().reset();
     Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    globalLogger.setLevel(java.util.logging.Level.OFF);
+    globalLogger.setLevel(java.util.logging.Level.OFF);// FIXME openJDK weak reference
     Handler[] handlers = globalLogger.getHandlers();
     for (Handler handler : handlers) {
       globalLogger.removeHandler(handler);

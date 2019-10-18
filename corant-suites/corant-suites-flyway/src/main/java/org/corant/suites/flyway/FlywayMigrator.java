@@ -13,6 +13,7 @@
  */
 package org.corant.suites.flyway;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -183,6 +184,7 @@ public class FlywayMigrator {
 
   @PostConstruct
   void onPostConstruct() {
-    globalFlywayConfig = DeclarativeConfigResolver.resolveSingle(FlywayConfig.class);
+    globalFlywayConfig = defaultObject(DeclarativeConfigResolver.resolveSingle(FlywayConfig.class),
+        FlywayConfig.EMPTY);
   }
 }

@@ -102,7 +102,7 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
     List<Runner> runners = new ArrayList<>();
     super.getChildren().stream().forEach(runner -> {
       if (runner instanceof CorantJunit4Runner) {
-        CorantJunit4Runner.class.cast(runner).setEmbedded(true);
+        ((CorantJunit4Runner)runner).setEmbedded(true);
       }
       runners.add(runner);
     });

@@ -27,11 +27,27 @@ import org.flywaydb.core.api.configuration.ClassicConfiguration;
 @ConfigKeyRoot(value = "flyway.migrate", keyIndex = 2, ignoreNoAnnotatedItem = false)
 public class FlywayConfig extends ClassicConfiguration implements DeclarativeConfig {
 
+  public static final FlywayConfig EMPTY = new FlywayConfig(false, "META-INF/dbmigration");
+
   @ConfigKeyItem(defaultValue = "false")
   boolean enable;
 
   @ConfigKeyItem(defaultValue = "META-INF/dbmigration")
   String locationPrefix;
+
+  public FlywayConfig() {
+
+  }
+
+  /**
+   * @param enable
+   * @param locationPrefix
+   */
+  protected FlywayConfig(boolean enable, String locationPrefix) {
+    super();
+    this.enable = enable;
+    this.locationPrefix = locationPrefix;
+  }
 
   /**
    *

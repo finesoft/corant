@@ -99,10 +99,10 @@ public class StreamUtils {
     return Stream.empty();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> Stream<T> streamOf(final Iterable<T> iterable) {
     if (iterable instanceof Collection) {
-      return Collection.class.cast(iterable).stream();
+      return ((Collection) iterable).stream();
     } else if (iterable != null) {
       return StreamSupport.stream(iterable.spliterator(), false);
     }

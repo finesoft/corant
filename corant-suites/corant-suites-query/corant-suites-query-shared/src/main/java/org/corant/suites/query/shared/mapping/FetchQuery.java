@@ -38,8 +38,8 @@ public class FetchQuery implements Serializable {
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private String referenceQueryversion = "";
   private boolean multiRecords = true;
-  private Script predicate = new Script();
-  private Script injection = new Script();
+  private Script predicateScript = new Script();
+  private Script injectionScript = new Script();
 
   public FetchQuery() {
     super();
@@ -53,8 +53,8 @@ public class FetchQuery implements Serializable {
    * @param parameters
    * @param referenceQueryversion
    * @param multiRecords
-   * @param predicate
-   * @param injection
+   * @param predicateScript
+   * @param injectionScript
    */
   public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
       int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
@@ -68,15 +68,15 @@ public class FetchQuery implements Serializable {
     this.referenceQueryversion = referenceQueryversion;
     this.multiRecords = multiRecords;
     if (predicate != null) {
-      this.predicate = predicate;
+      this.predicateScript = predicate;
     }
     if (injection != null) {
-      this.injection = injection;
+      this.injectionScript = injection;
     }
   }
 
-  public Script getInjection() {
-    return injection;
+  public Script getInjectionScript() {
+    return injectionScript;
   }
 
   /**
@@ -100,8 +100,8 @@ public class FetchQuery implements Serializable {
     return parameters;
   }
 
-  public Script getPredicate() {
-    return predicate;
+  public Script getPredicateScript() {
+    return predicateScript;
   }
 
   /**
@@ -138,8 +138,8 @@ public class FetchQuery implements Serializable {
     parameters.add(parameter);
   }
 
-  protected void setInjection(Script injection) {
-    this.injection = defaultObject(injection, new Script());
+  protected void setInjectionScript(Script injection) {
+    this.injectionScript = defaultObject(injection, new Script());
   }
 
   protected void setInjectPropertyName(String injectPropertyName) {
@@ -154,8 +154,8 @@ public class FetchQuery implements Serializable {
     this.multiRecords = multiRecords;
   }
 
-  protected void setPredicate(Script predicate) {
-    this.predicate = defaultObject(predicate, new Script());
+  protected void setPredicateScript(Script predicate) {
+    this.predicateScript = defaultObject(predicate, new Script());
   }
 
   protected void setReferenceQuery(String referenceQuery) {

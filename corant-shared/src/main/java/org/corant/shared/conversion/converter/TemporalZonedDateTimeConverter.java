@@ -74,11 +74,11 @@ public class TemporalZonedDateTimeConverter extends AbstractConverter<Temporal, 
     if (zoneId != null) {
       // violate JSR-310
       if (value instanceof Instant) {
-        return Instant.class.cast(value).atZone(zoneId);
+        return ((Instant) value).atZone(zoneId);
       } else if (value instanceof LocalDateTime) {
-        return LocalDateTime.class.cast(value).atZone(zoneId);
+        return ((LocalDateTime) value).atZone(zoneId);
       } else if (value instanceof LocalDate) {
-        return ZonedDateTime.of(LocalDate.class.cast(value), LocalTime.ofNanoOfDay(0L), zoneId);
+        return ZonedDateTime.of((LocalDate) value, LocalTime.ofNanoOfDay(0L), zoneId);
       }
     }
     return ZonedDateTime.from(value);

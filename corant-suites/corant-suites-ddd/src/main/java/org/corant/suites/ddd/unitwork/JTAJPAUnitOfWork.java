@@ -118,7 +118,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       } else if (obj instanceof Message) {
         registeredMessages.remove(obj);
       } else if (obj instanceof Pair<?, ?>) {
-        Pair<?, ?> p = Pair.class.cast(obj);
+        Pair<?, ?> p = (Pair<?, ?>) obj;
         registeredVariables.remove(p.getKey());
       }
     } else {
@@ -214,9 +214,9 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           }
         }
       } else if (obj instanceof Message) {
-        MessageUtils.mergeToQueue(registeredMessages, Message.class.cast(obj));
+        MessageUtils.mergeToQueue(registeredMessages, (Message) obj);
       } else if (obj instanceof Pair<?, ?>) {
-        Pair<?, ?> p = Pair.class.cast(obj);
+        Pair<?, ?> p = (Pair<?, ?>) obj;
         registeredVariables.put(p.getKey(), p.getValue());
       }
     } else {

@@ -102,7 +102,7 @@ public class AggregateLifecycleMessage implements MergableMessage {
     public AggregateLifecycleMessageMetadata(Aggregate aggregate) {
       source = new DefaultAggregateIdentifier(aggregate);
       if (aggregate instanceof AbstractDefaultAggregate) {
-        sequenceNumber = AbstractDefaultAggregate.class.cast(aggregate).getMn();
+        sequenceNumber = ((AbstractDefaultAggregate) aggregate).getMn();
       }
       versionNumber = aggregate.getVn();
     }

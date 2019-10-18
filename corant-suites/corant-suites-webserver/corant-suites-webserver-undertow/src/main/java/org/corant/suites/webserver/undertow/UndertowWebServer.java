@@ -217,6 +217,7 @@ public class UndertowWebServer extends AbstractWebServer {
     di.setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()));
     di.setClassLoader(getClass().getClassLoader());
     di.setEagerFilterInit(specConfig.isEagerFilterInit());
+    di.setEscapeErrorMessage(specConfig.isEscapeErrorMessage());// careful
     if (specConfig.isPersistenceSession() && sessionPersistenceManager.isResolvable()) {
       di.setSessionPersistenceManager(sessionPersistenceManager.get());
     }

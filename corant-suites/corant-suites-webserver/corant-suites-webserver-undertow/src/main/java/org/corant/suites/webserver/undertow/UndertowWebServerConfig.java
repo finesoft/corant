@@ -109,6 +109,10 @@ public class UndertowWebServerConfig {
   private boolean persistenceSession;
 
   @Inject
+  @ConfigProperty(name = "webserver.undertow.escape-error-message", defaultValue = "true")
+  private boolean escapeErrorMessage;
+
+  @Inject
   @ConfigProperty(name = "webserver.default-request-charset")
   private Optional<String> defaultRequestCharset;
 
@@ -149,7 +153,7 @@ public class UndertowWebServerConfig {
   }
 
   /**
-   * 
+   *
    * @return the defaultRequestCharset
    */
   public Optional<String> getDefaultRequestCharset() {
@@ -157,7 +161,7 @@ public class UndertowWebServerConfig {
   }
 
   /**
-   * 
+   *
    * @return the defaultResponseCharset
    */
   public Optional<String> getDefaultResponseCharset() {
@@ -262,6 +266,14 @@ public class UndertowWebServerConfig {
    */
   public boolean isEnableHttp2() {
     return enableHttp2;
+  }
+
+  /**
+   * 
+   * @return the escapeErrorMessage
+   */
+  public boolean isEscapeErrorMessage() {
+    return escapeErrorMessage;
   }
 
   /**

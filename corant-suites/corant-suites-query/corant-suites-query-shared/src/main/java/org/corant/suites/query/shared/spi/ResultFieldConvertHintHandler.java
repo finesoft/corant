@@ -110,7 +110,8 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
         useMap = null;
         if (pathVal instanceof Iterable) {
           String[] subKeyPath = Arrays.copyOfRange(keyPath, i + 1, keyPath.length);
-          for (Object ele : Iterable.class.cast(pathVal)) {
+          Iterable<?> pathVals = Iterable.class.cast(pathVal);
+          for (Object ele : pathVals) {
             if (ele instanceof Map) {
               convertMapValue(Map.class.cast(ele), subKeyPath, func);
             }

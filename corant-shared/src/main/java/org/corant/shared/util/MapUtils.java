@@ -436,12 +436,14 @@ public class MapUtils {
     }
     if (val instanceof Collection) {
       int idx = 0;
-      for (Object obj : Collection.class.cast(val)) {
+      Collection<?> vals = Collection.class.cast(val);
+      for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
     } else if (val instanceof Object[]) {
       int idx = 0;
-      for (Object obj : Object[].class.cast(val)) {
+      Object[] vals = Object[].class.cast(val);
+      for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
     } else if (val instanceof Map) {

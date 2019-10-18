@@ -43,7 +43,8 @@ public class QueryUtils {
           extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
         }
       } else if (result instanceof Iterable) {
-        for (Object next : Iterable.class.cast(result)) {
+        Iterable<?> resultIterable = Iterable.class.cast(result);
+        for (Object next : resultIterable) {
           if (next != null) {
             extractResult(next, paths, flatList, list);
           }

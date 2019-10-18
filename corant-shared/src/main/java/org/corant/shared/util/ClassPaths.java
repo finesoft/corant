@@ -197,7 +197,8 @@ public class ClassPaths {
         ClassLoader currClsLoader = classLoader;
         do {
           if (currClsLoader instanceof URLClassLoader) {
-            for (URL entry : URLClassLoader.class.cast(currClsLoader).getURLs()) {
+            URLClassLoader currUrlClsLoader = URLClassLoader.class.cast(currClsLoader);
+            for (URL entry : currUrlClsLoader.getURLs()) {
               entries.putIfAbsent(entry.toURI(), currClsLoader);
             }
           }

@@ -18,8 +18,10 @@
 			<artifactId>corant-suites-security-shared</artifactId>
 		</dependency>
 		<dependency>
+			<!-- Special version for resteasy4.3.1.final  -->
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
+			<version>6.0.1-resteasy_4_3_1_final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>

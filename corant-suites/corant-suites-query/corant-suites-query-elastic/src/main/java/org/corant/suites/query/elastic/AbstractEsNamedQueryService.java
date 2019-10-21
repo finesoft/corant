@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
@@ -157,7 +157,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract EsQueryExecutor getExecutor();
 
-  protected abstract NamedQueryResolver<String, Object, EsNamedQuerier> getResolver();
+  protected abstract NamedQuerierResolver<String, Object, EsNamedQuerier> getResolver();
 
   protected String resolveIndexName(String q) {
     int pos = 0;

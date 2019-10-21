@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -53,7 +53,7 @@ public class MgNamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQueryResolver<String, Object, MgNamedQuerier> resolver;
+  protected NamedQuerierResolver<String, Object, MgNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.mongodb.max-select-size", defaultValue = "128")
@@ -95,7 +95,7 @@ public class MgNamedQueryServiceManager {
     protected final MongoDatabase dataBase;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQueryResolver<String, Object, MgNamedQuerier> resolver;
+    protected final NamedQuerierResolver<String, Object, MgNamedQuerier> resolver;
 
     /**
      * @param dataBase
@@ -115,7 +115,7 @@ public class MgNamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultMgNamedQueryService(MongoDatabase dataBase, int defaultMaxSelectSize,
-        int defaultLimit, NamedQueryResolver<String, Object, MgNamedQuerier> resolver) {
+        int defaultLimit, NamedQuerierResolver<String, Object, MgNamedQuerier> resolver) {
       super();
       this.dataBase = dataBase;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -129,7 +129,7 @@ public class MgNamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQueryResolver<String, Object, MgNamedQuerier> getResolver() {
+    protected NamedQuerierResolver<String, Object, MgNamedQuerier> getResolver() {
       return resolver;
     }
 

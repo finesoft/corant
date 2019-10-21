@@ -11,18 +11,23 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.elastic;
+package org.corant.suites.query.sql;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
+import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-query
@@ -31,10 +36,11 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-public class DefaultEsNamedQueryResolver
-    implements NamedQueryResolver<String, Object, EsNamedQuerier> {
+@SuppressWarnings({"rawtypes"})
+public class DefaultSqlNamedQuerierResolver
+    implements NamedQuerierResolver<String, Object, SqlNamedQuerier> {
 
-  final Map<String, FreemarkerEsQuerierBuilder> builders = new ConcurrentHashMap<>();
+  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -45,18 +51,35 @@ public class DefaultEsNamedQueryResolver
   @Inject
   protected FetchQueryResolver fetchQueryResolver;
 
+  @Inject
+  @ConfigProperty(name = "query.sql.mapping-file.paths")
+  protected Optional<String> mappingFilePaths;
+
   @Override
-  public DefaultEsNamedQuerier resolve(String key, Object param) {
-    FreemarkerEsQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
-    return builder.build(param);
+  public DefaultSqlNamedQuerier resolve(String key, Object param) {
+    DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    return forceCast(builder.build(param));
   }
 
-  protected FreemarkerEsQuerierBuilder createBuilder(String key) {
+  protected DynamicQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
-    return new FreemarkerEsQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    // FIXME decide script engine
+    if (query.getScript().getType() == ScriptType.JS) {
+      return createJsBuilder(query);
+    } else {
+      return createFmBuilder(query);
+    }
+  }
+
+  protected DynamicQuerierBuilder createFmBuilder(Query query) {
+    return new FreemarkerSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  protected DynamicQuerierBuilder createJsBuilder(Query query) {
+    return new JavascriptSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

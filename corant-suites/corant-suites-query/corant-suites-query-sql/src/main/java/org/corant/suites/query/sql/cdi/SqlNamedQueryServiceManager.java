@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
@@ -59,7 +59,7 @@ public class SqlNamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQueryResolver<String, Object, SqlNamedQuerier> resolver;
+  protected NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
@@ -131,7 +131,7 @@ public class SqlNamedQueryServiceManager {
     protected final SqlQueryExecutor executor;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQueryResolver<String, Object, SqlNamedQuerier> resolver;
+    protected final NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver;
 
     /**
      * @param executor
@@ -140,7 +140,7 @@ public class SqlNamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultSqlNamedQueryService(SqlQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, NamedQueryResolver<String, Object, SqlNamedQuerier> resolver) {
+        int defaultLimit, NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver) {
       super();
       this.executor = executor;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -172,7 +172,7 @@ public class SqlNamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQueryResolver<String, Object, SqlNamedQuerier> getResolver() {
+    protected NamedQuerierResolver<String, Object, SqlNamedQuerier> getResolver() {
       return resolver;
     }
 

@@ -1,4 +1,3 @@
-package org.corant.suites.query.mongodb;
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
@@ -12,17 +11,21 @@ package org.corant.suites.query.mongodb;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.query.jpql;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
 
 /**
  * corant-suites-query
@@ -31,10 +34,10 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-public class DefaultMgNamedQueryResolver
-    implements NamedQueryResolver<String, Object, MgNamedQuerier> {
+public class DefaultJpqlNamedQuerierResolver
+    implements NamedQuerierResolver<String, Object, JpqlNamedQuerier> {
 
-  final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
+  final Map<String, FreemarkerJpqlQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -46,17 +49,33 @@ public class DefaultMgNamedQueryResolver
   protected FetchQueryResolver fetchQueryResolver;
 
   @Override
-  public DefaultMgNamedQuerier resolve(String key, Object param) {
-    FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+  public DefaultJpqlNamedQuerier resolve(String key, Object param) {
+    FreemarkerJpqlQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);
   }
 
-  protected FreemarkerMgQuerierBuilder createBuilder(String key) {
+  protected FreemarkerJpqlQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
-    return new FreemarkerMgQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    if (isNotEmpty(query.getFetchQueries()) || isNotEmpty(query.getHints())) {
+      throw new NotSupportedException();
+    }
+    // FIXME decide script engine
+    if (query.getScript().getType() == ScriptType.JS) {
+      return createJsProcessor(query);
+    } else {
+      return createFmProcessor(query);
+    }
+  }
+
+  protected FreemarkerJpqlQuerierBuilder createFmProcessor(Query query) {
+    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  protected FreemarkerJpqlQuerierBuilder createJsProcessor(Query query) {
+    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

@@ -23,7 +23,7 @@ import org.corant.suites.query.shared.mapping.QueryMappingService.QueryMappingFi
  *
  * @author bingo 下午12:07:37
  */
-public interface NamedQueryResolver<K, P, Q extends NamedQuerier>
+public interface NamedQuerierResolver<K, P, Q extends NamedQuerier>
     extends QueryMappingFilePathResolver {
 
   @Override

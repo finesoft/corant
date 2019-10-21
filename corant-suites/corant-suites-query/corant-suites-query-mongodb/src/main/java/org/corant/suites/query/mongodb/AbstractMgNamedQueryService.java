@@ -36,7 +36,7 @@ import org.bson.conversions.Bson;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -198,7 +198,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract MongoDatabase getDataBase();
 
-  protected abstract NamedQueryResolver<String, Object, MgNamedQuerier> getResolver();
+  protected abstract NamedQuerierResolver<String, Object, MgNamedQuerier> getResolver();
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
     FindIterable<Document> fi =

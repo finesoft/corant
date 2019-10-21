@@ -31,7 +31,7 @@ import javax.persistence.EntityManagerFactory;
 import org.corant.kernel.api.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQuerier;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -56,7 +56,7 @@ public class JpqlNamedQueryServiceManager {
   protected PersistenceService persistenceService;
 
   @Inject
-  protected NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver;
+  protected NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.jpql.max-select-size", defaultValue = "128")
@@ -98,7 +98,7 @@ public class JpqlNamedQueryServiceManager {
     protected final EntityManagerFactory emf;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver;
+    protected final NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver;
 
     /**
      * @param emf
@@ -120,7 +120,7 @@ public class JpqlNamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultJpqlNamedQueryService(EntityManagerFactory emf, int defaultMaxSelectSize,
-        int defaultLimit, NamedQueryResolver<String, Object, JpqlNamedQuerier> resolver) {
+        int defaultLimit, NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver) {
       super();
       this.emf = emf;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -134,7 +134,7 @@ public class JpqlNamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQueryResolver<String, Object, JpqlNamedQuerier> getResolver() {
+    protected NamedQuerierResolver<String, Object, JpqlNamedQuerier> getResolver() {
       return resolver;
     }
 

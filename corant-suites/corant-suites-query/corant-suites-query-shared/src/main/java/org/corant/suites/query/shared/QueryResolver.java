@@ -50,7 +50,7 @@ public interface QueryResolver {
       QueryParameter parameter);
 
   /**
-   * {@link #resolve(List, Class, List, QueryParameter)}
+   * Resolve single result {@link #resolve(List, Class, List, QueryParameter)}
    *
    * @param <T> the result class
    * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>

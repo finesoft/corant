@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -188,5 +188,5 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   protected abstract SqlQueryExecutor getExecutor();// FIXME use one connection for one method stack
 
-  protected abstract NamedQueryResolver<String, Object, SqlNamedQuerier> getResolver();
+  protected abstract NamedQuerierResolver<String, Object, SqlNamedQuerier> getResolver();
 }

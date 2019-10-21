@@ -32,7 +32,7 @@ import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -234,7 +234,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected abstract NamedQueryResolver<String, Object, JpqlNamedQuerier> getResolver();
+  protected abstract NamedQuerierResolver<String, Object, JpqlNamedQuerier> getResolver();
 
   protected void handleQuery(Query query, Class<?> cls, Map<String, String> properties) {}
 

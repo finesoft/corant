@@ -33,7 +33,7 @@ import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
 import org.corant.suites.query.elastic.EsNamedQuerier;
 import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
-import org.corant.suites.query.shared.NamedQueryResolver;
+import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
@@ -55,7 +55,7 @@ public class EsNamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQueryResolver<String, Object, EsNamedQuerier> resolver;
+  protected NamedQuerierResolver<String, Object, EsNamedQuerier> resolver;
 
   @Inject
   protected Function<String, TransportClient> transportClientManager;
@@ -100,7 +100,7 @@ public class EsNamedQueryServiceManager {
     protected final EsQueryExecutor executor;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQueryResolver<String, Object, EsNamedQuerier> resolver;
+    protected final NamedQuerierResolver<String, Object, EsNamedQuerier> resolver;
 
     /**
      * @param transportClient
@@ -121,7 +121,7 @@ public class EsNamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultEsNamedQueryService(EsQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, NamedQueryResolver<String, Object, EsNamedQuerier> resolver) {
+        int defaultLimit, NamedQuerierResolver<String, Object, EsNamedQuerier> resolver) {
       super();
       this.executor = executor;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -135,7 +135,7 @@ public class EsNamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQueryResolver<String, Object, EsNamedQuerier> getResolver() {
+    protected NamedQuerierResolver<String, Object, EsNamedQuerier> getResolver() {
       return resolver;
     }
 

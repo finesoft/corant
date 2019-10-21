@@ -16,8 +16,8 @@ package org.corant.suites.query.shared.dynamic;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.List;
 import java.util.Map;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
@@ -31,23 +31,28 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
 
   protected final Query query;
-  protected final QueryParameterResolver parameterResolver;
   protected final QueryResultResolver resultResolver;
+  protected final FetchQueryResolver fetchQueryResolver;
   protected final QueryParameter queryParameter;
 
   /**
    * @param query
    * @param queryParameter
-   * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    */
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
-      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver) {
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
     super();
     this.query = query;
     this.queryParameter = queryParameter;
-    this.parameterResolver = parameterResolver;
     this.resultResolver = resultResolver;
+    this.fetchQueryResolver = fetchQueryResolver;
+  }
+
+  @Override
+  public boolean decideFetch(Object result, FetchQuery fetchQuery) {
+    return fetchQueryResolver.canFetch(result, queryParameter, fetchQuery);
   }
 
   @Override
@@ -62,12 +67,12 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   @Override
   public void resolveFetchedResult(Object result, Object fetchResult, String injectProName) {
-    resultResolver.resolveFetchedResult(result, fetchResult, injectProName);
+    fetchQueryResolver.resolveFetchedResult(result, fetchResult, injectProName);
   }
 
   @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery) {
-    return parameterResolver.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
+    return fetchQueryResolver.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
   }
 
   @Override

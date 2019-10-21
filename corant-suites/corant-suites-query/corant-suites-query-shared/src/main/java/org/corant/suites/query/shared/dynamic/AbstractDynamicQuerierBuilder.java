@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared.dynamic;
 
 import java.time.Instant;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -33,9 +34,10 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   protected final Query query;
   protected final QueryParameterResolver parameterResolver;
   protected final QueryResultResolver resultResolver;
+  protected final FetchQueryResolver fetchQueryResolver;
 
   protected AbstractDynamicQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver) {
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
     if (query == null || parameterResolver == null) {
       throw new QueryRuntimeException(
           "Can not initialize dynamic querier builder from null query param!");
@@ -44,6 +46,7 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
     this.query = query;
     this.parameterResolver = parameterResolver;
     this.resultResolver = resultResolver;
+    this.fetchQueryResolver = fetchQueryResolver;
   }
 
   @Override
@@ -64,6 +67,10 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   @Override
   public QueryResultResolver getResultResolver() {
     return resultResolver;
+  }
+
+  protected FetchQueryResolver getFetchQueryResolver() {
+    return fetchQueryResolver;
   }
 
   protected QueryParameter resolveParameter(Object param) {

@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -193,6 +194,8 @@ public class QueryParseHandler extends DefaultHandler {
           fq.setMaxSize(ConversionUtils.toInteger(atv));
         } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
           fq.setInjectPropertyName(atv);
+        } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
+          fq.setEagerInject(isBlank(atv) ? true : toBoolean(atv));
         } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryversion(defaultString(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import org.corant.shared.util.ObjectUtils.Triple;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -54,10 +55,11 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
    * @param query
    * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    */
   protected FreemarkerDynamicQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver) {
-    super(query, parameterResolver, resultResolver);
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+    super(query, parameterResolver, resultResolver, fetchQueryResolver);
     try {
       execution = new Template(query.getName(), query.getScript().getCode(),
           FreemarkerConfigurations.FM_CFG);

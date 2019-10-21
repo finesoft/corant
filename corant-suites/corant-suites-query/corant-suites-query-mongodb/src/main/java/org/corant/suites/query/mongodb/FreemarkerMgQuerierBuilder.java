@@ -19,6 +19,7 @@ import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -33,17 +34,18 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 下午8:25:44
  *
  */
-public class DefaultMgNamedQuerierBuilder extends
+public class FreemarkerMgQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Bson>, DefaultMgNamedQuerier> {
 
   /**
    * @param query
    * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    */
-  protected DefaultMgNamedQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver) {
-    super(query, parameterResolver, resultResolver);
+  protected FreemarkerMgQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+    super(query, parameterResolver, resultResolver, fetchQueryResolver);
   }
 
   /**
@@ -61,8 +63,8 @@ public class DefaultMgNamedQuerierBuilder extends
     try {
       @SuppressWarnings("rawtypes")
       final Map mgQuery = DefaultMgNamedQuerier.OM.readValue(processed.getRight(), Map.class);
-      return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
-          getResultResolver(), mgQuery, processed.getRight());
+      return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+          getFetchQueryResolver(), mgQuery, processed.getRight());
     } catch (IOException e) {
       e.printStackTrace();
     }

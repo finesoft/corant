@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -37,7 +38,7 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
 public class DefaultJpqlNamedQueryResolver
     implements NamedQueryResolver<String, Object, JpqlNamedQuerier> {
 
-  final Map<String, JpqlNamedQuerierBuilder> builders = new ConcurrentHashMap<>();
+  final Map<String, FreemarkerJpqlQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -48,13 +49,16 @@ public class DefaultJpqlNamedQueryResolver
   @Inject
   protected QueryResultResolver resultResolver;
 
+  @Inject
+  protected FetchQueryResolver fetchQueryResolver;
+
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {
-    JpqlNamedQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    FreemarkerJpqlQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);
   }
 
-  protected JpqlNamedQuerierBuilder createBuilder(String key) {
+  protected FreemarkerJpqlQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
@@ -70,12 +74,14 @@ public class DefaultJpqlNamedQueryResolver
     }
   }
 
-  protected JpqlNamedQuerierBuilder createFmProcessor(Query query) {
-    return new JpqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
+  protected FreemarkerJpqlQuerierBuilder createFmProcessor(Query query) {
+    return new FreemarkerJpqlQuerierBuilder(query, parameterResolver, resultResolver,
+        fetchQueryResolver);
   }
 
-  protected JpqlNamedQuerierBuilder createJsProcessor(Query query) {
-    return new JpqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
+  protected FreemarkerJpqlQuerierBuilder createJsProcessor(Query query) {
+    return new FreemarkerJpqlQuerierBuilder(query, parameterResolver, resultResolver,
+        fetchQueryResolver);
   }
 
 }

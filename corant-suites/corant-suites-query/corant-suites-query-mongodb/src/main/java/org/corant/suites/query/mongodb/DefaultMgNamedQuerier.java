@@ -17,8 +17,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
@@ -46,15 +46,15 @@ public class DefaultMgNamedQuerier
   /**
    * @param query
    * @param queryParameter
-   * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    * @param mgQuery
    * @param originalScript
    */
   protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
-      Map<?, ?> mgQuery, String originalScript) {
-    super(query, queryParameter, parameterResolver, resultResolver);
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
+      String originalScript) {
+    super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);

@@ -14,22 +14,15 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toInteger;
-import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.suites.query.shared.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.suites.query.shared.QueryParameter.OFFSET_PARAM_NME;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.apache.commons.beanutils.BeanUtils;
 import org.corant.kernel.api.ConversionService;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
-import org.corant.suites.query.shared.mapping.FetchQuery;
-import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
-import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.suites.query.shared.mapping.Query;
 
 @ApplicationScoped
@@ -38,13 +31,6 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
 
   @Inject
   ConversionService conversionService;
-
-  @Override
-  public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
-      QueryParameter parentQueryparameter) {
-    return new DefaultQueryParameter().context(parentQueryparameter.getContext())
-        .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
-  }
 
   @Override
   public QueryParameter resolveQueryParameter(Query query, Object param) {
@@ -77,59 +63,6 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
       });
     }
     return convertedParam;
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  protected Map<String, Object> extractCriterias(QueryParameter parameter) {
-    Map<String, Object> map = new HashMap<>();
-    if (parameter != null) {
-      Object criteria = parameter.getCriteria();
-      if (criteria instanceof Map) {
-        ((Map) criteria).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      } else if (criteria != null) {
-        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      }
-    }
-    return map;
-  }
-
-  @SuppressWarnings("rawtypes")
-  protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
-      Map<String, Object> criteria) {
-    Map<String, Object> fetchCriteria = new HashMap<>();
-    for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
-      if (parameter.getSource() == FetchQueryParameterSource.C) {
-        fetchCriteria.put(parameter.getName(), parameter.getValue());
-      } else if (parameter.getSource() == FetchQueryParameterSource.P) {
-        fetchCriteria.put(parameter.getName(), criteria.get(parameter.getSourceName()));
-      } else if (result != null) {
-        String parameterName = parameter.getName();
-        String sourceName = parameter.getSourceName();
-        if (result instanceof Map) {
-          if (sourceName.indexOf('.') != -1) {
-            List<Object> values = new ArrayList<>();
-            QueryUtils.extractResult(result, sourceName, true, values);
-            Object value = values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
-            fetchCriteria.put(parameterName, value);
-          } else {
-            fetchCriteria.put(parameterName, ((Map) result).get(sourceName));
-          }
-        } else {
-          try {
-            fetchCriteria.put(parameterName, BeanUtils.getProperty(result, sourceName));
-          } catch (Exception e) {
-            throw new QueryRuntimeException(e,
-                "Can not extract value from query result for resolve fetch query [%s] parameter!",
-                fetchQuery.getReferenceQuery());
-          }
-        }
-      }
-    }
-    return fetchCriteria;
   }
 
 }

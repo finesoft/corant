@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
@@ -22,8 +21,6 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
 /**
@@ -44,21 +41,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
     throw new NotSupportedException();
-  }
-
-  protected boolean decideFetch(Object result, FetchQuery fetchQuery, Object criteria) {
-    // precondition to decide whether execute fetch.
-    if (fetchQuery.getPredicateScript().isValid()) {
-      ScriptFunction sf =
-          NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(), "p", "r");
-      if (sf != null) {
-        Boolean b = toBoolean(sf.apply(new Object[] {criteria, result}));
-        if (b == null || !b.booleanValue()) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   protected <T> void fetch(List<T> results, Querier querier) {

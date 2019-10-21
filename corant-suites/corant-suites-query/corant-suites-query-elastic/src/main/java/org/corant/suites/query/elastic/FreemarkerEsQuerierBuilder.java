@@ -16,6 +16,7 @@ package org.corant.suites.query.elastic;
 import java.io.IOException;
 import java.util.Map;
 import org.corant.shared.util.ObjectUtils.Triple;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -32,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author bingo 下午8:25:44
  *
  */
-public class DefaultEsNamedQuerierBuilder extends
+public class FreemarkerEsQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, Map<Object, Object>, DefaultEsNamedQuerier> {
 
   public final static ObjectMapper OM = new ObjectMapper();
@@ -41,10 +42,11 @@ public class DefaultEsNamedQuerierBuilder extends
    * @param query
    * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    */
-  protected DefaultEsNamedQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver) {
-    super(query, parameterResolver, resultResolver);
+  protected FreemarkerEsQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+    super(query, parameterResolver, resultResolver, fetchQueryResolver);
   }
 
   @SuppressWarnings("unchecked")
@@ -54,8 +56,8 @@ public class DefaultEsNamedQuerierBuilder extends
     try {
       @SuppressWarnings("rawtypes")
       final Map esQuery = OM.readValue(processed.getRight(), Map.class);
-      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
-          getResultResolver(), esQuery);
+      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+          getFetchQueryResolver(), esQuery);
     } catch (IOException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }

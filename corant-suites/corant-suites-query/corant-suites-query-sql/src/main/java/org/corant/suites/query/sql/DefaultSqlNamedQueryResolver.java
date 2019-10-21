@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -52,6 +53,9 @@ public class DefaultSqlNamedQueryResolver
   protected QueryResultResolver resultResolver;
 
   @Inject
+  protected FetchQueryResolver fetchQueryResolver;
+
+  @Inject
   @ConfigProperty(name = "query.sql.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
 
@@ -75,11 +79,12 @@ public class DefaultSqlNamedQueryResolver
   }
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {
-    return new SqlNamedQuerierBuilder(query, parameterResolver, resultResolver);
+    return new FreemarkerSqlQuerierBuilder(query, parameterResolver, resultResolver, fetchQueryResolver);
   }
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {
-    return new SqlNamedQuerierJsBuilder(query, parameterResolver, resultResolver);
+    return new JavascriptSqlQuerierBuilder(query, parameterResolver, resultResolver,
+        fetchQueryResolver);
   }
 
 }

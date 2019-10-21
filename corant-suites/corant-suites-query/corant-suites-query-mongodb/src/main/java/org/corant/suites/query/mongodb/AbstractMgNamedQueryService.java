@@ -172,13 +172,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (null == obj || fetchQuery == null) {
+    if (obj == null || fetchQuery == null || !parentQuerier.decideFetch(obj, fetchQuery)) {
       return;
     }
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(obj, fetchQuery);
-    if (!decideFetch(obj, fetchQuery, fetchParam)) {
-      return;
-    }
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();

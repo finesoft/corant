@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * corant-suites-query
@@ -40,6 +41,8 @@ public class FetchQuery implements Serializable {
   private boolean multiRecords = true;
   private Script predicateScript = new Script();
   private Script injectionScript = new Script();
+  private boolean eagerInject = true;
+  private final String id = UUID.randomUUID().toString();
 
   public FetchQuery() {
     super();
@@ -55,10 +58,11 @@ public class FetchQuery implements Serializable {
    * @param multiRecords
    * @param predicateScript
    * @param injectionScript
+   * @param eagerInject
    */
   public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
       int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
-      boolean multiRecords, Script predicate, Script injection) {
+      boolean multiRecords, Script predicate, Script injection, boolean eagerInject) {
     super();
     this.referenceQuery = referenceQuery;
     this.injectPropertyName = injectPropertyName;
@@ -68,11 +72,20 @@ public class FetchQuery implements Serializable {
     this.referenceQueryversion = referenceQueryversion;
     this.multiRecords = multiRecords;
     if (predicate != null) {
-      this.predicateScript = predicate;
+      predicateScript = predicate;
     }
     if (injection != null) {
-      this.injectionScript = injection;
+      injectionScript = injection;
     }
+    this.eagerInject = eagerInject;
+  }
+
+  /**
+   * 
+   * @return the id
+   */
+  public String getId() {
+    return id;
   }
 
   public Script getInjectionScript() {
@@ -130,6 +143,14 @@ public class FetchQuery implements Serializable {
         + (isNotBlank(getReferenceQueryversion()) ? "_" + getReferenceQueryversion() : "");
   }
 
+  /**
+   *
+   * @return the eagerInject
+   */
+  public boolean isEagerInject() {
+    return eagerInject;
+  }
+
   public boolean isMultiRecords() {
     return multiRecords;
   }
@@ -138,8 +159,16 @@ public class FetchQuery implements Serializable {
     parameters.add(parameter);
   }
 
+  /**
+   *
+   * @param eagerInject the eagerInject to set
+   */
+  protected void setEagerInject(boolean eagerInject) {
+    this.eagerInject = eagerInject;
+  }
+
   protected void setInjectionScript(Script injection) {
-    this.injectionScript = defaultObject(injection, new Script());
+    injectionScript = defaultObject(injection, new Script());
   }
 
   protected void setInjectPropertyName(String injectPropertyName) {
@@ -155,7 +184,7 @@ public class FetchQuery implements Serializable {
   }
 
   protected void setPredicateScript(Script predicate) {
-    this.predicateScript = defaultObject(predicate, new Script());
+    predicateScript = defaultObject(predicate, new Script());
   }
 
   protected void setReferenceQuery(String referenceQuery) {

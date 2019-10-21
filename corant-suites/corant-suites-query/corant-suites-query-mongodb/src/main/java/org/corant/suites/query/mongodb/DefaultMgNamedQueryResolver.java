@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
@@ -34,7 +35,7 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
 public class DefaultMgNamedQueryResolver
     implements NamedQueryResolver<String, Object, MgNamedQuerier> {
 
-  final Map<String, DefaultMgNamedQuerierBuilder> builders = new ConcurrentHashMap<>();
+  final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -45,18 +46,22 @@ public class DefaultMgNamedQueryResolver
   @Inject
   protected QueryResultResolver resultResolver;
 
+  @Inject
+  protected FetchQueryResolver fetchQueryResolver;
+
   @Override
   public DefaultMgNamedQuerier resolve(String key, Object param) {
-    DefaultMgNamedQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);
   }
 
-  protected DefaultMgNamedQuerierBuilder createBuilder(String key) {
+  protected FreemarkerMgQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
-    return new DefaultMgNamedQuerierBuilder(query, parameterResolver, resultResolver);
+    return new FreemarkerMgQuerierBuilder(query, parameterResolver, resultResolver,
+        fetchQueryResolver);
   }
 
 }

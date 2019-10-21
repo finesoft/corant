@@ -14,9 +14,6 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
-import static org.corant.shared.util.StringUtils.isBlank;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +22,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.spi.ResultHintHandler;
@@ -70,28 +66,6 @@ public class DefaultQueryResultResolver implements QueryResultResolver {
       resolveResultHints(result, resultClass, hints, parameter);
       return Map.class.isAssignableFrom(resultClass) ? (T) result
           : QueryObjectMapper.OM.convertValue(result, resultClass);
-    }
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  @Override
-  public void resolveFetchedResult(Object result, Object fetchedResult, String injectProName) {
-    if (isBlank(injectProName)) {
-      return;
-    }
-    if (result instanceof Map) {
-      if (injectProName.indexOf('.') != -1) {
-        Map<String, Object> mapResult = (Map) result;
-        putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
-      } else {
-        ((Map) result).put(injectProName, fetchedResult);
-      }
-    } else if (result != null) {
-      try {
-        BeanUtils.setProperty(result, injectProName, fetchedResult);
-      } catch (IllegalAccessException | InvocationTargetException e) {
-        throw new QueryRuntimeException(e);
-      }
     }
   }
 

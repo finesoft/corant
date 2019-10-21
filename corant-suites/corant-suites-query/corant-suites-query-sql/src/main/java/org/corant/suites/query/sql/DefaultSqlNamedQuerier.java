@@ -14,8 +14,8 @@
 package org.corant.suites.query.sql;
 
 import java.util.Map;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
@@ -36,15 +36,15 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
   /**
    * @param query
    * @param queryParameter
-   * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    * @param scriptParameter
    * @param script
    */
   protected DefaultSqlNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryParameterResolver parameterResolver, QueryResultResolver resultResolver,
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver,
       Object[] scriptParameter, String script) {
-    super(query, queryParameter, parameterResolver, resultResolver);
+    super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;
     this.script = script.replaceAll("[\\t\\n\\r]", " ");

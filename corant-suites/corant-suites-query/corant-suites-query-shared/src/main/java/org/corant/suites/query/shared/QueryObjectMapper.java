@@ -13,10 +13,10 @@
  */
 package org.corant.suites.query.shared;
 
+import org.corant.suites.json.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.corant.suites.json.JsonUtils;
 
 /**
  * corant-suites-query-shared

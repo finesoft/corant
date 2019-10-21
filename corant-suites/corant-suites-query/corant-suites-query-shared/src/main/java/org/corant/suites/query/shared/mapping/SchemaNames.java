@@ -53,6 +53,7 @@ public class SchemaNames {
   public static final String FQE_ELE_INJECTION_SCRIPT = "injection-script";
   public static final String FQE_ATT_NAME = "reference-query";
   public static final String FQE_ATT_PRO_NAME = "inject-property-name";
+  public static final String FQE_ATT_EAGER_INJECT_NAME = "eager-inject";
   public static final String FQE_ATT_MAX_SIZE = "max-fetch-size";
   public static final String FQE_ATT_VER = "reference-query-version";
   public static final String FQE_ATT_MULT_RECORDS = "multi-records";

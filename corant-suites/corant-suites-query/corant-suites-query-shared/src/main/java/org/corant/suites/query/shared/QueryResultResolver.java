@@ -65,15 +65,6 @@ public interface QueryResultResolver {
       QueryParameter parameter);
 
   /**
-   * Inject fetch query result in to parent query result
-   *
-   * @param result
-   * @param fetchResult
-   * @param injectProName
-   */
-  void resolveFetchedResult(Object result, Object fetchResult, String injectProName);
-
-  /**
    * Resolve query hints, in this step the result set may be adjusted or inserted with certain
    * values.
    *

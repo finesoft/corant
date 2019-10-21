@@ -151,6 +151,17 @@
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
+        <xsd:attribute name="eager-inject" type="xsd:boolean" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Represents whether to grab immediately; if true the fetch query is launched 
+                    when the result set of each parent query is processed; otherwise the fetch query
+                     is launched after the result set of all parent queries has been processed, 
+                     Useful for paging queries, especially to reduce the use of connection pooling.
+                     default is true.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
         <xsd:attribute name="reference-query-version" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation>

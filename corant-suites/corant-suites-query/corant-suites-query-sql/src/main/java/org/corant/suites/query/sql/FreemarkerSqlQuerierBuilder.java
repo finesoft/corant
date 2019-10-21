@@ -11,13 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.jpql;
+package org.corant.suites.query.sql;
 
 import org.corant.shared.util.ObjectUtils.Triple;
+import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameterResolver;
 import org.corant.suites.query.shared.QueryResultResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -27,31 +29,32 @@ import org.corant.suites.query.shared.mapping.Query;
  * @author bingo 下午7:46:22
  *
  */
-public class JpqlNamedQuerierBuilder
-    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
+public class FreemarkerSqlQuerierBuilder
+    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultSqlNamedQuerier> {
 
   /**
    * @param query
    * @param parameterResolver
    * @param resultResolver
+   * @param fetchQueryResolver
    */
-  public JpqlNamedQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver) {
-    super(query, parameterResolver, resultResolver);
+  public FreemarkerSqlQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
+      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+    super(query, parameterResolver, resultResolver, fetchQueryResolver);
   }
 
   /**
-   * Generate JPQL script with placeholder, and converted the parameter to appropriate type.
+   * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  protected DefaultJpqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
-    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getParameterResolver(),
-        getResultResolver(), processed.getMiddle(), processed.getRight());
+  protected DefaultSqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
+    return new DefaultSqlNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+        getFetchQueryResolver(), processed.getMiddle(), processed.getRight());
   }
 
   @Override
   protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
-    return new DynamicTemplateMethodModelExJpql();
+    return new DynamicTemplateMethodModelExSql();
   }
 
 }

@@ -149,13 +149,10 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   protected <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (null == result || fetchQuery == null) {
+    if (result == null || fetchQuery == null || !parentQuerier.decideFetch(result, fetchQuery)) {
       return;
     }
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    if (!decideFetch(result, fetchQuery, fetchParam)) {
-      return;
-    }
     int maxSize = fetchQuery.getMaxSize();
     boolean multiRecords = fetchQuery.isMultiRecords();
     String injectProName = fetchQuery.getInjectPropertyName();

@@ -16,7 +16,7 @@ package org.corant.suites.query.elastic;
 import java.util.Map;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -35,12 +35,12 @@ public class DefaultEsNamedQuerier extends
   /**
    * @param query
    * @param queryParameter
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    * @param script
    */
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver,
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
       Map<Object, Object> script) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();

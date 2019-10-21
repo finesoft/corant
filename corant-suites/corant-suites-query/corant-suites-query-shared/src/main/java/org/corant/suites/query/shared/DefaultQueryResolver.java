@@ -14,23 +14,71 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toInteger;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.suites.query.shared.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.suites.query.shared.QueryParameter.OFFSET_PARAM_NME;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.kernel.api.ConversionService;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.Query;
+import org.corant.suites.query.shared.mapping.QueryHint;
+import org.corant.suites.query.shared.spi.ResultHintHandler;
 
 @ApplicationScoped
 // @Alternative
-public class DefaultQueryParameterResolver implements QueryParameterResolver {
+public class DefaultQueryResolver implements QueryResolver {
+
+  @Inject
+  @Any
+  protected Instance<ResultHintHandler> resultHintHandlers;
 
   @Inject
   ConversionService conversionService;
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> List<T> resolve(List<?> results, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter) {
+    List<T> list = new ArrayList<>();
+    if (!isEmpty(results)) {
+      resolveResultHints(results, resultClass, hints, parameter);
+      if (Map.class.isAssignableFrom(resultClass)) {
+        for (Object r : results) {
+          list.add((T) r);
+        }
+      } else {
+        for (Object r : results) {
+          list.add(r == null ? null
+              : Map.class.isAssignableFrom(resultClass) ? (T) r
+                  : QueryObjectMapper.OM.convertValue(r, resultClass));
+        }
+      }
+    }
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T resolve(Object result, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter) {
+    if (result == null) {
+      return null;
+    } else {
+      resolveResultHints(result, resultClass, hints, parameter);
+      return Map.class.isAssignableFrom(resultClass) ? (T) result
+          : QueryObjectMapper.OM.convertValue(result, resultClass);
+    }
+  }
 
   @Override
   public QueryParameter resolveQueryParameter(Query query, Object param) {
@@ -49,6 +97,27 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     return queryParameter;
   }
 
+  @Override
+  public void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+      QueryParameter parameter) {
+    if (result != null && !resultHintHandlers.isUnsatisfied()) {
+      hints.forEach(qh -> {
+        AtomicBoolean exclusive = new AtomicBoolean(false);
+        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
+            .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
+              if (!exclusive.get()) {
+                try {
+                  h.handle(qh, parameter, result);
+                  exclusive.set(h.exclusive());
+                } catch (Exception e) {
+                  throw new CorantRuntimeException(e);
+                }
+              }
+            });
+      });
+    }
+  }
+
   protected Map<String, Object> convertParameter(Map<?, ?> param,
       Map<String, Class<?>> convertSchema) {
     Map<String, Object> convertedParam = new HashMap<>();
@@ -64,5 +133,4 @@ public class DefaultQueryParameterResolver implements QueryParameterResolver {
     }
     return convertedParam;
   }
-
 }

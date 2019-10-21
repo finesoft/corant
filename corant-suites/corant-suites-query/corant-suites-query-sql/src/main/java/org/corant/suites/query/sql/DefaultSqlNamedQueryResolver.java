@@ -21,8 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
@@ -47,10 +46,7 @@ public class DefaultSqlNamedQueryResolver
   protected QueryMappingService mappingService;
 
   @Inject
-  protected QueryParameterResolver parameterResolver;
-
-  @Inject
-  protected QueryResultResolver resultResolver;
+  protected QueryResolver queryResolver;
 
   @Inject
   protected FetchQueryResolver fetchQueryResolver;
@@ -79,12 +75,11 @@ public class DefaultSqlNamedQueryResolver
   }
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {
-    return new FreemarkerSqlQuerierBuilder(query, parameterResolver, resultResolver, fetchQueryResolver);
+    return new FreemarkerSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {
-    return new JavascriptSqlQuerierBuilder(query, parameterResolver, resultResolver,
-        fetchQueryResolver);
+    return new JavascriptSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

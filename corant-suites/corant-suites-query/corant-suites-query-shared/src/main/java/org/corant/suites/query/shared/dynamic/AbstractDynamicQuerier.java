@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -31,18 +31,18 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
 
   protected final Query query;
-  protected final QueryResultResolver resultResolver;
+  protected final QueryResolver resultResolver;
   protected final FetchQueryResolver fetchQueryResolver;
   protected final QueryParameter queryParameter;
 
   /**
    * @param query
    * @param queryParameter
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
     super();
     this.query = query;
     this.queryParameter = queryParameter;

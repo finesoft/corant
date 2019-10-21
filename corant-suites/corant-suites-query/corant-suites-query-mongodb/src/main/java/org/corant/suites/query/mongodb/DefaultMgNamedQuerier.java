@@ -19,7 +19,7 @@ import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
@@ -46,13 +46,13 @@ public class DefaultMgNamedQuerier
   /**
    * @param query
    * @param queryParameter
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    * @param mgQuery
    * @param originalScript
    */
   protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
       String originalScript) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();

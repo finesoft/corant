@@ -16,8 +16,7 @@ package org.corant.suites.query.jpql;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
@@ -33,13 +32,12 @@ public class FreemarkerJpqlQuerierBuilder
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  public FreemarkerJpqlQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  public FreemarkerJpqlQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
   }
 
   /**
@@ -47,7 +45,7 @@ public class FreemarkerJpqlQuerierBuilder
    */
   @Override
   protected DefaultJpqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
-    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
         getFetchQueryResolver(), processed.getMiddle(), processed.getRight());
   }
 

@@ -14,8 +14,7 @@
 package org.corant.suites.query.shared.dynamic.javascript;
 
 import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
@@ -34,13 +33,12 @@ public abstract class JavascriptDynamicQuerierBuilder<P, S, Q extends DynamicQue
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected JavascriptDynamicQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  protected JavascriptDynamicQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
     execution = NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
   }
 }

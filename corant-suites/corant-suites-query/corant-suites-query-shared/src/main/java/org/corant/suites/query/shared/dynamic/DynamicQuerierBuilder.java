@@ -13,8 +13,7 @@
  */
 package org.corant.suites.query.shared.dynamic;
 
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**
@@ -29,10 +28,8 @@ public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 
   Long getCachedTimestemp();
 
-  QueryParameterResolver getParameterResolver();
-
   Query getQuery();
 
-  QueryResultResolver getResultResolver();
+  QueryResolver getQueryResolver();
 
 }

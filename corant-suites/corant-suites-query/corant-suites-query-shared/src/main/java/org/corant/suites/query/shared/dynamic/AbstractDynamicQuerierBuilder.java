@@ -16,8 +16,7 @@ package org.corant.suites.query.shared.dynamic;
 import java.time.Instant;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -32,20 +31,18 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
 
   protected final long cachedTimestemp;
   protected final Query query;
-  protected final QueryParameterResolver parameterResolver;
-  protected final QueryResultResolver resultResolver;
+  protected final QueryResolver queryResolver;
   protected final FetchQueryResolver fetchQueryResolver;
 
-  protected AbstractDynamicQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    if (query == null || parameterResolver == null) {
+  protected AbstractDynamicQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    if (query == null || queryResolver == null) {
       throw new QueryRuntimeException(
           "Can not initialize dynamic querier builder from null query param!");
     }
     this.cachedTimestemp = Instant.now().toEpochMilli();
     this.query = query;
-    this.parameterResolver = parameterResolver;
-    this.resultResolver = resultResolver;
+    this.queryResolver = queryResolver;
     this.fetchQueryResolver = fetchQueryResolver;
   }
 
@@ -55,18 +52,13 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   }
 
   @Override
-  public QueryParameterResolver getParameterResolver() {
-    return parameterResolver;
-  }
-
-  @Override
   public Query getQuery() {
     return query;
   }
 
   @Override
-  public QueryResultResolver getResultResolver() {
-    return resultResolver;
+  public QueryResolver getQueryResolver() {
+    return queryResolver;
   }
 
   protected FetchQueryResolver getFetchQueryResolver() {
@@ -74,7 +66,7 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   }
 
   protected QueryParameter resolveParameter(Object param) {
-    return parameterResolver.resolveQueryParameter(query, param);
+    return queryResolver.resolveQueryParameter(query, param);
   }
 
 }

@@ -18,8 +18,7 @@ import java.util.Map;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
@@ -40,13 +39,12 @@ public class FreemarkerEsQuerierBuilder extends
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected FreemarkerEsQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  protected FreemarkerEsQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
   }
 
   @SuppressWarnings("unchecked")
@@ -56,7 +54,7 @@ public class FreemarkerEsQuerierBuilder extends
     try {
       @SuppressWarnings("rawtypes")
       final Map esQuery = OM.readValue(processed.getRight(), Map.class);
-      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
           getFetchQueryResolver(), esQuery);
     } catch (IOException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");

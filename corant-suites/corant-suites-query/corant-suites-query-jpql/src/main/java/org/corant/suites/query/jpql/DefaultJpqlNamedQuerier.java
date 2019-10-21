@@ -16,7 +16,7 @@ package org.corant.suites.query.jpql;
 import java.util.Map;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -36,13 +36,13 @@ public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], St
   /**
    * @param query
    * @param queryParameter
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    * @param scriptParameter
    * @param script
    */
   protected DefaultJpqlNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver,
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
       Object[] scriptParameter, String script) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();

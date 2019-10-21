@@ -54,7 +54,7 @@ public interface Querier {
    * @param result
    * @param fetchResult
    * @param injectProName
-   * @see QueryResultResolver#resolveFetchedResult(Object, Object, String)
+   * @see QueryResolver#resolveFetchedResult(Object, Object, String)
    */
   void resolveFetchedResult(Object result, Object fetchedResult, String injectProName);
 
@@ -72,7 +72,7 @@ public interface Querier {
    *
    * @param <T>
    * @param results
-   * @see QueryResultResolver#resolve(List, Class, List, QueryParameter)
+   * @see QueryResolver#resolve(List, Class, List, QueryParameter)
    */
   <T> List<T> resolveResult(List<?> results);
 
@@ -81,13 +81,13 @@ public interface Querier {
    *
    * @param <T>
    * @param result
-   * @see QueryResultResolver#resolve(Object, Class, List, QueryParameter)
+   * @see QueryResolver#resolve(Object, Class, List, QueryParameter)
    */
   <T> T resolveResult(Object result);
 
   /**
    * @param result resolveResultHints
-   * @see QueryResultResolver#resolveResultHints(Object, Class, List, QueryParameter)
+   * @see QueryResolver#resolveResultHints(Object, Class, List, QueryParameter)
    */
   void resolveResultHints(Object result);
 }

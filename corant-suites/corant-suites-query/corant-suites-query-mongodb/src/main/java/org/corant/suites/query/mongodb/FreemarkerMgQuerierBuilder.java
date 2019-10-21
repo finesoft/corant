@@ -21,8 +21,7 @@ import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
@@ -39,20 +38,19 @@ public class FreemarkerMgQuerierBuilder extends
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected FreemarkerMgQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  protected FreemarkerMgQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
   }
 
   /**
    * @param query
    * @param queryParameter
    * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param mgQuery
    * @param originalScript
    */
@@ -63,7 +61,7 @@ public class FreemarkerMgQuerierBuilder extends
     try {
       @SuppressWarnings("rawtypes")
       final Map mgQuery = DefaultMgNamedQuerier.OM.readValue(processed.getRight(), Map.class);
-      return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getResultResolver(),
+      return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
           getFetchQueryResolver(), mgQuery, processed.getRight());
     } catch (IOException e) {
       e.printStackTrace();

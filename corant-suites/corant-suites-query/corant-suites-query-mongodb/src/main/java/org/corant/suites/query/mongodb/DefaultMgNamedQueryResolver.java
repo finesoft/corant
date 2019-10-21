@@ -19,8 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
@@ -41,10 +40,7 @@ public class DefaultMgNamedQueryResolver
   protected QueryMappingService mappingService;
 
   @Inject
-  protected QueryParameterResolver parameterResolver;
-
-  @Inject
-  protected QueryResultResolver resultResolver;
+  protected QueryResolver queryResolver;
 
   @Inject
   protected FetchQueryResolver fetchQueryResolver;
@@ -60,8 +56,7 @@ public class DefaultMgNamedQueryResolver
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
     }
-    return new FreemarkerMgQuerierBuilder(query, parameterResolver, resultResolver,
-        fetchQueryResolver);
+    return new FreemarkerMgQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

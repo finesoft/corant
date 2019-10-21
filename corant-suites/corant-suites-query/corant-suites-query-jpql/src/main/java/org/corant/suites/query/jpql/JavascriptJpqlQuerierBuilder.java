@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
@@ -37,13 +36,12 @@ public class JavascriptJpqlQuerierBuilder
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected JavascriptJpqlQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  protected JavascriptJpqlQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
     execution = NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
   }
 
@@ -52,10 +50,10 @@ public class JavascriptJpqlQuerierBuilder
    */
   @Override
   public DefaultJpqlNamedQuerier build(Object param) {
-    QueryParameter queryParam = getParameterResolver().resolveQueryParameter(getQuery(), param);
+    QueryParameter queryParam = getQueryResolver().resolveQueryParameter(getQuery(), param);
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {queryParam, useParam});
-    return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getResultResolver(),
+    return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getQueryResolver(),
         getFetchQueryResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
   }
 

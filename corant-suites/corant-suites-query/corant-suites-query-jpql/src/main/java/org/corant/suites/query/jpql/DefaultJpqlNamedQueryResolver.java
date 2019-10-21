@@ -21,8 +21,7 @@ import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQueryResolver;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
@@ -44,10 +43,7 @@ public class DefaultJpqlNamedQueryResolver
   protected QueryMappingService mappingService;
 
   @Inject
-  protected QueryParameterResolver parameterResolver;
-
-  @Inject
-  protected QueryResultResolver resultResolver;
+  protected QueryResolver queryResolver;
 
   @Inject
   protected FetchQueryResolver fetchQueryResolver;
@@ -75,13 +71,11 @@ public class DefaultJpqlNamedQueryResolver
   }
 
   protected FreemarkerJpqlQuerierBuilder createFmProcessor(Query query) {
-    return new FreemarkerJpqlQuerierBuilder(query, parameterResolver, resultResolver,
-        fetchQueryResolver);
+    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
   protected FreemarkerJpqlQuerierBuilder createJsProcessor(Query query) {
-    return new FreemarkerJpqlQuerierBuilder(query, parameterResolver, resultResolver,
-        fetchQueryResolver);
+    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameterResolver;
-import org.corant.suites.query.shared.QueryResultResolver;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.javascript.JavascriptDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -33,13 +32,12 @@ public class JavascriptSqlQuerierBuilder
 
   /**
    * @param query
-   * @param parameterResolver
-   * @param resultResolver
+   * @param queryResolver
    * @param fetchQueryResolver
    */
-  public JavascriptSqlQuerierBuilder(Query query, QueryParameterResolver parameterResolver,
-      QueryResultResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
-    super(query, parameterResolver, resultResolver, fetchQueryResolver);
+  public JavascriptSqlQuerierBuilder(Query query, QueryResolver queryResolver,
+      FetchQueryResolver fetchQueryResolver) {
+    super(query, queryResolver, fetchQueryResolver);
   }
 
   /**
@@ -50,7 +48,7 @@ public class JavascriptSqlQuerierBuilder
     QueryParameter queryParameter = resolveParameter(param);// convert parameter
     List<Object> useParam = new ArrayList<>();
     Object script = execution.apply(new Object[] {queryParameter, useParam});
-    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getResultResolver(),
+    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryResolver(),
         getFetchQueryResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
   }
 

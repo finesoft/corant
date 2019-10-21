@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared;
 
 import java.util.List;
+import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.spi.ResultHintHandler;
 
@@ -23,7 +24,7 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
  * @author bingo 下午4:56:52
  *
  */
-public interface QueryResultResolver {
+public interface QueryResolver {
 
   /**
    * Resolve result list, The steps are as follows:
@@ -63,6 +64,15 @@ public interface QueryResultResolver {
    */
   <T> T resolve(Object result, Class<T> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
+
+  /**
+   * Resolve query parameter.
+   *
+   * @param query
+   * @param parameter
+   * @return query parameter
+   */
+  QueryParameter resolveQueryParameter(Query query, Object parameter);
 
   /**
    * Resolve query hints, in this step the result set may be adjusted or inserted with certain

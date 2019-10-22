@@ -65,8 +65,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
-  public void resolveFetchedResult(List<?> results, List<?> fetchedResults,
-      FetchQuery fetchQuery) {
+  public void resolveFetchedResult(List<?> results, List<?> fetchedResults, FetchQuery fetchQuery) {
     if (isEmpty(results)) {
       return;
     }
@@ -165,13 +164,13 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   protected Map<String, Object> extractCriterias(QueryParameter parameter) {
     Map<String, Object> map = new HashMap<>();
     if (parameter != null) {
       Object criteria = parameter.getCriteria();
       if (criteria instanceof Map) {
-        Map.class.cast(criteria).forEach((k, v) -> {
+        ((Map) criteria).forEach((k, v) -> {
           map.put(asDefaultString(k), v);
         });
       } else if (criteria != null) {
@@ -183,14 +182,14 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return map;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   protected void injectFetchedResult(Object result, Object fetchedResult, String injectProName) {
     if (result instanceof Map) {
+      Map<String, Object> mapResult = (Map) result;
       if (injectProName.indexOf('.') != -1) {
-        Map<String, Object> mapResult = Map.class.cast(result);
         putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
       } else {
-        Map.class.cast(result).put(injectProName, fetchedResult);
+        mapResult.put(injectProName, fetchedResult);
       }
     } else if (result != null) {
       try {
@@ -265,6 +264,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return fetchCriteria;
   }
 
+  @SuppressWarnings("rawtypes")
   protected Object resolveFetchQueryCriteriaValue(Object result, String sourceName)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     if (result instanceof Map) {
@@ -273,7 +273,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         QueryUtils.extractResult(result, sourceName, true, values);
         return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
       } else {
-        return Map.class.cast(result).get(sourceName);
+        return ((Map) result).get(sourceName);
       }
     } else {
       return BeanUtils.getProperty(result, sourceName);

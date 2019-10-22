@@ -224,7 +224,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
+  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     throw new NotSupportedException();
   }
 

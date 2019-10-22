@@ -28,11 +28,10 @@ public interface Querier {
   /**
    * Decide whether to fetch
    *
-   * @param result
    * @param fetchQuery
    * @return decideFetch
    */
-  boolean decideFetch(Object result, FetchQuery fetchQuery);
+  boolean decideFetch(FetchQuery fetchQuery);
 
   /**
    * The query object that this querier bind, the Query object define execution plan.
@@ -49,14 +48,24 @@ public interface Querier {
   QueryParameter getQueryParameter();
 
   /**
-   * Inject the fetched result to result
+   * Inject the fetched result to result list
    *
    * @param result
    * @param fetchResult
-   * @param injectProName
-   * @see QueryResolver#resolveFetchedResult(Object, Object, String)
+   * @param fetchQuery
+   * @see FetchQueryResolver#resolveFetchedResult(List, List, FetchQuery)
    */
-  void resolveFetchedResult(Object result, Object fetchedResult, String injectProName);
+  void resolveFetchedResult(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
+
+  /**
+   * Inject the fetched result to single result
+   *
+   * @param result
+   * @param fetchResult
+   * @param fetchQuery
+   * @see FetchQueryResolver#resolveFetchedResult(Object, List, FetchQuery)
+   */
+  void resolveFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
 
   /**
    * Resolve fetch query parameter, merge parent querier criteria.

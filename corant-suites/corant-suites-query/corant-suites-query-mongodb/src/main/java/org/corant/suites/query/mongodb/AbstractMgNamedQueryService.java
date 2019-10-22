@@ -17,7 +17,6 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.MapUtils.getOpt;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
@@ -171,29 +170,22 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (obj == null || fetchQuery == null || !parentQuerier.decideFetch(obj, fetchQuery)) {
-      return;
-    }
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(obj, fetchQuery);
-    boolean multiRecords = fetchQuery.isMultiRecords();
-    String injectProName = fetchQuery.getInjectPropertyName();
+  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     MgNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(128);
+    FindIterable<Document> fi = query(querier).limit(maxSize);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
-    Object fetchedResult = null;
-    if (multiRecords) {
-      fetchedResult = fetchedList;
-      this.fetch((List<?>) fetchedResult, querier);
-    } else if (!isEmpty(fetchedList)) {
-      fetchedResult = fetchedList.get(0);
-      this.fetch(fetchedResult, querier);
+    if (result instanceof List) {
+      parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+    } else {
+      parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
     }
-    querier.resolveResultHints(fetchedResult);
-    querier.resolveFetchedResult(obj, fetchedResult, injectProName);
+    fetch(fetchedList, querier);
+    querier.resolveResultHints(fetchedList);
   }
 
   protected abstract MongoDatabase getDataBase();

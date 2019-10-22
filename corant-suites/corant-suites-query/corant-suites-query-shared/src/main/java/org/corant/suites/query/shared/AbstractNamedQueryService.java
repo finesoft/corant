@@ -46,16 +46,30 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   protected <T> void fetch(List<T> results, Querier querier) {
     List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
     if (!isEmpty(results) && !isEmpty(fetchQueries)) {
-      fetchQueries.forEach(f -> results.forEach(e -> this.fetch(e, f, querier)));
+      for (FetchQuery fq : fetchQueries) {
+        if (querier.decideFetch(fq)) {
+          if (fq.isEagerInject()) {
+            for (T result : results) {
+              fetch(result, fq, querier);
+            }
+          } else {
+            fetch(results, fq, querier);
+          }
+        }
+      }
     }
   }
 
-  protected abstract <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier);
+  protected abstract void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
 
   protected <T> void fetch(T result, Querier parentQuerier) {
     List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
     if (result != null && !isEmpty(fetchQueries)) {
-      fetchQueries.forEach(f -> this.fetch(result, f, parentQuerier));
+      for (FetchQuery fq : fetchQueries) {
+        if (parentQuerier.decideFetch(fq)) {
+          fetch(result, fq, parentQuerier);
+        }
+      }
     }
   }
 

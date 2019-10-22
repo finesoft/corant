@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
+import java.util.List;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
 /**
@@ -26,21 +27,31 @@ public interface FetchQueryResolver {
   /**
    * Decide whether to fetch
    *
-   * @param result
    * @param queryParameter
    * @param fetchQuery
    * @return canFetch
    */
-  boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery);
+  boolean canFetch(QueryParameter queryParameter, FetchQuery fetchQuery);
 
   /**
-   * Inject fetch query result in to parent query result
+   * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
+   * modified.
+   *
+   * @param results
+   * @param fetchResults
+   * @param fetchQuery
+   */
+  void resolveFetchedResult(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
+
+  /**
+   * Inject fetch query result in to single parent query result, the parameter 'fetchResult' may be
+   * modified.
    *
    * @param result
-   * @param fetchResult
-   * @param injectProName
+   * @param fetchResults
+   * @param fetchQuery
    */
-  void resolveFetchedResult(Object result, Object fetchResult, String injectProName);
+  void resolveFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
    * Resolve fetch query parameter. Generally, the fetch query parameters are composed of parent

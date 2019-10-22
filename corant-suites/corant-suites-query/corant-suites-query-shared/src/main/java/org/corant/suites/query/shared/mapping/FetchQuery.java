@@ -35,7 +35,7 @@ public class FetchQuery implements Serializable {
   private String referenceQuery;
   private String injectPropertyName;
   private Class<?> resultClass = Map.class;
-  private int maxSize;
+  private int maxSize = 1024;
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private String referenceQueryversion = "";
   private boolean multiRecords = true;
@@ -81,7 +81,7 @@ public class FetchQuery implements Serializable {
   }
 
   /**
-   * 
+   *
    * @return the id
    */
   public String getId() {

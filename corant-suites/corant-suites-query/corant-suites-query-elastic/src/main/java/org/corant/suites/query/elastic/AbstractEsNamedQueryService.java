@@ -122,14 +122,9 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> void fetch(T obj, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (obj == null || fetchQuery == null || !parentQuerier.decideFetch(obj, fetchQuery)) {
-      return;
-    }
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(obj, fetchQuery);
-    boolean multiRecords = fetchQuery.isMultiRecords();
-    int maxSize = fetchQuery.getMaxSize();
-    String injectProName = fetchQuery.getInjectPropertyName();
+  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     EsNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     String script = resolveScript(querier.getScript(null), null, maxSize > 0 ? maxSize : null);
@@ -137,18 +132,13 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList =
           getExecutor().searchHits(resolveIndexName(refQueryName), script).getValue();
-      if (!isEmpty(fetchedList)) {
-        Object fetchedResult = null;
-        if (multiRecords) {
-          fetchedResult = fetchedList;
-          this.fetch((List<?>) fetchedResult, querier);
-        } else if (!isEmpty(fetchedList)) {
-          fetchedResult = fetchedList.get(0);
-          this.fetch(fetchedResult, querier);
-        }
-        querier.resolveResultHints(fetchedResult);
-        querier.resolveFetchedResult(obj, fetchedResult, injectProName);
+      if (result instanceof List) {
+        parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }
+      fetch(fetchedList, querier);
+      querier.resolveResultHints(fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

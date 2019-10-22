@@ -14,7 +14,6 @@
 package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.CollectionUtils.getSize;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import java.sql.SQLException;
 import java.util.List;
@@ -148,14 +147,9 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> void fetch(T result, FetchQuery fetchQuery, Querier parentQuerier) {
-    if (result == null || fetchQuery == null || !parentQuerier.decideFetch(result, fetchQuery)) {
-      return;
-    }
+  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.getMaxSize();
-    boolean multiRecords = fetchQuery.isMultiRecords();
-    String injectProName = fetchQuery.getInjectPropertyName();
+    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     SqlNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     String sql = querier.getScript(null);
@@ -166,16 +160,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     try {
       log("fetch-> " + refQueryName, scriptParameter, sql);
       List<Map<String, Object>> fetchedList = getExecutor().select(sql, scriptParameter);
-      Object fetchedResult = null;
-      if (multiRecords) {
-        fetchedResult = fetchedList;
-        this.fetch((List<?>) fetchedResult, querier);
-      } else if (!isEmpty(fetchedList)) {
-        fetchedResult = fetchedList.get(0);
-        this.fetch(fetchedResult, querier);
+      if (result instanceof List) {
+        querier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        querier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }
-      querier.resolveResultHints(fetchedResult);
-      querier.resolveFetchedResult(result, fetchedResult, injectProName);
+      fetch(fetchedList, querier);
+      querier.resolveResultHints(fetchedList);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

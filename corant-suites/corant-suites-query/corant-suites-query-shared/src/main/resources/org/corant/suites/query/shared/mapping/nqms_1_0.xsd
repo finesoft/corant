@@ -66,7 +66,7 @@
             <xsd:element name="properties" type="nqms:properties" maxOccurs="1" minOccurs="0"/>
             <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="1">
                 <xsd:annotation>
-                    <xsd:documentation>The query script</xsd:documentation>
+                    <xsd:documentation>The query script, default script is freemarker.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="fetch-query" type="nqms:fetch-query" minOccurs="0" maxOccurs="unbounded"/>
@@ -116,8 +116,14 @@
                 <xsd:annotation>
                     <xsd:documentation>
                     	The precondition script for decide execute this fetch query or not,
-                        script may be a function that receive result-record and query param and return bool,
-                         the default script type is Java Script.
+                        script may be a function that receive query param and return bool,
+                        the default script type is Java Script. 
+                        Example: 
+                         (function(p){ 
+								return p.criteria.get("key")!=null;
+						 })(p);
+						 the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
+						 the function must return boolean result.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>        
@@ -125,7 +131,16 @@
             <xsd:element name="injection-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
                 <xsd:annotation>
                     <xsd:documentation>
-                    	Reserve zone unfinished yet. Scripts for injection processing, the default script type is Java Script.
+                    	Experimental feature. Scripts for injection processing, 
+                    	the default script type is Java Script. Script may be a function that receive 
+                    	parent query result record and fetch query result record return bool.
+                    	Example:
+						(function(r,fr){ 
+							return r.get("key") === fr.get("key");
+						})(r,fr);           
+						the parameter 'r' is the parent query result record and the parameter 'fr' 
+						is the fetch query result record, usually all parameter are java.util.Map; 
+						the function must return boolean result.         	
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>    
@@ -147,7 +162,7 @@
         <xsd:attribute name="max-fetch-size" type="xsd:positiveInteger" use="optional">
             <xsd:annotation>
                 <xsd:documentation>
-                    The fetch query result size.
+                    The fetch query result size, default is 1024.
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
@@ -156,9 +171,9 @@
                 <xsd:documentation>
                     Represents whether to grab immediately; if true the fetch query is launched 
                     when the result set of each parent query is processed; otherwise the fetch query
-                     is launched after the result set of all parent queries has been processed, 
-                     Useful for paging queries, especially to reduce the use of connection pooling.
-                     default is true.
+                    is launched after the result set of all parent queries has been processed, 
+                    Useful for paging queries, especially to reduce the use of connection pooling.
+                    Default is true.
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>

@@ -86,7 +86,7 @@ public class QueryMapping {
     getParaMapping().values().forEach(p -> {
       if (p.getType() == null) {
         brokens.add(String.format(
-            "The 'type' attribute of parameter entry element in query file [%s] with name [%s] can not null!",
+            "The 'type' attribute of parameter entry element [%s] in query file [%s] can not null!",
             url, p.getName()));
       }
     });

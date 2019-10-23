@@ -119,10 +119,11 @@
                         script may be a function that receive query param and return bool,
                         the default script type is Java Script. 
                         Example: 
-                         (function(p){ 
-								return p.criteria.get("key")!=null;
-						 })(p);
+                         (function(p,r){ 
+								return p.criteria.get("key")!=null || r.get("key")!=null;
+						 })(p,r);
 						 the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
+						 the parameter 'r' is the parent query result record, usually is java util.Map;
 						 the function must return boolean result.
                     </xsd:documentation>
                 </xsd:annotation>
@@ -169,7 +170,7 @@
         <xsd:attribute name="eager-inject" type="xsd:boolean" use="optional">
             <xsd:annotation>
                 <xsd:documentation>
-                    Represents whether to grab immediately; if true the fetch query is launched 
+                    Represents whether to grab immediately, if true the fetch query is launched 
                     when the result set of each parent query is processed; otherwise the fetch query
                     is launched after the result set of all parent queries has been processed, 
                     Useful for paging queries, especially to reduce the use of connection pooling.
@@ -209,7 +210,7 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="P">
                 <xsd:annotation>
-                    <xsd:documentation>Parameter value from original query parameter.</xsd:documentation>
+                    <xsd:documentation>Parameter value from parent query parameter.</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="R">
@@ -227,7 +228,8 @@
 
     <xsd:complexType name="hint">
         <xsd:annotation>
-            <xsd:documentation>The query hints for additional query parameter process or result process.
+            <xsd:documentation>
+            	The query hints for additional query parameter process or result process.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>

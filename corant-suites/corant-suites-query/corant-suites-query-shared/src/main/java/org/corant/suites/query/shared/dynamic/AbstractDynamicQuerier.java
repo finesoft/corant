@@ -51,8 +51,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
-  public boolean decideFetch(FetchQuery fetchQuery) {
-    return fetchQueryResolver.canFetch(queryParameter, fetchQuery);
+  public boolean decideFetch(Object result, FetchQuery fetchQuery) {
+    return fetchQueryResolver.canFetch(result, queryParameter, fetchQuery);
   }
 
   @Override

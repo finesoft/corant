@@ -19,6 +19,7 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -47,14 +48,16 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
     if (!isEmpty(results) && !isEmpty(fetchQueries)) {
       for (FetchQuery fq : fetchQueries) {
-        if (querier.decideFetch(fq)) {
-          if (fq.isEagerInject()) {
-            for (T result : results) {
+        if (fq.isEagerInject()) {
+          for (T result : results) {
+            if (querier.decideFetch(result, fq)) {
               fetch(result, fq, querier);
             }
-          } else {
-            fetch(results, fq, querier);
           }
+        } else {
+          fetch(
+              results.stream().filter(r -> querier.decideFetch(r, fq)).collect(Collectors.toList()),
+              fq, querier);
         }
       }
     }
@@ -66,7 +69,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
     if (result != null && !isEmpty(fetchQueries)) {
       for (FetchQuery fq : fetchQueries) {
-        if (parentQuerier.decideFetch(fq)) {
+        if (parentQuerier.decideFetch(result, fq)) {
           fetch(result, fq, parentQuerier);
         }
       }

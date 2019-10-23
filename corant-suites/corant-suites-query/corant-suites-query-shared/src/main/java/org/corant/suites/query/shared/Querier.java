@@ -28,10 +28,11 @@ public interface Querier {
   /**
    * Decide whether to fetch
    *
+   * @param result
    * @param fetchQuery
    * @return decideFetch
    */
-  boolean decideFetch(FetchQuery fetchQuery);
+  boolean decideFetch(Object result, FetchQuery fetchQuery);
 
   /**
    * The query object that this querier bind, the Query object define execution plan.

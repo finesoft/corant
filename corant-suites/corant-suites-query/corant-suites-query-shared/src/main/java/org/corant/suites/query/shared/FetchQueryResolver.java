@@ -24,14 +24,19 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  */
 public interface FetchQueryResolver {
 
+  String RESULT_FUNC_PARAMETER_NAME = "r";
+  String FETCHED_RESULT_FUNC_PARAMETER_NAME = "fr";
+  String PARAMETER_FUNC_PARAMETER_NAME = "p";
+
   /**
-   * Decide whether to fetch
+   * Decide whether to fetch, generally, the parameter 'result' is a single result record.
    *
+   * @param result
    * @param queryParameter
    * @param fetchQuery
    * @return canFetch
    */
-  boolean canFetch(QueryParameter queryParameter, FetchQuery fetchQuery);
+  boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery);
 
   /**
    * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be

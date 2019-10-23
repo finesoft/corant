@@ -52,10 +52,10 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   ConversionService conversionService;
 
   @Override
-  public boolean canFetch(QueryParameter queryParameter, FetchQuery fetchQuery) {
+  public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
     ScriptFunction sf = resolveFetchPredicate(fetchQuery);
     if (sf != null) {
-      Boolean b = toBoolean(sf.apply(new Object[] {queryParameter}));
+      Boolean b = toBoolean(sf.apply(new Object[] {queryParameter, result}));
       if (b == null || !b.booleanValue()) {
         return false;
       }
@@ -206,8 +206,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
           throw new NotSupportedException();// For now we only support js script
         }
-        return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(), "r",
-            "fr");
+        return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
+            RESULT_FUNC_PARAMETER_NAME, FETCHED_RESULT_FUNC_PARAMETER_NAME);
       } else {
         return null;
       }
@@ -220,7 +220,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
           throw new NotSupportedException();// For now we only support js script
         }
-        return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(), "p");
+        return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(),
+            PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
       }
       return null;
     });

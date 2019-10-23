@@ -18,6 +18,8 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.corant.Corant;
 import org.corant.config.ConfigUtils;
@@ -26,10 +28,14 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerConfigurations;
+import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
+import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
+import org.corant.suites.query.shared.mapping.Script.ScriptType;
 import freemarker.core.Environment;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
  * corant-suites-query-shared
@@ -46,26 +52,17 @@ public class QueryMappingSchemaUtils {
       final QueryMappingService service = resolve(QueryMappingService.class).get();
       final Map<Object, Object> parameter = mapOf(params);
       out(false);
+      List<Throwable> throwabls = new ArrayList<>();
       for (Query q : service.getQueries()) {
-        System.out.println("[".concat(q.getName()).concat("]:\n"));
-        try (StringWriter sw = new StringWriter()) {
-          Template tpl =
-              new Template(q.getName(), q.getScript().getCode(), FreemarkerConfigurations.FM_CFG);
-          tpl.dump(System.out);
-          if (isNotEmpty(parameter)) {
-            DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
-            DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
-            System.out.println("\n\n[Empty parameter process]:\n");
-            Environment e = tpl.createProcessingEnvironment(parameter, sw);
-            e.setVariable(sqlTmm.getType(), sqlTmm);
-            e.setVariable(jsonTmm.getType(), jsonTmm);
-            e.process();
-            System.out.println(sw.toString());
-          }
-        } catch (IOException e) {
-          throw new CorantRuntimeException(e);
+        validateQueryScript(q, throwabls, parameter);
+        outLine();
+      }
+      if (isNotEmpty(throwabls)) {
+        outLine("Collected Errors");
+        for (Throwable t : throwabls) {
+          t.printStackTrace();
+          outLine();
         }
-        System.out.println("\n\n".concat(line).concat(line).concat("\n\n"));
       }
       out(true);
     } catch (Exception e) {
@@ -86,4 +83,62 @@ public class QueryMappingSchemaUtils {
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
     return Corant.run(QueryMappingSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
+
+  protected static void validateFetchQueryScript(Query query, FetchQuery fq,
+      List<Throwable> throwabls) {
+    if (fq.getPredicateScript().isValid() && fq.getPredicateScript().getType() == ScriptType.JS) {
+      try {
+        NashornScriptEngines.compileFunction(fq.getPredicateScript().getCode(), "p", "r");
+      } catch (Exception e) {
+        throwabls
+            .add(new CorantRuntimeException(e, "FETCH-QUERY-PREDICATE-SCRIPT-ERROR : [%s -> %s]",
+                query.getName(), fq.getReferenceQuery()));
+      }
+    }
+    if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.JS) {
+      try {
+        NashornScriptEngines.compileFunction(fq.getInjectionScript().getCode(), "r", "fr");
+      } catch (Exception e) {
+        throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
+            query.getName(), fq.getReferenceQuery()));
+      }
+    }
+  }
+
+  protected static void validateQueryScript(Query query, List<Throwable> throwabls,
+      Map<Object, Object> parameter) {
+    System.out.println("[".concat(query.getName()).concat("]:\n"));
+    if (query.getScript().getType() == ScriptType.FM) {
+      try (StringWriter sw = new StringWriter()) {
+        Template tpl = new Template(query.getName(), query.getScript().getCode(),
+            FreemarkerConfigurations.FM_CFG);
+        tpl.dump(System.out);
+        if (isNotEmpty(parameter)) {
+          DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
+          DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
+          System.out.println("\n\n[Empty parameter process]:\n");
+          Environment e = tpl.createProcessingEnvironment(parameter, sw);
+          e.setVariable(sqlTmm.getType(), sqlTmm);
+          e.setVariable(jsonTmm.getType(), jsonTmm);
+          e.process();
+          System.out.println(sw.toString());
+        }
+      } catch (IOException | TemplateException e) {
+        throwabls.add(new CorantRuntimeException(e, "QUERY-ERROR : [%s]", query.getName()));
+      }
+    } else if (query.getScript().getType() == ScriptType.JS) {
+      try {
+        NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
+      } catch (Exception e) {
+        throwabls.add(new CorantRuntimeException(e, "QUERY-ERROR : [%s]", query.getName()));
+      }
+    }
+    query.getFetchQueries().forEach(fq -> validateFetchQueryScript(query, fq, throwabls));
+  }
+
+  static void outLine(String... strings) {
+    System.out
+        .println("\n\n".concat(line).concat(String.join(" ", strings)).concat(line).concat("\n\n"));
+  }
+
 }

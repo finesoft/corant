@@ -55,7 +55,7 @@
 		<version.microprofile-jwt-auth-api>1.1.1</version.microprofile-jwt-auth-api>
 
 		<version.eclipse.yasson>1.0.4</version.eclipse.yasson>
-		<version.jackson>2.9.9</version.jackson>
+		<version.jackson>2.10.0</version.jackson>
 		<version.apache.geronimo-json>1.2</version.apache.geronimo-json>
 
 		<version.smallrye-config>1.3.9</version.smallrye-config>
@@ -68,12 +68,12 @@
 		<version.smallrye-fault-tolerance>2.0.0</version.smallrye-fault-tolerance>
 
 		<version.netty>4.1.34.Final</version.netty>
-		<version.xnio>3.3.8.Final</version.xnio>
+		<version.xnio>3.7.6.Final</version.xnio>
 		<version.tomcat>9.0.21</version.tomcat>
-		<version.undertow>2.0.26.Final</version.undertow>
+		<version.undertow>2.0.27.Final</version.undertow>
 		<version.resteasy>4.3.1.Final</version.resteasy>
 
-		<version.artemis>2.9.0</version.artemis>
+		<version.artemis>2.10.1</version.artemis>
 		<version.keycloak>6.0.1</version.keycloak>
 		<version.glassfish.soteria>1.0</version.glassfish.soteria>
 
@@ -97,7 +97,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.11.2</version.redisson>
 
-		<version.kotlin>1.3.31</version.kotlin>
+		<version.kotlin>1.3.50</version.kotlin>
 		<version.groovy>2.5.6</version.groovy>
 		<version.lombok>1.18.8</version.lombok>
 
@@ -105,7 +105,7 @@
 		<version.junit>4.12</version.junit>
 		<version.arquillian-core>1.2.1.Final</version.arquillian-core>
 		<version.testng>6.9.9</version.testng>
-		<version.rest-assured>4.0.0</version.rest-assured>
+		<version.rest-assured>4.1.2</version.rest-assured>
 		<version.org.openjdk.jmh>1.21</version.org.openjdk.jmh>
 		<version.swagger>2.0.8</version.swagger>
 
@@ -350,6 +350,11 @@
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-nio</artifactId>
+				<version>${version.xnio}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-api</artifactId>
 				<version>${version.xnio}</version>
 			</dependency>
 

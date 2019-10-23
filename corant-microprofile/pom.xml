@@ -16,6 +16,7 @@
   	<module>corant-microprofile-openapi</module>
   	<module>corant-microprofile-opentracking</module>
   	<module>corant-microprofile-restclient</module>
+  	<module>corant-microprofile-lra</module>
   </modules>
   	<dependencyManagement>
 		<dependencies>

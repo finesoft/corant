@@ -47,7 +47,7 @@ public class PropertyMessageBundle implements MessageBundle {
 
   @Inject
   @ConfigProperty(name = "bundle.message-file.paths",
-      defaultValue = "META-INF/**Messages_*.properties")
+      defaultValue = "META-INF/**Messages_*.properties,META-INF/**messages_*.properties")
   String bundleFilePaths;
 
   @Override

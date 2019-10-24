@@ -50,7 +50,8 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   private volatile boolean initialized = false;
 
   @Inject
-  @ConfigProperty(name = "bundle.enum-file.paths", defaultValue = "META-INF/**Enums_*.properties")
+  @ConfigProperty(name = "bundle.enum-file.paths",
+      defaultValue = "META-INF/**Enums_*.properties,META-INF/**enums_*.properties")
   String bundleFilePaths;
 
   @SuppressWarnings("unchecked")

@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.corant.suites.mongodb;
+
+import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.StreamUtils.batchCollectStream;
+import static org.corant.shared.util.StreamUtils.streamOf;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import javax.enterprise.inject.literal.NamedLiteral;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
+/**
+ * corant-suites-mongodb
+ *
+ * @author bingo 下午7:18:23
+ *
+ */
+public class Mongos {
+
+  public static void cloneCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      String collectionName) {
+    copyCollection(srcDatabaseNameSpace, destDatabaseNameSpace, collectionName, collectionName,
+        null, 256, null);
+  }
+
+  public static void cloneDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      int batchSize, BiConsumer<String, Document> consumer) {
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    for (String c : s.listCollectionNames()) {
+      MongoCollection<Document> dest = d.getCollection(c);
+      batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))
+          .forEach(b -> {
+            if (consumer != null) {
+              b.forEach(cs -> cs.append(c, d));
+            }
+            dest.insertMany(b);
+          });
+    }
+  }
+
+  public static void copyCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      String srcCollectionName, String destCollectionName, Supplier<Bson> filter, int batchSize,
+      Consumer<Document> consumer) {
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    Bson useFilter = filter == null ? null : filter.get();
+    MongoCollection<Document> dest = d.getCollection(destCollectionName);
+    if (useFilter == null) {
+      batchCollectStream(batchSize,
+          streamOf(s.getCollection(srcCollectionName).find().batchSize(batchSize))).forEach(b -> {
+            if (consumer != null) {
+              b.forEach(consumer::accept);
+            }
+            dest.insertMany(b);
+          });
+    } else {
+      batchCollectStream(batchSize,
+          streamOf(s.getCollection(srcCollectionName).find(useFilter).batchSize(batchSize)))
+              .forEach(b -> {
+                if (consumer != null) {
+                  b.forEach(consumer::accept);
+                }
+                dest.insertMany(b);
+              });
+    }
+  }
+
+  public static void copyCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      String collectionName, Supplier<Bson> filter, int batchSize, Consumer<Document> consumer) {
+    copyCollection(srcDatabaseNameSpace, destDatabaseNameSpace, collectionName, collectionName,
+        filter, batchSize, consumer);
+  }
+
+  public static void copyDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      int batchSize, BiConsumer<String, Document> consumer, String... collections) {
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    for (String c : setOf(collections)) {
+      MongoCollection<Document> dest = d.getCollection(c);
+      batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))
+          .forEach(b -> {
+            if (consumer != null) {
+              b.forEach(cs -> cs.append(c, d));
+            }
+            dest.insertMany(b);
+          });
+    }
+  }
+
+}

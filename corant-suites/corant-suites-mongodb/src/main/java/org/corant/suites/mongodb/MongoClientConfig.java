@@ -24,6 +24,7 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -170,7 +171,12 @@ public class MongoClientConfig implements NamedObject {
       } else if (pn.endsWith(MC_URI)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUri);
       } else if (pn.endsWith(MC_AUTH_DB)) {
-        config.getOptionalValue(pn, String.class).ifPresent(mc::setAuthenticationDatabase);
+        config.getOptionalValue(pn, String.class).ifPresent(dn -> {
+          mc.setAuthenticationDatabase(dn);
+          if (isNotBlank(dn)) {
+            mc.databases.put(dn, new MongodbConfig(mc, dn));
+          }
+        });
       } else if (pn.endsWith(MC_PASSWORD)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setPassword);
       } else if (pn.endsWith(MC_USER_NAME)) {

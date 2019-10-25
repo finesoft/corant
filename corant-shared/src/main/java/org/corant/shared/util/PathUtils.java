@@ -164,17 +164,17 @@ public class PathUtils {
     public static Pattern build(String globExpress, boolean isDos, boolean ignoreCase) {
       if (isDos) {
         if (ignoreCase) {
-          return Pattern.compile(toWindowsRegexPattern(globExpress), Pattern.UNICODE_CASE);
-        } else {
           return Pattern.compile(toWindowsRegexPattern(globExpress),
               Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } else {
+          return Pattern.compile(toWindowsRegexPattern(globExpress), Pattern.UNICODE_CASE);
         }
       } else {
         if (ignoreCase) {
-          return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
-        } else {
           return Pattern.compile(toUnixRegexPattern(globExpress),
               Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } else {
+          return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
         }
       }
     }

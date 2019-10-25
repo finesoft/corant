@@ -159,6 +159,21 @@ public class ClassPaths {
   }
 
   /**
+   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern, case
+   * insensitive.
+   *
+   * @see #from(ClassLoader, String, boolean)
+   * @param classLoader
+   * @param path
+   * @return
+   * @throws IOException from
+   */
+  public static Set<ClassPathResource> from(ClassLoader classLoader, String path)
+      throws IOException {
+    return from(classLoader, path, true);
+  }
+
+  /**
    * Scan class path resource with path, path separator is '/', allowed for use glob-pattern.
    *
    * <pre>
@@ -173,12 +188,13 @@ public class ClassPaths {
    *
    * @param classLoader
    * @param path
+   * @param ignoreCase
    * @return
    * @throws IOException from
    */
-  public static Set<ClassPathResource> from(ClassLoader classLoader, String path)
-      throws IOException {
-    Scanner scanner = buildScanner(defaultString(path), false);
+  public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
+      boolean ignoreCase) throws IOException {
+    Scanner scanner = buildScanner(defaultString(path), ignoreCase);
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
         defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
       scanner.scan(entry.getKey(), entry.getValue());

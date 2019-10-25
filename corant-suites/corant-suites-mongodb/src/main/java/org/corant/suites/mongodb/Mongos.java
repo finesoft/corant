@@ -56,31 +56,36 @@ public class Mongos {
     }
   }
 
+  public static void copyCollection(MongoCollection<Document> srcCollection,
+      MongoCollection<Document> destCollection, Supplier<Bson> filter, int batchSize,
+      Consumer<Document> consumer) {
+    Bson useFilter = filter == null ? null : filter.get();
+    if (useFilter == null) {
+      batchCollectStream(batchSize, streamOf(srcCollection.find().batchSize(batchSize)))
+          .forEach(b -> {
+            if (consumer != null) {
+              b.forEach(consumer::accept);
+            }
+            destCollection.insertMany(b);
+          });
+    } else {
+      batchCollectStream(batchSize, streamOf(srcCollection.find(useFilter).batchSize(batchSize)))
+          .forEach(b -> {
+            if (consumer != null) {
+              b.forEach(consumer::accept);
+            }
+            destCollection.insertMany(b);
+          });
+    }
+  }
+
   public static void copyCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
       String srcCollectionName, String destCollectionName, Supplier<Bson> filter, int batchSize,
       Consumer<Document> consumer) {
     MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
-    Bson useFilter = filter == null ? null : filter.get();
-    MongoCollection<Document> dest = d.getCollection(destCollectionName);
-    if (useFilter == null) {
-      batchCollectStream(batchSize,
-          streamOf(s.getCollection(srcCollectionName).find().batchSize(batchSize))).forEach(b -> {
-            if (consumer != null) {
-              b.forEach(consumer::accept);
-            }
-            dest.insertMany(b);
-          });
-    } else {
-      batchCollectStream(batchSize,
-          streamOf(s.getCollection(srcCollectionName).find(useFilter).batchSize(batchSize)))
-              .forEach(b -> {
-                if (consumer != null) {
-                  b.forEach(consumer::accept);
-                }
-                dest.insertMany(b);
-              });
-    }
+    copyCollection(s.getCollection(srcCollectionName), d.getCollection(destCollectionName), filter,
+        batchSize, consumer);
   }
 
   public static void copyCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,

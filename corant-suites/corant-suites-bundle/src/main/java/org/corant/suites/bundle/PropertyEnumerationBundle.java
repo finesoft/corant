@@ -160,6 +160,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
 
   static class EnumLiteralsObject {
 
+    Logger logger = Logger.getLogger(EnumLiteralsObject.class.getName());
     private final Map<Class<Enum>, String> classLiteral = new ConcurrentHashMap<>();
     private final Map<Class<Enum>, Map<Enum, String>> enumLiterals = new ConcurrentHashMap<>();
 
@@ -180,15 +181,15 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
       }
       Map<Enum, String> map = enumLiterals.get(declaringClass);
       if (map.put(e, literal) != null) {
-        throw new CorantRuntimeException("enum %s, value %s is duplicate", e.getClass().getName(),
-            e);
+        logger.warning(
+            () -> String.format("enum %s, value %s is duplicate", e.getClass().getName(), e));
       }
     }
 
     @SuppressWarnings("unchecked")
     public void putEnumClass(Class clz, String literal) {
       if (classLiteral.put(clz, literal) != null) {
-        throw new CorantRuntimeException("enum %s, is duplicate", clz);
+        logger.warning(() -> String.format("enum %s, is duplicate", clz));
       }
     }
   }

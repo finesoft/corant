@@ -182,14 +182,15 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
       Map<Enum, String> map = enumLiterals.get(declaringClass);
       if (map.put(e, literal) != null) {
         logger.warning(
-            () -> String.format("enum %s, value %s is duplicate", e.getClass().getName(), e));
+            () -> String.format("Enum value [%s] literal description of type [%s] repeats.", e,
+                e.getClass().getName()));
       }
     }
 
     @SuppressWarnings("unchecked")
     public void putEnumClass(Class clz, String literal) {
       if (classLiteral.put(clz, literal) != null) {
-        logger.warning(() -> String.format("enum %s, is duplicate", clz));
+        logger.warning(() -> String.format("Enum type [%s] literal description repeated.", clz));
       }
     }
   }

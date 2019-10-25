@@ -15,6 +15,7 @@ package org.corant.suites.ddd.model;
 
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.kernel.util.Instances.resolve;
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
@@ -26,8 +27,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -55,10 +54,6 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   static final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
-
-  @Inject
-  @Any
-  Instance<EntityManagerFactory> emfs;
 
   @Inject
   JTAJPAUnitOfWorksManager unitOfWorksManager;
@@ -112,7 +107,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   @PostConstruct
   void onPostConstruct() {
     final PersistenceService PersistenceService = resolve(PersistenceService.class).get();
-    emfs.forEach(emf -> {
+    select(EntityManagerFactory.class).forEach(emf -> {
       String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
       Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
       entities.stream().map(ManagedType::getJavaType)

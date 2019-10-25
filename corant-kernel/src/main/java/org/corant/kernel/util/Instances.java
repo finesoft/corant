@@ -58,6 +58,16 @@ public class Instances {
     return object != null && !instance().select(getUserClass(object), qualifiers).isUnsatisfied();
   }
 
+  /**
+   * Resolve CDI bean instance
+   *
+   * Use with care, there may be a memory leak
+   *
+   * @param <T>
+   * @param instanceClass
+   * @param qualifiers
+   * @return resolve
+   */
   public static <T> Optional<T> resolve(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
@@ -67,21 +77,58 @@ public class Instances {
     }
   }
 
+  /**
+   * Resolve CDI bean instance and consumer it.
+   *
+   * @param <T>
+   * @param instanceClass
+   * @param consumer
+   * @param qualifiers resolveAccept
+   */
   public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
-    shouldNotNull(consumer).accept(resolve(instanceClass, qualifiers).orElseThrow(
-        () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
+    Consumer<T> useConsumer = shouldNotNull(consumer);
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      T t = inst.get();
+      try {
+        useConsumer.accept(t);
+      } finally {
+        // inst.destroy(t); FIXME Whether to destroy
+      }
+    } else {
+      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+    }
   }
 
+  /**
+   * Resolve bean instance from CDI or Service Loader
+   *
+   * First, we try to resolve the bean instance from the CDI environment, and return the resolved
+   * instance immediately if it can be resolved; otherwise, try to look it up from the Service
+   * Loader, and resolve it with UnmanageableInstance if it is not found in the Service Loader;
+   * throw an exception if ambiguous appears in CDI.
+   *
+   * Use with care, there may be a memory leak
+   *
+   * @param <T>
+   * @param instanceClass
+   * @param qualifiers
+   * @return resolveAnyway
+   */
   public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
       return inst.get();
     } else if (inst.isUnsatisfied()) {
-      return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
-    } else {
       List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
-      return list != null && list.size() == 1 ? list.get(0) : null;
+      if (list.size() == 1) {
+        return list != null && list.size() == 1 ? list.get(0) : null;
+      } else {
+        return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
+      }
+    } else {
+      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
     }
   }
 
@@ -94,12 +141,40 @@ public class Instances {
     return null;
   }
 
+  /**
+   * Resolve CDI bean instance and returns the result using the function interface.
+   *
+   * @param <T>
+   * @param <R>
+   * @param instanceClass
+   * @param function
+   * @param qualifiers
+   * @return resolveApply
+   */
   public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
-    return shouldNotNull(function).apply(resolve(instanceClass, qualifiers).orElseThrow(
-        () -> new CorantRuntimeException("Can not resolve bean class %s", instanceClass)));
+    Function<T, R> useFunction = shouldNotNull(function);
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      T t = inst.get();
+      try {
+        return useFunction.apply(t);
+      } finally {
+        // inst.destroy(t); FIXME Whether to destroy
+      }
+    } else {
+      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+    }
   }
 
+  /**
+   * Resolve CDI named bean instance
+   *
+   * @param <T>
+   * @param instanceClass
+   * @param name
+   * @return resolveNamed
+   */
   public static <T> Optional<T> resolveNamed(Class<T> instanceClass, String name) {
     Instance<T> inst = select(instanceClass);
     if (inst.isUnsatisfied()) {
@@ -130,17 +205,29 @@ public class Instances {
 
   public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
+    Consumer<T> useConsumer = shouldNotNull(consumer);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      shouldNotNull(consumer).accept(inst.get());
+      T t = inst.get();
+      try {
+        useConsumer.accept(t);
+      } finally {
+        // inst.destroy(t); FIXME Whether to destroy
+      }
     }
   }
 
   public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
+    Function<T, R> useFunction = shouldNotNull(function);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      return shouldNotNull(function).apply(inst.get());
+      T t = inst.get();
+      try {
+        return useFunction.apply(t);
+      } finally {
+        // inst.destroy(t); FIXME Whether to destroy
+      }
     }
     return null;
   }

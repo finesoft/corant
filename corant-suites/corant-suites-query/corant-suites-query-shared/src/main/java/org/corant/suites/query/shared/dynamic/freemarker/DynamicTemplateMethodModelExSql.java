@@ -13,6 +13,12 @@
  */
 package org.corant.suites.query.shared.dynamic.freemarker;
 
+import static org.corant.shared.util.ConversionUtils.toObject;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -70,6 +76,12 @@ public class DynamicTemplateMethodModelExSql implements DynamicTemplateMethodMod
     Object obj = DynamicTemplateMethodModelEx.super.getWrappedParamValue(arg);
     if (Enum.class.isAssignableFrom(obj.getClass())) {
       return ((Enum) obj).name();
+    } else if (Instant.class.isAssignableFrom(obj.getClass())) {
+      return toObject(obj, Timestamp.class);
+    } else if (LocalDateTime.class.isAssignableFrom(obj.getClass())) {
+      return toObject(obj, Timestamp.class);
+    } else if (LocalDate.class.isAssignableFrom(obj.getClass())) {
+      return toObject(obj, Date.class);
     }
     return obj;
   }

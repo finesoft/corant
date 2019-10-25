@@ -14,7 +14,6 @@
 package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.StringUtils.defaultTrim;
-import javax.ejb.ApplicationException;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -30,7 +29,6 @@ import org.elasticsearch.client.transport.TransportClient;
  * @author bingo 上午11:05:18
  *
  */
-@ApplicationException
 public class ElasticTransportClientService {
 
   @Inject
@@ -38,7 +36,7 @@ public class ElasticTransportClientService {
 
   @Inject
   @Any
-  protected Instance<TransportClient> instance;
+  protected Instance<TransportClient> instance;// FIXME Unable to generate proxy
 
   public TransportClient get(String clusterName) {
     if (!instance.isUnsatisfied()) {

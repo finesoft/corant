@@ -414,6 +414,17 @@
 				<version>${version.narayana}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.jboss.narayana.rts</groupId>
+				<artifactId>lra-client</artifactId>
+				<version>${version.narayana}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.json</groupId>
+						<artifactId>jboss-json-api_1.0_spec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>net.java.xadisk</groupId>
 				<artifactId>xadisk</artifactId>
 				<version>${version.xadisk}</version>
@@ -550,6 +561,12 @@
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>artemis-core-client</artifactId>
 				<version>${version.artemis}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-json_1.0_spec</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- DataBase -->

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
+import static org.corant.kernel.util.Instances.select;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +50,6 @@ public class ResteasyProvider implements WebMetaDataProvider {
   @Inject
   ResteasyCdiExtension extension;
 
-  @Inject
-  Instance<Application> applications;
-
   final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
 
   final Map<String, Object> servletContextAttributes = new HashMap<>();
@@ -68,6 +66,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
   @PostConstruct
   void onPostConstruct() {
+    Instance<Application> applications = select(Application.class);
     if (applications.isResolvable()) {
       applications.stream().forEach(this::handle);
       servletContextAttributes.put(ResteasyContextParameters.RESTEASY_ROLE_BASED_SECURITY, true);

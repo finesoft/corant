@@ -14,6 +14,10 @@
 			<artifactId>narayana-lra</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.jboss.narayana.rts</groupId>
+			<artifactId>lra-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-kernel</artifactId>
 		</dependency>
@@ -24,6 +28,10 @@
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-bundle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-json</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax</groupId>

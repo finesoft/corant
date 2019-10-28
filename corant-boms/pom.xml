@@ -87,7 +87,7 @@
 		<version.xadisk>1.2.2</version.xadisk>
 
 		<version.mssql-jdbc>7.2.2.jre8</version.mssql-jdbc>
-		<version.mysql>5.1.47</version.mysql>
+		<version.mysql>5.1.48</version.mysql>
 
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>

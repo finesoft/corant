@@ -33,6 +33,14 @@ public class PropertiesConfigSource extends AbstractConfigSource {
 
   final Map<String, String> properties;
 
+  /**
+   * @param resourceUrl
+   * @param ordinal
+   */
+  public PropertiesConfigSource(URL resourceUrl, int ordinal) {
+    this(shouldNotNull(resourceUrl).toExternalForm(), ordinal, toMap(getProperties(resourceUrl)));
+  }
+
   PropertiesConfigSource(String name, int ordinal, InputStream is) throws IOException {
     this(name, ordinal, toMap(load(is)));
   }
@@ -49,14 +57,6 @@ public class PropertiesConfigSource extends AbstractConfigSource {
     } else {
       this.properties = Collections.emptyMap();
     }
-  }
-
-  /**
-   * @param resourceUrl
-   * @param ordinal
-   */
-  PropertiesConfigSource(URL resourceUrl, int ordinal) {
-    this(shouldNotNull(resourceUrl).toExternalForm(), ordinal, toMap(getProperties(resourceUrl)));
   }
 
   public static Properties getProperties(URL url) {

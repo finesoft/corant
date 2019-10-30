@@ -55,7 +55,10 @@ public class NarayanaTransactionServices implements TransactionServices {
   @Override
   public boolean isTransactionActive() {
     try {
-      return getTransactionManager().getStatus() != Status.STATUS_NO_TRANSACTION;
+      int status = getTransactionManager().getStatus();
+      return status == Status.STATUS_ACTIVE || status == Status.STATUS_COMMITTING
+          || status == Status.STATUS_MARKED_ROLLBACK || status == Status.STATUS_PREPARED
+          || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }

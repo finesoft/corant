@@ -17,7 +17,7 @@ import static org.corant.config.ConfigUtils.concatKey;
 import static org.corant.config.ConfigUtils.dashify;
 import static org.corant.config.ConfigUtils.getFieldActualTypeArguments;
 import static org.corant.config.ConfigUtils.getGroupConfigNames;
-import static org.corant.config.ConfigUtils.hanleInfixKey;
+import static org.corant.config.ConfigUtils.handleInfixKey;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.shared.conversion.ConverterRegistry;
+import org.corant.config.ConfigConversions;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassUtils;
 import org.eclipse.microprofile.config.Config;
@@ -54,16 +54,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
  *
  */
 public class DeclarativeConfigResolver {
-
-  static final Set<Class<?>> supportTypes =
-      new HashSet<>(ClassUtils.WRAPPER_PRIMITIVE_MAP.keySet());
-
-  static {
-    supportTypes.add(String.class);
-    ConverterRegistry.getSupportConverters().keySet().stream()
-        .filter(ct -> ct.getSourceClass().isAssignableFrom(String.class))
-        .map(ct -> ct.getTargetClass()).forEach(supportTypes::add);
-  }
 
   public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
     Map<String, T> configMaps = new HashMap<>();
@@ -174,7 +164,7 @@ public class DeclarativeConfigResolver {
           } else if (ft.isArray()) {
             ft = ft.getComponentType();
           }
-          if (supportTypes.contains(ft) || Map.class.isAssignableFrom(ft)) {
+          if (ConfigConversions.isSupport(ft) || Map.class.isAssignableFrom(ft)) {
             getFields().add(new ConfigField(this, f));
           }
         }
@@ -265,7 +255,7 @@ public class DeclarativeConfigResolver {
       if (isBlank(infix)) {
         return getDefaultKey();
       } else {
-        return concatKey(configClass.getKeyRoot(), hanleInfixKey(infix), getKeyItem());
+        return concatKey(configClass.getKeyRoot(), handleInfixKey(infix), getKeyItem());
       }
     }
 

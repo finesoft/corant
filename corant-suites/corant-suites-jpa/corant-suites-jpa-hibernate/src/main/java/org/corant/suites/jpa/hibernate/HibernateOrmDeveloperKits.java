@@ -49,7 +49,7 @@ import org.hibernate.tool.schema.TargetType;
  * @author bingo 下午2:15:40
  *
  */
-public class HibernateOrmSchemaUtils {
+public class HibernateOrmDeveloperKits {
 
   public static final String JPA_ORM_XML_NAME_END_WITH = "JpaOrm.xml";
 
@@ -183,7 +183,7 @@ public class HibernateOrmSchemaUtils {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(HibernateOrmSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
+    return Corant.run(HibernateOrmDeveloperKits.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
 
 }

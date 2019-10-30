@@ -285,7 +285,7 @@ public class Corant implements AutoCloseable {
     setMe(this);
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
-        "Perform the spi handlers before " + applicationName() + " starting");
+        "Perform the spi handlers before ".concat(applicationName()).concat(" starting"));
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
@@ -384,7 +384,7 @@ public class Corant implements AutoCloseable {
   private void printBoostLine() {
     if (!setOf(args).contains(DISABLE_BOOST_LINE_CMD)) {
       String spLine = "--------------------------------------------------";
-      System.out.println(spLine + spLine + "\n");
+      System.out.println(spLine.concat(spLine).concat("\n"));
     }
   }
 

@@ -115,6 +115,7 @@ public class NarayanaExtension implements Extension {
           .scope(Singleton.class).createWith(cc -> {
             RecoveryManagerService rms = new RecoveryManagerService();
             rms.create();
+            rms.start();
             return rms;
           }).disposeWith((t, inst) -> t.destroy());
     }

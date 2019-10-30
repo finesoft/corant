@@ -85,8 +85,20 @@ public class ConversionUtils {
     return defaultObject(Conversions.convert(obj, Boolean.class), Boolean.FALSE);
   }
 
+  public static Byte toByte(Object obj) {
+    return toByte(obj, null);
+  }
+
+  public static Byte toByte(Object obj, Byte altVal) {
+    return defaultObject(Conversions.convert(obj, Byte.class), altVal);
+  }
+
   public static Character toCharacter(Object obj) {
     return Conversions.convert(obj, Character.class, null);
+  }
+
+  public static Class<?> toClass(Object obj) {
+    return Conversions.convert(obj, Class.class);
   }
 
   public static Currency toCurrency(Object obj) {

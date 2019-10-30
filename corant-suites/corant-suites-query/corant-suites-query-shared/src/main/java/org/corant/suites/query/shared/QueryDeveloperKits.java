@@ -43,7 +43,7 @@ import freemarker.template.TemplateException;
  * @author bingo 下午3:16:46
  *
  */
-public class QueryMappingSchemaUtils {
+public class QueryDeveloperKits {
 
   static final String line = "--------------------------------------------------";
 
@@ -81,7 +81,7 @@ public class QueryMappingSchemaUtils {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(QueryMappingSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
+    return Corant.run(QueryDeveloperKits.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
 
   protected static void validateFetchQueryScript(Query query, FetchQuery fq,

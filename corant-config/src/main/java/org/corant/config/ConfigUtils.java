@@ -26,6 +26,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import org.eclipse.microprofile.config.Config;
 
@@ -107,7 +108,7 @@ public class ConfigUtils {
     return getGroupConfigNames(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
-  public static String hanleInfixKey(String key) {
+  public static String handleInfixKey(String key) {
     return key.contains(NAME_SPACE_SEPARATORS) ? key.replaceAll("\\.", "\\\\.") : key;
   }
 
@@ -131,6 +132,26 @@ public class ConfigUtils {
       rs = defaultTrim(rs.substring(SEPARATOR_LEN));
     }
     return rs;
+  }
+
+  public static String resolveVariables(String value, Function<String, String> vals) {
+    int startVar = 0;
+    while ((startVar = value.indexOf("${", startVar)) >= 0) {
+      int endVar = value.indexOf("}", startVar);
+      if (endVar <= 0) {
+        break;
+      }
+      String varName = value.substring(startVar + 2, endVar);
+      if (varName.isEmpty()) {
+        break;
+      }
+      String variableValue = vals.apply(varName);
+      if (variableValue != null) {
+        value = value.replace("${" + varName + "}", variableValue);
+      }
+      startVar++;
+    }
+    return value;
   }
 
   public static String[] splitKey(String text) {

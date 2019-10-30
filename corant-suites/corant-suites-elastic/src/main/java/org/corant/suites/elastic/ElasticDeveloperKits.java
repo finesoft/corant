@@ -28,7 +28,7 @@ import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
  * @author bingo 上午10:53:48
  *
  */
-public class ElasticSchemaUtils {
+public class ElasticDeveloperKits {
 
   public static void stdout(String clusterName, BiConsumer<String, Map<String, Object>> out) {
     try (Corant corant = prepare(clusterName)) {
@@ -47,6 +47,6 @@ public class ElasticSchemaUtils {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false",
         "elastic." + clusterName + ".auto-update-schame", "false");
-    return Corant.run(ElasticSchemaUtils.class, Corant.DISABLE_BOOST_LINE_CMD);
+    return Corant.run(ElasticDeveloperKits.class, Corant.DISABLE_BOOST_LINE_CMD);
   }
 }

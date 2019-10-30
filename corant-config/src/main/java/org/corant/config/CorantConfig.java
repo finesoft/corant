@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
+import org.corant.config.spi.ConfigPropertiesAdjuster;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -44,11 +45,13 @@ public class CorantConfig implements Config {
   final AtomicReference<List<ConfigSource>> sources;
   final AtomicReference<Iterable<String>> propertyNames;
   final AtomicReference<Map<String, String>> properties;
+  final ClassLoader classLoader;
 
   public CorantConfig(Map<Class<?>, Converter<?>> converters, List<ConfigSource> sources,
-      UnaryOperator<Map<String, String>> uo) {
+      ClassLoader classLoader) {
     this.converters = new HashMap<>(converters);
     this.sources = new AtomicReference<>(Collections.unmodifiableList(sources));
+    this.classLoader = defaultObject(classLoader, defaultClassLoader());
     Set<String> usePropertyNames = new HashSet<>();
     Map<String, String> useSourcesMap = new HashMap<>();
     for (ConfigSource source : sources) {
@@ -57,11 +60,8 @@ public class CorantConfig implements Config {
         useSourcesMap.computeIfAbsent(k, n -> v);
       });
     }
-    if (uo != null) {
-      properties = new AtomicReference<>(Collections.unmodifiableMap(uo.apply(useSourcesMap)));
-    } else {
-      properties = new AtomicReference<>(Collections.unmodifiableMap(useSourcesMap));
-    }
+    properties = new AtomicReference<>(Collections
+        .unmodifiableMap(ConfigPropertiesAdjuster.resolve(classLoader).apply(useSourcesMap)));
     propertyNames = new AtomicReference<>(Collections.unmodifiableSet(usePropertyNames));
   }
 

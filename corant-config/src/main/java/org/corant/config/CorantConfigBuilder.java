@@ -119,4 +119,5 @@ public class CorantConfigBuilder implements ConfigBuilder {
   ClassLoader getClassLoader() {
     return classLoader;
   }
+
 }

@@ -15,6 +15,7 @@ package org.corant.config;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,6 +78,19 @@ public class ConfigConversions {
 
   public static boolean isSupport(Class<?> cls) {
     return SUPPORT_TYPES.contains(cls);
+  }
+
+  static class ArrayConverter {
+
+  }
+
+  static class CollectionConverter<T, C extends Collection<T>> implements Converter<C> {
+
+    @Override
+    public C convert(String value) {
+      return null;
+    }
+
   }
 
   static class OrdinalConverter {

@@ -72,8 +72,8 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
-    Collections.sort(sources, Comparator.comparingInt(ConfigSource::getOrdinal));
-    Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal));
+    Collections.sort(sources, Comparator.comparingInt(ConfigSource::getOrdinal).reversed());
+    Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
     return null;
   }
 

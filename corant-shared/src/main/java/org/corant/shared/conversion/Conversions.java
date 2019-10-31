@@ -18,18 +18,13 @@ import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.IterableUtils.iterableOf;
 import static org.corant.shared.util.ObjectUtils.tryCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.ClassUtils;
 import org.corant.shared.util.ObjectUtils;
 
@@ -62,40 +57,15 @@ public class Conversions {
         targetClass);
   }
 
-  public static <C extends Collection<?>, T> C convert(Object value, Class<C> collectionClass,
+  public static <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClass,
       Class<T> targetClass, Map<String, ?> hints) {
-    Class<?> sourceClass = getComponentClass(value);
-    Iterable<T> it = null;
-    if (value instanceof Iterable) {
-      it = convert(tryCast(value, Iterable.class), sourceClass, targetClass, hints);
-    } else if (value instanceof Object[]) {
-      it = convert(iterableOf((Object[]) value), sourceClass, targetClass, hints);
-    } else if (value instanceof Iterator) {
-      it = convert(() -> ((Iterator) value), sourceClass, targetClass, hints);
-    } else if (value instanceof Enumeration) {
-      it = convert(iterableOf((Enumeration) value), sourceClass, targetClass, hints);
-    } else if (value != null) {
-      it = convert(iterableOf(value), sourceClass, targetClass, hints);
-    }
-    if (it != null) {
-      if (List.class.isAssignableFrom(collectionClass)) {
-        return (C) streamOf(it).collect(Collectors.toList());
-      } else if (SortedSet.class.isAssignableFrom(collectionClass)) {
-        TreeSet ts = new TreeSet<>();
-        streamOf(it).forEach(ts::add);// FIXME
-        return (C) ts;
-      } else {
-        return (C) streamOf(it).collect(Collectors.toSet());
+    return convert(value, targetClass, () -> {
+      try {
+        return collectionClass.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new NotSupportedException();
       }
-    } else {
-      if (List.class.isAssignableFrom(collectionClass)) {
-        return (C) new ArrayList<>();
-      } else if (SortedSet.class.isAssignableFrom(collectionClass)) {
-        return (C) new TreeSet<>();
-      } else {
-        return (C) new HashSet<>();
-      }
-    }
+    }, hints);
   }
 
   public static <T> T convert(Object value, Class<T> targetClass) {
@@ -124,6 +94,30 @@ public class Conversions {
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,
         targetClass);
+  }
+
+  public static <T, C extends Collection<T>> C convert(Object value, Class<T> itemClass,
+      Supplier<C> collectionFactory, Map<String, ?> hints) {
+    Class<?> sourceClass = getComponentClass(value);
+    Iterable<T> it = null;
+    if (value instanceof Iterable) {
+      it = convert(tryCast(value, Iterable.class), sourceClass, itemClass, hints);
+    } else if (value instanceof Object[]) {
+      it = convert(iterableOf((Object[]) value), sourceClass, itemClass, hints);
+    } else if (value instanceof Iterator) {
+      it = convert(() -> ((Iterator) value), sourceClass, itemClass, hints);
+    } else if (value instanceof Enumeration) {
+      it = convert(iterableOf((Enumeration) value), sourceClass, itemClass, hints);
+    } else if (value != null) {
+      it = convert(iterableOf(value), sourceClass, itemClass, hints);
+    }
+    final C collection = collectionFactory.get();
+    if (it != null) {
+      for (T item : it) {
+        collection.add(item);
+      }
+    }
+    return collection;
   }
 
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,

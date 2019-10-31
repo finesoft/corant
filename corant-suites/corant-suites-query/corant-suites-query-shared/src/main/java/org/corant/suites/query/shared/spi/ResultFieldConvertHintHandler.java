@@ -20,7 +20,9 @@ import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,11 +177,12 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       if (orginalVal != null) {
         try {
           if (orginalVal instanceof List) {
-            return conversionService.convert(orginalVal, List.class, targetClass, convertHits);
+            return conversionService.convert(orginalVal, targetClass, ArrayList::new, convertHits);
           } else if (orginalVal instanceof Set) {
-            return conversionService.convert(orginalVal, Set.class, targetClass, convertHits);
+            return conversionService.convert(orginalVal, targetClass, LinkedHashSet::new,
+                convertHits);
           } else if (orginalVal instanceof Object[]) {
-            return conversionService.convert(orginalVal, List.class, targetClass, convertHits);
+            return conversionService.convert(orginalVal, targetClass, ArrayList::new, convertHits);
           } else {
             return conversionService.convert(orginalVal, targetClass, convertHits);
           }

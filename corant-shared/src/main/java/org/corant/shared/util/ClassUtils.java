@@ -236,6 +236,12 @@ public class ClassUtils {
     return list;
   }
 
+  /**
+   * stupid method :) need to reconstruct
+   *
+   * @param object
+   * @return getComponentClass
+   */
   public static Class<?> getComponentClass(Object object) {
     Class<?> clazz = null;
     if (object instanceof Iterable<?>) {

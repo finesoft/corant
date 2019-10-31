@@ -16,21 +16,16 @@ package org.corant.config;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.corant.config.spi.ConfigAdjuster;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
-import org.eclipse.microprofile.config.spi.Converter;
 
 /**
  * corant-config
@@ -40,13 +35,12 @@ import org.eclipse.microprofile.config.spi.Converter;
  */
 public class CorantConfig implements Config {
 
-  final Map<Class<?>, Converter<?>> converters;
+  final ConfigConversion conversion;
   final AtomicReference<ConfigData> data;
 
-  public CorantConfig(Map<Class<?>, Converter<?>> converters, List<ConfigSource> sources,
-      ConfigAdjuster adjuster) {
-    this.converters = new HashMap<>(converters);
-    data = new AtomicReference<>(new ConfigData(sources, adjuster));
+  public CorantConfig(ConfigConversion conversion, ConfigData data) {
+    this.conversion = conversion;
+    this.data = new AtomicReference<>(data);
   }
 
   @Override
@@ -54,9 +48,13 @@ public class CorantConfig implements Config {
     return defaultObject(data.get().sources, Collections.emptyList());
   }
 
+  public ConfigConversion getConversion() {
+    return conversion;
+  }
+
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-    return null;
+    return Optional.ofNullable(getValue(propertyName, propertyType));
   }
 
   @Override
@@ -68,7 +66,7 @@ public class CorantConfig implements Config {
   public <T> T getValue(String propertyName, Class<T> propertyType) {
     String value = data.get().caches.get(propertyName);
     if (isNotBlank(value)) {
-      return convert(value, propertyType);
+      return conversion.convert(value, propertyType);
     }
     if (propertyType.isAssignableFrom(OptionalInt.class)) {
       return propertyType.cast(OptionalInt.empty());
@@ -80,44 +78,13 @@ public class CorantConfig implements Config {
     throw new CorantRuntimeException("Can not find any config value by %s", propertyName);
   }
 
-  public void setConfigSources(List<ConfigSource> sources, ConfigAdjuster adjuster) {
+  public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {
     ConfigData newDat = new ConfigData(sources, adjuster);
     for (;;) {
       ConfigData oldDat = data.get();
       if (data.compareAndSet(oldDat, newDat)) {
         return;
       }
-    }
-  }
-
-  <T> T convert(String value, Class<T> propertyType) {
-    return null;
-  }
-
-  /**
-   * corant-config
-   *
-   * @author bingo 上午11:03:42
-   *
-   */
-  static class ConfigData {
-
-    final List<ConfigSource> sources;
-    final Set<String> propertyNames;
-    final Map<String, String> caches;
-
-    ConfigData(List<ConfigSource> configSources, ConfigAdjuster adjuster) {
-      sources = Collections.unmodifiableList(configSources);
-      Set<String> usePropertyNames = new HashSet<>();
-      Map<String, String> useCaches = new HashMap<>();
-      for (ConfigSource source : configSources) {
-        source.getProperties().forEach((k, v) -> {
-          usePropertyNames.add(k);
-          useCaches.computeIfAbsent(k, n -> v);
-        });
-      }
-      caches = Collections.unmodifiableMap(adjuster.apply(useCaches));
-      propertyNames = Collections.unmodifiableSet(usePropertyNames);
     }
   }
 }

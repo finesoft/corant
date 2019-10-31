@@ -41,7 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.config.ConfigConversions;
+import org.corant.config.ConfigConversion;
+import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassUtils;
 import org.eclipse.microprofile.config.Config;
@@ -82,6 +83,14 @@ public class DeclarativeConfigResolver {
       }
     }
     return map.isEmpty() ? null : map.values().iterator().next();
+  }
+
+  static boolean isConverterSupport(Class<?> cls) {
+    Config cfg = ConfigProvider.getConfig();
+    if (cfg instanceof CorantConfig) {
+      return ((CorantConfig) cfg).getConversion().isSupport(cls);
+    }
+    return ConfigConversion.BUILT_IN_SUPPORT_TYPES.contains(cls);
   }
 
   static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
@@ -164,7 +173,7 @@ public class DeclarativeConfigResolver {
           } else if (ft.isArray()) {
             ft = ft.getComponentType();
           }
-          if (ConfigConversions.isSupport(ft) || Map.class.isAssignableFrom(ft)) {
+          if (isConverterSupport(ft) || Map.class.isAssignableFrom(ft)) {
             getFields().add(new ConfigField(this, f));
           }
         }

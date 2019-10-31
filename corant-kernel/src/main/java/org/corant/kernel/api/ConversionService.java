@@ -15,6 +15,7 @@ package org.corant.kernel.api;
 
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Collection;
+import java.util.function.Supplier;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.conversion.Conversions;
 import org.corant.shared.conversion.Converter;
@@ -35,6 +36,9 @@ public interface ConversionService {
       final Class<T> clazz, Object... hints);
 
   <T> T convert(final Object value, final Class<T> clazz, Object... hints);
+
+  <C extends Collection<T>, T> C convert(final Object value, final Class<T> clazz,
+      final Supplier<C> collectionFactory, Object... hints);
 
   void deregister(ConverterType<?, ?> converterType);
 
@@ -60,6 +64,12 @@ public interface ConversionService {
     @Override
     public <T> T convert(Object value, Class<T> clazz, Object... hints) {
       return Conversions.convert(value, clazz, mapOf(hints));
+    }
+
+    @Override
+    public <C extends Collection<T>, T> C convert(Object value, Class<T> clazz,
+        Supplier<C> collectionFactory, Object... hints) {
+      return Conversions.convert(value, clazz, collectionFactory, mapOf(hints));
     }
 
     @Override

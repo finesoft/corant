@@ -14,16 +14,15 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import org.corant.config.ConfigConversions.OrdinalConverter;
+import org.corant.config.ConfigConversion.OrdinalConverter;
 import org.corant.config.source.MpConfigPropertiesSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
+import org.corant.config.spi.ConfigAdjuster;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -44,9 +43,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   final List<OrdinalConverter> converters = new LinkedList<>();
   ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-  CorantConfigBuilder() {
-    converters.addAll(ConfigConversions.BUILT_IN_CONVERTERS);
-  }
+  CorantConfigBuilder() {}
 
   @Override
   public ConfigBuilder addDefaultSources() {
@@ -72,9 +69,8 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
-    Collections.sort(sources, Comparator.comparingInt(ConfigSource::getOrdinal).reversed());
-    Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
-    return null;
+    return new CorantConfig(new ConfigConversion(converters),
+        new ConfigData(sources, ConfigAdjuster.resolve(getClassLoader())));
   }
 
   @Override
@@ -107,9 +103,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   void addConverter(Converter<?> converter) {
     final Class<?> cls = converter.getClass();
-    Class<?> type = (Class<?>) ConfigConversions.getTypeOfConverter(cls);
+    Class<?> type = (Class<?>) ConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
-    converters.add(new OrdinalConverter(type, converter, ConfigConversions.findPriority(cls)));
+    converters.add(new OrdinalConverter(type, converter, ConfigConversion.findPriority(cls)));
   }
 
   void addSource(ConfigSource source) {

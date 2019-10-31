@@ -15,7 +15,6 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,8 +24,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class ConversionUtils {
   }
 
   public static List<BigDecimal> toBigDecimalList(Object obj) {
-    return Conversions.convert(obj, List.class, BigDecimal.class, null);
+    return toList(obj, BigDecimal.class);
   }
 
   public static BigInteger toBigInteger(Object obj) {
@@ -78,7 +79,7 @@ public class ConversionUtils {
   }
 
   public static List<BigInteger> toBigIntegerList(Object obj) {
-    return Conversions.convert(obj, List.class, BigInteger.class, null);
+    return toList(obj, BigInteger.class);
   }
 
   public static Boolean toBoolean(Object obj) {
@@ -118,7 +119,7 @@ public class ConversionUtils {
   }
 
   public static List<Double> toDoubleList(Object obj) {
-    return Conversions.convert(obj, List.class, Double.class, null);
+    return toList(obj, Double.class);
   }
 
   public static <T extends Enum<T>> T toEnum(Object obj, Class<T> enumClazz) {
@@ -126,7 +127,7 @@ public class ConversionUtils {
   }
 
   public static <T extends Enum<T>> List<T> toEnumList(Object obj, Class<T> enumClazz) {
-    return Conversions.convert(obj, List.class, enumClazz, null);
+    return toList(obj, enumClazz);
   }
 
   public static Float toFloat(Object obj) {
@@ -138,7 +139,7 @@ public class ConversionUtils {
   }
 
   public static List<Float> toFloatList(Object obj) {
-    return Conversions.convert(obj, List.class, Float.class, null);
+    return toList(obj, Float.class);
   }
 
   public static Instant toInstant(Object obj) {
@@ -150,7 +151,7 @@ public class ConversionUtils {
   }
 
   public static List<Instant> toInstantList(Object obj) {
-    return Conversions.convert(obj, List.class, Instant.class, null);
+    return toList(obj, Instant.class);
   }
 
   public static Integer toInteger(Object obj) {
@@ -162,11 +163,11 @@ public class ConversionUtils {
   }
 
   public static List<Integer> toIntegerList(Object obj) {
-    return Conversions.convert(obj, List.class, Integer.class, null);
+    return toList(obj, Integer.class);
   }
 
   public static <T> List<T> toList(Object obj, Class<T> clazz) {
-    return Conversions.convert(obj, List.class, clazz, null);
+    return Conversions.convert(obj, clazz, ArrayList::new, null);
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -206,10 +207,10 @@ public class ConversionUtils {
 
   public static List<LocalDate> toLocalDateList(Object obj, String pattern) {
     if (pattern != null) {
-      return Conversions.convert(obj, List.class, LocalDate.class,
+      return Conversions.convert(obj, LocalDate.class, ArrayList::new,
           mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern));
     } else {
-      return forceCast(Conversions.convert(obj, List.class, LocalDate.class, null));
+      return toList(obj, LocalDate.class);
     }
   }
 
@@ -230,11 +231,15 @@ public class ConversionUtils {
   }
 
   public static List<Long> toLongList(Object obj) {
-    return Conversions.convert(obj, List.class, Long.class, null);
+    return toList(obj, Long.class);
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz) {
     return Conversions.convert(obj, clazz);
+  }
+
+  public static <T> Set<T> toSet(Object obj, Class<T> clazz) {
+    return Conversions.convert(obj, clazz, HashSet::new, null);
   }
 
   public static Short toShort(Object obj) {
@@ -246,7 +251,7 @@ public class ConversionUtils {
   }
 
   public static List<Short> toShortList(Object obj) {
-    return Conversions.convert(obj, List.class, Short.class, null);
+    return toList(obj, Short.class);
   }
 
   public static String toString(Object obj) {
@@ -281,10 +286,10 @@ public class ConversionUtils {
 
   public static List<ZonedDateTime> toZonedDateTimeList(Object obj, String pattern) {
     if (pattern != null) {
-      return Conversions.convert(obj, List.class, ZonedDateTime.class,
+      return Conversions.convert(obj, ZonedDateTime.class, ArrayList::new,
           mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern));
     } else {
-      return forceCast(Conversions.convert(obj, List.class, ZonedDateTime.class, null));
+      return toList(obj, ZonedDateTime.class);
     }
   }
 }

@@ -26,12 +26,12 @@ import org.corant.config.ComparableConfigurator;
  *
  */
 @FunctionalInterface
-public interface ConfigPropertiesAdjuster
+public interface ConfigAdjuster
     extends ComparableConfigurator, UnaryOperator<Map<String, String>> {
 
-  static ConfigPropertiesAdjuster resolve(ClassLoader classLoader) {
-    ConfigPropertiesAdjuster adjuster = (m) -> m;
-    streamOf(ServiceLoader.load(ConfigPropertiesAdjuster.class, classLoader))
+  static ConfigAdjuster resolve(ClassLoader classLoader) {
+    ConfigAdjuster adjuster = (m) -> m;
+    streamOf(ServiceLoader.load(ConfigAdjuster.class, classLoader))
         .sorted(ComparableConfigurator::compare).forEach(adjuster::andThen);
     return adjuster;
   }

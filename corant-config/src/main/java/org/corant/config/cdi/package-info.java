@@ -11,30 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config.resolve;
-
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-@Documented
-@Retention(RUNTIME)
-@Target(TYPE)
-@Inherited
 /**
  * corant-config
- *
- * @author bingo 下午7:39:01
+ * 
+ * @author bingo 下午4:14:47
  *
  */
-public @interface ConfigKeyRoot {
-
-  boolean ignoreNoAnnotatedItem() default true;
-
-  int keyIndex() default 1;
-
-  String value();
-}
+package org.corant.config.cdi;

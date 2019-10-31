@@ -14,9 +14,9 @@
 package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.ObjectUtils.max;
-import org.corant.config.resolve.ConfigKeyItem;
-import org.corant.config.resolve.ConfigKeyRoot;
-import org.corant.config.resolve.DeclarativeConfig;
+import org.corant.config.declarative.ConfigKeyItem;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.kernel.util.Qualifiers.NamedObject;
 import org.corant.shared.util.StringUtils;
 

@@ -17,4 +17,4 @@
  * @author bingo 下午7:37:19
  *
  */
-package org.corant.config.resolve;
+package org.corant.config.declarative;

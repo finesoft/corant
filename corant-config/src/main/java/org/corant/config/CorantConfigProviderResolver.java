@@ -13,6 +13,14 @@
  */
 package org.corant.config;
 
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -25,34 +33,75 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  */
 public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
+  private static final Map<ClassLoader, Config> configs = new IdentityHashMap<>();
+  private static final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
   @Override
   public ConfigBuilder getBuilder() {
-    // TODO Auto-generated method stub
-    return null;
+    return new CorantConfigBuilder();
   }
 
   @Override
   public Config getConfig() {
-    // TODO Auto-generated method stub
-    return null;
+    return getConfig(Thread.currentThread().getContextClassLoader());
   }
 
   @Override
-  public Config getConfig(ClassLoader loader) {
-    // TODO Auto-generated method stub
-    return null;
+  public Config getConfig(ClassLoader classLoader) {
+    final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
+    Lock lock = rwLock.readLock();
+    try {
+      lock.lock();
+      Config config = configs.get(useClassLoader);
+      if (null == config) {
+        lock.unlock();
+        lock = rwLock.writeLock();
+        lock.lock();
+        config = doBuildConfig(useClassLoader);
+        doRegisterConfig(config, useClassLoader);
+      }
+      return config;
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
   public void registerConfig(Config config, ClassLoader classLoader) {
-    // TODO Auto-generated method stub
+    Lock lock = rwLock.writeLock();
+    try {
+      lock.lock();
+      doRegisterConfig(config, defaultObject(classLoader, defaultClassLoader()));
+    } finally {
+      lock.unlock();
+    }
 
   }
 
   @Override
-  public void releaseConfig(Config config) {
-    // TODO Auto-generated method stub
+  public void releaseConfig(final Config config) {
+    Lock lock = rwLock.readLock();
+    try {
+      lock.lock();
+      Iterator<Map.Entry<ClassLoader, Config>> iterator = configs.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<ClassLoader, Config> entry = iterator.next();
+        if (entry.getValue() == config) {
+          iterator.remove();
+        }
+      }
+    } finally {
+      lock.unlock();
+    }
+  }
 
+  private Config doBuildConfig(ClassLoader loader) {
+    return getBuilder().forClassLoader(loader).addDefaultSources().addDiscoveredSources()
+        .addDiscoveredConverters().build();
+  }
+
+  private void doRegisterConfig(Config config, ClassLoader classLoader) {
+    configs.put(classLoader, config);
   }
 
 }

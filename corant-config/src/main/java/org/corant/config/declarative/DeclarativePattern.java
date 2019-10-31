@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config.resolve;
+package org.corant.config.declarative;
 
 import static org.corant.config.ConfigUtils.getFieldActualTypeArguments;
 import static org.corant.config.ConfigUtils.removeSplitor;
@@ -37,7 +37,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.config.resolve.DeclarativeConfigResolver.ConfigField;
+import org.corant.config.declarative.DeclarativeConfigResolver.ConfigField;
 import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.config.Config;
 

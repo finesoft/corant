@@ -13,9 +13,9 @@
  */
 package org.corant.suites.flyway;
 
-import org.corant.config.resolve.ConfigKeyItem;
-import org.corant.config.resolve.ConfigKeyRoot;
-import org.corant.config.resolve.DeclarativeConfig;
+import org.corant.config.declarative.ConfigKeyItem;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;
 
 /**

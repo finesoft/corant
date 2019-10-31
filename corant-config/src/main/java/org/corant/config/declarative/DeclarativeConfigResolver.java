@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config.resolve;
+package org.corant.config.declarative;
 
 import static org.corant.config.ConfigUtils.concatKey;
 import static org.corant.config.ConfigUtils.dashify;

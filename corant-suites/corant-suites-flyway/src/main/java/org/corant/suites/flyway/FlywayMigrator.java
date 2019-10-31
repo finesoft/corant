@@ -34,7 +34,7 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.config.resolve.DeclarativeConfigResolver;
+import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.kernel.api.DataSourceService;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;

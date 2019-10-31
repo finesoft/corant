@@ -31,7 +31,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
-import org.corant.config.resolve.DeclarativeConfigResolver;
+import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;

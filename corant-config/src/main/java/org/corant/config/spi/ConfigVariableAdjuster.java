@@ -11,12 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.config.spi;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.corant.config.spi.ConfigAdjuster;
 
 /**
  * corant-config

@@ -15,7 +15,7 @@
  */
 package org.corant.suites.jta.narayana;
 
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
@@ -27,7 +27,7 @@ import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
  * @author bingo 上午10:46:42
  *
  */
-public interface NarayanaConfigurator extends ComparableConfigurator {
+public interface NarayanaConfigurator extends Sortable {
 
   void configCoordinatorEnvironment(CoordinatorEnvironmentBean bean);
 

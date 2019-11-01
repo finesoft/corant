@@ -13,7 +13,7 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.config.ConfigUtils.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toObject;
@@ -98,7 +98,7 @@ public class MongoClientConfig implements NamedObject {
     Set<MongoClientConfig> cfgs = new HashSet<>();
     Set<String> dfltCfgKeys = defaultPropertyNames(config);
     // handle named client
-    Map<String, List<String>> clientCfgs = getGroupConfigNames(config,
+    Map<String, List<String>> clientCfgs = getGroupConfigKeys(config,
         (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig cfg = of(config, k, v);

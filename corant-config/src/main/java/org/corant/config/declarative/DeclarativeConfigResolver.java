@@ -15,8 +15,7 @@ package org.corant.config.declarative;
 
 import static org.corant.config.ConfigUtils.concatKey;
 import static org.corant.config.ConfigUtils.dashify;
-import static org.corant.config.ConfigUtils.getFieldActualTypeArguments;
-import static org.corant.config.ConfigUtils.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.config.ConfigUtils.handleInfixKey;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
@@ -30,10 +29,11 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.config.ConfigConversion;
 import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassUtils;
@@ -90,7 +89,7 @@ public class DeclarativeConfigResolver {
     if (cfg instanceof CorantConfig) {
       return ((CorantConfig) cfg).getConversion().isSupport(cls);
     }
-    return ConfigConversion.BUILT_IN_SUPPORT_TYPES.contains(cls);
+    return false;
   }
 
   static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
@@ -143,11 +142,15 @@ public class DeclarativeConfigResolver {
     }
     itemKeys.removeAll(dfltKeys);
     if (isNotEmpty(itemKeys)) {
-      keys.addAll(getGroupConfigNames(config,
+      keys.addAll(getGroupConfigKeys(config,
           s -> defaultString(s).startsWith(prefix) && !dfltKeys.contains(s),
           configClass.getKeyIndex()).keySet());
     }
     return keys;
+  }
+
+  private static Class<?> getFieldActualTypeArguments(Field field, int index) {
+    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
   }
 
   public static class ConfigClass<T extends DeclarativeConfig> {
@@ -167,11 +170,16 @@ public class DeclarativeConfigResolver {
         if (f.isAnnotationPresent(ConfigKeyItem.class)) {
           getFields().add(new ConfigField(this, f));
         } else if (!ignoreNoAnnotatedItem) {
-          Class<?> ft = ClassUtils.primitiveToWrapper(f.getType());
-          if (Collection.class.isAssignableFrom(ft)) {
-            ft = getFieldActualTypeArguments(f, 0);
-          } else if (ft.isArray()) {
-            ft = ft.getComponentType();
+          Type type = f.getGenericType();
+          Class<?> ft = null;
+          if (type instanceof Class) {
+            ft = (Class<?>) type;
+            if (ft.isArray()) {
+              ft = ft.getComponentType();
+            }
+            ft = ClassUtils.primitiveToWrapper((Class<?>) type);
+          } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
+            ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
           }
           if (isConverterSupport(ft) || Map.class.isAssignableFrom(ft)) {
             getFields().add(new ConfigField(this, f));
@@ -219,7 +227,6 @@ public class DeclarativeConfigResolver {
     private final DeclarativePattern pattern;
     private final String defaultValue;
     private final String defaultKey;
-    private final Class<?> type;
 
     ConfigField(ConfigClass<?> configClass, Field field) {
       this.configClass = configClass;
@@ -229,13 +236,12 @@ public class DeclarativeConfigResolver {
         field.setAccessible(true);
         return field;
       });
-      type = field.getType();
       keyItem = isBlank(cki.value()) ? dashify(field.getName()) : cki.value();
       pattern = defaultObject(cki.pattern(), DeclarativePattern.SUFFIX);
       defaultValue = cki.defaultValue();
       defaultKey = concatKey(configClass.getKeyRoot(), getKeyItem());
       if (pattern == DeclarativePattern.PREFIX) {
-        shouldBeTrue(type.equals(Map.class),
+        shouldBeTrue(field.getType().equals(Map.class),
             "We only support Map field type for PREFIX pattern %s %s.",
             configClass.getClazz().getName(), field.getName());
         Class<?> mapKeyType = getFieldActualTypeArguments(field, 0);
@@ -276,15 +282,12 @@ public class DeclarativeConfigResolver {
       return pattern;
     }
 
-    public Class<?> getType() {
-      return type;
-    }
-
     @Override
     public String toString() {
       return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
           + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
-          + ", type=" + type + "]";
+          + "]";
     }
   }
+
 }

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
-import static org.corant.config.ConfigUtils.getGroupConfigNames;
+import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -54,7 +54,7 @@ public class PersistencePropertiesParser {
         .getOptionalValue(JPAConfig.JC_PREFIX + JPAConfig.JC_PU_NME.substring(1), String.class)
         .orElse(null);
     doParse(config, dfltPuNme, dfltCfgKeys, cfgs);// defaults
-    Map<String, List<String>> namedCfgKeys = getGroupConfigNames(config,
+    Map<String, List<String>> namedCfgKeys = getGroupConfigKeys(config,
         s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, cfgs);

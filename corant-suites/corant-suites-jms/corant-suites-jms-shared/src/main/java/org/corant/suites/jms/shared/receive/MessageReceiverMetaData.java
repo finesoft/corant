@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.jms.ConnectionFactory;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.context.JMSExceptionListener;
@@ -286,7 +286,7 @@ public class MessageReceiverMetaData {
 
   Optional<JMSExceptionListener> exceptionListener() {
     return instance().select(JMSExceptionListener.class).stream()
-        .sorted(ComparableConfigurator::compare).findFirst();
+        .sorted(Sortable::compare).findFirst();
   }
 
   boolean xa() {

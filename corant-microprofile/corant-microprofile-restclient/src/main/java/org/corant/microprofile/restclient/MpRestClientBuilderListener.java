@@ -16,7 +16,7 @@ package org.corant.microprofile.restclient;
 import static org.corant.kernel.util.Instances.select;
 import java.util.logging.Logger;
 import javax.ws.rs.Priorities;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;
@@ -40,7 +40,7 @@ public class MpRestClientBuilderListener implements RestClientBuilderListener {
       logger.info("Register default mp context resolver to RestClientBuilder");
       builder.register(MpDefaultContextResolver.class, Priorities.USER);
     }
-    select(MpRestClientBuilderConfigurator.class).stream().sorted(ComparableConfigurator::compare)
+    select(MpRestClientBuilderConfigurator.class).stream().sorted(Sortable::compare)
         .forEach(x -> x.config(builder));
   }
 }

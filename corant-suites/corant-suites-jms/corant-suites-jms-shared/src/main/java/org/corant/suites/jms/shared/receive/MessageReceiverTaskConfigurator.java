@@ -16,7 +16,7 @@ package org.corant.suites.jms.shared.receive;
 import javax.jms.Connection;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 
 /**
  * corant-suites-jms-shared
@@ -24,7 +24,7 @@ import org.corant.config.ComparableConfigurator;
  * @author bingo 下午7:27:36
  *
  */
-public interface MessageReceiverTaskConfigurator extends ComparableConfigurator {
+public interface MessageReceiverTaskConfigurator extends Sortable {
 
   void configConnection(Connection connection, MessageReceiverMetaData metaData);
 

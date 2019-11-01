@@ -14,7 +14,7 @@
 package org.corant.suites.webserver.undertow;
 
 import java.util.function.BiConsumer;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.xnio.Option;
 import io.undertow.servlet.api.DeploymentInfo;
 
@@ -24,7 +24,7 @@ import io.undertow.servlet.api.DeploymentInfo;
  * @author bingo 上午10:32:02
  *
  */
-public interface UndertowWebServerConfigurator extends ComparableConfigurator {
+public interface UndertowWebServerConfigurator extends Sortable {
 
   default void configureDeployment(DeploymentInfo deploymentInfo) {}
 

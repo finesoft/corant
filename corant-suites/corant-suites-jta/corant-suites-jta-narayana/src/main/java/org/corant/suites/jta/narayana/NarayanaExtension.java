@@ -42,7 +42,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.corant.kernel.normal.Defaults;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -189,7 +189,7 @@ public class NarayanaExtension implements Extension {
     config.getRecoveryListener().ifPresent(recoveryEnvironmentBean::setRecoveryListener);
 
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
-        .sorted(ComparableConfigurator::compare).forEach(cfgr -> {
+        .sorted(Sortable::compare).forEach(cfgr -> {
           logger.info(() -> String.format("Use customer narayana configurator $s.",
               cfgr.getClass().getName()));
           cfgr.configCoreEnvironment(coreEnvironmentBean);

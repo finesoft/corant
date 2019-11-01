@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,12 +30,14 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 上午11:03:42
  *
  */
-public class ConfigData {
+public class ConfigData implements Serializable {
 
   public static final Comparator<ConfigSource> CONFIG_SOURCE_COMPARATOR = (o1, o2) -> {
     int res = Long.signum((long) o2.getOrdinal() - (long) o1.getOrdinal());
     return res != 0 ? res : o2.getName().compareTo(o1.getName());
   };
+
+  private static final long serialVersionUID = 3960943457122668075L;
 
   final List<ConfigSource> sources;
   final Set<String> propertyNames;

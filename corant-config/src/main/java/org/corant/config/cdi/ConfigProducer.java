@@ -11,21 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.config.cdi;
+
+import java.io.Serializable;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-config
  *
- * @author bingo 上午10:44:33
+ * @author bingo 下午4:35:31
  *
  */
-public interface ComparableConfigurator {
+@ApplicationScoped
+public class ConfigProducer implements Serializable {
 
-  static int compare(ComparableConfigurator ccf1, ComparableConfigurator ccf2) {
-    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal());
-  }
+  private static final long serialVersionUID = -7704094948781355258L;
 
-  default int getOrdinal() {
-    return 0;
+  @Dependent
+  @Produces
+  public Config produce(InjectionPoint injectionPoint) {
+    return ConfigProvider.getConfig();
   }
 }

@@ -15,7 +15,7 @@ package org.corant.config;
 
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -33,7 +33,7 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  */
 public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
-  private static final Map<ClassLoader, Config> configs = new IdentityHashMap<>();
+  private static final Map<ClassLoader, Config> configs = new HashMap<>();
   private static final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
   @Override
@@ -57,8 +57,8 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
         lock.unlock();
         lock = rwLock.writeLock();
         lock.lock();
-        config = doBuildConfig(useClassLoader);
-        doRegisterConfig(config, useClassLoader);
+        config = buildConfig(useClassLoader);
+        cacheConfig(useClassLoader, config);
       }
       return config;
     } finally {
@@ -71,7 +71,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
     Lock lock = rwLock.writeLock();
     try {
       lock.lock();
-      doRegisterConfig(config, defaultObject(classLoader, defaultClassLoader()));
+      cacheConfig(defaultObject(classLoader, defaultClassLoader()), config);
     } finally {
       lock.unlock();
     }
@@ -95,12 +95,12 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
     }
   }
 
-  private Config doBuildConfig(ClassLoader loader) {
+  private Config buildConfig(ClassLoader loader) {
     return getBuilder().forClassLoader(loader).addDefaultSources().addDiscoveredSources()
         .addDiscoveredConverters().build();
   }
 
-  private void doRegisterConfig(Config config, ClassLoader classLoader) {
+  private void cacheConfig(ClassLoader classLoader, Config config) {
     configs.put(classLoader, config);
   }
 

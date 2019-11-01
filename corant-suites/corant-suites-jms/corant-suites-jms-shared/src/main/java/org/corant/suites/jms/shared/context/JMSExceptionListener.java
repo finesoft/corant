@@ -15,7 +15,7 @@ package org.corant.suites.jms.shared.context;
 
 import javax.jms.Connection;
 import javax.jms.ExceptionListener;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -24,7 +24,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午3:47:27
  *
  */
-public interface JMSExceptionListener extends ExceptionListener, ComparableConfigurator {
+public interface JMSExceptionListener extends ExceptionListener, Sortable {
 
   boolean canHandle(Object ob);
 

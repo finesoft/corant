@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -42,6 +43,10 @@ public class ObjectUtils {
 
   public static String asString(Object o, String nullDefault) {
     return Objects.toString(o, nullDefault);
+  }
+
+  public static String[] asStrings(Iterable<?> it) {
+    return asStrings(null, streamOf(it).map(o -> Objects.toString(o)).toArray(Object[]::new));
   }
 
   public static String[] asStrings(Object... objs) {

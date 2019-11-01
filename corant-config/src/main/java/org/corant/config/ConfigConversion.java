@@ -15,10 +15,17 @@ package org.corant.config;
 
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,13 +35,21 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Priority;
+import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
-import org.corant.shared.util.ClassUtils;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.Converter;
 
 /**
@@ -43,30 +58,31 @@ import org.eclipse.microprofile.config.spi.Converter;
  * @author bingo 下午4:27:06
  *
  */
-public class ConfigConversion {
+public class ConfigConversion implements Serializable {
 
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
-
-  public static final Set<Class<?>> BUILT_IN_SUPPORT_TYPES;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS;
 
+  private static final long serialVersionUID = -2708805756022227289L;
+
   static {
-    Set<Class<?>> builtInSupTyps = new HashSet<>();
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
-    builtInSupTyps.add(String.class);
-    builtInSupTyps.addAll(ClassUtils.WRAPPER_PRIMITIVE_MAP.keySet());
     ConverterRegistry.getSupportConverters().keySet().stream()
         .filter(ct -> ct.getSourceClass().isAssignableFrom(String.class))
-        .map(ct -> ct.getTargetClass()).forEach(builtInSupTyps::add);
-    builtInSupTyps.stream().map(OrdinalConverter::builtIn).forEach(builtInCvts::add);
-    BUILT_IN_SUPPORT_TYPES = Collections.unmodifiableSet(builtInSupTyps);
+        .map(ct -> ct.getTargetClass()).map(OrdinalConverter::builtIn).forEach(builtInCvts::add);
+    builtInCvts.add(OrdinalConverter.builtIn(String.class));
     BUILT_IN_CONVERTERS = Collections.unmodifiableList(builtInCvts);
   }
 
   private final AtomicReference<Map<Type, Converter<?>>> converters;
 
-  public ConfigConversion(List<OrdinalConverter> discoveredConverters) {
+  /**
+   * Assembly discovered converters and built in converters
+   *
+   * @param discoveredConverters
+   */
+  ConfigConversion(List<OrdinalConverter> discoveredConverters) {
     List<OrdinalConverter> converters = new LinkedList<>(BUILT_IN_CONVERTERS);
     if (isNotEmpty(discoveredConverters)) {
       converters.addAll(discoveredConverters);
@@ -79,11 +95,23 @@ public class ConfigConversion {
     this.converters = new AtomicReference<>(Collections.unmodifiableMap(useConverters));
   }
 
+  /**
+   * Find the custome priority if not found then return CUSTOMER_CONVERTER_ORDINAL
+   *
+   * @param clazz
+   * @return findPriority
+   */
   public static int findPriority(Class<?> clazz) {
     Priority priorityAnnot = clazz.getAnnotation(Priority.class);
     return null != priorityAnnot ? priorityAnnot.value() : CUSTOMER_CONVERTER_ORDINAL;
   }
 
+  /**
+   * Get target class type from Converter class
+   *
+   * @param clazz
+   * @return getTypeOfConverter
+   */
   public static Type getTypeOfConverter(Class<?> clazz) {
     if (clazz.equals(Object.class)) {
       return null;
@@ -104,42 +132,57 @@ public class ConfigConversion {
     return getTypeOfConverter(clazz.getSuperclass());
   }
 
-  public boolean isSupport(Class<?> cls) {
-    return converters.get().containsKey(cls);
-  }
-
-  <T> T convert(String value, Class<T> propertyType) {
-    if (propertyType == String.class) {
-      return forceCast(value);
-    } else {
-      final Converter<?> converter = converters.get().get(propertyType);
-      if (null != converter) {
-        return forceCast(converter.convert(value));
-      } else if (propertyType.isArray()) {
-        final Class<?> propertyComponentType = propertyType.getComponentType();
-        return forceCast(convert(ConfigUtils.splitValue(value), propertyComponentType));
-      } else if (List.class.isAssignableFrom(propertyType)) {
-        return forceCast(convert(ConfigUtils.splitValue(value), String.class, ArrayList::new));
-      } else if (Set.class.isAssignableFrom(propertyType)) {
-        return forceCast(convert(ConfigUtils.splitValue(value), String.class, ArrayList::new));
+  public Object convert(String rawValue, Type type) {
+    Object result = null;
+    String value = rawValue;
+    if (value != null) {
+      if (type instanceof Class) {
+        Class<?> typeClass = forceCast(type);
+        if (typeClass.isArray()) {
+          result = convertArray(value, typeClass.getComponentType());
+        } else {
+          result = convertSingle(value, typeClass);
+        }
+      } else if (type instanceof ParameterizedType) {
+        ParameterizedType ptype = (ParameterizedType) type;
+        Class<?> rType = forceCast(ptype.getRawType());
+        Type argType = ptype.getActualTypeArguments()[0];
+        if (Class.class.equals(rType)) {
+          result = convertSingle(value, Class.class);
+        } else if (List.class.isAssignableFrom(rType)) {
+          result = convertCollection(value, argType, ArrayList::new);
+        } else if (Set.class.isAssignableFrom(rType)) {
+          result = convertCollection(value, argType, HashSet::new);
+        } else if (Optional.class.isAssignableFrom(rType)) {
+          result = Optional.ofNullable(convert(value, argType));
+        } else if (Supplier.class.isAssignableFrom(rType)) {
+          result = (Supplier<?>) () -> convert(value, argType);
+        } else if (Map.class.isAssignableFrom(rType)) {
+          result = convertMap(value, ptype);
+        } else {
+          throw new CorantRuntimeException(
+              "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
+        }
       } else {
-        return toObject(value, propertyType);
+        throw new CorantRuntimeException("Cannot create config property for " + type);
       }
     }
+    return result;
   }
 
   /**
    * convert array
    *
    * @param <T>
-   * @param values
+   * @param rawValue
    * @param propertyComponentType
    * @return convert
    */
-  <T> T[] convert(String[] values, Class<T> propertyComponentType) {
+  public <T> T[] convertArray(String rawValue, Class<T> propertyComponentType) {
+    String[] values = ConfigUtils.splitValue(rawValue);
     Object array = Array.newInstance(propertyComponentType, values.length);
     for (int i = 0; i < values.length; i++) {
-      Array.set(array, i, convert(values[i], propertyComponentType));
+      Array.set(array, i, forceCast(convert(values[i], propertyComponentType)));
     }
     return forceCast(array);
   }
@@ -149,22 +192,194 @@ public class ConfigConversion {
    *
    * @param <T>
    * @param <C>
-   * @param values
+   * @param rawValue
    * @param propertyItemType
    * @param collectionFactory
    * @return convert
    */
-  <T, C extends Collection<T>> C convert(String[] values, Class<T> propertyItemType,
+  public <T, C extends Collection<T>> C convertCollection(String rawValue, Type propertyItemType,
       IntFunction<C> collectionFactory) {
+    String[] values = ConfigUtils.splitValue(rawValue);
     int length = values.length;
     final C collection = collectionFactory.apply(length);
     for (String value : values) {
-      collection.add(convert(value, propertyItemType));
+      collection.add(forceCast(convert(value, propertyItemType)));
     }
     return collection;
   }
 
-  static class OrdinalConverter {
+  public Object convertIfNecessary(Object object, Type type) {
+    if (object != null) {
+      return object;
+    }
+    Object result = null;
+    if (type instanceof Class) {
+      Class<?> typeClass = (Class<?>) type;
+      if (typeClass.isAssignableFrom(OptionalInt.class)) {
+        result = typeClass.cast(OptionalInt.empty());
+      } else if (typeClass.isAssignableFrom(OptionalLong.class)) {
+        result = typeClass.cast(OptionalLong.empty());
+      } else if (typeClass.isAssignableFrom(OptionalDouble.class)) {
+        result = typeClass.cast(OptionalDouble.empty());
+      }
+    } else if (type instanceof ParameterizedType) {
+      if (Optional.class.equals(((ParameterizedType) type).getRawType())) {
+        result = Optional.empty();
+      }
+    } else {
+      throw new CorantRuntimeException("Cannot create config property for " + type);
+    }
+    return result;
+  }
+
+  public Map<Object, Object> convertMap(String rawValue, ParameterizedType properyType) {
+    String[] values = ConfigUtils.splitValue(rawValue);
+    if (properyType.getActualTypeArguments().length == 0) {
+      return mapOf((Object[]) values);
+    } else if (properyType.getActualTypeArguments().length == 2) {
+      Class<?> kt = (Class<?>) properyType.getActualTypeArguments()[0];
+      Class<?> vt = (Class<?>) properyType.getActualTypeArguments()[1];
+      Map<String, String> temp = mapOf((Object[]) values);
+      Map<Object, Object> result = new HashMap<>();
+      temp.forEach((k, v) -> {
+        result.put(convert(k, kt), convert(v, vt));
+      });
+      return result;
+    }
+    return null;
+  }
+
+  public <T> T convertSingle(String value, Class<T> propertyType) {
+    if (propertyType == String.class || propertyType == Object.class) {
+      return forceCast(value);
+    } else {
+      final Converter<?> converter = converters.get().get(propertyType);
+      if (null != converter) {
+        return forceCast(converter.convert(value));
+      } else {
+        Optional<Converter<T>> ic = ImplicitConverter.forType(propertyType);
+        if (ic.isPresent()) {
+          return ic.get().convert(value);
+        } else {
+          return toObject(value, propertyType);
+        }
+      }
+    }
+  }
+
+  public Set<Type> getSupportTypes() {
+    return new HashSet<>(converters.get().keySet());
+  }
+
+  public boolean isSupport(Class<?> cls) {
+    return converters.get().containsKey(cls);
+  }
+
+  Class<?> resolveActualTypeArguments(ParameterizedType ptype, int idx) {
+    Type argType = ptype.getActualTypeArguments()[idx];
+    if (argType instanceof Class) {
+      return (Class<?>) argType;
+    } else if (argType instanceof WildcardType) {
+      return Object.class;
+    } else {
+      throw new CorantRuntimeException("Can not resolve parameterized type %s", ptype);
+    }
+  }
+
+  /**
+   * corant-config
+   *
+   * @author bingo 上午11:25:26
+   *
+   */
+  static class ImplicitConverter implements Converter<Object> {
+
+    private Method method;
+    private Constructor<?> constructor;
+
+    private ImplicitConverter(Constructor<?> constructor) {
+      this.constructor = constructor;
+    }
+
+    private ImplicitConverter(Method method) {
+      this.method = method;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<Converter<T>> forType(Type generalType) {
+      if (!(generalType instanceof Class)) {
+        return Optional.empty();
+      }
+      Class<T> type = (Class<T>) generalType;
+      return Stream.<Supplier<Converter<T>>>of(() -> forMethod(type, "of", String.class),
+          () -> forMethod(type, "valueOf", String.class), () -> forConstructor(type, String.class),
+          () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
+          .filter(converter -> converter != null).findFirst();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {
+      try {
+        Constructor<T> constructor = type.getConstructor(argumentTypes);
+        if (Modifier.isPublic(constructor.getModifiers())) {
+          return (Converter<T>) new ImplicitConverter(constructor);
+        } else {
+          return null;
+        }
+      } catch (NoSuchMethodException | SecurityException e) {
+        return null;
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Converter<T> forMethod(Class<T> type, String method,
+        Class<?>... argumentTypes) {
+      try {
+        Method factoryMethod = type.getMethod(method, argumentTypes);
+        if (Modifier.isStatic(factoryMethod.getModifiers())
+            && Modifier.isPublic(factoryMethod.getModifiers())) {
+          return (Converter<T>) new ImplicitConverter(factoryMethod);
+        } else {
+          return null;
+        }
+      } catch (NoSuchMethodException | SecurityException e) {
+        return null;
+      }
+    }
+
+    @Override
+    public Object convert(String value) {
+      if (value == null || value.equals(ConfigProperty.UNCONFIGURED_VALUE)) {
+        return null;
+      }
+      if (method != null) {
+        try {
+          return method.invoke(null, value);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+          throw new IllegalArgumentException("Unable to convert value to type  for value " + value,
+              ex);
+        }
+      } else if (constructor != null) {
+        try {
+          return constructor.newInstance(value);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+            | InvocationTargetException ex) {
+          throw new IllegalArgumentException("Unable to convert value to type  for value " + value,
+              ex);
+        }
+      }
+      throw new IllegalStateException(
+          "ImplicitConverter created without constructor or method to call");
+    }
+  }
+
+  /**
+   * corant-config
+   *
+   * @author bingo 上午11:25:40
+   *
+   */
+  static class OrdinalConverter implements Sortable {
     final Class<?> type;
     final Converter<?> converter;
     final int ordinal;
@@ -180,7 +395,8 @@ public class ConfigConversion {
           BUILT_IN_CONVERTER_ORDINAL);
     }
 
-    int getOrdinal() {
+    @Override
+    public int getOrdinal() {
       return ordinal;
     }
   }

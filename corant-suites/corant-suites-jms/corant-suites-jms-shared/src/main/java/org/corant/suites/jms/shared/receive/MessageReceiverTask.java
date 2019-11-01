@@ -43,7 +43,7 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.Corant;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -247,7 +247,7 @@ public class MessageReceiverTask implements Runnable {
           log(Level.FINE, null, "1. Created message receive task connection, [%s]", meta);
         }
         select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(ComparableConfigurator::compare)
+            .sorted(Sortable::compare)
             .forEach(c -> c.configConnection(connection, meta));
         meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
       } catch (JMSException je) {
@@ -267,7 +267,7 @@ public class MessageReceiverTask implements Runnable {
           log(Level.FINE, null, "2. Created message receive task session, [%s]", meta);
         }
         instance().select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(ComparableConfigurator::compare).forEach(c -> c.configSession(session, meta));
+            .sorted(Sortable::compare).forEach(c -> c.configSession(session, meta));
       } catch (JMSException je) {
         if (connection != null) {
           try {
@@ -299,7 +299,7 @@ public class MessageReceiverTask implements Runnable {
           messageConsumer = session.createConsumer(destination);
         }
         instance().select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(ComparableConfigurator::compare)
+            .sorted(Sortable::compare)
             .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
         log(Level.FINE, null, "3. Created message receive task consumer, [%s]", meta);
       } catch (JMSException je) {

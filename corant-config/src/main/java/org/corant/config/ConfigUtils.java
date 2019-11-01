@@ -21,8 +21,6 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +54,6 @@ public class ConfigUtils {
   }
 
   public static String dashify(String substring) {
-    /*
-     * StringBuilder ret = new StringBuilder(); for (char i : substring.toCharArray()) { if (i >=
-     * 'A' && i <= 'Z') { ret.append('-'); } ret.append(Character.toLowerCase(i)); }
-     */
     StringBuilder sb = new StringBuilder();
     boolean puc = false;
     boolean cuc = false;
@@ -73,24 +67,20 @@ public class ConfigUtils {
       suc = puc == cuc;
       puc = cuc;
     }
-    return sb.toString();// FIXME
+    return sb.toString();
   }
 
-  public static Class<?> getFieldActualTypeArguments(Field field, int index) {
-    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
-  }
-
-  public static Map<String, List<String>> getGroupConfigNames(Config config,
+  public static Map<String, List<String>> getGroupConfigKeys(Config config,
       Predicate<String> filter, int keyIndex) {
-    return getGroupConfigNames(config.getPropertyNames(), filter, keyIndex);
+    return getGroupConfigKeys(config.getPropertyNames(), filter, keyIndex);
   }
 
-  public static Map<String, List<String>> getGroupConfigNames(Config config, String prefix,
+  public static Map<String, List<String>> getGroupConfigKeys(Config config, String prefix,
       int keyIndex) {
-    return getGroupConfigNames(config.getPropertyNames(), prefix, keyIndex);
+    return getGroupConfigKeys(config.getPropertyNames(), prefix, keyIndex);
   }
 
-  public static Map<String, List<String>> getGroupConfigNames(Iterable<String> configs,
+  public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
     return group(configs, s -> filter.test(s), s -> {
@@ -102,9 +92,9 @@ public class ConfigUtils {
     });
   }
 
-  public static Map<String, List<String>> getGroupConfigNames(Iterable<String> configs,
+  public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       String prefix, int keyIndex) {
-    return getGroupConfigNames(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
+    return getGroupConfigKeys(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
   public static String handleInfixKey(String key) {

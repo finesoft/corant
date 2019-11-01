@@ -14,16 +14,13 @@
 package org.corant.config;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.corant.config.spi.ConfigAdjuster;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -33,7 +30,9 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 下午5:47:24
  *
  */
-public class CorantConfig implements Config {
+public class CorantConfig implements Config, Serializable {
+
+  private static final long serialVersionUID = 8788710772538278522L;
 
   final ConfigConversion conversion;
   final AtomicReference<ConfigData> data;
@@ -62,20 +61,14 @@ public class CorantConfig implements Config {
     return defaultObject(data.get().propertyNames, Collections.emptySet());
   }
 
+  public String getRawValue(String propertyName) {
+    return data.get().caches.get(propertyName);
+  }
+
   @Override
   public <T> T getValue(String propertyName, Class<T> propertyType) {
-    String value = data.get().caches.get(propertyName);
-    if (isNotBlank(value)) {
-      return conversion.convert(value, propertyType);
-    }
-    if (propertyType.isAssignableFrom(OptionalInt.class)) {
-      return propertyType.cast(OptionalInt.empty());
-    } else if (propertyType.isAssignableFrom(OptionalLong.class)) {
-      return propertyType.cast(OptionalLong.empty());
-    } else if (propertyType.isAssignableFrom(OptionalDouble.class)) {
-      return propertyType.cast(OptionalDouble.empty());
-    }
-    throw new CorantRuntimeException("Can not find any config value by %s", propertyName);
+    String value = getRawValue(propertyName);
+    return forceCast(conversion.convert(value, propertyType));
   }
 
   public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {

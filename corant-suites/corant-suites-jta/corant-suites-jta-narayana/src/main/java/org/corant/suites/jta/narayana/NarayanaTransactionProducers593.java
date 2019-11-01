@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 import org.corant.kernel.normal.Defaults;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -173,7 +173,7 @@ public class NarayanaTransactionProducers593 {
     recoveryListener.ifPresent(recoveryEnvironmentBean::setRecoveryListener);
 
     if (!configurators.isUnsatisfied()) {
-      configurators.stream().sorted(ComparableConfigurator::compare).forEachOrdered(cfgr -> {
+      configurators.stream().sorted(Sortable::compare).forEachOrdered(cfgr -> {
         cfgr.configCoreEnvironment(coreEnvironmentBean);
         cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);
         cfgr.configRecoveryEnvironment(recoveryEnvironmentBean);

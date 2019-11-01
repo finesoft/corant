@@ -11,19 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.microprofile.restclient;
-
-import org.corant.config.spi.Sortable;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
+package org.corant.config.spi;
 
 /**
- * corant-microprofile-restclient
+ * corant-config
  *
- * @author bingo 上午10:21:26
+ * @author bingo 上午10:44:33
  *
  */
-public interface MpRestClientBuilderConfigurator extends Sortable {
+public interface Sortable {
 
-  void config(RestClientBuilder builder);
+  static int compare(Sortable ccf1, Sortable ccf2) {
+    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal());
+  }
 
+  default int getOrdinal() {
+    return 0;
+  }
 }

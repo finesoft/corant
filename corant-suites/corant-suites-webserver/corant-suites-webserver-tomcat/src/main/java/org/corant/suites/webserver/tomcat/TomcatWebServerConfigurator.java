@@ -17,7 +17,7 @@ package org.corant.suites.webserver.tomcat;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
-import org.corant.config.ComparableConfigurator;
+import org.corant.config.spi.Sortable;
 
 /**
  * corant-suites-webserver-tomcat
@@ -25,7 +25,7 @@ import org.corant.config.ComparableConfigurator;
  * @author bingo 上午10:09:52
  *
  */
-public interface TomcatWebServerConfigurator extends ComparableConfigurator {
+public interface TomcatWebServerConfigurator extends Sortable {
 
   void configureConnector(Connector connector);
 

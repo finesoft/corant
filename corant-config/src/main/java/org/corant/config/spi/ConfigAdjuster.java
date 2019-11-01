@@ -17,7 +17,6 @@ import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
-import org.corant.config.ComparableConfigurator;
 
 /**
  * corant-config
@@ -27,12 +26,12 @@ import org.corant.config.ComparableConfigurator;
  */
 @FunctionalInterface
 public interface ConfigAdjuster
-    extends ComparableConfigurator, UnaryOperator<Map<String, String>> {
+    extends Sortable, UnaryOperator<Map<String, String>> {
 
   static ConfigAdjuster resolve(ClassLoader classLoader) {
     ConfigAdjuster adjuster = (m) -> m;
     streamOf(ServiceLoader.load(ConfigAdjuster.class, classLoader))
-        .sorted(ComparableConfigurator::compare).forEach(adjuster::andThen);
+        .sorted(Sortable::compare).forEach(adjuster::andThen);
     return adjuster;
   }
 

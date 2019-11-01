@@ -63,8 +63,8 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
-    list.add(new SystemPropertiesConfigSource());// system.properties
-    list.add(new SystemEnvironmentConfigSource());// system.environment
+    // list.add(new SystemPropertiesConfigSource());// system.properties
+    // list.add(new SystemEnvironmentConfigSource());// system.environment
     try {
       if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment

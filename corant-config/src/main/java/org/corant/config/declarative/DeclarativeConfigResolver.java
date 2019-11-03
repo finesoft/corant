@@ -16,7 +16,6 @@ package org.corant.config.declarative;
 import static org.corant.config.ConfigUtils.concatKey;
 import static org.corant.config.ConfigUtils.dashify;
 import static org.corant.config.ConfigUtils.getGroupConfigKeys;
-import static org.corant.config.ConfigUtils.handleInfixKey;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -270,7 +269,7 @@ public class DeclarativeConfigResolver {
       if (isBlank(infix)) {
         return getDefaultKey();
       } else {
-        return concatKey(configClass.getKeyRoot(), handleInfixKey(infix), getKeyItem());
+        return concatKey(configClass.getKeyRoot(), infix, getKeyItem());
       }
     }
 

@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import org.corant.config.ConfigConversion.OrdinalConverter;
+import org.corant.config.CorantConfigConversion.OrdinalConverter;
 import org.corant.config.source.MpConfigPropertiesSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
@@ -40,7 +40,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public static final Logger LOGGER = Logger.getLogger(CorantConfigBuilder.class.getName());
 
   final List<ConfigSource> sources = new LinkedList<>();
-  final List<OrdinalConverter> converters = new LinkedList<>();
+  final List<OrdinalConverter> converters = new LinkedList<>(CorantConfigConversion.BUILT_IN_CONVERTERS);
   ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
   CorantConfigBuilder() {}
@@ -69,8 +69,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
-    return new CorantConfig(new ConfigConversion(converters),
-        new ConfigData(sources, ConfigAdjuster.resolve(getClassLoader())));
+    return new CorantConfig(new CorantConfigConversion(converters), sources);
   }
 
   @Override
@@ -103,15 +102,16 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   void addConverter(Converter<?> converter) {
     final Class<?> cls = converter.getClass();
-    Class<?> type = (Class<?>) ConfigConversion.getTypeOfConverter(cls);
+    Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
-    converters.add(new OrdinalConverter(type, converter, ConfigConversion.findPriority(cls)));
+    converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
     LOGGER.fine(() -> String.format("Add config converter %s class loader %s.", converter,
         getClassLoader()));
   }
 
   void addSource(ConfigSource source) {
-    sources.add(shouldNotNull(source, "Config source can not null"));
+    sources.add(shouldNotNull(CorantConfigSource.of(source, ConfigAdjuster.resolve(getClassLoader())),
+        "Config source can not null"));
     LOGGER.fine(() -> String.format("Add config source %s %s items class loader %s.",
         source.getName(), source.getProperties().size(), getClassLoader()));
   }

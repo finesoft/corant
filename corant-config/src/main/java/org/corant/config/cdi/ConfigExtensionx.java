@@ -109,10 +109,10 @@ public class ConfigExtensionx implements Extension {
   void onAfterBeanDisconvery(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
     Config currentConfig = ConfigProvider.getConfig();
     if (currentConfig instanceof CorantConfig) {
-      AnnotatedType<ConfigPropertyProvider> beanType =
-          beanManager.createAnnotatedType(ConfigPropertyProvider.class);
+      AnnotatedType<ConfigProducer> beanType =
+          beanManager.createAnnotatedType(ConfigProducer.class);
       BeanAttributes<?> attributes = null;
-      AnnotatedMethod<? super ConfigPropertyProvider> method = null;
+      AnnotatedMethod<? super ConfigProducer> method = null;
       for (AnnotatedMethod<?> annMethod : beanType.getMethods()) {
         if (annMethod.getJavaMember().getName().equals("getConfigProperty")) {
           attributes = beanManager.createBeanAttributes(annMethod);
@@ -124,7 +124,7 @@ public class ConfigExtensionx implements Extension {
         for (final TypesAndQualifier taq : beanDefinitions) {
           event.addBean(
               beanManager.createBean(TypesBeanAttrs.of(attributes, taq.qualifiers, taq.types),
-                  ConfigPropertyProvider.class, beanManager.getProducerFactory(method, null)));
+                  ConfigProducer.class, beanManager.getProducerFactory(method, null)));
         }
       }
     }

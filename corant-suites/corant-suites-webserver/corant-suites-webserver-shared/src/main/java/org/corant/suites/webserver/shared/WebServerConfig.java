@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.shared;
 
-import static org.corant.kernel.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.HashMap;

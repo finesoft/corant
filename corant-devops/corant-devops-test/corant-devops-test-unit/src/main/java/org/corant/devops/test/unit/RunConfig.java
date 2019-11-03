@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.kernel.normal.Priorities.ConfigPriorities;
+import org.corant.shared.normal.Priorities.ConfigPriorities;
 
 /**
  * corant-devops-test-unit

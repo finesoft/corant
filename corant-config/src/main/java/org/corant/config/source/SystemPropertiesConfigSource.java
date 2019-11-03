@@ -13,10 +13,10 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
 import static org.corant.shared.util.MapUtils.toMap;
 import java.util.Collections;
 import java.util.Map;
-import org.corant.kernel.normal.Priorities;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -32,7 +32,7 @@ public class SystemPropertiesConfigSource extends AbstractConfigSource {
   public SystemPropertiesConfigSource() {
     super();
     name = "System.properties";
-    ordinal = Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
+    ordinal = SYSTEM_PROPERTIES_ORGINAL;
   }
 
   @Override

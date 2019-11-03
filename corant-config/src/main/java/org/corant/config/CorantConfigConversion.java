@@ -14,7 +14,6 @@
 package org.corant.config;
 
 import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.io.Serializable;
@@ -47,7 +46,6 @@ import java.util.stream.Stream;
 import javax.annotation.Priority;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.Converter;
@@ -58,7 +56,7 @@ import org.eclipse.microprofile.config.spi.Converter;
  * @author bingo 下午4:27:06
  *
  */
-public class ConfigConversion implements Serializable {
+public class CorantConfigConversion implements Serializable {
 
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
@@ -80,13 +78,9 @@ public class ConfigConversion implements Serializable {
   /**
    * Assembly discovered converters and built in converters
    *
-   * @param discoveredConverters
+   * @param converters
    */
-  ConfigConversion(List<OrdinalConverter> discoveredConverters) {
-    List<OrdinalConverter> converters = new LinkedList<>(BUILT_IN_CONVERTERS);
-    if (isNotEmpty(discoveredConverters)) {
-      converters.addAll(discoveredConverters);
-    }
+  CorantConfigConversion(List<OrdinalConverter> converters) {
     Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
     Map<Type, Converter<?>> useConverters = new HashMap<>();
     for (OrdinalConverter oc : converters) {
@@ -132,6 +126,11 @@ public class ConfigConversion implements Serializable {
     return getTypeOfConverter(clazz.getSuperclass());
   }
 
+  public static void main(String... strings) {
+    Type t = Class.class;
+    System.out.println(Class.class.isAssignableFrom((Class<?>) t));
+  }
+
   public Object convert(String rawValue, Type type) {
     Object result = null;
     String value = rawValue;
@@ -141,13 +140,27 @@ public class ConfigConversion implements Serializable {
         if (typeClass.isArray()) {
           result = convertArray(value, typeClass.getComponentType());
         } else {
-          result = convertSingle(value, typeClass);
+          if (Class.class.isAssignableFrom(typeClass)) {
+            result = convertSingle(value, Class.class);
+          } else if (List.class.isAssignableFrom(typeClass)) {
+            result = convertCollection(value, String.class, ArrayList::new);
+          } else if (Set.class.isAssignableFrom(typeClass)) {
+            result = convertCollection(value, String.class, HashSet::new);
+          } else if (Optional.class.isAssignableFrom(typeClass)) {
+            result = Optional.ofNullable(convert(value, String.class));
+          } else if (Supplier.class.isAssignableFrom(typeClass)) {
+            result = (Supplier<?>) () -> convert(value, String.class);
+          } else if (Map.class.isAssignableFrom(typeClass)) {
+            result = convertMap(value, String.class, String.class);
+          } else {
+            result = convertSingle(value, typeClass);
+          }
         }
       } else if (type instanceof ParameterizedType) {
         ParameterizedType ptype = (ParameterizedType) type;
         Class<?> rType = forceCast(ptype.getRawType());
         Type argType = ptype.getActualTypeArguments()[0];
-        if (Class.class.equals(rType)) {
+        if (Class.class.isAssignableFrom(rType)) {
           result = convertSingle(value, Class.class);
         } else if (List.class.isAssignableFrom(rType)) {
           result = convertCollection(value, argType, ArrayList::new);
@@ -160,11 +173,11 @@ public class ConfigConversion implements Serializable {
         } else if (Map.class.isAssignableFrom(rType)) {
           result = convertMap(value, ptype);
         } else {
-          throw new CorantRuntimeException(
+          throw new IllegalStateException(
               "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
         }
       } else {
-        throw new CorantRuntimeException("Cannot create config property for " + type);
+        throw new IllegalStateException("Cannot support config property for " + type);
       }
     }
     return result;
@@ -227,8 +240,18 @@ public class ConfigConversion implements Serializable {
         result = Optional.empty();
       }
     } else {
-      throw new CorantRuntimeException("Cannot create config property for " + type);
+      throw new IllegalStateException("Cannot create config property for " + type);
     }
+    return result;
+  }
+
+  public Map<Object, Object> convertMap(String rawValue, Class<?> kt, Class<?> vt) {
+    String[] values = ConfigUtils.splitValue(rawValue);
+    Map<String, String> temp = mapOf((Object[]) values);
+    Map<Object, Object> result = new HashMap<>();
+    temp.forEach((k, v) -> {
+      result.put(convert(k, kt), convert(v, vt));
+    });
     return result;
   }
 
@@ -239,12 +262,7 @@ public class ConfigConversion implements Serializable {
     } else if (properyType.getActualTypeArguments().length == 2) {
       Class<?> kt = (Class<?>) properyType.getActualTypeArguments()[0];
       Class<?> vt = (Class<?>) properyType.getActualTypeArguments()[1];
-      Map<String, String> temp = mapOf((Object[]) values);
-      Map<Object, Object> result = new HashMap<>();
-      temp.forEach((k, v) -> {
-        result.put(convert(k, kt), convert(v, vt));
-      });
-      return result;
+      return convertMap(rawValue, kt, vt);
     }
     return null;
   }
@@ -282,7 +300,8 @@ public class ConfigConversion implements Serializable {
     } else if (argType instanceof WildcardType) {
       return Object.class;
     } else {
-      throw new CorantRuntimeException("Can not resolve parameterized type %s", ptype);
+      throw new IllegalStateException(
+          String.format("Can not resolve parameterized type %s", ptype));
     }
   }
 

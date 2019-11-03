@@ -40,8 +40,8 @@ import javax.transaction.TransactionScoped;
 import org.corant.kernel.api.PersistenceService;
 import org.corant.kernel.api.TransactionService;
 import org.corant.kernel.api.ComponentManager.AbstractComponentManager;
-import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 
 /**

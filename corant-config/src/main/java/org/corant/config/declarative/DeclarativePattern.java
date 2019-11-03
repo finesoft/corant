@@ -42,13 +42,8 @@ public enum DeclarativePattern {
       CorantConfig corantConfig = forceCast(config);
       Field field = configField.getField();
       String key = configField.getKey(infix);
-      Object obj = corantConfig.getConversion().convert(corantConfig.getRawValue(key),
-          field.getGenericType());
-      if (obj == null && configField.getDefaultValue() != null) {
-        obj = corantConfig.getConversion().convert(configField.getDefaultValue(),
-            field.getGenericType());
-      }
-      obj = corantConfig.getConversion().convertIfNecessary(obj, field.getGenericType());
+      Object obj = corantConfig.getConvertedValue(key, field.getGenericType(),
+          configField.getDefaultValue());
       if (obj != null) {
         field.set(configObject, obj);
       }

@@ -31,8 +31,10 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
@@ -64,6 +66,11 @@ public class ConfigExtension implements Extension {
     types.forEach(type -> abd.addBean(new ConfigInjectionBean<>(bm, setOf(type))));
   }
 
+  void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd, BeanManager bm) {
+    AnnotatedType<ConfigProducer> configBean = bm.createAnnotatedType(ConfigProducer.class);
+    bbd.addAnnotatedType(configBean, ConfigProducer.class.getName());
+  }
+
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     ConfigProperty configProperty =
         pip.getInjectionPoint().getAnnotated().getAnnotation(ConfigProperty.class);
@@ -91,7 +98,7 @@ public class ConfigExtension implements Extension {
     public T create(CreationalContext<T> context) {
       InjectionPoint ip =
           (InjectionPoint) beanManager.getInjectableReference(new CurrentInjectionPoint(), context);
-      return forceCast(ConfigPropertyProvider.getConfigProperty(ip));
+      return forceCast(ConfigProducer.getConfigProperty(ip));
     }
 
     @Override
@@ -190,10 +197,9 @@ public class ConfigExtension implements Extension {
         return null;
       }
 
-      @SuppressWarnings("serial")
       @Override
       public Set<Annotation> getQualifiers() {
-        return Collections.<Annotation>singleton(new AnnotationLiteral<Default>() {});
+        return Collections.<Annotation>singleton(Default.Literal.INSTANCE);
       }
 
       @Override

@@ -11,24 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import org.corant.kernel.event.PreContainerStopEvent;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
-
 /**
- * corant-config
- *
- * @author bingo 下午12:25:49
+ * corant-shared
+ * 
+ * @author bingo 下午3:09:52
  *
  */
-@ApplicationScoped
-public class CorantLifecycleHandler {
-
-  void onPreContainerStopEvent(@Observes PreContainerStopEvent e) {
-    ConfigProviderResolver.instance().releaseConfig(ConfigProvider.getConfig());
-  }
-}
+package org.corant.shared.normal;

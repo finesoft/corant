@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.undertow;
 
-import static org.corant.kernel.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -26,8 +26,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
-import org.corant.kernel.normal.Names;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.StopWatch;

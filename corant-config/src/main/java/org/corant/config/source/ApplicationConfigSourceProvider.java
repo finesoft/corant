@@ -13,6 +13,9 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
+import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -24,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import org.corant.kernel.normal.Names.ConfigNames;
-import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils;
 import org.corant.shared.util.Resources.SourceType;
@@ -44,10 +45,10 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String appBaseName = "application";
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
-  static String sysLcPro = System.getProperty(ConfigNames.CFG_LOCATION_KEY);
-  static String sysLcEnv = System.getenv(ConfigNames.CFG_LOCATION_KEY);
+  static String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
+  static String sysLcEnv = System.getenv(CFG_LOCATION_KEY);
   static String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
-  static String cfgUrlExPattern = System.getProperty(ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN);
+  static String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
 
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
@@ -63,20 +64,16 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
-    // list.add(new SystemPropertiesConfigSource());// system.properties
-    // list.add(new SystemEnvironmentConfigSource());// system.environment
     try {
       if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment
         logger.info(String.format("Load config source from designated locations %s",
             String.join(",", locations)));
-        list.addAll(
-            ConfigSourceLoader.load(ConfigPriorities.APPLICATION_ORDINAL, filter, locations));
+        list.addAll(ConfigSourceLoader.load(APPLICATION_ORDINAL, filter, locations));
       } else {
         logger.info(
             String.format("Load config source from class paths %s", String.join(",", classPaths)));
-        list.addAll(ConfigSourceLoader.load(classLoader, ConfigPriorities.APPLICATION_ORDINAL,
-            filter, classPaths));
+        list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
       }
       list.forEach(cs -> logger
           .info(() -> String.format("Loaded config source[%s], inlcude %s items, location is %s.",

@@ -13,8 +13,8 @@
  */
 package org.corant.config;
 
-import static org.corant.kernel.normal.Names.NAME_SPACE_SEPARATORS;
-import static org.corant.kernel.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -97,10 +97,6 @@ public class ConfigUtils {
     return getGroupConfigKeys(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
-  public static String handleInfixKey(String key) {
-    return key.contains(NAME_SPACE_SEPARATORS) ? key.replaceAll("\\.", "\\\\.") : key;
-  }
-
   public static String regulerKeyPrefix(String prefix) {
     String rs = defaultTrim(prefix);
     if (rs.length() == 0) {
@@ -114,7 +110,7 @@ public class ConfigUtils {
     if (rs.length() == 0) {
       return rs;
     }
-    while (rs.endsWith(NAME_SPACE_SEPARATORS) && !rs.endsWith("\\.")) {
+    while (rs.endsWith(NAME_SPACE_SEPARATORS) && !rs.endsWith("\\\\.")) {
       rs = defaultTrim(rs.substring(0, rs.length() - SEPARATOR_LEN));
     }
     while (rs.startsWith(NAME_SPACE_SEPARATORS)) {
@@ -141,7 +137,7 @@ public class ConfigUtils {
     String[] result = new String[spLen];
     int reLen = 0;
     for (int i = 0; i < spLen; i++) {
-      split[i] = split[i].replace("\\" + splitor, splitor);
+      split[i] = split[i].replace("\\\\" + splitor, splitor);
       if (isNotBlank(split[i])) {
         result[reLen] = trim ? split[i].trim() : split[i];
         reLen++;

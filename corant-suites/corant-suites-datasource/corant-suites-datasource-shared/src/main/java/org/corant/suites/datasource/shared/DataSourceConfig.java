@@ -21,9 +21,9 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.kernel.normal.Names.JndiNames;
 import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.kernel.util.Unnamed;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.StringUtils;
 import org.eclipse.microprofile.config.Config;
 

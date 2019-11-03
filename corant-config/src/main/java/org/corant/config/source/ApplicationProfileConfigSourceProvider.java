@@ -13,7 +13,8 @@
  */
 package org.corant.config.source;
 
-import static org.corant.kernel.normal.Names.ConfigNames.CFG_PROFILE_KEY;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
+import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_PROFILE_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import static org.corant.shared.util.StringUtils.defaultString;
@@ -23,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.SourceType;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -58,13 +58,12 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
         // first find locations that designated in system properties or system environment
         logger.info(String.format("Load profile config source from designated locations %s",
             String.join(",", pfLocations)));
-        list.addAll(ConfigSourceLoader.load(ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter,
-            pfLocations));
+        list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, pfLocations));
       } else if (isNotEmpty(pfClassPaths)) {
         logger.info(String.format("Load profile config source from class paths %s",
             String.join(",", pfClassPaths)));
-        list.addAll(ConfigSourceLoader.load(classLoader,
-            ConfigPriorities.APPLICATION_PROFILE_ORDINAL, filter, pfClassPaths));
+        list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_PROFILE_ORDINAL, filter,
+            pfClassPaths));
       }
       list.forEach(cs -> logger.info(
           () -> String.format("Loaded profile config source[%s], inlcude %s items, location is %s.",

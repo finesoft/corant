@@ -16,7 +16,7 @@ package org.corant.devops.test.unit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.corant.kernel.normal.Priorities;
+import org.corant.shared.normal.Priorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 

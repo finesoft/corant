@@ -13,13 +13,22 @@
  */
 package org.corant.config.cdi;
 
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATOR;
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.io.Serializable;
-import javax.enterprise.context.ApplicationScoped;
+import java.lang.reflect.Member;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import org.corant.config.CorantConfig;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-config
@@ -27,10 +36,37 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * @author bingo 下午4:35:31
  *
  */
-@ApplicationScoped
 public class ConfigProducer implements Serializable {
 
   private static final long serialVersionUID = -7704094948781355258L;
+
+  public static String getConfigKey(InjectionPoint injectionPoint) {
+    ConfigProperty property =
+        shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
+    String key = defaultTrim(property.name());
+    if (isBlank(key)) {
+      Bean<?> bean = injectionPoint.getBean();
+      Member member = injectionPoint.getMember();
+      if (bean == null) {
+        key = member.getDeclaringClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
+            .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+      } else {
+        key = bean.getBeanClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
+            .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+      }
+    }
+    return key;
+  }
+
+  @ConfigProperty
+  @Dependent
+  public static Object getConfigProperty(InjectionPoint injectionPoint) {
+    CorantConfig config = forceCast(ConfigProvider.getConfig());
+    String key = defaultTrim(getConfigKey(injectionPoint));
+    ConfigProperty property =
+        shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
+    return config.getConvertedValue(key, injectionPoint.getType(), property.defaultValue());
+  }
 
   @Dependent
   @Produces

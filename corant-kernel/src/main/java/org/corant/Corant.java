@@ -13,7 +13,7 @@
  */
 package org.corant;
 
-import static org.corant.kernel.normal.Names.applicationName;
+import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;

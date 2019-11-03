@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.corant.kernel.normal.Defaults;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.Resource;

@@ -22,7 +22,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.corant.devops.test.unit.web.RandomWebServerPortSourceProvider.RandomWebServerPortConfigSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
-import org.corant.kernel.normal.Defaults;
+import org.corant.shared.normal.Defaults;
 import org.corant.suites.servlet.abstraction.ContentDispositions.ContentDisposition;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.restassured.RestAssured;

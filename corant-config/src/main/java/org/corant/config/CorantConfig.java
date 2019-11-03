@@ -13,15 +13,19 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
-import java.util.Collections;
+import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.corant.config.spi.ConfigAdjuster;
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -34,48 +38,73 @@ public class CorantConfig implements Config, Serializable {
 
   private static final long serialVersionUID = 8788710772538278522L;
 
-  final ConfigConversion conversion;
-  final AtomicReference<ConfigData> data;
+  final CorantConfigConversion conversion;
+  final AtomicReference<List<ConfigSource>> sources;
 
-  public CorantConfig(ConfigConversion conversion, ConfigData data) {
+  public CorantConfig(CorantConfigConversion conversion, List<ConfigSource> sources) {
     this.conversion = conversion;
-    this.data = new AtomicReference<>(data);
+    this.sources = new AtomicReference<>(sources);
   }
 
   @Override
   public Iterable<ConfigSource> getConfigSources() {
-    return defaultObject(data.get().sources, Collections.emptyList());
+    return sources.get();
   }
 
-  public ConfigConversion getConversion() {
+  public CorantConfigConversion getConversion() {
     return conversion;
+  }
+
+  public Object getConvertedValue(String propertyName, Type type, String defaultRawValue) {
+    Object result = conversion.convert(getRawValue(propertyName), type);
+    if (result == null && defaultRawValue != null
+        && !defaultRawValue.equals(ConfigProperty.UNCONFIGURED_VALUE)) {
+      result = conversion.convert(defaultRawValue, type);
+    }
+    return conversion.convertIfNecessary(result, type);
   }
 
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-    return Optional.ofNullable(getValue(propertyName, propertyType));
+    return Optional
+        .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));
   }
 
   @Override
   public Iterable<String> getPropertyNames() {
-    return defaultObject(data.get().propertyNames, Collections.emptySet());
+    Set<String> names = new HashSet<>();
+    for (ConfigSource configSource : sources.get()) {
+      names.addAll(configSource.getPropertyNames());
+    }
+    return names;
   }
 
   public String getRawValue(String propertyName) {
-    return data.get().caches.get(propertyName);
+    for (ConfigSource cs : sources.get()) {
+      String value = cs.getValue(propertyName);
+      if (isNotBlank(value)) {
+        return value;
+      }
+    }
+    return null;
   }
 
   @Override
   public <T> T getValue(String propertyName, Class<T> propertyType) {
-    String value = getRawValue(propertyName);
-    return forceCast(conversion.convert(value, propertyType));
+    T value = forceCast(conversion.convert(getRawValue(propertyName), propertyType));
+    if (value == null) {
+      throw new NoSuchElementException(
+          String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
+              propertyType, String.join("\n", getPropertyNames())));
+    }
+    return value;
   }
 
   public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {
-    ConfigData newDat = new ConfigData(sources, adjuster);
+    List<ConfigSource> newSources = sources;
     for (;;) {
-      ConfigData oldDat = data.get();
-      if (data.compareAndSet(oldDat, newDat)) {
+      List<ConfigSource> oldSources = this.sources.get();
+      if (this.sources.compareAndSet(oldSources, newSources)) {
         return;
       }
     }

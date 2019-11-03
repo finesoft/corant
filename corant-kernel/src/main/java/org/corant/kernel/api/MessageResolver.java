@@ -15,7 +15,7 @@ package org.corant.kernel.api;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Locale;
-import org.corant.kernel.normal.Names;
+import org.corant.shared.normal.Names;
 
 /**
  * corant-kernel

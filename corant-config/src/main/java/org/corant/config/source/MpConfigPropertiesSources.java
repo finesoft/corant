@@ -13,7 +13,8 @@
  */
 package org.corant.config.source;
 
-import java.util.stream.Stream;
+import java.util.LinkedList;
+import java.util.List;
 import org.corant.shared.util.Resources;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -28,10 +29,16 @@ public class MpConfigPropertiesSources {
   public static final int DEFAULT_ORDINAL = 100;
   public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES =
       "META-INF/microprofile-config.properties";
+  public static final String WEB_INF_MICROPROFILE_CONFIG_PROPERTIES =
+      "WEB-INF/classes/META-INF/microprofile-config.properties";
 
-  public static Stream<ConfigSource> get(ClassLoader classLoader) {
-    return Resources.tryFromClassPath(classLoader, META_INF_MICROPROFILE_CONFIG_PROPERTIES)
-        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL));
+  public static List<ConfigSource> get(ClassLoader classLoader) {
+    List<ConfigSource> sources = new LinkedList<>();
+    Resources.tryFromClassPath(classLoader, META_INF_MICROPROFILE_CONFIG_PROPERTIES)
+        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
+    Resources.tryFromClassPath(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROPERTIES)
+        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
+    return sources;
   }
 
 }

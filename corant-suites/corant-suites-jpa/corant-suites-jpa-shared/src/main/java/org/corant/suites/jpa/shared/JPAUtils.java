@@ -31,8 +31,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.normal.Names.PersistenceNames;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
 

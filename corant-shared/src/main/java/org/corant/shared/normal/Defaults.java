@@ -11,28 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.normal;
+package org.corant.shared.normal;
+
+import static org.corant.shared.util.StringUtils.defaultString;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * corant-shared
  *
- * @author bingo 上午10:20:20
+ * @author bingo 上午10:25:36
  *
  */
-public interface Priorities {
+public interface Defaults {
 
-  interface ConfigPriorities {
-    int FRAMEWORK_DEFAULTS_ORDINAL = -1000;
-    int APPLICATION_ORDINAL = 200;
-    int APPLICATION_PROFILE_ORDINAL = 250;
-    int SYSTEM_ENVIRONMENT_ORGINAL = 300;
-    int SYSTEM_PROPERTIES_ORGINAL = 400;
-    int APPLICATION_ADJUST_ORDINAL = 1000;
+  String DFLT_CHARSET_STR = "UTF-8";
 
-  }
+  Charset DFLT_CHARSET = StandardCharsets.UTF_8;
 
-  interface PostReadyEventPriorities {
+  int ONE_KB = 1024;
 
+  int SIXTEEN_KBS = ONE_KB * 16;
+
+  long ONE_MB = ONE_KB * ONE_KB;
+
+  static Path corantUserDir(String suffix) {
+    return Paths.get(System.getProperty("user.home"))
+        .resolve("." + Names.applicationName() + defaultString(suffix));
   }
 
 }

@@ -13,6 +13,8 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
+import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
 import static org.corant.shared.util.MapUtils.toMap;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.util.ArrayList;
@@ -21,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import org.corant.kernel.normal.Names.ConfigNames;
-import org.corant.kernel.normal.Priorities.ConfigPriorities;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -37,7 +37,7 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     final Properties props = new Properties();
-    final String prefix = ConfigNames.CFG_ADJUST_PREFIX;
+    final String prefix = CFG_ADJUST_PREFIX;
     final int prefixLen = prefix.length();
     System.getProperties().forEach((k, v) -> {
       String key = asDefaultString(k);
@@ -77,12 +77,12 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
 
     @Override
     public String getName() {
-      return ConfigNames.CFG_ADJUST_PREFIX;
+      return CFG_ADJUST_PREFIX;
     }
 
     @Override
     public int getOrdinal() {
-      return ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
+      return APPLICATION_ADJUST_ORDINAL;
     }
 
     @Override

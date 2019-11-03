@@ -41,8 +41,6 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
 import org.corant.shared.util.ObjectUtils;
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -80,14 +78,13 @@ public class ConfigExtension implements Extension {
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
-
+    // TODO FIXME validate config
   }
 
   public static class ConfigInjectionBean<T> implements Bean<T>, PassivationCapable {
     private final static Set<Annotation> qualifiers = immutableSetOf(new ConfigPropertyLiteral());
     private final BeanManager beanManager;
     private final Set<Type> types;
-    private Config config;
 
     public ConfigInjectionBean(BeanManager bm, Set<Type> types) {
       this.beanManager = bm;
@@ -107,13 +104,6 @@ public class ConfigExtension implements Extension {
     @Override
     public Class<?> getBeanClass() {
       return ConfigInjectionBean.class;
-    }
-
-    public Config getConfig() {
-      if (config == null) {
-        config = ConfigProvider.getConfig();
-      }
-      return config;
     }
 
     @Override

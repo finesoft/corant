@@ -24,7 +24,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 下午5:05:04
  *
  */
-public class MpConfigPropertiesSources {
+public class MicroprofileConfigSources {
 
   public static final int DEFAULT_ORDINAL = 100;
   public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES =

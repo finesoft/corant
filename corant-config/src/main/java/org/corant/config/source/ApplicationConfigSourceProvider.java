@@ -75,9 +75,6 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
             String.format("Load config source from class paths %s", String.join(",", classPaths)));
         list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
       }
-      list.forEach(cs -> logger
-          .info(() -> String.format("Loaded config source[%s], inlcude %s items, location is %s.",
-              cs.getOrdinal(), cs.getProperties().size(), cs.getName())));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

@@ -13,6 +13,7 @@
  */
 package org.corant.config.spi;
 
+import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,15 +27,20 @@ import java.util.function.Function;
 public class ConfigVariableAdjuster implements ConfigAdjuster {
 
   @Override
-  public Map<String, String> apply(Map<String, String> t) {
-    Map<String, String> adjustered = new HashMap<>(t);
-    t.forEach((k, v) -> {
-      if (v.indexOf("${") != -1 && v.indexOf("}") != -1) {
-        String av = resolveVariables(v, adjustered::get);
+  public Map<String, String> apply(Map<String, String> properties,
+      Map<String, String> allProperties) {
+    Map<String, String> adjustered = new HashMap<>(properties);
+    properties.forEach((k, v) -> {
+      if (hasVariable(v) && isEquals(v, allProperties.get(k))) {
+        String av = resolveVariables(v, allProperties::get);
         adjustered.put(k, av);
       }
     });
     return adjustered;
+  }
+
+  boolean hasVariable(String v) {
+    return v != null && v.indexOf("${") != -1 && v.indexOf("}") != -1;
   }
 
   String resolveVariables(String value, Function<String, String> vals) {

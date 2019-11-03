@@ -44,6 +44,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Priority;
+import javax.inject.Provider;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.util.ConversionUtils;
@@ -150,6 +151,8 @@ public class CorantConfigConversion implements Serializable {
             result = Optional.ofNullable(convert(value, String.class));
           } else if (Supplier.class.isAssignableFrom(typeClass)) {
             result = (Supplier<?>) () -> convert(value, String.class);
+          } else if (Provider.class.isAssignableFrom(typeClass)) {
+            result = (Provider<?>) () -> convert(value, String.class);
           } else if (Map.class.isAssignableFrom(typeClass)) {
             result = convertMap(value, String.class, String.class);
           } else {
@@ -170,6 +173,8 @@ public class CorantConfigConversion implements Serializable {
           result = Optional.ofNullable(convert(value, argType));
         } else if (Supplier.class.isAssignableFrom(rType)) {
           result = (Supplier<?>) () -> convert(value, argType);
+        } else if (Provider.class.isAssignableFrom(rType)) {
+          result = (Provider<?>) () -> convert(value, argType);
         } else if (Map.class.isAssignableFrom(rType)) {
           result = convertMap(value, ptype);
         } else {

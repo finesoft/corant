@@ -14,17 +14,17 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfigConversion.OrdinalConverter;
-import org.corant.config.CorantConfigSource.ConfigSourceInUse;
-import org.corant.config.source.MpConfigPropertiesSources;
+import org.corant.config.CorantConfigSource.AdjustedConfigSource;
+import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
-import org.corant.config.spi.ConfigAdjuster;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
@@ -42,7 +42,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   static final Logger logger = Logger.getLogger(CorantConfigBuilder.class.getName());
 
-  final List<ConfigSource> sources = new LinkedList<>();
+  final List<ConfigSource> sources = new ArrayList<>();
   final List<OrdinalConverter> converters =
       new LinkedList<>(CorantConfigConversion.BUILT_IN_CONVERTERS);
   ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -53,7 +53,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public ConfigBuilder addDefaultSources() {
     addSource(new SystemPropertiesConfigSource());
     addSource(new SystemEnvironmentConfigSource());
-    MpConfigPropertiesSources.get(getClassLoader()).forEach(this::addSource);
+    MicroprofileConfigSources.get(getClassLoader()).forEach(this::addSource);
     return this;
   }
 
@@ -73,15 +73,17 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
+    List<ConfigSource> resolvedSources =
+        CorantConfigSource.resolveAdjust(sources, getClassLoader());
     logger.fine(() -> String.format("Resolve sources [%s] ",
         String.join("\n", ObjectUtils.asStrings(sources.stream().map(s -> {
           final StringBuilder sb =
-              new StringBuilder(((ConfigSourceInUse) s).orginal.getClass().getName())
+              new StringBuilder(((AdjustedConfigSource) s).orginal.getClass().getName())
                   .append(":\n{\n");
           s.getProperties().forEach((k, v) -> sb.append(k).append(" : ").append(v).append("\n"));
           return sb.append("}\n").toString();
         }).collect(Collectors.toList())))));
-    return new CorantConfig(new CorantConfigConversion(converters), sources);
+    return new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
   }
 
   @Override
@@ -117,16 +119,16 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    logger.fine(() -> String.format("Add config converter %s class loader %s.", converter,
+    logger.fine(() -> String.format("Add config converter %s, class loader is %s.", converter,
         getClassLoader()));
   }
 
   void addSource(ConfigSource source) {
-    sources
-        .add(shouldNotNull(ConfigSourceInUse.of(source, ConfigAdjuster.resolve(getClassLoader())),
-            "Config source can not null"));
-    logger.fine(() -> String.format("Add config source %s %s items class loader %s.",
-        source.getName(), source.getProperties().size(), getClassLoader()));
+    sources.add(shouldNotNull(source, "Config source can not null."));
+    logger.info(() -> String.format(
+        "Add config source[%s] include %s items, location is [%s], class loader is %s, source class is [%s].",
+        source.getOrdinal(), source.getProperties().size(), source.getName(), getClassLoader(),
+        source.getClass().getName()));
   }
 
   ClassLoader getClassLoader() {

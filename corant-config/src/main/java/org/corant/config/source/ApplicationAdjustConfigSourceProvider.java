@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -49,11 +47,7 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
     });
     if (!props.isEmpty()) {
       List<ConfigSource> list = new ArrayList<>();
-      List<String> keys =
-          props.keySet().stream().map(ObjectUtils::asString).collect(Collectors.toList());
       list.add(new AdjustConfigSource(props));
-      list.forEach(cs -> logger.info(() -> String.format("Loaded adjust config source[%s] %s.",
-          cs.getOrdinal(), String.join(",", keys))));
       return list;
     }
     return Collections.emptyList();

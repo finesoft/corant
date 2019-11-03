@@ -13,7 +13,12 @@
  */
 package org.corant.config;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.config.spi.ConfigAdjuster;
@@ -26,6 +31,11 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  *
  */
 public abstract class CorantConfigSource implements ConfigSource {
+
+  static final Comparator<ConfigSource> CONFIG_SOURCE_COMPARATOR = (o1, o2) -> {
+    int res = Long.signum((long) o2.getOrdinal() - (long) o1.getOrdinal());
+    return res != 0 ? res : o2.getName().compareTo(o1.getName());
+  };
 
   protected String name;
 
@@ -45,6 +55,34 @@ public abstract class CorantConfigSource implements ConfigSource {
     this.ordinal = ordinal;
   }
 
+  /**
+   *
+   * @param orginals
+   * @param classLoader
+   * @return resolveAdjust
+   */
+  public static List<ConfigSource> resolveAdjust(List<ConfigSource> orginals,
+      ClassLoader classLoader) {
+    shouldNotNull(orginals, "The config sources can not null!").sort(CONFIG_SOURCE_COMPARATOR);
+    List<ConfigSource> resolved = new ArrayList<>(orginals.size());
+    final Map<String, String> allProperties = new HashMap<>();
+    for (ConfigSource orginal : orginals) {
+      orginal.getProperties().forEach((k, v) -> {
+        allProperties.computeIfAbsent(k, x -> v);
+      });
+    }
+    final ConfigAdjuster adjuster = ConfigAdjuster.resolve(classLoader);
+    for (ConfigSource orginal : orginals) {
+      if (orginal instanceof CorantConfigSource) {
+        resolved.add(new AdjustedConfigSource((CorantConfigSource) orginal,
+            adjuster.apply(orginal.getProperties(), Collections.unmodifiableMap(allProperties))));
+      } else {
+        resolved.add(orginal);
+      }
+    }
+    return resolved;
+  }
+
   @Override
   public String getName() {
     return name;
@@ -52,6 +90,13 @@ public abstract class CorantConfigSource implements ConfigSource {
 
   @Override
   public int getOrdinal() {
+    String configOrdinal = getValue(CONFIG_ORDINAL);
+    if (configOrdinal != null) {
+      try {
+        return Integer.parseInt(configOrdinal);
+      } catch (NumberFormatException ignored) {
+      }
+    }
     return ordinal;
   }
 
@@ -68,26 +113,16 @@ public abstract class CorantConfigSource implements ConfigSource {
    * @author bingo 下午5:18:52
    *
    */
-  static class ConfigSourceInUse implements ConfigSource {
+  static class AdjustedConfigSource implements ConfigSource {
 
     final ConfigSource orginal;
     final Map<String, String> properties;
     final Set<String> propertyNames;
-    final boolean corant;
 
-    private ConfigSourceInUse(ConfigSource orginal, ConfigAdjuster adjuster) {
+    AdjustedConfigSource(CorantConfigSource orginal, Map<String, String> newProperties) {
       this.orginal = orginal;
-      if (corant = orginal instanceof CorantConfigSource) {
-        properties = Collections.unmodifiableMap(adjuster.apply(orginal.getProperties()));
-        propertyNames = Collections.unmodifiableSet(properties.keySet());
-      } else {
-        properties = Collections.emptyMap();
-        propertyNames = Collections.emptySet();
-      }
-    }
-
-    public static ConfigSourceInUse of(ConfigSource orginal, ConfigAdjuster adjuster) {
-      return new ConfigSourceInUse(orginal, adjuster);
+      properties = Collections.unmodifiableMap(newProperties);
+      propertyNames = Collections.unmodifiableSet(properties.keySet());
     }
 
     @Override
@@ -102,17 +137,17 @@ public abstract class CorantConfigSource implements ConfigSource {
 
     @Override
     public Map<String, String> getProperties() {
-      return corant ? properties : orginal.getProperties();
+      return properties;
     }
 
     @Override
     public Set<String> getPropertyNames() {
-      return corant ? propertyNames : orginal.getPropertyNames();
+      return propertyNames;
     }
 
     @Override
     public String getValue(String propertyName) {
-      return corant ? properties.get(propertyName) : orginal.getValue(propertyName);
+      return properties.get(propertyName);
     }
 
   }

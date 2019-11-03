@@ -15,8 +15,8 @@ package org.corant.config.spi;
 
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
-import java.util.function.UnaryOperator;
 
 /**
  * corant-config
@@ -25,14 +25,20 @@ import java.util.function.UnaryOperator;
  *
  */
 @FunctionalInterface
-public interface ConfigAdjuster
-    extends Sortable, UnaryOperator<Map<String, String>> {
+public interface ConfigAdjuster extends Sortable {
 
   static ConfigAdjuster resolve(ClassLoader classLoader) {
-    ConfigAdjuster adjuster = (m) -> m;
-    streamOf(ServiceLoader.load(ConfigAdjuster.class, classLoader))
-        .sorted(Sortable::compare).forEach(adjuster::andThen);
+    final ConfigAdjuster adjuster = (m, a) -> m;
+    streamOf(ServiceLoader.load(ConfigAdjuster.class, classLoader)).sorted(Sortable::compare)
+        .forEach(adjuster::andThen);
     return adjuster;
   }
+
+  default ConfigAdjuster andThen(ConfigAdjuster after) {
+    Objects.requireNonNull(after);
+    return (p, ap) -> after.apply(apply(p, ap), ap);
+  }
+
+  Map<String, String> apply(Map<String, String> properties, Map<String, String> allProperties);
 
 }

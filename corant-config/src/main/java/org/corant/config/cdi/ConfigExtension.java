@@ -84,7 +84,7 @@ public class ConfigExtension implements Extension {
   }
 
   public static class ConfigInjectionBean<T> implements Bean<T>, PassivationCapable {
-    private final static Set<Annotation> QUALIFIERS = immutableSetOf(new ConfigPropertyLiteral());
+    private final static Set<Annotation> qualifiers = immutableSetOf(new ConfigPropertyLiteral());
     private final BeanManager beanManager;
     private final Set<Type> types;
     private Config config;
@@ -133,7 +133,7 @@ public class ConfigExtension implements Extension {
 
     @Override
     public Set<Annotation> getQualifiers() {
-      return QUALIFIERS;
+      return qualifiers;
     }
 
     @Override

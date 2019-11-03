@@ -21,6 +21,7 @@ import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.io.Serializable;
 import java.lang.reflect.Member;
+import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Bean;
@@ -39,6 +40,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class ConfigProducer implements Serializable {
 
   private static final long serialVersionUID = -7704094948781355258L;
+  private static final Logger logger = Logger.getLogger(ConfigProducer.class.getName());
 
   public static String getConfigKey(InjectionPoint injectionPoint) {
     ConfigProperty property =
@@ -65,7 +67,11 @@ public class ConfigProducer implements Serializable {
     String key = defaultTrim(getConfigKey(injectionPoint));
     ConfigProperty property =
         shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
-    return config.getConvertedValue(key, injectionPoint.getType(), property.defaultValue());
+    Object value = config.getConvertedValue(key, injectionPoint.getType(), property.defaultValue());
+    logger.fine(() -> String.format("Inject config property to [%s.%s] with key [%s] value [%s]",
+        injectionPoint.getMember().getDeclaringClass().getName(),
+        injectionPoint.getMember().getName(), key, value));
+    return value;
   }
 
   @Dependent

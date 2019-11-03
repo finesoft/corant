@@ -15,6 +15,7 @@ package org.corant.config.source;
 
 import java.net.URL;
 import java.util.Map;
+import org.corant.config.CorantConfigSource;
 
 /**
  * corant-config
@@ -22,7 +23,7 @@ import java.util.Map;
  * @author bingo 上午10:10:55
  *
  */
-public class JsonConfigSource extends AbstractConfigSource {
+public class JsonConfigSource extends CorantConfigSource {
 
   JsonConfigSource(URL resourceUrl, int ordinal) {
     // TODO
@@ -35,7 +36,7 @@ public class JsonConfigSource extends AbstractConfigSource {
   }
 
   @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
+  protected CorantConfigSource withProperties(Map<String, String> properties) {
     // TODO
     return null;
   }

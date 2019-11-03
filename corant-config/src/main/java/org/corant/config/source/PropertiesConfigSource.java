@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
+import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -29,7 +30,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午5:19:11
  *
  */
-public class PropertiesConfigSource extends AbstractConfigSource {
+public class PropertiesConfigSource extends CorantConfigSource {
 
   final Map<String, String> properties;
 
@@ -82,7 +83,7 @@ public class PropertiesConfigSource extends AbstractConfigSource {
   }
 
   @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
+  protected CorantConfigSource withProperties(Map<String, String> properties) {
     return new PropertiesConfigSource(getName(), getOrdinal(), properties);
   }
 }

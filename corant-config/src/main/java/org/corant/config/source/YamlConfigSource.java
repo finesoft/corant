@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.yaml.snakeyaml.Yaml;
 
@@ -32,7 +33,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author bingo 上午10:10:30
  *
  */
-public class YamlConfigSource extends AbstractConfigSource {
+public class YamlConfigSource extends CorantConfigSource {
 
   final Map<String, String> properties;
 
@@ -84,7 +85,7 @@ public class YamlConfigSource extends AbstractConfigSource {
   }
 
   @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
+  protected CorantConfigSource withProperties(Map<String, String> properties) {
     return new YamlConfigSource(getName(), properties, getOrdinal());
   }
 

@@ -18,11 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.corant.config.CorantConfigConversion.OrdinalConverter;
+import org.corant.config.CorantConfigSource.ConfigSourceInUse;
 import org.corant.config.source.MpConfigPropertiesSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
 import org.corant.config.spi.ConfigAdjuster;
+import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -37,10 +40,11 @@ import org.eclipse.microprofile.config.spi.Converter;
  */
 public class CorantConfigBuilder implements ConfigBuilder {
 
-  public static final Logger LOGGER = Logger.getLogger(CorantConfigBuilder.class.getName());
+  static final Logger logger = Logger.getLogger(CorantConfigBuilder.class.getName());
 
   final List<ConfigSource> sources = new LinkedList<>();
-  final List<OrdinalConverter> converters = new LinkedList<>(CorantConfigConversion.BUILT_IN_CONVERTERS);
+  final List<OrdinalConverter> converters =
+      new LinkedList<>(CorantConfigConversion.BUILT_IN_CONVERTERS);
   ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
   CorantConfigBuilder() {}
@@ -69,6 +73,14 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
+    logger.fine(() -> String.format("Resolve sources [%s] ",
+        String.join("\n", ObjectUtils.asStrings(sources.stream().map(s -> {
+          final StringBuilder sb =
+              new StringBuilder(((ConfigSourceInUse) s).orginal.getClass().getName())
+                  .append(":\n{\n");
+          s.getProperties().forEach((k, v) -> sb.append(k).append(" : ").append(v).append("\n"));
+          return sb.append("}\n").toString();
+        }).collect(Collectors.toList())))));
     return new CorantConfig(new CorantConfigConversion(converters), sources);
   }
 
@@ -105,14 +117,15 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    LOGGER.fine(() -> String.format("Add config converter %s class loader %s.", converter,
+    logger.fine(() -> String.format("Add config converter %s class loader %s.", converter,
         getClassLoader()));
   }
 
   void addSource(ConfigSource source) {
-    sources.add(shouldNotNull(CorantConfigSource.of(source, ConfigAdjuster.resolve(getClassLoader())),
-        "Config source can not null"));
-    LOGGER.fine(() -> String.format("Add config source %s %s items class loader %s.",
+    sources
+        .add(shouldNotNull(ConfigSourceInUse.of(source, ConfigAdjuster.resolve(getClassLoader())),
+            "Config source can not null"));
+    logger.fine(() -> String.format("Add config source %s %s items class loader %s.",
         source.getName(), source.getProperties().size(), getClassLoader()));
   }
 

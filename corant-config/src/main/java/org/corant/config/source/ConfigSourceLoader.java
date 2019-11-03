@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources;
@@ -66,7 +67,7 @@ public class ConfigSourceLoader {
     return sources;
   }
 
-  static Optional<AbstractConfigSource> load(Predicate<URL> filter, URLResource resource,
+  static Optional<CorantConfigSource> load(Predicate<URL> filter, URLResource resource,
       int ordinal) {
     if (resource != null && filter.test(resource.getURL())) {
       String location = defaultTrim(resource.getURL().getPath());
@@ -87,7 +88,7 @@ public class ConfigSourceLoader {
     return Optional.empty();
   }
 
-  static AbstractConfigSource load(URL resourceUrl, int ordinal) {
+  static CorantConfigSource load(URL resourceUrl, int ordinal) {
     String urlstr = defaultString(resourceUrl.getPath()).toLowerCase(Locale.ROOT);
     if (urlstr.endsWith(".properties")) {
       return new PropertiesConfigSource(resourceUrl, ordinal);

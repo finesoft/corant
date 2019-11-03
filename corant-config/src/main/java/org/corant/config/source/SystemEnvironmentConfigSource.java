@@ -19,6 +19,7 @@ import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -27,7 +28,7 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 上午11:04:36
  *
  */
-public class SystemEnvironmentConfigSource extends AbstractConfigSource {
+public class SystemEnvironmentConfigSource extends CorantConfigSource {
 
   final Map<String, String> sysPros = Collections.unmodifiableMap(System.getenv());
 
@@ -63,7 +64,7 @@ public class SystemEnvironmentConfigSource extends AbstractConfigSource {
   }
 
   @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
+  protected CorantConfigSource withProperties(Map<String, String> properties) {
     throw new NotSupportedException("Can not adjust system environment!");
   }
 

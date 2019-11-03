@@ -15,6 +15,7 @@ package org.corant.config.source;
 
 import java.net.URL;
 import java.util.Map;
+import org.corant.config.CorantConfigSource;
 
 /**
  * corant-config
@@ -22,7 +23,7 @@ import java.util.Map;
  * @author bingo 上午10:11:23
  *
  */
-public class XmlConfigSource extends AbstractConfigSource {
+public class XmlConfigSource extends CorantConfigSource {
 
   XmlConfigSource(URL resourceUrl, int ordinal) {}
 
@@ -32,7 +33,7 @@ public class XmlConfigSource extends AbstractConfigSource {
   }
 
   @Override
-  AbstractConfigSource withProperties(Map<String, String> properties) {
+  protected CorantConfigSource withProperties(Map<String, String> properties) {
     return null;
   }
 

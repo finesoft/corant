@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 import org.corant.config.spi.ConfigAdjuster;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -37,6 +38,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class CorantConfig implements Config, Serializable {
 
   private static final long serialVersionUID = 8788710772538278522L;
+  private static final Logger logger = Logger.getLogger(CorantConfig.class.getName());
 
   final CorantConfigConversion conversion;
   final AtomicReference<List<ConfigSource>> sources;
@@ -66,6 +68,8 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
+    logger.fine(() -> String.format("Retrive optional config property key [%s] type [%s]",
+        propertyName, propertyType.getName()));
     return Optional
         .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));
   }
@@ -91,6 +95,8 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public <T> T getValue(String propertyName, Class<T> propertyType) {
+    logger.fine(() -> String.format("Retrive config property key [%s] type [%s]", propertyName,
+        propertyType.getName()));
     T value = forceCast(conversion.convert(getRawValue(propertyName), propertyType));
     if (value == null) {
       throw new NoSuchElementException(

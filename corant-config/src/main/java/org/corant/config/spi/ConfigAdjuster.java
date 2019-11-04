@@ -13,7 +13,8 @@
  */
 package org.corant.config.spi;
 
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.CollectionUtils.listOf;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -28,9 +29,13 @@ import java.util.ServiceLoader;
 public interface ConfigAdjuster extends Sortable {
 
   static ConfigAdjuster resolve(ClassLoader classLoader) {
-    final ConfigAdjuster adjuster = (m, a) -> m;
-    streamOf(ServiceLoader.load(ConfigAdjuster.class, classLoader)).sorted(Sortable::compare)
-        .forEach(adjuster::andThen);
+    ConfigAdjuster adjuster = (m, a) -> m;
+    List<ConfigAdjuster> discoveredAdjusters =
+        listOf(ServiceLoader.load(ConfigAdjuster.class, classLoader));
+    discoveredAdjusters.sort(Sortable::compare);
+    for (ConfigAdjuster discoveredAdjuster : discoveredAdjusters) {
+      adjuster = adjuster.compose(discoveredAdjuster);
+    }
     return adjuster;
   }
 
@@ -40,5 +45,10 @@ public interface ConfigAdjuster extends Sortable {
   }
 
   Map<String, String> apply(Map<String, String> properties, Map<String, String> allProperties);
+
+  default ConfigAdjuster compose(ConfigAdjuster before) {
+    Objects.requireNonNull(before);
+    return (p, ap) -> apply(before.apply(p, ap), ap);
+  }
 
 }

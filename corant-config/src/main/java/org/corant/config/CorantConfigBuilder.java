@@ -21,7 +21,6 @@ import java.util.ServiceLoader;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfigConversion.OrdinalConverter;
-import org.corant.config.CorantConfigSource.AdjustedConfigSource;
 import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
@@ -75,11 +74,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public Config build() {
     List<ConfigSource> resolvedSources =
         CorantConfigSource.resolveAdjust(sources, getClassLoader());
-    logger.fine(() -> String.format("Resolve sources [%s] ",
-        String.join("\n", ObjectUtils.asStrings(sources.stream().map(s -> {
-          final StringBuilder sb =
-              new StringBuilder(((AdjustedConfigSource) s).orginal.getClass().getName())
-                  .append(":\n{\n");
+    logger.fine(() -> String.format("Resolve sources: %n %s",
+        String.join("\n", ObjectUtils.asStrings(resolvedSources.stream().map(s -> {
+          final StringBuilder sb = new StringBuilder(s.getClass().getName()).append(":\n{\n");
           s.getProperties().forEach((k, v) -> sb.append(k).append(" : ").append(v).append("\n"));
           return sb.append("}\n").toString();
         }).collect(Collectors.toList())))));

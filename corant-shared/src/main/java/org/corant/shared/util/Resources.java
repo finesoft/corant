@@ -385,17 +385,17 @@ public class Resources {
     final ClassLoader classLoader;
     final String classPath;
 
-    public ClassPathResource(String classPath, ClassLoader classLoader) {
-      super(SourceType.CLASS_PATH);
+    public ClassPathResource(String classPath, ClassLoader classLoader, URL url) {
+      super(url, SourceType.CLASS_PATH);
       this.classLoader = shouldNotNull(classLoader);
       this.classPath = shouldNotNull(classPath);
     }
 
-    public static ClassPathResource of(String classPath, ClassLoader classLoader) {
+    public static ClassPathResource of(String classPath, ClassLoader classLoader, URL url) {
       if (classPath.endsWith(ClassUtils.CLASS_FILE_NAME_EXTENSION)) {
-        return new ClassResource(classPath, classLoader);
+        return new ClassResource(classPath, classLoader, url);
       } else {
-        return new ClassPathResource(classPath, classLoader);
+        return new ClassPathResource(classPath, classLoader, url);
       }
     }
 
@@ -441,17 +441,10 @@ public class Resources {
       return classPath;
     }
 
-    @Override
-    public final URL getURL() {
-      if (url == null) {
-        synchronized (this) {
-          if (url == null) {
-            url = classLoader.getResource(classPath);
-          }
-        }
-      }
-      return url;
-    }
+    /*
+     * @Override public final URL getURL() { if (url == null) { synchronized (this) { if (url ==
+     * null) { url = classLoader.getResource(classPath); } } } return url; }
+     */
 
     @Override
     public int hashCode() {
@@ -485,8 +478,8 @@ public class Resources {
 
     final String className;
 
-    public ClassResource(String classPath, ClassLoader classLoader) {
-      super(classPath, classLoader);
+    public ClassResource(String classPath, ClassLoader classLoader, URL url) {
+      super(classPath, classLoader, url);
       int classNameEnd = classPath.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
       className = classPath.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
           ClassUtils.PACKAGE_SEPARATOR_CHAR);
@@ -869,7 +862,7 @@ public class Resources {
    */
   public static class URLResource implements Resource {
     final SourceType sourceType;
-    volatile URL url;
+    URL url;
 
     public URLResource(String url) throws MalformedURLException {
       this(new URL(url), SourceType.URL);

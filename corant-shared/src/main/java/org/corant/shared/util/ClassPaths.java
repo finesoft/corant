@@ -348,12 +348,9 @@ public class ClassPaths {
 
     protected void scan(URI uri, ClassLoader classloader) throws IOException {
       if (uri.getScheme().equals(FILE_SCHEMA) && scannedUris.add(uri)) {
-        scanFrom(new File(uri).getCanonicalFile(), classloader);
-      } else if (uri.getScheme().equals(JAR_SCHEMA)) {
-        URI exUri = tryExtractFileUri(uri);
-        if (exUri != null && scannedUris.add(exUri)) {
-          scanFrom(new File(exUri).getCanonicalFile(), classloader);
-        }
+        scanFromFile(new File(uri).getCanonicalFile(), classloader);
+      } else if (uri.getScheme().equals(JAR_SCHEMA) && scannedUris.add(uri)) {
+        scanFromJar(uri, classloader);
       }
     }
 
@@ -384,29 +381,41 @@ public class ClassPaths {
         } else {
           String resourceName = packagePrefix + name;
           if (!resourceName.equals(JarFile.MANIFEST_NAME) && filter.test(resourceName)) {
-            resources.add(ClassPathResource.of(resourceName, classloader));
+            resources.add(ClassPathResource.of(resourceName, classloader, f.toURI().toURL()));
           }
         }
       }
     }
 
-    protected void scanFrom(File file, ClassLoader classloader) throws IOException {
+    protected void scanFromFile(File file, ClassLoader classloader) throws IOException {
       if (!file.exists()) {
         return;
       }
       if (file.isDirectory()) {
         scanDirectory(file, classloader);
-      } else if (file.getCanonicalPath().toLowerCase(Locale.getDefault()).endsWith(JAR_EXT)) {
-        scanJar(file, classloader);
-      } else if (file.getCanonicalPath().toLowerCase(Locale.getDefault()).endsWith(WAR_EXT)) {
-        // To adapt spring boot, a simple and crude and experimental implementation :)
-        scanWar(file, classloader);
       } else {
         scanSingleFile(file, classloader);
       }
     }
 
-    protected void scanJar(File file, ClassLoader classloader) throws IOException {
+    protected void scanFromJar(URI uri, ClassLoader classloader) throws IOException {
+      URI fileUri = tryExtractFileUri(uri);
+      if (fileUri != null && scannedUris.add(fileUri)) {
+        File jarFile = new File(fileUri).getCanonicalFile();
+        if (jarFile.getCanonicalPath().toLowerCase(Locale.getDefault()).endsWith(WAR_EXT)) {
+          scanWar(jarFile, classloader);
+        } else {
+          scanJar(uri, jarFile.getCanonicalFile(), classloader);
+        }
+      }
+    }
+
+    protected void scanJar(URI jarUri, File file, ClassLoader classloader) throws IOException {
+      String jarPath = jarUri.toString();
+      int sp = jarPath.indexOf(JAR_URL_SEPARATOR);
+      if (sp != -1) {
+        jarPath = jarPath.substring(0, sp);
+      }
       JarFile jarFile;
       try {
         jarFile = new JarFile(file);
@@ -426,7 +435,8 @@ public class ClassPaths {
               || isNotBlank(root) && !name.startsWith(root) || !filter.test(name)) {
             continue;
           }
-          resources.add(ClassPathResource.of(name, classloader));
+          String entryUrl = jarPath.concat(isNotBlank(name) ? JAR_URL_SEPARATOR.concat(name) : name);
+          resources.add(ClassPathResource.of(name, classloader, new URL(entryUrl)));
         }
       } finally {
         try {
@@ -445,7 +455,7 @@ public class ClassPaths {
         }
         String resourceName = replace(filePath, File.separator, PATH_SEPARATOR_STRING);
         if (filter.test(resourceName)) {
-          resources.add(ClassPathResource.of(resourceName, classloader));
+          resources.add(ClassPathResource.of(resourceName, classloader, file.toURI().toURL()));
         }
       }
     }

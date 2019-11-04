@@ -28,7 +28,7 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
-import org.corant.kernel.api.PersistenceService;
+import org.corant.suites.jpa.shared.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQuerier;
 import org.corant.suites.query.shared.NamedQuerierResolver;

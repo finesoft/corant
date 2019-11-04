@@ -30,9 +30,9 @@ import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
+import org.corant.suites.jta.shared.TransactionService;
 
 /**
  * corant-suites-jms-artemis

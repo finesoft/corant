@@ -29,13 +29,13 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import org.corant.kernel.api.PersistenceService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
+import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
  * corant-suites-ddd

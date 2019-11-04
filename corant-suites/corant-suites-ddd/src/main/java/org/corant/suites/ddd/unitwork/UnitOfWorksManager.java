@@ -17,10 +17,10 @@ import static org.corant.kernel.util.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.corant.kernel.api.PersistenceService;
 import org.corant.suites.ddd.message.MessageDispatcher;
 import org.corant.suites.ddd.message.MessageStorage;
 import org.corant.suites.ddd.saga.SagaService;
+import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
  * corant-suites-ddd

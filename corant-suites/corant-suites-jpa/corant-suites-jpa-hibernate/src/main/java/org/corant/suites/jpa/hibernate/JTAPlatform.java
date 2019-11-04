@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.kernel.util.Instances.resolveAnyway;
+import javax.enterprise.inject.spi.CDI;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
-import org.corant.kernel.api.TransactionService;
+import org.corant.suites.jta.shared.TransactionService;
 import org.hibernate.engine.transaction.jta.platform.internal.AbstractJtaPlatform;
 
 /**
@@ -31,12 +31,12 @@ public class JTAPlatform extends AbstractJtaPlatform {
 
   @Override
   protected TransactionManager locateTransactionManager() {
-    return resolveAnyway(TransactionService.class).getTransactionManager();
+    return CDI.current().select(TransactionService.class).get().getTransactionManager();
   }
 
   @Override
   protected UserTransaction locateUserTransaction() {
-    return resolveAnyway(TransactionService.class).getUserTransaction();
+    return CDI.current().select(TransactionService.class).get().getUserTransaction();
   }
 
 }

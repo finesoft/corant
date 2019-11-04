@@ -28,12 +28,12 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
-import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.EntityLifecycleManager;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
 import org.corant.suites.jpa.shared.JPAExtension;
+import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
 /**
  * corant-suites-ddd

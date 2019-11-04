@@ -33,11 +33,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
-import org.corant.kernel.api.PersistenceService;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
  * corant-asosat-ddd

@@ -13,11 +13,11 @@
  */
 package org.corant.microprofile.jwt.cdi;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
 import org.corant.microprofile.jwt.jaxrs.MpSmallRyeJWTAuthJaxRsFeature;
@@ -45,7 +45,7 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
 
   public static boolean isHttpAuthMechanismEnabled() {
     if (isEESecurityAvailable()) {
-      return resolve(JWTHttpAuthenticationMechanism.class).isPresent();
+      return !CDI.current().select(JWTHttpAuthenticationMechanism.class).isUnsatisfied();
     }
     return false;
   }

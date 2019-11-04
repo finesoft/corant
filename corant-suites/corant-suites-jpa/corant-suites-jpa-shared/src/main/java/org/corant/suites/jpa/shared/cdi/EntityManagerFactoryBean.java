@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.shared.cdi;
 
-import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.annotation.Annotation;
@@ -21,10 +20,11 @@ import java.util.Collections;
 import java.util.logging.Logger;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.api.PersistenceService;
 import org.corant.kernel.util.AbstractBean;
+import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
  * corant-suites-jpa-shared
@@ -52,7 +52,7 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
 
   @Override
   public EntityManagerFactory create(CreationalContext<EntityManagerFactory> creationalContext) {
-    return resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu));
+    return CDI.current().select(PersistenceService.class).get().getEntityManagerFactory(pu);
   }
 
   @Override

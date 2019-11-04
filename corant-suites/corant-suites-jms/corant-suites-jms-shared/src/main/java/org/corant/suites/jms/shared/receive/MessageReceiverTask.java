@@ -44,8 +44,8 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.Corant;
 import org.corant.config.spi.Sortable;
-import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jta.shared.TransactionService;
 
 /**
  * corant-suites-jms-shared
@@ -246,8 +246,7 @@ public class MessageReceiverTask implements Runnable {
           connection = connectionFactory.createConnection();
           log(Level.FINE, null, "1. Created message receive task connection, [%s]", meta);
         }
-        select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(Sortable::compare)
+        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
             .forEach(c -> c.configConnection(connection, meta));
         meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
       } catch (JMSException je) {
@@ -266,8 +265,8 @@ public class MessageReceiverTask implements Runnable {
           session = connection.createSession(meta.getAcknowledge());
           log(Level.FINE, null, "2. Created message receive task session, [%s]", meta);
         }
-        instance().select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(Sortable::compare).forEach(c -> c.configSession(session, meta));
+        instance().select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
+            .forEach(c -> c.configSession(session, meta));
       } catch (JMSException je) {
         if (connection != null) {
           try {
@@ -298,8 +297,7 @@ public class MessageReceiverTask implements Runnable {
         } else {
           messageConsumer = session.createConsumer(destination);
         }
-        instance().select(MessageReceiverTaskConfigurator.class).stream()
-            .sorted(Sortable::compare)
+        instance().select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
             .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
         log(Level.FINE, null, "3. Created message receive task consumer, [%s]", meta);
       } catch (JMSException je) {

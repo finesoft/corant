@@ -13,8 +13,8 @@
  */
 package org.corant.microprofile.jwt.jaxrs;
 
-import static org.corant.kernel.util.Instances.select;
 import javax.annotation.Priority;
+import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -33,7 +33,7 @@ public class MpBlackListFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    select(MpBlackListFilterHandler.class).forEach(h -> h.handle(requestContext));
+    CDI.current().select(MpBlackListFilterHandler.class).forEach(h -> h.handle(requestContext));
     logger.debugf("Success");
   }
 

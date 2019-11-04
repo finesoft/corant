@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.api;
+package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;

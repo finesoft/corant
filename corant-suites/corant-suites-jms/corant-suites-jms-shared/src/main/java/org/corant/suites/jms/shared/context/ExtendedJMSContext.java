@@ -33,10 +33,10 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.XAJMSContext;
 import javax.transaction.xa.XAResource;
-import org.corant.kernel.api.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.context.JMSContextManager.RsJMSContextManager;
 import org.corant.suites.jms.shared.context.JMSContextManager.TsJMSContextManager;
+import org.corant.suites.jta.shared.TransactionService;
 
 /**
  * corant-suites-jms-artemis

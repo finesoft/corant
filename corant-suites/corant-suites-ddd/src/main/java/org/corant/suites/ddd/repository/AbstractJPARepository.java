@@ -21,8 +21,8 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.corant.kernel.api.PersistenceService.PersistenceContextLiteral;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
 /**
  * corant-suites-ddd

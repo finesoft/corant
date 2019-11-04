@@ -13,9 +13,9 @@
  */
 package org.corant.suites.jms.shared.annotation;
 
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Repeatable;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.jms.JMSContext;
@@ -26,10 +26,10 @@ import javax.jms.JMSContext;
  * @author bingo 下午3:49:53
  *
  */
-@Repeatable(MessageSends.class)
+@Documented
 @Retention(RUNTIME)
-@Target(TYPE)
-public @interface MessageSend {
+@Target(FIELD)
+public @interface MessageSender {
 
   String connectionFactoryId() default "";
 

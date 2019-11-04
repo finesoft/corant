@@ -317,7 +317,15 @@ public class ClassPaths {
       return root;
     }
 
-    protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException {
+    /**
+     * Unfinish yet
+     *
+     * @param jarFile
+     * @param path
+     * @return
+     * @throws URISyntaxException getClassPathEntry
+     */
+    protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException { // FIXME
       URI uri = new URI(path);
       if (uri.isAbsolute()) {
         return uri;
@@ -327,7 +335,14 @@ public class ClassPaths {
       }
     }
 
-    protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) {
+    /**
+     * Unfinish yet
+     *
+     * @param jarFile
+     * @param manifest
+     * @return getClassPathFromManifest
+     */
+    protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) { // FIXME
       String attrName = Attributes.Name.CLASS_PATH.toString();
       Attributes attrs = null;
       if (manifest == null || (attrs = manifest.getMainAttributes()) == null
@@ -435,7 +450,8 @@ public class ClassPaths {
               || isNotBlank(root) && !name.startsWith(root) || !filter.test(name)) {
             continue;
           }
-          String entryUrl = jarPath.concat(isNotBlank(name) ? JAR_URL_SEPARATOR.concat(name) : name);
+          String entryUrl =
+              jarPath.concat(isNotBlank(name) ? JAR_URL_SEPARATOR.concat(name) : name);
           resources.add(ClassPathResource.of(name, classloader, new URL(entryUrl)));
         }
       } finally {

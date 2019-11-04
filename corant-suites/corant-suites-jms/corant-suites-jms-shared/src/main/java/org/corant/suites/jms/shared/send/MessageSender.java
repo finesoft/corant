@@ -26,7 +26,6 @@ import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
 
 /**
@@ -68,7 +67,7 @@ public interface MessageSender {
     protected final String connectionFactoryId;
     protected final int sessionMode;
 
-    public MessageSenderImpl(MessageSend mpl) {
+    public MessageSenderImpl(org.corant.suites.jms.shared.annotation.MessageSender mpl) {
       multicast = mpl.multicast();
       destination = shouldNotNull(mpl.destination());
       connectionFactoryId = mpl.connectionFactoryId();
@@ -111,8 +110,8 @@ public interface MessageSender {
 
     @SuppressWarnings("unchecked")
     void doSend(Object message) {
-      final JMSContext jmsc = resolveApply(JMSContextProducer.class,
-          b -> b.create(connectionFactoryId, sessionMode));
+      final JMSContext jmsc =
+          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
       try {
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();

@@ -15,30 +15,19 @@ package org.corant.suites.jms.shared.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.jms.JMSContext;
 
 /**
  * corant-suites-jms-shared
  *
- * @author bingo 下午3:49:53
+ * @author bingo 下午4:12:28
  *
  */
-@Repeatable(MessageSends.class)
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface MessageSend {
+public @interface MessageSends {
 
-  String connectionFactoryId() default "";
-
-  String destination();
-
-  String durableSubscription() default "";
-
-  boolean multicast() default false;
-
-  int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
+  MessageSend[] value();
 
 }

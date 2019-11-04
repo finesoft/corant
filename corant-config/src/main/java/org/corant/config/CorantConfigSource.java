@@ -56,22 +56,36 @@ public abstract class CorantConfigSource implements ConfigSource {
   }
 
   /**
-   *
+   * @see #resolveAdjust(List, ConfigAdjuster)
    * @param orginals
    * @param classLoader
    * @return resolveAdjust
    */
   public static List<ConfigSource> resolveAdjust(List<ConfigSource> orginals,
       ClassLoader classLoader) {
+    return resolveAdjust(orginals, ConfigAdjuster.resolve(classLoader));
+  }
+
+  /**
+   * Adjust the config source, we only adjust the config souce that added by corant. Some dynamic
+   * non-corant config sources may not be fully processed. All resolved config sources were cache in
+   * Config.
+   *
+   * @param orginals
+   * @param adjuster
+   * @return adjusted config sources
+   */
+  public static List<ConfigSource> resolveAdjust(List<ConfigSource> orginals,
+      ConfigAdjuster adjuster) {
     shouldNotNull(orginals, "The config sources can not null!").sort(CONFIG_SOURCE_COMPARATOR);
+    if (adjuster == null) {
+      return orginals;
+    }
     List<ConfigSource> resolved = new ArrayList<>(orginals.size());
     final Map<String, String> allProperties = new HashMap<>();
     for (ConfigSource orginal : orginals) {
-      orginal.getProperties().forEach((k, v) -> {
-        allProperties.computeIfAbsent(k, x -> v);
-      });
+      orginal.getProperties().forEach((k, v) -> allProperties.computeIfAbsent(k, x -> v));
     }
-    final ConfigAdjuster adjuster = ConfigAdjuster.resolve(classLoader);
     for (ConfigSource orginal : orginals) {
       if (orginal instanceof CorantConfigSource) {
         resolved.add(new AdjustedConfigSource((CorantConfigSource) orginal,
@@ -88,6 +102,14 @@ public abstract class CorantConfigSource implements ConfigSource {
     return name;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * <b>The current implementation:</b> Find {@link ConfigSource#CONFIG_ORDINAL} if is existen and
+   * can be converted to Integer then return the value else use {@link #ordinal}
+   * </p>
+   */
   @Override
   public int getOrdinal() {
     String configOrdinal = getValue(CONFIG_ORDINAL);

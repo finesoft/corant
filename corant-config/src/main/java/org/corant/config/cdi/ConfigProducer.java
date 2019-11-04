@@ -42,7 +42,10 @@ public class ConfigProducer implements Serializable {
   private static final long serialVersionUID = -7704094948781355258L;
   private static final Logger logger = Logger.getLogger(ConfigProducer.class.getName());
 
-  public static String getConfigKey(InjectionPoint injectionPoint) {
+  @ConfigProperty
+  @Dependent
+  public static Object getConfigProperty(InjectionPoint injectionPoint) {
+    CorantConfig config = forceCast(ConfigProvider.getConfig());
     ConfigProperty property =
         shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
     String key = defaultTrim(property.name());
@@ -57,20 +60,12 @@ public class ConfigProducer implements Serializable {
             .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
       }
     }
-    return key;
-  }
-
-  @ConfigProperty
-  @Dependent
-  public static Object getConfigProperty(InjectionPoint injectionPoint) {
-    CorantConfig config = forceCast(ConfigProvider.getConfig());
-    String key = defaultTrim(getConfigKey(injectionPoint));
-    ConfigProperty property =
-        shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
-    Object value = config.getConvertedValue(key, injectionPoint.getType(), property.defaultValue());
+    final String useKey = key;
+    Object value =
+        config.getConvertedValue(useKey, injectionPoint.getType(), property.defaultValue());
     logger.fine(() -> String.format("Inject config property to [%s.%s] with key [%s] value [%s]",
         injectionPoint.getMember().getDeclaringClass().getName(),
-        injectionPoint.getMember().getName(), key, value));
+        injectionPoint.getMember().getName(), useKey, value));
     return value;
   }
 

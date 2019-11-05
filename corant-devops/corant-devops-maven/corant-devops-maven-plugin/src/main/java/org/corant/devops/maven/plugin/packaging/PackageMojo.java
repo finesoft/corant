@@ -50,6 +50,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-attach")
   protected boolean withAttach;
 
+  @Parameter(defaultValue = "true", property = "corant.maven-mojo.with-uber")
+  protected boolean withUber;
+
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-dist")
   protected boolean withDist;
 
@@ -74,7 +77,9 @@ public class PackageMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (isJar()) {
       try {
-        new JarPackager(this).pack();
+        if (isWithUber()) {
+          new JarPackager(this).pack();
+        }
         if (isWithAttach()) {
           new AttachPackager(this).pack();
         }
@@ -134,6 +139,10 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isWithDist() {
     return withDist;
+  }
+
+  public boolean isWithUber() {
+    return withUber;
   }
 
   protected String getUsedConfigProfile() {

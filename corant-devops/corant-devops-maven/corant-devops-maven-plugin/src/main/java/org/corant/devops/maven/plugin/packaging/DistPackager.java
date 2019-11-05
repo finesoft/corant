@@ -86,6 +86,7 @@ public class DistPackager implements Packager {
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
+    log.info(String.format("Building dist zip: %s", destPath));
     try (ZipArchiveOutputStream zos =
         new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries

@@ -39,6 +39,12 @@ public @interface MessageSend {
 
   boolean multicast() default false;
 
+  SerializationSchema serialization() default SerializationSchema.JSON_STRING;
+
   int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
+
+  public static enum SerializationSchema {
+    JSON_STRING, BINARY, JAVA_SERIAL, MAP
+  }
 
 }

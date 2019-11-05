@@ -11,22 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared.send;
+package org.corant.suites.jms.shared.annotation;
 
-import java.io.Serializable;
-import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.jms.JMSContext;
 
 /**
  * corant-suites-jms-shared
  *
- * @author bingo 下午4:49:35
+ * @author bingo 下午3:49:53
  *
  */
-public interface MessageSender {
+@Documented
+@Retention(RUNTIME)
+@Target(FIELD)
+public @interface MessageDispatch {
 
-  void send(Serializable message);
+  String connectionFactoryId() default "";
 
-  void send(Serializable message, String connectionFactoryId, String destination, boolean multicast,
-      String durableSubscription, int sessionMode, SerializationSchema schema);
+  String destination();
+
+  String durableSubscription() default "";
+
+  boolean multicast() default false;
+
+  int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
 
 }

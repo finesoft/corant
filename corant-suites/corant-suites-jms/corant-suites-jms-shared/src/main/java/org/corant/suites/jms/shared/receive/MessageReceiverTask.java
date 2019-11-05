@@ -14,6 +14,7 @@
 package org.corant.suites.jms.shared.receive;
 
 import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.ObjectUtils.tryThreadSleep;
@@ -45,6 +46,8 @@ import javax.transaction.SystemException;
 import org.corant.Corant;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
+import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
 
 /**
@@ -496,6 +499,7 @@ public class MessageReceiverTask implements Runnable {
 
     final Object object;
     final AnnotatedMethod<?> method;
+    final Class<?> messageClass;
 
     MessageHandler(AnnotatedMethod<?> method) {
       super();
@@ -507,13 +511,29 @@ public class MessageReceiverTask implements Runnable {
           beanManager.createCreationalContext(propertyResolverBean);
       object = beanManager.getReference(propertyResolverBean,
           method.getJavaMember().getDeclaringClass(), creationalContext);
+      messageClass = method.getParameters().get(0).getJavaParameter().getType();
     }
 
     @Override
     public void onMessage(Message message) {
       try {
-        method.getJavaMember().invoke(object, message);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        if (messageClass.isAssignableFrom(Message.class)) {
+          method.getJavaMember().invoke(object, message);
+          return;
+        } else {
+          String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
+          if (isNotBlank(serialSchema)) {
+            MessageSerializer serializer =
+                resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema))
+                    .get();
+            method.getJavaMember().invoke(object, serializer.deserialize(message, messageClass));
+            return;
+          }
+        }
+        throw new IllegalArgumentException("Can not convert message payload to " + messageClass);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException |
+
+          JMSException e) {
         log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
             method.getJavaMember());
         throw new CorantRuntimeException(e);

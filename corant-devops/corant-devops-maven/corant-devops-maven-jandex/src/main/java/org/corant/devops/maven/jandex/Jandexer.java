@@ -70,8 +70,7 @@ public class Jandexer extends AbstractMojo {
     }
     File idxFile = new File(clsDir, "META-INF/jandex.idx");
     idxFile.getParentFile().mkdirs();
-    getLog()
-        .info("(corant) building index file with jandex, the directory is " + idxFile.getPath());
+    getLog().info("(corant) building index file: " + idxFile.getPath() + " with jandex.");
     try (FileOutputStream indexOut = new FileOutputStream(idxFile)) {
       IndexWriter writer = new IndexWriter(indexOut);
       writer.write(indexer.complete());

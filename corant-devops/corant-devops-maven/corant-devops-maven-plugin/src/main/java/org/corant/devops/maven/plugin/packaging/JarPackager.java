@@ -78,7 +78,7 @@ public class JarPackager implements Packager {
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
-    log.info(String.format("Building jar: %s", destPath));
+    log.info(String.format("(corant) building jar: %s", destPath));
     try (JarArchiveOutputStream jos =
         new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries

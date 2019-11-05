@@ -48,7 +48,6 @@ import javax.inject.Provider;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.util.ConversionUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.Converter;
 
 /**
@@ -125,11 +124,6 @@ public class CorantConfigConversion implements Serializable {
       }
     }
     return getTypeOfConverter(clazz.getSuperclass());
-  }
-
-  public static void main(String... strings) {
-    Type t = Class.class;
-    System.out.println(Class.class.isAssignableFrom((Class<?>) t));
   }
 
   public Object convert(String rawValue, Type type) {
@@ -280,12 +274,8 @@ public class CorantConfigConversion implements Serializable {
       if (null != converter) {
         return forceCast(converter.convert(value));
       } else {
-        Optional<Converter<T>> ic = ImplicitConverter.forType(propertyType);
-        if (ic.isPresent()) {
-          return ic.get().convert(value);
-        } else {
-          return toObject(value, propertyType);
-        }
+        return forceCast(ImplicitConverters.of(propertyType).orElse(s -> toObject(s, propertyType))
+            .convert(value));
       }
     }
   }
@@ -316,37 +306,33 @@ public class CorantConfigConversion implements Serializable {
    * @author bingo 上午11:25:26
    *
    */
-  static class ImplicitConverter implements Converter<Object> {
+  static class ImplicitConverters {
 
-    private Method method;
-    private Constructor<?> constructor;
-
-    private ImplicitConverter(Constructor<?> constructor) {
-      this.constructor = constructor;
-    }
-
-    private ImplicitConverter(Method method) {
-      this.method = method;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Optional<Converter<T>> forType(Type generalType) {
+    public static <T> Optional<Converter<T>> of(Type generalType) {
       if (!(generalType instanceof Class)) {
         return Optional.empty();
       }
+      @SuppressWarnings("unchecked")
       Class<T> type = (Class<T>) generalType;
-      return Stream.<Supplier<Converter<T>>>of(() -> forMethod(type, "of", String.class),
-          () -> forMethod(type, "valueOf", String.class), () -> forConstructor(type, String.class),
+      return Stream.<Supplier<Converter<T>>>of(() -> forConstructor(type, String.class),
+          () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
           () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
           .filter(converter -> converter != null).findFirst();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {
+    static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {
       try {
         Constructor<T> constructor = type.getConstructor(argumentTypes);
         if (Modifier.isPublic(constructor.getModifiers())) {
-          return (Converter<T>) new ImplicitConverter(constructor);
+          return (s) -> {
+            try {
+              return constructor.newInstance(s);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException ex) {
+              throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
+                  ex);
+            }
+          };
         } else {
           return null;
         }
@@ -355,45 +341,26 @@ public class CorantConfigConversion implements Serializable {
       }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Converter<T> forMethod(Class<T> type, String method,
-        Class<?>... argumentTypes) {
+    static <T> Converter<T> forMethod(Class<T> type, String method, Class<?>... argumentTypes) {
       try {
-        Method factoryMethod = type.getMethod(method, argumentTypes);
+        final Method factoryMethod = type.getMethod(method, argumentTypes);
         if (Modifier.isStatic(factoryMethod.getModifiers())
             && Modifier.isPublic(factoryMethod.getModifiers())) {
-          return (Converter<T>) new ImplicitConverter(factoryMethod);
+          return (s) -> {
+            try {
+              return forceCast(factoryMethod.invoke(null, s));
+            } catch (IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException ex) {
+              throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
+                  ex);
+            }
+          };
         } else {
           return null;
         }
       } catch (NoSuchMethodException | SecurityException e) {
         return null;
       }
-    }
-
-    @Override
-    public Object convert(String value) {
-      if (value == null || value.equals(ConfigProperty.UNCONFIGURED_VALUE)) {
-        return null;
-      }
-      if (method != null) {
-        try {
-          return method.invoke(null, value);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-          throw new IllegalArgumentException("Unable to convert value to type  for value " + value,
-              ex);
-        }
-      } else if (constructor != null) {
-        try {
-          return constructor.newInstance(value);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-            | InvocationTargetException ex) {
-          throw new IllegalArgumentException("Unable to convert value to type  for value " + value,
-              ex);
-        }
-      }
-      throw new IllegalStateException(
-          "ImplicitConverter created without constructor or method to call");
     }
   }
 

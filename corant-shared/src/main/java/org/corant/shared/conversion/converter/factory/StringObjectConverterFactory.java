@@ -13,14 +13,27 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 
 /**
  * corant-shared
+ *
+ * <ul>
+ * <li>the target type {@code T} has a {@code public static T of(String)} method, or</li>
+ * <li>the target type {@code T} has a {@code public static T valueOf(String)} method, or</li>
+ * <li>the target type {@code T} has a public Constructor with a String parameter, or</li>
+ * <li>the target type {@code T} has a {@code public static T parse(CharSequence)} method</li>
+ * </ul>
  *
  * Unfinish yet
  *
@@ -32,19 +45,27 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
   @Override
   public Converter<String, Object> create(Class<Object> targetClass, Object defaultValue,
       boolean throwException) {
-    return null;
+    return forType(targetClass).get();
   }
 
   @Override
   public boolean isSupportTargetClass(Class<?> targetClass) {
-    return false;
+    return forType(targetClass).isPresent();
   }
 
-  Constructor<?> findConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
+  <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
     try {
       Constructor<?> constructor = targetClass.getConstructor(argumentTypes);
       if (Modifier.isPublic(constructor.getModifiers())) {
-        return constructor;
+        return (s, m) -> {
+          try {
+            return forceCast(constructor.newInstance(s));
+          } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+              | InvocationTargetException ex) {
+            throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
+                ex);
+          }
+        };
       } else {
         return null;
       }
@@ -53,12 +74,21 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     }
   }
 
-  Method findMethod(Class<?> targetClass, String method, Class<?>... argumentTypes) {
+  <T> Converter<String, T> forMethod(Class<?> targetClass, String method,
+      Class<?>... argumentTypes) {
     try {
       Method factoryMethod = targetClass.getMethod(method, String.class);
       if (Modifier.isStatic(factoryMethod.getModifiers())
           && Modifier.isPublic(factoryMethod.getModifiers())) {
-        return factoryMethod;
+        return (s, m) -> {
+          try {
+            return forceCast(factoryMethod.invoke(null, s));
+          } catch (IllegalAccessException | IllegalArgumentException
+              | InvocationTargetException ex) {
+            throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
+                ex);
+          }
+        };
       } else {
         return null;
       }
@@ -66,4 +96,17 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
       return null;
     }
   }
+
+  @SuppressWarnings("unchecked")
+  <T> Optional<Converter<String, T>> forType(Type generalType) {
+    if (!(generalType instanceof Class)) {
+      return Optional.empty();
+    }
+    Class<T> type = (Class<T>) generalType;
+    return Stream.<Supplier<Converter<String, T>>>of(() -> forConstructor(type, String.class),
+        () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
+        () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
+        .filter(converter -> converter != null).findFirst();
+  }
+
 }

@@ -14,7 +14,6 @@
 package org.corant.config.cdi;
 
 import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
-import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.annotation.Annotation;
@@ -82,9 +81,9 @@ public class ConfigExtension implements Extension {
   }
 
   public static class ConfigInjectionBean<T> implements Bean<T>, PassivationCapable {
-    private final static Set<Annotation> qualifiers = immutableSetOf(new ConfigPropertyLiteral());
-    private final BeanManager beanManager;
-    private final Set<Type> types;
+    static final Set<Annotation> qualifiers = Collections.singleton(new ConfigPropertyLiteral());
+    final BeanManager beanManager;
+    final Set<Type> types;
 
     public ConfigInjectionBean(BeanManager bm, Set<Type> types) {
       this.beanManager = bm;
@@ -172,6 +171,9 @@ public class ConfigExtension implements Extension {
     }
 
     private static class CurrentInjectionPoint implements InjectionPoint {
+
+      static final Set<Annotation> qualifiers = Collections.singleton(Default.Literal.INSTANCE);
+
       @Override
       public Annotated getAnnotated() {
         return null;
@@ -189,7 +191,7 @@ public class ConfigExtension implements Extension {
 
       @Override
       public Set<Annotation> getQualifiers() {
-        return Collections.<Annotation>singleton(Default.Literal.INSTANCE);
+        return qualifiers;
       }
 
       @Override

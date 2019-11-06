@@ -14,9 +14,11 @@
 package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.ObjectUtils.isNull;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -171,4 +173,11 @@ public class QueryMapping {
     this.commonSegment = commonSegment;
   }
 
+  void assembly() { // FIXME
+    if (isNotBlank(commonSegment) && isNotEmpty(queries)) {
+      for (Query q : queries) {
+        q.setMacroScript(commonSegment);
+      }
+    }
+  }
 }

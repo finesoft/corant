@@ -84,6 +84,7 @@ public class QueryParseHandler extends DefaultHandler {
     mapping.paraMapping
         .putAll(paraMappings.stream().collect(Collectors.toMap(p -> p.getName(), p -> p)));
     mapping.queries.addAll(queries);
+    mapping.assembly();// FIXME
     valueStack.clear();
     nameStack.clear();
   }

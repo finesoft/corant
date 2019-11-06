@@ -15,6 +15,7 @@ package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
@@ -59,8 +60,9 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       FetchQueryResolver fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
     try {
-      execution = new Template(query.getName(), query.getScript().getCode(),
-          FreemarkerConfigurations.FM_CFG);
+      String scriptSource =
+          defaultString(query.getMacroScript()).concat(query.getScript().getCode());// FIXME
+      execution = new Template(query.getName(), scriptSource, FreemarkerConfigurations.FM_CFG);
     } catch (IOException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the query template [%s].", query.getName());

@@ -50,6 +50,7 @@ public class Query implements Serializable {
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
   private Map<String, String> properties = new HashMap<>();
   private String mappingFilePath;
+  private String macroScript;// FIXME temporary
 
   public Query() {
     super();
@@ -73,13 +74,14 @@ public class Query implements Serializable {
    * @param version
    * @param paramMappings
    * @param properties
-   * @param mappingFilePath;
+   * @param mappingFilePath
+   * @param macroScript
    */
   public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
       boolean cacheResultSetMetadata, String description, Script script,
       List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
       Map<String, ParameterMapping> paramMappings, Map<String, String> properties,
-      String mappingFilePath) {
+      String mappingFilePath, String macroScript) {
     super();
     this.name = name;
     setResultClass(resultClass);
@@ -96,6 +98,7 @@ public class Query implements Serializable {
     this.paramMappings = paramMappings;
     this.properties = properties;
     this.mappingFilePath = defaultTrim(mappingFilePath);
+    this.macroScript = macroScript;
   }
 
   /**
@@ -117,6 +120,14 @@ public class Query implements Serializable {
    */
   public List<QueryHint> getHints() {
     return hints;
+  }
+
+  /**
+   *
+   * @return the macroScript
+   */
+  public String getMacroScript() {
+    return macroScript;
   }
 
   /**
@@ -256,6 +267,14 @@ public class Query implements Serializable {
 
   protected void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   *
+   * @param macroScript the macroScript to set
+   */
+  protected void setMacroScript(String macroScript) {
+    this.macroScript = macroScript;
   }
 
   protected void setMappingFilePath(String mappingFilePath) {

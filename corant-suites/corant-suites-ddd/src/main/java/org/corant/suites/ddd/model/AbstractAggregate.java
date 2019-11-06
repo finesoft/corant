@@ -36,6 +36,7 @@ import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLit
 import org.corant.suites.ddd.event.AggregateLifecycleEvent;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.event.Event;
+import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
@@ -95,6 +96,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Override
   public String toString() {
     return this.getClass().getSimpleName() + " [id=" + getId() + ",vn = " + getVn() + "]";
+  }
+
+  protected Optional<AggregateLifecycleMessage> buildLifecycleMessage(Lifecycle lifecycle) {
+    return Optional.empty();
   }
 
   /**

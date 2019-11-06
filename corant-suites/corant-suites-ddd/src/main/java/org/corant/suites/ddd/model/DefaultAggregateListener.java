@@ -23,7 +23,6 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
@@ -45,17 +44,17 @@ public class DefaultAggregateListener {
   }
 
   protected void handlePostPersist(AbstractAggregate o) {
-    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_PERSISTED));
+    o.buildLifecycleMessage(Lifecycle.POST_PERSISTED).ifPresent(this::registerToUnitOfWork);
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_PERSISTED));
   }
 
   protected void handlePostRemove(AbstractAggregate o) {
-    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_REMOVED));
+    o.buildLifecycleMessage(Lifecycle.POST_REMOVED).ifPresent(this::registerToUnitOfWork);
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_REMOVED));
   }
 
   protected void handlePostUpdate(AbstractAggregate o) {
-    registerToUnitOfWork(new AggregateLifecycleMessage(o, Lifecycle.POST_UPDATED));
+    o.buildLifecycleMessage(Lifecycle.POST_UPDATED).ifPresent(this::registerToUnitOfWork);
     registerToUnitOfWork(o.lifecycle(Lifecycle.POST_UPDATED));
   }
 

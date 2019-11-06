@@ -25,9 +25,7 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.Message;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 import org.corant.suites.jms.shared.annotation.MessageSends;
@@ -45,16 +43,18 @@ public abstract class AbstractMessageSender implements MessageSender {
 
   @Override
   public void send(Serializable... annotatedPayloads) {
-    Class<?> payloadClass = getUserClass(shouldNotNull(annotatedPayloads));
-    Set<MessageSenderMetaData> sends = resolveMetaDatas(payloadClass);
-    shouldBeTrue(isNotEmpty(sends),
-        "The payload class %s must include either MessageSend or MessageSends annotaion.");
-    for (MessageSenderMetaData send : sends) {
-      send(annotatedPayloads, send.getConnectionFactoryId(), send.getDestination(),
-          send.isMulticast(), send.getDurableSubscription(), send.getSessionMode(),
-          send.getSerialization());
+    for (Serializable annotatedPayload : annotatedPayloads) {
+      Class<?> payloadClass = getUserClass(shouldNotNull(annotatedPayload));
+      Set<MessageSenderMetaData> sends = resolveMetaDatas(payloadClass);
+      shouldBeTrue(isNotEmpty(sends),
+          "The payload class %s must include either MessageSend or MessageSends annotaion.",
+          payloadClass);
+      for (MessageSenderMetaData send : sends) {
+        send(annotatedPayload, send.getConnectionFactoryId(), send.getDestination(),
+            send.isMulticast(), send.getDurableSubscription(), send.getSessionMode(),
+            send.getSerialization());
+      }
     }
-
   }
 
   public void send(Serializable message, String connectionFactoryId, String destination,
@@ -64,11 +64,6 @@ public abstract class AbstractMessageSender implements MessageSender {
     final JMSContext jmsc =
         resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
     Message body = serializer.serialize(jmsc, shouldNotNull(message));
-    try {
-      body.setStringProperty(MessageSerializer.MSG_SERIAL_SCHAME, schema.name());
-    } catch (JMSException e) {
-      throw new CorantRuntimeException(e);
-    }
     if (multicast) {
       jmsc.createProducer().send(jmsc.createTopic(destination), body);
     } else {

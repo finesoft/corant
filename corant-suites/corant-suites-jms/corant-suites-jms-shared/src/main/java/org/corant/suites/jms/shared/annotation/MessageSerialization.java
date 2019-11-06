@@ -22,7 +22,6 @@ import static org.corant.shared.util.ConversionUtils.toObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
-import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 
@@ -37,7 +36,6 @@ import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 public @interface MessageSerialization {
 
-  @Nonbinding
   SerializationSchema schema();
 
   /**

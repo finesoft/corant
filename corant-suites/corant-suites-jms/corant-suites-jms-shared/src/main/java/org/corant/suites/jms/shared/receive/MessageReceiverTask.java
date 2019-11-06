@@ -416,7 +416,7 @@ public class MessageReceiverTask implements Runnable {
           }
         }
       }
-      release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));
+      release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));// FIXME
     } catch (Exception e) {
       logger.log(Level.SEVERE, e,
           () -> String.format("On post run message receive task occurred error, %s", meta));

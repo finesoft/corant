@@ -24,7 +24,6 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.enterprise.context.ApplicationScoped;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -42,12 +41,42 @@ import org.corant.suites.jms.shared.context.MessageSerializer;
  * @author bingo 下午5:00:02
  *
  */
-@ApplicationScoped
-public class DefaultMessageSender implements MessageSender {
+public abstract class AbstractMessageSender implements MessageSender {
 
   @Override
-  public void send(Serializable message) {
-    Class<?> messageClass = getUserClass(shouldNotNull(message));
+  public void send(Serializable... annotatedPayloads) {
+    Class<?> payloadClass = getUserClass(shouldNotNull(annotatedPayloads));
+    Set<MessageSenderMetaData> sends = resolveMetaDatas(payloadClass);
+    shouldBeTrue(isNotEmpty(sends),
+        "The payload class %s must include either MessageSend or MessageSends annotaion.");
+    for (MessageSenderMetaData send : sends) {
+      send(annotatedPayloads, send.getConnectionFactoryId(), send.getDestination(),
+          send.isMulticast(), send.getDurableSubscription(), send.getSessionMode(),
+          send.getSerialization());
+    }
+
+  }
+
+  public void send(Serializable message, String connectionFactoryId, String destination,
+      boolean multicast, String durableSubscription, int sessionMode, SerializationSchema schema) {
+    MessageSerializer serializer =
+        resolve(MessageSerializer.class, MessageSerializationLiteral.of(schema)).get();
+    final JMSContext jmsc =
+        resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
+    Message body = serializer.serialize(jmsc, shouldNotNull(message));
+    try {
+      body.setStringProperty(MessageSerializer.MSG_SERIAL_SCHAME, schema.name());
+    } catch (JMSException e) {
+      throw new CorantRuntimeException(e);
+    }
+    if (multicast) {
+      jmsc.createProducer().send(jmsc.createTopic(destination), body);
+    } else {
+      jmsc.createProducer().send(jmsc.createQueue(destination), body);
+    }
+  }
+
+  protected Set<MessageSenderMetaData> resolveMetaDatas(Class<?> messageClass) {
     Set<MessageSenderMetaData> sends = new LinkedHashSet<>();
     MessageSends anns = findAnnotation(messageClass, MessageSends.class, false);// FIXME inherit
     if (anns == null) {
@@ -58,32 +87,7 @@ public class DefaultMessageSender implements MessageSender {
     } else {
       listOf(anns.value()).stream().map(MessageSenderMetaData::new).forEach(sends::add);
     }
-    shouldBeTrue(isNotEmpty(sends),
-        "The message class %s must include either MessageSend or MessageSends annotaion.");
-    for (MessageSenderMetaData send : sends) {
-      send(message, send.getConnectionFactoryId(), send.getDestination(), send.isMulticast(),
-          send.getDurableSubscription(), send.getSessionMode(), send.getSerialization());
-    }
-  }
-
-  @Override
-  public void send(Serializable message, String connectionFactoryId, String destination,
-      boolean multicast, String durableSubscription, int sessionMode, SerializationSchema schema) {
-    MessageSerializer serializer =
-        resolve(MessageSerializer.class, MessageSerializationLiteral.of(schema)).get();
-    Message body = serializer.serialize(shouldNotNull(message));
-    try {
-      body.setStringProperty(MessageSerializer.MSG_SERIAL_SCHAME, schema.name());
-    } catch (JMSException e) {
-      throw new CorantRuntimeException(e);
-    }
-    final JMSContext jmsc =
-        resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
-    if (multicast) {
-      jmsc.createProducer().send(jmsc.createTopic(destination), body);
-    } else {
-      jmsc.createProducer().send(jmsc.createQueue(destination), body);
-    }
+    return sends;
   }
 
 }

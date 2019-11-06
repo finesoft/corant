@@ -14,7 +14,11 @@
 package org.corant.suites.jms.shared.context;
 
 import java.io.Serializable;
+import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 
 /**
  * corant-suites-jms-shared
@@ -28,6 +32,14 @@ public interface MessageSerializer {
 
   <T> T deserialize(Message message, Class<T> clazz);
 
-  Message serialize(Serializable object);
+  default void resolveSchemaProperty(Message message, SerializationSchema schema) {
+    try {
+      message.setStringProperty(MSG_SERIAL_SCHAME, schema.name());
+    } catch (JMSException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  Message serialize(JMSContext jmsContext, Serializable object);
 
 }

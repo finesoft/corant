@@ -14,7 +14,6 @@
 package org.corant.suites.jms.shared.send;
 
 import java.io.Serializable;
-import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 
 /**
  * corant-suites-jms-shared
@@ -24,9 +23,6 @@ import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
  */
 public interface MessageSender {
 
-  void send(Serializable message);
-
-  void send(Serializable message, String connectionFactoryId, String destination, boolean multicast,
-      String durableSubscription, int sessionMode, SerializationSchema schema);
+  void send(Serializable... message);
 
 }

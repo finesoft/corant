@@ -14,6 +14,7 @@
 package org.corant.suites.query.jpql;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
@@ -23,6 +24,7 @@ import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
+import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.QueryMappingService;
 import org.corant.suites.query.shared.mapping.Script.ScriptType;
@@ -33,11 +35,12 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
  * @author bingo 下午3:16:56
  *
  */
+@SuppressWarnings("rawtypes")
 @ApplicationScoped
 public class DefaultJpqlNamedQuerierResolver
     implements NamedQuerierResolver<String, Object, JpqlNamedQuerier> {
 
-  final Map<String, FreemarkerJpqlQuerierBuilder> builders = new ConcurrentHashMap<>();
+  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
   protected QueryMappingService mappingService;
@@ -50,11 +53,11 @@ public class DefaultJpqlNamedQuerierResolver
 
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {
-    FreemarkerJpqlQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
-    return builder.build(param);
+    DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+    return forceCast(builder.build(param));
   }
 
-  protected FreemarkerJpqlQuerierBuilder createBuilder(String key) {
+  protected DynamicQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not found QueryService for key %s", key);
@@ -74,8 +77,8 @@ public class DefaultJpqlNamedQuerierResolver
     return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
-  protected FreemarkerJpqlQuerierBuilder createJsProcessor(Query query) {
-    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  protected JavascriptJpqlQuerierBuilder createJsProcessor(Query query) {
+    return new JavascriptJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
   }
 
 }

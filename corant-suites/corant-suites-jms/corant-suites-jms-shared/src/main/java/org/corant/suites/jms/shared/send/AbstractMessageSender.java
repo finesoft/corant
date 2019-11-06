@@ -59,15 +59,20 @@ public abstract class AbstractMessageSender implements MessageSender {
 
   public void send(Serializable message, String connectionFactoryId, String destination,
       boolean multicast, String durableSubscription, int sessionMode, SerializationSchema schema) {
-    MessageSerializer serializer =
-        resolve(MessageSerializer.class, MessageSerializationLiteral.of(schema)).get();
     final JMSContext jmsc =
         resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
-    Message body = serializer.serialize(jmsc, shouldNotNull(message));
-    if (multicast) {
-      jmsc.createProducer().send(jmsc.createTopic(destination), body);
+    Message useMessage = null;
+    if (message instanceof Message) {
+      useMessage = (Message) message;
     } else {
-      jmsc.createProducer().send(jmsc.createQueue(destination), body);
+      MessageSerializer serializer =
+          resolve(MessageSerializer.class, MessageSerializationLiteral.of(schema)).get();
+      useMessage = serializer.serialize(jmsc, shouldNotNull(message));
+    }
+    if (multicast) {
+      jmsc.createProducer().send(jmsc.createTopic(destination), useMessage);
+    } else {
+      jmsc.createProducer().send(jmsc.createQueue(destination), useMessage);
     }
   }
 

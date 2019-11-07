@@ -117,8 +117,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    * Connections acquired for longer than this time period may be reported as leaking. A duration of
    * {@link Duration#ZERO} means that a this feature is disabled.
    */
-  @ConfigKeyItem(defaultValue = "PT1S")
-  protected Duration leakTimeout = Duration.ofSeconds(1);
+  @ConfigKeyItem(defaultValue = "PT0S")
+  protected Duration leakTimeout = Duration.ofSeconds(0);
 
   /**
    * Connections that are older than this time period are flushed from the pool. A duration of
@@ -146,8 +146,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    * Connections idle for longer than this time period are flushed from the pool. A duration of
    * {@link Duration#ZERO} means that a this feature is disabled.
    */
-  @ConfigKeyItem(defaultValue = "PT60S")
-  protected Duration reapTimeout = Duration.ofSeconds(60L);
+  @ConfigKeyItem(defaultValue = "PT30S")
+  protected Duration reapTimeout = Duration.ofSeconds(30L);
 
   /**
    * The maximum amount of time a thread may be blocked waiting for a connection. If this time

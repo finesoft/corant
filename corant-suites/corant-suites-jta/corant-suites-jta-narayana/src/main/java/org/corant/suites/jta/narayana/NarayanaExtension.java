@@ -54,6 +54,7 @@ import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.coordinator.CheckedAction;
 import com.arjuna.ats.arjuna.logging.tsLogger;
+import com.arjuna.ats.arjuna.recovery.RecoveryManager;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
@@ -113,9 +114,10 @@ public class NarayanaExtension implements Extension {
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
               NamedLiteral.of("narayana-jta"))
           .scope(Singleton.class).createWith(cc -> {
+            RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT).initialize();
             RecoveryManagerService rms = new RecoveryManagerService();
             rms.create();
-            rms.start();
+            // rms.start();
             return rms;
           }).disposeWith((t, inst) -> t.destroy());
     }

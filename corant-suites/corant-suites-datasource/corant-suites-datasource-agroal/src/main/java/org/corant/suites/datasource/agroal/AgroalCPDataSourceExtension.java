@@ -15,9 +15,17 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.util.List;
+import java.util.ServiceLoader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
@@ -28,12 +36,14 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
+import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.jboss.tm.XAResourceRecoveryRegistry;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
+import io.agroal.api.configuration.AgroalConnectionPoolConfiguration.ConnectionValidator;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
 import io.agroal.api.security.NamePrincipal;
 import io.agroal.api.security.SimplePassword;
@@ -102,6 +112,19 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
           .credential(new SimplePassword(cfg.getPassword()));
     }
 
+    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+        .trackJdbcResources(cfg.isEnableTrackJdbcResources());
+
+    if (isNotEmpty(cfg.getJdbcProperties())) {
+      cfg.getJdbcProperties().forEach(
+          cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()::jdbcProperty);
+    }
+
+    if (isNotBlank(cfg.getInitialSql())) {
+      cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+          .initialSql(cfg.getInitialSql());
+    }
+
     // connection pool
     cfgs.connectionPoolConfiguration().acquisitionTimeout(cfg.getAcquisitionTimeout());
     cfgs.connectionPoolConfiguration().maxSize(cfg.getMaxSize());
@@ -110,10 +133,21 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.connectionPoolConfiguration().leakTimeout(cfg.getLeakTimeout());
     cfgs.connectionPoolConfiguration().reapTimeout(cfg.getReapTimeout());
     cfgs.connectionPoolConfiguration().validationTimeout(cfg.getValidationTimeout());
-    if (cfg.isValidateConnection()) {
-      cfgs.connectionPoolConfiguration().connectionValidator(
-          AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
+    cfgs.connectionPoolConfiguration().idleValidationTimeout(cfg.getIdleValidationTimeout());
+    cfgs.connectionPoolConfiguration().maxLifetime(cfg.getMaxLifetime());
+
+    if (!cfg.getValidationTimeout().equals(Duration.ZERO)) {
+      List<ConnectionValidator> validators =
+          listOf(ServiceLoader.load(ConnectionValidator.class, defaultClassLoader()));
+      if (isEmpty(validators)) {
+        cfgs.connectionPoolConfiguration().connectionValidator(
+            AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
+      } else {
+        cfgs.connectionPoolConfiguration().connectionValidator(validators.get(0));
+      }
     }
+    streamOf(ServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader()))
+        .sorted(Sortable::compare).forEach(c -> c.config(cfgs));
     return AgroalDataSource.from(cfgs);
   }
 
@@ -130,11 +164,11 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
       }
       if (xar != null) {
-        cfgs.connectionPoolConfiguration().transactionIntegration(
-            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable(), xar));
+        cfgs.connectionPoolConfiguration()
+            .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, "", false, xar));
       } else {
-        cfgs.connectionPoolConfiguration().transactionIntegration(
-            new NarayanaTransactionIntegration(tm, tsr, null, cfg.isConnectable()));
+        cfgs.connectionPoolConfiguration()
+            .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
       }
     }
   }

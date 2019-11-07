@@ -28,14 +28,19 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import javax.jms.StreamMessage;
+import javax.jms.TextMessage;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XASession;
@@ -52,6 +57,18 @@ import org.corant.suites.jta.shared.TransactionService;
 
 /**
  * corant-suites-jms-shared
+ *
+ * <p>
+ * JMS objects like connection, session, consumer and producer were designed to be re-used, but non
+ * thread safe. In most implementations connection and session are pretty heavyweight to setup and
+ * consumer usually requires a network round trip to set up. Producer is often more lightweight,
+ * although there is often some overhead in creating it.
+ *
+ * Unfinish: use connection or session pool
+ *
+ * <p>
+ * {@link <a href = "https://developer.jboss.org/wiki/ShouldICacheJMSConnectionsAndJMSSessions">
+ * Should I cache JMS connections and JMS sessions</a>}
  *
  * @author bingo 上午11:33:15
  *
@@ -517,28 +534,39 @@ public class MessageReceiverTask implements Runnable {
     @Override
     public void onMessage(Message message) {
       try {
-        if (messageClass.isAssignableFrom(Message.class)) {
-          method.getJavaMember().invoke(object, message);
-          return;
-        } else {
-          String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
-          if (isNotBlank(serialSchema)) {
-            MessageSerializer serializer =
-                resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema))
-                    .get();
-            method.getJavaMember().invoke(object, serializer.deserialize(message, messageClass));
-            return;
-          }
-        }
-        throw new IllegalArgumentException("Can not convert message payload to " + messageClass);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException |
-
-          JMSException e) {
+        method.getJavaMember().invoke(object, resolvePayload(message));
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | JMSException e) {
         log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
             method.getJavaMember());
         throw new CorantRuntimeException(e);
       }
     }
+
+    Object resolvePayload(Message message) throws JMSException {
+      if (messageClass == Message.class) {
+        return message;
+      } else if (messageClass == TextMessage.class) {
+        return TextMessage.class.cast(message);
+      } else if (messageClass == BytesMessage.class) {
+        return BytesMessage.class.cast(message);
+      } else if (messageClass == MapMessage.class) {
+        return MapMessage.class.cast(message);
+      } else if (messageClass == StreamMessage.class) {
+        return StreamMessage.class.cast(message);
+      } else if (messageClass == ObjectMessage.class) {
+        return ObjectMessage.class.cast(message);
+      } else {
+        String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
+        if (isNotBlank(serialSchema)) {
+          MessageSerializer serializer =
+              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema)).get();
+          return serializer.deserialize(message, messageClass);
+        }
+      }
+      throw new IllegalArgumentException("Can not convert message payload to " + messageClass);
+    }
+
   }
 
 }

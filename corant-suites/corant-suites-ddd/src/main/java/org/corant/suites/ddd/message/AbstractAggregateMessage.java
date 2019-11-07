@@ -11,19 +11,33 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jms.shared.send;
+package org.corant.suites.ddd.message;
 
-import javax.jms.Message;
+import org.corant.suites.ddd.model.Aggregate;
 
 /**
- * corant-suites-jms-shared
+ * corant-suites-ddd
  *
- * @author bingo 下午4:49:35
+ * @author bingo 上午10:18:59
  *
  */
-public interface MessageSender {
+public abstract class AbstractAggregateMessage implements Message {
 
-  void send(Message message, String connectionFactoryId, String destination, boolean multicast,
-      int sessionMode);
+  private static final long serialVersionUID = -2704628374745952353L;
+
+  protected AggregateMessageMetadata metadata;
+
+  public AbstractAggregateMessage(Aggregate aggregate) {
+    metadata = new AggregateMessageMetadata(aggregate);
+  }
+
+  protected AbstractAggregateMessage() {
+
+  }
+
+  @Override
+  public AggregateMessageMetadata getMetadata() {
+    return metadata;
+  }
 
 }

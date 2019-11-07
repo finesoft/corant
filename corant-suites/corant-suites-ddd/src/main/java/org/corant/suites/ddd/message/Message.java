@@ -27,37 +27,18 @@ public interface Message extends Serializable {
   }
 
   static int compareOccurredTime(Message m1, Message m2) {
-    return m1.occurredTime().compareTo(m2.occurredTime());
+    return m1.getMetadata().getOccurredTime().compareTo(m2.getMetadata().getOccurredTime());
   }
 
   static int compareSequenceNumber(Message m1, Message m2) {
-    return Long.compare(m1.sequenceNumber(), m2.sequenceNumber());
-  }
-
-  // Should we have this property?
-  default Object destination() {
-    return getMetadata() == null ? null : getMetadata().getDestination();
+    if (m1 instanceof AbstractAggregateMessage && m2 instanceof AbstractAggregateMessage) {
+      return Long.compare(((AbstractAggregateMessage) m1).getMetadata().getSequenceNumber(),
+          ((AbstractAggregateMessage) m2).getMetadata().getSequenceNumber());
+    }
+    return 0;
   }
 
   MessageMetadata getMetadata();
-
-  Object getPayload();
-
-  default Instant occurredTime() {
-    return getMetadata() == null ? Instant.MIN : getMetadata().getOccurredTime();
-  }
-
-  default long sequenceNumber() {
-    return getMetadata() == null ? -1L : getMetadata().getSequenceNumber();
-  }
-
-  default Object sourceObject() {
-    return getMetadata() == null ? null : getMetadata().getSource();
-  }
-
-  default String trackingToken() {
-    return getMetadata() == null ? null : getMetadata().getTrackingToken();
-  }
 
   public interface ExchangedMessage extends Message {
 
@@ -67,8 +48,7 @@ public interface Message extends Serializable {
 
   public interface MessageHandling extends Serializable {
 
-    // Should we have this property?
-    Object getDestination();
+    Object getDestination(); // Should we have this property?
 
     Instant getHandledTime();
 
@@ -91,25 +71,10 @@ public interface Message extends Serializable {
 
   public interface MessageMetadata extends Serializable {
 
-    default Object getAttributes() {
-      return null;
-    }
-
-    default Object getDestination() {
-      return null;
-    }
-
     Instant getOccurredTime();
-
-    long getSequenceNumber();
 
     Object getSource();
 
-    default String getTrackingToken() {
-      return null;
-    }
-
-    void resetSequenceNumber(long sequenceNumber);
   }
 
   public interface MessageQueues {

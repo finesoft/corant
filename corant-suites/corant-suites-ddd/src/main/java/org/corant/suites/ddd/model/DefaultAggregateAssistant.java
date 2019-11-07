@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import org.corant.Corant;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.event.Event;
+import org.corant.suites.ddd.message.AggregateMessageMetadata;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
 
@@ -61,7 +62,9 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   public List<Message> dequeueMessages(boolean flush) {
     final AtomicLong counter = new AtomicLong(lastMessageSequenceNumber);
     List<Message> exMsgs = messages.stream().map(m -> {
-      m.getMetadata().resetSequenceNumber(counter.incrementAndGet());
+      if (m.getMetadata() instanceof AggregateMessageMetadata) {
+        ((AggregateMessageMetadata) m.getMetadata()).resetSequenceNumber(counter.incrementAndGet());
+      }
       return m;
     }).collect(Collectors.toList());
     if (flush) {

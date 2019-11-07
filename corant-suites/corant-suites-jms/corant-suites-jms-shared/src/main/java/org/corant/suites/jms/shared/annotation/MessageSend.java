@@ -19,6 +19,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.jms.JMSContext;
+import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 
 /**
  * corant-suites-jms-shared
@@ -35,8 +36,6 @@ public @interface MessageSend {
 
   String destination();
 
-  String durableSubscription() default "";
-
   boolean multicast() default false;
 
   SerializationSchema serialization() default SerializationSchema.JSON_STRING;
@@ -44,7 +43,17 @@ public @interface MessageSend {
   int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
 
   public static enum SerializationSchema {
-    JSON_STRING, BINARY, JAVA_SERIAL, MAP
+    JSON_STRING, BINARY, JAVA_SERIAL, MAP;
+
+    private final MessageSerialization qualifier;
+
+    private SerializationSchema() {
+      qualifier = MessageSerializationLiteral.of(this);
+    }
+
+    public MessageSerialization qualifier() {
+      return qualifier;
+    }
   }
 
 }

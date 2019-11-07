@@ -67,11 +67,11 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "4")
   protected Integer initialSize = 4;
 
-  @ConfigKeyItem(defaultValue = "0")
-  protected Integer minSize = 0;
+  @ConfigKeyItem(defaultValue = "4")
+  protected Integer minSize = 4;
 
-  @ConfigKeyItem(defaultValue = "8")
-  protected Integer maxSize = 8;
+  @ConfigKeyItem(defaultValue = "64")
+  protected Integer maxSize = 64;
 
   @ConfigKeyItem(defaultValue = "PT1S")
   protected Duration leakTimeout = Duration.ofSeconds(1);

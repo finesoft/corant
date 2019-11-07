@@ -21,8 +21,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
@@ -90,6 +92,10 @@ public abstract class AbstractJMSExtension implements Extension {
         streamMethods.add(am);
       }
     }
+  }
+
+  void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    // TODO FIXME validate config
   }
 
 }

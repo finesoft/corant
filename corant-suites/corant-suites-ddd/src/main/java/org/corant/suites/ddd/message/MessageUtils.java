@@ -26,8 +26,8 @@ public class MessageUtils {
 
   public static boolean isCorrelated(Message m, Message o) {
     return m instanceof MergableMessage && o instanceof MergableMessage
-        && isEquals(m.getClass(), o.getClass()) && isEquals(m.destination(), o.destination())
-        && isEquals(m.sourceObject(), o.sourceObject());
+        && isEquals(m.getClass(), o.getClass())
+        && isEquals(m.getMetadata().getSource(), m.getMetadata().getSource());
   }
 
   public static void mergeToQueue(Queue<Message> queue, Message msg) {

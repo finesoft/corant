@@ -19,7 +19,7 @@
         </license>
     </licenses>
     <properties>
-        <revision>1.1.0-SNAPSHOT</revision>
+        <revision>1.1.1-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.java>1.8</version.java>
         <version.maven-compiler-plugin>3.7.0</version.maven-compiler-plugin>

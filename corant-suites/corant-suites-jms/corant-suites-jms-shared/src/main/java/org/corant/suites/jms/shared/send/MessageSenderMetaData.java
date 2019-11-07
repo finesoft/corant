@@ -14,6 +14,7 @@
 package org.corant.suites.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 
@@ -29,8 +30,6 @@ public class MessageSenderMetaData {
 
   private final String destination;
 
-  private final String durableSubscription;
-
   private final boolean multicast;
 
   private final int sessionMode;
@@ -39,25 +38,21 @@ public class MessageSenderMetaData {
 
   public MessageSenderMetaData(MessageSend annotation) {
     this(shouldNotNull(annotation).connectionFactoryId(), annotation.destination(),
-        annotation.durableSubscription(), annotation.multicast(), annotation.sessionMode(),
-        annotation.serialization());
+        annotation.multicast(), annotation.sessionMode(), annotation.serialization());
   }
 
   /**
    * @param connectionFactoryId
    * @param destination
-   * @param durableSubscription
    * @param multicast
    * @param sessionMode
    * @param serialization
    */
-  public MessageSenderMetaData(String connectionFactoryId, String destination,
-      String durableSubscription, boolean multicast, int sessionMode,
-      SerializationSchema serialization) {
+  public MessageSenderMetaData(String connectionFactoryId, String destination, boolean multicast,
+      int sessionMode, SerializationSchema serialization) {
     super();
     this.connectionFactoryId = connectionFactoryId;
     this.destination = destination;
-    this.durableSubscription = durableSubscription;
     this.multicast = multicast;
     this.sessionMode = sessionMode;
     this.serialization = serialization;
@@ -111,16 +106,12 @@ public class MessageSenderMetaData {
     return destination;
   }
 
-  /**
-   *
-   * @return the durableSubscription
-   */
-  public String getDurableSubscription() {
-    return durableSubscription;
+  public Pair<String, Integer> getFactoryKey() {
+    return Pair.of(connectionFactoryId, sessionMode);
   }
 
   /**
-   * 
+   *
    * @return the serialization
    */
   public SerializationSchema getSerialization() {
@@ -152,5 +143,4 @@ public class MessageSenderMetaData {
   public boolean isMulticast() {
     return multicast;
   }
-
 }

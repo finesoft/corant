@@ -13,81 +13,36 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.resolveApply;
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.Empties.isNotEmpty;
-import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.logging.Logger;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.suites.jms.shared.annotation.MessageSend;
-import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
-import org.corant.suites.jms.shared.annotation.MessageSends;
-import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
-import org.corant.suites.jms.shared.context.MessageSerializer;
 
 /**
  * corant-suites-jms-shared
  *
- * @author bingo 下午5:00:02
+ * @author bingo 上午9:34:56
  *
  */
 public abstract class AbstractMessageSender implements MessageSender {
 
-  @Override
-  public void send(Serializable... annotatedPayloads) {
-    for (Serializable annotatedPayload : annotatedPayloads) {
-      Class<?> payloadClass = getUserClass(shouldNotNull(annotatedPayload));
-      Set<MessageSenderMetaData> sends = resolveMetaDatas(payloadClass);
-      shouldBeTrue(isNotEmpty(sends),
-          "The payload class %s must include either MessageSend or MessageSends annotaion.",
-          payloadClass);
-      for (MessageSenderMetaData send : sends) {
-        send(annotatedPayload, send.getConnectionFactoryId(), send.getDestination(),
-            send.isMulticast(), send.getDurableSubscription(), send.getSessionMode(),
-            send.getSerialization());
-      }
-    }
-  }
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-  public void send(Serializable message, String connectionFactoryId, String destination,
-      boolean multicast, String durableSubscription, int sessionMode, SerializationSchema schema) {
+  @Override
+  public void send(Message message, String connectionFactoryId, String destination,
+      boolean multicast, int sessionMode) {
     final JMSContext jmsc =
         resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
-    Message useMessage = null;
-    if (message instanceof Message) {
-      useMessage = (Message) message;
-    } else {
-      MessageSerializer serializer =
-          resolve(MessageSerializer.class, MessageSerializationLiteral.of(schema)).get();
-      useMessage = serializer.serialize(jmsc, shouldNotNull(message));
-    }
-    if (multicast) {
-      jmsc.createProducer().send(jmsc.createTopic(destination), useMessage);
-    } else {
-      jmsc.createProducer().send(jmsc.createQueue(destination), useMessage);
-    }
+    send(jmsc, message, destination, multicast);
   }
 
-  protected Set<MessageSenderMetaData> resolveMetaDatas(Class<?> messageClass) {
-    Set<MessageSenderMetaData> sends = new LinkedHashSet<>();
-    MessageSends anns = findAnnotation(messageClass, MessageSends.class, false);// FIXME inherit
-    if (anns == null) {
-      MessageSend ann = findAnnotation(messageClass, MessageSend.class, false);// FIXME inherit
-      if (ann != null) {
-        sends.add(new MessageSenderMetaData(ann));
-      }
+  protected void send(JMSContext jmsc, Message message, String destination, boolean multicast) {
+    if (multicast) {
+      jmsc.createProducer().send(jmsc.createTopic(destination), message);
     } else {
-      listOf(anns.value()).stream().map(MessageSenderMetaData::new).forEach(sends::add);
+      jmsc.createProducer().send(jmsc.createQueue(destination), message);
     }
-    return sends;
   }
 
 }

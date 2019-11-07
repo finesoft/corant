@@ -13,12 +13,6 @@
  */
 package org.corant.suites.ddd.message;
 
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import java.time.Instant;
-import java.util.Map;
-import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
-import org.corant.suites.ddd.model.AbstractDefaultAggregate;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.model.Value.SimpleValueMap;
@@ -29,15 +23,14 @@ import org.corant.suites.ddd.model.Value.SimpleValueMap;
  * @author bingo 下午5:48:49
  *
  */
-public class AggregateLifecycleMessage implements MergableMessage {
+public class AggregateLifecycleMessage extends AbstractAggregateMessage implements MergableMessage {
 
   private static final long serialVersionUID = -5988315884617833263L;
-  private final AggregateLifecycleMessageMetadata metadata;
   private final Lifecycle lifecycle;
   private final SimpleValueMap payload;
 
   public AggregateLifecycleMessage(Aggregate aggregate, Lifecycle lifecycle) {
-    metadata = new AggregateLifecycleMessageMetadata(aggregate);
+    super(aggregate);
     this.lifecycle = lifecycle;
     if (aggregate instanceof AggregateLifecycleMessageBuilder) {
       payload = ((AggregateLifecycleMessageBuilder) aggregate).buildLifecycleMessagePayload();
@@ -46,36 +39,10 @@ public class AggregateLifecycleMessage implements MergableMessage {
     }
   }
 
-  public AggregateLifecycleMessage(Aggregate aggregate, Lifecycle lifecycle,
-      SimpleValueMap payload) {
-    metadata = new AggregateLifecycleMessageMetadata(aggregate);
-    this.lifecycle = lifecycle;
-    this.payload = defaultObject(payload, SimpleValueMap.empty());
-  }
-
-  /**
-   * @param metadata
-   * @param lifecycle
-   * @param payload
-   */
-  public AggregateLifecycleMessage(AggregateLifecycleMessageMetadata metadata, Lifecycle lifecycle,
-      SimpleValueMap payload) {
-    super();
-    this.metadata = metadata;
-    this.lifecycle = lifecycle;
-    this.payload = payload;
-  }
-
   public Lifecycle getLifecycle() {
     return lifecycle;
   }
 
-  @Override
-  public AggregateLifecycleMessageMetadata getMetadata() {
-    return metadata;
-  }
-
-  @Override
   public SimpleValueMap getPayload() {
     return payload;
   }
@@ -88,62 +55,6 @@ public class AggregateLifecycleMessage implements MergableMessage {
   @FunctionalInterface
   public interface AggregateLifecycleMessageBuilder {
     SimpleValueMap buildLifecycleMessagePayload();
-  }
-
-  public static class AggregateLifecycleMessageMetadata implements MessageMetadata {
-
-    private static final long serialVersionUID = 5896162140881655490L;
-
-    private final DefaultAggregateIdentifier source;
-    private final Instant occurredTime = Instant.now();
-    private final long versionNumber;
-    private long sequenceNumber = 0;
-
-    public AggregateLifecycleMessageMetadata(Aggregate aggregate) {
-      source = new DefaultAggregateIdentifier(aggregate);
-      if (aggregate instanceof AbstractDefaultAggregate) {
-        sequenceNumber = ((AbstractDefaultAggregate) aggregate).getMn();
-      }
-      versionNumber = aggregate.getVn();
-    }
-
-    /**
-     * @param source
-     * @param versionNumber
-     * @param sequenceNumber
-     */
-    public AggregateLifecycleMessageMetadata(DefaultAggregateIdentifier source, long versionNumber,
-        long sequenceNumber) {
-      super();
-      this.source = source;
-      this.versionNumber = versionNumber;
-      this.sequenceNumber = sequenceNumber;
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-      return mapOf("versionNumber", versionNumber);
-    }
-
-    @Override
-    public Instant getOccurredTime() {
-      return occurredTime;
-    }
-
-    @Override
-    public long getSequenceNumber() {
-      return sequenceNumber;
-    }
-
-    @Override
-    public DefaultAggregateIdentifier getSource() {
-      return source;
-    }
-
-    @Override
-    public void resetSequenceNumber(long sequenceNumber) {
-      this.sequenceNumber = sequenceNumber;
-    }
   }
 
 }

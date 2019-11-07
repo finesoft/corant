@@ -146,8 +146,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    * Connections idle for longer than this time period are flushed from the pool. A duration of
    * {@link Duration#ZERO} means that a this feature is disabled.
    */
-  @ConfigKeyItem(defaultValue = "PT30S")
-  protected Duration reapTimeout = Duration.ofSeconds(30L);
+  @ConfigKeyItem(defaultValue = "PT16S")
+  protected Duration reapTimeout = Duration.ofSeconds(16L);
 
   /**
    * The maximum amount of time a thread may be blocked waiting for a connection. If this time

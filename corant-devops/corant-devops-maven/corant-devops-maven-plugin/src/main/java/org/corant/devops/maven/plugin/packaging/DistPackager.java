@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
@@ -55,7 +55,7 @@ public class DistPackager implements Packager {
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
   public static final String RUN_USED_CONFIG_PROFILE = "#USED_CONFIG_PROFILE#";
-  public static final String DIST_NAME_SUF = "-dist.zip";
+  public static final String DIST_NAME_SUF = "-dist.tar";
 
   private final PackageMojo mojo;
   private final Log log;
@@ -86,18 +86,18 @@ public class DistPackager implements Packager {
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
-    log.info(String.format("(corant) building dist zip: %s", destPath));
-    try (ZipArchiveOutputStream zos =
-        new ZipArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
+    log.info(String.format("(corant) building dist archive: %s", destPath));
+    try (TarArchiveOutputStream cos =
+        new TarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
-          ZipArchiveEntry zipEntry =
-              new ZipArchiveEntry(resolveArchivePath(root.getPath(), entry.getName()));
-          zos.putArchiveEntry(zipEntry);
-          IOUtils.copy(entry.getInputStream(), zos);
-          zos.closeArchiveEntry();
-          log.debug(String.format("(corant) packaged entry %s", zipEntry.getName()));
+          TarArchiveEntry compressEntry =
+              new TarArchiveEntry(resolveArchivePath(root.getPath(), entry.getName()));
+          cos.putArchiveEntry(compressEntry);
+          IOUtils.copy(entry.getInputStream(), cos);
+          cos.closeArchiveEntry();
+          log.debug(String.format("(corant) packaged entry %s", compressEntry.getName()));
         }
       }
       // handle child archives
@@ -106,12 +106,12 @@ public class DistPackager implements Packager {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
           for (Entry childEntry : childArchive) {
-            ZipArchiveEntry childZipEntry = new ZipArchiveEntry(
+            TarArchiveEntry childCompressEntry = new TarArchiveEntry(
                 resolveArchivePath(childArchive.getPath(), childEntry.getName()));
-            zos.putArchiveEntry(childZipEntry);
-            IOUtils.copy(childEntry.getInputStream(), zos);
-            zos.closeArchiveEntry();
-            log.debug(String.format("(corant) packaged entry %s", childZipEntry.getName()));
+            cos.putArchiveEntry(childCompressEntry);
+            IOUtils.copy(childEntry.getInputStream(), cos);
+            cos.closeArchiveEntry();
+            log.debug(String.format("(corant) packaged entry %s", childCompressEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());

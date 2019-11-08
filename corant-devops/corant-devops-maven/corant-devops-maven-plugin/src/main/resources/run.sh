@@ -1,4 +1,4 @@
-#!/bin/sh
+# !/bin/sh
 
 function join() {
   local IFS=$1

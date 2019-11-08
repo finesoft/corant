@@ -14,6 +14,7 @@
 package org.corant.kernel.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.lang.annotation.Annotation;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
@@ -37,6 +38,16 @@ public abstract class CDIs {
       return ((ParameterInjectionPoint<?, ?>) injectionPoint).getAnnotated().getDeclaringCallable();
     }
     return injectionPoint.getAnnotated();
+  }
+
+  public static <T extends Annotation> T getAnnotation(InjectionPoint injectionPoint,
+      Class<T> annotationType) {
+    return getAnnotated(injectionPoint).getAnnotation(annotationType);
+  }
+
+  public static <T extends Annotation> Set<T> getAnnotations(InjectionPoint injectionPoint,
+      Class<T> annotationType) {
+    return getAnnotated(injectionPoint).getAnnotations(annotationType);
   }
 
   public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {

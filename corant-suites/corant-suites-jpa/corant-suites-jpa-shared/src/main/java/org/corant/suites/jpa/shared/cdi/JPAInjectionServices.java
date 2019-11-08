@@ -43,8 +43,7 @@ public class JPAInjectionServices implements JpaInjectionServices {
   @Override
   public ResourceReferenceFactory<EntityManager> registerPersistenceContextInjectionPoint(
       InjectionPoint injectionPoint) {
-    final PersistenceContext pc =
-        CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceContext.class);
+    final PersistenceContext pc = CDIs.getAnnotation(injectionPoint, PersistenceContext.class);
     return ResourceReferences
         .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManager(pc)));
   }
@@ -52,7 +51,7 @@ public class JPAInjectionServices implements JpaInjectionServices {
   @Override
   public ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnitInjectionPoint(
       InjectionPoint injectionPoint) {
-    PersistenceUnit pu = CDIs.getAnnotated(injectionPoint).getAnnotation(PersistenceUnit.class);
+    PersistenceUnit pu = CDIs.getAnnotation(injectionPoint, PersistenceUnit.class);
     return ResourceReferences
         .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)));
   }

@@ -39,14 +39,13 @@ public class MessageDispatcherProducer {
   @Produces
   public MessageDispatcher produce(final InjectionPoint ip) {
     List<MessageDispatcher> dispatchers = new ArrayList<>();
-    final MessageDispatch at = CDIs.getAnnotated(ip).getAnnotation(MessageDispatch.class);
+    final MessageDispatch at = CDIs.getAnnotation(ip, MessageDispatch.class);
     if (at != null) {
       dispatchers.add(new MessageDispatcherImpl(at));
     }
     // nonstandard
-    final JMSDestinationDefinition jmd =
-        CDIs.getAnnotated(ip).getAnnotation(JMSDestinationDefinition.class);
-    final JMSSessionMode jmsd = CDIs.getAnnotated(ip).getAnnotation(JMSSessionMode.class);
+    final JMSDestinationDefinition jmd = CDIs.getAnnotation(ip, JMSDestinationDefinition.class);
+    final JMSSessionMode jmsd = CDIs.getAnnotation(ip, JMSSessionMode.class);
     if (jmd != null) {
       if (jmsd != null) {
         dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
@@ -54,8 +53,7 @@ public class MessageDispatcherProducer {
         dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
       }
     }
-    final JMSDestinationDefinitions jmds =
-        CDIs.getAnnotated(ip).getAnnotation(JMSDestinationDefinitions.class);
+    final JMSDestinationDefinitions jmds = CDIs.getAnnotation(ip, JMSDestinationDefinitions.class);
     for (JMSDestinationDefinition jmdss : jmds.value()) {
       if (jmdss != null) {
         dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));

@@ -15,17 +15,24 @@ package org.corant.suites.jms.shared.send;
 
 import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.StreamUtils.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import javax.jms.JMSDestinationDefinition;
 import javax.jms.JMSProducer;
+import javax.jms.JMSSessionMode;
 import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Session;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
 
 /**
@@ -38,14 +45,6 @@ public interface MessageDispatcher {
 
   void dispatch(byte[] message);
 
-  default void send(InputStream message) throws IOException {
-    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-      copy(message, buffer);
-      byte[] bytes = buffer.toByteArray();
-      dispatch(bytes);
-    }
-  }
-
   void dispatch(Map<String, Object> message);
 
   void dispatch(Message message);
@@ -54,20 +53,35 @@ public interface MessageDispatcher {
 
   void dispatch(String message);
 
+  default void send(InputStream message) throws IOException {
+    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+      copy(message, buffer);
+      byte[] bytes = buffer.toByteArray();
+      dispatch(bytes);
+    }
+  }
+
   /**
    * corant-suites-jms-artemis
    *
    * @author bingo 下午4:29:24
    *
    */
-  public static class MessageSenderImpl implements MessageDispatcher {
+  public static class MessageDispatcherImpl implements MessageDispatcher {
 
     protected final boolean multicast;
     protected final String destination;
     protected final String connectionFactoryId;
     protected final int sessionMode;
 
-    public MessageSenderImpl(org.corant.suites.jms.shared.annotation.MessageDispatch mpl) {
+    public MessageDispatcherImpl(JMSDestinationDefinition dann, JMSSessionMode sann) {
+      multicast = tryAsClass(dann.description()).isAssignableFrom(Queue.class);
+      destination = shouldNotNull(dann.destinationName());
+      connectionFactoryId = shouldNotNull(dann.name());
+      sessionMode = sann == null ? Session.AUTO_ACKNOWLEDGE : sann.value();
+    }
+
+    public MessageDispatcherImpl(MessageDispatch mpl) {
       multicast = mpl.multicast();
       destination = shouldNotNull(mpl.destination());
       connectionFactoryId = mpl.connectionFactoryId();
@@ -77,15 +91,6 @@ public interface MessageDispatcher {
     @Override
     public void dispatch(byte[] message) {
       doDispatch(message);
-    }
-
-    @Override
-    public void send(InputStream message) throws IOException {
-      try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-        copy(message, buffer);
-        byte[] bytes = buffer.toByteArray();
-        dispatch(bytes);
-      }
     }
 
     @Override
@@ -106,6 +111,15 @@ public interface MessageDispatcher {
     @Override
     public void dispatch(String message) {
       doDispatch(message);
+    }
+
+    @Override
+    public void send(InputStream message) throws IOException {
+      try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+        copy(message, buffer);
+        byte[] bytes = buffer.toByteArray();
+        dispatch(bytes);
+      }
     }
 
     @SuppressWarnings("unchecked")
@@ -130,5 +144,60 @@ public interface MessageDispatcher {
         throw new CorantRuntimeException(e);
       }
     }
+  }
+
+  /**
+   * corant-suites-jms-shared
+   *
+   * @author bingo 下午7:45:18
+   *
+   */
+  public static class GroupMessageDispatcherImpl implements MessageDispatcher {
+
+    final List<MessageDispatcher> dispatchers;
+
+    /**
+     * @param dispatchers
+     */
+    protected GroupMessageDispatcherImpl(List<MessageDispatcher> dispatchers) {
+      super();
+      this.dispatchers = dispatchers;
+    }
+
+    @Override
+    public void dispatch(byte[] message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Map<String, Object> message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Message message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Serializable message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(String message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
   }
 }

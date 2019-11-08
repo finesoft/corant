@@ -50,6 +50,26 @@ public class Resources {
 
   public static final Logger logger = Logger.getLogger(Resources.class.getName());
 
+  /**
+   * Get URL resources from specified url path, support Glob Pattern.
+   * <p>
+   * <li>The incoming path start with 'filesystem:'({@link SourceType#FILE_SYSTEM}) means that get
+   * resouces from file system.</li>
+   *
+   * <li>The incoming path start with 'classpath:' ({@link SourceType#CLASS_PATH}) means that get
+   * resouces from class path.</li>
+   *
+   * <li>The incoming path start with 'url:' ({@link SourceType#CLASS_PATH}) means that get resouces
+   * from url.</li>
+   *
+   * Note: If the incoming path non start with {@link SourceType} that means not specified schema
+   * then use class path.
+   *
+   * @param <T>
+   * @param path
+   * @return
+   * @throws IOException from
+   */
   public static <T extends URLResource> Stream<T> from(String path) throws IOException {
     if (isNotBlank(path)) {
       SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);

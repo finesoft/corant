@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversions;
 import org.corant.shared.conversion.ConverterHints;
@@ -100,6 +102,11 @@ public class ConversionUtils {
 
   public static Class<?> toClass(Object obj) {
     return Conversions.convert(obj, Class.class);
+  }
+
+  public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
+      Supplier<C> collectionFactory) {
+    return Conversions.convert(obj, itemClass, collectionFactory, null);
   }
 
   public static Currency toCurrency(Object obj) {

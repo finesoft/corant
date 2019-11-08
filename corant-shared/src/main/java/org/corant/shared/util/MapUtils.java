@@ -182,18 +182,45 @@ public class MapUtils {
     return getMapObject(map, key, ConversionUtils::toInteger, nvt);
   }
 
+  /**
+   * Retrieve the list value with the key from a map, use force cast convert.
+   *
+   * @param <T>
+   * @param map
+   * @param key
+   * @return getMapList
+   */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, o -> forceCast(o));
   }
 
+  /**
+   * Retrieve the list value with the key and element class from a map, use converter.
+   *
+   * @param <T> the expected element type in list
+   * @param map
+   * @param key
+   * @param elementClazz the expected element class in list
+   * @return getMapList
+   */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
-      final Class<T> clazz) {
-    return getMapObjectList(map, key, (o) -> ConversionUtils.toList(o, clazz));
+      final Class<T> elementClazz) {
+    return getMapObjectList(map, key, (o) -> ConversionUtils.toList(o, elementClazz));
   }
 
+  /**
+   * Retrieve the list value with the key and convert function from a map.
+   *
+   * @param <T> the expected element type in list
+   * @param map
+   * @param key
+   * @param singleElementExtractor the extractor function that extract value to expected list
+   *        element.
+   * @return getMapList
+   */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
-      final Function<Object, T> objFunc) {
-    return getMapObjectList(map, key, (v) -> ConversionUtils.toList(v, objFunc));
+      final Function<Object, T> singleElementExtractor) {
+    return getMapObjectList(map, key, (v) -> ConversionUtils.toList(v, singleElementExtractor));
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
@@ -237,10 +264,28 @@ public class MapUtils {
     return map == null ? null : map.get(key);
   }
 
+  /**
+   * Retrieves the value of the specified type with key from map, use converter.
+   *
+   * @param <T> the expected value type
+   * @param map
+   * @param key
+   * @param clazz the expected value class
+   * @return getMapObject
+   */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
     return ConversionUtils.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }
 
+  /**
+   * Retrieves the value of the specified type with key from map, use specified extractor.
+   *
+   * @param <T> the expected value type
+   * @param map
+   * @param key
+   * @param extractor the value extractor
+   * @return getMapObject
+   */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return getMapObject(map, key, extractor, null);
@@ -251,6 +296,15 @@ public class MapUtils {
     return map != null ? defaultObject(extractor.apply(map.get(key)), nvt) : nvt;
   }
 
+  /**
+   * Retrieves the value of the specified type with key from map, use specified list extractor.
+   *
+   * @param <T> the expected value type
+   * @param map
+   * @param key
+   * @param extractor the value extractor that extract map value.
+   * @return getMapObjectList
+   */
   public static <T> List<T> getMapObjectList(final Map<?, ?> map, final Object key,
       final Function<Object, List<T>> extractor) {
     return map != null ? extractor.apply(map.get(key)) : null;

@@ -13,12 +13,19 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
+import java.util.ArrayList;
+import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.jms.JMSDestinationDefinition;
+import javax.jms.JMSDestinationDefinitions;
+import javax.jms.JMSSessionMode;
 import org.corant.kernel.util.CDIs;
-import org.corant.suites.jms.shared.send.MessageDispatcher.MessageSenderImpl;
+import org.corant.suites.jms.shared.annotation.MessageDispatch;
+import org.corant.suites.jms.shared.send.MessageDispatcher.GroupMessageDispatcherImpl;
+import org.corant.suites.jms.shared.send.MessageDispatcher.MessageDispatcherImpl;
 
 /**
  * corant-suites-jms-shared
@@ -31,9 +38,31 @@ public class MessageDispatcherProducer {
 
   @Produces
   public MessageDispatcher produce(final InjectionPoint ip) {
-    final org.corant.suites.jms.shared.annotation.MessageDispatch at =
-        shouldNotNull(CDIs.getAnnotated(ip)
-            .getAnnotation(org.corant.suites.jms.shared.annotation.MessageDispatch.class));
-    return new MessageSenderImpl(at);
+    List<MessageDispatcher> dispatchers = new ArrayList<>();
+    final MessageDispatch at = CDIs.getAnnotated(ip).getAnnotation(MessageDispatch.class);
+    if (at != null) {
+      dispatchers.add(new MessageDispatcherImpl(at));
+    }
+    // nonstandard
+    final JMSDestinationDefinition jmd =
+        CDIs.getAnnotated(ip).getAnnotation(JMSDestinationDefinition.class);
+    final JMSSessionMode jmsd = CDIs.getAnnotated(ip).getAnnotation(JMSSessionMode.class);
+    if (jmd != null) {
+      if (jmsd != null) {
+        dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
+      } else {
+        dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
+      }
+    }
+    final JMSDestinationDefinitions jmds =
+        CDIs.getAnnotated(ip).getAnnotation(JMSDestinationDefinitions.class);
+    for (JMSDestinationDefinition jmdss : jmds.value()) {
+      if (jmdss != null) {
+        dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));
+      } else {
+        dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));
+      }
+    }
+    return new GroupMessageDispatcherImpl(shouldNotEmpty(dispatchers));
   }
 }

@@ -20,8 +20,10 @@ import static org.corant.shared.util.StreamUtils.streamOf;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -327,9 +329,11 @@ public class Corant implements AutoCloseable {
         });
 
     log(logger, "Finished at: %s.", Instant.now());
-    log(logger, "Final memory: %sM/%sM/%sM, process id: %s, java version: %s.",
+    log(logger,
+        "Final memory: %sM/%sM/%sM, process id: %s, java version: %s, default locale: %s, default timezone: %s.",
         LaunchUtils.getUsedMemoryMb(), LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(),
-        LaunchUtils.getPid(), LaunchUtils.getJavaVersion());
+        LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
+        TimeZone.getDefault().getID());
     printBoostLine();
 
     doOnReady();

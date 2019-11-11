@@ -114,6 +114,8 @@ public class PropertyMessageBundle implements MessageBundle {
                     Collectors.toMap(k -> k.getKey(), v -> new MessageFormat(v.getValue())));
                 holder.computeIfAbsent(res.getLocale(), (k) -> new ConcurrentHashMap<>())
                     .putAll(localeMap);
+                logger.fine(() -> String.format("Find %s %s message keys from %s.",
+                    localeMap.size(), res.getLocale(), s));
               });
             });
 

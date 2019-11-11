@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.suites.keycloak.spi;
+package org.corant.suites.keycloak.eventspi;
 
-import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.Config.Scope;
@@ -33,8 +32,8 @@ import org.keycloak.models.KeycloakSessionFactory;
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProviderFactory.class);
   static final String id = "corantKeycloakEventListener";
-  Predicate<Event> eventSelector;
-  Predicate<AdminEvent> adminEventSelector;
+  KeycloakEventSelector<Event> eventSelector;
+  KeycloakEventSelector<AdminEvent> adminEventSelector;
   KeycloakJMSSender jmsSender;
 
   @Override
@@ -55,13 +54,10 @@ public class KeycloakEventListenerJMSProviderFactory implements EventListenerPro
   @Override
   public void init(Scope config) {
     Scope s = Config.scope("eventListener", id);
-    if (s.getBoolean("composition-selector")) {
-      eventSelector = new CompositionEventSelector(s);
-      adminEventSelector = new CompositionAdminEventSelector(s);
-    } else {
-      eventSelector = new EventSelector(s);
-      adminEventSelector = new AdminEventSelector(s);
-    }
+    String adminEventPredicates = s.get("admin-event-selectors");
+    String eventPredicates = s.get("event-selectors");
+    eventSelector = new KeycloakEventTypeSelector(eventPredicates);
+    adminEventSelector = new KeycloakAdminEventSelector(adminEventPredicates);
     jmsSender = new KeycloakJMSSender(s);
     logger.infof("Initialize %s with id %s.", this.getClass().getName(), getId());
   }

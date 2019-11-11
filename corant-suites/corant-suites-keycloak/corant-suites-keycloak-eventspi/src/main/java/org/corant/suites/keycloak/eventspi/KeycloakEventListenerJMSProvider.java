@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.suites.keycloak.spi;
+package org.corant.suites.keycloak.eventspi;
 
-import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -28,13 +27,13 @@ import org.keycloak.events.admin.AdminEvent;
 public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProvider.class);
-  final Predicate<Event> eventSelector;
-  final Predicate<AdminEvent> adminEventSelector;
+  KeycloakEventSelector<Event> eventTypeSelector;
+  KeycloakEventSelector<AdminEvent> adminEventSelector;
   final KeycloakJMSSender jmsSender;
 
-  public KeycloakEventListenerJMSProvider(Predicate<Event> eventSelector,
-      Predicate<AdminEvent> adminEventSelector, KeycloakJMSSender jmsSender) {
-    this.eventSelector = eventSelector;
+  public KeycloakEventListenerJMSProvider(KeycloakEventSelector<Event> eventTypeSelector,
+      KeycloakEventSelector<AdminEvent> adminEventSelector, KeycloakJMSSender jmsSender) {
+    this.eventTypeSelector = eventTypeSelector;
     this.adminEventSelector = adminEventSelector;
     this.jmsSender = jmsSender;
   }
@@ -60,7 +59,7 @@ public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
   @Override
   public void onEvent(Event event) {
     logger.debugf("Resend event to jms!");
-    if (!eventSelector.test(event) || jmsSender == null) {
+    if (!eventTypeSelector.test(event) || jmsSender == null) {
       return;
     }
     try {

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.suites.keycloak.spi;
+package org.corant.suites.keycloak.eventspi.selector;
 
 import java.io.IOException;
 import java.util.ArrayList;

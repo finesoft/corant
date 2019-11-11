@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.suites.keycloak.spi;
+package org.corant.suites.keycloak.eventspi.selector;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -96,7 +96,7 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
 
   @Override
   public String toString() {
-    return "AdminEventSelector [realmId=" + realmId + ", types=[" + String.join(",", types)
+    return "KeycloakAdminEventSelector [realmId=" + realmId + ", types=[" + String.join(",", types)
         + "], resourcePaths=[" + String.join(",", resourcePaths) + "], authDetailsRealmId="
         + authDetailsRealmId + ", authDetailsClientId=" + authDetailsClientId
         + ", authDetailsUserId=" + authDetailsUserId + ", resourcePathRegex=" + resourcePathRegex

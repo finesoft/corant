@@ -7,7 +7,7 @@
 		<artifactId>corant-suites-keycloak</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>corant-suites-keycloak-spi</artifactId>
+	<artifactId>corant-suites-keycloak-eventspi</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.suites.keycloak.spi;
+package org.corant.suites.keycloak.eventspi;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class KeycloakJMSSender {
 
-  static final Logger logger = Logger.getLogger(EventSelector.class);
+  static final Logger logger = Logger.getLogger(KeycloakJMSSender.class);
   static final String MESSAGE_TYPE = "messageType";
   static final String KEYCLOAK_EVENT = "keycloakEvent";
   static final String JMS_CONN_FACTORY_JNDI_NAME = "java:jboss/exported/jms/RemoteArtemis";

@@ -69,9 +69,11 @@ public class DefaultMessageResolver implements MessageResolver {
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
     if (ser == MessageSeverity.INF) {
-      return messageBundle.getMessage(locale, MessageSource.UNKNOW_INF_CODE, new Object[] {code});
+      return messageBundle.getMessage(locale, MessageSource.UNKNOW_INF_CODE, new Object[] {code},
+          (l) -> String.format("Can't find any message for %s", code));
     } else {
-      return messageBundle.getMessage(locale, MessageSource.UNKNOW_ERR_CODE, new Object[] {code});
+      return messageBundle.getMessage(locale, MessageSource.UNKNOW_ERR_CODE, new Object[] {code},
+          (l) -> String.format("Can't find any message for %s", code));
     }
   }
 

@@ -56,8 +56,20 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-dist")
   protected boolean withDist;
 
-  @Parameter(property = "corant.maven-mojo.mainClass")
+  @Parameter(defaultValue = "zip", property = "corant.maven-mojo.dist-format")
+  protected String distFormat;
+
+  @Parameter(property = "corant.maven-mojo.main-class")
   protected String mainClass;
+
+  @Parameter
+  protected String sysPros;
+
+  @Parameter
+  protected String vmArgs;
+
+  @Parameter
+  protected String appArgs;
 
   @Parameter(defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,**log*.*",
       property = "corant.maven-mojo.dist-config-paths")
@@ -97,12 +109,24 @@ public class PackageMojo extends AbstractMojo {
     }
   }
 
+  public String getAppArgs() {
+    return appArgs != null && !appArgs.isEmpty() ? appArgs.trim() : "";
+  }
+
   public String getClassifier() {
     return classifier;
   }
 
   public String getDistConfigPaths() {
     return distConfigPaths;
+  }
+
+  public String getDistFormat() {
+    String df = distFormat != null && !distFormat.isEmpty() ? distFormat.trim() : "";
+    if (df.startsWith(".")) {
+      return df.substring(1);
+    }
+    return df.isEmpty() ? "zip" : df;
   }
 
   public String getDistResourcePaths() {
@@ -121,8 +145,16 @@ public class PackageMojo extends AbstractMojo {
     return project;
   }
 
+  public String getSysPros() {
+    return sysPros != null && !sysPros.isEmpty() ? sysPros.trim() : "";
+  }
+
   public String getUsedConfigLocation() {
     return usedConfigLocation == null ? "" : usedConfigLocation;
+  }
+
+  public String getVmArgs() {
+    return vmArgs != null && !vmArgs.isEmpty() ? vmArgs.trim() : "";
   }
 
   public boolean isJar() {

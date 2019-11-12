@@ -14,6 +14,8 @@
 package org.corant.devops.maven.plugin.packaging;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +29,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveOutputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
@@ -52,10 +55,13 @@ public class DistPackager implements Packager {
   public static final String RUN_BAT = "run.bat";
   public static final String RUN_SH = "run.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
+  public static final String RUN_APP_ARGS = "#APPLICATION_ARGUMENTS#";
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
   public static final String RUN_USED_CONFIG_PROFILE = "#USED_CONFIG_PROFILE#";
-  public static final String DIST_NAME_SUF = "-dist.tar";
+  public static final String RUN_ADD_SYS_PROS = "#ADDITIONAL_SYSTEM_PROPERTIES#";
+  public static final String RUN_ADD_VM_ARGS = "#ADDITIONAL_VM_ARGUMENTS#";
+  public static final String DIST_NAME_SUF = "-dist";
 
   private final PackageMojo mojo;
   private final Log log;
@@ -80,24 +86,19 @@ public class DistPackager implements Packager {
     doPack(buildArchive());
   }
 
-  protected void doPack(Archive root) throws IOException {
+  protected void doPack(Archive root) throws IOException, ArchiveException {
     final Path destPath = Objects.requireNonNull(resolvePath());
     log.debug(String.format("(corant) created destination url %s for packaging.",
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
     log.info(String.format("(corant) building dist archive: %s", destPath));
-    try (TarArchiveOutputStream cos =
-        new TarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
+    try (ArchiveOutputStream cos = packArchiveOutput(destPath.toFile())) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
-          TarArchiveEntry compressEntry =
-              new TarArchiveEntry(resolveArchivePath(root.getPath(), entry.getName()));
-          cos.putArchiveEntry(compressEntry);
-          IOUtils.copy(entry.getInputStream(), cos);
-          cos.closeArchiveEntry();
-          log.debug(String.format("(corant) packaged entry %s", compressEntry.getName()));
+          packArchiveEntry(cos, root, entry);
+          log.debug(String.format("(corant) packaged entry %s", entry.getName()));
         }
       }
       // handle child archives
@@ -106,12 +107,8 @@ public class DistPackager implements Packager {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
           for (Entry childEntry : childArchive) {
-            TarArchiveEntry childCompressEntry = new TarArchiveEntry(
-                resolveArchivePath(childArchive.getPath(), childEntry.getName()));
-            cos.putArchiveEntry(childCompressEntry);
-            IOUtils.copy(childEntry.getInputStream(), cos);
-            cos.closeArchiveEntry();
-            log.debug(String.format("(corant) packaged entry %s", childCompressEntry.getName()));
+            packArchiveEntry(cos, childArchive, childEntry);
+            log.debug(String.format("(corant) packaged entry %s", childEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());
@@ -129,7 +126,8 @@ public class DistPackager implements Packager {
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
     DefaultArchive.of(CFG_DIR, root).addEntries(resolveConfigFiles());
     DefaultArchive.of(BIN_DIR, root).addEntries(resolveBinFiles());
-    log.debug("(corant) built archive for packaging.");
+    log.debug(
+        String.format("(corant) built archive %s for packaging.", root.getEntries(null).size()));
     return root;
   }
 
@@ -160,8 +158,8 @@ public class DistPackager implements Packager {
 
   Path resolvePath() {
     Path target = Paths.get(getMojo().getProject().getBuild().getDirectory());
-    return target
-        .resolve(getMojo().getFinalName() + "-" + getMojo().getClassifier() + DIST_NAME_SUF);
+    return target.resolve(getMojo().getFinalName().concat("-").concat(getMojo().getClassifier())
+        .concat(DIST_NAME_SUF).concat(".").concat(getMojo().getDistFormat()));
   }
 
   List<Entry> resolveRootResources() throws IOException {
@@ -186,7 +184,10 @@ public class DistPackager implements Packager {
     final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
         .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
-        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile());
+        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
+        .replaceAll(RUN_APP_ARGS, getMojo().getAppArgs())
+        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
+        .replaceAll(RUN_ADD_SYS_PROS, getMojo().getSysPros());
     return new ScriptEntry(RUN_BAT, usebat);
   }
 
@@ -195,8 +196,34 @@ public class DistPackager implements Packager {
     final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
         .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
         .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
-        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile());
+        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
+        .replaceAll(RUN_APP_ARGS, getMojo().getAppArgs())
+        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
+        .replaceAll(RUN_ADD_SYS_PROS, getMojo().getSysPros());
     return new ScriptEntry(RUN_SH, usesh);
+  }
+
+  private void packArchiveEntry(ArchiveOutputStream aos, Archive archive, Entry entry)
+      throws IOException {
+    String entryName = resolveArchivePath(archive.getPath(), entry.getName());
+    log.debug(String.format("(corant) packaging entry %s", entryName));
+    File file = null;
+    if (entry instanceof FileEntry) {
+      file = ((FileEntry) entry).getFile();
+    } else {
+      file = Files.createTempFile("corant-mojo-pack", entry.getName()).toFile();
+      IOUtils.copy(entry.getInputStream(), new FileOutputStream(file));
+      file.deleteOnExit();
+    }
+    aos.putArchiveEntry(aos.createArchiveEntry(file, entryName));
+    IOUtils.copy(new FileInputStream(file), aos);
+    aos.closeArchiveEntry();
+  }
+
+  private ArchiveOutputStream packArchiveOutput(File file)
+      throws FileNotFoundException, IOException, ArchiveException {
+    return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(),
+        new FileOutputStream(file));
   }
 
   /**

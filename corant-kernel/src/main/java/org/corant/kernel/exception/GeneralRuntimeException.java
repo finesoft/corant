@@ -15,6 +15,7 @@ package org.corant.kernel.exception;
 
 import static org.corant.kernel.util.Instances.resolveAnyway;
 import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.Arrays;
@@ -124,9 +125,13 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
 
   @Override
   public String getLocalizedMessage() {
+    return getLocalizedMessage(Locale.getDefault());
+  }
+
+  public String getLocalizedMessage(Locale locale) {
     MessageResolver resolver = resolveAnyway(MessageResolver.class);
     if (resolver != null) {
-      return resolver.getMessage(Locale.getDefault(), this);
+      return resolver.getMessage(defaultObject(locale, Locale.getDefault()), this);
     } else {
       return defaultString(super.getMessage()) + " " + asDefaultString(getCode());
     }
@@ -134,7 +139,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
 
   @Override
   public String getMessage() {
-    return getLocalizedMessage();
+    return getLocalizedMessage(Locale.getDefault());
   }
 
   @Override

@@ -41,6 +41,10 @@ public class FileEntry implements Entry {
     return new FileEntry(file);
   }
 
+  public File getFile() {
+    return file;
+  }
+
   @Override
   public InputStream getInputStream() throws IOException {
     return new FileInputStream(file);

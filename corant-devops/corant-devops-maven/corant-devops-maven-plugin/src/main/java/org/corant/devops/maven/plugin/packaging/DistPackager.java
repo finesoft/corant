@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,12 +94,12 @@ public class DistPackager implements Packager {
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
     log.info(String.format("(corant) building dist archive: %s", destPath));
-    try (ArchiveOutputStream cos = packArchiveOutput(destPath.toFile())) {
+    try (FileOutputStream fos = new FileOutputStream(destPath.toFile());
+        ArchiveOutputStream aos = packArchiveOutput(fos)) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
-          packArchiveEntry(cos, root, entry);
-          log.debug(String.format("(corant) packaged entry %s", entry.getName()));
+          packArchiveEntry(aos, root, entry);
         }
       }
       // handle child archives
@@ -107,8 +108,7 @@ public class DistPackager implements Packager {
         Archive childArchive = childrenArchives.remove(0);
         if (!childArchive.getEntries(null).isEmpty()) {
           for (Entry childEntry : childArchive) {
-            packArchiveEntry(cos, childArchive, childEntry);
-            log.debug(String.format("(corant) packaged entry %s", childEntry.getName()));
+            packArchiveEntry(aos, childArchive, childEntry);
           }
         }
         childrenArchives.addAll(childArchive.getChildren());
@@ -206,11 +206,11 @@ public class DistPackager implements Packager {
   private void packArchiveEntry(ArchiveOutputStream aos, Archive archive, Entry entry)
       throws IOException {
     String entryName = resolveArchivePath(archive.getPath(), entry.getName());
-    log.debug(String.format("(corant) packaging entry %s", entryName));
     File file = null;
     if (entry instanceof FileEntry) {
       file = ((FileEntry) entry).getFile();
     } else {
+      log.debug(String.format("(corant) create temp entry file for entry %s", entryName));
       file = Files.createTempFile("corant-mojo-pack", entry.getName()).toFile();
       IOUtils.copy(entry.getInputStream(), new FileOutputStream(file));
       file.deleteOnExit();
@@ -218,12 +218,12 @@ public class DistPackager implements Packager {
     aos.putArchiveEntry(aos.createArchiveEntry(file, entryName));
     IOUtils.copy(new FileInputStream(file), aos);
     aos.closeArchiveEntry();
+    log.debug(String.format("(corant) packaged entry %s", entryName));
   }
 
-  private ArchiveOutputStream packArchiveOutput(File file)
+  private ArchiveOutputStream packArchiveOutput(OutputStream os)
       throws FileNotFoundException, IOException, ArchiveException {
-    return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(),
-        new FileOutputStream(file));
+    return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(), os);
   }
 
   /**

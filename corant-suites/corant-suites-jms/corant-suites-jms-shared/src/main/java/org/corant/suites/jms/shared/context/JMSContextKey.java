@@ -76,7 +76,7 @@ public class JMSContextKey implements Serializable {
       if (isXa() && TransactionService.isCurrentTransactionActive()) {
         XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
         TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
-        logger.info(() -> "Create new XAJMSContext and register it to current transaction!");
+        logger.fine(() -> "Create new XAJMSContext and register it to current transaction!");
         return ctx;
       } else {
         if (sessionMode != null && TransactionService.isCurrentTransactionActive()) {

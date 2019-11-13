@@ -82,7 +82,7 @@
 		<version.HikariCP>3.2.0</version.HikariCP>
 		<version.agroal>1.7</version.agroal>
 
-		<version.narayana>5.9.8.Final</version.narayana>
+		<version.narayana>5.10.0.Final</version.narayana>
 		<version.atomikos>4.0.6</version.atomikos>
 		<version.xadisk>1.2.2</version.xadisk>
 

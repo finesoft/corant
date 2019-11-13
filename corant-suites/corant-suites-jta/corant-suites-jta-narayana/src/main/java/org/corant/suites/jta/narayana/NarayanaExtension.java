@@ -69,6 +69,7 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 public class NarayanaExtension implements Extension {
 
   public static final String JTA_BIND_TO_JNDI_CFG = "jta.bind-to-jndi";
+  public static final String AUTO_START_RECOVERY = "jta.auto-start-recovery";
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
@@ -117,7 +118,10 @@ public class NarayanaExtension implements Extension {
             RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT).initialize();
             RecoveryManagerService rms = new RecoveryManagerService();
             rms.create();
-            // rms.start();
+            if (ConfigProvider.getConfig().getOptionalValue(AUTO_START_RECOVERY, Boolean.class)
+                .orElse(false)) {
+              rms.start();
+            }
             return rms;
           }).disposeWith((t, inst) -> t.destroy());
     }

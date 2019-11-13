@@ -45,12 +45,16 @@ public class ConfigUtils {
   }
 
   public static String concatKey(String... keys) {
-    String concats = "";
+    StringBuilder concats = new StringBuilder();
     for (String key : keys) {
-      concats = removeSplitor(concats).concat(NAME_SPACE_SEPARATORS)
-          .concat(removeSplitor(defaultTrim(key)));
+      String useKey = defaultString(key);
+      if (isNotBlank(useKey)) {
+        concats = concats.append(removeSplitor(key)).append(NAME_SPACE_SEPARATORS);
+      }
+      // concats = removeSplitor(concats).concat(NAME_SPACE_SEPARATORS)
+      // .concat(removeSplitor(defaultTrim(key)));
     }
-    return removeSplitor(concats);
+    return removeSplitor(concats.toString());
   }
 
   public static String dashify(String substring) {

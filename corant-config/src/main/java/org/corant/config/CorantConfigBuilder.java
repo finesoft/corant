@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.corant.config.CorantConfigConversion.OrdinalConverter;
 import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
-import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -74,12 +74,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public Config build() {
     List<ConfigSource> resolvedSources =
         CorantConfigSource.resolveAdjust(sources, getClassLoader());
-    logger.fine(() -> String.format("Resolve sources: %n %s",
-        String.join("\n", ObjectUtils.asStrings(resolvedSources.stream().map(s -> {
-          final StringBuilder sb = new StringBuilder(s.getClass().getName()).append(":\n{\n");
-          s.getProperties().forEach((k, v) -> sb.append(k).append(" : ").append(v).append("\n"));
-          return sb.append("}\n").toString();
-        }).collect(Collectors.toList())))));
+    debugOutputSource(resolvedSources);
     return new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
   }
 
@@ -116,16 +111,34 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    logger.fine(() -> String.format("Add config converter %s, class loader is %s.", converter,
-        getClassLoader()));
+    logger.fine(
+        () -> String.format("Add config converter, name:[%s], target type:[%s], class loader:[%s].",
+            cls.getName(), type.getName(), getClassLoader()));
   }
 
   void addSource(ConfigSource source) {
     sources.add(shouldNotNull(source, "Config source can not null."));
     logger.info(() -> String.format(
-        "Add config source[%s] include %s items, location is [%s], class loader is %s, source class is [%s].",
-        source.getOrdinal(), source.getProperties().size(), source.getName(), getClassLoader(),
-        source.getClass().getName()));
+        "Add config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
+        source.getOrdinal(), source.getProperties().size(), source.getName(),
+        getClassLoader().getClass().getName(), source.getClass().getName()));
+  }
+
+  void debugOutputSource(List<ConfigSource> resolvedSources) {
+    logger.fine(() -> String.format("Resolved %s config sources.", resolvedSources.size()));
+    logger.fine(() -> {
+      StringBuilder sb = new StringBuilder("Now output all the config properties:\n\n");
+      for (ConfigSource cs : resolvedSources) {
+        sb.append(cs.getClass().getName());
+        sb.append(":\n{\n");
+        SortedMap<String, String> sortMap = new TreeMap<>(cs.getProperties());
+        sortMap.forEach((k, v) -> {
+          sb.append("  ").append(k).append(" : ").append(v).append("\n");
+        });
+        sb.append("}\n\n");
+      }
+      return sb.toString();
+    });
   }
 
   ClassLoader getClassLoader() {

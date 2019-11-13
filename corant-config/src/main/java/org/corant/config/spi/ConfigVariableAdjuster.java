@@ -40,13 +40,13 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
   }
 
   boolean hasVariable(String v) {
-    return v != null && v.indexOf("${") != -1 && v.indexOf("}") != -1;
+    return v != null && v.indexOf("${") != -1 && v.indexOf('}') != -1;
   }
 
   String resolveVariables(String value, Function<String, String> vals) {
     int startVar = 0;
     while ((startVar = value.indexOf("${", startVar)) >= 0) {
-      int endVar = value.indexOf("}", startVar);
+      int endVar = value.indexOf('}', startVar);
       if (endVar <= 0) {
         break;
       }

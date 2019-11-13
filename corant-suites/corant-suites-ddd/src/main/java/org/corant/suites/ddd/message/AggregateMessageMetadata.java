@@ -22,6 +22,7 @@ import org.corant.suites.ddd.message.Message.MessageMetadata;
 import org.corant.suites.ddd.model.AbstractAggregate.DefaultAggregateIdentifier;
 import org.corant.suites.ddd.model.AbstractDefaultAggregate;
 import org.corant.suites.ddd.model.Aggregate;
+import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 
 /**
  * corant-suites-ddd
@@ -34,7 +35,7 @@ public class AggregateMessageMetadata implements MessageMetadata {
   protected Map<String, Serializable> attributes = new HashMap<>();
   protected long versionNumber;
   protected long sequenceNumber = 0;
-  private Object source;
+  private AggregateIdentifier source;
   private Instant occurredTime = Instant.now();
 
   public AggregateMessageMetadata(Aggregate aggregate) {
@@ -50,7 +51,8 @@ public class AggregateMessageMetadata implements MessageMetadata {
    * @param versionNumber
    * @param sequenceNumber
    */
-  public AggregateMessageMetadata(Object source, long versionNumber, long sequenceNumber) {
+  public AggregateMessageMetadata(AggregateIdentifier source, long versionNumber,
+      long sequenceNumber) {
     super();
     this.versionNumber = versionNumber;
     this.sequenceNumber = sequenceNumber;
@@ -75,7 +77,7 @@ public class AggregateMessageMetadata implements MessageMetadata {
   }
 
   @Override
-  public Object getSource() {
+  public AggregateIdentifier getSource() {
     return source;
   }
 

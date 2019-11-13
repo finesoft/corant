@@ -47,17 +47,11 @@ public class MessageDispatcherProducer {
     final JMSDestinationDefinition jmd = CDIs.getAnnotation(ip, JMSDestinationDefinition.class);
     final JMSSessionMode jmsd = CDIs.getAnnotation(ip, JMSSessionMode.class);
     if (jmd != null) {
-      if (jmsd != null) {
-        dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
-      } else {
-        dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
-      }
+      dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
     }
     final JMSDestinationDefinitions jmds = CDIs.getAnnotation(ip, JMSDestinationDefinitions.class);
     for (JMSDestinationDefinition jmdss : jmds.value()) {
       if (jmdss != null) {
-        dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));
-      } else {
         dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));
       }
     }

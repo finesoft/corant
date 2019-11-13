@@ -53,11 +53,18 @@ public class ConfigProducer implements Serializable {
       Bean<?> bean = injectionPoint.getBean();
       Member member = injectionPoint.getMember();
       if (bean == null) {
-        key = member.getDeclaringClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
-            .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+        // key = member.getDeclaringClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
+        // .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+        key = new StringBuilder()
+            .append(
+                member.getDeclaringClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR))
+            .append(NAME_SPACE_SEPARATORS).append(member.getName()).toString();
       } else {
-        key = bean.getBeanClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
-            .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+        // key = bean.getBeanClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR)
+        // .concat(NAME_SPACE_SEPARATORS).concat(member.getName());
+        key = new StringBuilder()
+            .append(bean.getBeanClass().getCanonicalName().replace('$', NAME_SPACE_SEPARATOR))
+            .append(NAME_SPACE_SEPARATORS).append(member.getName()).toString();
       }
     }
     final String useKey = key;

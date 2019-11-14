@@ -31,6 +31,8 @@ public interface MergableMessage extends Message {
     return true;
   }
 
-  MergableMessage merge(MergableMessage other);
+  default MergableMessage merge(MergableMessage other) {
+    return this;
+  }
 
 }

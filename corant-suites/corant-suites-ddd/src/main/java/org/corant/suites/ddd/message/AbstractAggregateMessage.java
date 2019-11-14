@@ -31,6 +31,10 @@ public abstract class AbstractAggregateMessage implements Message {
     metadata = new AggregateMessageMetadata(aggregate);
   }
 
+  public AbstractAggregateMessage(AggregateMessageMetadata metadata) {
+    this.metadata = metadata;
+  }
+
   protected AbstractAggregateMessage() {
 
   }

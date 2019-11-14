@@ -35,6 +35,7 @@ public interface CorantJunit4Runner {
   ThreadLocal<Corant> CORANTS = new ThreadLocal<>();
   ThreadLocal<Boolean> ENA_RDM_WEB_PORTS = ThreadLocal.withInitial(() -> Boolean.FALSE);
   ThreadLocal<String> PROFILES = new ThreadLocal<>();
+  ThreadLocal<Class<?>[]> BEAN_CLASSES = new ThreadLocal<>();
   ThreadLocal<Boolean> AUTO_DISPOSES = ThreadLocal.withInitial(() -> Boolean.TRUE);
   ThreadLocal<Map<String, String>> ADDI_CFG_PROS = ThreadLocal.withInitial(HashMap::new);
   ThreadLocal<Map<Class<?>, UnmanagedInstance<?>>> TEST_OBJECTS =
@@ -49,7 +50,7 @@ public interface CorantJunit4Runner {
           if (CORANTS.get() == null) {
             Class<?> configClass = configTestClass(testClass);
             CORANTS.set(new Corant(configClass, testClass.getClassLoader()));
-            CORANTS.get().start(new Class[0]);
+            CORANTS.get().start(BEAN_CLASSES.get());
           }
           classBlock.get().evaluate();
         } catch (Throwable t) {
@@ -76,6 +77,7 @@ public interface CorantJunit4Runner {
             ADDI_CFG_PROS.remove();
             PROFILES.remove();
             ENA_RDM_WEB_PORTS.remove();
+            BEAN_CLASSES.remove();
           }
         }
       }
@@ -88,6 +90,7 @@ public interface CorantJunit4Runner {
     if (isEmbedded() || (rc = testClass.getAnnotation(RunConfig.class)) == null) {
       return testClass;
     }
+    BEAN_CLASSES.set(rc.beanClasses());
     ENA_RDM_WEB_PORTS.set(rc.randomWebPort());
     if (isNotBlank(rc.profile())) {
       PROFILES.set(rc.profile());

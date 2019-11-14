@@ -49,6 +49,13 @@ public @interface RunConfig {
   boolean autoDispose() default true;
 
   /**
+   * The append bean classes
+   * 
+   * @return beanClasses
+   */
+  Class<?>[] beanClasses() default {};
+
+  /**
    * The config class
    *
    * @return configClass

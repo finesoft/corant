@@ -20,6 +20,8 @@ import org.corant.suites.query.shared.mapping.Query;
 /**
  * corant-suites-query-shared
  *
+ * This interface will be refactored in the future to add more capabilities
+ *
  * @author bingo 上午9:41:03
  *
  */

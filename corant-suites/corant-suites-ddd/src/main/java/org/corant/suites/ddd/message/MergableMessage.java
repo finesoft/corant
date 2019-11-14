@@ -13,6 +13,8 @@
  */
 package org.corant.suites.ddd.message;
 
+import java.beans.Transient;
+
 /**
  * Marking a integration message object can be merged. Imagine that in the transaction unit of works
  * if an aggregate property value from '1' change to '2' and finally change to '1' then it should
@@ -27,6 +29,8 @@ public interface MergableMessage extends Message {
     return true;
   }
 
+  @Transient
+  @javax.persistence.Transient
   default boolean isValid() {
     return true;
   }

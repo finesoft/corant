@@ -181,8 +181,9 @@ public class DistPackager implements Packager {
 
   Entry resolveRunbat() throws IOException {
     String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
+    String applicationName = resolveApplicationName();
     final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
+        .replaceAll(RUN_APP_NAME_PH, applicationName)
         .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
         .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
         .replaceAll(RUN_APP_ARGS, getMojo().getAppArgs())
@@ -193,13 +194,14 @@ public class DistPackager implements Packager {
 
   Entry resolveRunsh() throws IOException {
     String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
+    String applicationName = resolveApplicationName();
     final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, resolveApplicationName())
-        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
-        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
-        .replaceAll(RUN_APP_ARGS, getMojo().getAppArgs())
-        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
-        .replaceAll(RUN_ADD_SYS_PROS, getMojo().getSysPros());
+        .replaceAll(RUN_APP_NAME_PH, resolveRunshVar(applicationName))
+        .replaceAll(RUN_USED_CONFIG_LOCATION, resolveRunshVar(getMojo().getUsedConfigLocation()))
+        .replaceAll(RUN_USED_CONFIG_PROFILE, resolveRunshVar(getMojo().getUsedConfigProfile()))
+        .replaceAll(RUN_APP_ARGS, resolveRunshVar(getMojo().getAppArgs()))
+        .replaceAll(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()))
+        .replaceAll(RUN_ADD_SYS_PROS, resolveRunshVar(getMojo().getSysPros()));
     return new ScriptEntry(RUN_SH, usesh);
   }
 
@@ -224,6 +226,13 @@ public class DistPackager implements Packager {
   private ArchiveOutputStream packArchiveOutput(OutputStream os)
       throws FileNotFoundException, IOException, ArchiveException {
     return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(), os);
+  }
+
+  private String resolveRunshVar(String var) {
+    if (!var.isEmpty()) {
+      return "\"".concat(var).concat("\"");
+    }
+    return var;
   }
 
   /**

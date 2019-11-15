@@ -36,6 +36,7 @@
 		<module>corant-suites-lang</module>
 		<module>corant-suites-keycloak</module>
 		<module>corant-suites-shell</module>
+		<module>corant-suites-grpc</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

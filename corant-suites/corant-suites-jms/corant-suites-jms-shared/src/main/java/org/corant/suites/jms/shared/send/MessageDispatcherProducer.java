@@ -44,15 +44,17 @@ public class MessageDispatcherProducer {
       dispatchers.add(new MessageDispatcherImpl(at));
     }
     // nonstandard
-    final JMSDestinationDefinition jmd = CDIs.getAnnotation(ip, JMSDestinationDefinition.class);
-    final JMSSessionMode jmsd = CDIs.getAnnotation(ip, JMSSessionMode.class);
-    if (jmd != null) {
-      dispatchers.add(new MessageDispatcherImpl(jmd, jmsd));
+    final JMSDestinationDefinition jdf = CDIs.getAnnotation(ip, JMSDestinationDefinition.class);
+    final JMSSessionMode jsm = CDIs.getAnnotation(ip, JMSSessionMode.class);
+    if (jdf != null) {
+      dispatchers.add(new MessageDispatcherImpl(jdf, jsm));
     }
-    final JMSDestinationDefinitions jmds = CDIs.getAnnotation(ip, JMSDestinationDefinitions.class);
-    for (JMSDestinationDefinition jmdss : jmds.value()) {
-      if (jmdss != null) {
-        dispatchers.add(new MessageDispatcherImpl(jmdss, jmsd));
+    final JMSDestinationDefinitions jdfs = CDIs.getAnnotation(ip, JMSDestinationDefinitions.class);
+    if (jdfs != null) {
+      for (JMSDestinationDefinition d : jdfs.value()) {
+        if (d != null) {
+          dispatchers.add(new MessageDispatcherImpl(d, jsm));
+        }
       }
     }
     return new GroupMessageDispatcherImpl(shouldNotEmpty(dispatchers));

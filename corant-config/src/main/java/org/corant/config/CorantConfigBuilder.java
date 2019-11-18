@@ -14,6 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,8 +75,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public Config build() {
     List<ConfigSource> resolvedSources =
         CorantConfigSource.resolveAdjust(sources, getClassLoader());
-    debugOutputSource(resolvedSources);
-    return new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
+    CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
+    debugOutputSource(resolvedSources, config);
+    return config;
   }
 
   @Override
@@ -124,19 +126,18 @@ public class CorantConfigBuilder implements ConfigBuilder {
         getClassLoader().getClass().getName(), source.getClass().getName()));
   }
 
-  void debugOutputSource(List<ConfigSource> resolvedSources) {
+  void debugOutputSource(List<ConfigSource> resolvedSources, CorantConfig config) {
     logger.fine(() -> String.format("Resolved %s config sources.", resolvedSources.size()));
     logger.fine(() -> {
-      StringBuilder sb = new StringBuilder("Now output all the config properties:\n\n");
-      for (ConfigSource cs : resolvedSources) {
-        sb.append(cs.getClass().getName());
-        sb.append(":\n{\n");
-        SortedMap<String, String> sortMap = new TreeMap<>(cs.getProperties());
-        sortMap.forEach((k, v) -> {
-          sb.append("  ").append(k).append(" : ").append(v).append("\n");
-        });
-        sb.append("}\n\n");
+      SortedMap<String, String> sortMap = new TreeMap<>();
+      for (String name : config.getPropertyNames()) {
+        sortMap.put(name, defaultString(config.getRawValue(name)));
       }
+      StringBuilder sb = new StringBuilder("Resolved config properties:\n\n{\n");
+      sortMap.forEach((k, v) -> {
+        sb.append("  ").append(k).append(" : ").append(v).append("\n");
+      });
+      sb.append("}\n\n");
       return sb.toString();
     });
   }

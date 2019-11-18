@@ -82,8 +82,7 @@ public class KeycloakAdmin {
   void onPostConstruct() {
     synchronized (this) {
       if (keycloakJsonPath.isPresent()) {
-        Resource resource =
-            Resources.tryFromClassPath(keycloakJsonPath.get()).findFirst().orElse(null);
+        Resource resource = Resources.tryFrom(keycloakJsonPath.get()).findFirst().orElse(null);
         if (resource != null) {
           logger.info(() -> String.format("Find keycloak admin client config json %s",
               keycloakJsonPath.get()));

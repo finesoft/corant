@@ -98,8 +98,8 @@ public class KeycloakAuthzClient {
   @PostConstruct
   protected void onPostConstruct() {
     try {
-      authzClient = AuthzClient
-          .create(Resources.fromClassPath(keycloakJsonPath).findFirst().get().openStream());
+      authzClient =
+          AuthzClient.create(Resources.from(keycloakJsonPath).findFirst().get().openStream());
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
       logger

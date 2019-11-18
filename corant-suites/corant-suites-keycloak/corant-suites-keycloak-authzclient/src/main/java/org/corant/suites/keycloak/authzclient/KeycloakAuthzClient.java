@@ -106,7 +106,7 @@ public class KeycloakAuthzClient {
           .info(() -> String.format("Create keycloak authz client instance %s.", keycloakJsonPath));
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
-      throw new CorantRuntimeException("Can't find keycloak.json from %", keycloakJsonPath);
+      throw new CorantRuntimeException("Can't find keycloak.json from %s", keycloakJsonPath);
     }
   }
 }

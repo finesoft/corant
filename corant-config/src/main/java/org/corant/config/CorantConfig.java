@@ -107,7 +107,7 @@ public class CorantConfig implements Config, Serializable {
   }
 
   public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {
-    List<ConfigSource> newSources = CorantConfigSource.resolveAdjust(sources, adjuster);
+    List<ConfigSource> newSources = CorantConfigSource.resolve(sources, adjuster);
     for (;;) {
       List<ConfigSource> oldSources = this.sources.get();
       if (this.sources.compareAndSet(oldSources, newSources)) {

@@ -73,8 +73,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
-    List<ConfigSource> resolvedSources =
-        CorantConfigSource.resolveAdjust(sources, getClassLoader());
+    List<ConfigSource> resolvedSources = CorantConfigSource.resolve(sources, getClassLoader());
     CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
     debugOutputSource(resolvedSources, config);
     return config;
@@ -113,7 +112,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    logger.fine(
+    logger.info(
         () -> String.format("Add config converter, name:[%s], target type:[%s], class loader:[%s].",
             cls.getName(), type.getName(), getClassLoader()));
   }

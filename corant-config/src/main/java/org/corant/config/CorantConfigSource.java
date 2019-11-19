@@ -56,27 +56,25 @@ public abstract class CorantConfigSource implements ConfigSource {
   }
 
   /**
-   * @see #resolveAdjust(List, ConfigAdjuster)
+   * @see #resolve(List, ConfigAdjuster)
    * @param orginals
    * @param classLoader
-   * @return resolveAdjust
+   * @return sorted & adjusted config sources
    */
-  public static List<ConfigSource> resolveAdjust(List<ConfigSource> orginals,
-      ClassLoader classLoader) {
-    return resolveAdjust(orginals, ConfigAdjuster.resolve(classLoader));
+  public static List<ConfigSource> resolve(List<ConfigSource> orginals, ClassLoader classLoader) {
+    return resolve(orginals, ConfigAdjuster.resolve(classLoader));
   }
 
   /**
-   * Adjust the config source, we only adjust the config souce that added by corant. Some dynamic
-   * non-corant config sources may not be fully processed. All resolved config sources were cache in
-   * Config.
+   * Sort & adjust the config source, we only adjust the config souce that added by corant. Some
+   * dynamic non-corant config sources may not be fully processed. All resolved config sources were
+   * cache in Config.
    *
    * @param orginals
    * @param adjuster
-   * @return adjusted config sources
+   * @return sorted & adjusted config sources
    */
-  public static List<ConfigSource> resolveAdjust(List<ConfigSource> orginals,
-      ConfigAdjuster adjuster) {
+  public static List<ConfigSource> resolve(List<ConfigSource> orginals, ConfigAdjuster adjuster) {
     shouldNotNull(orginals, "The config sources can not null!").sort(CONFIG_SOURCE_COMPARATOR);
     if (adjuster == null) {
       return orginals;

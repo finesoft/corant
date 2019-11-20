@@ -14,17 +14,14 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ConversionUtils.toLong;
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.MapUtils.getMapInstant;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.bson.Document;
 import org.corant.shared.util.Identifiers;
@@ -33,7 +30,6 @@ import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
-import com.mongodb.client.MongoDatabase;
 
 /**
  * corant-suites-jpa-hibernate
@@ -52,7 +48,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static volatile int WORKER_ID;
   static volatile boolean usePersistenceTime =
       getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
-  static Map<Class<?>, Supplier<?>> timeSuppliers = new ConcurrentHashMap<>();
+  static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();
 
   static {
     DATA_CENTER_ID = getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
@@ -78,51 +74,25 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     if (!usePersistenceTime) {
       return System.currentTimeMillis();
     }
-    return toLong(resolveTimer(session, object).get());
+    return resolveTime(session, object);
   }
 
-  Supplier<?> resolveTimer(final SharedSessionContractImplementor session, Object object) {
-    return timeSuppliers.computeIfAbsent(getUserClass(object.getClass()), c -> {
-      MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(session);
-      if (mp != null) {
-        final MongoDatabase md = mp.getDatabase();
-        final Document timeBson =
-            new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
-        return () -> {
-          return getMapInstant(md.runCommand(timeBson), "localTime").toEpochMilli();
-        };
-      } else {
-        final String timeSql = session.getFactory().getServiceRegistry()
-            .getService(JdbcServices.class).getDialect().getCurrentTimestampSelectString();
-        return () -> {
-          try {
-            final PreparedStatement st =
-                session.getJdbcCoordinator().getStatementPreparer().prepareStatement(timeSql);
-            try {
-              final ResultSet rs = session.getJdbcCoordinator().getResultSetReturn().extract(st);
-              try {
-                rs.next();
-                return rs.getTimestamp(1).getTime();
-              } finally {
-                try {
-                  session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry()
-                      .release(rs, st);
-                } catch (Throwable ignore) {
-                }
-              }
-            } finally {
-              session.getJdbcCoordinator().getLogicalConnection().getResourceRegistry().release(st);
-              session.getJdbcCoordinator().afterStatementExecution();
-            }
-
-          } catch (SQLException sqle) {
-            throw session.getFactory().getServiceRegistry().getService(JdbcServices.class)
-                .getSqlExceptionHelper()
-                .convert(sqle, "could not get next sequence value", timeSql);
-          }
-        };
-      }
-    });
+  long resolveTime(final SharedSessionContractImplementor session, final Object object) {
+    return timeResolvers.computeIfAbsent(getUserClass(object.getClass()), (cls) -> {
+      return (s, o) -> {
+        MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(s);
+        if (mp != null) {
+          final Document timeBson =
+              new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
+          return getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
+        } else {
+          final String timeSql = s.getFactory().getServiceRegistry().getService(JdbcServices.class)
+              .getDialect().getCurrentTimestampSelectString();
+          return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
+              .getTime();
+        }
+      };
+    }).resolve(session, object);
   }
 
   private MongoDBDatastoreProvider resolveMongoDBDatastoreProvider(
@@ -133,5 +103,10 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
       // Noop FIXME
     }
     return null;
+  }
+
+  @FunctionalInterface
+  public interface TimerResolver {
+    long resolve(SharedSessionContractImplementor session, Object object);
   }
 }

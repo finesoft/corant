@@ -239,6 +239,9 @@ public class ClassUtils {
   /**
    * stupid method :) need to reconstruct
    *
+   * Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if not
+   * resolved
+   *
    * @param object
    * @return getComponentClass
    */
@@ -281,7 +284,8 @@ public class ClassUtils {
       }
     } else if (object != null) {
       clazz = object.getClass();
-    } else {
+    }
+    if (clazz == null) {
       clazz = Object.class;
     }
     return getUserClass(clazz);

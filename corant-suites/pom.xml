@@ -37,6 +37,7 @@
 		<module>corant-suites-keycloak</module>
 		<module>corant-suites-shell</module>
 		<module>corant-suites-grpc</module>
+		<module>corant-suites-rsocket</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

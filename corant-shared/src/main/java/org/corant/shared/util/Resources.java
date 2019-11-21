@@ -187,7 +187,7 @@ public class Resources {
    */
   public static InputStreamResource fromInputStream(InputStream inputStream, String location)
       throws IOException {
-    return new InputStreamResource(location, inputStream);
+    return new InputStreamResource(inputStream, location, null);
   }
 
   /**
@@ -570,17 +570,20 @@ public class Resources {
     final File file;
 
     public FileSystemResource(File file) {
-      super(SourceType.FILE_SYSTEM);
+      super(getFileUrl(file), SourceType.FILE_SYSTEM);
       this.file = shouldNotNull(file);
-      try {
-        url = file.toURI().toURL();
-      } catch (MalformedURLException e) {
-        throw new CorantRuntimeException(e);
-      }
     }
 
     public FileSystemResource(String location) {
       this(new File(shouldNotNull(location)));
+    }
+
+    private static URL getFileUrl(File file) {
+      try {
+        return shouldNotNull(file).toURI().toURL();
+      } catch (MalformedURLException e) {
+        throw new CorantRuntimeException(e);
+      }
     }
 
     @Override
@@ -616,9 +619,9 @@ public class Resources {
 
     @Override
     public Map<String, Object> getMetadata() {
-      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "path",
-          getFile().getPath(), "fileName", getName(), "lastModified", getFile().lastModified(),
-          "length", getFile().length());
+      return immutableMapOf("location", getLocation(), "sourceType", SourceType.FILE_SYSTEM.name(),
+          "path", getFile().getPath(), "fileName", getName(), "lastModified",
+          getFile().lastModified(), "length", getFile().length());
     }
 
     @Override
@@ -665,15 +668,11 @@ public class Resources {
       location = null;
     }
 
-    /**
-     * @param location
-     * @param inputStream
-     */
-    public InputStreamResource(String location, InputStream inputStream) {
+    public InputStreamResource(InputStream inputStream, String location, String name) {
       super();
+      this.name = name;
       this.location = location;
       this.inputStream = inputStream;
-      name = null;
     }
 
     /**
@@ -741,7 +740,8 @@ public class Resources {
      * @return getMetadata
      */
     default Map<String, Object> getMetadata() {
-      return immutableMapOf("location", getLocation(), "sourceType", getSourceType());
+      return immutableMapOf("location", getLocation(), "sourceType",
+          getSourceType() == null ? null : getSourceType().name(), "name", getName());
     }
 
     /**
@@ -882,7 +882,7 @@ public class Resources {
    */
   public static class URLResource implements Resource {
     final SourceType sourceType;
-    URL url;
+    final URL url;
 
     public URLResource(String url) throws MalformedURLException {
       this(new URL(url), SourceType.URL);
@@ -890,10 +890,6 @@ public class Resources {
 
     public URLResource(URL url) {
       this(url, SourceType.URL);
-    }
-
-    protected URLResource(SourceType sourceType) {
-      this.sourceType = shouldNotNull(sourceType);
     }
 
     URLResource(URL url, SourceType sourceType) {
@@ -923,8 +919,8 @@ public class Resources {
 
     @Override
     public Map<String, Object> getMetadata() {
-      return immutableMapOf("location", getLocation(), "sourceType", getSourceType(), "url",
-          url.toExternalForm());
+      return immutableMapOf("location", getLocation(), "sourceType",
+          getSourceType() == null ? null : getSourceType().name(), "url", url.toExternalForm());
     }
 
     @Override

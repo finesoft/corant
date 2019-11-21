@@ -1,15 +1,14 @@
 package org.corant.suites.microprofile.lra;
 
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
 import io.narayana.lra.filter.ClientLRARequestFilter;
 import io.narayana.lra.filter.ClientLRAResponseFilter;
 import io.narayana.lra.filter.FilterRegistration;
 import io.narayana.lra.filter.ServerLRAFilter;
 import io.narayana.lra.provider.ParticipantStatusOctetStreamProvider;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
 
 /**
  *
@@ -18,22 +17,22 @@ import javax.enterprise.inject.spi.Extension;
  */
 public class LRAExtension implements Extension {
 
-  void afterBeanDiscovery(@Observes final AfterBeanDiscovery afterBeanDiscovery) {
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event, BeanManager beanManager) {
 
-    afterBeanDiscovery.<ServerLRAFilter>addBean()
-            .addTransitiveTypeClosure(ServerLRAFilter.class)
-            .beanClass(ServerLRAFilter.class).scope(ApplicationScoped.class);
-    afterBeanDiscovery.<ClientLRARequestFilter>addBean()
-            .addTransitiveTypeClosure(ClientLRARequestFilter.class)
-            .beanClass(ClientLRARequestFilter.class).scope(ApplicationScoped.class);
-    afterBeanDiscovery.<FilterRegistration>addBean()
-            .addTransitiveTypeClosure(FilterRegistration.class)
-            .beanClass(FilterRegistration.class).scope(ApplicationScoped.class);
-    afterBeanDiscovery.<ClientLRAResponseFilter>addBean()
-            .addTransitiveTypeClosure(ClientLRAResponseFilter.class)
-            .beanClass(ClientLRAResponseFilter.class).scope(ApplicationScoped.class);
-    afterBeanDiscovery.<ParticipantStatusOctetStreamProvider>addBean()
-            .addTransitiveTypeClosure(ParticipantStatusOctetStreamProvider.class)
-            .beanClass(ParticipantStatusOctetStreamProvider.class).scope(ApplicationScoped.class);
+    event.addAnnotatedType(beanManager.createAnnotatedType(ServerLRAFilter.class),
+        ServerLRAFilter.class.getSimpleName());
+
+    event.addAnnotatedType(beanManager.createAnnotatedType(ClientLRARequestFilter.class),
+        ClientLRARequestFilter.class.getSimpleName());
+
+    event.addAnnotatedType(beanManager.createAnnotatedType(ClientLRAResponseFilter.class),
+        ClientLRAResponseFilter.class.getSimpleName());
+
+    event.addAnnotatedType(beanManager.createAnnotatedType(FilterRegistration.class),
+        FilterRegistration.class.getSimpleName());
+
+    event.addAnnotatedType(
+        beanManager.createAnnotatedType(ParticipantStatusOctetStreamProvider.class),
+        ParticipantStatusOctetStreamProvider.class.getSimpleName());
   }
 }

@@ -71,7 +71,7 @@
 		<version.netty>4.1.34.Final</version.netty>
 		<version.xnio>3.7.6.Final</version.xnio>
 		<version.tomcat>9.0.21</version.tomcat>
-		<version.undertow>2.0.27.Final</version.undertow>
+		<version.undertow>2.0.28.Final</version.undertow>
 		<version.resteasy>4.4.1.Final</version.resteasy>
 
 		<version.artemis>2.10.1</version.artemis>

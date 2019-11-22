@@ -1,38 +1,65 @@
 package org.corant.suites.microprofile.lra;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
 import io.narayana.lra.filter.ClientLRARequestFilter;
 import io.narayana.lra.filter.ClientLRAResponseFilter;
 import io.narayana.lra.filter.FilterRegistration;
 import io.narayana.lra.filter.ServerLRAFilter;
 import io.narayana.lra.provider.ParticipantStatusOctetStreamProvider;
+import org.corant.config.declarative.DeclarativeConfigResolver;
+
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 
 /**
- *
  * @auther sushuaihao 2019/11/21
  * @since
  */
 public class LRAExtension implements Extension {
 
+  /**
+   * Key for looking up the config property that specifies which host a coordinator is running on
+   */
+  public static final String LRA_COORDINATOR_HOST_KEY = "lra.http.host";
+  /**
+   * Key for looking up the config property that specifies which port a coordinator is running on
+   */
+  public static final String LRA_COORDINATOR_PORT_KEY = "lra.http.port";
+
+  LRAConfig config;
+
+  void afterBeanDiscovery(@Observes final AfterBeanDiscovery event, BeanManager beanManager) {}
+
   void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event, BeanManager beanManager) {
 
-    event.addAnnotatedType(beanManager.createAnnotatedType(ServerLRAFilter.class),
+    config =
+        defaultObject(DeclarativeConfigResolver.resolveSingle(LRAConfig.class), LRAConfig.EMPTY);
+
+    System.setProperty(LRA_COORDINATOR_PORT_KEY, String.valueOf(config.getPort()));
+    System.setProperty(LRA_COORDINATOR_HOST_KEY, config.getHost());
+
+    event.addAnnotatedType(
+        beanManager.createAnnotatedType(ServerLRAFilter.class),
         ServerLRAFilter.class.getSimpleName());
 
-    event.addAnnotatedType(beanManager.createAnnotatedType(ClientLRARequestFilter.class),
-        ClientLRARequestFilter.class.getSimpleName());
-
-    event.addAnnotatedType(beanManager.createAnnotatedType(ClientLRAResponseFilter.class),
-        ClientLRAResponseFilter.class.getSimpleName());
-
-    event.addAnnotatedType(beanManager.createAnnotatedType(FilterRegistration.class),
+    event.addAnnotatedType(
+        beanManager.createAnnotatedType(FilterRegistration.class),
         FilterRegistration.class.getSimpleName());
 
     event.addAnnotatedType(
         beanManager.createAnnotatedType(ParticipantStatusOctetStreamProvider.class),
         ParticipantStatusOctetStreamProvider.class.getSimpleName());
+
+    event.addAnnotatedType(
+        beanManager.createAnnotatedType(ClientLRARequestFilterExt.class),
+        ClientLRARequestFilter.class.getSimpleName());
+
+    event.addAnnotatedType(
+        beanManager.createAnnotatedType(ClientLRAResponseFilterExt.class),
+        ClientLRAResponseFilter.class.getSimpleName());
   }
 }

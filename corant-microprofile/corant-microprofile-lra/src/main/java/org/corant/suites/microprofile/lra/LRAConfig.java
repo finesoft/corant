@@ -21,15 +21,30 @@ import org.corant.config.declarative.DeclarativeConfig;
  * corant-microprofile-lra
  *
  * @author bingo 下午3:52:27
- *
  */
 @ConfigKeyRoot("mp.lra")
 public class LRAConfig implements DeclarativeConfig {
 
-  @ConfigKeyItem(defaultValue = "0.0.0.0")
+  public static final LRAConfig EMPTY = new LRAConfig("localhost", 8089);
+
+  @ConfigKeyItem(defaultValue = "localhost")
   private String host;
 
-  @ConfigKeyItem(defaultValue = "7788")
-  private String port;
+  @ConfigKeyItem(defaultValue = "8089")
+  private Integer port;
 
+  public LRAConfig() {}
+
+  public LRAConfig(String host, Integer port) {
+    this.host = host;
+    this.port = port;
+  }
+
+  public String getHost() {
+    return host;
+  }
+
+  public Integer getPort() {
+    return port;
+  }
 }

@@ -49,27 +49,27 @@ public class KeycloakAdmin {
   Logger logger;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.json-path")
-  protected Optional<String> keycloakJsonPath;
+  @ConfigProperty(name = "keycloak.admin_client.location")
+  protected Optional<String> keycloakJsonLocation;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.username")
+  @ConfigProperty(name = "keycloak.admin_client.username")
   protected Optional<String> username;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.password")
+  @ConfigProperty(name = "keycloak.admin_client.password")
   protected Optional<String> password;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.server-url")
+  @ConfigProperty(name = "keycloak.admin_client.server_url")
   protected Optional<String> serverUrl;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.realm")
+  @ConfigProperty(name = "keycloak.admin_client.realm")
   protected Optional<String> realm;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin-client.client-id")
+  @ConfigProperty(name = "keycloak.admin_client.client_id")
   protected Optional<String> clientId;
 
   @Inject
@@ -81,11 +81,11 @@ public class KeycloakAdmin {
   @PostConstruct
   void onPostConstruct() {
     synchronized (this) {
-      if (keycloakJsonPath.isPresent()) {
-        Resource resource = Resources.tryFrom(keycloakJsonPath.get()).findFirst().orElse(null);
+      if (keycloakJsonLocation.isPresent()) {
+        Resource resource = Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
         if (resource != null) {
           logger.info(() -> String.format("Find keycloak admin client config json %s",
-              keycloakJsonPath.get()));
+              keycloakJsonLocation.get()));
           try (InputStream is = resource.openStream()) {
             adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);
           } catch (IOException e) {

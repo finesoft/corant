@@ -32,9 +32,4 @@ public class XmlConfigSource extends CorantConfigSource {
     return null;
   }
 
-  @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    return null;
-  }
-
 }

@@ -17,7 +17,10 @@ import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -32,9 +35,11 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
   public Map<String, String> apply(final Map<String, String> properties,
       final Collection<ConfigSource> originalSources) {
     Map<String, String> adjustered = new HashMap<>(properties);
+    final Set<String> stack = new LinkedHashSet<>();
     properties.forEach((k, v) -> {
       if (hasVariable(v) && isEquals(v, resolveValue(k, originalSources))) {
-        String av = resolveVariables(v, originalSources);
+        String av = resolveVariables(k, v, originalSources, stack);
+        stack.clear();
         adjustered.put(k, av);
       }
     });
@@ -45,8 +50,7 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
     return v != null && v.indexOf("${") != -1 && v.indexOf('}') != -1;
   }
 
-  String resolveValue(final String propertyName,
-      final Collection<ConfigSource> originalSources) {
+  String resolveValue(final String propertyName, final Collection<ConfigSource> originalSources) {
     for (ConfigSource cs : originalSources) {
       String value = cs.getValue(propertyName);
       if (isNotBlank(value)) {
@@ -56,7 +60,8 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
     return null;
   }
 
-  String resolveVariables(String value, final Collection<ConfigSource> originalSources) {
+  String resolveVariables(String key, String value, final Collection<ConfigSource> originalSources,
+      final Set<String> stack) {
     int startVar = 0;
     while ((startVar = value.indexOf("${", startVar)) >= 0) {
       int endVar = value.indexOf('}', startVar);
@@ -66,11 +71,17 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       String varName = value.substring(startVar + 2, endVar);
       if (varName.isEmpty()) {
         break;
+      } else if (varName.equals(key)) {
+        throw new CorantRuntimeException(
+            "A recursive error occurred in the configuration entry  [%s].",
+            String.join(" -> ", stack));
+      } else {
+        stack.add(varName);
       }
-      String variableValue = resolveValue(varName, originalSources);
-      if (variableValue != null) {
-        value =
-            resolveVariables(value.replace("${" + varName + "}", variableValue), originalSources);
+      String varVal = resolveValue(varName, originalSources);
+      if (varVal != null) {
+        value = resolveVariables(key, value.replace("${" + varName + "}", varVal), originalSources,
+            stack);
       }
       startVar++;
     }

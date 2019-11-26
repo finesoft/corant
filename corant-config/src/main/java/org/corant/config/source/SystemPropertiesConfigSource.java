@@ -14,11 +14,12 @@
 package org.corant.config.source;
 
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
-import static org.corant.shared.util.MapUtils.toMap;
-import java.util.Collections;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.HashMap;
 import java.util.Map;
-import org.corant.config.CorantConfigSource;
-import org.corant.shared.exception.NotSupportedException;
+import java.util.Properties;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
@@ -26,24 +27,29 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 上午11:04:36
  *
  */
-public class SystemPropertiesConfigSource extends CorantConfigSource {
+public class SystemPropertiesConfigSource implements ConfigSource {
 
-  final Map<String, String> sysPros = Collections.unmodifiableMap(toMap(System.getProperties()));
-
-  public SystemPropertiesConfigSource() {
-    super();
-    name = "System.properties";
-    ordinal = SYSTEM_PROPERTIES_ORGINAL;
+  @Override
+  public String getName() {
+    return "System.properties";
   }
 
+  @Override
+  public int getOrdinal() {
+    return SYSTEM_PROPERTIES_ORGINAL;
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public Map<String, String> getProperties() {
-    return sysPros;
+    Properties properties =
+        AccessController.doPrivileged((PrivilegedAction<Properties>) System::getProperties);
+    return new HashMap(properties);
   }
 
   @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    throw new NotSupportedException("Can not adjust system properties!");
+  public String getValue(String s) {
+    return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(s));
   }
 
 }

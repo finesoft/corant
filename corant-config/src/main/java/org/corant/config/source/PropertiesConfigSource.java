@@ -82,8 +82,4 @@ public class PropertiesConfigSource extends CorantConfigSource {
     return properties;
   }
 
-  @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    return new PropertiesConfigSource(getName(), getOrdinal(), properties);
-  }
 }

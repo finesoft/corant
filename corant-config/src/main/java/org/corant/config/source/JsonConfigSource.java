@@ -35,10 +35,4 @@ public class JsonConfigSource extends CorantConfigSource {
     return null;
   }
 
-  @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    // TODO
-    return null;
-  }
-
 }

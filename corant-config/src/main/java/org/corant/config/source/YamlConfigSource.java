@@ -84,9 +84,4 @@ public class YamlConfigSource extends CorantConfigSource {
     return properties;
   }
 
-  @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    return new YamlConfigSource(getName(), properties, getOrdinal());
-  }
-
 }

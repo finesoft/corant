@@ -22,9 +22,12 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.io.IOException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.config.ConfigUtils;
@@ -47,7 +50,9 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
   static String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-  static String sysLcEnv = ConfigUtils.extractSysEnv(CFG_LOCATION_KEY);
+  static String sysLcEnv = ConfigUtils.extractSysEnv(
+      AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+      CFG_LOCATION_KEY);
   static String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
   static String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
 

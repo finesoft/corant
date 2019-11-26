@@ -21,8 +21,6 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -54,8 +52,6 @@ public class ConfigUtils {
       if (isNotBlank(useKey)) {
         concats = concats.append(removeSplitor(key)).append(NAME_SPACE_SEPARATORS);
       }
-      // concats = removeSplitor(concats).concat(NAME_SPACE_SEPARATORS)
-      // .concat(removeSplitor(defaultTrim(key)));
     }
     return removeSplitor(concats.toString());
   }
@@ -77,23 +73,20 @@ public class ConfigUtils {
     return sb.toString();
   }
 
-  public static String extractSysEnv(String propertyName) {
+  public static String extractSysEnv(Map<String, String> sysEnv, String propertyName) {
     if (propertyName == null) {
       return null;
     }
-    String value =
-        AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(propertyName));
+    String value = sysEnv.get(propertyName);
     if (value != null) {
       return value;
     }
     String sanitizedName = propertyName.replaceAll("[^a-zA-Z0-9_]", "_");
-    value = AccessController
-        .doPrivileged((PrivilegedAction<String>) () -> System.getenv(sanitizedName));
+    value = sysEnv.get(sanitizedName);
     if (value != null) {
       return value;
     }
-    return AccessController.doPrivileged(
-        (PrivilegedAction<String>) () -> System.getenv(sanitizedName.toUpperCase(Locale.ROOT)));
+    return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
   }
 
   public static Map<String, List<String>> getGroupConfigKeys(Config config,

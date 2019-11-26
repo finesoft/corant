@@ -65,9 +65,15 @@ public abstract class CorantConfigSource implements ConfigSource {
   }
 
   /**
-   * Sort & adjust the config source, we only adjust the config souce that added by corant. Some
-   * dynamic non-corant config sources may not be fully processed. All resolved config sources were
-   * cache in Config.
+   * Sort & adjust the config source, we only tweak the configuration sources that CORANT handles
+   * and adds, and do not include system environment variables and system properties. Some dynamic
+   * non-corant config sources may not be fully processed. All resolved config sources were cache in
+   * Config.
+   *
+   * If the variable value of the configuration item comes from the system properties or environment
+   * variable, the value of the configuration item was obtained from the system properties or
+   * environment variable at the time of the configuration initialization, and it will not be
+   * changed after initialization.
    *
    * @param orginals
    * @param adjuster
@@ -79,11 +85,11 @@ public abstract class CorantConfigSource implements ConfigSource {
       return orginals;
     }
     List<ConfigSource> resolved = new ArrayList<>(orginals.size());
-    final List<ConfigSource> allProperties = new ArrayList<>(orginals);
+    final List<ConfigSource> orginalSources = new ArrayList<>(orginals);
     for (ConfigSource orginal : orginals) {
       if (orginal instanceof CorantConfigSource) {
         resolved.add(new AdjustedConfigSource((CorantConfigSource) orginal,
-            adjuster.apply(orginal.getProperties(), allProperties)));
+            adjuster.apply(orginal.getProperties(), orginalSources)));
       } else {
         resolved.add(orginal);
       }
@@ -120,8 +126,6 @@ public abstract class CorantConfigSource implements ConfigSource {
   public String getValue(String propertyName) {
     return getProperties().get(propertyName);
   }
-
-  protected abstract CorantConfigSource withProperties(Map<String, String> properties);
 
   /**
    * corant-config

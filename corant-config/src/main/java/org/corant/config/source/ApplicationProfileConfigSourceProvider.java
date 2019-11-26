@@ -21,9 +21,12 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.SourceType;
@@ -38,7 +41,9 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSourceProvider {
 
   static String sysPfPro = System.getProperty(CFG_PROFILE_KEY);
-  static String sysPfEvn = ConfigUtils.extractSysEnv(CFG_PROFILE_KEY);
+  static String sysPfEvn = ConfigUtils.extractSysEnv(
+      AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+      CFG_PROFILE_KEY);
   static String[] profiles = split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
 
   static String[] pfClassPaths = Arrays.stream(profiles)

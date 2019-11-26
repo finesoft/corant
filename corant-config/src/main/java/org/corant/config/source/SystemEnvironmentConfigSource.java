@@ -15,10 +15,11 @@ package org.corant.config.source;
 
 import static org.corant.config.ConfigUtils.extractSysEnv;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
-import org.corant.config.CorantConfigSource;
-import org.corant.shared.exception.NotSupportedException;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
@@ -26,29 +27,29 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 上午11:04:36
  *
  */
-public class SystemEnvironmentConfigSource extends CorantConfigSource {
+public class SystemEnvironmentConfigSource implements ConfigSource {
 
-  final Map<String, String> sysPros = Collections.unmodifiableMap(System.getenv());
+  @Override
+  public String getName() {
+    return "System.environment";
+  }
 
-  public SystemEnvironmentConfigSource() {
-    super();
-    name = "System.environment";
-    ordinal = SYSTEM_ENVIRONMENT_ORGINAL;
+  @Override
+  public int getOrdinal() {
+    return SYSTEM_ENVIRONMENT_ORGINAL;
   }
 
   @Override
   public Map<String, String> getProperties() {
-    return sysPros;
+    return Collections.unmodifiableMap(
+        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv));
   }
 
   @Override
   public String getValue(String propertyName) {
-    return extractSysEnv(propertyName);
-  }
-
-  @Override
-  protected CorantConfigSource withProperties(Map<String, String> properties) {
-    throw new NotSupportedException("Can not adjust system environment!");
+    return extractSysEnv(
+        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+        propertyName);
   }
 
 }

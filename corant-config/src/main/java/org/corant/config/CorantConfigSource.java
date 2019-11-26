@@ -17,7 +17,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,14 +79,11 @@ public abstract class CorantConfigSource implements ConfigSource {
       return orginals;
     }
     List<ConfigSource> resolved = new ArrayList<>(orginals.size());
-    final Map<String, String> allProperties = new HashMap<>();
-    for (ConfigSource orginal : orginals) {
-      orginal.getProperties().forEach((k, v) -> allProperties.computeIfAbsent(k, x -> v));
-    }
+    final List<ConfigSource> allProperties = new ArrayList<>(orginals);
     for (ConfigSource orginal : orginals) {
       if (orginal instanceof CorantConfigSource) {
         resolved.add(new AdjustedConfigSource((CorantConfigSource) orginal,
-            adjuster.apply(orginal.getProperties(), Collections.unmodifiableMap(allProperties))));
+            adjuster.apply(orginal.getProperties(), allProperties)));
       } else {
         resolved.add(orginal);
       }

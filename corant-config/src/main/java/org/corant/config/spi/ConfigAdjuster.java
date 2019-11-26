@@ -14,10 +14,12 @@
 package org.corant.config.spi;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
@@ -44,7 +46,8 @@ public interface ConfigAdjuster extends Sortable {
     return (p, ap) -> after.apply(apply(p, ap), ap);
   }
 
-  Map<String, String> apply(Map<String, String> properties, Map<String, String> allProperties);
+  Map<String, String> apply(Map<String, String> properties,
+      Collection<ConfigSource> originalSources);
 
   default ConfigAdjuster compose(ConfigAdjuster before) {
     Objects.requireNonNull(before);

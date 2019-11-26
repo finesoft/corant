@@ -16,6 +16,7 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.min;
 import static org.corant.shared.util.ObjectUtils.optional;
@@ -117,8 +118,8 @@ public class Converters {
         consumer.accept(matchedPipe.getStack());
         LOGGER.fine(() -> String.format(
             "Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
-            sourceClass, targetClass, String.join("->",
-                matchedPipe.getStack().stream().map(ct -> ct.toString()).toArray(String[]::new))));
+            sourceClass, targetClass, String.join("->", matchedPipe.getStack().stream()
+                .map(ConverterType::toString).toArray(String[]::new))));
         return converter;
       }
     }
@@ -156,7 +157,7 @@ public class Converters {
     LOGGER.fine(() -> String.format(
         "Can not find the direct converter for %s -> %s, use converter pipe [%s] !", sourceClass,
         targetClass, String.join("->",
-            converterTypes.stream().map(ct -> ct.toString()).toArray(String[]::new))));
+            converterTypes.stream().map(ConverterType::toString).toArray(String[]::new))));
     return converter;
   }
 
@@ -228,7 +229,7 @@ public class Converters {
         Class<?> targetClass) {
       Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses = new HashMap<>();
       Map<Class<?>, Set<Class<?>>> tagClassMappedSrcClasses = new HashMap<>();
-      ConverterRegistry.getNotSyntheticConverterTypes().forEach((ct) -> {
+      ConverterRegistry.getNotSyntheticConverterTypes().forEach(ct -> {
         srcClassMappedTagClasses.computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
             .add(ct.getTargetClass());
         tagClassMappedSrcClasses.computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())
@@ -246,7 +247,7 @@ public class Converters {
           for (Class<?> canBeConvertedBySrcClass : classesCanBeConvertedBySrcClass) {
             Stack classesPipe = searchMatchedClass(srcClassMappedTagClasses,
                 canBeConvertedBySrcClass, endClassesCanConvertTargetClass, new Stack());
-            if (classesPipe.size() > 0) {
+            if (isNotEmpty(classesPipe)) {
               Stack<Class<?>> stack = new Stack();
               stack.push(srcCls);
               stack.addAll(classesPipe);
@@ -273,7 +274,7 @@ public class Converters {
         return classSurvival;
       } else {
         Set<Class<?>> children = srcClassMappedTagClasses.get(classCanBeConvertedBySrcClass);
-        if (children == null || children.size() == 0) {
+        if (isEmpty(children)) {
           classSurvival.pop();
         } else {
           Stack childSurvivalStack = new Stack<>();

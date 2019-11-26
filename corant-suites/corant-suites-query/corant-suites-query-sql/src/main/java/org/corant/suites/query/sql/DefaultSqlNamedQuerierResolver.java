@@ -64,7 +64,7 @@ public class DefaultSqlNamedQuerierResolver
   protected DynamicQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found QueryService for key %s", key);
+      throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
     // FIXME decide script engine
     if (query.getScript().getType() == ScriptType.JS) {

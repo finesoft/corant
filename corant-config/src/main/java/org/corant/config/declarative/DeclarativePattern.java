@@ -65,9 +65,8 @@ public enum DeclarativePattern {
         Map<String, Object> valueMap = new HashMap<>();
         if (filedType.equals(Map.class)) {
           for (Entry<String, Optional<String>> entry : map.entrySet()) {
-            entry.getValue().ifPresent(v -> {
-              valueMap.put(removeSplitor(entry.getKey().substring(prefixLen)), v);
-            });
+            entry.getValue().ifPresent(
+                v -> valueMap.put(removeSplitor(entry.getKey().substring(prefixLen)), v));
           }
           field.set(configObject, valueMap);
         }

@@ -27,6 +27,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class MicroprofileConfigSources {
 
   public static final int DEFAULT_ORDINAL = 100;
+
   public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES =
       "META-INF/microprofile-config.properties";
   public static final String WEB_INF_MICROPROFILE_CONFIG_PROPERTIES =

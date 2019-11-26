@@ -165,7 +165,7 @@ public class DeclarativeConfigResolver {
       clazz = cls;
       keyIndex = ckr.keyIndex();
       ignoreNoAnnotatedItem = ckr.ignoreNoAnnotatedItem();
-      traverseFields(cls, (f) -> {
+      traverseFields(cls, f -> {
         if (f.isAnnotationPresent(ConfigKeyItem.class)) {
           getFields().add(new ConfigField(this, f));
         } else if (!ignoreNoAnnotatedItem) {
@@ -192,7 +192,7 @@ public class DeclarativeConfigResolver {
     }
 
     public Set<String> getDefaultItemKeys() {
-      return getFields().stream().map(f -> f.getDefaultKey()).collect(Collectors.toSet());
+      return getFields().stream().map(ConfigField::getDefaultKey).collect(Collectors.toSet());
     }
 
     public List<ConfigField> getFields() {

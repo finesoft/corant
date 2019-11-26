@@ -60,7 +60,7 @@ public class DefaultJpqlNamedQuerierResolver
   protected DynamicQuerierBuilder createBuilder(String key) {
     Query query = mappingService.getQuery(key);
     if (query == null) {
-      throw new QueryRuntimeException("Can not found QueryService for key %s", key);
+      throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
     if (isNotEmpty(query.getFetchQueries()) || isNotEmpty(query.getHints())) {
       throw new NotSupportedException();

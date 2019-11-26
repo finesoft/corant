@@ -56,7 +56,7 @@ public class ConverterRegistry {
         .forEach(ConverterRegistry::register);
   }
 
-  public synchronized static void deregister(ConverterType<?, ?> converterType) {
+  public static synchronized void deregister(ConverterType<?, ?> converterType) {
     if (SUPPORT_CONVERTERS.remove(converterType) != null) {
       removeConverterPipeTypes(converterType);
     }
@@ -66,7 +66,7 @@ public class ConverterRegistry {
     return Collections.unmodifiableMap(SUPPORT_CONVERTERS);
   }
 
-  public synchronized static <S, T> void register(Converter<S, T> converter) {
+  public static synchronized <S, T> void register(Converter<S, T> converter) {
     Type[] types =
         TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
@@ -74,7 +74,7 @@ public class ConverterRegistry {
     register((Class) types[0], (Class) types[1], converter);
   }
 
-  public synchronized static <S, T> void register(ConverterFactory<S, T> converter) {
+  public static synchronized <S, T> void register(ConverterFactory<S, T> converter) {
     Type[] types = TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)),
         ConverterFactory.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class,
@@ -82,12 +82,12 @@ public class ConverterRegistry {
     SUPPORT_CONVERTER_FACTORIES.put(types[1], converter);
   }
 
-  public synchronized static void registerNotSupportType(Class<?> sourceClass,
+  public static synchronized void registerNotSupportType(Class<?> sourceClass,
       Class<?> targetClass) {
     registerNotSupportType(ConverterType.of(sourceClass, targetClass));
   }
 
-  public synchronized static void registerNotSupportType(ConverterType converterType) {
+  public static synchronized void registerNotSupportType(ConverterType converterType) {
     if (!NOT_SUPPORT_TYPES.contains(converterType) && NOT_SUPPORT_TYPES.add(converterType)
         && NOT_SUPPORT_TYPES.size() > 128) {
       ConverterType first = NOT_SUPPORT_TYPES.iterator().next();
@@ -131,7 +131,7 @@ public class ConverterRegistry {
     return SUPPORT_CONVERTERS.containsKey(ConverterType.of(sourceClass, targetClass));
   }
 
-  synchronized static <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
+  static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
       Converter<S, T> converter, ConverterType<?, ?>... pipeTypes) {
     ConverterType<S, T> ct = ConverterType.<S, T>of(sourceClass, targetClass);
     if (SUPPORT_CONVERTERS.put(ct, converter) != null) {

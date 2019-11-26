@@ -57,6 +57,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午4:34:28
  *
  */
+@Deprecated
 public class ConfigExtensionx implements Extension {
 
   static final Logger logger = Logger.getLogger(ConfigExtensionx.class.getName());

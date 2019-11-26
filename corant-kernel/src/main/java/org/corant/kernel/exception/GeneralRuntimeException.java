@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import org.corant.kernel.api.MessageResolver;
 import org.corant.kernel.api.MessageResolver.MessageSeverity;
 import org.corant.kernel.api.MessageResolver.MessageSource;
@@ -96,8 +96,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
     return this;
   }
 
-  public GeneralRuntimeException attributes(
-      Function<Map<Object, Object>, Map<Object, Object>> func) {
+  public GeneralRuntimeException attributes(UnaryOperator<Map<Object, Object>> func) {
     if (func != null) {
       setAttributes(func.apply(new HashMap<>(attributes)));
     }
@@ -166,7 +165,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   /**
    * Supply the original parameters list for handler and then return the new variants
    */
-  public GeneralRuntimeException parameters(Function<List<Object>, List<Object>> func) {
+  public GeneralRuntimeException parameters(UnaryOperator<List<Object>> func) {
     if (func != null) {
       List<Object> updated = func.apply(listOf(parameters));
       setParameters(updated == null ? new Object[0] : updated.toArray());

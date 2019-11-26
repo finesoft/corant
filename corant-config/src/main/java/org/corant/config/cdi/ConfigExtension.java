@@ -98,7 +98,9 @@ public class ConfigExtension implements Extension {
     }
 
     @Override
-    public void destroy(T instance, CreationalContext<T> context) {}
+    public void destroy(T instance, CreationalContext<T> context) {
+      // Noop!
+    }
 
     @Override
     public Class<?> getBeanClass() {

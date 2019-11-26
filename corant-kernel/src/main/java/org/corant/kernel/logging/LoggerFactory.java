@@ -47,6 +47,7 @@ public class LoggerFactory {
             tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
       }
     } catch (Exception ignore) {
+      // Noop
     }
   }
 

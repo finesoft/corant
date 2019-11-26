@@ -175,7 +175,7 @@ public class Qualifiers {
       return getAllWithNames().size();
     }
 
-    public static abstract class AbstractNamedObject implements NamedObject {
+    public abstract static class AbstractNamedObject implements NamedObject {
 
       private String name;
 

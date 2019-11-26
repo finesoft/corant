@@ -15,10 +15,14 @@ package org.corant.config.source;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -45,15 +49,16 @@ public class ConfigSourceLoader {
 
   public static List<ConfigSource> load(ClassLoader classLoader, int ordinal, Predicate<URL> filter,
       String... classPaths) throws IOException {
-    Set<URL> loadedUrls = new LinkedHashSet<>();
+    Set<URI> loadedUrls = new LinkedHashSet<>();
     for (String path : classPaths) {
-      listOf(classLoader.getResources(path)).stream().filter(filter).forEach(loadedUrls::add);
+      listOf(classLoader.getResources(path)).stream().filter(filter).map(ConfigSourceLoader::toURI)
+          .forEach(loadedUrls::add);
       if (Thread.currentThread().getContextClassLoader() != classLoader) {
-        listOf(Thread.currentThread().getContextClassLoader().getResources(path))
-            .forEach(loadedUrls::add);
+        streamOf(Thread.currentThread().getContextClassLoader().getResources(path))
+            .map(ConfigSourceLoader::toURI).forEach(loadedUrls::add);
       }
     }
-    return loadedUrls.stream().map(url -> load(url, ordinal)).filter(ObjectUtils::isNotNull)
+    return loadedUrls.stream().map(uri -> load(toURL(uri), ordinal)).filter(ObjectUtils::isNotNull)
         .collect(Collectors.toList());
   }
 
@@ -100,5 +105,21 @@ public class ConfigSourceLoader {
       return new XmlConfigSource(resourceUrl, ordinal);
     }
     return null;
+  }
+
+  static URI toURI(URL url) {
+    try {
+      return url.toURI();
+    } catch (URISyntaxException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  static URL toURL(URI uri) {
+    try {
+      return uri.toURL();
+    } catch (MalformedURLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 }

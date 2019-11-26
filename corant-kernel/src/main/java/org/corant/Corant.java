@@ -213,7 +213,7 @@ public class Corant implements AutoCloseable {
     }
   }
 
-  public synchronized static Instance<Object> instance() {
+  public static synchronized Instance<Object> instance() {
     validateRunning();
     return me.container;
   }
@@ -222,15 +222,15 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
-  public synchronized static Corant run(Class<?> configClass, String... args) {
+  public static synchronized Corant run(Class<?> configClass, String... args) {
     return configClass == null ? new Corant(args).start() : new Corant(configClass, args).start();
   }
 
-  public synchronized static Corant run(Object configObject, String... args) {
+  public static synchronized Corant run(Object configObject, String... args) {
     return run(configObject == null ? null : configObject.getClass(), args);
   }
 
-  public synchronized static Optional<Instance<Object>> tryInstance() {
+  public static synchronized Optional<Instance<Object>> tryInstance() {
     if (me == null || me.container == null) {
       return Optional.empty();
     }
@@ -396,7 +396,7 @@ public class Corant implements AutoCloseable {
     void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
       event.addBean().addType(Corant.class).scope(ApplicationScoped.class)
           .addQualifier(Default.Literal.INSTANCE).addQualifier(Any.Literal.INSTANCE)
-          .produceWith((obj) -> Corant.this);
+          .produceWith(obj -> Corant.this);
     }
   }
 }

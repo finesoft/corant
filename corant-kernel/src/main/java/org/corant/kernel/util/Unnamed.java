@@ -34,7 +34,7 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface Unnamed {
 
-  final static UnnamedLiteral INST = new UnnamedLiteral();
+  static final UnnamedLiteral INST = new UnnamedLiteral();
 
   public static class UnnamedLiteral extends AnnotationLiteral<Unnamed> {
 

@@ -303,7 +303,7 @@ public class MongoClientConfig implements NamedObject {
       try {
         entry.getValue().invoke(optionsBuilder, value);
       } catch (InvocationTargetException | IllegalAccessException e) {
-        throw new CorantRuntimeException("Unable to build mongo client options [%s]",
+        throw new CorantRuntimeException(e,"Unable to build mongo client options [%s]",
             entry.getKey());
       }
     }

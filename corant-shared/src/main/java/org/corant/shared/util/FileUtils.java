@@ -193,6 +193,7 @@ public class FileUtils {
     try {
       return Files.probeContentType(Paths.get(fileName));
     } catch (IOException e) {
+      // Noop!
     }
     return null;
   }
@@ -245,7 +246,7 @@ public class FileUtils {
 
   public static List<File> selectFiles(String directoryName, Predicate<File> p) {
     final File directory = new File(directoryName);
-    final Predicate<File> up = p == null ? (t) -> true : p;
+    final Predicate<File> up = p == null ? t -> true : p;
     List<File> files = new ArrayList<>();
     if (directory.isFile() && up.test(directory)) {
       files.add(directory);

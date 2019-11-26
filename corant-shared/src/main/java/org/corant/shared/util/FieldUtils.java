@@ -40,7 +40,7 @@ public class FieldUtils {
   }
 
   public static void traverseFields(Class<?> clazz, Consumer<Field> visitor) {
-    traverseFields(clazz, (field) -> {
+    traverseFields(clazz, field -> {
       visitor.accept(field);
       return true;
     });

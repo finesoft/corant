@@ -91,12 +91,8 @@ public class ClassUtils {
    */
   public static Class<?> asClass(final ClassLoader classLoader, final String className,
       final boolean initialize) throws ClassNotFoundException {
-    try {
-      return NAME_PRIMITIVE_MAP.getOrDefault(className,
-          Class.forName(className, initialize, classLoader));
-    } catch (ClassNotFoundException ex) {
-      throw ex;
-    }
+    return NAME_PRIMITIVE_MAP.getOrDefault(className,
+        Class.forName(className, initialize, classLoader));
   }
 
   /**

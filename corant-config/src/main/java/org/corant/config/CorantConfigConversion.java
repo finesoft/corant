@@ -48,6 +48,7 @@ import javax.inject.Provider;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.Converter;
 
 /**
@@ -84,7 +85,7 @@ public class CorantConfigConversion implements Serializable {
     Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
     Map<Type, Converter<?>> useConverters = new HashMap<>();
     for (OrdinalConverter oc : converters) {
-      useConverters.computeIfAbsent(oc.type, (t) -> oc.converter);
+      useConverters.computeIfAbsent(oc.type, t -> oc.converter);
     }
     this.converters = new AtomicReference<>(Collections.unmodifiableMap(useConverters));
   }
@@ -248,9 +249,7 @@ public class CorantConfigConversion implements Serializable {
     String[] values = ConfigUtils.splitValue(rawValue);
     Map<String, String> temp = mapOf((Object[]) values);
     Map<Object, Object> result = new HashMap<>();
-    temp.forEach((k, v) -> {
-      result.put(convert(k, kt), convert(v, vt));
-    });
+    temp.forEach((k, v) -> result.put(convert(k, kt), convert(v, vt)));
     return result;
   }
 
@@ -308,6 +307,8 @@ public class CorantConfigConversion implements Serializable {
    */
   static class ImplicitConverters {
 
+    private ImplicitConverters() {}
+
     public static <T> Optional<Converter<T>> of(Type generalType) {
       if (!(generalType instanceof Class)) {
         return Optional.empty();
@@ -317,14 +318,14 @@ public class CorantConfigConversion implements Serializable {
       return Stream.<Supplier<Converter<T>>>of(() -> forConstructor(type, String.class),
           () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
           () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
-          .filter(converter -> converter != null).findFirst();
+          .filter(ObjectUtils::isNotNull).findFirst();
     }
 
     static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {
       try {
         Constructor<T> constructor = type.getConstructor(argumentTypes);
         if (Modifier.isPublic(constructor.getModifiers())) {
-          return (s) -> {
+          return s -> {
             try {
               return constructor.newInstance(s);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -346,7 +347,7 @@ public class CorantConfigConversion implements Serializable {
         final Method factoryMethod = type.getMethod(method, argumentTypes);
         if (Modifier.isStatic(factoryMethod.getModifiers())
             && Modifier.isPublic(factoryMethod.getModifiers())) {
-          return (s) -> {
+          return s -> {
             try {
               return forceCast(factoryMethod.invoke(null, s));
             } catch (IllegalAccessException | IllegalArgumentException

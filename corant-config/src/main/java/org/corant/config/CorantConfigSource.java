@@ -117,6 +117,7 @@ public abstract class CorantConfigSource implements ConfigSource {
       try {
         return Integer.parseInt(configOrdinal);
       } catch (NumberFormatException ignored) {
+        // Noop
       }
     }
     return ordinal;

@@ -35,7 +35,7 @@ public interface Defaults {
 
   int SIXTEEN_KBS = ONE_KB * 16;
 
-  long ONE_MB = ONE_KB * ONE_KB;
+  long ONE_MB = ONE_KB * (long) ONE_KB;
 
   static Path corantUserDir(String suffix) {
     return Paths.get(System.getProperty("user.home"))

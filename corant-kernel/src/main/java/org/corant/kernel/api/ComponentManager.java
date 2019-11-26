@@ -46,7 +46,7 @@ public interface ComponentManager<N, C> extends Serializable {
    * @author bingo 下午5:34:28
    *
    */
-  public static abstract class AbstractComponentManager<N, C> implements ComponentManager<N, C> {
+  public abstract static class AbstractComponentManager<N, C> implements ComponentManager<N, C> {
 
     private static final long serialVersionUID = -2257315467951134869L;
 
@@ -86,17 +86,17 @@ public interface ComponentManager<N, C> extends Serializable {
   }
 
   @RequestScoped
-  public static abstract class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  public abstract static class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2588026760995417834L;
   }
 
   @SessionScoped
-  public static abstract class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  public abstract static class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = 7462742316873226368L;
   }
 
   @TransactionScoped
-  public static abstract class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  public abstract static class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2804585149568989342L;
   }
 }

@@ -80,10 +80,10 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
-  public static final Map<Path, URLClassLoader> CACHED_CLASS_LOADERS = new ConcurrentHashMap<>();
-  public static final Set<String> SYS_LIBS =
+  protected static final Set<String> sysLibs =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
+  protected static final Map<Path, URLClassLoader> cachedClassLoaders = new ConcurrentHashMap<>();
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 
   private ClassPaths() {
@@ -119,12 +119,12 @@ public class ClassPaths {
   public static synchronized URLClassLoader buildWarClassLoader(Path path,
       final ClassLoader parentClassLoader) throws IOException {
     shouldBeTrue(path != null, "Build war class loader error path is null");
-    if (CACHED_CLASS_LOADERS.containsKey(path)) {
-      return CACHED_CLASS_LOADERS.get(path);
+    if (cachedClassLoaders.containsKey(path)) {
+      return cachedClassLoaders.get(path);
     }
     Path tmpDir = Files.createTempDirectory(asString(path.getFileName()));
     // We only extract the WEB-INF folder, it is class path resource.
-    FileUtils.extractJarFile(path, tmpDir, (e) -> e.getName().contains(WEB_INF));
+    FileUtils.extractJarFile(path, tmpDir, e -> e.getName().contains(WEB_INF));
     final List<URL> urls = new ArrayList<>();
     if (shouldNotNull(tmpDir.toFile()).exists()) {
       Path webInf = tmpDir.resolve(WEB_INF);
@@ -153,7 +153,7 @@ public class ClassPaths {
       }
       tmpDir.toFile().deleteOnExit();
     }
-    return CACHED_CLASS_LOADERS.put(path,
+    return cachedClassLoaders.put(path,
         AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(
             urls.toArray(new URL[urls.size()]), parentClassLoader)));
   }
@@ -240,7 +240,7 @@ public class ClassPaths {
   }
 
   static boolean loadAll(String path) {
-    return isBlank(path) || SYS_LIBS.stream().anyMatch(sp -> path.startsWith(sp));
+    return isBlank(path) || sysLibs.stream().anyMatch(path::startsWith);
   }
 
   /**
@@ -355,7 +355,6 @@ public class ClassPaths {
           uriSet.add(getClassPathEntry(jarFile, path));
         } catch (URISyntaxException e) {
           logger.warning(() -> "Invalid Class-Path entry: " + path);
-          continue;
         }
       }
       return uriSet;
@@ -458,6 +457,7 @@ public class ClassPaths {
         try {
           jarFile.close();
         } catch (IOException ignored) {
+          // Noop!
         }
       }
     }
@@ -492,7 +492,6 @@ public class ClassPaths {
 
     protected URI tryExtractFileUri(URI jarUri) {
       try {
-        // String specPart = jarUri.getSchemeSpecificPart();
         URI fileUri = new URI(jarUri.getRawSchemeSpecificPart());
         if (FILE_SCHEMA.equals(fileUri.getScheme())) {
           String fileUrlStr = fileUri.toString();

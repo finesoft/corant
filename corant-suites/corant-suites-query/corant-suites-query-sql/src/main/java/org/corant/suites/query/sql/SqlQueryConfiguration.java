@@ -81,7 +81,7 @@ public interface SqlQueryConfiguration {
 
     public SqlQueryConfiguration build() {
       if (cfg.dataSource == null || cfg.dialect == null) {
-        throw new QueryRuntimeException();
+        throw new QueryRuntimeException("The data source and dialect can't null.");
       }
       return cfg;
     }

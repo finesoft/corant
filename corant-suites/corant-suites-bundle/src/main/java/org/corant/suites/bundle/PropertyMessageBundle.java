@@ -54,15 +54,17 @@ public class PropertyMessageBundle implements MessageBundle {
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException {
     load();
     if (key == null) {
-      throw new NoSuchBundleException(null);
+      throw new NoSuchBundleException("The message property key can't null");
     } else {
       Map<String, MessageFormat> mfMap = holder.get(locale);
       if (mfMap == null) {
-        throw new NoSuchBundleException(key.toString());
+        throw new NoSuchBundleException("Can't find message for %s with locale %s", key.toString(),
+            locale == null ? null : locale.toString());
       } else {
         MessageFormat mf = mfMap.get(key);
         if (mf == null) {
-          throw new NoSuchBundleException(key.toString());
+          throw new NoSuchBundleException("Can't find message for %s with locale %s",
+              key.toString(), locale == null ? null : locale.toString());
         } else {
           return mf.format(args);
         }

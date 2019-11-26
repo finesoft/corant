@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * @author bingo 上午10:24:46
@@ -62,27 +62,27 @@ public class GeneralRuntimeExceptionWrapper {
       subCode = wrapper.exception.getSubCode();
     }
 
-    public Builder thenAttributes(Function<Map<Object, Object>, Map<Object, Object>> func) {
+    public Builder thenAttributes(Map<Object, Object> attributes) {
+      return this.thenAttributes(t -> attributes);
+    }
+
+    public Builder thenAttributes(UnaryOperator<Map<Object, Object>> func) {
       if (func != null) {
         setAttributes(func.apply(new HashMap<>(attributes)));
       }
       return this;
     }
 
-    public Builder thenAttributes(Map<Object, Object> attributes) {
-      return this.thenAttributes(t -> attributes);
+    public Builder thenParameters(List<Object> parameters) {
+      return this.thenParameters(t -> parameters);
     }
 
-    public Builder thenParameters(Function<List<Object>, List<Object>> func) {
+    public Builder thenParameters(UnaryOperator<List<Object>> func) {
       if (func != null) {
         List<Object> updated = func.apply(listOf(parameters));
         setParameters(updated == null ? null : updated.toArray());
       }
       return this;
-    }
-
-    public Builder thenParameters(List<Object> parameters) {
-      return this.thenParameters(t -> parameters);
     }
 
     public Builder thenSubCode(Object subCode) {
@@ -142,27 +142,26 @@ public class GeneralRuntimeExceptionWrapper {
     }
 
     @Override
-    public ConjoinedBuilder thenAttributes(
-        Function<Map<Object, Object>, Map<Object, Object>> func) {
-      super.thenAttributes(func);
-      return this;
-    }
-
-    @Override
     public ConjoinedBuilder thenAttributes(Map<Object, Object> attributes) {
       super.thenAttributes(attributes);
       return this;
     }
 
     @Override
-    public ConjoinedBuilder thenParameters(Function<List<Object>, List<Object>> func) {
-      super.thenParameters(func);
+    public ConjoinedBuilder thenAttributes(UnaryOperator<Map<Object, Object>> func) {
+      super.thenAttributes(func);
       return this;
     }
 
     @Override
     public ConjoinedBuilder thenParameters(List<Object> parameters) {
       super.thenParameters(parameters);
+      return this;
+    }
+
+    @Override
+    public ConjoinedBuilder thenParameters(UnaryOperator<List<Object>> func) {
+      super.thenParameters(func);
       return this;
     }
 

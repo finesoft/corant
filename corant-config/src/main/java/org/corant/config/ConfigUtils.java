@@ -37,6 +37,7 @@ import org.eclipse.microprofile.config.Config;
 public class ConfigUtils {
 
   public static final int SEPARATOR_LEN = NAME_SPACE_SEPARATORS.length();
+
   public static final String VALUE_DELIMITER = "(?<!\\\\),";
   public static final String KEY_DELIMITER = "(?<!\\\\)\\.";
 
@@ -102,7 +103,7 @@ public class ConfigUtils {
   public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return group(configs, s -> filter.test(s), s -> {
+    return group(configs, filter::test, s -> {
       String[] arr = splitKey(s);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};

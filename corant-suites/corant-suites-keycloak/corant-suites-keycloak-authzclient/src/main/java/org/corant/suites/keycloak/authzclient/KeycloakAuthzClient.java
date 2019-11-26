@@ -44,9 +44,9 @@ public class KeycloakAuthzClient {
   Logger logger;
 
   @Inject
-  @ConfigProperty(name = "keycloak.authz-client.json-path",
+  @ConfigProperty(name = "keycloak.authz_client.location",
       defaultValue = "META-INF/keycloak-authz-client.json")
-  protected String keycloakJsonPath;
+  protected String keycloakJsonLocation;
 
   protected AuthzClient authzClient = null;
   protected ServerConfiguration serverConfiguration = null;
@@ -60,8 +60,8 @@ public class KeycloakAuthzClient {
     return configuration;
   }
 
-  public String getKeycloakJsonPath() {
-    return keycloakJsonPath;
+  public String getKeycloakJsonLocation() {
+    return keycloakJsonLocation;
   }
 
   public ServerConfiguration getServerConfiguration() {
@@ -99,14 +99,14 @@ public class KeycloakAuthzClient {
   protected void onPostConstruct() {
     try {
       authzClient =
-          AuthzClient.create(Resources.from(keycloakJsonPath).findFirst().get().openStream());
+          AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
-      logger
-          .info(() -> String.format("Create keycloak authz client instance %s.", keycloakJsonPath));
+      logger.info(
+          () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
-      throw new CorantRuntimeException("Can't find keycloak.json from %s", keycloakJsonPath);
+      throw new CorantRuntimeException(e, "Can't find keycloak.json from %s", keycloakJsonLocation);
     }
   }
 }

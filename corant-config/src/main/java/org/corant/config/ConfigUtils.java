@@ -21,8 +21,11 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.eclipse.microprofile.config.Config;
@@ -72,6 +75,25 @@ public class ConfigUtils {
       puc = cuc;
     }
     return sb.toString();
+  }
+
+  public static String extractSysEnv(String propertyName) {
+    if (propertyName == null) {
+      return null;
+    }
+    String value =
+        AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(propertyName));
+    if (value != null) {
+      return value;
+    }
+    String sanitizedName = propertyName.replaceAll("[^a-zA-Z0-9_]", "_");
+    value = AccessController
+        .doPrivileged((PrivilegedAction<String>) () -> System.getenv(sanitizedName));
+    if (value != null) {
+      return value;
+    }
+    return AccessController.doPrivileged(
+        (PrivilegedAction<String>) () -> System.getenv(sanitizedName.toUpperCase(Locale.ROOT)));
   }
 
   public static Map<String, List<String>> getGroupConfigKeys(Config config,

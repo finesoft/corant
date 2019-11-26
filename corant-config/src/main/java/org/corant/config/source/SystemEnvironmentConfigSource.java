@@ -13,11 +13,9 @@
  */
 package org.corant.config.source;
 
+import static org.corant.config.ConfigUtils.extractSysEnv;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Map;
 import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.NotSupportedException;
@@ -45,22 +43,7 @@ public class SystemEnvironmentConfigSource extends CorantConfigSource {
 
   @Override
   public String getValue(String propertyName) {
-    if (propertyName == null) {
-      return null;
-    }
-    String value =
-        AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(propertyName));
-    if (value != null) {
-      return value;
-    }
-    String sanitizedName = propertyName.replaceAll("[^a-zA-Z0-9_]", "_");
-    value = AccessController
-        .doPrivileged((PrivilegedAction<String>) () -> System.getenv(sanitizedName));
-    if (value != null) {
-      return value;
-    }
-    return AccessController.doPrivileged(
-        (PrivilegedAction<String>) () -> System.getenv(sanitizedName.toUpperCase(Locale.ROOT)));
+    return extractSysEnv(propertyName);
   }
 
   @Override

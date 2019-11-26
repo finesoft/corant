@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils;
 import org.corant.shared.util.Resources.SourceType;
@@ -46,7 +47,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
   static String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-  static String sysLcEnv = System.getenv(CFG_LOCATION_KEY);
+  static String sysLcEnv = ConfigUtils.extractSysEnv(CFG_LOCATION_KEY);
   static String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
   static String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
 

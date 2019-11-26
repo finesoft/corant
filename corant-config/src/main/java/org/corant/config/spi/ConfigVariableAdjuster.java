@@ -73,7 +73,7 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
         break;
       } else if (varName.equals(key)) {
         throw new CorantRuntimeException(
-            "A recursive error occurred in the configuration entry  [%s].",
+            "A recursive error occurred in the configuration entry [%s].",
             String.join(" -> ", stack));
       } else {
         stack.add(varName);

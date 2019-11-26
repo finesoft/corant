@@ -13,7 +13,10 @@
  */
 package org.corant.suites.keycloak.authzclient;
 
+import static org.corant.shared.util.StringUtils.isNotBlank;
+
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -30,6 +33,7 @@ import org.keycloak.authorization.client.representation.ServerConfiguration;
 import org.keycloak.authorization.client.util.HttpMethod;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.util.BasicAuthHelper;
+import org.keycloak.util.JsonSerialization;
 
 /**
  * corant-suites-keycloak-client
@@ -42,6 +46,10 @@ public class KeycloakAuthzClient {
 
   @Inject
   Logger logger;
+
+  @Inject
+  @ConfigProperty(name = "keycloak.authz_client.json")
+  protected Optional<String> keycloakJson;
 
   @Inject
   @ConfigProperty(name = "keycloak.authz_client.location",
@@ -98,12 +106,15 @@ public class KeycloakAuthzClient {
   @PostConstruct
   protected void onPostConstruct() {
     try {
-      authzClient =
-          AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
+      if(keycloakJson.isPresent() && isNotBlank(keycloakJson.get())){
+        authzClient = AuthzClient.create(JsonSerialization.readValue(keycloakJson.get(), Configuration.class));
+        logger.info(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
+      }else{
+        authzClient = AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
+        logger.info( () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
+      }
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
-      logger.info(
-          () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
       throw new CorantRuntimeException(e, "Can't find keycloak.json from %s", keycloakJsonLocation);

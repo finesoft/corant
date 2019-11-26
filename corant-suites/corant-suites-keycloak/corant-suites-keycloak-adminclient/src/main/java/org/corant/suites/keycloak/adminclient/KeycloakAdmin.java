@@ -15,6 +15,8 @@ package org.corant.suites.keycloak.adminclient;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.getMapString;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.keycloak.OAuth2Constants;
@@ -38,15 +41,17 @@ import org.keycloak.util.JsonSerialization;
 
 /**
  * corant-suites-keycloak-admin
- *
  * @author bingo 上午11:22:03
- *
  */
 @ApplicationScoped
 public class KeycloakAdmin {
 
   @Inject
   Logger logger;
+
+  @Inject
+  @ConfigProperty(name = "keycloak.admin_client.json")
+  protected Optional<String> keycloakJson;
 
   @Inject
   @ConfigProperty(name = "keycloak.admin_client.location")
@@ -81,17 +86,21 @@ public class KeycloakAdmin {
   @PostConstruct
   void onPostConstruct() {
     synchronized (this) {
-      if (keycloakJsonLocation.isPresent()) {
-        Resource resource = Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
-        if (resource != null) {
-          logger.info(() -> String.format("Find keycloak admin client config json %s",
-              keycloakJsonLocation.get()));
-          try (InputStream is = resource.openStream()) {
-            adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);
-          } catch (IOException e) {
-            throw new CorantRuntimeException(e);
+      try {
+        if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
+          logger.info(() -> String.format("Find keycloak admin client config json %s", keycloakJson.get()));
+          adminConfig = JsonSerialization.readValue(keycloakJson.get(), AdapterConfig.class);
+        } else if (keycloakJsonLocation.isPresent()) {
+          Resource resource = Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
+          if (resource != null) {
+            logger.info(() -> String.format("Find keycloak admin client config json %s", keycloakJsonLocation.get()));
+            try (InputStream is = resource.openStream()) {
+              adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);
+            }
           }
         }
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
       }
     }
   }
@@ -110,7 +119,7 @@ public class KeycloakAdmin {
       return builder.build();
     } else {
       shouldBeTrue(serverUrl.isPresent() && realm.isPresent() && username.isPresent()
-          && password.isPresent() && clientId.isPresent());
+                       && password.isPresent() && clientId.isPresent());
       logger.info(() -> "Use keycloak admin config to build Keycloak instance.");
       KeycloakBuilder builder =
           KeycloakBuilder.builder().serverUrl(serverUrl.get()).realm(realm.get())

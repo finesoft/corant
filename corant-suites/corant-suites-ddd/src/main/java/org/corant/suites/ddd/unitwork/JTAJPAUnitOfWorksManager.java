@@ -127,7 +127,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     try {
       final Transaction curTx = shouldNotNull(getTransactionManager().getTransaction(),
           "For now we only support transactional unit of work.");
-      final JTAJPAUnitOfWork curUow = uows.computeIfAbsent(wrapUintOfWorksKey(curTx), (key) -> {
+      return uows.computeIfAbsent(wrapUintOfWorksKey(curTx), key -> {
         try {
           logger.fine(() -> "Register an new unit of work with the current transacion context.");
           JTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
@@ -137,7 +137,6 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
           throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
         }
       });
-      return curUow;
     } catch (SystemException | IllegalStateException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }

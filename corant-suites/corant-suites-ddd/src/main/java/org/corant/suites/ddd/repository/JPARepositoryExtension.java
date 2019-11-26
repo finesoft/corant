@@ -56,14 +56,13 @@ public class JPARepositoryExtension implements Extension {
             .stream().map(u -> u.unitName()).collect(Collectors.toSet());
     qualifiers.clear();
     qualifiers.putAll(Qualifiers.resolveNameds(names));
-    qualifiers.forEach((k, v) -> {
-      abd.<JPARepository>addBean().addQualifiers(v).addTransitiveTypeClosure(JPARepository.class)
-          .beanClass(JPARepository.class).scope(ApplicationScoped.class)
-          .stereotypes(setOf(Repositories.class)).produceWith(beans -> {
-            return produce(beans, k);
-          }).disposeWith((repo, beans) -> {
-          });
-    });
+    qualifiers.forEach((k, v) -> abd.<JPARepository>addBean().addQualifiers(v)
+        .addTransitiveTypeClosure(JPARepository.class).beanClass(JPARepository.class)
+        .scope(ApplicationScoped.class).stereotypes(setOf(Repositories.class))
+        .produceWith(beans -> {
+          return produce(beans, k);
+        }).disposeWith((repo, beans) -> {
+        }));
   }
 
   JPARepository produce(Instance<Object> instances, String unitName) {

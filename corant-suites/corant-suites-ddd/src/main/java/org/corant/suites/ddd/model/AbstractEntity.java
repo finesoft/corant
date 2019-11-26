@@ -34,7 +34,7 @@ public abstract class AbstractEntity implements Entity {
     if (this == o) {
       return true;
     }
-    if (o == null || !(o instanceof AbstractEntity)) {
+    if (!(o instanceof AbstractEntity)) {
       return false;
     }
     if (getId() == null || ((AbstractEntity) o).getId() == null) {

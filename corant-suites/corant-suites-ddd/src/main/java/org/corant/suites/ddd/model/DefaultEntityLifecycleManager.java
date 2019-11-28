@@ -33,6 +33,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
@@ -106,12 +107,13 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   @PostConstruct
   void onPostConstruct() {
-    final PersistenceService PersistenceService = resolve(PersistenceService.class).get();
+    final PersistenceService persistenceService = resolve(PersistenceService.class)
+        .orElseThrow(() -> new CorantRuntimeException("Can't find Persistence service!"));
     select(EntityManagerFactory.class).forEach(emf -> {
       String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
       Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
       entities.stream().map(ManagedType::getJavaType)
-          .forEach(cls -> clsUns.put(cls, PersistenceService.getPersistenceContext(puNme)));
+          .forEach(cls -> clsUns.put(cls, persistenceService.getPersistenceContext(puNme)));
     });
     logger.info(() -> "Initialized JPAPersistenceService.");
   }

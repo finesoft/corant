@@ -29,6 +29,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import org.corant.kernel.util.Qualifiers;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.EntityLifecycleManager;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
@@ -46,8 +47,9 @@ public class JPARepositoryExtension implements Extension {
   static final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
   public static Annotation[] resolveQualifiers(Class<?> cls) {
-    return qualifiers
-        .get(resolve(EntityLifecycleManager.class).get().getPersistenceContext(cls).unitName());
+    return qualifiers.get(resolve(EntityLifecycleManager.class)
+        .orElseThrow(() -> new CorantRuntimeException("Can't find entity lifecycle manager!"))
+        .getPersistenceContext(cls).unitName());
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {

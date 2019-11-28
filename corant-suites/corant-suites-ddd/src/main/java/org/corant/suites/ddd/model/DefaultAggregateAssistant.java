@@ -41,7 +41,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   protected transient final Aggregate aggregate;
 
   protected transient final Queue<Message> messages = new LinkedList<>();
-  protected transient volatile long lastMessageSequenceNumber = 1L;
+  protected transient volatile long lastMessageSequenceNumber = 0L;
 
   public DefaultAggregateAssistant(Aggregate aggregate) {
     this.aggregate = requireNotNull(aggregate, GlobalMessageCodes.ERR_PARAM);

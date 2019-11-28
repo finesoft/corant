@@ -111,6 +111,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   public <T> Stream<T> stream(String q, Object param) {
     EsNamedQuerier querier = getResolver().resolve(q, param);
     String script = resolveScript(querier.getScript(null), null, null);
+    log("stream-> " + q, querier.getQueryParameter(), script);
     try {
       return getExecutor().stream(resolveIndexName(q), script).map(result -> {
         this.fetch(result, querier);

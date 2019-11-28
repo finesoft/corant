@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.elastic.cdi;
 
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
@@ -34,6 +35,7 @@ import org.corant.suites.query.elastic.EsNamedQuerier;
 import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
 import org.corant.suites.query.shared.NamedQuerierResolver;
+import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
@@ -47,7 +49,7 @@ import org.elasticsearch.client.transport.TransportClient;
 @Priority(1)
 @ApplicationScoped
 @Alternative
-public class EsNamedQueryServiceManager {
+public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
   static final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
@@ -72,21 +74,27 @@ public class EsNamedQueryServiceManager {
   @ConfigProperty(name = "query.elastic.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
-  @Produces
-  @EsQuery
-  EsNamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final EsQuery sc = annotated.getAnnotation(EsQuery.class);
+  @Override
+  public EsNamedQueryService get(Object qualifier) {
+    final EsQuery sc = forceCast(qualifier);
     String clusterName = sc == null ? EMPTY : defaultString(sc.value());
     if (isBlank(clusterName) && defaultQualifierValue.isPresent()) {
       clusterName = defaultQualifierValue.get();
     }
     final String useClusterName = clusterName;
-    return services.computeIfAbsent(useClusterName, (cn) -> {
+    return services.computeIfAbsent(useClusterName, cn -> {
       logger.info(() -> String
           .format("Create default elastic named query service, the data center is [%s]. ", cn));
       return new DefaultEsNamedQueryService(transportClientManager.apply(cn), this);
     });
+  }
+
+  @Produces
+  @EsQuery
+  EsNamedQueryService produce(InjectionPoint ip) {
+    final Annotated annotated = ip.getAnnotated();
+    final EsQuery sc = annotated.getAnnotation(EsQuery.class);
+    return get(sc);
   }
 
   /**

@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.jpql.cdi;
 
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +33,7 @@ import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQuerier;
 import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -45,7 +46,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Priority(1)
 @ApplicationScoped
 @Alternative
-public class JpqlNamedQueryServiceManager {
+public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
@@ -70,21 +71,27 @@ public class JpqlNamedQueryServiceManager {
   @ConfigProperty(name = "query.jpql.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
+  @Override
+  public NamedQueryService get(Object qualifier) {
+    final JpqlQuery sc = forceCast(qualifier);
+    String pun = sc == null ? null : sc.value();
+    if (isBlank(pun) && defaultQualifierValue.isPresent()) {
+      pun = defaultQualifierValue.get();
+    }
+    final String pu = pun;
+    return services.computeIfAbsent(pu, n -> {
+      logger.info(() -> String
+          .format("Create default jpql named query service, the persistence unit is [%s].", n));
+      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n), this);
+    });
+  }
+
   @Produces
   @JpqlQuery
   NamedQueryService produce(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final JpqlQuery sc = shouldNotNull(annotated.getAnnotation(JpqlQuery.class));
-    String pun = shouldNotBlank(sc.value());
-    if (isBlank(pun) && defaultQualifierValue.isPresent()) {
-      pun = defaultQualifierValue.get();
-    }
-    final String pu = pun;
-    return services.computeIfAbsent(pu, (n) -> {
-      logger.info(() -> String
-          .format("Create default jpql named query service, the persistence unit is [%s].", n));
-      return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n), this);
-    });
+    return get(sc);
   }
 
   /**
@@ -149,4 +156,5 @@ public class JpqlNamedQueryServiceManager {
           defaultMaxSelectSize);
     }
   }
+
 }

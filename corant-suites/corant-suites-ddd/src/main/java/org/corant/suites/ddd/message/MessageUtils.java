@@ -27,13 +27,11 @@ public class MessageUtils {
   public static boolean isCorrelated(Message m, Message o) {
     return m instanceof MergableMessage && o instanceof MergableMessage
         && isEquals(m.getClass(), o.getClass())
-        && isEquals(m.getMetadata().getSource(), m.getMetadata().getSource());
+        && isEquals(m.getMetadata().getSource(), o.getMetadata().getSource());
   }
 
   public static void mergeToQueue(Queue<Message> queue, Message msg) {
-    if (msg == null) {
-      return;
-    } else if (msg instanceof MergableMessage) {
+    if (msg instanceof MergableMessage) {
       MergableMessage newMgbMsg = (MergableMessage) msg;
       MergableMessage oldMgbMsg = null;
       for (Message queMsg : queue) {
@@ -50,7 +48,7 @@ public class MessageUtils {
           queue.add(newMgbMsg);
         }
       }
-    } else {
+    } else if (msg != null) {
       queue.add(msg);
     }
   }

@@ -16,6 +16,7 @@ package org.corant.suites.query.sql.cdi;
 import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
@@ -30,8 +31,10 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
@@ -51,7 +54,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Priority(1)
 @ApplicationScoped
 @Alternative
-public class SqlNamedQueryServiceManager {
+public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
@@ -97,13 +100,11 @@ public class SqlNamedQueryServiceManager {
   @ConfigProperty(name = "query.sql.default-qualifier-dialect", defaultValue = "MYSQL")
   protected String defaultQualifierDialect;
 
-  @Produces
-  @SqlQuery
-  NamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    String dataSourceName = defaultString(sc.value());
-    String dialectName = defaultString(sc.dialect());
+  @Override
+  public NamedQueryService get(Object qualifier) {
+    SqlQuery q = forceCast(qualifier);
+    String dataSourceName = q == null ? null : defaultString(q.value());
+    String dialectName = q == null ? null : defaultString(q.dialect());
     if (isBlank(dataSourceName) && defaultQualifierValue.isPresent()) {
       dataSourceName = defaultQualifierValue.get();
     }
@@ -112,12 +113,20 @@ public class SqlNamedQueryServiceManager {
     }
     final String dsn = dataSourceName;
     final DBMS dialect = toObject(dialectName, DBMS.class);
-    return services.computeIfAbsent(dsn, (ds) -> {
+    return services.computeIfAbsent(dsn, ds -> {
       logger.info(() -> String.format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
           ds, dialect.name()));
       return new DefaultSqlNamedQueryService(ds, dialect, this);
     });
+  }
+
+  @Produces
+  @SqlQuery
+  NamedQueryService produce(InjectionPoint ip) {
+    final Annotated annotated = ip.getAnnotated();
+    final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
+    return get(sc);
   }
 
   /**
@@ -157,9 +166,12 @@ public class SqlNamedQueryServiceManager {
         SqlNamedQueryServiceManager manager) {
       resolver = manager.resolver;
       Builder builder = SqlQueryConfiguration.defaultBuilder()
-          .dataSource(resolveNamed(DataSource.class, dataSourceName).get()).dialect(dbms.instance())
-          .fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize).maxRows(manager.maxRows)
-          .queryTimeout(manager.timeout);
+          .dataSource(resolveNamed(DataSource.class, dataSourceName)
+              .orElseThrow(() -> new CorantRuntimeException(
+                  "Can't build default sql named query, the data source named %s not found.",
+                  dataSourceName)))
+          .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize)
+          .maxRows(manager.maxRows).queryTimeout(manager.timeout);
       manager.fetchDirection.ifPresent(builder::fetchDirection);
       executor = new DefaultSqlQueryExecutor(builder.build());
       defaultMaxSelectSize = manager.maxSelectSize;

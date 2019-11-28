@@ -33,7 +33,7 @@ public abstract class AbstractDefaultAggregate extends AbstractAggregate {
    * Message sequence number
    */
   @Column(name = "mn")
-  private volatile long mn = 1L;
+  private volatile long mn = 0L;
 
   protected AbstractDefaultAggregate() {
     super();

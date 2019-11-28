@@ -97,7 +97,7 @@
 		<version.mongodb>3.9.1</version.mongodb>
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.11.2</version.redisson>
-		
+
 		<version.ehcache>3.8.1</version.ehcache>
 
 		<version.grpc>1.25.0</version.grpc>
@@ -668,6 +668,11 @@
 			<dependency>
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
+				<version>${version.ehcache}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ehcache</groupId>
+				<artifactId>ehcache-transactions</artifactId>
 				<version>${version.ehcache}</version>
 			</dependency>
 

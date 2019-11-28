@@ -140,7 +140,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
-    log(queryName, scriptParameter, sql);
+    log("stream-> " + queryName, scriptParameter, sql);
     return getExecutor().stream(sql, scriptParameter).map(result -> {
       this.fetch(result, querier);
       return querier.resolveResult(result);

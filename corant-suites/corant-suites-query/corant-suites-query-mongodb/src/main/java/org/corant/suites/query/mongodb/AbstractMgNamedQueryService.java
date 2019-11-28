@@ -162,7 +162,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
     MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
       this.fetch(Decimal128Utils.convert(result), querier);
       return querier.resolveResult(result);

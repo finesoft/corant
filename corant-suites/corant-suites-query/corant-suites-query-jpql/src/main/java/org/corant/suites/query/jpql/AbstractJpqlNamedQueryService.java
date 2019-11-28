@@ -180,6 +180,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript(null);
+    log("stream-> " + queryName, scriptParameter, ql);
     final EntityManager em = getEntityManager(); // FIXME close
     Stream<T> stream =
         createQuery(em, ql, properties, resultClass, scriptParameter).getResultStream();

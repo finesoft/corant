@@ -53,11 +53,6 @@ public abstract class AbstractEvent implements Event {
         + "]";
   }
 
-  @Override
-  protected Object clone() throws CloneNotSupportedException {
-    return super.clone();
-  }
-
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
   }

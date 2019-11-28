@@ -35,7 +35,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface ApplicationServices {
 
-  final static ApplicationServicesLiteral INST = new ApplicationServicesLiteral();
+  static final ApplicationServicesLiteral INST = new ApplicationServicesLiteral();
 
   public static class ApplicationServicesLiteral extends AnnotationLiteral<ApplicationServices> {
     private static final long serialVersionUID = 7671506263921692286L;

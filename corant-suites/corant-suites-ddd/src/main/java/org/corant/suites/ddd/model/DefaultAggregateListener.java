@@ -39,38 +39,38 @@ public class DefaultAggregateListener {
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected void handlePostLoad(AbstractAggregate o) {
-    o.lifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
+    o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
     registerToUnitOfWork(o);
   }
 
   protected void handlePostPersist(AbstractAggregate o) {
     o.buildLifecycleMessage(Lifecycle.POST_PERSISTED).ifPresent(this::registerToUnitOfWork);
-    registerToUnitOfWork(o.lifecycle(Lifecycle.POST_PERSISTED));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.POST_PERSISTED));
   }
 
   protected void handlePostRemove(AbstractAggregate o) {
     o.buildLifecycleMessage(Lifecycle.POST_REMOVED).ifPresent(this::registerToUnitOfWork);
-    registerToUnitOfWork(o.lifecycle(Lifecycle.POST_REMOVED));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.POST_REMOVED));
   }
 
   protected void handlePostUpdate(AbstractAggregate o) {
     o.buildLifecycleMessage(Lifecycle.POST_UPDATED).ifPresent(this::registerToUnitOfWork);
-    registerToUnitOfWork(o.lifecycle(Lifecycle.POST_UPDATED));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.POST_UPDATED));
   }
 
   protected void handlePrePersist(AbstractAggregate o) {
     o.onPrePreserve();
-    registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_PERSIST));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.PRE_PERSIST));
   }
 
   protected void handlePreRemove(AbstractAggregate o) {
     o.onPreDestroy();
-    registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_REMOVE));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.PRE_REMOVE));
   }
 
   protected void handlePreUpdate(AbstractAggregate o) {
     o.onPrePreserve();
-    registerToUnitOfWork(o.lifecycle(Lifecycle.PRE_UPDATE));
+    registerToUnitOfWork(o.setLifecycle(Lifecycle.PRE_UPDATE));
   }
 
   @PostLoad

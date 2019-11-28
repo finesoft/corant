@@ -14,7 +14,6 @@
 package org.corant.suites.ddd.event;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import java.time.Instant;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
 
@@ -41,11 +40,6 @@ public abstract class AbstractPropertyChangedEvent<T extends Aggregate, PT> exte
 
   public PT getNewValue() {
     return this.newValue;
-  }
-
-  @Override
-  public Instant getOccurredTime() {
-    return super.getOccurredTime();
   }
 
   public PT getOldValue() {

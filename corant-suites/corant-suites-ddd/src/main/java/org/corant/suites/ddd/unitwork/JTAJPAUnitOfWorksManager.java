@@ -188,7 +188,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     uows.clear();
   }
 
-  static abstract class SynchronizationAdapter implements Synchronization {
+  abstract static class SynchronizationAdapter implements Synchronization {
     @Override
     public void afterCompletion(int status) {
       // NOOP!

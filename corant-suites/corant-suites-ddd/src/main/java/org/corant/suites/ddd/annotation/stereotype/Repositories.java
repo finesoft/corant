@@ -35,7 +35,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface Repositories {
 
-  final static RepositoriesLiteral INST = new RepositoriesLiteral();
+  static final RepositoriesLiteral INST = new RepositoriesLiteral();
 
   public static class RepositoriesLiteral extends AnnotationLiteral<Repositories> {
 

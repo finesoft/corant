@@ -38,9 +38,9 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   private static final String RISE_LOG = "Register integration message [%s] to message queue!";
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-  protected transient final Aggregate aggregate;
+  protected final transient Aggregate aggregate;
 
-  protected transient final Queue<Message> messages = new LinkedList<>();
+  protected final transient Queue<Message> messages = new LinkedList<>();
   protected transient volatile long lastMessageSequenceNumber = 0L;
 
   public DefaultAggregateAssistant(Aggregate aggregate) {

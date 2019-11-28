@@ -34,7 +34,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Inherited
 @Stereotype
 public @interface DomainServices {
-  final static DomainServicesLiteral INST = new DomainServicesLiteral();
+  static final DomainServicesLiteral INST = new DomainServicesLiteral();
 
   public static class DomainServicesLiteral extends AnnotationLiteral<DomainServices> {
     private static final long serialVersionUID = -2219684886733335276L;

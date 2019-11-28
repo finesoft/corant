@@ -33,7 +33,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Inherited
 public @interface Queriers {
 
-  final static QueriersLiteral INST = new QueriersLiteral();
+  static final QueriersLiteral INST = new QueriersLiteral();
 
   public static class QueriersLiteral extends AnnotationLiteral<Queriers> {
     private static final long serialVersionUID = -7622269300418055785L;

@@ -35,7 +35,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface Values {
 
-  final static ValueObjectsLiteral INST = new ValueObjectsLiteral();
+  static final ValueObjectsLiteral INST = new ValueObjectsLiteral();
 
   public static class ValueObjectsLiteral extends AnnotationLiteral<Values> {
     private static final long serialVersionUID = -100669600982412983L;

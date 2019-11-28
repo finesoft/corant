@@ -35,7 +35,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface InfrastructureServices {
 
-  final static InfrastructureServicesLiteral INST = new InfrastructureServicesLiteral();
+  static final InfrastructureServicesLiteral INST = new InfrastructureServicesLiteral();
 
   public static class InfrastructureServicesLiteral
       extends AnnotationLiteral<InfrastructureServices> {

@@ -129,7 +129,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected synchronized void destroy(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
-    lifecycle(Lifecycle.DESTROYED);
+    setLifecycle(Lifecycle.DESTROYED);
   }
 
   /**
@@ -140,7 +140,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @param lifecycle
    * @return lifecycle
    */
-  protected synchronized AbstractAggregate lifecycle(Lifecycle lifecycle) {
+  protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
       if (lifecycle != Lifecycle.LOADED) {
@@ -195,7 +195,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected synchronized AbstractAggregate preserve(boolean immediately) {
     requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
-    return lifecycle(Lifecycle.PRESERVED);
+    return setLifecycle(Lifecycle.PRESERVED);
   }
 
   /**

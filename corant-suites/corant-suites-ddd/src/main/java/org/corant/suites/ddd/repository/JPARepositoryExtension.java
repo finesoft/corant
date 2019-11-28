@@ -28,6 +28,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
@@ -55,15 +56,13 @@ public class JPARepositoryExtension implements Extension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
     Set<String> names =
         beanManager.getExtension(JPAExtension.class).getPersistenceUnitInfoMetaDatas().keySet()
-            .stream().map(u -> u.unitName()).collect(Collectors.toSet());
+            .stream().map(PersistenceUnit::unitName).collect(Collectors.toSet());
     qualifiers.clear();
     qualifiers.putAll(Qualifiers.resolveNameds(names));
     qualifiers.forEach((k, v) -> abd.<JPARepository>addBean().addQualifiers(v)
         .addTransitiveTypeClosure(JPARepository.class).beanClass(JPARepository.class)
         .scope(ApplicationScoped.class).stereotypes(setOf(Repositories.class))
-        .produceWith(beans -> {
-          return produce(beans, k);
-        }).disposeWith((repo, beans) -> {
+        .produceWith(beans -> produce(beans, k)).disposeWith((repo, beans) -> {
         }));
   }
 

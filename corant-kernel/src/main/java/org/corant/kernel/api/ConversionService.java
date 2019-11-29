@@ -44,7 +44,7 @@ public interface ConversionService {
 
   <S, T> Converter<S, T> getConverter(final Class<S> sourceType, final Class<T> targetType);
 
-  <T> void register(Converter<?, ?> converter);
+  void register(Converter<?, ?> converter);
 
   /**
    * corant-kernel
@@ -83,7 +83,7 @@ public interface ConversionService {
     }
 
     @Override
-    public <T> void register(Converter<?, ?> converter) {
+    public void register(Converter<?, ?> converter) {
       ConverterRegistry.register(converter);
     }
 

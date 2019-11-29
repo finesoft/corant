@@ -13,7 +13,6 @@
  */
 package org.corant.kernel.util;
 
-import static org.corant.Corant.instance;
 import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -35,11 +34,11 @@ import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.CDI;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
-import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jboss.weld.bean.builtin.BeanManagerProxy;
 import org.jboss.weld.injection.InterceptionFactoryImpl;
@@ -55,13 +54,13 @@ import org.jboss.weld.manager.api.WeldManager;
 public class Instances {
 
   public static boolean isManagedBean(Object object, Annotation... qualifiers) {
-    return object != null && !instance().select(getUserClass(object), qualifiers).isUnsatisfied();
+    return object != null && !select(getUserClass(object), qualifiers).isUnsatisfied();
   }
 
   /**
    * Resolve CDI bean instance
    *
-   * Use with care, there may be a memory leak
+   * Use with care, there may be a memory leak.
    *
    * @param <T>
    * @param instanceClass
@@ -90,12 +89,7 @@ public class Instances {
     Consumer<T> useConsumer = shouldNotNull(consumer);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      T t = inst.get();
-      try {
-        useConsumer.accept(t);
-      } finally {
-        // inst.destroy(t); FIXME Whether to destroy
-      }
+      useConsumer.accept(inst.get());
     } else {
       throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
     }
@@ -109,7 +103,7 @@ public class Instances {
    * Loader, and resolve it with UnmanageableInstance if it is not found in the Service Loader;
    * throw an exception if ambiguous appears in CDI.
    *
-   * Use with care, there may be a memory leak
+   * Use with care, there may be a memory leak.
    *
    * @param <T>
    * @param instanceClass
@@ -156,12 +150,7 @@ public class Instances {
     Function<T, R> useFunction = shouldNotNull(function);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      T t = inst.get();
-      try {
-        return useFunction.apply(t);
-      } finally {
-        // inst.destroy(t); FIXME Whether to destroy
-      }
+      return useFunction.apply(inst.get());
     } else {
       throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
     }
@@ -191,8 +180,7 @@ public class Instances {
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
-    Class<T> instCls = shouldNotNull(instanceClass);
-    return instance().select(instCls, qualifiers);
+    return CDI.current().select(shouldNotNull(instanceClass), qualifiers);
   }
 
   public static <T> T tryResolve(Class<T> instanceClass, Annotation... qualifiers) {
@@ -208,12 +196,7 @@ public class Instances {
     Consumer<T> useConsumer = shouldNotNull(consumer);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      T t = inst.get();
-      try {
-        useConsumer.accept(t);
-      } finally {
-        // inst.destroy(t); FIXME Whether to destroy
-      }
+      useConsumer.accept(inst.get());
     }
   }
 
@@ -222,12 +205,7 @@ public class Instances {
     Function<T, R> useFunction = shouldNotNull(function);
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
-      T t = inst.get();
-      try {
-        return useFunction.apply(t);
-      } finally {
-        // inst.destroy(t); FIXME Whether to destroy
-      }
+      return useFunction.apply(inst.get());
     }
     return null;
   }
@@ -251,9 +229,9 @@ public class Instances {
         NamingReference reference = (NamingReference) obj;
         Class<?> theClass = asClass(reference.getClassName());
         if (reference.qualifiers.length > 0) {
-          return instance().select(theClass).select(reference.qualifiers).get();
+          return CDI.current().select(theClass).select(reference.qualifiers).get();
         }
-        return instance().select(theClass).get();
+        return CDI.current().select(theClass).get();
       } else {
         throw new CorantRuntimeException(
             "Object %s named %s is not a CDI managed bean instance reference!", obj, name);
@@ -332,7 +310,7 @@ public class Instances {
     private boolean disposed = false;
 
     public UnmanageableInstance(Class<T> clazz) {
-      bm = Corant.me().getBeanManager();
+      bm = (WeldManager) CDI.current().getBeanManager();
       creationalContext = bm.createCreationalContext(null);
       annotatedType = bm.createAnnotatedType(clazz);
       injectionTarget = bm.getInjectionTargetFactory(annotatedType).createInjectionTarget(null);
@@ -340,8 +318,8 @@ public class Instances {
     }
 
     public UnmanageableInstance(T object) {
-      shouldBeFalse(isManagedBean(object));
-      bm = Corant.me().getBeanManager();
+      shouldBeFalse(isManagedBean(shouldNotNull(object)));
+      bm = (WeldManager) CDI.current().getBeanManager();
       creationalContext = bm.createCreationalContext(null);
       annotatedType = bm.createAnnotatedType(forceCast(object.getClass()));
       injectionTarget =

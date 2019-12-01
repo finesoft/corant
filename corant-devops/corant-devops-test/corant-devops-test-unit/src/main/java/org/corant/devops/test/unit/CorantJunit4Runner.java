@@ -19,9 +19,9 @@ import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import javax.enterprise.inject.spi.Unmanaged;
-import javax.enterprise.inject.spi.Unmanaged.UnmanagedInstance;
 import org.corant.Corant;
+import org.corant.kernel.util.Instances.UnmanageableInstance;
+import org.corant.shared.util.CollectionUtils;
 import org.junit.runners.model.Statement;
 
 /**
@@ -38,7 +38,7 @@ public interface CorantJunit4Runner {
   ThreadLocal<Class<?>[]> BEAN_CLASSES = new ThreadLocal<>();
   ThreadLocal<Boolean> AUTO_DISPOSES = ThreadLocal.withInitial(() -> Boolean.TRUE);
   ThreadLocal<Map<String, String>> ADDI_CFG_PROS = ThreadLocal.withInitial(HashMap::new);
-  ThreadLocal<Map<Class<?>, UnmanagedInstance<?>>> TEST_OBJECTS =
+  ThreadLocal<Map<Class<?>, UnmanageableInstance<?>>> TEST_OBJECTS =
       ThreadLocal.withInitial(HashMap::new);
 
   default Statement classBlockWithCorant(final Class<?> testClass,
@@ -48,21 +48,19 @@ public interface CorantJunit4Runner {
       public void evaluate() throws Throwable {
         try {
           if (CORANTS.get() == null) {
-            Class<?> configClass = configTestClass(testClass);
-            CORANTS.set(new Corant(configClass, testClass.getClassLoader()));
-            CORANTS.get().start(BEAN_CLASSES.get());
+            Class<?>[] beanClasses = new Class<?>[] {configTestClass(testClass)};
+            beanClasses = CollectionUtils.append(beanClasses, BEAN_CLASSES.get());
+            CORANTS.set(new Corant(beanClasses, testClass.getClassLoader()));
+            CORANTS.get().start(null);
           }
           classBlock.get().evaluate();
-        } catch (Throwable t) {
-          t.printStackTrace();
-          throw t;
         } finally {
           if (!isEmbedded()) {
             if (isNotBlank(PROFILES.get())) {
               System.clearProperty(CFG_PROFILE_KEY);
             }
             System.clearProperty(CFG_LOCATION_EXCLUDE_PATTERN);
-            if (AUTO_DISPOSES.get()) {
+            if (AUTO_DISPOSES.get().booleanValue()) {
               if (TEST_OBJECTS.get() != null) {
                 TEST_OBJECTS.get().values().forEach(umi -> umi.preDestroy().dispose());
                 TEST_OBJECTS.get().clear();
@@ -110,12 +108,12 @@ public interface CorantJunit4Runner {
     return rc.configClass() == null ? testClass : rc.configClass();
   }
 
-  default Object createTestWithCorant(Class<?> clazz) throws Exception {
+  default Object createTestWithCorant(Class<?> clazz) {
     if (TEST_OBJECTS.get() == null) {
       TEST_OBJECTS.set(new HashMap<>());
     }
     return TEST_OBJECTS.get().computeIfAbsent(clazz,
-        (cls) -> new Unmanaged<>(cls).newInstance().produce().inject().postConstruct()).get();
+        cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct()).get();
   }
 
   default boolean isEmbedded() {

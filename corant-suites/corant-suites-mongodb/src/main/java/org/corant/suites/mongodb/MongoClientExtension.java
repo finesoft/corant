@@ -15,6 +15,7 @@ package org.corant.suites.mongodb;
 
 import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.resolveNamed;
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInstant;
@@ -139,11 +140,11 @@ public class MongoClientExtension implements Extension {
   }
 
   public GridFSBucket getGridFSBucket(String namespace) {
-    if (Corant.me() == null) {
+    if (Corant.current() == null) {
       return null;
     }
     Instance<GridFSBucket> inst =
-        Corant.instance().select(GridFSBucket.class, NamedLiteral.of(namespace));
+        select(GridFSBucket.class, NamedLiteral.of(namespace));
     return inst.isResolvable() ? inst.get() : null;
   }
 

@@ -21,9 +21,9 @@ import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -31,14 +31,15 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.StopWatch;
 import org.jboss.weld.environment.se.Weld;
@@ -55,7 +56,7 @@ import org.jboss.weld.manager.api.WeldManager;
  * <li>Execute the boot preprocessor to handle some works before CDI container start, the works like
  * set some appropriate configuration properties to intervene system running.</li>
  * <li>Configure appropriate class loader to the current thread context class loader and CDI
- * container class loader and add configuration class to the set of bean classes for the synthetic
+ * container class loader and add configuration classes to the set of bean classes for the synthetic
  * bean archive if necessary.</li>
  * <li>Construct the CDI container and initialize it, after the CDI container initialized then fire
  * PostContainerStartedEvent to listeners, those listeners may be use to configure some components
@@ -71,8 +72,8 @@ import org.jboss.weld.manager.api.WeldManager;
  * <pre>
  * public class MyApplication {
  *   // ... Bean definitions
- *   public static void main(String[] args) throws Exception {
- *     try(Corant corant = Corant.run(MyApplication.class, args)){
+ *   public static void main(String[] arguments) throws Exception {
+ *     try(Corant corant = Corant.run(MyApplication.class, arguments)){
  *      //... some works in CDI
  *   }
  * }
@@ -83,8 +84,8 @@ import org.jboss.weld.manager.api.WeldManager;
  * <pre>
  * public class MyApplication {
  *   // ... Bean definitions
- *   public static void main(String[] args) throws Exception {
- *    Corant corant = Corant.run(MyApplication.class, args)
+ *   public static void main(String[] arguments) throws Exception {
+ *    Corant corant = Corant.run(MyApplication.class, arguments)
  *   }
  * }
  * </pre>
@@ -94,17 +95,19 @@ import org.jboss.weld.manager.api.WeldManager;
  * <pre>
  * public class MyApplication {
  *   // ... Bean definitions
- *   public static void main(String[] args) throws Exception {
- *    try(Corant corant = new Corant(args).start(MyApplication.class,MyAnother.class....){
- *    }
+ *   public static void main(String[] arguments) throws Exception {
+ *     try (Corant corant =
+ *         Corant.run(new Class[] {MyApplication.class, MyAnother.class}, arguments)) {
+ *     }
  *   }
  * }
  * </pre>
  * <p>
  *
- * @see #Corant(Class, ClassLoader, String...)
- * @see #Corant(Class, String...)
- * @see #Corant(ClassLoader, String...)
+ * @see Corant#Corant(String...)
+ * @see Corant#Corant(Class, String...)
+ * @see Corant#Corant(ClassLoader, String...)
+ * @see Corant#Corant(Class[], ClassLoader, String...)
  * @see CorantBootHandler
  * @see ApplicationConfigSourceProvider
  * @see ApplicationAdjustConfigSourceProvider
@@ -119,12 +122,12 @@ public class Corant implements AutoCloseable {
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
 
-  private static volatile Corant me;
-  private final Class<?> configClass;
-  private final String[] args;
-  private ClassLoader classLoader = Corant.class.getClassLoader();
-  private volatile WeldContainer container;
-  private volatile Object id;
+  private static volatile Corant me; // NOSONAR
+
+  private final Class<?>[] beanClasses;
+  private final String[] arguments;
+  private final ClassLoader classLoader;
+  private WeldContainer container;
 
   /**
    * Use the class loader of Corant.class as current thread context and the CDI container class
@@ -135,106 +138,113 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Construct Coarnt instance with given config class and class loader and args. If the given
-   * config class is not null then it will be added to the set of bean classes for the synthetic
-   * bean archive. If the given class loader is not null then it will be set to the context
-   * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
-   * class loader. The given args will be propagate to all CorantBootHandler and all
-   * CorantLifecycleEvent listeners.
-   *
-   * @param configClass
-   * @param classLoader
-   * @param args
-   */
-  public Corant(Class<?> configClass, ClassLoader classLoader, String... args) {
-    this.configClass = configClass;
-    if (classLoader != null) {
-      this.classLoader = classLoader;
-    }
-    this.args = args;
-  }
-
-  /**
-   * Use given config class and args construct Corant instance. If the given config class is not
-   * null then the class loader of the current thread context and the CDI container will be set with
-   * the given config class class loader. The given args will be propagate to all CorantBootHandler
-   * and all CorantLifecycleEvent listeners.
+   * Use given config class and arguments construct Corant instance. If the given config class is
+   * not null then the class loader of the current thread context and the CDI container will be set
+   * with the given config class class loader. The given arguments will be propagate to all
+   * CorantBootHandler and all CorantLifecycleEvent listeners.
    *
    * @see #Corant(Class, ClassLoader, String...)
    * @param configClass
-   * @param args
+   * @param arguments
    */
-  public Corant(Class<?> configClass, String... args) {
-    this(configClass, configClass != null ? configClass.getClassLoader() : null, args);
+  public Corant(Class<?> configClass, String... arguments) {
+    this(configClass == null ? null : new Class<?>[] {configClass},
+        configClass != null ? configClass.getClassLoader() : null, arguments);
   }
 
   /**
-   * Use given class loader and args to construct Corant instance. If the given class loader is not
-   * null then the class loader of the current thread context and the CDI container will be set with
-   * the given class loader.The given args will be propagate to all CorantBootHandler and all
+   * Construct Coarnt instance with given bean classes and class loader and arguments. If the given
+   * bean classes are not null then they will be added to the set of bean classes for the synthetic
+   * bean archive. If the given class loader is not null then it will be set to the context
+   * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
+   * class loader. The given arguments will be propagate to all CorantBootHandler and all
    * CorantLifecycleEvent listeners.
    *
+   * @param beanClasses
    * @param classLoader
-   * @param args
+   * @param arguments
    */
-  public Corant(ClassLoader classLoader, String... args) {
-    this(null, classLoader, args);
+  public Corant(Class<?>[] beanClasses, ClassLoader classLoader, String... arguments) {
+    this.beanClasses =
+        beanClasses == null ? new Class[0] : Arrays.copyOf(beanClasses, beanClasses.length);
+    if (classLoader != null) {
+      this.classLoader = classLoader;
+    } else {
+      this.classLoader = Corant.class.getClassLoader();
+    }
+    this.arguments = arguments;
   }
 
   /**
-   * Use given args and the class loader of Corant.class to construct Corant instance.The given args
-   * will be propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
+   * Use given class loader and arguments to construct Corant instance. If the given class loader is
+   * not null then the class loader of the current thread context and the CDI container will be set
+   * with the given class loader.The given arguments will be propagate to all CorantBootHandler and
+   * all CorantLifecycleEvent listeners.
    *
-   * @param args
+   * @param classLoader
+   * @param arguments
    */
-  public Corant(String... args) {
-    this(null, null, args);
+  public Corant(ClassLoader classLoader, String... arguments) {
+    this(null, classLoader, arguments);
+  }
+
+  /**
+   * Use given arguments and the class loader of Corant.class to construct Corant instance.The given
+   * arguments will be propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
+   *
+   * @param arguments
+   */
+  public Corant(String... arguments) {
+    this(null, null, arguments);
+  }
+
+  public static Corant current() {
+    return me;
   }
 
   public static void fireAsyncEvent(Object event, Annotation... qualifiers) {
-    validateRunning();
     if (event != null) {
       if (qualifiers.length > 0) {
-        me.getBeanManager().getEvent().select(qualifiers).fireAsync(event);
+        CDI.current().getBeanManager().getEvent().select(qualifiers).fireAsync(event);
       } else {
-        me.getBeanManager().getEvent().fireAsync(event);
+        CDI.current().getBeanManager().getEvent().fireAsync(event);
       }
     }
   }
 
   public static void fireEvent(Object event, Annotation... qualifiers) {
-    validateRunning();
     if (event != null) {
       if (qualifiers.length > 0) {
-        me.getBeanManager().getEvent().select(qualifiers).fire(event);
+        CDI.current().getBeanManager().getEvent().select(qualifiers).fire(event);
       } else {
-        me.getBeanManager().getEvent().fire(event);
+        CDI.current().getBeanManager().getEvent().fire(event);
       }
     }
   }
 
-  public static synchronized Instance<Object> instance() {
-    validateRunning();
-    return me.container;
+  public static synchronized Corant run(Class<?> configClass, String... arguments) {
+    Corant corant = new Corant(configClass, arguments);
+    corant.start(null);
+    return corant;
   }
 
-  public static Corant me() {
-    return me;
+  public static synchronized Corant run(Class<?>[] beanClasses) {
+    Corant corant = new Corant(beanClasses, null);
+    corant.start(null);
+    return corant;
   }
 
-  public static synchronized Corant run(Class<?> configClass, String... args) {
-    return configClass == null ? new Corant(args).start() : new Corant(configClass, args).start();
+  public static synchronized Corant run(Class<?>[] beanClasses, String... arguments) {
+    Corant corant = new Corant(beanClasses, null, arguments);
+    corant.start(null);
+    return corant;
   }
 
-  public static synchronized Corant run(Object configObject, String... args) {
-    return run(configObject == null ? null : configObject.getClass(), args);
-  }
-
-  public static synchronized Optional<Instance<Object>> tryInstance() {
-    if (me == null || me.container == null) {
-      return Optional.empty();
-    }
-    return Optional.of(me.container);
+  public static synchronized Corant run(ClassLoader classLoader, Consumer<Weld> preInitializer,
+      String... arguments) {
+    Corant corant = new Corant(classLoader, arguments);
+    corant.start(preInitializer);
+    return corant;
   }
 
   private static synchronized void setMe(Corant me) {
@@ -242,10 +252,6 @@ public class Corant implements AutoCloseable {
       shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
     }
     Corant.me = me;
-  }
-
-  private static void validateRunning() {
-    shouldBeTrue(me != null && me.isRuning(), "The corant instance is null or is not in running");
   }
 
   public Corant accept(Consumer<Corant> consumer) {
@@ -268,43 +274,42 @@ public class Corant implements AutoCloseable {
   }
 
   public synchronized WeldManager getBeanManager() {
-    validateRunning();
+    shouldBeTrue(isRuning(), "The corant instance is null or is not in running");
     return (WeldManager) container.getBeanManager();
   }
 
-  public Object getId() {
-    return id;
+  public synchronized Object getId() {
+    return container.getId();
   }
 
   public synchronized boolean isRuning() {
     return container != null && container.isRunning();
   }
 
-  public synchronized Corant start(Class<?>... beanClasses) {
-    if (isRuning()) {
-      return this;
+  public synchronized void start(Consumer<Weld> preInitializer) {
+    if (me != null) {
+      return;
+    } else {
+      setMe(this);
     }
-    setMe(this);
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
         "Perform the spi handlers before ".concat(applicationName()).concat(" starting"));
     doBeforeStart(classLoader);
-
     final Logger logger = Logger.getLogger(Corant.class.getName());
     stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
-
-    Weld weld = new Weld();
+    String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    Weld weld = new Weld(id);
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
-    if (configClass != null) {
-      weld.addBeanClass(configClass);
+    if (beanClasses != null) {
+      weld.addBeanClasses(beanClasses);
     }
-    for (Class<?> beanClass : beanClasses) {
-      weld.addBeanClass(beanClass);
+    if (preInitializer != null) {
+      preInitializer.accept(weld);
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
-    id = container.getId();
 
     stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
@@ -337,56 +342,56 @@ public class Corant implements AutoCloseable {
     printBoostLine();
 
     doOnReady();
-    return this;
   }
 
   public synchronized void stop() {
     if (isRuning()) {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-      emitter.fire(new PreContainerStopEvent(args));
+      emitter.fire(new PreContainerStopEvent(arguments));
       container.close();
     }
+    container = null;
     setMe(null);
   }
 
   void doAfterContainerInitialized() {
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostContainerStartedEvent(args));
+    emitter.fire(new PostContainerStartedEvent(arguments));
   }
 
   void doAfterStarted(ClassLoader classLoader) {
-    if (setOf(args).contains(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
+    if (setOf(arguments).contains(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
-        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(args, args.length)));
+        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
   }
 
   void doBeforeStart(ClassLoader classLoader) {
-    if (setOf(args).contains(DISABLE_BEFORE_START_HANDLER_CMD)) {
+    if (setOf(arguments).contains(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
-        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(args, args.length)));
+        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
   }
 
   void doOnReady() {
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostCorantReadyEvent(args));
+    emitter.fire(new PostCorantReadyEvent(arguments));
   }
 
-  private void log(Logger logger, String msgOrFmt, Object... args) {
-    if (args.length > 0) {
-      logger.info(() -> String.format(msgOrFmt, args));
+  private void log(Logger logger, String msgOrFmt, Object... arguments) {
+    if (arguments.length > 0) {
+      logger.info(() -> String.format(msgOrFmt, arguments));
     } else {
       logger.info(() -> msgOrFmt);
     }
   }
 
   private void printBoostLine() {
-    if (!setOf(args).contains(DISABLE_BOOST_LINE_CMD)) {
+    if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
       String spLine = "--------------------------------------------------";
       System.out.println(spLine.concat(spLine).concat("\n"));
     }

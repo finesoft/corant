@@ -18,8 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.CDI;
 import javax.transaction.Transactional;
-import org.corant.Corant;
 
 /**
  * corant-suites-jta-shared
@@ -55,13 +55,13 @@ public class TransactionalMetaUtils {
       if (annotation.annotationType().equals(Transactional.class)) {
         return (Transactional) annotation;
       }
-      if (Corant.me().getBeanManager().isStereotype(annotation.annotationType())) {
+      if (CDI.current().getBeanManager().isStereotype(annotation.annotationType())) {
         stereotypeAnnotations.add(annotation.annotationType());
       }
     }
     for (Class<? extends Annotation> stereotypeAnnotation : stereotypeAnnotations) {
       return getTransactionalAnnotationRecursive(
-          Corant.me().getBeanManager().getStereotypeDefinition(stereotypeAnnotation));
+          CDI.current().getBeanManager().getStereotypeDefinition(stereotypeAnnotation));
     }
     return null;
   }

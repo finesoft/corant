@@ -13,6 +13,7 @@
  */
 package org.corant.suites.elastic;
 
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -32,8 +33,7 @@ public class ElasticDeveloperKits {
 
   public static void stdout(String clusterName, BiConsumer<String, Map<String, Object>> out) {
     try (Corant corant = prepare(clusterName)) {
-      ElasticIndexingResolver indexingResolver =
-          Corant.instance().select(ElasticIndexingResolver.class).get();
+      ElasticIndexingResolver indexingResolver = select(ElasticIndexingResolver.class).get();
       indexingResolver.getIndexings().forEach((n, i) -> {
         out.accept(n, mapOf("settings", i.getSetting().getSetting(), "mappings",
             mapOf(Elastic6Constants.TYP_NME, i.getSchema())));

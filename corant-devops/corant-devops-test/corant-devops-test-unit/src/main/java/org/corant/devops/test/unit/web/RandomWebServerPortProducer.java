@@ -46,6 +46,7 @@ public class RandomWebServerPortProducer {
           serverPort.close();
         }
       } catch (IOException ex) {
+        // Noop!
       }
     }
   }

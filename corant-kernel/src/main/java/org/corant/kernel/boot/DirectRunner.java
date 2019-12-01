@@ -13,8 +13,6 @@
  */
 package org.corant.kernel.boot;
 
-import org.corant.Corant;
-
 /**
  * corant-kernel
  *
@@ -23,19 +21,6 @@ import org.corant.Corant;
  */
 public class DirectRunner implements Runner {
 
-  private final Class<?> configClass;
-
-  /**
-   * @param configClass
-   */
-  public DirectRunner(Class<?> configClass) {
-    super();
-    this.configClass = configClass;
-  }
-
-  @SuppressWarnings("resource")
   @Override
-  public void run(String... args) throws Exception {
-    new Corant(configClass, args).start();
-  }
+  public void run(String... args) throws Exception {}
 }

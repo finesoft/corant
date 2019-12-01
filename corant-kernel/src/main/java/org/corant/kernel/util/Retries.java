@@ -86,7 +86,7 @@ public class Retries {
 
     private int times = 8;
     private Duration interval = Duration.ofMillis(1000L);
-    private Function<Exception, RuntimeException> transfer = e -> new CorantRuntimeException(e);
+    private Function<Exception, RuntimeException> transfer = CorantRuntimeException::new;
     private Set<Class<? extends Exception>> on = new LinkedHashSet<>();
 
     public T execute() {

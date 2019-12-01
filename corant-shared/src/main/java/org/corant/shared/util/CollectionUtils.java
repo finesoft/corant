@@ -44,6 +44,27 @@ public class CollectionUtils {
     super();
   }
 
+  @SuppressWarnings("unchecked")
+  public static <T> T[] append(T[] src, T... ts) {
+    if (src == null) {
+      return ts.clone();
+    }
+    final Class<?> st = src.getClass().getComponentType();
+    final T[] appendArray = (T[]) Array.newInstance(st, src.length + ts.length);
+    System.arraycopy(src, 0, appendArray, 0, src.length);
+    try {
+      System.arraycopy(ts, 0, appendArray, src.length, ts.length);
+    } catch (ArrayStoreException e) {
+      Class<?> tt = ts.getClass().getComponentType();
+      if (!st.isAssignableFrom(tt)) {
+        throw new IllegalArgumentException(
+            "Cannot append " + tt.getName() + " in an array of " + st.getName(), e);
+      }
+      throw e;
+    }
+    return appendArray;
+  }
+
   public static Object get(final Object object, final int index) {
     final int i = index;
     if (i < 0) {

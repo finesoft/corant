@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
@@ -285,8 +285,7 @@ public class MessageReceiverMetaData {
   }
 
   Optional<JMSExceptionListener> exceptionListener() {
-    return instance().select(JMSExceptionListener.class).stream()
-        .sorted(Sortable::compare).findFirst();
+    return select(JMSExceptionListener.class).stream().sorted(Sortable::compare).findFirst();
   }
 
   boolean xa() {

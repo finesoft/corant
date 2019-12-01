@@ -446,6 +446,8 @@ public class Instances {
         throw new IllegalStateException("Trying to call produce() on an already disposed instance");
       }
       instance =
+          // orginalInstance == null ? injectionTarget.produce(creationalContext) : orginalInstance;
+
           InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
               .createInterceptedInstance(
                   orginalInstance == null ? injectionTarget.produce(creationalContext)

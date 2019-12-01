@@ -14,8 +14,8 @@
 package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
-import static org.corant.Corant.instance;
 import static org.corant.kernel.util.Instances.resolveNamed;
+import static org.corant.kernel.util.Instances.select;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,9 +49,8 @@ public abstract class AbstractJMSExtension implements Extension {
       NamedQualifierObjectManager.empty();
 
   public static AbstractJMSConfig getConfig(String connectionFactoryId) {
-    if (instance().select(AbstractJMSExtension.class).isResolvable()) {
-      return instance().select(AbstractJMSExtension.class).get().getConfigManager()
-          .get(connectionFactoryId);
+    if (select(AbstractJMSExtension.class).isResolvable()) {
+      return select(AbstractJMSExtension.class).get().getConfigManager().get(connectionFactoryId);
     }
     return null;
   }

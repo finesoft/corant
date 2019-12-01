@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jta.narayana;
 
-import static org.corant.Corant.instance;
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -63,6 +63,8 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 /**
  * corant-suites-jta-narayana
  *
+ * FIXME org.jboss.logging.annotations.Message.Format.MESSAGE_FORMAT version issue!!!!
+ *
  * @author bingo 下午7:19:18
  *
  */
@@ -101,7 +103,7 @@ public class NarayanaExtension implements Extension {
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).types(Transaction.class)
           .scope(TransactionScoped.class).createWith(cc -> {
             try {
-              return instance().select(TransactionManager.class).get().getTransaction();
+              return select(TransactionManager.class).get().getTransaction();
             } catch (final SystemException systemException) {
               throw new CreationException(systemException.getMessage(), systemException);
             }
@@ -196,7 +198,7 @@ public class NarayanaExtension implements Extension {
 
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
         .sorted(Sortable::compare).forEach(cfgr -> {
-          logger.info(() -> String.format("Use customer narayana configurator $s.",
+          logger.info(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));
           cfgr.configCoreEnvironment(coreEnvironmentBean);
           cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);

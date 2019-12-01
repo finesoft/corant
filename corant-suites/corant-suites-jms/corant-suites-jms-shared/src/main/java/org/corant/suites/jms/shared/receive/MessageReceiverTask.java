@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.Corant.instance;
 import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ObjectUtils.max;
@@ -28,6 +27,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -48,7 +48,6 @@ import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
-import org.corant.Corant;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
@@ -285,7 +284,7 @@ public class MessageReceiverTask implements Runnable {
           session = connection.createSession(meta.getAcknowledge());
           log(Level.FINE, null, "2. Created message receive task session, [%s]", meta);
         }
-        instance().select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
+        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
             .forEach(c -> c.configSession(session, meta));
       } catch (JMSException je) {
         if (connection != null) {
@@ -317,7 +316,7 @@ public class MessageReceiverTask implements Runnable {
         } else {
           messageConsumer = session.createConsumer(destination);
         }
-        instance().select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
+        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
             .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
         log(Level.FINE, null, "3. Created message receive task consumer, [%s]", meta);
       } catch (JMSException je) {
@@ -521,7 +520,7 @@ public class MessageReceiverTask implements Runnable {
     MessageHandler(AnnotatedMethod<?> method) {
       super();
       this.method = method;
-      final BeanManager beanManager = Corant.me().getBeanManager();
+      final BeanManager beanManager = CDI.current().getBeanManager();
       final Bean<?> propertyResolverBean =
           beanManager.resolve(beanManager.getBeans(method.getJavaMember().getDeclaringClass()));
       final CreationalContext<?> creationalContext =

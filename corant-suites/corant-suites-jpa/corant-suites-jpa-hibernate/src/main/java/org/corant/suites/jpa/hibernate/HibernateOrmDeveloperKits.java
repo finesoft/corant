@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.propertiesOf;
 import static org.corant.shared.util.StringUtils.replace;
@@ -157,8 +158,8 @@ public class HibernateOrmDeveloperKits {
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(AvailableSettings.HBM2DDL_DATABASE_ACTION, "none");
-    JPAExtension extension = Corant.instance().select(JPAExtension.class).get();
-    DataSourceService dataSourceService = Corant.instance().select(DataSourceService.class).get();
+    JPAExtension extension = select(JPAExtension.class).get();
+    DataSourceService dataSourceService = select(DataSourceService.class).get();
     PersistenceUnitInfoMetaData pum =
         shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
     PersistenceUnitInfoMetaData usePum =

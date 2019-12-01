@@ -24,6 +24,7 @@
 		<version.javax.enterprise.concurrent>1.1</version.javax.enterprise.concurrent>
 		<version.javax.json.bind-api>1.0</version.javax.json.bind-api>
 		<version.weld>3.1.2.Final</version.weld>
+		<version.weld-junit4>2.0.1.Final</version.weld-junit4>
 
 		<version.commons-lang3>3.8</version.commons-lang3>
 		<version.commons-io>2.6</version.commons-io>
@@ -69,7 +70,7 @@
 		<version.smallrye-fault-tolerance>2.0.0</version.smallrye-fault-tolerance>
 
 		<version.netty>4.1.34.Final</version.netty>
-		<version.xnio>3.7.6.Final</version.xnio>
+		<version.xnio>3.3.8.Final</version.xnio>
 		<version.tomcat>9.0.21</version.tomcat>
 		<version.undertow>2.0.28.Final</version.undertow>
 		<version.resteasy>4.4.1.Final</version.resteasy>
@@ -791,6 +792,16 @@
 				<groupId>org.jboss.weld.module</groupId>
 				<artifactId>weld-jta</artifactId>
 				<version>${version.weld}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld.se</groupId>
+				<artifactId>weld-se-tests</artifactId>
+				<version>${version.weld}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-junit4</artifactId>
+				<version>${version.weld-junit4}</version>
 			</dependency>
 
 			<!-- Java & Javax -->

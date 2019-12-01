@@ -18,10 +18,10 @@ import static org.corant.shared.util.MapUtils.mapOf;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
-import org.corant.Corant;
 import org.corant.suites.datasource.shared.DataSourceService;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -40,7 +40,7 @@ import org.hibernate.tool.schema.Action;
 public class HibernateJPAOrmProvider implements JPAProvider {
 
   static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, Corant.me().getBeanManager());
+      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
 
   static Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
   static {

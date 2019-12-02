@@ -65,7 +65,7 @@ public abstract class CorantConfigSource implements ConfigSource {
   }
 
   /**
-   * Sort & adjust the config source, we only tweak the configuration sources that CORANT handles
+   * Sort & adjust the config source, we only adjust the configuration sources that CORANT handles
    * and adds, and do not include system environment variables and system properties. Some dynamic
    * non-corant config sources may not be fully processed. All resolved config sources were cache in
    * Config.

@@ -264,6 +264,7 @@ public class FetchQuery implements Serializable {
     private String sourceName;
     private FetchQueryParameterSource source;
     private String value;
+    private Class<?> type;
 
     public FetchQueryParameter() {
       super();
@@ -274,14 +275,16 @@ public class FetchQuery implements Serializable {
      * @param sourceName
      * @param source
      * @param value
+     * @param type
      */
     public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
-        String value) {
+        String value, Class<?> type) {
       super();
       this.name = name;
       this.sourceName = sourceName;
       this.source = source;
       this.value = value;
+      this.type = type;
     }
 
     /**
@@ -305,6 +308,18 @@ public class FetchQuery implements Serializable {
       return sourceName;
     }
 
+    /**
+     *
+     * @return the type
+     */
+    public Class<?> getType() {
+      return type;
+    }
+
+    /**
+     *
+     * @return getValue
+     */
     public String getValue() {
       return value;
     }
@@ -319,6 +334,10 @@ public class FetchQuery implements Serializable {
 
     protected void setSourceName(String sourceName) {
       this.sourceName = sourceName;
+    }
+
+    protected void setType(Class<?> type) {
+      this.type = type;
     }
 
     protected void setValue(String value) {

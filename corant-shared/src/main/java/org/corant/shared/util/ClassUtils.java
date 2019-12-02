@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -100,11 +101,14 @@ public class ClassUtils {
    *
    * @param className
    * @return
-   * @throws ClassNotFoundException asClass
    * @see #defaultClassLoader()
    */
-  public static Class<?> asClass(String className) throws ClassNotFoundException {
-    return asClass(defaultClassLoader(), className, true);
+  public static Class<?> asClass(String className) {
+    try {
+      return asClass(defaultClassLoader(), className, true);
+    } catch (ClassNotFoundException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static void checkPackageAccess(Class<?> clazz) {
@@ -484,7 +488,7 @@ public class ClassUtils {
       return null;
     }
     try {
-      return asClass(className);
+      return asClass(defaultClassLoader(), className, true);
     } catch (ClassNotFoundException e) {
       return null;
     }

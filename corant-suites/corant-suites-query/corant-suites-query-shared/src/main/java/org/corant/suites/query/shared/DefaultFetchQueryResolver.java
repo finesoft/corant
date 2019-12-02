@@ -14,11 +14,14 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,6 +167,14 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
   }
 
+  protected Object convertIfNecessarily(Object obj, Class<?> type) {
+    if (type == null || obj == null) {
+      return obj;
+    } else {
+      return obj instanceof Collection ? toList(obj, type) : toObject(obj, type);
+    }
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   protected Map<String, Object> extractCriterias(QueryParameter parameter) {
     Map<String, Object> map = new HashMap<>();
@@ -231,10 +242,12 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       Map<String, Object> criteria) {
     Map<String, Object> fetchCriteria = new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
+      Class<?> type = parameter.getType();
       if (parameter.getSource() == FetchQueryParameterSource.C) {
-        fetchCriteria.put(parameter.getName(), parameter.getValue());
+        fetchCriteria.put(parameter.getName(), convertIfNecessarily(parameter.getValue(), type));
       } else if (parameter.getSource() == FetchQueryParameterSource.P) {
-        fetchCriteria.put(parameter.getName(), criteria.get(parameter.getSourceName()));
+        fetchCriteria.put(parameter.getName(),
+            convertIfNecessarily(criteria.get(parameter.getSourceName()), type));
       } else if (result != null) {
         String parameterName = parameter.getName();
         String sourceName = parameter.getSourceName();
@@ -247,12 +260,13 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
             for (Object resultItem : resultList) {
               Object itemParameterValue = resolveFetchQueryCriteriaValue(resultItem, sourceName);
               if (itemParameterValue != null) {
-                listParameterValue.add(itemParameterValue);
+                listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
               }
             }
             parameterValue = listParameterValue;
           } else {
-            parameterValue = resolveFetchQueryCriteriaValue(result, sourceName);
+            parameterValue =
+                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceName), type);
           }
           fetchCriteria.put(parameterName, parameterValue);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -280,5 +294,4 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       return BeanUtils.getProperty(result, sourceName);
     }
   }
-
 }

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.ClassUtils.asClass;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -205,7 +205,7 @@ public class QueryParseHandler extends DefaultHandler {
         } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryversion(defaultString(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
-          fq.setResultClass(isBlank(atv) ? java.util.Map.class : tryAsClass(atv));
+          fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
           fq.setMultiRecords(isBlank(atv) ? true : ConversionUtils.toBoolean(atv));
         }
@@ -237,6 +237,12 @@ public class QueryParseHandler extends DefaultHandler {
           fqp.setSourceName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
           fqp.setValue(atv);
+        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+          if (isNotBlank(atv)) {
+            fqp.setType(asClass(atv));
+          } else {
+            fqp.setType(null);
+          }
         }
       }
       valueStack.push(fqp);
@@ -261,7 +267,7 @@ public class QueryParseHandler extends DefaultHandler {
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
         } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-          pm.setType(tryAsClass(atv));
+          pm.setType(asClass(atv));
         }
       }
       valueStack.push(pm);
@@ -306,9 +312,9 @@ public class QueryParseHandler extends DefaultHandler {
         } else if (SchemaNames.QUE_ATT_CACHE_RS_MD.equalsIgnoreCase(aqn)) {
           q.setCacheResultSetMetadata(ConversionUtils.toBoolean(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
-          q.setResultClass(isBlank(atv) ? java.util.Map.class : tryAsClass(atv));
+          q.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.QUE_ATT_RST_SET_CLS.equalsIgnoreCase(aqn)) {
-          q.setResultSetMapping(isBlank(atv) ? null : tryAsClass(atv));
+          q.setResultSetMapping(isBlank(atv) ? null : asClass(atv));
         } else if (SchemaNames.QUE_ATT_VER.equalsIgnoreCase(aqn)) {
           q.setVersion(defaultString(atv));
         }

@@ -87,6 +87,25 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_BACKWORDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Override
+  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
+    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    MgNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
+    log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
+    FindIterable<Document> fi = query(querier).limit(maxSize);
+    List<Map<String, Object>> fetchedList =
+        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+    if (result instanceof List) {
+      parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+    } else {
+      parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+    }
+    fetch(fetchedList, querier);
+    querier.resolveResultHints(fetchedList);
+  }
+
+  @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
     MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
@@ -167,25 +186,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       this.fetch(Decimal128Utils.convert(result), querier);
       return querier.resolveResult(result);
     });
-  }
-
-  @Override
-  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    MgNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
-    log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(maxSize);
-    List<Map<String, Object>> fetchedList =
-        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
-    if (result instanceof List) {
-      parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
-    } else {
-      parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
-    }
-    fetch(fetchedList, querier);
-    querier.resolveResultHints(fetchedList);
   }
 
   protected abstract MongoDatabase getDataBase();

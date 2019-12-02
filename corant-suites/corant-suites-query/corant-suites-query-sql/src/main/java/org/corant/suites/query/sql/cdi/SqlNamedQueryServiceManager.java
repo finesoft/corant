@@ -17,8 +17,10 @@ import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +38,7 @@ import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
 import org.corant.suites.query.sql.SqlNamedQuerier;
@@ -102,9 +105,21 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    SqlQuery q = forceCast(qualifier);
-    String dataSourceName = q == null ? null : defaultString(q.value());
-    String dialectName = q == null ? null : defaultString(q.dialect());
+    String dataSourceName = null;
+    String dialectName = null;
+    if (qualifier instanceof SqlQuery) {
+      SqlQuery q = forceCast(qualifier);
+      dataSourceName = q == null ? null : defaultString(q.value());
+      dialectName = q == null ? null : defaultString(q.dialect());
+    } else {
+      String[] qs = split(asDefaultString(qualifier), ":", true, true);
+      if (qs.length > 0) {
+        dataSourceName = qs[0];
+        if (qs.length > 1) {
+          dialectName = qs[1];
+        }
+      }
+    }
     if (isBlank(dataSourceName) && defaultQualifierValue.isPresent()) {
       dataSourceName = defaultQualifierValue.get();
     }
@@ -119,6 +134,11 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           ds, dialect.name()));
       return new DefaultSqlNamedQueryService(ds, dialect, this);
     });
+  }
+
+  @Override
+  public QueryType getType() {
+    return QueryType.SQL;
   }
 
   @Produces

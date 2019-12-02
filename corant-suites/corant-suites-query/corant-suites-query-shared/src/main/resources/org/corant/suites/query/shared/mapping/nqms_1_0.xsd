@@ -185,6 +185,20 @@
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
+        <xsd:attribute name="reference-query-type" type="nqms:query-type" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The query type of actual execution query for fetch query, If not set use the parent query service.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>        
+        <xsd:attribute name="reference-query-qualifier" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The query type qualifier of actual execution query for fetch query.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>             
         <xsd:attribute name="result-class" type="xsd:string" use="optional"></xsd:attribute>
         <xsd:attribute name="multi-records" type="xsd:boolean" use="optional">
             <xsd:annotation>
@@ -205,7 +219,7 @@
         <xsd:attribute name="source" type="nqms:fetch-query-parameter-source" use="required"></xsd:attribute>
         <xsd:attribute name="value" type="xsd:string" use="optional"></xsd:attribute>
     </xsd:complexType>
-
+    
     <xsd:simpleType name="fetch-query-parameter-source">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="P">
@@ -281,5 +295,30 @@
             </xsd:enumeration>
         </xsd:restriction>
     </xsd:simpleType>    
+        
+ 	<xsd:simpleType name="query-type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SQL">
+                <xsd:annotation>
+                    <xsd:documentation>Use sql query service to execute the fetch query.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="MG">
+                <xsd:annotation>
+                    <xsd:documentation>Use mongodb query service to execute the fetch query.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="ES">
+                <xsd:annotation>
+                    <xsd:documentation>Use elastic query service to execute the fetch query.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="JPQL">
+                <xsd:annotation>
+                    <xsd:documentation>Use jpql query service to execute the fetch query.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>        
         
 </xsd:schema>

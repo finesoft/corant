@@ -16,6 +16,7 @@ package org.corant.suites.query.mongodb.cdi;
 import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.mongodb.client.MongoDatabase;
 
@@ -72,8 +74,13 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    MgQuery q = forceCast(qualifier);
-    String dataBaseName = q == null ? null : defaultString(q.value());
+    String dataBaseName;
+    if (qualifier instanceof MgQuery) {
+      MgQuery q = forceCast(qualifier);
+      dataBaseName = q == null ? null : defaultString(q.value());
+    } else {
+      dataBaseName = asDefaultString(qualifier);
+    }
     if (isBlank(dataBaseName) && defaultQualifierValue.isPresent()) {
       dataBaseName = defaultQualifierValue.get();
     }
@@ -83,6 +90,11 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
           .format("Create default mongodb named query service, the data base is [%s].", db));
       return new DefaultMgNamedQueryService(db, this);
     });
+  }
+
+  @Override
+  public QueryType getType() {
+    return QueryType.MG;
   }
 
   @Produces

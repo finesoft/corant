@@ -38,6 +38,7 @@ import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.suites.query.shared.mapping.Properties.Property;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
 import org.corant.suites.query.shared.mapping.Script.ScriptType;
 import org.xml.sax.Attributes;
@@ -189,8 +190,12 @@ public class QueryParseHandler extends DefaultHandler {
       FetchQuery fq = new FetchQuery();
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
-        if (SchemaNames.FQE_ATT_NAME.equalsIgnoreCase(aqn)) {
+        if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
           fq.setReferenceQuery(atv);
+        } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
+          fq.setReferenceQueryType(ConversionUtils.toEnum(atv, QueryType.class));
+        } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
+          fq.setReferenceQueryQualifier(atv);
         } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
           fq.setMaxSize(ConversionUtils.toInteger(atv));
         } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {

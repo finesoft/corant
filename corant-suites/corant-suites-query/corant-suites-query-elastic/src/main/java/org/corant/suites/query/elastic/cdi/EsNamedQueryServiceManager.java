@@ -15,6 +15,7 @@ package org.corant.suites.query.elastic.cdi;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.EMPTY;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.corant.suites.query.elastic.EsQueryExecutor;
 import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
 
@@ -76,8 +78,13 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public EsNamedQueryService get(Object qualifier) {
-    final EsQuery sc = forceCast(qualifier);
-    String clusterName = sc == null ? EMPTY : defaultString(sc.value());
+    String clusterName;
+    if (qualifier instanceof EsQuery) {
+      EsQuery q = forceCast(qualifier);
+      clusterName = q == null ? EMPTY : defaultString(q.value());
+    } else {
+      clusterName = asDefaultString(qualifier);
+    }
     if (isBlank(clusterName) && defaultQualifierValue.isPresent()) {
       clusterName = defaultQualifierValue.get();
     }
@@ -87,6 +94,11 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
           .format("Create default elastic named query service, the data center is [%s]. ", cn));
       return new DefaultEsNamedQueryService(transportClientManager.apply(cn), this);
     });
+  }
+
+  @Override
+  public QueryType getType() {
+    return QueryType.ES;
   }
 
   @Produces

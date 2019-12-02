@@ -51,6 +51,11 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   public static final int PRO_KEY_HINT_PREFIX_LEN = PRO_KEY_HINT_PREFIX.length();
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
+  @Override
+  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    throw new NotSupportedException();
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
@@ -222,11 +227,6 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     }
     handleQuery(query, cls, properties);
     return query;
-  }
-
-  @Override
-  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    throw new NotSupportedException();
   }
 
   protected EntityManager getEntityManager() {

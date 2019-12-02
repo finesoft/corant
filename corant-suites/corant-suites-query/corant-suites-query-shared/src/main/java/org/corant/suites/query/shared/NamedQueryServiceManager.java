@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.shared;
 
+import org.corant.suites.query.shared.mapping.Query.QueryType;
+
 /**
  * corant-suites-query-shared
  *
@@ -22,5 +24,7 @@ package org.corant.suites.query.shared;
 public interface NamedQueryServiceManager {
 
   NamedQueryService get(Object qualifier);
+
+  QueryType getType();
 
 }

@@ -331,4 +331,8 @@ public class Query implements Serializable {
         properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
 
   }
+
+  public enum QueryType {
+    SQL, MG, JPQL, ES;
+  }
 }

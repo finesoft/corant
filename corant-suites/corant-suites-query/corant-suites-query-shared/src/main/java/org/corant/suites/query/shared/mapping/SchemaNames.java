@@ -51,7 +51,9 @@ public class SchemaNames {
   public static final String FQE_ELE_PARAM_ATT_SRC_NME = "source-name";
   public static final String FQE_ELE_PREDICATE_SCRIPT = "predicate-script";
   public static final String FQE_ELE_INJECTION_SCRIPT = "injection-script";
-  public static final String FQE_ATT_NAME = "reference-query";
+  public static final String FQE_ATT_REF_QUE = "reference-query";
+  public static final String FQE_ATT_REF_QUE_TYP = "reference-query-type";
+  public static final String FQE_ATT_REF_QUE_QUA = "reference-query-qualifier";
   public static final String FQE_ATT_PRO_NAME = "inject-property-name";
   public static final String FQE_ATT_EAGER_INJECT_NAME = "eager-inject";
   public static final String FQE_ATT_MAX_SIZE = "max-fetch-size";

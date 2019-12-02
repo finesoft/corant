@@ -18,9 +18,13 @@ import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.kernel.util.Instances;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
@@ -37,6 +41,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
   public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
 
+  static final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();
+
   protected Logger logger = Logger.getLogger(getClass().getName());
 
   @Override
@@ -48,14 +54,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
     if (!isEmpty(results) && !isEmpty(fetchQueries)) {
       for (FetchQuery fq : fetchQueries) {
+        NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (fq.isEagerInject()) {
           for (T result : results) {
             if (querier.decideFetch(result, fq)) {
-              fetch(result, fq, querier);
+              fetchQueryService.fetch(result, fq, querier);
             }
           }
         } else {
-          fetch(
+          fetchQueryService.fetch(
               results.stream().filter(r -> querier.decideFetch(r, fq)).collect(Collectors.toList()),
               fq, querier);
         }
@@ -63,14 +70,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     }
   }
 
-  protected abstract void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
+  // protected abstract void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
 
   protected <T> void fetch(T result, Querier parentQuerier) {
     List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
     if (result != null && !isEmpty(fetchQueries)) {
       for (FetchQuery fq : fetchQueries) {
+        NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (parentQuerier.decideFetch(result, fq)) {
-          fetch(result, fq, parentQuerier);
+          fetchQueryService.fetch(result, fq, parentQuerier);
         }
       }
     }
@@ -90,6 +98,18 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected int resolveDefaultLimit(Querier querier) {
     return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT);
+  }
+
+  protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
+    return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
+      AtomicReference<NamedQueryService> ref = new AtomicReference<>(this);
+      Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
+        if (nqs.getType() == fq.getReferenceQueryType()) {
+          ref.set(nqs.get(fq.getReferenceQueryQualifier()));
+        }
+      });
+      return ref.get();
+    });
   }
 
   protected int resolveLimit(Querier querier) {

@@ -36,6 +36,33 @@ import org.corant.suites.query.sql.dialect.Dialect;
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
 
   @Override
+  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
+    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    SqlNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
+    String sql = querier.getScript(null);
+    Object[] scriptParameter = querier.getScriptParameter();
+    if (maxSize > 0) {
+      sql = getDialect().getLimitSql(sql, maxSize);
+    }
+    try {
+      log("fetch-> " + refQueryName, scriptParameter, sql);
+      List<Map<String, Object>> fetchedList = getExecutor().select(sql, scriptParameter);
+      if (result instanceof List) {
+        querier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        querier.resolveFetchedResult(result, fetchedList, fetchQuery);
+      }
+      fetch(fetchedList, querier);
+      querier.resolveResultHints(fetchedList);
+    } catch (SQLException e) {
+      throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
+          fetchQuery.getReferenceQuery());
+    }
+  }
+
+  @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
     SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
@@ -145,33 +172,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       this.fetch(result, querier);
       return querier.resolveResult(result);
     });
-  }
-
-  @Override
-  protected void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    SqlNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
-    String sql = querier.getScript(null);
-    Object[] scriptParameter = querier.getScriptParameter();
-    if (maxSize > 0) {
-      sql = getDialect().getLimitSql(sql, maxSize);
-    }
-    try {
-      log("fetch-> " + refQueryName, scriptParameter, sql);
-      List<Map<String, Object>> fetchedList = getExecutor().select(sql, scriptParameter);
-      if (result instanceof List) {
-        querier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        querier.resolveFetchedResult(result, fetchedList, fetchQuery);
-      }
-      fetch(fetchedList, querier);
-      querier.resolveResultHints(fetchedList);
-    } catch (SQLException e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
-          fetchQuery.getReferenceQuery());
-    }
   }
 
   protected Dialect getDialect() {

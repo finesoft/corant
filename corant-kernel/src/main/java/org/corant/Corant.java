@@ -273,6 +273,12 @@ public class Corant implements AutoCloseable {
     stop();
   }
 
+  /**
+   * This method is not normally used, and should be use CDI.current().getBeanManager(), except to
+   * take advantage of some of the features of Weld.
+   *
+   * @return getBeanManager
+   */
   public synchronized WeldManager getBeanManager() {
     shouldBeTrue(isRuning(), "The corant instance is null or is not in running");
     return (WeldManager) container.getBeanManager();

@@ -15,6 +15,7 @@ package org.corant.suites.query.jpql.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -73,8 +75,13 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    final JpqlQuery sc = forceCast(qualifier);
-    String pun = sc == null ? null : sc.value();
+    String pun;
+    if (qualifier instanceof JpqlQuery) {
+      JpqlQuery q = forceCast(qualifier);
+      pun = q == null ? null : q.value();
+    } else {
+      pun = asDefaultString(qualifier);
+    }
     if (isBlank(pun) && defaultQualifierValue.isPresent()) {
       pun = defaultQualifierValue.get();
     }
@@ -84,6 +91,11 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
           .format("Create default jpql named query service, the persistence unit is [%s].", n));
       return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(n), this);
     });
+  }
+
+  @Override
+  public QueryType getType() {
+    return QueryType.JPQL;
   }
 
   @Produces

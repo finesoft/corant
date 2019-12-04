@@ -117,7 +117,7 @@ public class JDBCTemplate {
 
   public static Map<String, Object> get(Connection conn, String sql, Object... params)
       throws SQLException {
-    return query(conn, sql, MAP_HANDLER);
+    return query(conn, sql, MAP_HANDLER, params);
   }
 
   public static Map<String, Object> insert(Connection conn, String sql, Object... params)
@@ -149,7 +149,7 @@ public class JDBCTemplate {
 
   public static List<Map<String, Object>> query(Connection conn, String sql, Object... params)
       throws SQLException {
-    return query(conn, sql, MAP_LIST_HANDLER);
+    return query(conn, sql, MAP_LIST_HANDLER, params);
   }
 
   public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
@@ -162,15 +162,18 @@ public class JDBCTemplate {
     try {
       DbUtils.close(rs);
     } catch (SQLException e) {
+      // Noop
     } finally {
       try {
         DbUtils.close(stmt);
       } catch (SQLException e) {
+        // Noop
       }
       if (closeConn) {
         try {
           DbUtils.close(conn);
         } catch (SQLException e) {
+          // Noop
         }
       }
     }
@@ -186,6 +189,152 @@ public class JDBCTemplate {
     return new StreamableQueryRunner(
         new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
             .streamQuery(conn, false, sql, rsh, params);
+  }
+
+  public static void tryBatch(Connection conn, String sql, int batchSubmitSize,
+      Stream<Iterable<?>> params, Consumer<int[]> consumer) {
+    try {
+      batch(conn, sql, batchSubmitSize, params, consumer);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static int[] tryBatch(Connection conn, String sql, Object[][] params) {
+    try {
+      return batch(conn, sql, params);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static int[] tryBatch(Connection conn, String sql, Stream<Iterable<?>> params) {
+    try {
+      return batch(conn, sql, params);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static int tryExecute(Connection conn, String sql, Object... params) {
+    try {
+      return execute(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T> List<T> tryExecute(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Object... params) {
+    try {
+      return execute(conn, sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static List<List<Map<String, Object>>> tryExecutes(Connection conn, String sql,
+      Object... params) {
+    try {
+      return executes(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static Map<String, Object> tryGet(Connection conn, String sql, Object... params) {
+    try {
+      return get(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static Map<String, Object> tryInsert(Connection conn, String sql, Object... params) {
+    try {
+      return insert(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T> T tryInsert(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Object... params) {
+    try {
+      return insert(conn, sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void tryInsertBatch(Connection conn, String sql, int batchSubmitSize,
+      Stream<Iterable<?>> params, Consumer<List<Map<String, Object>>> consumer) {
+    try {
+      insertBatch(conn, sql, batchSubmitSize, params, consumer);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static List<Map<String, Object>> tryInsertBatch(Connection conn, String sql,
+      Object[][] params) {
+    try {
+      return insertBatch(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T> T tryInsertBatch(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Object[][] params) {
+    try {
+      return insertBatch(conn, sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static List<Map<String, Object>> tryQuery(Connection conn, String sql, Object... params) {
+    try {
+      return query(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T> T tryQuery(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Object... params) {
+    try {
+      return query(conn, sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static Stream<Map<String, Object>> tryStream(Connection conn, String sql, int fetchSize,
+      Object... params) {
+    try {
+      return stream(conn, sql, fetchSize, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T> Stream<T> tryStream(Connection conn, String sql, int fetchSize,
+      ResultSetHandler<T> rsh, Object... params) {
+    try {
+      return stream(conn, sql, fetchSize, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static int tryUpdate(Connection conn, String sql, Object... params) {
+    try {
+      return update(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
@@ -272,12 +421,135 @@ public class JDBCTemplate {
             .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
   }
 
+  public int[] tryBatch(String sql, Object[][] params) {
+    try {
+      return batch(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public int[] tryBatch(String sql, Stream<Iterable<?>> params) {
+    try {
+      return batch(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public int tryExecute(String sql, Object... params) {
+    try {
+      return execute(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public <T> List<T> tryExecute(String sql, ResultSetHandler<T> rsh, Object... params) {
+    try {
+      return execute(sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public List<Map<String, Object>> tryExecutes(String sql, Object... params) {
+    try {
+      return executes(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public Map<String, Object> tryGet(String sql, Object... params) {
+    try {
+      return get(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public Map<String, Object> tryInsert(String sql, Object... params) {
+    try {
+      return insert(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public <T> T tryInsert(String sql, ResultSetHandler<T> rsh, Object... params) {
+    try {
+      return insert(sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+
+  }
+
+  public void tryInsertBatch(String sql, int batchSubmitSize, Stream<Iterable<?>> params,
+      Consumer<List<Map<String, Object>>> consumer) {
+    try {
+      insertBatch(sql, batchSubmitSize, params, consumer);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public List<Map<String, Object>> tryInsertBatch(String sql, Object[][] params) {
+    try {
+      return insertBatch(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public <T> T tryInsertBatch(String sql, ResultSetHandler<T> rsh, Object[][] params) {
+    try {
+      return insertBatch(sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public List<Map<String, Object>> tryQuery(String sql, Object... params) {
+    try {
+      return query(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public <T> T tryQuery(String sql, ResultSetHandler<T> rsh, Object... params) {
+    try {
+      return query(sql, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public Stream<Map<String, Object>> tryStream(String sql, int fetchSize, Object... params) {
+    try {
+      return stream(sql, fetchSize, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public <T> Stream<T> tryStream(String sql, int fetchSize, ResultSetHandler<T> rsh,
+      Object... params) {
+    try {
+      return stream(sql, fetchSize, rsh, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   public int update(String sql, Object... params) throws SQLException {
     return runner.update(sql, params);
   }
 
   public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
-    final static int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
+    static final int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
     private final Runnable releaser;
     private final ResultSet rs;
     private final ResultSetHandler<T> rsh;
@@ -352,7 +624,7 @@ public class JDBCTemplate {
         throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
       }
       PreparedStatement stmt = null;
-      final Consumer<int[]> useConsumer = consumer != null ? consumer : (ia) -> {
+      final Consumer<int[]> useConsumer = consumer != null ? consumer : ia -> {
       };
       try {
         final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
@@ -420,7 +692,7 @@ public class JDBCTemplate {
         throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
       }
       PreparedStatement stmt = null;
-      final Consumer<T> useConsumer = consumer == null ? (t) -> {
+      final Consumer<T> useConsumer = consumer == null ? t -> {
       } : consumer;
       try {
         final PreparedStatement stmtx =

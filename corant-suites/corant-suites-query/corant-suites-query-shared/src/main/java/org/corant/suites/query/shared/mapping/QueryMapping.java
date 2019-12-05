@@ -126,17 +126,34 @@ public class QueryMapping {
               "The 'reference-query' attribute of 'fetch-query' in query element [%s] in query file [%s] can not null!",
               q.getName(), getUrl()));
         }
-        if (isBlank(fq.getInjectPropertyName())) {
+        if (isBlank(fq.getInjectPropertyName()) && !fq.getInjectionScript().isValid()) {
           brokens.add(String.format(
-              "The 'inject-property-name' attribute of 'fetch-query' in query element [%s] in query file [%s] can not null!",
-              q.getName(), getUrl()));
-        } else if (injectProNames.contains(fq.getInjectPropertyName())) {
-          brokens.add(String.format(
-              "The 'fetch-query' [%s] with 'inject-property-name' [%s] in query element [%s] in query file [%s] can not repeat!",
-              fq.getReferenceQuery(), fq.getInjectPropertyName(), q.getName(), getUrl()));
-        } else {
-          injectProNames.add(fq.getInjectPropertyName());
+              "The 'fetch-query' [%s] must contain either 'inject-property-name' attribute or 'injection-script' element in query element [%s] in query file [%s].",
+              fq.getReferenceQuery(), q.getName(), getUrl()));
+        } else if (isNotBlank(fq.getInjectPropertyName())) {
+          if (injectProNames.contains(fq.getInjectPropertyName())) {
+            brokens.add(String.format(
+                "The 'fetch-query' [%s] with 'inject-property-name' [%s] in query element [%s] in query file [%s] can not repeat!",
+                fq.getReferenceQuery(), fq.getInjectPropertyName(), q.getName(), getUrl()));
+          } else {
+            injectProNames.add(fq.getInjectPropertyName());
+          }
         }
+
+        // if (isBlank(fq.getInjectPropertyName())) {
+        // brokens.add(String.format(
+        // "The 'inject-property-name' attribute of 'fetch-query' in query element [%s] in query
+        // file [%s] can not null!",
+        // q.getName(), getUrl()));
+        // } else if (injectProNames.contains(fq.getInjectPropertyName())) {
+        // brokens.add(String.format(
+        // "The 'fetch-query' [%s] with 'inject-property-name' [%s] in query element [%s] in query
+        // file [%s] can not repeat!",
+        // fq.getReferenceQuery(), fq.getInjectPropertyName(), q.getName(), getUrl()));
+        // } else {
+        // injectProNames.add(fq.getInjectPropertyName());
+        // }
+
         if (isEquals(q.getVersionedName(), fq.getVersionedReferenceQueryName())) {
           brokens.add(String.format(
               "The 'fetch-query' [%s] in query element [%s] in query file [%s] can not reference the parent query!",

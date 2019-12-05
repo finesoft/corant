@@ -132,16 +132,24 @@
             <xsd:element name="injection-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
                 <xsd:annotation>
                     <xsd:documentation>
+                    	<![CDATA[
                     	Experimental feature. Scripts for injection processing, 
                     	the default script type is Java Script. Script may be a function that receive 
-                    	parent query result record and fetch query result record return bool.
+                    	parent query result record and fetch query result record, you can programic 
+                    	handle parent query result record use those parameters.
                     	Example:
-						(function(r,fr){ 
-							return r.get("key") === fr.get("key");
-						})(r,fr);           
-						the parameter 'r' is the parent query result record and the parameter 'fr' 
-						is the fetch query result record, usually all parameter are java.util.Map; 
-						the function must return boolean result.         	
+						(function(r,frs){ 
+							for each(var fr in frs){
+								if(r.get("key").equals(fr.get("key"))){
+									r.put("inject property name",fr);
+								}
+							}
+						})(r,frs);           
+						the parameter 'r' is the parent query result record and the parameter 'frs' 
+						is the fetch query result records, usually the parameter 'r' is java.util.Map,
+						the paremeter 'frs' is java.util.ArrayList<java.util.Map>
+						the function return value is ignored.    
+						]]>    	
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>    
@@ -153,10 +161,13 @@
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="inject-property-name" type="xsd:string" use="required">
+        <xsd:attribute name="inject-property-name" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation>
+                	<![CDATA[
                     The property name in parent query result to inject the fetch query result.
+                    Note: If <injection-script> is specified, <injection-script> is preferred.
+                    ]]>  
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>

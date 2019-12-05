@@ -13,11 +13,13 @@
  */
 package org.corant.suites.query.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
  * @author bingo 上午10:05:02
  *
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
 public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
@@ -66,9 +69,195 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return true;
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void resolveFetchedResult(List<?> results, List<?> fetchedResults, FetchQuery fetchQuery) {
+    if (isEmpty(results)) {
+      return;
+    }
+    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final String injectProName = fetchQuery.getInjectPropertyName();
+    if (injection == null) {
+      // use inject pro name
+      shouldNotBlank(injectProName);
+      if (isEmpty(fetchedResults)) {
+        for (Object result : results) {
+          injectFetchedResult(result, null, injectProName);
+        }
+      } else {
+        for (Object result : results) {
+          if (fetchQuery.isMultiRecords()) {
+            injectFetchedResult(result, fetchedResults, injectProName);
+          } else {
+            injectFetchedResult(result, fetchedResults.get(0), injectProName);
+          }
+        }
+      }
+    } else {
+      // use inject script
+      List usedFetchedResults = defaultObject(fetchedResults, new ArrayList());
+      for (Object result : results) {
+        injection.apply(new Object[] {result, usedFetchedResults});
+      }
+    }
+  }
+
+  @Override
+  public void resolveFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
+    if (result == null) {
+      return;
+    }
+    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final String injectProName = fetchQuery.getInjectPropertyName();
+    if (injection == null) {
+      // use inject pro name
+      shouldNotBlank(injectProName);
+      if (isEmpty(fetchedResults)) {
+        injectFetchedResult(result, null, injectProName);
+      } else {
+        if (fetchQuery.isMultiRecords()) {
+          injectFetchedResult(result, fetchedResults, injectProName);
+        } else {
+          injectFetchedResult(result, fetchedResults.iterator().next(), injectProName);
+        }
+      }
+    } else {
+      injection.apply(new Object[] {result, defaultObject(fetchedResults, new ArrayList())});
+    }
+  }
+
+  @Override
+  public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
+      QueryParameter parentQueryparameter) {
+    return new DefaultQueryParameter().context(parentQueryparameter.getContext())
+        .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
+  }
+
+  protected Object convertIfNecessarily(Object obj, Class<?> type) {
+    if (type == null || obj == null) {
+      return obj;
+    } else {
+      return obj instanceof Collection ? toList(obj, type) : toObject(obj, type);
+    }
+  }
+
+  protected Map<String, Object> extractCriterias(QueryParameter parameter) {
+    Map<String, Object> map = new HashMap<>();
+    if (parameter != null) {
+      Object criteria = parameter.getCriteria();
+      if (criteria instanceof Map) {
+        ((Map) criteria).forEach((k, v) -> map.put(asDefaultString(k), v));
+      } else if (criteria != null) {
+        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
+          map.put(asDefaultString(k), v);
+        });
+      }
+    }
+    return map;
+  }
+
+  protected void injectFetchedResult(Object result, Object fetchedResult, String injectProName) {
+    if (result instanceof Map) {
+      Map<String, Object> mapResult = (Map) result;
+      if (injectProName.indexOf('.') != -1) {
+        putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
+      } else {
+        mapResult.put(injectProName, fetchedResult);
+      }
+    } else if (result != null) {
+      try {
+        BeanUtils.setProperty(result, injectProName, fetchedResult);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new QueryRuntimeException(e);
+      }
+    }
+  }
+
+  protected ScriptFunction resolveFetchInjection(FetchQuery fetchQuery) {
+    return injections.computeIfAbsent(fetchQuery.getId(), id -> {
+      if (fetchQuery.getInjectionScript().isValid()) {
+        if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
+          throw new NotSupportedException();// For now we only support js script
+        }
+        return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
+            RESULT_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  protected ScriptFunction resolveFetchPredicate(FetchQuery fetchQuery) {
+    return predicates.computeIfAbsent(fetchQuery.getId(), k -> {
+      if (fetchQuery.getPredicateScript().isValid()) {
+        if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
+          throw new NotSupportedException();// For now we only support js script
+        }
+        return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(),
+            PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
+      }
+      return null;
+    });
+  }
+
+  protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
+      Map<String, Object> criteria) {
+    Map<String, Object> fetchCriteria = new HashMap<>();
+    for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
+      Class<?> type = parameter.getType();
+      if (parameter.getSource() == FetchQueryParameterSource.C) {
+        fetchCriteria.put(parameter.getName(), convertIfNecessarily(parameter.getValue(), type));
+      } else if (parameter.getSource() == FetchQueryParameterSource.P) {
+        fetchCriteria.put(parameter.getName(),
+            convertIfNecessarily(criteria.get(parameter.getSourceName()), type));
+      } else if (result != null) {
+        String parameterName = parameter.getName();
+        String sourceName = parameter.getSourceName();
+        try {
+          Object parameterValue = null;
+          // handle multi results
+          if (result instanceof List) {
+            List<Object> listParameterValue = new ArrayList<>();
+            List<?> resultList = (List<?>) result;
+            for (Object resultItem : resultList) {
+              Object itemParameterValue = resolveFetchQueryCriteriaValue(resultItem, sourceName);
+              if (itemParameterValue != null) {
+                listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
+              }
+            }
+            parameterValue = listParameterValue;
+          } else {
+            parameterValue =
+                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceName), type);
+          }
+          fetchCriteria.put(parameterName, parameterValue);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new QueryRuntimeException(e,
+              "Can not extract value from query result for resolve fetch query [%s] parameter!",
+              fetchQuery.getReferenceQuery());
+        }
+      }
+    }
+    return fetchCriteria;
+  }
+
+  protected Object resolveFetchQueryCriteriaValue(Object result, String sourceName)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    if (result instanceof Map) {
+      if (sourceName.indexOf('.') != -1) {
+        List<Object> values = new ArrayList<>();
+        QueryUtils.extractResult(result, sourceName, true, values);
+        return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
+      } else {
+        return ((Map) result).get(sourceName);
+      }
+    } else {
+      return BeanUtils.getProperty(result, sourceName);
+    }
+  }
+
+  @Deprecated
+  void resolveFetchedResultDeprecate(List<?> results, List<?> fetchedResults,
+      FetchQuery fetchQuery) {
     if (isEmpty(results)) {
       return;
     }
@@ -126,9 +315,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  @Override
-  public void resolveFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
+  @Deprecated
+  void resolveFetchedResultDeprecate(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
     if (result == null) {
       return;
     }
@@ -157,141 +345,6 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       injectFetchedResult(result, fetchedResults, injectProName);
     } else {
       injectFetchedResult(result, fetchedResults.iterator().next(), injectProName);
-    }
-  }
-
-  @Override
-  public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
-      QueryParameter parentQueryparameter) {
-    return new DefaultQueryParameter().context(parentQueryparameter.getContext())
-        .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
-  }
-
-  protected Object convertIfNecessarily(Object obj, Class<?> type) {
-    if (type == null || obj == null) {
-      return obj;
-    } else {
-      return obj instanceof Collection ? toList(obj, type) : toObject(obj, type);
-    }
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  protected Map<String, Object> extractCriterias(QueryParameter parameter) {
-    Map<String, Object> map = new HashMap<>();
-    if (parameter != null) {
-      Object criteria = parameter.getCriteria();
-      if (criteria instanceof Map) {
-        ((Map) criteria).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      } else if (criteria != null) {
-        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
-      }
-    }
-    return map;
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  protected void injectFetchedResult(Object result, Object fetchedResult, String injectProName) {
-    if (result instanceof Map) {
-      Map<String, Object> mapResult = (Map) result;
-      if (injectProName.indexOf('.') != -1) {
-        putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
-      } else {
-        mapResult.put(injectProName, fetchedResult);
-      }
-    } else if (result != null) {
-      try {
-        BeanUtils.setProperty(result, injectProName, fetchedResult);
-      } catch (IllegalAccessException | InvocationTargetException e) {
-        throw new QueryRuntimeException(e);
-      }
-    }
-  }
-
-  protected ScriptFunction resolveFetchInjection(FetchQuery fetchQuery) {
-    return injections.computeIfAbsent(fetchQuery.getId(), (id) -> {
-      if (fetchQuery.getInjectionScript().isValid()) {
-        if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
-          throw new NotSupportedException();// For now we only support js script
-        }
-        return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
-            RESULT_FUNC_PARAMETER_NAME, FETCHED_RESULT_FUNC_PARAMETER_NAME);
-      } else {
-        return null;
-      }
-    });
-  }
-
-  protected ScriptFunction resolveFetchPredicate(FetchQuery fetchQuery) {
-    return predicates.computeIfAbsent(fetchQuery.getId(), (k) -> {
-      if (fetchQuery.getPredicateScript().isValid()) {
-        if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
-          throw new NotSupportedException();// For now we only support js script
-        }
-        return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(),
-            PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
-      }
-      return null;
-    });
-  }
-
-  protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
-      Map<String, Object> criteria) {
-    Map<String, Object> fetchCriteria = new HashMap<>();
-    for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
-      Class<?> type = parameter.getType();
-      if (parameter.getSource() == FetchQueryParameterSource.C) {
-        fetchCriteria.put(parameter.getName(), convertIfNecessarily(parameter.getValue(), type));
-      } else if (parameter.getSource() == FetchQueryParameterSource.P) {
-        fetchCriteria.put(parameter.getName(),
-            convertIfNecessarily(criteria.get(parameter.getSourceName()), type));
-      } else if (result != null) {
-        String parameterName = parameter.getName();
-        String sourceName = parameter.getSourceName();
-        try {
-          Object parameterValue = null;
-          // handle multi results
-          if (result instanceof List) {
-            List<Object> listParameterValue = new ArrayList<>();
-            List<?> resultList = (List<?>) result;
-            for (Object resultItem : resultList) {
-              Object itemParameterValue = resolveFetchQueryCriteriaValue(resultItem, sourceName);
-              if (itemParameterValue != null) {
-                listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
-              }
-            }
-            parameterValue = listParameterValue;
-          } else {
-            parameterValue =
-                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceName), type);
-          }
-          fetchCriteria.put(parameterName, parameterValue);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new QueryRuntimeException(e,
-              "Can not extract value from query result for resolve fetch query [%s] parameter!",
-              fetchQuery.getReferenceQuery());
-        }
-      }
-    }
-    return fetchCriteria;
-  }
-
-  @SuppressWarnings("rawtypes")
-  protected Object resolveFetchQueryCriteriaValue(Object result, String sourceName)
-      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-    if (result instanceof Map) {
-      if (sourceName.indexOf('.') != -1) {
-        List<Object> values = new ArrayList<>();
-        QueryUtils.extractResult(result, sourceName, true, values);
-        return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
-      } else {
-        return ((Map) result).get(sourceName);
-      }
-    } else {
-      return BeanUtils.getProperty(result, sourceName);
     }
   }
 }

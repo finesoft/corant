@@ -93,7 +93,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
     MgNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(maxSize);
+    FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
     if (result instanceof List) {

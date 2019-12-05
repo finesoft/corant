@@ -265,6 +265,7 @@ public class FetchQuery implements Serializable {
     private FetchQueryParameterSource source;
     private String value;
     private Class<?> type;
+    private boolean distinct;
 
     public FetchQueryParameter() {
       super();
@@ -276,15 +277,17 @@ public class FetchQuery implements Serializable {
      * @param source
      * @param value
      * @param type
+     * @param distinct
      */
     public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
-        String value, Class<?> type) {
+        String value, Class<?> type, boolean distinct) {
       super();
       this.name = name;
       this.sourceName = sourceName;
       this.source = source;
       this.value = value;
       this.type = type;
+      this.distinct = distinct;
     }
 
     /**
@@ -322,6 +325,14 @@ public class FetchQuery implements Serializable {
      */
     public String getValue() {
       return value;
+    }
+
+    public boolean isDistinct() {
+      return distinct;
+    }
+
+    protected void setDistinct(boolean distinct) {
+      this.distinct = distinct;
     }
 
     protected void setName(String name) {

@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -204,6 +205,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     Map<String, Object> fetchCriteria = new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       Class<?> type = parameter.getType();
+      boolean distinct = parameter.isDistinct();
       if (parameter.getSource() == FetchQueryParameterSource.C) {
         fetchCriteria.put(parameter.getName(), convertIfNecessarily(parameter.getValue(), type));
       } else if (parameter.getSource() == FetchQueryParameterSource.P) {
@@ -216,7 +218,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
           Object parameterValue = null;
           // handle multi results
           if (result instanceof List) {
-            List<Object> listParameterValue = new ArrayList<>();
+            Collection<Object> listParameterValue =
+                distinct ? new LinkedHashSet<>() : new ArrayList<>();
             List<?> resultList = (List<?>) result;
             for (Object resultItem : resultList) {
               Object itemParameterValue = resolveFetchQueryCriteriaValue(resultItem, sourceName);

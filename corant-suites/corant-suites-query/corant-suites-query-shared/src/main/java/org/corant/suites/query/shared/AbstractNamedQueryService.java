@@ -102,12 +102,16 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
-      AtomicReference<NamedQueryService> ref = new AtomicReference<>(this);
-      Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
-        if (nqs.getType() == fq.getReferenceQueryType()) {
-          ref.set(nqs.get(fq.getReferenceQueryQualifier()));
-        }
-      });
+      AtomicReference<NamedQueryService> ref = new AtomicReference<>();
+      if (fq.getReferenceQueryType() == null) {
+        ref.set(this);
+      } else {
+        Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
+          if (nqs.getType() == fq.getReferenceQueryType()) {
+            ref.set(nqs.get(fq.getReferenceQueryQualifier()));
+          }
+        });
+      }
       return ref.get();
     });
   }

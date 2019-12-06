@@ -26,8 +26,8 @@
     <xsd:complexType name="parameter-type-mapping">
         <xsd:annotation>
             <xsd:documentation>
-                The query parameter type mapping element, the name is parameter name,
-                the type is parameter's java class path such as 'java.math.BigDecimal'.
+                The query parameter type mapping element, the name is query parameter name,
+                the type is query parameter's java class path such as 'java.math.BigDecimal'.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
@@ -63,7 +63,13 @@
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="description" type="xsd:string" maxOccurs="1" minOccurs="0"/>
-            <xsd:element name="properties" type="nqms:properties" maxOccurs="1" minOccurs="0"/>
+            <xsd:element name="properties" type="nqms:properties" maxOccurs="1" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                    	The query properties, used to tune the query if the query service supports it.
+                    </xsd:documentation>
+                </xsd:annotation>            
+            </xsd:element>
             <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>The query script, default script is freemarker.</xsd:documentation>
@@ -135,11 +141,11 @@
                     	<![CDATA[
                     	Experimental feature. Scripts for injection processing, 
                     	the default script type is Java Script. Script may be a function that receive 
-                    	parent query result record and fetch query result record, you can programic 
+                    	parent query result record and fetch query result records, you can programic 
                     	handle parent query result record use those parameters.
                     	Example:
 						(function(r,frs){ 
-							for each(var fr in frs){
+							for each (var fr in frs){
 								if(r.get("key").equals(fr.get("key"))){
 									r.put("inject property name",fr);
 								}
@@ -186,7 +192,7 @@
                     when the result set of each parent query is processed; otherwise the fetch query
                     is launched after the result set of all parent queries has been processed, 
                     Useful for paging queries, especially to reduce the use of connection pooling.
-                    Default is true.
+                    Default is true. When eager-inject is true, the injection script must be set.
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
@@ -226,12 +232,53 @@
         <xsd:annotation>
             <xsd:documentation>The fetch query parameters</xsd:documentation>
         </xsd:annotation>
-        <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
-        <xsd:attribute name="source-name" type="xsd:string" use="optional"></xsd:attribute>
-        <xsd:attribute name="source" type="nqms:fetch-query-parameter-source" use="required"></xsd:attribute>
-        <xsd:attribute name="value" type="xsd:string" use="optional"></xsd:attribute>
-        <xsd:attribute name="type" type="xsd:string" use="optional"></xsd:attribute>
-        <xsd:attribute name="distinct" type="xsd:boolean" use="optional"></xsd:attribute>
+        <xsd:attribute name="name" type="xsd:string" use="required">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    The fetch query parameter name.
+                 </xsd:documentation>
+             </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="source" type="nqms:fetch-query-parameter-source" use="required">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    The source type that the parameter value comes from, the parameter value may be extracted from the
+                    parent query result record or the parent query parameter or comes from some definite constant.
+                 </xsd:documentation>
+             </xsd:annotation>            
+        </xsd:attribute>
+        <xsd:attribute name="source-name" type="xsd:string" use="optional">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    For example, when the source is specified as R (parent query result), the parameter value comes from the parent SQL query result set, 
+                    so the source-name can be the query field name, and when the source is specified as P (parent query parameter), 
+                    the parameter value comes from the parent query parameter, 
+                    so the source-name can be the property name of the query parameter object.
+                    when the source is specified as C (constant), the parameter value comes from definite constant, the source-name is not necessary to set.
+                 </xsd:documentation>
+             </xsd:annotation>        
+        </xsd:attribute>
+        <xsd:attribute name="value" type="xsd:string" use="optional">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    The specific parameter value, if source is specified as C (constant) then must set specific value, otherwise is not necessary to set.
+                 </xsd:documentation>
+             </xsd:annotation>          
+        </xsd:attribute>
+        <xsd:attribute name="type" type="xsd:string" use="optional">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    The parameter type to convert the value extracted from the source.
+                 </xsd:documentation>
+             </xsd:annotation>            
+        </xsd:attribute>
+        <xsd:attribute name="distinct" type="xsd:boolean" use="optional">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    When the parameter is a collection, this value specifies whether to remove the duplicate.
+                 </xsd:documentation>
+             </xsd:annotation>           
+        </xsd:attribute>
     </xsd:complexType>
     
     <xsd:simpleType name="fetch-query-parameter-source">

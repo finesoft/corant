@@ -41,8 +41,8 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
   @ConfigKeyItem
   protected Boolean xa = true;
 
-  @ConfigKeyItem(defaultValue = "0")
-  protected Long receiveTaskInitialDelayMs = 0L;
+  @ConfigKeyItem(defaultValue = "30000")
+  protected Long receiveTaskInitialDelayMs = 30000L;
 
   @ConfigKeyItem(defaultValue = "1000")
   protected Long receiveTaskDelayMs = 1000L;

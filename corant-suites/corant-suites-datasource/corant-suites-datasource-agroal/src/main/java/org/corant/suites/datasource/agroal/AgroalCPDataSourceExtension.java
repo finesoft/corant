@@ -14,7 +14,6 @@
 package org.corant.suites.datasource.agroal;
 
 import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.listOf;
@@ -33,7 +32,6 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.config.spi.Sortable;
@@ -86,9 +84,9 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     AgroalDataSourceConfigurationSupplier cfgs = new AgroalDataSourceConfigurationSupplier();
 
     // transaction
-    if (cfg.isXa()) {
-      shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
-    }
+    // if (cfg.isXa()) {
+    // shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
+    // }
     transactionIntegration(cfg, cfgs);
 
     // metrics

@@ -139,14 +139,6 @@ public class ObjectUtils {
     return Optional.ofNullable(tryCast(o, cls));
   }
 
-  public static void threadSleep(Long ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
   public static <T> T tryCast(Object o, Class<T> cls) {
     return o != null && cls.isInstance(o) ? cls.cast(o) : null;
   }
@@ -166,6 +158,7 @@ public class ObjectUtils {
     try {
       Thread.sleep(ms);
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       // Noop! we are try....
     }
   }

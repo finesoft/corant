@@ -148,6 +148,8 @@ public class NarayanaExtension implements Extension {
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
     communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
 
+    logger.info(() -> String.format("Specify the narayana object store path %s.", dfltObjStoreDir));
+
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
     coordinatorEnvironmentBean.setDefaultTimeout(config.getTransactionTimeout());

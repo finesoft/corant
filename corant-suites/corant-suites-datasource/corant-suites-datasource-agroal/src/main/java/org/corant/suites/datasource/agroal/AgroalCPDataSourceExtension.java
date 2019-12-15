@@ -20,7 +20,9 @@ import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.lang.management.ManagementFactory;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
@@ -30,12 +32,18 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import org.jboss.tm.XAResourceRecoveryRegistry;
@@ -146,7 +154,30 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
     streamOf(ServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader()))
         .sorted(Sortable::compare).forEach(c -> c.config(cfgs));
-    return AgroalDataSource.from(cfgs);
+    AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
+    if (cfg.isEnableMetrics()) {
+      registerMetricsMBean(agroalDataSource, cfg.getName());
+    }
+    return agroalDataSource;
+  }
+
+  void registerMetricsMBean(AgroalDataSource agroalDataSource, String name) {
+    final String useName = defaultString(name, "_default");
+    logger.info(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
+    ObjectName objectName = null;
+    try {
+      objectName = new ObjectName(
+          Names.CORANT.concat(".agroal-datasource:type=metrices,name=").concat(useName));
+    } catch (MalformedObjectNameException ex) {
+      throw new CorantRuntimeException(ex);
+    }
+    try {
+      ManagementFactory.getPlatformMBeanServer()
+          .registerMBean(new AgroalCPDataSourceMetrics(agroalDataSource), objectName);
+    } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+        | NotCompliantMBeanException ex) {
+      throw new CorantRuntimeException(ex);
+    }
   }
 
   void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {

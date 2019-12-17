@@ -96,7 +96,8 @@ public class DefaultQueryResolver implements QueryResolver {
       DefaultQueryParameter qp = new DefaultQueryParameter();
       Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, 1)));
       Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, 0)));
-      queryParameter = qp.criteria(convertParameter(mp, query.getParamConvertSchema()));
+      Map<String, Class<?>> convertSchema = query == null ? null : query.getParamConvertSchema();
+      queryParameter = qp.criteria(convertParameter(mp, convertSchema));
     } else if (param != null) {
       queryParameter = new DefaultQueryParameter().criteria(param);
     }

@@ -34,7 +34,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.query.shared.NamedQuerierResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
@@ -65,7 +65,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver;
+  protected AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
@@ -160,7 +160,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final SqlQueryExecutor executor;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver;
+    protected final AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
     /**
      * @param executor
@@ -169,7 +169,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultSqlNamedQueryService(SqlQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, NamedQuerierResolver<String, Object, SqlNamedQuerier> resolver) {
+        int defaultLimit, AbstractNamedQuerierResolver<SqlNamedQuerier> resolver) {
       super();
       this.executor = executor;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -204,7 +204,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQuerierResolver<String, Object, SqlNamedQuerier> getResolver() {
+    protected AbstractNamedQuerierResolver<SqlNamedQuerier> getQuerierResolver() {
       return resolver;
     }
 

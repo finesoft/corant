@@ -35,7 +35,7 @@ import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
 import org.corant.suites.query.elastic.EsNamedQuerier;
 import org.corant.suites.query.elastic.EsNamedQueryService;
 import org.corant.suites.query.elastic.EsQueryExecutor;
-import org.corant.suites.query.shared.NamedQuerierResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
@@ -59,7 +59,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQuerierResolver<String, Object, EsNamedQuerier> resolver;
+  protected AbstractNamedQuerierResolver<EsNamedQuerier> resolver;
 
   @Inject
   protected Function<String, TransportClient> transportClientManager;
@@ -120,7 +120,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final EsQueryExecutor executor;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQuerierResolver<String, Object, EsNamedQuerier> resolver;
+    protected final AbstractNamedQuerierResolver<EsNamedQuerier> resolver;
 
     /**
      * @param transportClient
@@ -141,7 +141,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultEsNamedQueryService(EsQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, NamedQuerierResolver<String, Object, EsNamedQuerier> resolver) {
+        int defaultLimit, AbstractNamedQuerierResolver<EsNamedQuerier> resolver) {
       super();
       this.executor = executor;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -155,7 +155,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQuerierResolver<String, Object, EsNamedQuerier> getResolver() {
+    protected AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver() {
       return resolver;
     }
 

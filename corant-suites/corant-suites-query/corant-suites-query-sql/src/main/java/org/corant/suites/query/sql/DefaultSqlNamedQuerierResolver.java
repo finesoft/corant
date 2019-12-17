@@ -19,13 +19,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.NamedQuerierResolver;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.mapping.QueryMappingService;
 import org.corant.suites.query.shared.mapping.Script.ScriptType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -37,19 +34,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 @SuppressWarnings({"rawtypes"})
-public class DefaultSqlNamedQuerierResolver
-    implements NamedQuerierResolver<String, Object, SqlNamedQuerier> {
+public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver<SqlNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
-
-  @Inject
-  protected QueryMappingService mappingService;
-
-  @Inject
-  protected QueryResolver queryResolver;
-
-  @Inject
-  protected FetchQueryResolver fetchQueryResolver;
 
   @Inject
   @ConfigProperty(name = "query.sql.mapping-file.paths")

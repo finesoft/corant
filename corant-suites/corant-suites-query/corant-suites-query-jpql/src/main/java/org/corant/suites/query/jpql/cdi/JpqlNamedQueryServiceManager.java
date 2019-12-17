@@ -32,7 +32,7 @@ import javax.persistence.EntityManagerFactory;
 import org.corant.suites.jpa.shared.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQuerier;
-import org.corant.suites.query.shared.NamedQuerierResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
@@ -59,7 +59,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected PersistenceService persistenceService;
 
   @Inject
-  protected NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver;
+  protected AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.jpql.max-select-size", defaultValue = "128")
@@ -117,7 +117,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final EntityManagerFactory emf;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver;
+    protected final AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
     /**
      * @param emf
@@ -139,7 +139,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultJpqlNamedQueryService(EntityManagerFactory emf, int defaultMaxSelectSize,
-        int defaultLimit, NamedQuerierResolver<String, Object, JpqlNamedQuerier> resolver) {
+        int defaultLimit, AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver) {
       super();
       this.emf = emf;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -153,7 +153,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQuerierResolver<String, Object, JpqlNamedQuerier> getResolver() {
+    protected AbstractNamedQuerierResolver<JpqlNamedQuerier> getQuerierResolver() {
       return resolver;
     }
 

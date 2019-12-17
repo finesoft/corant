@@ -34,8 +34,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -91,7 +91,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    MgNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
+    MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
     List<Map<String, Object>> fetchedList =
@@ -107,7 +107,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
-    MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
@@ -128,7 +128,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> T get(String queryName, Object parameter) {
-    MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
     Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
@@ -138,7 +138,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> PagedList<T> page(String queryName, Object parameter) {
-    MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     PagedList<T> result = PagedList.of(offset, limit);
@@ -160,7 +160,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> List<T> select(String queryName, Object parameter) {
-    MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
@@ -180,7 +180,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    MgNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
       this.fetch(Decimal128Utils.convert(result), querier);
@@ -190,7 +190,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract MongoDatabase getDataBase();
 
-  protected abstract NamedQuerierResolver<String, Object, MgNamedQuerier> getResolver();
+  @Override
+  protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
     FindIterable<Document> fi =

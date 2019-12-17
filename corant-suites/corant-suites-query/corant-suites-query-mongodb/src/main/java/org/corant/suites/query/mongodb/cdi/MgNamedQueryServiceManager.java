@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
-import org.corant.suites.query.shared.NamedQuerierResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.Querier;
@@ -58,7 +58,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Logger logger;
 
   @Inject
-  protected NamedQuerierResolver<String, Object, MgNamedQuerier> resolver;
+  protected AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
 
   @Inject
   @ConfigProperty(name = "query.mongodb.max-select-size", defaultValue = "128")
@@ -116,7 +116,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final MongoDatabase dataBase;
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
-    protected final NamedQuerierResolver<String, Object, MgNamedQuerier> resolver;
+    protected final AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
 
     /**
      * @param dataBase
@@ -139,7 +139,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param resolver
      */
     protected DefaultMgNamedQueryService(MongoDatabase dataBase, int defaultMaxSelectSize,
-        int defaultLimit, NamedQuerierResolver<String, Object, MgNamedQuerier> resolver) {
+        int defaultLimit, AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
       super();
       this.dataBase = dataBase;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
@@ -153,7 +153,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected NamedQuerierResolver<String, Object, MgNamedQuerier> getResolver() {
+    protected AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver() {
       return resolver;
     }
 

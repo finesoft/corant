@@ -82,6 +82,19 @@ public interface QueryParameter extends Serializable {
     private Integer offset = 0;
     private Map<String, Object> context = new HashMap<>();
 
+    public DefaultQueryParameter() {}
+
+    public DefaultQueryParameter(QueryParameter other) {
+      if (other != null) {
+        criteria = other.getCriteria();
+        limit = other.getLimit();
+        offset = other.getOffset();
+        if (other.getContext() != null) {
+          context.putAll(other.getContext());
+        }
+      }
+    }
+
     /**
      *
      * @param context the context to set

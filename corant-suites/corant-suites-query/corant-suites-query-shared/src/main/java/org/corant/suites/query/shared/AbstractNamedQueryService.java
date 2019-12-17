@@ -13,12 +13,18 @@
  */
 package org.corant.suites.query.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.StreamUtils.streamOf;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.kernel.util.Instances;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
 /**
@@ -50,6 +57,51 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     throw new NotSupportedException();
   }
 
+  @Override
+  public <T> Stream<List<T>> streams(String queryName, Object parameter) {
+    final QueryParameter resolvedParameter =
+        getQuerierResolver().getQueryResolver().resolveQueryParameter(null, parameter);
+    final int limit =
+        resolvedParameter.getLimit() == null || resolvedParameter.getLimit() < 1 ? DEFAULT_LIMIT
+            : resolvedParameter.getLimit();
+    final DefaultQueryParameter usePparameter =
+        new DefaultQueryParameter(resolvedParameter).limit(limit);
+    final ForwardList<T> empty = ForwardList.inst();
+
+    final Iterator<List<T>> iterator = new Iterator<List<T>>() {
+      final AtomicReference<ForwardList<T>> buffers =
+          new AtomicReference<>(defaultObject(forward(queryName, usePparameter), empty));
+      int offset = usePparameter.getOffset();
+
+      @Override
+      public boolean hasNext() {
+        ForwardList<T> fw = buffers.get();
+        if (isEmpty(fw.getResults())) {
+          if (fw.hasNext()) {
+            fw = defaultObject(forward(queryName, usePparameter.offset(offset += limit)), empty);
+            buffers.set(fw);
+            return isNotEmpty(fw.getResults());
+          }
+        } else {
+          return true;
+        }
+        return false;
+      }
+
+      @Override
+      public List<T> next() {
+        ForwardList<T> fw = buffers.get();
+        if (isEmpty(fw.getResults())) {
+          throw new NoSuchElementException();
+        }
+        List<T> list = new ArrayList<>(fw.getResults());
+        fw.getResults().clear();
+        return list;
+      }
+    };
+    return streamOf(iterator);
+  }
+
   protected <T> void fetch(List<T> results, Querier querier) {
     List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
     if (!isEmpty(results) && !isEmpty(fetchQueries)) {
@@ -70,8 +122,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     }
   }
 
-  // protected abstract void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
-
   protected <T> void fetch(T result, Querier parentQuerier) {
     List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
     if (result != null && !isEmpty(fetchQueries)) {
@@ -83,6 +133,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       }
     }
   }
+
+  protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
 
   protected void log(String name, Object param, String... script) {
     logger.fine(() -> String.format(
@@ -112,7 +164,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
           }
         });
       }
-      return ref.get();
+      return shouldNotNull(ref.get(),
+          "Can't find any query service to execute fetch query %s %s %s", fq.getReferenceQuery(),
+          fq.getReferenceQueryType(), fq.getReferenceQueryQualifier());
     });
   }
 

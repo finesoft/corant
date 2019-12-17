@@ -18,15 +18,11 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.NamedQuerierResolver;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.mapping.QueryMappingService;
 import org.corant.suites.query.shared.mapping.Script.ScriptType;
 
 /**
@@ -38,18 +34,9 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
 @SuppressWarnings("rawtypes")
 @ApplicationScoped
 public class DefaultJpqlNamedQuerierResolver
-    implements NamedQuerierResolver<String, Object, JpqlNamedQuerier> {
+    extends AbstractNamedQuerierResolver<JpqlNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
-
-  @Inject
-  protected QueryMappingService mappingService;
-
-  @Inject
-  protected QueryResolver queryResolver;
-
-  @Inject
-  protected FetchQueryResolver fetchQueryResolver;
 
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {

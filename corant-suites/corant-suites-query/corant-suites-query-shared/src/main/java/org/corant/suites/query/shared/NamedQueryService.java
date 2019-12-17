@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.shared;
 
+import java.util.List;
+import java.util.stream.Stream;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 
 /**
@@ -24,5 +26,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
 public interface NamedQueryService extends QueryService<String, Object> {
 
   void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
+
+  <T> Stream<List<T>> streams(String queryName, Object parameter);
 
 }

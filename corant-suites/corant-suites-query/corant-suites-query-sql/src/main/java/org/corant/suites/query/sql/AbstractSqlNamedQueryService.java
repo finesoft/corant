@@ -19,8 +19,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.NamedQuerierResolver;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -40,7 +40,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getVersionedReferenceQueryName();
-    SqlNamedQuerier querier = getResolver().resolve(refQueryName, fetchParam);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     String sql = querier.getScript(null);
     Object[] scriptParameter = querier.getScriptParameter();
     if (maxSize > 0) {
@@ -64,7 +64,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public <T> ForwardList<T> forward(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
     int offset = resolveOffset(querier);
@@ -91,7 +91,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public <T> T get(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
     try {
@@ -107,7 +107,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public <T> PagedList<T> page(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
     int offset = resolveOffset(querier);
@@ -138,7 +138,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public <T> List<T> select(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
     int maxSelectSize = resolveMaxSelectSize(querier);
@@ -164,7 +164,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getResolver().resolve(queryName, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
     log("stream-> " + queryName, scriptParameter, sql);
@@ -180,5 +180,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   protected abstract SqlQueryExecutor getExecutor();// FIXME use one connection for one method stack
 
-  protected abstract NamedQuerierResolver<String, Object, SqlNamedQuerier> getResolver();
+  @Override
+  protected abstract AbstractNamedQuerierResolver<SqlNamedQuerier> getQuerierResolver();
 }

@@ -16,13 +16,9 @@ package org.corant.suites.query.mongodb;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.corant.suites.query.shared.FetchQueryResolver;
-import org.corant.suites.query.shared.NamedQuerierResolver;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
-import org.corant.suites.query.shared.mapping.QueryMappingService;
 
 /**
  * corant-suites-query
@@ -31,19 +27,9 @@ import org.corant.suites.query.shared.mapping.QueryMappingService;
  *
  */
 @ApplicationScoped
-public class DefaultMgNamedQuerierResolver
-    implements NamedQuerierResolver<String, Object, MgNamedQuerier> {
+public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<MgNamedQuerier> {
 
   final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
-
-  @Inject
-  protected QueryMappingService mappingService;
-
-  @Inject
-  protected QueryResolver queryResolver;
-
-  @Inject
-  protected FetchQueryResolver fetchQueryResolver;
 
   @Override
   public DefaultMgNamedQuerier resolve(String key, Object param) {

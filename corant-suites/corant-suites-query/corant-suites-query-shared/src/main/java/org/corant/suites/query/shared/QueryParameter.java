@@ -77,8 +77,6 @@ public interface QueryParameter extends Serializable {
 
     private static final long serialVersionUID = 6618232487063961660L;
 
-    public static final DefaultQueryParameter EMPTY_INST = new DefaultQueryParameter();
-
     private Object criteria;
     private Integer limit;
     private Integer offset = 0;

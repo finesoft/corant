@@ -54,13 +54,19 @@ public class DefaultQueryResolver implements QueryResolver {
       resolveResultHints(results, resultClass, hints, parameter);
       if (Map.class.isAssignableFrom(resultClass)) {
         for (Object r : results) {
-          list.add((T) r);
+          if (r != null) {
+            list.add((T) r);
+          } else {
+            list.add(null);
+          }
         }
       } else {
         for (Object r : results) {
-          list.add(r == null ? null
-              : Map.class.isAssignableFrom(resultClass) ? (T) r
-                  : QueryObjectMapper.OM.convertValue(r, resultClass));
+          if (r != null) {
+            list.add(QueryObjectMapper.OM.convertValue(r, resultClass));
+          } else {
+            list.add(null);
+          }
         }
       }
     }
@@ -82,7 +88,7 @@ public class DefaultQueryResolver implements QueryResolver {
 
   @Override
   public QueryParameter resolveQueryParameter(Query query, Object param) {
-    QueryParameter queryParameter = DefaultQueryParameter.EMPTY_INST;
+    QueryParameter queryParameter = new DefaultQueryParameter();
     if (param instanceof QueryParameter) {
       queryParameter = (QueryParameter) param;
     } else if (param instanceof Map) {

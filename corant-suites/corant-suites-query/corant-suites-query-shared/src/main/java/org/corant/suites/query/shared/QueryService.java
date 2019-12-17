@@ -27,8 +27,27 @@ import java.util.stream.Stream;
  */
 public interface QueryService<Q, P> {
 
+  /**
+   * Step forward query, do not pagination, do not calculate the total number of records, can be
+   * used for mass data streaming processing.
+   *
+   * @param <T> The expected query result set record type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @return The result set and whether there is a flag for the next result set.
+   */
   <T> ForwardList<T> forward(Q q, P p);
 
+  /**
+   * Like {@link #forward(Object, Object)} but support an result record handler callback.
+   *
+   * @param <R> The orginal result record object type, usually is an Map.
+   * @param <T> The expected query result set record type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @param f The result record handler callback.
+   * @return The result set and whether there is a flag for the next result set.
+   */
   default <R, T> ForwardList<T> forward(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
     ForwardList<R> raw = forward(q, p);
     if (raw == null) {
@@ -42,15 +61,51 @@ public interface QueryService<Q, P> {
     }
   }
 
+  /**
+   * Query a single result.
+   *
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @return The query result object.
+   */
   <T> T get(Q q, P p);
 
+  /**
+   * Like {@link #get(Object, Object)} but support an result record handler callback.
+   *
+   * @param <R> The orginal result record object type, usually is an Map.
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @param f The result record handler callback.
+   * @return The query result object.
+   */
   default <R, T> T get(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
     R t = get(q, p);
     return f.apply(t, this);
   }
 
+  /**
+   * Paging query, returns the query result set and total record counts etc.
+   *
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @return The paging result list.
+   */
   <T> PagedList<T> page(Q q, P p);
 
+  /**
+   * Like {@link #page(Object, Object)} but support an result record handler callback.
+   *
+   * @param <R> The orginal result record object type, usually is an Map.
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @param f The result record handler callback.
+   * @return The query result object.
+   */
   default <R, T> PagedList<T> page(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
     PagedList<R> raw = page(q, p);
     if (raw == null) {
@@ -64,8 +119,26 @@ public interface QueryService<Q, P> {
     }
   }
 
+  /**
+   * Query list results
+   *
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @return The query result list
+   */
   <T> List<T> select(Q q, P p);
 
+  /**
+   * Like {@link #select(Object, Object)} but support an result record handler callback.
+   *
+   * @param <R> The orginal result record object type, usually is an Map.
+   * @param <T> The expected query result object type.
+   * @param q The query object reference, in named query this parameter may be the name of query.
+   * @param p The query parameter, include query criteria and context.
+   * @param f The result record handler callback.
+   * @return The query result list
+   */
   default <R, T> List<T> select(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
     List<R> raw = select(q, p);
     if (raw == null) {
@@ -75,8 +148,24 @@ public interface QueryService<Q, P> {
     }
   }
 
+  /**
+   * Query stream results, use for mass data query.
+   *
+   * @param <T>
+   * @param q
+   * @param p
+   * @return stream
+   */
   <T> Stream<T> stream(Q q, P p);
 
+  /**
+   * corant-suites-query-shared
+   *
+   * Forward query result list, Consists of the result list and has next result mark.
+   *
+   * @author bingo 下午5:51:56
+   *
+   */
   public static class ForwardList<T> {
 
     private boolean hasNext;
@@ -94,12 +183,17 @@ public interface QueryService<Q, P> {
     }
 
     /**
-     * @return the data
+     * The result list
      */
     public List<T> getResults() {
       return results;
     }
 
+    /**
+     * Returns {@code true} if the query has more result set.
+     *
+     * @return hasNext
+     */
     public boolean hasNext() {
       return hasNext;
     }
@@ -126,6 +220,14 @@ public interface QueryService<Q, P> {
 
   }
 
+  /**
+   * corant-suites-query-shared
+   *
+   * Paging query result list.
+   *
+   * @author bingo 下午6:11:55
+   *
+   */
   public static class PagedList<T> {
 
     private int total;

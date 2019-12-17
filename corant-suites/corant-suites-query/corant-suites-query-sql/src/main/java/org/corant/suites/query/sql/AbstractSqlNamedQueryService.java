@@ -76,11 +76,11 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
       int size = getSize(list);
       if (size > 0) {
-        this.fetch(list, querier);
         if (size > limit) {
           list.remove(size - 1);
           result.withHasNext(true);
         }
+        this.fetch(list, querier);
       }
       return result.withResults(querier.resolveResult(list));
     } catch (SQLException e) {

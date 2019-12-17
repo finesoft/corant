@@ -67,7 +67,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     final DefaultQueryParameter usePparameter =
         new DefaultQueryParameter(resolvedParameter).limit(limit);
     final ForwardList<T> empty = ForwardList.inst();
-
     final Iterator<List<T>> iterator = new Iterator<List<T>>() {
       final AtomicReference<ForwardList<T>> buffers =
           new AtomicReference<>(defaultObject(forward(queryName, usePparameter), empty));

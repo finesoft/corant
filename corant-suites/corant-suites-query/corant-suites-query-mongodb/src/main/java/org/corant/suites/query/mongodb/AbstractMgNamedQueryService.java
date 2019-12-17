@@ -117,11 +117,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
     int size = getSize(list);
     if (size > 0) {
-      this.fetch(list, querier);
       if (size > limit) {
         list.remove(size - 1);
         result.withHasNext(true);
       }
+      this.fetch(list, querier);
     }
     return result.withResults(querier.resolveResult(list));
   }

@@ -13,14 +13,19 @@
  */
 package org.corant.suites.datasource.shared;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -37,6 +42,7 @@ import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
 
 /**
  * corant-suites-datasource-shared
@@ -46,6 +52,10 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class JDBCTemplate {
 
+  public static final String SQL_PARAM_PH = "?";
+  public static final char SQL_PARAM_PH_C = SQL_PARAM_PH.charAt(0);
+  public static final char SQL_PARAM_ESC_C = '\'';
+  public static final String SQL_PARAM_SP = ",";
   public static final QueryRunner SIMPLE_RUNNER = new QueryRunner();
   public static final MapHandler MAP_HANDLER = new MapHandler();
   public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
@@ -339,6 +349,52 @@ public class JDBCTemplate {
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
     return SIMPLE_RUNNER.update(conn, sql, params);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static Pair<String, Object[]> processSqlAndParams(String sql, Object... params) {
+    if (isEmpty(params) || isBlank(sql)) {
+      return Pair.of(sql, params);
+    }
+    int sqlLen = sql.length();
+    int escs = 0;
+    List<Integer> poses = new ArrayList<>(params.length);
+    for (int i = 0; i < sqlLen; i++) {
+      char c = sql.charAt(i);
+      if (c == SQL_PARAM_ESC_C) {
+        escs++;
+      } else if (c == SQL_PARAM_PH_C && escs % 2 == 0) {
+        poses.add(i);
+      }
+    }
+    shouldBeTrue(poses.size() == params.length, "Parameters and sql statements not match.", sql);
+    StringBuilder useSql = new StringBuilder();
+    List<Object> useParams = new ArrayList<>();
+    int paramPos = 0;
+    int paramIdx = 0;
+    for (Integer pos : poses) {
+      useSql.append(sql.substring(paramPos, pos));
+      paramPos = pos + 1;
+      Object param = params[paramIdx++];
+      List<Object> collectionParams = new ArrayList<>();
+      List<String> placeHolders = new ArrayList<>();
+      if (param instanceof Collection) {
+        collectionParams.addAll((Collection) param);
+      } else if (param != null && param.getClass().isArray()) {
+        collectionParams.addAll(listOf((Object[]) param));
+      } else {
+        collectionParams.add(param);
+      }
+      for (Object cp : collectionParams) {
+        useParams.add(cp);
+        placeHolders.add(SQL_PARAM_PH);
+      }
+      useSql.append(String.join(SQL_PARAM_SP, placeHolders));
+    }
+    if (paramPos < sqlLen) {
+      useSql.append(sql.substring(paramPos));
+    }
+    return Pair.of(useSql.toString(), useParams.toArray());
   }
 
   public int[] batch(String sql, Object[][] params) throws SQLException {

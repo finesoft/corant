@@ -112,17 +112,20 @@ public class JDBCTemplate {
   }
 
   public static int execute(Connection conn, String sql, Object... params) throws SQLException {
-    return SIMPLE_RUNNER.execute(conn, sql, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), processeds.getValue());
   }
 
   public static <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh,
       Object... params) throws SQLException {
-    return SIMPLE_RUNNER.execute(conn, sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
   public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
       Object... params) throws SQLException {
-    return SIMPLE_RUNNER.execute(conn, sql, MAP_LIST_HANDLER, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), MAP_LIST_HANDLER, processeds.getValue());
   }
 
   public static Map<String, Object> get(Connection conn, String sql, Object... params)
@@ -137,7 +140,8 @@ public class JDBCTemplate {
 
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    return SIMPLE_RUNNER.insert(conn, sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.insert(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
   public static void insertBatch(Connection conn, String sql, int batchSubmitSize,
@@ -164,7 +168,8 @@ public class JDBCTemplate {
 
   public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    return SIMPLE_RUNNER.query(conn, sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.query(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
   public static void release(ResultSet rs, PreparedStatement stmt, Connection conn,
@@ -348,7 +353,8 @@ public class JDBCTemplate {
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
-    return SIMPLE_RUNNER.update(conn, sql, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

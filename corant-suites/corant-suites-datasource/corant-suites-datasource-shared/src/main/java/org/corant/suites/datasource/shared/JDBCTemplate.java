@@ -124,8 +124,7 @@ public class JDBCTemplate {
 
   public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
       Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
-    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), MAP_LIST_HANDLER, processeds.getValue());
+    return execute(conn, sql, MAP_LIST_HANDLER, params);
   }
 
   public static Map<String, Object> get(Connection conn, String sql, Object... params)
@@ -412,12 +411,14 @@ public class JDBCTemplate {
   }
 
   public int execute(String sql, Object... params) throws SQLException {
-    return runner.execute(sql, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return runner.execute(processeds.getKey(), processeds.getValue());
   }
 
   public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    return runner.execute(sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return runner.execute(processeds.getKey(), rsh, processeds.getValue());
   }
 
   public List<Map<String, Object>> executes(String sql, Object... params) throws SQLException {
@@ -425,7 +426,8 @@ public class JDBCTemplate {
   }
 
   public Map<String, Object> get(String sql, Object... params) throws SQLException {
-    return runner.query(sql, MAP_HANDLER, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return runner.query(processeds.getKey(), MAP_HANDLER, processeds.getValue());
   }
 
   public DataSource getDataSource() {
@@ -441,11 +443,12 @@ public class JDBCTemplate {
   }
 
   public Map<String, Object> insert(String sql, Object... params) throws SQLException {
-    return runner.insert(sql, MAP_HANDLER, params);
+    return insert(sql, MAP_HANDLER, params);
   }
 
   public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    return runner.insert(sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return runner.insert(processeds.getKey(), rsh, processeds.getValue());
   }
 
   public void insertBatch(String sql, int batchSubmitSize, Stream<Iterable<?>> params,
@@ -464,11 +467,12 @@ public class JDBCTemplate {
   }
 
   public List<Map<String, Object>> query(String sql, Object... params) throws SQLException {
-    return runner.query(sql, MAP_LIST_HANDLER, params);
+    return query(sql, MAP_LIST_HANDLER, params);
   }
 
   public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    return runner.query(sql, rsh, params);
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    return runner.query(processeds.getKey(), rsh, processeds.getValue());
   }
 
   public Stream<Map<String, Object>> stream(String sql, int fetchSize, Object... params)
@@ -607,7 +611,8 @@ public class JDBCTemplate {
   }
 
   public int update(String sql, Object... params) throws SQLException {
-    return runner.update(sql, params);
+    Pair<String, Object[]> processed = processSqlAndParams(sql, params);
+    return runner.update(processed.getKey(), processed.getValue());
   }
 
   public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {

@@ -14,8 +14,14 @@
 package org.corant.suites.datasource.dbcp;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
@@ -27,6 +33,18 @@ import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
+import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
+import com.arjuna.ats.arjuna.common.arjPropertyManager;
+import com.arjuna.ats.arjuna.common.recoveryPropertyManager;
+import com.arjuna.ats.arjuna.coordinator.TransactionReaper;
+import com.arjuna.ats.arjuna.coordinator.TxControl;
+import com.arjuna.ats.arjuna.recovery.RecoveryManager;
+import com.arjuna.ats.internal.arjuna.recovery.AtomicActionRecoveryModule;
+import com.arjuna.ats.internal.arjuna.recovery.ExpiredTransactionStatusManagerScanner;
+import com.arjuna.ats.internal.jta.recovery.arjunacore.JTANodeNameXAResourceOrphanFilter;
+import com.arjuna.ats.internal.jta.recovery.arjunacore.JTATransactionLogXAResourceOrphanFilter;
+import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
+import com.arjuna.ats.jdbc.TransactionalDriver;
 import com.arjuna.ats.jta.common.jtaPropertyManager;
 
 /**
@@ -39,13 +57,34 @@ import com.arjuna.ats.jta.common.jtaPropertyManager;
  */
 public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
 
+  private static final String DEFAULT_NODE_IDENTIFIER = "1";
+
+  private static final List<String> DEFAULT_RECOVERY_MODULES =
+      Arrays.asList(AtomicActionRecoveryModule.class.getName(), XARecoveryModule.class.getName());
+
+  private static final List<String> DEFAULT_ORPHAN_FILTERS =
+      Arrays.asList(JTATransactionLogXAResourceOrphanFilter.class.getName(),
+          JTANodeNameXAResourceOrphanFilter.class.getName());
+
+  private static final List<String> DEFAULT_EXPIRY_SCANNERS =
+      Arrays.asList(ExpiredTransactionStatusManagerScanner.class.getName());
+
+  void initNarayana() {
+    initNodeIdentifier();
+    initRecoveryModules();
+    initOrphanFilters();
+    initExpiryScanners();
+    RecoveryManager.manager();
+    TxControl.enable();
+    TransactionReaper.instantiate();
+  }
+
   /**
    *
    * @param event onAfterBeanDiscovery
    */
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
-    jtaPropertyManager.getJTAEnvironmentBean().setLastResourceOptimisationInterfaceClassName(
-        "org.apache.commons.dbcp2.managed.LocalXAConnectionFactory$LocalXAResource");
+    initNarayana();
     if (event != null) {
       getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
         event.<DataSource>addBean().addQualifiers(dsn)
@@ -71,6 +110,22 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
+  @PreDestroy
+  void onPreDestroy() {
+    logger.fine("Disabling Narayana");
+    TransactionReaper.terminate(false);
+    TxControl.disable(true);
+    RecoveryManager.manager().terminate();
+    Collections.list(DriverManager.getDrivers()).stream()
+        .filter(d -> d instanceof TransactionalDriver).forEach(d -> {
+          try {
+            DriverManager.deregisterDriver(d);
+          } catch (SQLException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+          }
+        });
+  }
+
   BasicManagedDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
     BasicManagedDataSource ds = new BasicManagedDataSource();
@@ -86,6 +141,73 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
     ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
     return ds;
+  }
+
+  /**
+   * If expiry scanners were not set by property manager, then set defaults
+   * {@link #DEFAULT_EXPIRY_SCANNERS}.
+   */
+  private void initExpiryScanners() {
+    if (!recoveryPropertyManager.getRecoveryEnvironmentBean().getExpiryScannerClassNames()
+        .isEmpty()) {
+      return;
+    }
+
+    logger.fine(
+        "Expiry scanners were not enabled. Enabling default scanners: " + DEFAULT_EXPIRY_SCANNERS);
+    recoveryPropertyManager.getRecoveryEnvironmentBean()
+        .setExpiryScannerClassNames(DEFAULT_EXPIRY_SCANNERS);
+  }
+
+  /**
+   * If node identifier wasn't set by property manager, then set default
+   * {@link #DEFAULT_NODE_IDENTIFIER}.
+   */
+  private void initNodeIdentifier() {
+    if (arjPropertyManager.getCoreEnvironmentBean().getNodeIdentifier() == null) {
+      logger.warning("Node identifier was not set. Setting it to the default value: "
+          + DEFAULT_NODE_IDENTIFIER);
+      try {
+        arjPropertyManager.getCoreEnvironmentBean().setNodeIdentifier(DEFAULT_NODE_IDENTIFIER);
+      } catch (CoreEnvironmentBeanException e) {
+        logger.log(Level.WARNING, e.getMessage(), e);
+      }
+    }
+    jtaPropertyManager.getJTAEnvironmentBean().setLastResourceOptimisationInterfaceClassName(
+        "org.apache.commons.dbcp2.managed.LocalXAConnectionFactory$LocalXAResource");
+    jtaPropertyManager.getJTAEnvironmentBean().setXaRecoveryNodes(
+        Collections.singletonList(arjPropertyManager.getCoreEnvironmentBean().getNodeIdentifier()));
+  }
+
+  /**
+   * If orphan filters were not set by property manager, then set defaults
+   * {@link #DEFAULT_ORPHAN_FILTERS}.
+   */
+  private void initOrphanFilters() {
+    if (!jtaPropertyManager.getJTAEnvironmentBean().getXaResourceOrphanFilterClassNames()
+        .isEmpty()) {
+      return;
+    }
+
+    logger.fine(
+        "Orphan filters were not enabled. Enabling default filters: " + DEFAULT_ORPHAN_FILTERS);
+    jtaPropertyManager.getJTAEnvironmentBean()
+        .setXaResourceOrphanFilterClassNames(DEFAULT_ORPHAN_FILTERS);
+  }
+
+  /**
+   * If recovery modules were not set by property manager, then set defaults
+   * {@link #DEFAULT_RECOVERY_MODULES}.
+   */
+  private void initRecoveryModules() {
+    if (!recoveryPropertyManager.getRecoveryEnvironmentBean().getRecoveryModuleClassNames()
+        .isEmpty()) {
+      return;
+    }
+    logger.fine(
+        "Recovery modules were not enabled. Enabling default modules: " + DEFAULT_RECOVERY_MODULES);
+    recoveryPropertyManager.getRecoveryEnvironmentBean()
+        .setRecoveryModuleClassNames(DEFAULT_RECOVERY_MODULES);
   }
 
 }

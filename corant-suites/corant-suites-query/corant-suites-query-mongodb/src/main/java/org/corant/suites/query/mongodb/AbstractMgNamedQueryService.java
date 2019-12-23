@@ -13,18 +13,16 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.CursorType;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.*;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.corant.shared.util.ConversionUtils;
-import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
-import org.corant.suites.query.shared.*;
-import org.corant.suites.query.shared.mapping.FetchQuery;
-
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.CollectionUtils.getSize;
+import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.ConversionUtils.toEnum;
+import static org.corant.shared.util.MapUtils.getMapEnum;
+import static org.corant.shared.util.MapUtils.getOpt;
+import static org.corant.shared.util.MapUtils.getOptMapObject;
+import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +30,26 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.getSize;
-import static org.corant.shared.util.ConversionUtils.toBoolean;
-import static org.corant.shared.util.ConversionUtils.toEnum;
-import static org.corant.shared.util.MapUtils.*;
-import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.corant.shared.util.ConversionUtils;
+import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
+import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
+import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.corant.suites.query.shared.Querier;
+import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryRuntimeException;
+import org.corant.suites.query.shared.mapping.FetchQuery;
+import com.mongodb.BasicDBObject;
+import com.mongodb.CursorType;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.CollationAlternate;
+import com.mongodb.client.model.CollationCaseFirst;
+import com.mongodb.client.model.CollationMaxVariable;
+import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.CountOptions;
 
 /**
  * corant-suites-query
@@ -232,7 +241,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     getOptMapObject(pros, PRO_KEY_RETURN_KEY, ConversionUtils::toBoolean).ifPresent(fi::returnKey);
     getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, ConversionUtils::toBoolean)
         .ifPresent(fi::showRecordId);
-    resolveCollation(querier).ifPresent(fi::collation);
+    resovleCollation(querier).ifPresent(fi::collation);
     return fi;
   }
 
@@ -246,7 +255,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, ConversionUtils::toLong)
         .ifPresent(t -> co.maxTime(t, TimeUnit.MILLISECONDS));
     getOptMapObject(pros, PRO_KEY_CO_SKIP, ConversionUtils::toInteger).ifPresent(co::skip);
-    resolveCollation(querier).ifPresent(co::collation);
+    resovleCollation(querier).ifPresent(co::collation);
     if (co.getLimit() <= 0) {
       co.limit(max(resolveCountOptionsLimit(), 1));
     }
@@ -265,7 +274,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return 1024;
   }
 
-  protected Optional<Collation> resolveCollation(MgNamedQuerier querier) {
+  protected Optional<Collation> resovleCollation(MgNamedQuerier querier) {
     Map<String, String> pros = querier.getQuery().getProperties();
     if (pros.keySet().stream().anyMatch(t -> t.startsWith(PRO_KEY_CO_COLA))) {
       Collation.Builder b = Collation.builder();

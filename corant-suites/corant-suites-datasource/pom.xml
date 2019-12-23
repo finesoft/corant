@@ -13,6 +13,7 @@
 		<module>corant-suites-datasource-shared</module>
 		<module>corant-suites-datasource-hikari</module>
 		<module>corant-suites-datasource-agroal</module>
+		<module>corant-suites-datasource-dbcp</module>
 	</modules>
 	<description>The Corant data source suites, which contains connection pool involved in enterprise development.</description>
 </project>

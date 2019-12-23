@@ -35,13 +35,13 @@
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.apache-poi>4.1.1</version.apache-poi>
 		<version.apache.johnzon-core>1.1.13</version.apache.johnzon-core>
-		<version.log4j2>2.12.1</version.log4j2>
+		<version.log4j2>2.13.0</version.log4j2>
 		<version.calcite>1.17.0</version.calcite>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
 		<version.commons-dbcp2>2.7.0</version.commons-dbcp2>
 		<version.commons-pool2>2.7.0</version.commons-pool2>
 		<version.freemarker>2.3.29</version.freemarker>
-		<version.jandex>2.1.1.Final</version.jandex>
+		<version.jandex>2.1.2.Final</version.jandex>
 		<version.snakeyaml>1.25</version.snakeyaml>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.pinyin4j>2.5.1</version.pinyin4j>

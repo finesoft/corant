@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.StreamUtils.streamOf;
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class ObjectUtils {
   }
 
   public static String[] asStrings(Iterable<?> it) {
-    return asStrings(null, streamOf(it).map(o -> Objects.toString(o)).toArray(Object[]::new));
+    return asStrings(null, streamOf(it).map(Objects::toString).toArray(Object[]::new));
   }
 
   public static String[] asStrings(Object... objs) {
@@ -149,6 +150,7 @@ public class ObjectUtils {
       try {
         supplied = supplier.get();
       } catch (Exception e) {
+        // Noop! just try...
       }
     }
     return supplied;
@@ -159,7 +161,7 @@ public class ObjectUtils {
       Thread.sleep(ms);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      // Noop! we are try....
+      // Noop! just try...
     }
   }
 
@@ -171,16 +173,25 @@ public class ObjectUtils {
    */
   public static class Pair<L, R> implements Map.Entry<L, R>, Serializable {
     private static final long serialVersionUID = -474294448204498274L;
+
+    @SuppressWarnings("rawtypes")
+    static final Pair emptyInstance = new Pair();
+
     private final L left;
     private final R right;
+
+    protected Pair() {
+      this(null, null);
+    }
 
     protected Pair(L left, R right) {
       this.left = left;
       this.right = right;
     }
 
+    @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R> empty() {
-      return new Pair<>(null, null);
+      return emptyInstance;
     }
 
     public static <L, R> Pair<L, R> of(L left, R right) {
@@ -208,7 +219,8 @@ public class ObjectUtils {
     }
 
     @Override
-    public final L getKey() {
+    @Transient
+    public L getKey() {
       return getLeft();
     }
 
@@ -221,6 +233,7 @@ public class ObjectUtils {
     }
 
     @Override
+    @Transient
     public R getValue() {
       return getRight();
     }
@@ -242,7 +255,11 @@ public class ObjectUtils {
 
     @Override
     public String toString() {
-      return "{" + getLeft() + ':' + getRight() + '}';
+      return asString("[%s,%s]");
+    }
+
+    public Pair<L, R> withKey(L key) {
+      return new Pair<>(key, getValue());
     }
 
     public Pair<L, R> withLeft(L left) {
@@ -251,6 +268,10 @@ public class ObjectUtils {
 
     public Pair<L, R> withRight(R right) {
       return new Pair<>(getLeft(), right);
+    }
+
+    public Pair<L, R> withValue(R value) {
+      return new Pair<>(getKey(), value);
     }
   }
 
@@ -265,7 +286,7 @@ public class ObjectUtils {
     private final ThreadLocal<Deque<T>> local = new ThreadLocal<>();
 
     public void clear() {
-      local.set(null);
+      local.remove();
     }
 
     public boolean isEmpty() {
@@ -318,9 +339,16 @@ public class ObjectUtils {
 
     private static final long serialVersionUID = 6441751980847755625L;
 
+    @SuppressWarnings("rawtypes")
+    static final Triple emptyInstance = new Triple();
+
     private final L left;
     private final M middle;
     private final R right;
+
+    protected Triple() {
+      this(null, null, null);
+    }
 
     protected Triple(L left, M middle, R right) {
       this.left = left;
@@ -328,8 +356,9 @@ public class ObjectUtils {
       this.right = right;
     }
 
+    @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R> empty() {
-      return new Triple<>(null, null, null);
+      return emptyInstance;
     }
 
     public static <L, M, R> Triple<L, M, R> of(L left, M middle, R right) {
@@ -378,7 +407,7 @@ public class ObjectUtils {
 
     @Override
     public String toString() {
-      return "[" + getLeft() + "," + getMiddle() + "," + getRight() + "]";
+      return asString("[%s,%s,%s]");
     }
 
     public Triple<L, M, R> withLeft(L left) {

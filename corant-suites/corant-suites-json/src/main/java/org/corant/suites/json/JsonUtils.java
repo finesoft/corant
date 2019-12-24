@@ -15,12 +15,22 @@ package org.corant.suites.json;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map;
+import org.corant.kernel.exception.GeneralRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.shared.util.ObjectUtils.Triple;
+import org.corant.suites.bundle.GlobalMessageCodes;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,12 +40,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import org.corant.kernel.exception.GeneralRuntimeException;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.bundle.GlobalMessageCodes;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Map;
 
 /**
  * corant-asosat-ddd
@@ -45,10 +49,14 @@ import java.util.Map;
  */
 public class JsonUtils {
 
-  final static ObjectMapper objectMapper = new ObjectMapper();
+  static final ObjectMapper objectMapper = new ObjectMapper();
 
   static {
-    SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer());
+    SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
+        .addDeserializer(Pair.class, new PairDeserializer())
+        .addSerializer(Pair.class, new PairSerializer())
+        .addDeserializer(Triple.class, new TripleDeserializer())
+        .addSerializer(Triple.class, new TripleSerializer());
     objectMapper.registerModules(simpleModule);
     objectMapper.registerModules(new JavaTimeModule());
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
@@ -218,7 +226,41 @@ public class JsonUtils {
     return null;
   }
 
-  /**日期转数组*/
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:10
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class PairDeserializer extends JsonDeserializer<Pair> {
+    @Override
+    public Pair deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+        throws IOException {
+      final Object[] array = jsonParser.readValueAs(Object[].class);
+      return Pair.of(array[0], array[1]);
+    }
+  }
+
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:14
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class PairSerializer extends JsonSerializer<Pair> {
+    @Override
+    public void serialize(Pair pair, JsonGenerator gen, SerializerProvider serializerProvider)
+        throws IOException {
+      gen.writeStartArray(2);
+      gen.writeObject(pair.getLeft());
+      gen.writeObject(pair.getRight());
+      gen.writeEndArray();
+    }
+  }
+
+  /** 日期转数组 */
   static class SqlDateSerializer extends JsonSerializer<java.sql.Date> {
 
     @Override
@@ -228,9 +270,45 @@ public class JsonUtils {
 
     @Override
     public void serialize(java.sql.Date value, JsonGenerator gen, SerializerProvider provider)
-            throws IOException {
+        throws IOException {
       LocalDate date = value.toLocalDate();
       LocalDateSerializer.INSTANCE.serialize(date, gen, provider);
     }
   }
+
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:10
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class TripleDeserializer extends JsonDeserializer<Triple> {
+    @Override
+    public Triple deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+        throws IOException {
+      final Object[] array = jsonParser.readValueAs(Object[].class);
+      return Triple.of(array[0], array[1], array[2]);
+    }
+  }
+
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:14
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class TripleSerializer extends JsonSerializer<Triple> {
+    @Override
+    public void serialize(Triple triple, JsonGenerator gen, SerializerProvider serializerProvider)
+        throws IOException {
+      gen.writeStartArray(3);
+      gen.writeObject(triple.getLeft());
+      gen.writeObject(triple.getMiddle());
+      gen.writeObject(triple.getRight());
+      gen.writeEndArray();
+    }
+  }
+
 }

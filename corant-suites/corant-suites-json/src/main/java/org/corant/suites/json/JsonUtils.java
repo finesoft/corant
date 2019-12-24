@@ -162,7 +162,6 @@ public class JsonUtils {
       try {
         return objectMapper.readValue(cmd, clazz);
       } catch (IOException e) {
-        e.printStackTrace();
         throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd,
             clazz.getName());
       }

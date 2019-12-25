@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -105,7 +104,7 @@ public class XContentUtils {
   }
 
   public static Map<String, Object> searchResponseToMap(SearchResponse searchResponse,
-      String... paths) throws ElasticsearchParseException, IOException {
+      String... paths) throws IOException {
     if (searchResponse == null) {
       return new HashMap<>();
     } else {

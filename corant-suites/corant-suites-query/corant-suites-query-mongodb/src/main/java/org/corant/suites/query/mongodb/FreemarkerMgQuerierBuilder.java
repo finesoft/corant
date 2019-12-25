@@ -16,6 +16,7 @@ package org.corant.suites.query.mongodb;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Level;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
@@ -64,7 +65,7 @@ public class FreemarkerMgQuerierBuilder extends
       return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
           getFetchQueryResolver(), mgQuery, processed.getRight());
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.log(Level.SEVERE, e, () -> "Can't not build mongodb named querier");
     }
     return null;
   }

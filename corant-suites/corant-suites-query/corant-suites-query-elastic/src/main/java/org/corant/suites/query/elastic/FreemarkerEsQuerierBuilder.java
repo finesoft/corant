@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FreemarkerEsQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, Map<Object, Object>, DefaultEsNamedQuerier> {
 
-  public final static ObjectMapper OM = new ObjectMapper();
+  public static final ObjectMapper OM = new ObjectMapper();
 
   /**
    * @param query

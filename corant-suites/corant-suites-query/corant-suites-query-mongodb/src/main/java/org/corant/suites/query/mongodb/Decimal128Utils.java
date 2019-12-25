@@ -61,7 +61,7 @@ public class Decimal128Utils {
   private static Collection convert(Collection collection, int deep) {
     int dp = deep + 1;
     if (collection == null || dp > MAX_DEEP) {
-      return null;
+      return collection;
     }
     List list = new ArrayList<>(collection.size());
     for (Object o : collection) {

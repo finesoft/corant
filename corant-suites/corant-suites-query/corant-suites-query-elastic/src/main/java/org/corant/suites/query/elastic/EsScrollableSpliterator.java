@@ -46,7 +46,7 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
 
   public EsScrollableSpliterator(TransportClient client, QueryBuilder queryBuilder,
       String indexName, String typeName) {
-    this(client, queryBuilder, indexName, typeName, null, DFLT_BATCH_SIZE, (seq) -> {
+    this(client, queryBuilder, indexName, typeName, null, DFLT_BATCH_SIZE, seq -> {
     });
   }
 
@@ -64,7 +64,7 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
   }
 
   public EsScrollableSpliterator(TransportClient client, String indexName, String script) {
-    this(client, indexName, script, null, DFLT_BATCH_SIZE, (seq) -> {
+    this(client, indexName, script, null, DFLT_BATCH_SIZE, seq -> {
     });
   }
 

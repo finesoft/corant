@@ -38,8 +38,8 @@ import org.corant.suites.query.sql.dialect.Dialect;
  */
 public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
-  public final static MapHandler MAP_HANDLER = new MapHandler();
-  public final static MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+  public static final MapHandler MAP_HANDLER = new MapHandler();
+  public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
 
   protected final SqlQueryConfiguration confiuration;
   protected final QueryRunner runner;

@@ -64,8 +64,7 @@ public interface EsQueryExecutor {
   default Map<String, Object> search(String indexName, String script) throws Exception {
     SearchResponse searchResponse = execute(indexName, script);
     if (searchResponse != null) {
-      Map<String, Object> result = XContentUtils.searchResponseToMap(searchResponse);
-      return result;
+      return XContentUtils.searchResponseToMap(searchResponse);
     } else {
       return new HashMap<>();
     }

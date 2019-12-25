@@ -58,15 +58,18 @@ public class StreamableQueryRunner extends QueryRunner {
     try {
       DbUtils.close(rs);
     } catch (SQLException e) {
+      // Noop!
     } finally {
       try {
         DbUtils.close(stmt);
       } catch (SQLException e) {
+        // Noop!
       }
       if (closeConn) {
         try {
           DbUtils.close(conn);
         } catch (SQLException e) {
+          // Noop!
         }
       }
     }
@@ -82,7 +85,7 @@ public class StreamableQueryRunner extends QueryRunner {
       throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
     }
     PreparedStatement stmt = null;
-    final Consumer<int[]> useConsumer = consumer != null ? consumer : (ia) -> {
+    final Consumer<int[]> useConsumer = consumer != null ? consumer : ia -> {
     };
     try {
       final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
@@ -150,7 +153,7 @@ public class StreamableQueryRunner extends QueryRunner {
       throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
     }
     PreparedStatement stmt = null;
-    final Consumer<T> useConsumer = consumer == null ? (t) -> {
+    final Consumer<T> useConsumer = consumer == null ? t -> {
     } : consumer;
     try {
       final PreparedStatement stmtx =
@@ -238,7 +241,7 @@ public class StreamableQueryRunner extends QueryRunner {
 
   private void rethrow(Exception e, String sql, Object... params) throws SQLException {
     if (e instanceof SQLException) {
-      super.rethrow((SQLException)e, sql, params);
+      super.rethrow((SQLException) e, sql, params);
     } else {
       super.rethrow(new SQLException(e), sql, params);
     }
@@ -266,7 +269,7 @@ public class StreamableQueryRunner extends QueryRunner {
   }
 
   static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
-    final static int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
+    static final int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
     private final Runnable releaser;
     private final ResultSet rs;
     private final ResultSetHandler<T> rsh;

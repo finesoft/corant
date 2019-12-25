@@ -59,26 +59,24 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   @Override
   public <T> Stream<List<T>> streams(String queryName, Object parameter) {
-    final QueryParameter resolvedParameter =
-        getQuerierResolver().getQueryResolver().resolveQueryParameter(null, parameter);
-    final int limit =
-        resolvedParameter.getLimit() == null || resolvedParameter.getLimit() < 1 ? DEFAULT_LIMIT
-            : resolvedParameter.getLimit();
-    final DefaultQueryParameter usePparameter =
-        new DefaultQueryParameter(resolvedParameter).limit(limit);
+    QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
+    final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
+    final int limit = max(defaultObject(queryParam.getLimit(), DEFAULT_LIMIT), 1);
+    final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
     final ForwardList<T> empty = ForwardList.inst();
     final Iterator<List<T>> iterator = new Iterator<List<T>>() {
-      final AtomicReference<ForwardList<T>> buffers =
-          new AtomicReference<>(defaultObject(forward(queryName, usePparameter), empty));
-      int offset = usePparameter.getOffset();
+
+      final AtomicReference<ForwardList<T>> buffer =
+          new AtomicReference<>(defaultObject(forward(queryName, useParam), empty));
+      int offset = useParam.getOffset();
 
       @Override
       public boolean hasNext() {
-        ForwardList<T> fw = buffers.get();
+        ForwardList<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           if (fw.hasNext()) {
-            fw = defaultObject(forward(queryName, usePparameter.offset(offset += limit)), empty);
-            buffers.set(fw);
+            fw = defaultObject(forward(queryName, useParam.offset(offset += limit)), empty);
+            buffer.set(fw);
             return isNotEmpty(fw.getResults());
           }
         } else {
@@ -89,7 +87,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       @Override
       public List<T> next() {
-        ForwardList<T> fw = buffers.get();
+        ForwardList<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           throw new NoSuchElementException();
         }

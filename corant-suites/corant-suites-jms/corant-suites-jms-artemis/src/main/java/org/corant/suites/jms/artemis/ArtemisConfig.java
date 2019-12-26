@@ -59,12 +59,6 @@ public class ArtemisConfig extends AbstractJMSConfig {
   }
 
   @ConfigKeyItem
-  protected String username;
-
-  @ConfigKeyItem
-  protected String password;
-
-  @ConfigKeyItem
   protected String url;
 
   @ConfigKeyItem(defaultValue = "false")
@@ -110,16 +104,8 @@ public class ArtemisConfig extends AbstractJMSConfig {
     return hostPorts;
   }
 
-  public String getPassword() {
-    return password;
-  }
-
   public String getUrl() {
     return url;
-  }
-
-  public String getUsername() {
-    return username;
   }
 
   public boolean hasAuthentication() {

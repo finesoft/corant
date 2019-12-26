@@ -46,6 +46,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.tm.XAResourceRecoveryRegistry;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
@@ -186,11 +187,14 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       TransactionSynchronizationRegistry tsr =
           resolve(TransactionSynchronizationRegistry.class).orElse(null);
       XAResourceRecoveryRegistry xar = null;
-      if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-        xar =
-            resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta")).orElse(null);
-      } else {
-        xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
+      if (ConfigProvider.getConfig().getOptionalValue("jta.auto-start-recovery", Boolean.class)
+          .orElse(false)) {
+        if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
+          xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
+              .orElse(null);
+        } else {
+          xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
+        }
       }
       if (xar != null) {
         cfgs.connectionPoolConfiguration()

@@ -43,7 +43,9 @@ import javax.transaction.UserTransaction;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.suites.jta.shared.TransactionIntegration;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.tm.XAResourceRecovery;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
@@ -113,18 +115,23 @@ public class NarayanaExtension implements Extension {
 
       if (ConfigProvider.getConfig().getOptionalValue(JTA_AUTO_START_RECOVERY, Boolean.class)
           .orElse(false)) {
-        event.<RecoveryManagerService>addBean()
-            .addTransitiveTypeClosure(RecoveryManagerService.class)
-            .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
-                NamedLiteral.of("narayana-jta"))
-            .scope(Singleton.class).createWith(cc -> {
-              RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT).initialize();
-              RecoveryManagerService rms = new RecoveryManagerService();
-              rms.create();
-              rms.start();
-              return rms;
-            }).disposeWith((t, inst) -> t.destroy());
+        RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT).initialize();
+      } else {
+        RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT).initialize();
       }
+
+      event.<RecoveryManagerService>addBean().addTransitiveTypeClosure(RecoveryManagerService.class)
+          .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
+              NamedLiteral.of("narayana-jta"))
+          .scope(Singleton.class).produceWith((inst) -> {
+            RecoveryManagerService rms = new RecoveryManagerService();
+            rms.create();
+            inst.select(TransactionIntegration.class).stream()
+                .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
+                .forEach(rms::addXAResourceRecovery);
+            return rms;
+          }).disposeWith((t, inst) -> t.destroy());
+
     }
   }
 

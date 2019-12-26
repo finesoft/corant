@@ -13,13 +13,16 @@
  */
 package org.corant.suites.jta.shared;
 
+import javax.transaction.xa.XAResource;
+
 /**
  * corant-suites-jta-shared
  *
  * @author bingo 下午2:47:59
  *
  */
-// TODO
 public interface TransactionIntegration {
+
+  XAResource[] getRecoveryXAResources();
 
 }

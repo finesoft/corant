@@ -36,6 +36,12 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
   protected String connectionFactoryId = StringUtils.EMPTY;
 
   @ConfigKeyItem
+  protected String username;
+
+  @ConfigKeyItem
+  protected String password;
+
+  @ConfigKeyItem
   protected Boolean enable = true;
 
   @ConfigKeyItem
@@ -85,6 +91,10 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
     return connectionFactoryId;
   }
 
+  public String getPassword() {
+    return password;
+  }
+
   /**
    *
    * @return the receiveTaskDelayMs
@@ -107,6 +117,10 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
    */
   public Integer getReceiveTaskThreads() {
     return receiveTaskThreads;
+  }
+
+  public String getUsername() {
+    return username;
   }
 
   @Override

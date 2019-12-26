@@ -265,7 +265,7 @@ public class FetchQuery implements Serializable {
     private FetchQueryParameterSource source;
     private String value;
     private Class<?> type;
-    private boolean distinct;
+    private boolean distinct = true;
 
     public FetchQueryParameter() {
       super();

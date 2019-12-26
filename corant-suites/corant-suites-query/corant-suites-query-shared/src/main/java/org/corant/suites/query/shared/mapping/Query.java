@@ -40,8 +40,8 @@ public class Query implements Serializable {
   private String name;
   private Class<?> resultClass = Map.class;
   private Class<?> resultSetMapping;
-  private boolean cache = true;
-  private boolean cacheResultSetMetadata = true;
+  private boolean cache = false;
+  private boolean cacheResultSetMetadata = false;
   private String description;
   private Script script = new Script();
   private List<FetchQuery> fetchQueries = new ArrayList<>();

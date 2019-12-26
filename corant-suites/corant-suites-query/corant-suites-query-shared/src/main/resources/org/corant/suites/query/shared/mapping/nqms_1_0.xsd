@@ -272,7 +272,7 @@
                  </xsd:documentation>
              </xsd:annotation>            
         </xsd:attribute>
-        <xsd:attribute name="distinct" type="xsd:boolean" use="optional">
+        <xsd:attribute name="distinct" type="xsd:boolean" use="optional" default="true">
             <xsd:annotation>
                  <xsd:documentation>
                     When the parameter is a collection, this value specifies whether to remove the duplicate.

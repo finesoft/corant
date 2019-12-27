@@ -48,13 +48,13 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       extensions.forEach(et -> {
         et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
           if (cfg.isJta() && cfg.isXa()) {
-            if (!javax.sql.XADataSource.class.isAssignableFrom(cfg.getDriver())) {
+            if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
               logger.warning(() -> String.format(
                   "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",
                   cfg.getName()));
             } else {
               try {
-                XADataSource xads = cfg.getDriver().asSubclass(javax.sql.XADataSource.class)
+                XADataSource xads = cfg.getDriver().asSubclass(XADataSource.class)
                     .getDeclaredConstructor().newInstance();
                 if (isNotEmpty(cfg.getJdbcProperties())) {
                   new PropertyInjector(xads).inject(cfg.getJdbcProperties());

@@ -284,6 +284,14 @@ public class Corant implements AutoCloseable {
     return (WeldManager) container.getBeanManager();
   }
 
+  /**
+   * 
+   * @return the classLoader
+   */
+  public ClassLoader getClassLoader() {
+    return classLoader;
+  }
+
   public synchronized Object getId() {
     return container.getId();
   }

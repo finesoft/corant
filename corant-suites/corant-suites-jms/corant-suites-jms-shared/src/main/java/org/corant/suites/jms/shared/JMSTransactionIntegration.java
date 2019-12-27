@@ -17,10 +17,9 @@ import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
+import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import javax.enterprise.inject.spi.CDI;
 import javax.jms.XAConnectionFactory;
 import javax.transaction.xa.XAResource;
 import org.corant.suites.jta.shared.TransactionIntegration;
@@ -31,21 +30,22 @@ import org.corant.suites.jta.shared.TransactionIntegration;
  * @author bingo 下午5:12:28
  *
  */
-@ApplicationScoped
 public class JMSTransactionIntegration implements TransactionIntegration {
 
-  @Inject
-  @Any
-  Instance<AbstractJMSExtension> extensions;
+  private static final Logger logger = Logger.getLogger(JMSTransactionIntegration.class.getName());
 
   @Override
   public XAResource[] getRecoveryXAResources() {
+    logger.info(() -> "Resolving JMS XAResources for JTA recovery processes.");
+    Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
     List<XAResource> resources = new ArrayList<>();
     if (!extensions.isUnsatisfied()) {
       extensions.forEach(et -> et.getConfigManager().getAllWithNames().forEach((k, v) -> {
         if (v.isXa() && v.isEnable()) {
           resolveNamed(XAConnectionFactory.class, k)
               .ifPresent(xacf -> resources.add(xacf.createXAContext().getXAResource()));
+          logger
+              .info(() -> String.format("Added JMS[%s] XAResource to JTA recovery processes.", k));
         }
       }));
     }

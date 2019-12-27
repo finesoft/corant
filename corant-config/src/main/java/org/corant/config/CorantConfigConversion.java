@@ -240,7 +240,7 @@ public class CorantConfigConversion implements Serializable {
         result = Optional.empty();
       }
     } else {
-      throw new IllegalStateException("Cannot create config property for " + type);
+      throw new IllegalStateException("Can not create config property for " + type);
     }
     return result;
   }

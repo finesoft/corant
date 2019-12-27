@@ -15,7 +15,6 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -30,7 +29,6 @@ import java.util.ServiceLoader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -46,8 +44,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.jboss.tm.XAResourceRecoveryRegistry;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration.ConnectionValidator;
@@ -186,23 +182,26 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       TransactionManager tm = resolve(TransactionManager.class).orElse(null);
       TransactionSynchronizationRegistry tsr =
           resolve(TransactionSynchronizationRegistry.class).orElse(null);
-      XAResourceRecoveryRegistry xar = null;
-      if (ConfigProvider.getConfig().getOptionalValue("jta.auto-start-recovery", Boolean.class)
-          .orElse(false)) {
-        if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-          xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
-              .orElse(null);
-        } else {
-          xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
-        }
-      }
-      if (xar != null) {
-        cfgs.connectionPoolConfiguration()
-            .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, "", false, xar));
-      } else {
-        cfgs.connectionPoolConfiguration()
-            .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
-      }
+      cfgs.connectionPoolConfiguration()
+          .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
+
+      // XAResourceRecoveryRegistry xar = null;
+      // if (ConfigProvider.getConfig().getOptionalValue("jta.auto-start-recovery", Boolean.class)
+      // .orElse(false)) {
+      // if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
+      // xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
+      // .orElse(null);
+      // } else {
+      // xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
+      // }
+      // }
+      // if (xar != null) {
+      // cfgs.connectionPoolConfiguration()
+      // .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, "", false, xar));
+      // } else {
+      // cfgs.connectionPoolConfiguration()
+      // .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
+      // }
     }
   }
 

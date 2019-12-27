@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -40,7 +41,9 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
+import org.corant.Corant;
 import org.corant.config.spi.Sortable;
+import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.suites.jta.shared.TransactionIntegration;
@@ -63,6 +66,9 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  * corant-suites-jta-narayana
  *
  * FIXME org.jboss.logging.annotations.Message.Format.MESSAGE_FORMAT version issue!!!!
+ *
+ *
+ * FIXME relase recovery XAResources.
  *
  * @author bingo 下午7:19:18
  *
@@ -113,24 +119,11 @@ public class NarayanaExtension implements Extension {
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).scope(Singleton.class)
           .createWith(cc -> BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
 
-      if (ConfigProvider.getConfig().getOptionalValue(JTA_AUTO_START_RECOVERY, Boolean.class)
-          .orElse(false)) {
-        RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT).initialize();
-      } else {
-        RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT).initialize();
-      }
-
       event.<RecoveryManagerService>addBean().addTransitiveTypeClosure(RecoveryManagerService.class)
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
               NamedLiteral.of("narayana-jta"))
-          .scope(Singleton.class).produceWith((inst) -> {
-            RecoveryManagerService rms = new RecoveryManagerService();
-            rms.create();
-            inst.select(TransactionIntegration.class).stream()
-                .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
-                .forEach(rms::addXAResourceRecovery);
-            return rms;
-          }).disposeWith((t, inst) -> t.destroy());
+          .scope(Singleton.class).createWith(cc -> new RecoveryManagerService())
+          .disposeWith((t, inst) -> t.destroy());
 
     }
   }
@@ -189,6 +182,30 @@ public class NarayanaExtension implements Extension {
               "communicationStore");
           cfgr.configJTAEnvironmentBean(jtaEnvironmentBean);
         });
+  }
+
+  void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
+    if (ConfigProvider.getConfig().getOptionalValue(JTA_AUTO_START_RECOVERY, Boolean.class)
+        .orElse(false)) {
+      logger.info(() -> "Initializes automatic JTA recovery processes.");
+      RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
+      RecoveryManagerService rms = resolve(RecoveryManagerService.class).get();
+      rms.create();
+      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
+          .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
+          .forEach(rms::addXAResourceRecovery);
+      rms.start();
+      logger.info(() -> "JTA automatic recovery processes has been started.");
+    } else {
+      logger.info(() -> "Initializes manual JTA recovery processes.");
+      RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
+      RecoveryManagerService rms = resolve(RecoveryManagerService.class).get();
+      rms.create();
+      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
+          .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
+          .forEach(rms::addXAResourceRecovery);
+    }
+
   }
 
   public static class InterruptCheckedAction extends CheckedAction {

@@ -24,9 +24,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.inject.Inject;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
@@ -54,6 +54,16 @@ public class MessageReceiverManager {
 
   protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {
     return new MessageReceiverTask(metaData);
+  }
+
+  void beforeShutdown(@Observes final BeforeShutdown e) {
+    executorServices.values().forEach(es -> {
+      es.shutdownNow().forEach(r -> {
+        if (r instanceof MessageReceiverTask) {
+          ((MessageReceiverTask) r).release(true);
+        }
+      });
+    });
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
@@ -88,14 +98,4 @@ public class MessageReceiverManager {
     }
   }
 
-  @PreDestroy
-  void preDestroy() {
-    executorServices.values().forEach(es -> {
-      es.shutdownNow().forEach(r -> {
-        if (r instanceof MessageReceiverTask) {
-          ((MessageReceiverTask) r).release(true);
-        }
-      });
-    });
-  }
 }

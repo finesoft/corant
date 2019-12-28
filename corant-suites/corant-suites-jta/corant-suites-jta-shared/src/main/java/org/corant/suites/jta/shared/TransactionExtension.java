@@ -13,26 +13,15 @@
  */
 package org.corant.suites.jta.shared;
 
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.transaction.xa.XAResource;
+import javax.enterprise.inject.spi.Extension;
 
 /**
  * corant-suites-jta-shared
  *
- * @author bingo 下午2:47:59
+ * @author bingo 下午9:20:02
  *
  */
-public interface TransactionIntegration {
+public interface TransactionExtension extends Extension {
 
-  default TransactionConfig getConfig() {
-    Instance<TransactionExtension> txExt = CDI.current().select(TransactionExtension.class);
-    if (txExt.isResolvable()) {
-      return txExt.get().getConfig();
-    }
-    return TransactionConfig.empty();
-  }
-
-  XAResource[] getRecoveryXAResources();
-
+  TransactionConfig getConfig();
 }

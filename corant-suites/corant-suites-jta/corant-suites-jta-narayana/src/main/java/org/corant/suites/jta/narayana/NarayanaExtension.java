@@ -33,7 +33,6 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
 import javax.naming.NamingException;
 import javax.transaction.SystemException;
@@ -42,12 +41,13 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
 import org.corant.Corant;
+import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.config.spi.Sortable;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.suites.jta.shared.TransactionExtension;
 import org.corant.suites.jta.shared.TransactionIntegration;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.tm.XAResourceRecovery;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
@@ -73,18 +73,19 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  * @author bingo 下午7:19:18
  *
  */
-public class NarayanaExtension implements Extension {
-
-  public static final String JTA_BIND_TO_JNDI_CFG = "jta.bind-to-jndi";
-  public static final String JTA_TRANSACTION_TIMEOUT = "jta.transaction.timeout";
-  public static final String JTA_AUTO_START_RECOVERY = "jta.auto-start-recovery";
-  public static final String JTA_NARAYANA_OBJECTS_STORE = "jta.narayana.objects-store";
+public class NarayanaExtension implements TransactionExtension {
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
+  protected final NarayanaTransactionConfig config =
+      DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
+
+  @Override
+  public NarayanaTransactionConfig getConfig() {
+    return config;
+  }
 
   void afterBeanDiscovery(@Observes final AfterBeanDiscovery event, final BeanManager beanManager) {
-    if (ConfigProvider.getConfig().getOptionalValue(JTA_BIND_TO_JNDI_CFG, Boolean.class)
-        .orElse(false)) {
+    if (getConfig().isBindToJndi()) {
       try {
         JNDIManager.bindJTAImplementation();
         logger.info(() -> "Bind JTA implementations to Jndi.");
@@ -130,9 +131,8 @@ public class NarayanaExtension implements Extension {
 
   void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event,
       final BeanManager beanManager) {
-    String dfltObjStoreDir =
-        ConfigProvider.getConfig().getOptionalValue(JTA_NARAYANA_OBJECTS_STORE, String.class)
-            .orElse(Defaults.corantUserDir("-narayana-objects").toString());
+    String dfltObjStoreDir = getConfig().getObjectsStore()
+        .orElse(Defaults.corantUserDir("-narayana-objects").toString());
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
         BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
     nullActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
@@ -151,15 +151,14 @@ public class NarayanaExtension implements Extension {
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
 
-    ConfigProvider.getConfig().getOptionalValue(JTA_TRANSACTION_TIMEOUT, Integer.class)
-        .ifPresent(t -> {
-          coordinatorEnvironmentBean.setDefaultTimeout(t.intValue());
-          logger.warning(
-              () -> "Use thread interrupt checked action for narayana, It can cause inconsistencies.");
-          coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
-          coordinatorEnvironmentBean
-              .setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());
-        });
+    getConfig().getTimeout().ifPresent(t -> {
+      coordinatorEnvironmentBean.setDefaultTimeout(((Long) t.getSeconds()).intValue());
+      logger.warning(
+          () -> "Use thread interrupt checked action for narayana, It can cause inconsistencies.");
+      coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
+      coordinatorEnvironmentBean
+          .setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());
+    });
 
     final CoreEnvironmentBean coreEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class);
@@ -185,8 +184,7 @@ public class NarayanaExtension implements Extension {
   }
 
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
-    if (ConfigProvider.getConfig().getOptionalValue(JTA_AUTO_START_RECOVERY, Boolean.class)
-        .orElse(false)) {
+    if (getConfig().isAutoRecovery()) {
       logger.info(() -> "Initializes automatic JTA recovery processes.");
       RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
       RecoveryManagerService rms = resolve(RecoveryManagerService.class).get();

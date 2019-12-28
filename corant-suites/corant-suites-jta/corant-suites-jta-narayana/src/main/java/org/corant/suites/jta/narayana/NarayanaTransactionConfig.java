@@ -11,28 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.shared;
+package org.corant.suites.jta.narayana;
 
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.transaction.xa.XAResource;
+import java.util.Optional;
+import org.corant.config.declarative.ConfigKeyItem;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.suites.jta.shared.TransactionConfig;
 
 /**
- * corant-suites-jta-shared
+ * corant-suites-jta-narayana
  *
- * @author bingo 下午2:47:59
+ * @author bingo 下午9:23:19
  *
  */
-public interface TransactionIntegration {
+@ConfigKeyRoot(value = "jta.transaction", keyIndex = 2, ignoreNoAnnotatedItem = false)
+public class NarayanaTransactionConfig extends TransactionConfig {
 
-  default TransactionConfig getConfig() {
-    Instance<TransactionExtension> txExt = CDI.current().select(TransactionExtension.class);
-    if (txExt.isResolvable()) {
-      return txExt.get().getConfig();
-    }
-    return TransactionConfig.empty();
+  @ConfigKeyItem
+  Optional<String> objectsStore;
+
+  public Optional<String> getObjectsStore() {
+    return objectsStore;
   }
-
-  XAResource[] getRecoveryXAResources();
 
 }

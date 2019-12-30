@@ -37,6 +37,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.config.spi.Sortable;
@@ -89,9 +90,9 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     AgroalDataSourceConfigurationSupplier cfgs = new AgroalDataSourceConfigurationSupplier();
 
     // transaction
-    // if (cfg.isXa()) {
-    // shouldBeTrue(XADataSource.class.isAssignableFrom(cfg.getDriver()));
-    // }
+    if (cfg.isXa() && !XADataSource.class.isAssignableFrom(cfg.getDriver())) {
+      logger.warning(() -> "When using XA, the driver should be a XADataSource.");
+    }
     transactionIntegration(cfg, cfgs);
 
     // metrics

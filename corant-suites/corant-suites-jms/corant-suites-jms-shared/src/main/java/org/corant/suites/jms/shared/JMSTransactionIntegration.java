@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
@@ -67,7 +68,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
   }
 
   public static class JMSRecoveryXAResource implements XAResource {
-
+    static final Logger logger = Logger.getLogger(JMSRecoveryXAResource.class.getName());
     final AbstractJMSConfig config;
     final XAConnectionFactory factory;
     final AtomicReference<XAConnection> connection = new AtomicReference<>();
@@ -190,15 +191,23 @@ public class JMSTransactionIntegration implements TransactionIntegration {
           try {
             connection.set(factory.createXAConnection());
           } catch (JMSSecurityException e) {
+            logger.log(Level.WARNING, e,
+                () -> String.format(
+                    "Connect to jms server %s occured security exception, use another way!",
+                    config.connectionFactoryId));
             connection.set(factory.createXAConnection(config.getUsername(), config.getPassword()));
           }
           session.set(connection.get().createXASession());
         } catch (JMSException e) {
+          logger.log(Level.SEVERE, e, () -> String.format("Can't not connect to jms server %s!",
+              config.connectionFactoryId));
           if (connection.get() != null) {
             try {
               connection.get().close();
             } catch (JMSException ex) {
-              // Noop!
+              logger.log(Level.WARNING, e,
+                  () -> String.format("Release jms %s connection occured exception!",
+                      config.connectionFactoryId));
             }
           }
           throw new XAException(XAException.XAER_RMFAIL);

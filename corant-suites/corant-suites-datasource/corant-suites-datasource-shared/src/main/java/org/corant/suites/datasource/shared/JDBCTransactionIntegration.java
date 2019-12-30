@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
@@ -50,6 +51,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     try {
       return xads.getXAConnection();
     } catch (SQLException nfe) {
+      logger.log(Level.WARNING, nfe,
+          () -> String.format("Connect to xa data source %s occured exception, use another way!",
+              cfg.getName()));
       return xads.getXAConnection(cfg.getUsername(), cfg.getPassword());
     }
   }
@@ -114,7 +118,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
   }
 
   public static class JDBCRecoveryXAResource implements XAResource {
-
+    static final Logger logger = Logger.getLogger(JDBCRecoveryXAResource.class.getName());
     final DataSourceConfig config;
     final XADataSource dataSource;
     final AtomicReference<XAConnection> connection = new AtomicReference<>();
@@ -228,7 +232,8 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       try {
         connection.get().close();
       } catch (SQLException e) {
-        // Noop!
+        logger.log(Level.WARNING, e, () -> String
+            .format("Can not release connection to xa data source %s", config.getName()));
       } finally {
         connection.set(null);
       }
@@ -239,12 +244,16 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         try {
           connection.set(getXAConnection(dataSource, config));
         } catch (SQLException e) {
+          logger.log(Level.SEVERE, e,
+              () -> String.format("Can not connect to xa data source %s", config.getName()));
           throw new XAException(XAException.XAER_RMFAIL);
         }
       }
       try {
         return connection.get().getXAResource();
       } catch (SQLException e) {
+        logger.log(Level.SEVERE, e, () -> String
+            .format("Can not get xa resource from xa data source %s", config.getName()));
         throw new XAException(XAException.XAER_RMFAIL);
       }
     }

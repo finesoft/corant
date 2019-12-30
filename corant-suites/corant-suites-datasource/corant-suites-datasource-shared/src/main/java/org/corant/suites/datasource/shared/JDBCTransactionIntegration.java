@@ -14,6 +14,7 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -102,12 +103,20 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       try {
         xads =
             cfg.getDriver().asSubclass(XADataSource.class).getDeclaredConstructor().newInstance();
+        PropertyInjector pi = new PropertyInjector(xads);
+        if (isNotEmpty(cfg.getJdbcProperties())) {
+          pi.inject(cfg.getJdbcProperties());
+        }
+        if (isNotBlank(cfg.getUsername()) && isNotBlank(cfg.getPassword())) {
+          pi.inject("user", cfg.getUsername());
+          pi.inject("password", cfg.getPassword());
+        }
+        if (isNotBlank(cfg.getConnectionUrl())) {
+          pi.inject("url", cfg.getConnectionUrl());
+        }
       } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
           | InvocationTargetException | NoSuchMethodException | SecurityException e) {
         throw new CorantRuntimeException(e);
-      }
-      if (isNotEmpty(cfg.getJdbcProperties())) {
-        new PropertyInjector(xads).inject(cfg.getJdbcProperties());
       }
       return xads;
     });

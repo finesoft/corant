@@ -83,7 +83,7 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
     if (hintDtf.isPresent()) {
       return hintDtf.get().parse(value, Instant::from);// strictly
     } else {
-      TemporalMatcher m = decideMatcher(value).orElse(null);
+      TemporalFormatter m = decideFormatter(value).orElse(null);
       if (m != null) {
         if (m.withTime) {
           TemporalAccessor ta = m.formatter.parseBest(value, Instant::from, ZonedDateTime::from,

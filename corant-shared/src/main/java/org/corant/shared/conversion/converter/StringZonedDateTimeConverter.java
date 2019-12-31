@@ -91,7 +91,7 @@ public class StringZonedDateTimeConverter extends AbstractTemporalConverter<Stri
     if (hintDtf.isPresent()) {
       return hintDtf.get().parse(value, ZonedDateTime::from);// strictly
     } else {
-      TemporalMatcher m = decideMatcher(value).orElse(null);
+      TemporalFormatter m = decideFormatter(value).orElse(null);
       if (m != null) {
         if (m.withTime) {
           TemporalAccessor ta = m.formatter.parseBest(value, ZonedDateTime::from,

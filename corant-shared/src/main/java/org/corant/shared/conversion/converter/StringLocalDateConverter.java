@@ -71,7 +71,7 @@ public class StringLocalDateConverter extends AbstractTemporalConverter<String, 
     if (hintDtf.isPresent()) {
       return hintDtf.get().parse(value, LocalDate::from);// strictly
     } else {
-      TemporalMatcher m = decideMatcher(value).orElse(null);
+      TemporalFormatter m = decideFormatter(value).orElse(null);
       if (m != null) {
         if (!m.withTime) {
           return m.formatter.parse(value, LocalDate::from);

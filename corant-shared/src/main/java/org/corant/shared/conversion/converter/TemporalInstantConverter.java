@@ -20,7 +20,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -28,7 +27,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 上午10:47:31
  *
  */
-public class TemporalInstantConverter extends AbstractConverter<Temporal, Instant> {
+public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal, Instant> {
 
   public TemporalInstantConverter() {
     super();
@@ -58,13 +57,7 @@ public class TemporalInstantConverter extends AbstractConverter<Temporal, Instan
 
   @Override
   protected Instant convert(Temporal value, Map<String, ?> hints) throws Exception {
-    ZoneId zoneId = null;
-    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (hintZoneId instanceof ZoneId) {
-      zoneId = (ZoneId) hintZoneId;
-    } else if (hintZoneId instanceof String) {
-      zoneId = ZoneId.of(hintZoneId.toString());
-    }
+    ZoneId zoneId = resolveHintZoneId(hints).orElse(null);
     if (zoneId != null) {
       // violate JSR-310
       if (value instanceof LocalDateTime) {

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Currency;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -150,11 +152,19 @@ public class ConversionUtils {
   }
 
   public static Instant toInstant(Object obj) {
-    return toInstant(obj, null);
+    return toInstant(obj, (Map<String, ?>) null, null);
   }
 
   public static Instant toInstant(Object obj, Instant altVal) {
-    return defaultObject(Conversions.convert(obj, Instant.class), altVal);
+    return toInstant(obj, (Map<String, ?>) null, altVal);
+  }
+
+  public static Instant toInstant(Object obj, Map<String, ?> hints) {
+    return toInstant(obj, hints, null);
+  }
+
+  public static Instant toInstant(Object obj, Map<String, ?> hints, Instant altVal) {
+    return defaultObject(Conversions.convert(obj, Instant.class, hints), altVal);
   }
 
   public static List<Instant> toInstantList(Object obj) {
@@ -188,11 +198,15 @@ public class ConversionUtils {
   }
 
   public static LocalDate toLocalDate(Object obj) {
-    return toLocalDate(obj, null, null);
+    return toLocalDate(obj, (Map<String, ?>) null, null);
   }
 
   public static LocalDate toLocalDate(Object obj, LocalDate altVal) {
-    return toLocalDate(obj, null, altVal);
+    return toLocalDate(obj, (Map<String, ?>) null, altVal);
+  }
+
+  public static LocalDate toLocalDate(Object obj, Map<String, ?> hints, LocalDate altVal) {
+    return defaultObject(Conversions.convert(obj, LocalDate.class, hints), altVal);
   }
 
   public static LocalDate toLocalDate(Object obj, String pattern) {
@@ -201,23 +215,68 @@ public class ConversionUtils {
 
   public static LocalDate toLocalDate(Object obj, String pattern, LocalDate altVal) {
     if (pattern != null) {
-      return defaultObject(Conversions.convert(obj, LocalDate.class,
-          mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern)), altVal);
+      return toLocalDate(obj, mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern), altVal);
     } else {
-      return defaultObject(Conversions.convert(obj, LocalDate.class), altVal);
+      return toLocalDate(obj, (Map<String, ?>) null, altVal);
     }
   }
 
   public static LocalDate toLocalDate(Object obj, ZoneId zoneId) {
-    return Conversions.convert(obj, LocalDate.class, mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId));
+    if (zoneId != null) {
+      return toLocalDate(obj, mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId), null);
+    } else {
+      return toLocalDate(obj, (Map<String, ?>) null, null);
+    }
   }
 
-  public static List<LocalDate> toLocalDateList(Object obj, String pattern) {
-    if (pattern != null) {
-      return Conversions.convert(obj, LocalDate.class, ArrayList::new,
-          mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern));
+  public static List<LocalDate> toLocalDateList(Object obj, Map<String, ?> hints) {
+    if (hints != null) {
+      return Conversions.convert(obj, LocalDate.class, ArrayList::new, hints);
     } else {
       return toList(obj, LocalDate.class);
+    }
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj) {
+    return toLocalDateTime(obj, (Map<String, ?>) null, null);
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj, LocalDateTime altVal) {
+    return toLocalDateTime(obj, (Map<String, ?>) null, altVal);
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj, Map<String, ?> hints,
+      LocalDateTime altVal) {
+    return defaultObject(Conversions.convert(obj, LocalDateTime.class, hints), altVal);
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj, String pattern) {
+    return toLocalDateTime(obj, pattern, null);
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj, String pattern, LocalDateTime altVal) {
+    if (pattern != null) {
+      return toLocalDateTime(obj, mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern), altVal);
+    } else {
+      return toLocalDateTime(obj, (Map<String, ?>) null, null);
+    }
+
+  }
+
+  public static LocalDateTime toLocalDateTime(Object obj, ZoneId zoneId) {
+    if (zoneId != null) {
+      return toLocalDateTime(obj, mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId), null);
+    } else {
+      return toLocalDateTime(obj, (Map<String, ?>) null, null);
+    }
+  }
+
+  public static List<LocalDateTime> toLocalDateTimeList(Object obj, String pattern) {
+    if (pattern != null) {
+      return Conversions.convert(obj, LocalDateTime.class, ArrayList::new,
+          mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern));
+    } else {
+      return toList(obj, LocalDateTime.class);
     }
   }
 
@@ -270,7 +329,12 @@ public class ConversionUtils {
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj) {
-    return toZonedDateTime(obj, null, null);
+    return toZonedDateTime(obj, (Map<String, ?>) null, null);
+  }
+
+  public static ZonedDateTime toZonedDateTime(Object obj, Map<String, ?> hints,
+      ZonedDateTime altVal) {
+    return defaultObject(Conversions.convert(obj, ZonedDateTime.class, hints), altVal);
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, String pattern) {
@@ -278,23 +342,29 @@ public class ConversionUtils {
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, String pattern, ZonedDateTime altVal) {
-    return defaultObject(Conversions.convert(obj, ZonedDateTime.class,
-        mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern)), altVal);
+    if (pattern != null) {
+      return toZonedDateTime(obj, mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern), altVal);
+    } else {
+      return toZonedDateTime(obj, (Map<String, ?>) null, altVal);
+    }
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, ZonedDateTime altVal) {
-    return toZonedDateTime(obj, null, altVal);
+    return toZonedDateTime(obj, (Map<String, ?>) null, altVal);
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, ZoneId zoneId) {
-    return defaultObject(Conversions.convert(obj, ZonedDateTime.class,
-        mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId)), null);
+    if (zoneId != null) {
+      return toZonedDateTime(obj, mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId), null);
+    } else {
+      return toZonedDateTime(obj, (Map<String, ?>) null, null);
+    }
   }
 
   public static List<ZonedDateTime> toZonedDateTimeList(Object obj, String pattern) {
     if (pattern != null) {
       return Conversions.convert(obj, ZonedDateTime.class, ArrayList::new,
-          mapOf(ConverterHints.CVT_DATE_FMT_PTN_KEY, pattern));
+          mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern));
     } else {
       return toList(obj, ZonedDateTime.class);
     }

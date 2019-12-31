@@ -17,7 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -25,7 +25,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 下午5:40:35
  *
  */
-public class StringLocalTimeConverter extends AbstractConverter<String, LocalTime> {
+public class StringLocalTimeConverter extends AbstractTemporalConverter<String, LocalTime> {
 
   public StringLocalTimeConverter() {
     super();
@@ -58,15 +58,9 @@ public class StringLocalTimeConverter extends AbstractConverter<String, LocalTim
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null) {
-      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
-      if (hintPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(hintPtn);
-      }
-    }
-    if (dtf != null) {
-      return LocalTime.parse(value, dtf);
+    Optional<DateTimeFormatter> dtf = resolveHintFormatter(hints);
+    if (dtf.isPresent()) {
+      return dtf.get().parse(value, LocalTime::from);
     } else {
       return LocalTime.parse(value, DateTimeFormatter.ISO_TIME);
     }

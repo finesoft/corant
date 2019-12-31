@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -149,7 +150,7 @@ public class MapUtils {
 
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
       final Class<T> enumClazz) {
-    return getMapObject(map, key, (o) -> ConversionUtils.toEnum(o, enumClazz), null);
+    return getMapObject(map, key, o -> ConversionUtils.toEnum(o, enumClazz), null);
   }
 
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
@@ -205,7 +206,7 @@ public class MapUtils {
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Class<T> elementClazz) {
-    return getMapObjectList(map, key, (o) -> ConversionUtils.toList(o, elementClazz));
+    return getMapObjectList(map, key, o -> ConversionUtils.toList(o, elementClazz));
   }
 
   /**
@@ -220,7 +221,7 @@ public class MapUtils {
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Function<Object, T> singleElementExtractor) {
-    return getMapObjectList(map, key, (v) -> ConversionUtils.toList(v, singleElementExtractor));
+    return getMapObjectList(map, key, v -> ConversionUtils.toList(v, singleElementExtractor));
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
@@ -232,7 +233,21 @@ public class MapUtils {
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, ZoneId zoneId) {
-    return getMapObject(map, key, (v) -> ConversionUtils.toLocalDate(v, zoneId), null);
+    return getMapObject(map, key, v -> ConversionUtils.toLocalDate(v, zoneId), null);
+  }
+
+  public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key) {
+    return getMapObject(map, key, ConversionUtils::toLocalDateTime, null);
+  }
+
+  public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key,
+      LocalDateTime nvt) {
+    return getMapObject(map, key, ConversionUtils::toLocalDateTime, nvt);
+  }
+
+  public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key,
+      ZoneId zoneId) {
+    return getMapObject(map, key, v -> ConversionUtils.toLocalDateTime(v, zoneId), null);
   }
 
   public static Locale getMapLocale(final Map<?, ?> map, final Object key) {
@@ -253,7 +268,7 @@ public class MapUtils {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static <K, V> Map<K, V> getMapMap(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, (o) -> o instanceof Map ? (Map) o : null, null);
+    return getMapObject(map, key, o -> o instanceof Map ? (Map) o : null, null);
   }
 
   public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
@@ -315,12 +330,12 @@ public class MapUtils {
   }
 
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key, final Class<T> clazz) {
-    return new HashSet<>(getMapObjectList(map, key, (o) -> ConversionUtils.toList(o, clazz)));
+    return new HashSet<>(getMapObjectList(map, key, o -> ConversionUtils.toList(o, clazz)));
   }
 
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
       final Function<Object, T> objFunc) {
-    return new HashSet<>(getMapObjectList(map, key, (v) -> ConversionUtils.toList(v, objFunc)));
+    return new HashSet<>(getMapObjectList(map, key, v -> ConversionUtils.toList(v, objFunc)));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {
@@ -350,7 +365,7 @@ public class MapUtils {
 
   public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key,
       ZoneId zoneId) {
-    return getMapObject(map, key, (v) -> ConversionUtils.toZonedDateTime(v, zoneId), null);
+    return getMapObject(map, key, v -> ConversionUtils.toZonedDateTime(v, zoneId), null);
   }
 
   public static <K, V> Optional<V> getOpt(Map<K, V> map, K key) {
@@ -545,21 +560,14 @@ public class MapUtils {
         return false;
       }
       FlatMapKey other = (FlatMapKey) obj;
-      if (keys == null) {
-        if (other.keys != null) {
-          return false;
-        }
-      } else if (!keys.equals(other.keys)) {
-        return false;
-      }
-      return true;
+      return keys.equals(other.keys);
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (keys == null ? 0 : keys.hashCode());
+      result = prime * result + keys.hashCode();
       return result;
     }
 

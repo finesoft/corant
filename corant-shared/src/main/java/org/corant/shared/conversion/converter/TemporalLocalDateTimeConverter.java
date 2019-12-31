@@ -20,7 +20,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -28,7 +28,8 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 上午10:47:31
  *
  */
-public class TemporalLocalDateTimeConverter extends AbstractConverter<Temporal, LocalDateTime> {
+public class TemporalLocalDateTimeConverter
+    extends AbstractTemporalConverter<Temporal, LocalDateTime> {
 
   public TemporalLocalDateTimeConverter() {
     super();
@@ -63,17 +64,20 @@ public class TemporalLocalDateTimeConverter extends AbstractConverter<Temporal, 
 
   @Override
   protected LocalDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
-    ZoneId zoneId = null;
-    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (hintZoneId instanceof ZoneId) {
-      zoneId = (ZoneId) hintZoneId;
-    } else if (hintZoneId instanceof String) {
-      zoneId = ZoneId.of(hintZoneId.toString());
-    }
-    if (zoneId != null) {
+    Optional<ZoneId> zoneId = resolveHintZoneId(hints);
+    if (zoneId.isPresent()) {
       // violate JSR-310
       if (value instanceof Instant) {
-        return ((Instant) value).atZone(zoneId).toLocalDateTime();
+        return ((Instant) value).atZone(zoneId.get()).toLocalDateTime();
+      } else if (value instanceof LocalDate) {
+        warn(LocalDateTime.class, value);
+        return LocalDateTime.of((LocalDate) value, LocalTime.ofNanoOfDay(0L));
+      }
+    } else if (!isStrict(hints)) {
+      // violate JSR-310
+      warn(LocalDateTime.class, value);
+      if (value instanceof Instant) {
+        return ((Instant) value).atZone(ZoneId.systemDefault()).toLocalDateTime();
       } else if (value instanceof LocalDate) {
         return LocalDateTime.of((LocalDate) value, LocalTime.ofNanoOfDay(0L));
       }

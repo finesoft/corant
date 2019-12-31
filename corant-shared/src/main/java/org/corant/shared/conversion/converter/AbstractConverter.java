@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -96,6 +97,13 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
   protected abstract T convert(S value, Map<String, ?> hints) throws Exception;
 
+  protected boolean isStrict(Map<String, ?> hints) {
+    if (ConverterHints.containsKey(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY)) {
+      return ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY);
+    }
+    return false;
+  }
+
   /**
    *
    * @param defaultValue the defaultValue to set
@@ -110,6 +118,18 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    */
   protected void setThrowException(boolean throwException) {
     this.throwException = throwException;
+  }
+
+  protected void warn(Class<?> target, Object object) {
+    if (object == null) {
+      logger.warning(
+          () -> String.format("The conversion of an object from %s to %s may cause distortion!",
+              "Object", target.getName()));
+    } else {
+      logger
+          .warning(() -> String.format("The conversion of [%s] from %s to %s may cause distortion!",
+              asString(object), object.getClass().getName(), target.getName()));
+    }
   }
 
 }

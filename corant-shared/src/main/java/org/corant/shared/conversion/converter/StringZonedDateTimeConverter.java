@@ -14,11 +14,17 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.split;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -26,7 +32,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 下午5:40:35
  *
  */
-public class StringZonedDateTimeConverter extends AbstractConverter<String, ZonedDateTime> {
+public class StringZonedDateTimeConverter extends AbstractTemporalConverter<String, ZonedDateTime> {
 
   public StringZonedDateTimeConverter() {
     super();
@@ -64,28 +70,59 @@ public class StringZonedDateTimeConverter extends AbstractConverter<String, Zone
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null) {
-      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
-      if (hintPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(hintPtn);
+    boolean strictly = isStrict(hints);
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    if (value.contains(",")) {
+      String[] arr = split(value, ",", true, true);
+      if (arr.length == 2 && arr[0].chars().allMatch(Character::isDigit)
+          && arr[1].chars().allMatch(Character::isDigit)) {
+        if (ozoneId.isPresent()) {
+          return ZonedDateTime.ofInstant(
+              Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1])), ozoneId.get());
+        } else if (!strictly) {
+          warn(ZonedDateTime.class, value);
+          return ZonedDateTime.ofInstant(
+              Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1])),
+              ZoneId.systemDefault());
+        }
       }
     }
-    ZoneId zoneId = ZoneId.systemDefault();
-    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (hintZoneId instanceof ZoneId) {
-      zoneId = (ZoneId) hintZoneId;
-    } else if (hintZoneId instanceof String) {
-      zoneId = ZoneId.of(hintZoneId.toString());
-    }
-
-    if (dtf != null) {
-      return ZonedDateTime.parse(value, dtf);
-    } else if (value.indexOf('[') != -1 && value.indexOf(']') != -1) {
-      return ZonedDateTime.parse(value);
+    Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
+    if (hintDtf.isPresent()) {
+      return hintDtf.get().parse(value, ZonedDateTime::from);// strictly
     } else {
-      StringBuilder zone = new StringBuilder("[").append(zoneId.toString()).append("]");
-      return ZonedDateTime.parse(value + zone);
+      TemporalMatcher m = decideMatcher(value).orElse(null);
+      if (m != null) {
+        if (m.withTime) {
+          TemporalAccessor ta = m.formatter.parseBest(value, ZonedDateTime::from,
+              OffsetDateTime::from, LocalDateTime::from, Instant::from);
+          if (ta instanceof Instant) {
+            if (ozoneId.isPresent()) {
+              return ((Instant) ta).atZone(ozoneId.get());
+            } else if (!strictly) {
+              warn(ZonedDateTime.class, value);
+              return ((Instant) ta).atZone(ZoneId.systemDefault());
+            }
+          } else if (ta instanceof ZonedDateTime) {
+            return (ZonedDateTime) ta;
+          } else if (ta instanceof OffsetDateTime) {
+            return ((OffsetDateTime) ta).toZonedDateTime();
+          } else if (ta instanceof LocalDateTime) {
+            if (ozoneId.isPresent()) {
+              return ((LocalDateTime) ta).atZone(ozoneId.get());
+            } else if (!strictly) {
+              warn(ZonedDateTime.class, value);
+              return ((LocalDateTime) ta).atZone(ZoneId.systemDefault());
+            }
+          }
+        } else if (!strictly) {
+          warn(ZonedDateTime.class, value);
+          LocalDate ta = m.formatter.parse(value, LocalDate::from);
+          return ta.atStartOfDay(ozoneId.orElse(ZoneId.systemDefault()));
+        }
+      }
+      return ZonedDateTime.parse(value);
     }
   }
+
 }

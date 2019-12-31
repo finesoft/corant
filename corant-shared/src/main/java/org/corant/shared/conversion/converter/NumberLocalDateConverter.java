@@ -13,8 +13,13 @@
  */
 package org.corant.shared.conversion.converter;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -22,7 +27,7 @@ import java.util.Map;
  * @author bingo 下午5:35:33
  *
  */
-public class NumberLocalDateConverter extends AbstractConverter<Number, LocalDate> {
+public class NumberLocalDateConverter extends AbstractTemporalConverter<Number, LocalDate> {
 
   public NumberLocalDateConverter() {
     super();
@@ -57,6 +62,23 @@ public class NumberLocalDateConverter extends AbstractConverter<Number, LocalDat
 
   @Override
   protected LocalDate convert(Number value, Map<String, ?> hints) throws Exception {
+    ChronoUnit cu = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY);
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    if (ozoneId.isPresent()) {
+      if (ChronoUnit.MILLIS.equals(cu)) {
+        return Instant.ofEpochMilli(value.longValue()).atZone(ozoneId.get()).toLocalDate();
+      } else if (ChronoUnit.SECONDS.equals(cu)) {
+        return Instant.ofEpochSecond(value.longValue()).atZone(ozoneId.get()).toLocalDate();
+      }
+    } else if (!isStrict(hints)) {
+      warn(LocalDate.class, value);
+      if (ChronoUnit.MILLIS.equals(cu)) {
+        return Instant.ofEpochMilli(value.longValue()).atZone(ZoneId.systemDefault()).toLocalDate();
+      } else if (ChronoUnit.SECONDS.equals(cu)) {
+        return Instant.ofEpochSecond(value.longValue()).atZone(ZoneId.systemDefault())
+            .toLocalDate();
+      }
+    }
     return LocalDate.ofEpochDay(value.longValue());
   }
 }

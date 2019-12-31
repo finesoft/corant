@@ -27,9 +27,13 @@ public class ConverterHints {
 
   public static final String CVT_NEST_DEPT_KEY = "converter.max.nest.dept";
 
-  public static final String CVT_DATE_FMT_PTN_KEY = "converter.date.formater.pattern";
+  public static final String CVT_TEMPORAL_FMT_PTN_KEY = "converter.temporal.formater.pattern";
 
-  public static final String CVT_DATE_FMT_KEY = "converter.date.formater";
+  public static final String CVT_TEMPORAL_FMT_KEY = "converter.temporal.formater";
+
+  public static final String CVT_TEMPORAL_EPOCH_KEY = "converter.temporal.of-epoch";
+
+  public static final String CVT_TEMPORAL_STRICTLY_KEY = "converter.temporal.strictly";
 
   public static final String CVT_ZONE_ID_KEY = "converter.zoneId";
 

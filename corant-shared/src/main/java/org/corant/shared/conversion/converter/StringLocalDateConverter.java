@@ -13,15 +13,17 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.CollectionUtils.swap;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.split;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
-import org.corant.shared.conversion.ConversionException;
-import org.corant.shared.conversion.ConverterHints;
-import org.corant.shared.exception.NotSupportedException;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -29,7 +31,7 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 下午5:40:35
  *
  */
-public class StringLocalDateConverter extends AbstractConverter<String, LocalDate> {
+public class StringLocalDateConverter extends AbstractTemporalConverter<String, LocalDate> {
 
   public StringLocalDateConverter() {
     super();
@@ -62,39 +64,39 @@ public class StringLocalDateConverter extends AbstractConverter<String, LocalDat
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null) {
-      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
-      if (hintPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(hintPtn);
-      }
-    }
-    if (dtf != null) {
-      LocalDate.parse(value, dtf);
-    } else if (value.chars().allMatch(Character::isDigit)) {
-      return LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE);
+
+    Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    boolean strictly = isStrict(hints);
+    if (hintDtf.isPresent()) {
+      return hintDtf.get().parse(value, LocalDate::from);// strictly
     } else {
-      String[] values = split(value, c -> c == '-' || c == ' ' || c == '/' || c == '.');
-      if (values.length == 3 && values[0].length() == 2 && values[2].length() == 4) {
-        swap(values, 0, 2);// MM/DD/YYYY
-      }
-      String fixedValue = String.join("-", values);
-      if (values.length == 3) {
-        if (values[1].chars().allMatch(Character::isDigit)) {
-          if (values[2].contains("+")) {
-            return LocalDate.parse(fixedValue, DateTimeFormatter.ISO_OFFSET_DATE);
-          } else {
-            return LocalDate.parse(fixedValue, DateTimeFormatter.ISO_LOCAL_DATE);
-          }
+      TemporalMatcher m = decideMatcher(value).orElse(null);
+      if (m != null) {
+        if (!m.withTime) {
+          return m.formatter.parse(value, LocalDate::from);
         } else {
-          return LocalDate.parse(fixedValue, DateTimeFormatter.ISO_WEEK_DATE);
+          TemporalAccessor ta = m.formatter.parseBest(value, LocalDateTime::from,
+              ZonedDateTime::from, OffsetDateTime::from, Instant::from);
+          if (ta instanceof Instant) {
+            if (ozoneId.isPresent()) {
+              return ((Instant) ta).atZone(ozoneId.get()).toLocalDate();
+            } else if (!strictly) {
+              warn(LocalDate.class, value);
+              return ((Instant) ta).atZone(ZoneId.systemDefault()).toLocalDate();
+            }
+          } else if (ta instanceof ZonedDateTime) {
+            return ((ZonedDateTime) ta).toLocalDate();
+          } else if (ta instanceof OffsetDateTime) {
+            return ((OffsetDateTime) ta).toLocalDate();
+          } else if (ta instanceof LocalDateTime) {
+            return ((LocalDateTime) ta).toLocalDate();
+          }
         }
-      } else if (values.length == 2) {
-        return LocalDate.parse(fixedValue, DateTimeFormatter.ISO_ORDINAL_DATE);
       }
+      return LocalDate.parse(value);
     }
-    throw new ConversionException(new NotSupportedException(),
-        "Can not convert String value '%s' to LocalDate!", value);
+
   }
 
 }

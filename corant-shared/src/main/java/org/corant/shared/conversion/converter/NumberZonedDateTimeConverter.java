@@ -14,9 +14,13 @@
 package org.corant.shared.conversion.converter;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
+import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.ConverterHints;
 
 /**
@@ -25,7 +29,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 下午5:35:33
  *
  */
-public class NumberZonedDateTimeConverter extends AbstractConverter<Number, ZonedDateTime> {
+public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Number, ZonedDateTime> {
 
   public NumberZonedDateTimeConverter() {
     super();
@@ -60,13 +64,27 @@ public class NumberZonedDateTimeConverter extends AbstractConverter<Number, Zone
 
   @Override
   protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
-    ZoneId zoneId = ZoneId.systemDefault();
-    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (hintZoneId instanceof ZoneId) {
-      zoneId = (ZoneId) hintZoneId;
-    } else if (hintZoneId instanceof String) {
-      zoneId = ZoneId.of(hintZoneId.toString());
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    if (!ozoneId.isPresent()) {
+      if (!isStrict(hints)) {
+        warn(LocalDateTime.class, value);
+        if (ChronoUnit.SECONDS
+            .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
+          return ZonedDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()),
+              ZoneId.systemDefault());
+        } else {
+          return ZonedDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()),
+              ZoneId.systemDefault());
+        }
+      }
+    } else {
+      if (ChronoUnit.SECONDS
+          .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()), ozoneId.get());
+      } else {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()), ozoneId.get());
+      }
     }
-    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()), zoneId);
+    throw new ConversionException("Can't not convert %s to ZonedDateTime", value);
   }
 }

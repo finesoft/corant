@@ -14,7 +14,9 @@
 package org.corant.shared.conversion.converter;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -22,7 +24,7 @@ import java.util.Map;
  * @author bingo 下午5:35:33
  *
  */
-public class NumberInstantConverter extends AbstractConverter<Number, Instant> {
+public class NumberInstantConverter extends AbstractTemporalConverter<Number, Instant> {
 
   public NumberInstantConverter() {
     super();
@@ -57,6 +59,11 @@ public class NumberInstantConverter extends AbstractConverter<Number, Instant> {
 
   @Override
   protected Instant convert(Number value, Map<String, ?> hints) throws Exception {
-    return Instant.ofEpochMilli(value.longValue());
+    if (ChronoUnit.SECONDS
+        .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
+      return Instant.ofEpochSecond(value.longValue());
+    } else {
+      return Instant.ofEpochMilli(value.longValue());
+    }
   }
 }

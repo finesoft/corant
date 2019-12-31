@@ -16,7 +16,11 @@ package org.corant.shared.conversion.converter;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
+import org.corant.shared.conversion.ConversionException;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -24,7 +28,7 @@ import java.util.Map;
  * @author bingo 下午5:35:33
  *
  */
-public class NumberLocalDateTimeConverter extends AbstractConverter<Number, LocalDateTime> {
+public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Number, LocalDateTime> {
 
   public NumberLocalDateTimeConverter() {
     super();
@@ -59,6 +63,27 @@ public class NumberLocalDateTimeConverter extends AbstractConverter<Number, Loca
 
   @Override
   protected LocalDateTime convert(Number value, Map<String, ?> hints) throws Exception {
-    return LocalDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()), ZoneId.systemDefault());
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    if (!ozoneId.isPresent()) {
+      if (!isStrict(hints)) {
+        warn(LocalDateTime.class, value);
+        if (ChronoUnit.SECONDS
+            .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
+          return LocalDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()),
+              ZoneId.systemDefault());
+        } else {
+          return LocalDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()),
+              ZoneId.systemDefault());
+        }
+      }
+    } else {
+      if (ChronoUnit.SECONDS
+          .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(value.longValue()), ozoneId.get());
+      } else {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value.longValue()), ozoneId.get());
+      }
+    }
+    throw new ConversionException("Can't not convert %s to LocalDateTime", value);
   }
 }

@@ -14,10 +14,17 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.split;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -25,7 +32,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 下午5:40:35
  *
  */
-public class StringInstantConverter extends AbstractConverter<String, Instant> {
+public class StringInstantConverter extends AbstractTemporalConverter<String, Instant> {
 
   public StringInstantConverter() {
     super();
@@ -63,19 +70,44 @@ public class StringInstantConverter extends AbstractConverter<String, Instant> {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null) {
-      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
-      if (hintPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(hintPtn);
+    if (value.contains(",")) {
+      String[] arr = split(value, ",", true, true);
+      if (arr.length == 2 && arr[0].chars().allMatch(Character::isDigit)
+          && arr[1].chars().allMatch(Character::isDigit)) {
+        return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]));
       }
     }
-    if (dtf != null) {
-      return dtf.parse(value, Instant::from);
-    } else if (value.chars().allMatch(Character::isDigit)) {
-      // My be long
-      return Instant.ofEpochMilli(Long.parseLong(value));
+    Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    boolean strictly = isStrict(hints);
+    if (hintDtf.isPresent()) {
+      return hintDtf.get().parse(value, Instant::from);// strictly
     } else {
+      TemporalMatcher m = decideMatcher(value).orElse(null);
+      if (m != null) {
+        if (m.withTime) {
+          TemporalAccessor ta = m.formatter.parseBest(value, Instant::from, ZonedDateTime::from,
+              OffsetDateTime::from, LocalDateTime::from);
+          if (ta instanceof Instant) {
+            return (Instant) ta;
+          } else if (ta instanceof ZonedDateTime) {
+            return ((ZonedDateTime) ta).toInstant();
+          } else if (ta instanceof OffsetDateTime) {
+            return ((OffsetDateTime) ta).toInstant();
+          } else if (ta instanceof LocalDateTime) {
+            if (ozoneId.isPresent()) {
+              return ((LocalDateTime) ta).atZone(ozoneId.get()).toInstant();
+            } else if (!strictly) {
+              warn(Instant.class, value);
+              return ((LocalDateTime) ta).atZone(ZoneId.systemDefault()).toInstant();
+            }
+          }
+        } else if (!strictly) {
+          warn(Instant.class, value);
+          LocalDate ta = m.formatter.parse(value, LocalDate::from);
+          return ta.atStartOfDay(ozoneId.orElse(ZoneId.systemDefault())).toInstant();
+        }
+      }
       return Instant.parse(value);
     }
   }

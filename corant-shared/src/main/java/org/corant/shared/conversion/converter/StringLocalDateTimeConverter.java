@@ -14,10 +14,17 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.split;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
-import org.corant.shared.conversion.ConverterHints;
+import java.util.Optional;
 
 /**
  * corant-shared
@@ -25,7 +32,7 @@ import org.corant.shared.conversion.ConverterHints;
  * @author bingo 下午5:40:35
  *
  */
-public class StringLocalDateTimeConverter extends AbstractConverter<String, LocalDateTime> {
+public class StringLocalDateTimeConverter extends AbstractTemporalConverter<String, LocalDateTime> {
 
   public StringLocalDateTimeConverter() {
     super();
@@ -58,19 +65,50 @@ public class StringLocalDateTimeConverter extends AbstractConverter<String, Loca
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_KEY);
-    if (dtf == null) {
-      String hintPtn = ConverterHints.getHint(hints, ConverterHints.CVT_DATE_FMT_PTN_KEY);
-      if (hintPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(hintPtn);
+    Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
+    Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
+    boolean strictly = isStrict(hints);
+    if (value.contains(",")) {
+      // violate JSR-310
+      String[] arr = split(value, ",", true, true);
+      if (arr.length == 2 && arr[0].chars().allMatch(Character::isDigit)
+          && arr[1].chars().allMatch(Character::isDigit)) {
+        if (ozoneId.isPresent()) {
+          return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]))
+              .atZone(ozoneId.get()).toLocalDateTime();
+        } else if (!strictly) {
+          warn(LocalDateTime.class, value);
+          return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]))
+              .atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
       }
     }
-    if (dtf != null) {
-      return LocalDateTime.parse(value, dtf);
-    } else if (value.contains("T")) {
-      return LocalDateTime.parse(value);
+
+    if (hintDtf.isPresent()) {
+      return hintDtf.get().parse(value, LocalDateTime::from);// strictly
     } else {
-      return LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+      TemporalMatcher m = decideMatcher(value).orElse(null);
+      if (m != null) {
+        if (m.withTime) {
+          TemporalAccessor ta = m.formatter.parseBest(value, LocalDateTime::from,
+              ZonedDateTime::from, OffsetDateTime::from, Instant::from);
+          if (ta instanceof LocalDateTime || ta instanceof ZonedDateTime
+              || ta instanceof OffsetDateTime) {
+            return LocalDateTime.from(ta);
+          } else if (ta instanceof Instant) {
+            if (ozoneId.isPresent()) {
+              return ((Instant) ta).atZone(ozoneId.get()).toLocalDateTime();
+            } else if (!strictly) {
+              warn(LocalDateTime.class, value);
+              return ((Instant) ta).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            }
+          }
+        } else if (!strictly) {
+          warn(LocalDateTime.class, value);
+          return m.formatter.parse(value, LocalDate::from).atStartOfDay();
+        }
+      }
+      return LocalDateTime.parse(value);
     }
   }
 }

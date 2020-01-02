@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
@@ -44,6 +45,8 @@ public class ConverterHints {
   public static final String CVT_TEMPORAL_STRICTLY_KEY = "converter.temporal.strictly";
 
   public static final String CVT_ZONE_ID_KEY = "converter.zone-id";
+
+  public static final String CVT_LOCAL_KEY = "converter.local";
 
   public static final String CVT_CLS_LOADER_KEY = "converter.class-loader";
 
@@ -75,10 +78,16 @@ public class ConverterHints {
   static Map<String, Object> resolveSysProHints() {
     Map<String, Object> map = new HashMap<>();
     resolveSysProHints(map, CVT_NEST_DEPT_KEY, Integer::valueOf);
-    resolveSysProHints(map, CVT_TEMPORAL_FMT_PTN_KEY, DateTimeFormatter::ofPattern);
+    resolveSysProHints(map, CVT_ZONE_ID_KEY, ZoneId::of);
+    resolveSysProHints(map, CVT_LOCAL_KEY, Locale::forLanguageTag);
+    resolveSysProHints(map, CVT_TEMPORAL_FMT_PTN_KEY, s -> s);
+    resolveSysProHints(map, CVT_TEMPORAL_FMT_KEY,
+        s -> map.get(CVT_LOCAL_KEY) != null
+            ? DateTimeFormatter.ofPattern(s, (Locale) map.get(CVT_LOCAL_KEY))
+            : DateTimeFormatter.ofPattern(s));
     resolveSysProHints(map, CVT_TEMPORAL_EPOCH_KEY, ChronoUnit::valueOf);
     resolveSysProHints(map, CVT_TEMPORAL_STRICTLY_KEY, Boolean::valueOf);
-    resolveSysProHints(map, CVT_ZONE_ID_KEY, ZoneId::of);
+
     return map;
   }
 

@@ -23,7 +23,11 @@ import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 import static java.time.temporal.ChronoField.YEAR;
 import static org.corant.shared.util.CollectionUtils.immutableListOf;
 import static org.corant.shared.util.MapUtils.immutableMapOf;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
@@ -38,6 +42,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.corant.shared.conversion.ConverterHints;
+import org.corant.shared.util.StopWatch;
 
 /**
  * corant-shared
@@ -170,7 +175,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
           new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}-\\d{1,2}\\.\\d{2}\\.\\d{2}\\.\\d{1,6}$",
               "yyyy-MM-dd-HH.mm.ss.SSSSSS", true),
 
-          // SQL timestamp
+          // SQL timestamp NOTE:imprecision for MSSQL SERVER
           new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}\\:\\d{2}\\:\\d{2}\\.\\d{3,}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive()
                   .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
@@ -274,29 +279,28 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     values.add("1979-11-14 11:14:08.8888");
     values.add("Wed, 14 Nov 1979 11:14:08 GMT");
     values.add("Wed Nov 14 11:14:08 GMT 1979");
-    long t1 = System.currentTimeMillis();
+    StopWatch sw = StopWatch.press("Time use");
     values.forEach(v -> {
       Optional<TemporalFormatter> tf = decideFormatter(v);
       if (tf.isPresent()) {
-        // try {
-        // if (tf.get().isWithTime()) {
-        // String s = tf.get().getFormatter()
-        // .parseBest(v, Instant::from, ZonedDateTime::from, LocalDateTime::from).toString();
-        // System.out.println(v + "\t=\t" + s + "\t\t" + tf.get().getDescription());
-        // } else {
-        // String s = DateTimeFormatter.ISO_DATE
-        // .format(tf.get().getFormatter().parse(v, LocalDate::from));
-        // System.out.println(v + "\t=\t" + s + "\t\t" + tf.get().getDescription());
-        // }
-        // } catch (Exception e) {
-        // System.out.println("==========" + v + "==========");
-        // e.printStackTrace();
-        // }
-        // } else {
-        // System.out.println("********" + v + "*********");
+        try {
+          if (tf.get().isWithTime()) {
+            String s = tf.get().getFormatter()
+                .parseBest(v, Instant::from, ZonedDateTime::from, LocalDateTime::from).toString();
+            System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
+          } else {
+            String s = DateTimeFormatter.ISO_DATE
+                .format(tf.get().getFormatter().parse(v, LocalDate::from));
+            System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
+          }
+        } catch (Exception e) {
+          e.printStackTrace(); // NOSONAR
+        }
+      } else {
+        System.out.println(String.format("Formatter %s not found!", v));
       }
     });
-    System.out.println(System.currentTimeMillis() - t1);
+    sw.stop((t) -> System.out.println(t.getTaskName() + " : " + t.getTimeMillis() + " ms!"));
   }
 
   protected Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
@@ -304,7 +308,12 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     if (dtf == null) {
       String dtfPtn = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY);
       if (dtfPtn != null) {
-        dtf = DateTimeFormatter.ofPattern(dtfPtn);
+        if (ConverterHints.getHint(hints, ConverterHints.CVT_LOCAL_KEY) != null) {
+          dtf = DateTimeFormatter.ofPattern(dtfPtn,
+              ConverterHints.getHint(hints, ConverterHints.CVT_LOCAL_KEY));
+        } else {
+          dtf = DateTimeFormatter.ofPattern(dtfPtn);
+        }
       }
     }
     return Optional.ofNullable(dtf);

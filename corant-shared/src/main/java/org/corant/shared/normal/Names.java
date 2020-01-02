@@ -31,6 +31,8 @@ public interface Names {
 
   String CORANT_APP_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "application-name";
 
+  String CORANT_PREFIX = CORANT + NAME_SPACE_SEPARATORS;
+
   static String applicationName() {
     return defaultString(System.getProperty(CORANT_APP_NME_KEY), CORANT);
   }

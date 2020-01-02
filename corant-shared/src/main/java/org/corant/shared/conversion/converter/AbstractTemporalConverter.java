@@ -15,15 +15,22 @@ package org.corant.shared.conversion.converter;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
 import static java.time.temporal.ChronoField.DAY_OF_WEEK;
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 import static java.time.temporal.ChronoField.YEAR;
 import static org.corant.shared.util.CollectionUtils.immutableListOf;
+import static org.corant.shared.util.MapUtils.immutableMapOf;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
+import java.time.format.TextStyle;
 import java.time.temporal.IsoFields;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,78 +48,154 @@ import org.corant.shared.conversion.ConverterHints;
 public abstract class AbstractTemporalConverter<S, T extends Temporal>
     extends AbstractConverter<S, T> {
 
-  static final List<TemporalFormatter> formatters = immutableListOf(
-      new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false),
-      new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy", false),
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}(\\+\\d{2}:\\d{2})?$",
-          DateTimeFormatter.ISO_DATE, "yyyy-MM-dd", false),
-      new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}$", "MM/dd/yyyy", false),
-      new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd", false),
-      new TemporalFormatter("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}$",
-          new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
-              .appendLiteral('.').appendValue(MONTH_OF_YEAR, 2).appendLiteral('.')
-              .appendValue(DAY_OF_MONTH, 2).toFormatter(),
-          "yyyy.MM.dd", false),
-      // 27 Sep 2015 only for US
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}$", "dd MMM yyyy", Locale.US, false),
-      // 27-Sep-2015 only for US
-      new TemporalFormatter("^\\d{1,2}-[a-zA-Z]{3}-\\d{4}$", "dd-MMM-yyyy", Locale.US, false),
-      // 27 June 2015 only for US
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}$", "dd MMMM yyyy", Locale.US, false),
-      // ISO Week dates
-      new TemporalFormatter("^\\d{4}-W\\d{2}-\\d{1}$", DateTimeFormatter.ISO_WEEK_DATE,
-          "yyyy-Www-D", false),
-      // ISO Week dates
-      new TemporalFormatter("^\\d{4}W\\d{2}\\d{1}$",
-          new DateTimeFormatterBuilder().parseCaseInsensitive()
-              .appendValue(IsoFields.WEEK_BASED_YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-              .appendLiteral("W").appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR, 2)
-              .appendValue(DAY_OF_WEEK, 1).toFormatter(),
-          "yyyyWwwD", false),
-      new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true),
-      new TemporalFormatter("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm", true),
-      new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}$", "dd-MM-yyyy HH:mm",
-          true),
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy-MM-dd HH:mm",
-          true),
-      new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}$", "MM/dd/yyyy HH:mm",
-          true),
-      new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy/MM/dd HH:mm",
-          true),
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-          "dd MMM yyyy HH:mm", Locale.US, true),
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-          "dd MMMM yyyy HH:mm", Locale.US, true),
-      new TemporalFormatter("^\\d{14}$", "yyyyMMddHHmmss", true),
-      new TemporalFormatter("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss", true),
-      new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "dd-MM-yyyy HH:mm:ss", true),
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "yyyy-MM-dd HH:mm:ss", true),
+  public static final Map<Long, String> DEFAULT_DAY_OF_WEEK_LP = // NOSONAR
+      immutableMapOf(1L, "Mon", 2L, "Tue", 3L, "Wed", 4L, "Thu", 5L, "Fri", 6L, "Sat", 7L, "Sun");
 
-      // ISO_INSTANT
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}Z$",
-          DateTimeFormatter.ISO_INSTANT, "yyyy-MM-ddTHH:mm:ssZ", true),
-      // ISO_DATE_TIME
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}(.*)?",
-          DateTimeFormatter.ISO_DATE_TIME, "yyyy-MM-ddTHH:mm:ss+o[z]", true),
+  public static final Map<Long, String> DEFAULT_ZH_DAY_OF_WEEK_LP = // NOSONAR
+      immutableMapOf(1L, "星期一", 2L, "星期二", 3L, "星期三", 4L, "星期四", 5L, "星期五", 6L, "星期六", 7L, "星期日");
 
-      new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "MM/dd/yyyy HH:mm:ss", true),
-      new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "yyyy/MM/dd HH:mm:ss", true),
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "dd MMM yyyy HH:mm:ss", Locale.US, true),
-      new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-          "dd MMMM yyyy HH:mm:ss", Locale.US, true),
-      new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}-\\d{1,2}\\.\\d{2}\\.\\d{2}\\.\\d{1,6}$",
-          "yyyy-MM-dd-HH.mm.ss.SSSSSS", true),
-      // Tue, 3 Jun 2008 11:05:30 GMT
-      new TemporalFormatter(
-          "^[a-zA-Z]{3}\\,\\s\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s(.*)?",
-          DateTimeFormatter.RFC_1123_DATE_TIME, "RFC_1123_DATE_TIME", true)
+  public static final Map<Long, String> DEFAULT_MONTH_OF_YEAR_LP = // NOSONAR
+      immutableMapOf(1L, "Jan", 2L, "Feb", 3L, "Mar", 4L, "Apr", 5L, "May", 6L, "Jun", 7L, "Jul",
+          8L, "Aug", 9L, "Sep", 10L, "Oct", 11L, "Nov", 12L, "Dec");
 
-  );
+  public static final Map<Long, String> DEFAULT_ZH_MONTH_OF_YEAR_LP = // NOSONAR
+      immutableMapOf(1L, "一月", 2L, "二月", 3L, "三月", 4L, "四月", 5L, "五月", 6L, "六月", 7L, "七月", 8L, "八月",
+          9L, "九月", 10L, "十月", 11L, "十一月", 12L, "十二月");
+
+  public static final List<TemporalFormatter> DEFAULT_FORMATTERS = // NOSONAR
+
+      immutableListOf(
+
+          new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false),
+
+          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy", false),
+
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}(\\+\\d{2}:\\d{2})?$",
+              DateTimeFormatter.ISO_DATE, "yyyy-MM-dd", false),
+
+          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}$", "MM/dd/yyyy", false),
+
+          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd", false),
+
+          new TemporalFormatter("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('.').appendValue(MONTH_OF_YEAR, 2).appendLiteral('.')
+                  .appendValue(DAY_OF_MONTH, 2).toFormatter(),
+              "yyyy.MM.dd", false),
+
+          // 1979年11月14日
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日$", "yyyy年MM月dd日", false),
+
+          // 14 Nov 1979 only for US
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}$", "dd MMM yyyy", Locale.US,
+              false),
+
+          // 14-Nov-1979 only for US
+          new TemporalFormatter("^\\d{1,2}-[a-zA-Z]{3}-\\d{4}$", "dd-MMM-yyyy", Locale.US, false),
+
+          // 14 November 1979 only for US
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}$", "dd MMMM yyyy", Locale.US,
+              false),
+
+          // ISO Week dates
+          new TemporalFormatter("^\\d{4}-W\\d{2}-\\d{1}$", DateTimeFormatter.ISO_WEEK_DATE,
+              "yyyy-Www-D", false),
+
+          // ISO Week dates
+          new TemporalFormatter("^\\d{4}W\\d{2}\\d{1}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(IsoFields.WEEK_BASED_YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+                  .appendLiteral("W").appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR, 2)
+                  .appendValue(DAY_OF_WEEK, 1).toFormatter(),
+              "yyyyWwwD", false),
+
+          new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true),
+
+          new TemporalFormatter("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm", true),
+
+          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}$", "dd-MM-yyyy HH:mm",
+              true),
+
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy-MM-dd HH:mm",
+              true),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{2}分$",
+              "yyyy年MM月dd日 HH时mm分", true),
+
+          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}$", "MM/dd/yyyy HH:mm",
+              true),
+
+          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy/MM/dd HH:mm",
+              true),
+
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
+              "dd MMM yyyy HH:mm", Locale.US, true),
+
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
+              "dd MMMM yyyy HH:mm", Locale.US, true),
+
+          new TemporalFormatter("^\\d{14}$", "yyyyMMddHHmmss", true),
+
+          new TemporalFormatter("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss", true),
+
+          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "dd-MM-yyyy HH:mm:ss", true),
+
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "yyyy-MM-dd HH:mm:ss", true),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{2}分\\d{2}秒$",
+              "yyyy年MM月dd日 HH时mm分ss秒", true),
+
+          // ISO_INSTANT
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}Z$",
+              DateTimeFormatter.ISO_INSTANT, "yyyy-MM-ddTHH:mm:ssZ", true),
+
+          // ISO_DATE_TIME
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}(.*)?",
+              DateTimeFormatter.ISO_DATE_TIME, "yyyy-MM-ddTHH:mm:ss+o[z]", true),
+
+          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "MM/dd/yyyy HH:mm:ss", true),
+
+          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "yyyy/MM/dd HH:mm:ss", true),
+
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "dd MMM yyyy HH:mm:ss", Locale.US, true),
+
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "dd MMMM yyyy HH:mm:ss", Locale.US, true),
+
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}-\\d{1,2}\\.\\d{2}\\.\\d{2}\\.\\d{1,6}$",
+              "yyyy-MM-dd-HH.mm.ss.SSSSSS", true),
+
+          // SQL timestamp
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}\\:\\d{2}\\:\\d{2}\\.\\d{3,}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                  .appendFraction(NANO_OF_SECOND, 3, 9, true).toFormatter(),
+              "yyyy-MM-dd HH:mm:ss.[S...]", true),
+
+          // Tue, 3 Jun 2008 11:05:30 GMT
+          new TemporalFormatter(
+              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s(.*)?",
+              DateTimeFormatter.RFC_1123_DATE_TIME, "RFC_1123_DATE_TIME", true),
+
+          // Thu Jan 02 11:26:28 CST 2020 java.util.Date string
+          new TemporalFormatter(
+              "^[a-zA-Z]{3}\\s[a-zA-Z]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                  .appendText(DAY_OF_WEEK, DEFAULT_DAY_OF_WEEK_LP).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, DEFAULT_MONTH_OF_YEAR_LP).appendLiteral(' ')
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2)
+                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
+                  .appendZoneText(TextStyle.SHORT).appendLiteral(' ').appendValue(YEAR, 4)
+                  .toFormatter(),
+              "java.util.Date().toString()", true)
+
+      );
 
   /**
    *
@@ -143,52 +226,77 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     super(defaultValue, throwException);
   }
 
-  // public static void main(String... strings) {
-  // String s = "";
-  // final String s = "2011-12-03T10:15:30+01:00[Europe/Paris]";//
-  // ISO_DATE_TIME,ISO_ZONED_DATE_TIME
-  // final String s = "2011-12-03T10:15:30Z";// ISO_INSTANT
-  // final String s = "2011-12-03T10:15:30";// ISO_DATE_TIME
-  // final String s = "2011-12-03T10:15:30+01:00";// ISO_DATE_TIME,ISO_OFFSET_DATE_TIME
-  // final String s = "2011-12-03"; // ISO_DATE
-  // final String s = "20111203"; // BASIC_ISO_DATE
-  // final String s = "2011-12-03+01:00";// ISO_OFFSET_DATE,ISO_DATE
-  // final String s = "31-12-2019";
-  // final String s = "12/31/2019";
-  // final String s = "2016/12/31";
-  // final String s = "2016.12.31";
-  // final String s = "27 June 2015";
-  // final String s = "2004-W19-1";
-  // final String s = "2004W191";
-  // final String s = "200411142321";
-  // final String s = "20041114 2321";
-  // final String s = "14-11-2011 23:21";
-  // final String s = "2011-11-14 23:21";
-  // final String s = "11/14/1979 23:21";
-  // final String s = "1979/11/14 23:21";
-  // final String s = "27 june 2015 23:21";
-  // final String s = "27 may 2015 23:21";
-  // final String s = "20041114232123";
-  // final String s = "20041114 232123";
-  // final String s = "14-11-2011 23:21:10";
-  // final String s = "2011-11-14 23:21:19";
-  // final String s = "11/14/1979 23:21:13";
-  // final String s = "1979/11/14 23:21:13";
-  // final String s = "27 JUNE 2015 23:21:17";
-  // final String s = "2016-01-19-09.55.00.000000";
-  // formatters.stream().filter(t -> t.match(s)).forEach(t -> {
-  // System.out.println(t.regex + "\t\t" + s + "\t\t" + t.patternString);
-  // System.out
-  // .println(t.formatter.parseBest(s, LocalDateTime::from, Instant::from, LocalDate::from));
-  // });
-  // }
-
-  protected Optional<TemporalFormatter> decideFormatter(String value) {
+  public static Optional<TemporalFormatter> decideFormatter(String value) {
     return decideFormatters(value).findFirst();
   }
 
-  protected Stream<TemporalFormatter> decideFormatters(String value) {
-    return formatters.stream().filter(tm -> tm.match(value));
+  public static Stream<TemporalFormatter> decideFormatters(String value) {
+    return DEFAULT_FORMATTERS.stream().filter(tm -> tm.match(value));
+  }
+
+  public static void main(String... strings) {
+    List<String> values = new ArrayList<>();
+    values.add("19791114");
+    values.add("14-11-1979");
+    values.add("1979-11-14");
+    values.add("11/14/1979");
+    values.add("1979/11/14");
+    values.add("1979.11.14");
+    values.add("1979年11月14日");
+    values.add("14 Nov 1979");
+    values.add("14-Nov-1979");
+    values.add("14 November 1979");
+    values.add("1979-W46-3");
+    values.add("1979W463");
+    values.add("197911141114");
+    values.add("19791114 1114");
+    values.add("14-11-1979 11:14");
+    values.add("1979-11-14 11:14");
+    values.add("1979年11月14日 11时14分");
+    values.add("11/14/1979 11:14");
+    values.add("1979/11/14 11:14");
+    values.add("14 Nov 1979 11:14");
+    values.add("14 November 1979 11:14");
+    values.add("19791114111408");
+    values.add("19791114 111408");
+    values.add("14-11-1979 11:14:08");
+    values.add("1979-11-14 11:14:08");
+    values.add("1979-11-14T11:14:08.008Z");
+    values.add("1979-11-14T11:14:08+08:00[Asia/Shanghai]");
+    values.add("14-11-1979 11:14:08");
+    values.add("1979-11-14 11:14:08");
+    values.add("1979年11月14日 11时14分08秒");
+    values.add("11/14/1979 11:14:08");
+    values.add("1979/11/14 11:14:08");
+    values.add("14 Nov 1979 11:14:08");
+    values.add("14 November 1979 11:14:08");
+    values.add("1979-11-14-11.14.08.888888");
+    values.add("1979-11-14 11:14:08.8888");
+    values.add("Wed, 14 Nov 1979 11:14:08 GMT");
+    values.add("Wed Nov 14 11:14:08 GMT 1979");
+    long t1 = System.currentTimeMillis();
+    values.forEach(v -> {
+      Optional<TemporalFormatter> tf = decideFormatter(v);
+      if (tf.isPresent()) {
+        // try {
+        // if (tf.get().isWithTime()) {
+        // String s = tf.get().getFormatter()
+        // .parseBest(v, Instant::from, ZonedDateTime::from, LocalDateTime::from).toString();
+        // System.out.println(v + "\t=\t" + s + "\t\t" + tf.get().getDescription());
+        // } else {
+        // String s = DateTimeFormatter.ISO_DATE
+        // .format(tf.get().getFormatter().parse(v, LocalDate::from));
+        // System.out.println(v + "\t=\t" + s + "\t\t" + tf.get().getDescription());
+        // }
+        // } catch (Exception e) {
+        // System.out.println("==========" + v + "==========");
+        // e.printStackTrace();
+        // }
+        // } else {
+        // System.out.println("********" + v + "*********");
+      }
+    });
+    System.out.println(System.currentTimeMillis() - t1);
   }
 
   protected Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
@@ -213,26 +321,26 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     return Optional.ofNullable(zoneId);
   }
 
-  static class TemporalFormatter {
+  public static class TemporalFormatter {
     final String regex;
     final Pattern pattern;
     final DateTimeFormatter formatter;
     final boolean withTime;
-    final String patternString;
+    final String description;
     final Locale locale;
 
-    TemporalFormatter(String regex, DateTimeFormatter formatter, String patternString,
+    TemporalFormatter(String regex, DateTimeFormatter formatter, String description,
         boolean withTime) {
-      this(regex, formatter, patternString, Locale.getDefault(), withTime);
+      this(regex, formatter, description, Locale.getDefault(), withTime);
     }
 
-    TemporalFormatter(String regex, DateTimeFormatter formatter, String patternString,
-        Locale locale, boolean withTime) {
+    TemporalFormatter(String regex, DateTimeFormatter formatter, String description, Locale locale,
+        boolean withTime) {
       this.regex = regex;
       this.formatter = formatter;
       pattern = Pattern.compile(regex);
       this.withTime = withTime;
-      this.patternString = patternString;
+      this.description = description;
       this.locale = locale;
     }
 
@@ -249,9 +357,34 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
       return pattern.matcher(value).find();
     }
 
+    public String getDescription() {
+      return description;
+    }
+
+    public DateTimeFormatter getFormatter() {
+      return formatter;
+    }
+
+    public Locale getLocale() {
+      return locale;
+    }
+
+    public Pattern getPattern() {
+      return pattern;
+    }
+
+    public String getRegex() {
+      return regex;
+    }
+
+    public boolean isWithTime() {
+      return withTime;
+    }
+
     public boolean match(String value) {
       return pattern.matcher(value).matches();
     }
+
   }
 
 }

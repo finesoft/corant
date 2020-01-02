@@ -171,6 +171,10 @@ public class ConversionUtils {
     return toList(obj, Instant.class);
   }
 
+  public static List<Instant> toInstantList(Object obj, Map<String, ?> hints) {
+    return toList(obj, Instant.class, hints);
+  }
+
   public static Integer toInteger(Object obj) {
     return toInteger(obj, null);
   }
@@ -184,7 +188,11 @@ public class ConversionUtils {
   }
 
   public static <T> List<T> toList(Object obj, Class<T> clazz) {
-    return Conversions.convert(obj, clazz, ArrayList::new, null);
+    return toList(obj, clazz, null);
+  }
+
+  public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    return Conversions.convert(obj, clazz, ArrayList::new, hints);
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -230,11 +238,7 @@ public class ConversionUtils {
   }
 
   public static List<LocalDate> toLocalDateList(Object obj, Map<String, ?> hints) {
-    if (hints != null) {
-      return Conversions.convert(obj, LocalDate.class, ArrayList::new, hints);
-    } else {
-      return toList(obj, LocalDate.class);
-    }
+    return toList(obj, LocalDate.class, hints);
   }
 
   public static LocalDateTime toLocalDateTime(Object obj) {
@@ -273,7 +277,7 @@ public class ConversionUtils {
 
   public static List<LocalDateTime> toLocalDateTimeList(Object obj, String pattern) {
     if (pattern != null) {
-      return Conversions.convert(obj, LocalDateTime.class, ArrayList::new,
+      return toList(obj, LocalDateTime.class,
           mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern));
     } else {
       return toList(obj, LocalDateTime.class);
@@ -363,7 +367,7 @@ public class ConversionUtils {
 
   public static List<ZonedDateTime> toZonedDateTimeList(Object obj, String pattern) {
     if (pattern != null) {
-      return Conversions.convert(obj, ZonedDateTime.class, ArrayList::new,
+      return toList(obj, ZonedDateTime.class,
           mapOf(ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY, pattern));
     } else {
       return toList(obj, ZonedDateTime.class);

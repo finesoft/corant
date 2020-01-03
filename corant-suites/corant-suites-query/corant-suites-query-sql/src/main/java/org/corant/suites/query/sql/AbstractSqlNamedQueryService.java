@@ -161,6 +161,18 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     }
   }
 
+  // @Override
+  // public <T> Stream<T> stream(String queryName, Object parameter) {
+  // SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  // Object[] scriptParameter = querier.getScriptParameter();
+  // String sql = querier.getScript(null);
+  // log("stream-> " + queryName, scriptParameter, sql);
+  // return getExecutor().stream(sql, scriptParameter).map(result -> {
+  // this.fetch(result, querier);
+  // return querier.resolveResult(result);
+  // });
+  // }
+
   protected Dialect getDialect() {
     return getExecutor().getDialect();
   }

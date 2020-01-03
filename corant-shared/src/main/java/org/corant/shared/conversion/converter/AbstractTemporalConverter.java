@@ -198,6 +198,19 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .toFormatter(),
               "RFC_1123_DATE_TIME(ZH)", true),
 
+          // Wed, 14 Nov 1979 11:14:08
+          new TemporalFormatter(
+              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart()
+                  .appendText(DAY_OF_WEEK, DEFAULT_DAY_OF_WEEK_LP).appendLiteral(", ").optionalEnd()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, DEFAULT_MONTH_OF_YEAR_LP).appendLiteral(' ')
+                  .appendValue(YEAR, 4).appendLiteral(' ').appendValue(HOUR_OF_DAY, 2)
+                  .appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2).optionalStart()
+                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).optionalEnd().optionalStart()
+                  .appendLiteral(' ').appendOffset("+HHMM", "GMT").optionalEnd().toFormatter(),
+              "RFC_1123_DATE_TIMEX", true),
+
           // Wed, 14 Nov 1979 11:14:08 GMT
           new TemporalFormatter(
               "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[a-zA-Z]{1,}$",
@@ -309,6 +322,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     values.add("1979-11-14-11.14.08.888888");
     values.add("1979-11-14 11:14:08.8888");
     values.add("Wed, 14 Nov 1979 11:14:08 GMT");
+    values.add("Wed, 14 Nov 1979 11:14:08");
     values.add("星期三, 14 十一月 1979 11:14:08 GMT");
     values.add("Wed Nov 14 11:14:08 GMT 1979");
     values.add("星期三 十一月 14 11:26:28 CST 1979");
@@ -399,7 +413,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     }
 
     public boolean find(String value) {
-      return isNotBlank(value) && pattern.matcher(value).find();
+      return isNotBlank(value) && pattern.matcher(value.trim()).find();
     }
 
     public String getDescription() {
@@ -427,7 +441,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     }
 
     public boolean match(String value) {
-      return isNotBlank(value) && pattern.matcher(value).matches();
+      return isNotBlank(value) && pattern.matcher(value.trim()).matches();
     }
 
   }

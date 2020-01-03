@@ -23,6 +23,7 @@ import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 import static java.time.temporal.ChronoField.YEAR;
 import static org.corant.shared.util.CollectionUtils.immutableListOf;
 import static org.corant.shared.util.MapUtils.immutableMapOf;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ import java.time.format.SignStyle;
 import java.time.format.TextStyle;
 import java.time.temporal.IsoFields;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -154,11 +156,11 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
 
           // ISO_INSTANT
           new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}Z$",
-              DateTimeFormatter.ISO_INSTANT, "yyyy-MM-ddTHH:mm:ssZ", true),
+              DateTimeFormatter.ISO_INSTANT, "ISO_INSTANT yyyy-MM-ddTHH:mm:ssZ", true),
 
           // ISO_DATE_TIME
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}(.*)?",
-              DateTimeFormatter.ISO_DATE_TIME, "yyyy-MM-ddTHH:mm:ss+o[z]", true),
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}(.*)?$",
+              DateTimeFormatter.ISO_DATE_TIME, "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]", true),
 
           new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
               "MM/dd/yyyy HH:mm:ss", true),
@@ -182,12 +184,26 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .appendFraction(NANO_OF_SECOND, 3, 9, true).toFormatter(),
               "yyyy-MM-dd HH:mm:ss.[S...]", true),
 
-          // Tue, 3 Jun 2008 11:05:30 GMT
+          // 星期三, 14 十一月 1979 11:14:08
           new TemporalFormatter(
-              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s(.*)?",
+              "^([\u4E00-\u9FA5]{3}\\,\\s)?\\d{1,2}\\s[\u4E00-\u9FA5]{2,3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}(.*)?$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart()
+                  .appendText(DAY_OF_WEEK, DEFAULT_ZH_DAY_OF_WEEK_LP).appendLiteral(", ")
+                  .optionalEnd().appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral(' ').appendText(MONTH_OF_YEAR, DEFAULT_ZH_MONTH_OF_YEAR_LP)
+                  .appendLiteral(' ').appendValue(YEAR, 4).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2)
+                  .optionalStart().appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).optionalEnd()
+                  .optionalStart().appendLiteral(' ').appendOffset("+HHMM", "GMT").optionalEnd()
+                  .toFormatter(),
+              "RFC_1123_DATE_TIME(ZH)", true),
+
+          // Wed, 14 Nov 1979 11:14:08 GMT
+          new TemporalFormatter(
+              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[a-zA-Z]{1,}$",
               DateTimeFormatter.RFC_1123_DATE_TIME, "RFC_1123_DATE_TIME", true),
 
-          // Thu Jan 02 11:26:28 CST 2020 java.util.Date string
+          // Wed Nov 14 11:26:28 CST 1979 java.util.Date string
           new TemporalFormatter(
               "^[a-zA-Z]{3}\\s[a-zA-Z]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
@@ -198,7 +214,20 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
                   .appendZoneText(TextStyle.SHORT).appendLiteral(' ').appendValue(YEAR, 4)
                   .toFormatter(),
-              "java.util.Date().toString()", true)
+              "java.util.Date().toString()", true),
+
+          // 星期三 十一月 14 11:26:28 CST 1979 java.util.Date string
+          new TemporalFormatter(
+              "^[\u4E00-\u9FA5]{3}\\s[\u4E00-\u9FA5]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                  .appendText(DAY_OF_WEEK, DEFAULT_ZH_DAY_OF_WEEK_LP).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, DEFAULT_ZH_MONTH_OF_YEAR_LP).appendLiteral(' ')
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2)
+                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
+                  .appendZoneText(TextStyle.SHORT).appendLiteral(' ').appendValue(YEAR, 4)
+                  .toFormatter(),
+              "ZH java.util.Date().toString()", true)
 
       );
 
@@ -266,7 +295,9 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     values.add("19791114 111408");
     values.add("14-11-1979 11:14:08");
     values.add("1979-11-14 11:14:08");
-    values.add("1979-11-14T11:14:08.008Z");
+    values.add("1979-11-14T11:14:08Z");
+    values.add("1979-11-14T11:14:08.080Z");
+    values.add("1979-11-14T11:14:08+08:00");
     values.add("1979-11-14T11:14:08+08:00[Asia/Shanghai]");
     values.add("14-11-1979 11:14:08");
     values.add("1979-11-14 11:14:08");
@@ -278,26 +309,31 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     values.add("1979-11-14-11.14.08.888888");
     values.add("1979-11-14 11:14:08.8888");
     values.add("Wed, 14 Nov 1979 11:14:08 GMT");
+    values.add("星期三, 14 十一月 1979 11:14:08 GMT");
     values.add("Wed Nov 14 11:14:08 GMT 1979");
+    values.add("星期三 十一月 14 11:26:28 CST 1979");
     StopWatch sw = StopWatch.press("Time use");
     values.forEach(v -> {
       Optional<TemporalFormatter> tf = decideFormatter(v);
       if (tf.isPresent()) {
         try {
           if (tf.get().isWithTime()) {
-            String s = tf.get().getFormatter()
-                .parseBest(v, Instant::from, ZonedDateTime::from, LocalDateTime::from).toString();
-            System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
+            TemporalAccessor ta = tf.get().getFormatter().parseBest(v, ZonedDateTime::from,
+                Instant::from, LocalDateTime::from);
+            String s = ta.toString();
+            System.out.println(v + "\t=>\t" + s + "\t[" + ta.getClass() + "]\t\tPTN: "
+                + tf.get().getDescription());
           } else {
             String s = DateTimeFormatter.ISO_DATE
                 .format(tf.get().getFormatter().parse(v, LocalDate::from));
             System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
           }
         } catch (Exception e) {
+          System.out.println("Error PTN:" + tf.get().getDescription());
           e.printStackTrace(); // NOSONAR
         }
       } else {
-        System.out.println(String.format("Formatter %s not found!", v));
+        System.out.println(String.format("Formatter [%s] not found!", v));
       }
     });
     sw.stop((t) -> System.out.println(t.getTaskName() + " : " + t.getTimeMillis() + " ms!"));
@@ -363,7 +399,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     }
 
     public boolean find(String value) {
-      return pattern.matcher(value).find();
+      return isNotBlank(value) && pattern.matcher(value).find();
     }
 
     public String getDescription() {
@@ -391,7 +427,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     }
 
     public boolean match(String value) {
-      return pattern.matcher(value).matches();
+      return isNotBlank(value) && pattern.matcher(value).matches();
     }
 
   }

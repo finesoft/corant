@@ -17,7 +17,6 @@ import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
-import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
@@ -32,7 +31,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
@@ -202,26 +200,6 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
-  public static void fireAsyncEvent(Object event, Annotation... qualifiers) {
-    if (event != null) {
-      if (qualifiers.length > 0) {
-        CDI.current().getBeanManager().getEvent().select(qualifiers).fireAsync(event);
-      } else {
-        CDI.current().getBeanManager().getEvent().fireAsync(event);
-      }
-    }
-  }
-
-  public static void fireEvent(Object event, Annotation... qualifiers) {
-    if (event != null) {
-      if (qualifiers.length > 0) {
-        CDI.current().getBeanManager().getEvent().select(qualifiers).fire(event);
-      } else {
-        CDI.current().getBeanManager().getEvent().fire(event);
-      }
-    }
-  }
-
   public static synchronized Corant run(Class<?> configClass, String... arguments) {
     Corant corant = new Corant(configClass, arguments);
     corant.start(null);
@@ -285,7 +263,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * 
+   *
    * @return the classLoader
    */
   public ClassLoader getClassLoader() {

@@ -14,8 +14,8 @@
 package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
-import static org.corant.kernel.util.Instances.resolveNamed;
-import static org.corant.kernel.util.Instances.select;
+import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +29,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.ConnectionFactory;
-import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 

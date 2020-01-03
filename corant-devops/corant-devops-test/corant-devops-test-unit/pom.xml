@@ -16,6 +16,10 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-cdi</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>compile</scope>

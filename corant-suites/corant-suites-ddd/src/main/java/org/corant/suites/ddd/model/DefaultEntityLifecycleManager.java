@@ -14,10 +14,10 @@
 package org.corant.suites.ddd.model;
 
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

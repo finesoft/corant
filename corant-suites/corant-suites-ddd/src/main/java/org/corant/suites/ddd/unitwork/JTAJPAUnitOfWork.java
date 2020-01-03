@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.Corant.fireAsyncEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,10 +26,11 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.suites.bundle.exception.GeneralRuntimeException;
+import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
 import org.corant.suites.ddd.event.AggregatePersistEvent;
 import org.corant.suites.ddd.message.Message;
@@ -279,7 +279,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
       evolutiveAggregates.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
-            fireAsyncEvent(new AggregatePersistEvent(k, v),
+            CDIs.fireAsyncEvent(new AggregatePersistEvent(k, v),
                 AggregateTypeLiteral.of(k.getTypeCls()));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");

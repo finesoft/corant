@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.kernel.util.Preconditions.requireGaet;
-import static org.corant.kernel.util.Preconditions.requireNotNull;
+import static org.corant.suites.bundle.Preconditions.requireGaet;
+import static org.corant.suites.bundle.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +22,8 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.corant.Corant;
 import org.corant.suites.bundle.GlobalMessageCodes;
+import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.AggregateMessageMetadata;
 import org.corant.suites.ddd.message.Message;
@@ -116,7 +116,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   public void fireAsyncEvent(Event event, Annotation... qualifiers) {
     if (event != null) {
       logger.fine(() -> String.format(FIRE_LOG, event.toString()));
-      Corant.fireAsyncEvent(event, qualifiers);
+      CDIs.fireAsyncEvent(event, qualifiers);
     }
   }
 
@@ -124,7 +124,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   public void fireEvent(Event event, Annotation... qualifiers) {
     if (event != null) {
       logger.fine(() -> String.format(FIRE_LOG, event.toString()));
-      Corant.fireEvent(event, qualifiers);
+      CDIs.fireEvent(event, qualifiers);
     }
   }
 

@@ -11,22 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.exception;
+package org.corant.shared.ubiquity;
+
+import java.util.Locale;
 
 /**
- * @author bingo 下午6:02:36
+ * corant-kernel
+ *
+ * @author bingo 下午8:16:35
  *
  */
-public enum GeneralExceptionSeverity {
-  ERROR(2), WARN(1), CRITICAL(0);
+public interface Readable<T> {
 
-  private int id;
-
-  private GeneralExceptionSeverity(int id) {
-    this.id = id;
+  default String toHumanReader(Locale locale) {
+    return toString();
   }
 
-  public int getId() {
-    return id;
-  }
 }

@@ -13,11 +13,11 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
+import static org.corant.suites.cdi.Instances.resolveNamed;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -33,9 +33,9 @@ import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
-import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
 import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 import org.corant.suites.elastic.service.AbstractElasticDocumentService;

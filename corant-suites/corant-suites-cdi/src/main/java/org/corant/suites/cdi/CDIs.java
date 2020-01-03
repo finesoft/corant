@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.util;
+package org.corant.suites.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import org.corant.shared.util.MethodUtils.MethodSignature;
@@ -32,6 +33,26 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  *
  */
 public abstract class CDIs {
+
+  public static void fireAsyncEvent(Object event, Annotation... qualifiers) {
+    if (event != null) {
+      if (qualifiers.length > 0) {
+        CDI.current().getBeanManager().getEvent().select(qualifiers).fireAsync(event);
+      } else {
+        CDI.current().getBeanManager().getEvent().fireAsync(event);
+      }
+    }
+  }
+
+  public static void fireEvent(Object event, Annotation... qualifiers) {
+    if (event != null) {
+      if (qualifiers.length > 0) {
+        CDI.current().getBeanManager().getEvent().select(qualifiers).fire(event);
+      } else {
+        CDI.current().getBeanManager().getEvent().fire(event);
+      }
+    }
+  }
 
   public static Annotated getAnnotated(InjectionPoint injectionPoint) {
     if (injectionPoint instanceof ParameterInjectionPoint) {

@@ -14,12 +14,10 @@
 package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.StringUtils.defaultTrim;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.suites.elastic.ElasticExtension;
 import org.elasticsearch.client.transport.TransportClient;
 
@@ -52,7 +50,4 @@ public class ElasticTransportClientService {
     return extension;
   }
 
-  void onPostCorantReadyEvent(@Observes PostCorantReadyEvent e) {
-    // NOOP
-  }
 }

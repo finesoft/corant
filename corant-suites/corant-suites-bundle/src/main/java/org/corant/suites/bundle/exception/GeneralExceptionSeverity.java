@@ -11,27 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.api;
-
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import java.util.Locale;
-import java.util.function.Function;
-import javax.json.JsonObject;
+package org.corant.suites.bundle.exception;
 
 /**
- * corant-kernel
- *
- * @author bingo 下午8:16:35
+ * @author bingo 下午6:02:36
  *
  */
-public interface Readable<T> {
+public enum GeneralExceptionSeverity {
+  ERROR(2), WARN(1), CRITICAL(0);
 
-  default String toHumanReader(Locale locale) {
-    return toString();
+  private int id;
+
+  private GeneralExceptionSeverity(int id) {
+    this.id = id;
   }
 
-  default JsonObject toJsonReader(Function<T, JsonObject> provider) {
-    return provider.apply(forceCast(this));
+  public int getId() {
+    return id;
   }
-
 }

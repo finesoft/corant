@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.exception;
+package org.corant.suites.bundle.exception;
 
-import static org.corant.kernel.util.Instances.resolveAnyway;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
@@ -25,10 +24,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import org.corant.kernel.api.MessageResolver;
-import org.corant.kernel.api.MessageResolver.MessageSeverity;
-import org.corant.kernel.api.MessageResolver.MessageSource;
+import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.bundle.MessageResolver;
+import org.corant.suites.bundle.MessageResolver.MessageSeverity;
+import org.corant.suites.bundle.MessageResolver.MessageSource;
 
 /**
  * @author bingo 下午6:19:52
@@ -128,7 +128,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   }
 
   public String getLocalizedMessage(Locale locale) {
-    MessageResolver resolver = resolveAnyway(MessageResolver.class);
+    MessageResolver resolver = CDI.current().select(MessageResolver.class).get();
     if (resolver != null) {
       return resolver.getMessage(defaultObject(locale, Locale.getDefault()), this);
     } else {

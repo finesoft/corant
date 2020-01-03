@@ -13,9 +13,6 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.kernel.util.Instances.resolveNamed;
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapInstant;
@@ -24,6 +21,9 @@ import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
+import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.select;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -39,6 +39,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
@@ -50,12 +51,11 @@ import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.corant.Corant;
-import org.corant.kernel.util.Instances.NamingReference;
-import org.corant.kernel.util.Qualifiers.DefaultNamedQualifierObjectManager;
-import org.corant.kernel.util.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.suites.cdi.Instances.NamingReference;
+import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -140,11 +140,10 @@ public class MongoClientExtension implements Extension {
   }
 
   public GridFSBucket getGridFSBucket(String namespace) {
-    if (Corant.current() == null) {
+    if (CDI.current() == null) { // FIXME EXCEPTION
       return null;
     }
-    Instance<GridFSBucket> inst =
-        select(GridFSBucket.class, NamedLiteral.of(namespace));
+    Instance<GridFSBucket> inst = select(GridFSBucket.class, NamedLiteral.of(namespace));
     return inst.isResolvable() ? inst.get() : null;
   }
 

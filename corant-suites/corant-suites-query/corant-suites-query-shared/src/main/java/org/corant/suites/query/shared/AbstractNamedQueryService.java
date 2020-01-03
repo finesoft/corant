@@ -30,8 +30,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.corant.kernel.util.Instances;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 

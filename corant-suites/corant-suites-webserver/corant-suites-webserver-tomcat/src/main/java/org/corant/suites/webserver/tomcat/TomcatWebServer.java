@@ -35,6 +35,7 @@ import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceEnvRef;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.ObjectUtils;
@@ -138,9 +139,9 @@ public class TomcatWebServer extends AbstractWebServer {
     }
     ServletContext servletContext = ctx.getServletContext();
     servletContext.setAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
-        corant.getBeanManager());
+        Corant.current().getBeanManager());
     servletContext.setAttribute(org.jboss.weld.Container.CONTEXT_ID_KEY,
-        corant.getBeanManager().getId());
+        Corant.current().getBeanManager().getId());
     getServletContextAttributes().forEach(servletContext::setAttribute);
     ctx.addParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
         TomcatContainer.class.getName());

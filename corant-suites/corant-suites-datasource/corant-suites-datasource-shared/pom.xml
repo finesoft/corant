@@ -11,11 +11,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
+			<artifactId>corant-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jta-shared</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-config</artifactId>
+			<artifactId>corant-suites-cdi</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbutils</groupId>

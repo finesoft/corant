@@ -38,6 +38,7 @@
 		<module>corant-suites-shell</module>
 		<module>corant-suites-grpc</module>
 		<module>corant-suites-rsocket</module>
+		<module>corant-suites-cdi</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
-import static org.corant.kernel.util.Instances.select;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

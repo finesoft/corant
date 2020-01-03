@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.kernel.util.Preconditions.requireTrue;
+import static org.corant.suites.bundle.Preconditions.requireTrue;
 import java.io.Serializable;
 import java.util.function.Predicate;
 import javax.persistence.EntityManager;

@@ -13,8 +13,8 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;

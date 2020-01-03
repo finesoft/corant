@@ -17,7 +17,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.jms.JMSContext;
 import javax.jms.JMSRuntimeException;
 import javax.transaction.TransactionScoped;
-import org.corant.kernel.api.ComponentManager.AbstractComponentManager;
+import org.corant.suites.cdi.ComponentManager.AbstractComponentManager;
 
 /**
  * corant-suites-jms-artemis

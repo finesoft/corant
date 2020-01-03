@@ -13,9 +13,9 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +29,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.util.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.cdi.Qualifiers;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.EntityLifecycleManager;
 import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;

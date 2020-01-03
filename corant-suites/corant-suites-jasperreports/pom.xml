@@ -12,7 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-kernel</artifactId>
+			<artifactId>corant-suites-cdi</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>

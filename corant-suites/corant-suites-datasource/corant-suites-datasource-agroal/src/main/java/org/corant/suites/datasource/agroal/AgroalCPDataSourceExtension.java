@@ -13,7 +13,6 @@
  */
 package org.corant.suites.datasource.agroal;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -21,6 +20,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.management.ManagementFactory;
 import java.sql.SQLException;
 import java.time.Duration;

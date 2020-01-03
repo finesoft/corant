@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jms.shared;
 
-import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.suites.cdi.Instances.resolveNamed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;

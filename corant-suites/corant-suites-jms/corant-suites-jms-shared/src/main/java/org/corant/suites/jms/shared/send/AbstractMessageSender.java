@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.kernel.util.Instances.resolveApply;
+import static org.corant.suites.cdi.Instances.resolveApply;
 import java.util.logging.Logger;
 import javax.jms.JMSContext;
 import javax.jms.Message;

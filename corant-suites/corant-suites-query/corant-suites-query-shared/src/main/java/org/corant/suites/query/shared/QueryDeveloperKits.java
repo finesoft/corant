@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.kernel.util.Instances.resolve;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;

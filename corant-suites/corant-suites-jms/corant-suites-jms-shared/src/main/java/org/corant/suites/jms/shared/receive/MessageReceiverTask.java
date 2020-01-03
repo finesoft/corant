@@ -13,11 +13,11 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.ObjectUtils.tryThreadSleep;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.select;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;

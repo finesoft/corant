@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.exception;
+package org.corant.suites.bundle.exception;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.isEquals;

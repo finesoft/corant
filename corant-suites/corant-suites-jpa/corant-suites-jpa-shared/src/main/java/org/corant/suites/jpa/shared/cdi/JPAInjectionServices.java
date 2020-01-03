@@ -13,14 +13,14 @@
  */
 package org.corant.suites.jpa.shared.cdi;
 
-import static org.corant.kernel.util.Instances.resolveApply;
+import static org.corant.suites.cdi.Instances.resolveApply;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import org.corant.kernel.util.CDIs;
-import org.corant.kernel.util.ResourceReferences;
+import org.corant.suites.cdi.CDIs;
+import org.corant.suites.cdi.ResourceReferences;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.PersistenceService;
 import org.jboss.weld.injection.spi.JpaInjectionServices;

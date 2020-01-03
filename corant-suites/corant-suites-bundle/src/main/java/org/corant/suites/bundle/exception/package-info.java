@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-kernel
+ * corant-suites-bundle
  * 
- * @author bingo 下午3:29:18
+ * @author bingo 上午11:35:56
  *
  */
-package org.corant.kernel.util;
+package org.corant.suites.bundle.exception;

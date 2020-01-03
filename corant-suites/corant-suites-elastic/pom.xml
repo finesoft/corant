@@ -11,11 +11,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-kernel</artifactId>
+			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-config</artifactId>
+			<artifactId>corant-kernel</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-cdi</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>

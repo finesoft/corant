@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
@@ -22,6 +21,7 @@ import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
+import static org.corant.suites.cdi.Instances.select;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;

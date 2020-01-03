@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.api;
+package org.corant.suites.bundle;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Locale;

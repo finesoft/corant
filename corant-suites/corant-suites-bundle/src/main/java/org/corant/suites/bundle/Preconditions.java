@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.util;
+package org.corant.suites.bundle;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isDeepEquals;
@@ -29,8 +29,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.corant.kernel.exception.GeneralRuntimeException;
 import org.corant.shared.util.ValidateUtils;
+import org.corant.suites.bundle.exception.GeneralRuntimeException;
 
 /**
  * @author bingo 2013年6月24日

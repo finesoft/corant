@@ -11,9 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.kernel.util;
+package org.corant.suites.cdi;
 
-import static org.corant.kernel.util.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.asClass;
@@ -23,6 +22,7 @@ import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.suites.cdi.Qualifiers.resolveNameds;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Hashtable;

@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.kernel.util.Instances.resolveApply;
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.suites.cdi.Instances.resolveApply;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -37,9 +37,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.TransactionScoped;
-import org.corant.kernel.api.ComponentManager.AbstractComponentManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
+import org.corant.suites.cdi.ComponentManager.AbstractComponentManager;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jta.shared.TransactionService;
 

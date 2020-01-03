@@ -13,12 +13,12 @@
  */
 package org.corant.suites.query.mongodb.cdi;
 
-import static org.corant.kernel.util.Instances.resolveNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.suites.cdi.Instances.resolveNamed;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

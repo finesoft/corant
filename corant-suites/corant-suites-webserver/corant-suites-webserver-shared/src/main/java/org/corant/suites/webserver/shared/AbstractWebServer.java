@@ -36,7 +36,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.servlet.WebMetaDataProvider;
 import org.corant.suites.servlet.metadata.WebFilterMetaData;
@@ -83,9 +82,6 @@ public abstract class AbstractWebServer implements WebServer {
   @Inject
   @Any
   protected Instance<PostStoppedHandler> postStoppedHandlers;
-
-  @Inject
-  protected Corant corant;
 
   /**
    *

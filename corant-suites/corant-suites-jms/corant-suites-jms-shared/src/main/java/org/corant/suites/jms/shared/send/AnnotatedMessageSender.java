@@ -13,14 +13,14 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.kernel.util.Instances.resolveApply;
 import static org.corant.shared.util.AnnotationUtils.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.resolveApply;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashSet;

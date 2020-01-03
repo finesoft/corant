@@ -13,11 +13,11 @@
  */
 package org.corant.suites.jta.narayana;
 
-import static org.corant.kernel.util.Instances.resolve;
-import static org.corant.kernel.util.Instances.select;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.select;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.ServiceLoader;

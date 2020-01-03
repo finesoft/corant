@@ -74,7 +74,7 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
       String[] arr = split(value, ",", true, true);
       if (arr.length == 2 && arr[0].chars().allMatch(Character::isDigit)
           && arr[1].chars().allMatch(Character::isDigit)) {
-        return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]));
+        return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]));
       }
     }
     Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);

@@ -78,11 +78,11 @@ public class StringZonedDateTimeConverter extends AbstractTemporalConverter<Stri
           && arr[1].chars().allMatch(Character::isDigit)) {
         if (ozoneId.isPresent()) {
           return ZonedDateTime.ofInstant(
-              Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1])), ozoneId.get());
+              Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1])), ozoneId.get());
         } else if (!strictly) {
           warn(ZonedDateTime.class, value);
           return ZonedDateTime.ofInstant(
-              Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1])),
+              Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1])),
               ZoneId.systemDefault());
         }
       }

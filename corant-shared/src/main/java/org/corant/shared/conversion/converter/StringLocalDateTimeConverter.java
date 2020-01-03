@@ -74,11 +74,11 @@ public class StringLocalDateTimeConverter extends AbstractTemporalConverter<Stri
       if (arr.length == 2 && arr[0].chars().allMatch(Character::isDigit)
           && arr[1].chars().allMatch(Character::isDigit)) {
         if (ozoneId.isPresent()) {
-          return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]))
+          return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]))
               .atZone(ozoneId.get()).toLocalDateTime();
         } else if (!strictly) {
           warn(LocalDateTime.class, value);
-          return Instant.ofEpochSecond(Long.valueOf(arr[0]), Long.valueOf(arr[1]))
+          return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]))
               .atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
       }

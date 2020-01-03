@@ -16,6 +16,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -66,7 +67,7 @@ public class TypeUtils {
    */
   public static Type canonicalize(Type type) {
     if (type instanceof Class) {
-      Class<?> c = (Class<?>) type;
+      Class<?> c = forceCast(type);
       return c.isArray() ? new GenericArrayTypeImpl(canonicalize(c.getComponentType())) : c;
 
     } else if (type instanceof ParameterizedType) {
@@ -201,7 +202,7 @@ public class TypeUtils {
   public static Class<?> getRawType(Type type) {
     if (type instanceof Class<?>) {
       // type is a normal class.
-      return (Class<?>) type;
+      return forceCast(type);
 
     } else if (type instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) type;

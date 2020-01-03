@@ -113,8 +113,6 @@ public class PersistencePropertiesParser {
             split(config.getOptionalValue(pn, String.class).orElse(JPAConfig.DFLT_ORM_XML_LOCATION),
                 ",", true, true))
             .forEach(puimd::addMappingFileName);
-      } else if (pn.endsWith(JPAConfig.JC_JAR_FILE)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> puimd.addJarFileUrl(toUrl(s)));
       }
     });
     if (isNotBlank(puimd.getPersistenceProviderClassName())) {

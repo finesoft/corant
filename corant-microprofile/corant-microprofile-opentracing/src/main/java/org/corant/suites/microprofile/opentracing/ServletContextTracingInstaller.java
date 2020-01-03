@@ -1,8 +1,6 @@
 package org.corant.suites.microprofile.opentracing;
 
-import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
-import io.smallrye.opentracing.SmallRyeTracingDynamicFeature;
-
+import java.util.EnumSet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
@@ -10,7 +8,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.util.EnumSet;
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
+import io.smallrye.opentracing.SmallRyeTracingDynamicFeature;
 
 /**
  *
@@ -20,11 +19,12 @@ import java.util.EnumSet;
 @ApplicationScoped
 @WebListener
 public class ServletContextTracingInstaller implements ServletContextListener {
+
   @Override
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     ServletContext servletContext = servletContextEvent.getServletContext();
-    servletContext.setInitParameter(
-        "resteasy.providers", SmallRyeTracingDynamicFeature.class.getName());
+    servletContext.setInitParameter("resteasy.providers",
+        SmallRyeTracingDynamicFeature.class.getName());
 
     Dynamic filterRegistration =
         servletContext.addFilter("tracingFilter", new SpanFinishingFilter());

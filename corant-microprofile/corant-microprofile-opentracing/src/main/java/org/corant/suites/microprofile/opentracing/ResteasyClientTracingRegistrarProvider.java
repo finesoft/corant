@@ -1,15 +1,13 @@
 package org.corant.suites.microprofile.opentracing;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.enterprise.inject.spi.CDI;
+import javax.ws.rs.client.ClientBuilder;
+import org.eclipse.microprofile.opentracing.ClientTracingRegistrarProvider;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.concurrent.TracedExecutorService;
 import io.smallrye.opentracing.SmallRyeClientTracingFeature;
-import org.eclipse.microprofile.opentracing.ClientTracingRegistrarProvider;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import javax.enterprise.inject.spi.CDI;
-import javax.ws.rs.client.ClientBuilder;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @auther sushuaihao 2020/1/2
@@ -25,10 +23,8 @@ public class ResteasyClientTracingRegistrarProvider implements ClientTracingRegi
 
   @Override
   public ClientBuilder configure(ClientBuilder clientBuilder, ExecutorService executorService) {
-    ResteasyClientBuilder resteasyClientBuilder = (ResteasyClientBuilder) clientBuilder;
     Tracer tracer = CDI.current().select(Tracer.class).get();
-    return resteasyClientBuilder
-        .executorService(new TracedExecutorService(executorService, tracer))
+    return clientBuilder.executorService(new TracedExecutorService(executorService, tracer))
         .register(new SmallRyeClientTracingFeature(tracer));
   }
 }

@@ -14,9 +14,9 @@
   	<module>corant-microprofile-jwt</module>
   	<module>corant-microprofile-metrics</module>
   	<module>corant-microprofile-openapi</module>
-  	<module>corant-microprofile-opentracking</module>
   	<module>corant-microprofile-restclient</module>
   	<module>corant-microprofile-lra</module>
+  	<module>corant-microprofile-opentracing</module>
   </modules>
   	<dependencyManagement>
 		<dependencies>

@@ -11,10 +11,10 @@ import javax.enterprise.inject.spi.Extension;
  * @auther sushuaihao 2020/1/2
  * @since
  */
-public class OpenTracingCDIExtension implements Extension {
+public class OpenTracingExtension implements Extension {
 
   public void observeBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd, BeanManager manager) {
-    String extensionName = OpenTracingCDIExtension.class.getName();
+    String extensionName = OpenTracingExtension.class.getName();
     for (Class<?> clazz : new Class<?>[] {OpenTracingInterceptor.class}) {
       bbd.addAnnotatedType(
           manager.createAnnotatedType(clazz), extensionName + "_" + clazz.getName());

@@ -29,8 +29,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.script.ScriptEngineManager;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.query.shared.QueryService.ForwardList;
-import org.corant.suites.query.shared.QueryService.PagedList;
+import org.corant.suites.query.shared.QueryService.Forwarding;
+import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -117,12 +117,12 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       func.accept(new Object[] {parameter, (Map) result});
     } else {
       List<?> list = null;
-      if (result instanceof ForwardList) {
-        list = ((ForwardList) result).getResults();
+      if (result instanceof Forwarding) {
+        list = ((Forwarding) result).getResults();
       } else if (result instanceof List) {
         list = (List) result;
-      } else if (result instanceof PagedList) {
-        list = ((PagedList) result).getResults();
+      } else if (result instanceof Paging) {
+        list = ((Paging) result).getResults();
       }
       if (!isEmpty(list)) {
         for (Object item : list) {

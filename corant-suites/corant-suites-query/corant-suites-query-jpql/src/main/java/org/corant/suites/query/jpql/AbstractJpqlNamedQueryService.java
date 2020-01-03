@@ -58,7 +58,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+  public <T> Forwarding<T> forward(String queryName, Object parameter) {
     JpqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
@@ -69,7 +69,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     log(queryName, scriptParameter, ql);
     EntityManager em = getEntityManager();
     try {
-      ForwardList<T> result = ForwardList.inst();
+      Forwarding<T> result = Forwarding.inst();
       Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit + 1);
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
@@ -114,7 +114,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> PagedList<T> page(String queryName, Object parameter) {
+  public <T> Paging<T> page(String queryName, Object parameter) {
     JpqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
@@ -128,7 +128,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit);
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
-      PagedList<T> result = PagedList.of(offset, limit);
+      Paging<T> result = Paging.of(offset, limit);
       int size = getSize(list);
       if (size > 0) {
         if (size < limit) {

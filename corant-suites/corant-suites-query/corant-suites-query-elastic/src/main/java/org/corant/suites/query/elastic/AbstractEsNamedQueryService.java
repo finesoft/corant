@@ -80,13 +80,13 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+  public <T> Forwarding<T> forward(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
     List<T> result = hits.getValue();
-    return ForwardList.of(result, hits.getLeft() > offset + limit);
+    return Forwarding.of(result, hits.getLeft() > offset + limit);
   }
 
   @Override
@@ -101,13 +101,13 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> PagedList<T> page(String queryName, Object parameter) {
+  public <T> Paging<T> page(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
     List<T> result = hits.getValue();
-    return PagedList.of(hits.getLeft().intValue(), result, offset, limit);
+    return Paging.of(hits.getLeft().intValue(), result, offset, limit);
   }
 
   @Override

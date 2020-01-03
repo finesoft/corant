@@ -36,7 +36,7 @@ public interface QueryService<Q, P> {
    * @param p The query parameter, include query criteria and context.
    * @return The result set and whether there is a flag for the next result set.
    */
-  <T> ForwardList<T> forward(Q q, P p);
+  <T> Forwarding<T> forward(Q q, P p);
 
   /**
    * Like {@link #forward(Object, Object)} but support an result record handler callback.
@@ -48,12 +48,12 @@ public interface QueryService<Q, P> {
    * @param f The result record handler callback.
    * @return The result set and whether there is a flag for the next result set.
    */
-  default <R, T> ForwardList<T> forward(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
-    ForwardList<R> raw = forward(q, p);
+  default <R, T> Forwarding<T> forward(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    Forwarding<R> raw = forward(q, p);
     if (raw == null) {
-      return ForwardList.inst();
+      return Forwarding.inst();
     } else {
-      ForwardList<T> result = new ForwardList<>();
+      Forwarding<T> result = new Forwarding<>();
       return result
           .withResults(
               raw.getResults().stream().map(i -> f.apply(i, this)).collect(Collectors.toList()))
@@ -94,7 +94,7 @@ public interface QueryService<Q, P> {
    * @param p The query parameter, include query criteria and context.
    * @return The paging result list.
    */
-  <T> PagedList<T> page(Q q, P p);
+  <T> Paging<T> page(Q q, P p);
 
   /**
    * Like {@link #page(Object, Object)} but support an result record handler callback.
@@ -106,12 +106,12 @@ public interface QueryService<Q, P> {
    * @param f The result record handler callback.
    * @return The query result object.
    */
-  default <R, T> PagedList<T> page(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
-    PagedList<R> raw = page(q, p);
+  default <R, T> Paging<T> page(Q q, P p, BiFunction<R, QueryService<Q, P>, T> f) {
+    Paging<R> raw = page(q, p);
     if (raw == null) {
-      return PagedList.inst();
+      return Paging.inst();
     } else {
-      PagedList<T> result = new PagedList<>();
+      Paging<T> result = new Paging<>();
       return result
           .withResults(
               raw.getResults().stream().map(i -> f.apply(i, this)).collect(Collectors.toList()))
@@ -166,19 +166,19 @@ public interface QueryService<Q, P> {
    * @author bingo 下午5:51:56
    *
    */
-  public static class ForwardList<T> {
+  public static class Forwarding<T> {
 
     private boolean hasNext;
     private final List<T> results = new ArrayList<>();
 
-    ForwardList() {}
+    Forwarding() {}
 
-    public static <T> ForwardList<T> inst() {
-      return new ForwardList<>();
+    public static <T> Forwarding<T> inst() {
+      return new Forwarding<>();
     }
 
-    public static <T> ForwardList<T> of(List<T> results, boolean hasNext) {
-      ForwardList<T> il = new ForwardList<>();
+    public static <T> Forwarding<T> of(List<T> results, boolean hasNext) {
+      Forwarding<T> il = new Forwarding<>();
       return il.withResults(results).withHasNext(hasNext);
     }
 
@@ -205,12 +205,12 @@ public interface QueryService<Q, P> {
       return hasNext;
     }
 
-    public ForwardList<T> withHasNext(boolean hasNext) {
+    public Forwarding<T> withHasNext(boolean hasNext) {
       this.hasNext = hasNext;
       return this;
     }
 
-    public ForwardList<T> withResults(List<T> results) {
+    public Forwarding<T> withResults(List<T> results) {
       this.results.clear();
       if (results != null) {
         this.results.addAll(results);
@@ -228,7 +228,7 @@ public interface QueryService<Q, P> {
    * @author bingo 下午6:11:55
    *
    */
-  public static class PagedList<T> {
+  public static class Paging<T> {
 
     private int total;
     private int pageSize;
@@ -237,17 +237,17 @@ public interface QueryService<Q, P> {
     private int offset;
     private List<T> results = new ArrayList<>();
 
-    public static <T> PagedList<T> inst() {
-      return new PagedList<>();
+    public static <T> Paging<T> inst() {
+      return new Paging<>();
     }
 
-    public static <T> PagedList<T> of(int offset, int pageSize) {
-      PagedList<T> pl = new PagedList<>();
+    public static <T> Paging<T> of(int offset, int pageSize) {
+      Paging<T> pl = new Paging<>();
       return pl.withOffset(offset).withPageSize(pageSize);
     }
 
-    public static <T> PagedList<T> of(int total, List<T> results, int offset, int pageSize) {
-      PagedList<T> pl = new PagedList<>();
+    public static <T> Paging<T> of(int total, List<T> results, int offset, int pageSize) {
+      Paging<T> pl = new Paging<>();
       return pl.withResults(results).withTotal(total).withOffset(offset).withPageSize(pageSize);
     }
 
@@ -287,19 +287,19 @@ public interface QueryService<Q, P> {
       return totalPages;
     }
 
-    public PagedList<T> withOffset(int offset) {
+    public Paging<T> withOffset(int offset) {
       this.offset = offset;
       calPages();
       return this;
     }
 
-    public PagedList<T> withPageSize(int pageSize) {
+    public Paging<T> withPageSize(int pageSize) {
       this.pageSize = pageSize;
       calPages();
       return this;
     }
 
-    public PagedList<T> withResults(List<T> results) {
+    public Paging<T> withResults(List<T> results) {
       this.results.clear();
       if (results != null) {
         this.results.addAll(results);
@@ -307,7 +307,7 @@ public interface QueryService<Q, P> {
       return this;
     }
 
-    public PagedList<T> withTotal(int total) {
+    public Paging<T> withTotal(int total) {
       this.total = total;
       calPages();
       return this;

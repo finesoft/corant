@@ -35,8 +35,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.cdi.ConversionService;
-import org.corant.suites.query.shared.QueryService.ForwardList;
-import org.corant.suites.query.shared.QueryService.PagedList;
+import org.corant.suites.query.shared.QueryService.Forwarding;
+import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
 
@@ -152,12 +152,12 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       handle((Map) result, hint.getLeft(), hint.getRight().getKey(), hint.getRight().getRight());
     } else {
       List<?> list = null;
-      if (result instanceof ForwardList) {
-        list = ((ForwardList) result).getResults();
+      if (result instanceof Forwarding) {
+        list = ((Forwarding) result).getResults();
       } else if (result instanceof List) {
         list = (List) result;
-      } else if (result instanceof PagedList) {
-        list = ((PagedList) result).getResults();
+      } else if (result instanceof Paging) {
+        list = ((Paging) result).getResults();
       }
       if (!isEmpty(list)) {
         for (Object item : list) {

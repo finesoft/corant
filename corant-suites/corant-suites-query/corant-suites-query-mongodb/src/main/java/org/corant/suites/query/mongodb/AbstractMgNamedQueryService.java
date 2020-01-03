@@ -106,12 +106,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+  public <T> Forwarding<T> forward(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    ForwardList<T> result = ForwardList.inst();
+    Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
@@ -137,11 +137,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> PagedList<T> page(String queryName, Object parameter) {
+  public <T> Paging<T> page(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
-    PagedList<T> result = PagedList.of(offset, limit);
+    Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =

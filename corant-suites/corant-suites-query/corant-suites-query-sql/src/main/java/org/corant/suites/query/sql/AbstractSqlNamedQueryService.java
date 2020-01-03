@@ -18,7 +18,6 @@ import static org.corant.shared.util.MapUtils.getMapInteger;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
@@ -63,7 +62,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  public <T> ForwardList<T> forward(String queryName, Object parameter) {
+  public <T> Forwarding<T> forward(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
@@ -72,7 +71,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
-      ForwardList<T> result = ForwardList.inst();
+      Forwarding<T> result = Forwarding.inst();
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
       int size = getSize(list);
       if (size > 0) {
@@ -106,7 +105,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  public <T> PagedList<T> page(String queryName, Object parameter) {
+  public <T> Paging<T> page(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript(null);
@@ -116,7 +115,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
       List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
-      PagedList<T> result = PagedList.of(offset, limit);
+      Paging<T> result = Paging.of(offset, limit);
       int size = getSize(list);
       if (size > 0) {
         if (size < limit) {
@@ -160,18 +159,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
           queryName);
     }
-  }
-
-  @Override
-  public <T> Stream<T> stream(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript(null);
-    log("stream-> " + queryName, scriptParameter, sql);
-    return getExecutor().stream(sql, scriptParameter).map(result -> {
-      this.fetch(result, querier);
-      return querier.resolveResult(result);
-    });
   }
 
   protected Dialect getDialect() {

@@ -20,7 +20,6 @@ import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -54,25 +52,20 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    throw new NotSupportedException();
-  }
-
-  @Override
-  public <T> Stream<List<T>> streams(String queryName, Object parameter) {
     QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
     final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
     final int limit = max(defaultObject(queryParam.getLimit(), DEFAULT_LIMIT), 1);
     final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
-    final ForwardList<T> empty = ForwardList.inst();
-    final Iterator<List<T>> iterator = new Iterator<List<T>>() {
+    final Forwarding<T> empty = Forwarding.inst();
+    final Iterator<T> iterator = new Iterator<T>() {
 
-      final AtomicReference<ForwardList<T>> buffer =
+      final AtomicReference<Forwarding<T>> buffer =
           new AtomicReference<>(defaultObject(forward(queryName, useParam), empty));
       int offset = useParam.getOffset();
 
       @Override
       public boolean hasNext() {
-        ForwardList<T> fw = buffer.get();
+        Forwarding<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           if (fw.hasNext()) {
             fw = defaultObject(forward(queryName, useParam.offset(offset += limit)), empty);
@@ -86,14 +79,12 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       }
 
       @Override
-      public List<T> next() {
-        ForwardList<T> fw = buffer.get();
+      public T next() {
+        Forwarding<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           throw new NoSuchElementException();
         }
-        List<T> list = new ArrayList<>(fw.getResults());
-        fw.getResults().clear();
-        return list;
+        return fw.getResults().remove(0);
       }
     };
     return streamOf(iterator);

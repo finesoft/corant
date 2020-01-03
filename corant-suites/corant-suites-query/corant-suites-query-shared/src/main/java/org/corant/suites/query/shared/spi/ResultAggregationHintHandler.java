@@ -33,8 +33,8 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.cdi.ConversionService;
-import org.corant.suites.query.shared.QueryService.ForwardList;
-import org.corant.suites.query.shared.QueryService.PagedList;
+import org.corant.suites.query.shared.QueryService.Forwarding;
+import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
 import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
 
@@ -101,12 +101,12 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
       return;
     }
     List<Map<?, ?>> list = null;
-    if (result instanceof ForwardList) {
-      list = ((ForwardList) result).getResults();
+    if (result instanceof Forwarding) {
+      list = ((Forwarding) result).getResults();
     } else if (result instanceof List) {
       list = (List) result;
-    } else if (result instanceof PagedList) {
-      list = ((PagedList) result).getResults();
+    } else if (result instanceof Paging) {
+      list = ((Paging) result).getResults();
     }
     if (!isEmpty(list)) {
       handler.accept(list);

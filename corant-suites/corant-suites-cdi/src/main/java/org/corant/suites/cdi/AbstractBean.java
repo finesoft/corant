@@ -26,7 +26,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
- * corant-kernel
+ * corant-suites-cdi
  *
  * @author bingo 下午3:45:22
  *

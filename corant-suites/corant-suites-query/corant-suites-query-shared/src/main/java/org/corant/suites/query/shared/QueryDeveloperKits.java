@@ -49,7 +49,7 @@ public class QueryDeveloperKits {
 
   public static void staticValidate(Object... params) {
     try (Corant corant = prepare()) {
-      final QueryMappingService service = resolve(QueryMappingService.class).get();
+      final QueryMappingService service = resolve(QueryMappingService.class);
       final Map<Object, Object> parameter = mapOf(params);
       out(false);
       List<Throwable> throwabls = new ArrayList<>();

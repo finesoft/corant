@@ -14,7 +14,7 @@
 package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Collections;
 import java.util.Set;
@@ -56,7 +56,7 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   public static ConnectionFactory getConnectionFactory(String connectionFactoryId) {
-    return resolveNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
+    return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
         () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
             connectionFactoryId));
   }

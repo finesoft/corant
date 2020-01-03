@@ -17,7 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -171,7 +171,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     public DefaultElasticDocumentService(Instance<Object> instance, ElasticConfig ec) {
       transportClient =
           instance.select(ElasticExtension.class).get().getTransportClient(ec.getClusterName());
-      indexingResolver = resolveNamed(ElasticIndexingResolver.class, ec.getClusterName()).get();
+      indexingResolver = findNamed(ElasticIndexingResolver.class, ec.getClusterName()).get();
     }
 
     @Override
@@ -195,7 +195,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
      */
     public DefaultElasticIndexingResolver(ElasticConfig ec) {
       config = ec;
-      indicesService = resolveNamed(ElasticIndicesService.class, ec.getClusterName()).get();
+      indicesService = findNamed(ElasticIndicesService.class, ec.getClusterName()).get();
       logger = Logger.getLogger(DefaultElasticIndexingResolver.class.getName());
       onPostConstruct();
     }

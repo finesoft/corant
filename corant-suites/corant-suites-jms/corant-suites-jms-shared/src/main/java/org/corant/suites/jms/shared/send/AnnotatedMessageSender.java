@@ -67,7 +67,7 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
     if (payload instanceof Message) {
       return (Message) payload;
     } else {
-      return resolve(MessageSerializer.class, schema.qualifier()).get().serialize(jmsc, payload);
+      return resolve(MessageSerializer.class, schema.qualifier()).serialize(jmsc, payload);
     }
   }
 

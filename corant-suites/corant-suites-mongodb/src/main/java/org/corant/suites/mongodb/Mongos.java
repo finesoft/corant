@@ -42,8 +42,8 @@ public class Mongos {
 
   public static void cloneDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
       int batchSize, BiConsumer<String, Document> consumer) {
-    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
-    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     for (String c : s.listCollectionNames()) {
       MongoCollection<Document> dest = d.getCollection(c);
       batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))
@@ -82,8 +82,8 @@ public class Mongos {
   public static void copyCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
       String srcCollectionName, String destCollectionName, Supplier<Bson> filter, int batchSize,
       Consumer<Document> consumer) {
-    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
-    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     copyCollection(s.getCollection(srcCollectionName), d.getCollection(destCollectionName), filter,
         batchSize, consumer);
   }
@@ -96,8 +96,8 @@ public class Mongos {
 
   public static void copyDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
       int batchSize, BiConsumer<String, Document> consumer, String... collections) {
-    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace)).get();
-    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace)).get();
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     for (String c : setOf(collections)) {
       MongoCollection<Document> dest = d.getCollection(c);
       batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))

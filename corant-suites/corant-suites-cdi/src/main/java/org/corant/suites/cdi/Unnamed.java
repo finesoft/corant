@@ -24,7 +24,7 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
 /**
- * corant-kernel
+ * corant-suites-cdi
  *
  * @author bingo 上午11:29:39
  *

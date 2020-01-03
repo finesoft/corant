@@ -20,7 +20,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.tryResolve;
 import java.lang.management.ManagementFactory;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -180,9 +180,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {
     if (cfg.isJta() || cfg.isXa()) {
-      TransactionManager tm = resolve(TransactionManager.class).orElse(null);
-      TransactionSynchronizationRegistry tsr =
-          resolve(TransactionSynchronizationRegistry.class).orElse(null);
+      TransactionManager tm = tryResolve(TransactionManager.class);
+      TransactionSynchronizationRegistry tsr = tryResolve(TransactionSynchronizationRegistry.class);
       cfgs.connectionPoolConfiguration()
           .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
 

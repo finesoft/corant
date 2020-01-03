@@ -21,8 +21,8 @@ import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
-import static org.corant.suites.cdi.Instances.resolve;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.find;
+import static org.corant.suites.cdi.Instances.findNamed;
 import static org.corant.suites.cdi.Instances.select;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -53,7 +53,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.suites.cdi.Instances.NamingReference;
+import org.corant.suites.cdi.NamingReference;
 import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
@@ -107,13 +107,13 @@ public class MongoClientExtension implements Extension {
         throw new CorantRuntimeException(e);
       }
     } else {
-      return resolveNamed(MongoClient.class, name).orElseThrow(
+      return findNamed(MongoClient.class, name).orElseThrow(
           () -> new CorantRuntimeException("Can not find any mongo client named %s", name));
     }
   }
 
   public static MongoDatabase getDatabase(String namespace) {
-    return resolveNamed(MongoDatabase.class, namespace).orElseThrow(
+    return findNamed(MongoDatabase.class, namespace).orElseThrow(
         () -> new CorantRuntimeException("Can not find any mongo database named %s", namespace));
   }
 
@@ -211,9 +211,9 @@ public class MongoClientExtension implements Extension {
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
     MongoClient mc =
-        resolve(MongoClient.class, clientConfigManager.getQualifiers(cfg.getClientName()))
-            .orElseThrow(() -> new CorantRuntimeException(
-                "Can not find mongo data base with client name %s", cfg.getClientName()));
+        find(MongoClient.class, clientConfigManager.getQualifiers(cfg.getClientName())).orElseThrow(
+            () -> new CorantRuntimeException("Can not find mongo data base with client name %s",
+                cfg.getClientName()));
     return mc.getDatabase(cfg.getDatabaseName());
   }
 

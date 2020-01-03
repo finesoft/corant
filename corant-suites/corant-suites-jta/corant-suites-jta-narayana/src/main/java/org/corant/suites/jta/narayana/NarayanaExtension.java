@@ -187,7 +187,7 @@ public class NarayanaExtension implements TransactionExtension {
     if (getConfig().isAutoRecovery()) {
       logger.info(() -> "Initializes automatic JTA recovery processes.");
       RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
-      RecoveryManagerService rms = resolve(RecoveryManagerService.class).get();
+      RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();
       streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
           .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
@@ -197,7 +197,7 @@ public class NarayanaExtension implements TransactionExtension {
     } else {
       logger.info(() -> "Initializes manual JTA recovery processes.");
       RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
-      RecoveryManagerService rms = resolve(RecoveryManagerService.class).get();
+      RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();
       streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
           .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)

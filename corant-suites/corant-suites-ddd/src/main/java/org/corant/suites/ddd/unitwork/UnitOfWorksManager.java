@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,7 +31,7 @@ public interface UnitOfWorksManager {
 
   @SuppressWarnings("unchecked")
   static <U extends UnitOfWork> Optional<U> currentUnitOfWork(Annotation... annotations) {
-    Optional<UnitOfWorksManager> uowm = resolve(UnitOfWorksManager.class, annotations);
+    Optional<UnitOfWorksManager> uowm = find(UnitOfWorksManager.class, annotations);
     return Optional.ofNullable(uowm.isPresent() ? (U) uowm.get().getCurrentUnitOfWork() : null);
   }
 

@@ -18,7 +18,7 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,7 +124,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
      */
     public DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
       this.dataBase =
-          resolveNamed(MongoDatabase.class, dataBase).orElseThrow(() -> new CorantRuntimeException(
+          findNamed(MongoDatabase.class, dataBase).orElseThrow(() -> new CorantRuntimeException(
               "Can't build default mongo named query, the data base named %s not found.",
               dataBase));
       resolver = manager.resolver;

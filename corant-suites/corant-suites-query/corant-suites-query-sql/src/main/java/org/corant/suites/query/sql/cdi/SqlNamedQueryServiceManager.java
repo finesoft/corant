@@ -20,7 +20,7 @@ import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -186,7 +186,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
         SqlNamedQueryServiceManager manager) {
       resolver = manager.resolver;
       Builder builder = SqlQueryConfiguration.defaultBuilder()
-          .dataSource(resolveNamed(DataSource.class, dataSourceName)
+          .dataSource(findNamed(DataSource.class, dataSourceName)
               .orElseThrow(() -> new CorantRuntimeException(
                   "Can't build default sql named query, the data source named %s not found.",
                   dataSourceName)))

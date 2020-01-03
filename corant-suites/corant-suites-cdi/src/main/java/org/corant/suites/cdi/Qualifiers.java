@@ -29,7 +29,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import org.corant.shared.util.StringUtils;
 
 /**
- * corant-kernel
+ * corant-suites-cdi
  *
  * @author bingo 下午2:10:11
  *

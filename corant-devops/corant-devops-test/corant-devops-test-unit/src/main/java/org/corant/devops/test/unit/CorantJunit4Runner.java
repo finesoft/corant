@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.corant.Corant;
 import org.corant.shared.util.CollectionUtils;
-import org.corant.suites.cdi.Instances.UnmanageableInstance;
+import org.corant.suites.cdi.UnmanageableInstance;
 import org.junit.runners.model.Statement;
 
 /**

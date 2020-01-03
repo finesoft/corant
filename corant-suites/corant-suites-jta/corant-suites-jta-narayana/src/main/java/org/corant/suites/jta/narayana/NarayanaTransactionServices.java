@@ -14,7 +14,7 @@
 package org.corant.suites.jta.narayana;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.find;
 import static org.corant.suites.cdi.Instances.resolveApply;
 import static org.corant.suites.cdi.Instances.select;
 import javax.enterprise.context.ApplicationScoped;
@@ -78,7 +78,7 @@ public class NarayanaTransactionServices implements TransactionServices {
 
     @Override
     public TransactionManager getTransactionManager() {
-      return resolve(TransactionManager.class)
+      return find(TransactionManager.class)
           .orElse(com.arjuna.ats.jta.TransactionManager.transactionManager());
     }
 

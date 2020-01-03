@@ -27,7 +27,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.transaction.TransactionScoped;
 
 /**
- * corant-kernel
+ * corant-suites-cdi
  *
  * @author bingo 下午5:29:56
  *

@@ -15,7 +15,7 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class JPARepositoryExtension implements Extension {
   static final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
   public static Annotation[] resolveQualifiers(Class<?> cls) {
-    return qualifiers.get(resolve(EntityLifecycleManager.class)
+    return qualifiers.get(find(EntityLifecycleManager.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find entity lifecycle manager!"))
         .getPersistenceContext(cls).unitName());
   }

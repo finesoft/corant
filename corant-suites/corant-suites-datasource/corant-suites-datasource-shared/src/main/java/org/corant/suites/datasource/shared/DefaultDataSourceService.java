@@ -15,7 +15,7 @@ package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -40,7 +40,7 @@ public class DefaultDataSourceService implements DataSourceService {
         throw new CorantRuntimeException(e);
       }
     } else {
-      return resolveNamed(DataSource.class, name).orElseThrow(
+      return findNamed(DataSource.class, name).orElseThrow(
           () -> new CorantRuntimeException("Can not find any data source named %s", name));
     }
   }

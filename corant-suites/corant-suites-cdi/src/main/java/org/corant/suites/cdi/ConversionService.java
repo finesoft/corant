@@ -25,7 +25,7 @@ import org.corant.shared.conversion.Converters;
 
 /**
  *
- * corant-kernel
+ * corant-suites-cdi
  *
  * @author bingo 上午12:16:42
  *

@@ -16,7 +16,7 @@ package org.corant.suites.ddd.model;
 import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.suites.cdi.Instances.find;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +107,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   @PostConstruct
   void onPostConstruct() {
-    final PersistenceService persistenceService = resolve(PersistenceService.class)
+    final PersistenceService persistenceService = find(PersistenceService.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find Persistence service!"));
     select(EntityManagerFactory.class).forEach(emf -> {
       String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);

@@ -14,7 +14,7 @@
 package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.suites.cdi.Instances.resolveNamed;
+import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,7 +55,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
           if (txCfg.isAutoRecovery()) {
             resources.add(new JMSRecoveryXAResource(v));
           } else {
-            resolveNamed(XAConnectionFactory.class, k)
+            findNamed(XAConnectionFactory.class, k)
                 .ifPresent(xacf -> resources.add(xacf.createXAContext().getXAResource()));
           }
           logger
@@ -80,7 +80,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     protected JMSRecoveryXAResource(AbstractJMSConfig config) {
       super();
       this.config = config;
-      factory = resolveNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).get();
+      factory = findNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).get();
     }
 
     @Override

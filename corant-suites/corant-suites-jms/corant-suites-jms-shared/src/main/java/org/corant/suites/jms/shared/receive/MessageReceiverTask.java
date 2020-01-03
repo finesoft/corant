@@ -559,7 +559,7 @@ public class MessageReceiverTask implements Runnable {
         String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
         if (isNotBlank(serialSchema)) {
           MessageSerializer serializer =
-              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema)).get();
+              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
           return serializer.deserialize(message, messageClass);
         }
       }

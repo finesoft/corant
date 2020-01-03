@@ -15,5 +15,18 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-config</artifactId>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.opentracing.contrib</groupId>
+			<artifactId>opentracing-tracerresolver</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client-microprofile</artifactId>
+		</dependency>
+    </dependencies>
 </project>

@@ -14,12 +14,21 @@
 			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-kernel</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.rsocket</groupId>
 			<artifactId>rsocket-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.rsocket</groupId>
 			<artifactId>rsocket-transport-netty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -289,7 +289,7 @@ public class Corant implements AutoCloseable {
         "Perform the spi handlers before ".concat(applicationName()).concat(" starting"));
     doBeforeStart(classLoader);
     final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
     String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
     Weld weld = new Weld(id);
@@ -303,17 +303,17 @@ public class Corant implements AutoCloseable {
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
 
     doAfterContainerInitialized();
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getName(), tk.getTimeSeconds()))
         .start("Perform the spi handlers after corant startup");
 
     doAfterStarted(classLoader);
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getTaskName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
         .destroy(sw -> {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {

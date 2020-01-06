@@ -99,7 +99,7 @@ public class UndertowWebServer extends AbstractWebServer {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
         sw.destroy((t) -> logger.info(() -> String.format("%s [%s] was started, takes %s seconds.",
-            t.getLastTaskInfo().getTaskName(), config.getDescription(),
+            t.getLastTaskInfo().getName(), config.getDescription(),
             t.getLastTaskInfo().getTimeSeconds())));
       } else {
         logger.info(() -> "Undertow can not start, due to some PreStartHandler interruption!");

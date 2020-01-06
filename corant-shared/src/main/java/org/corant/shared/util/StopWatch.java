@@ -15,10 +15,13 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.defaultString;
+import java.io.PrintStream;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * corant-shared
@@ -50,6 +53,10 @@ public class StopWatch {
     this.id = id;
   }
 
+  public static StopWatch press() {
+    return new StopWatch().start();
+  }
+
   public static StopWatch press(String taskName) {
     return new StopWatch().start(taskName);
   }
@@ -59,7 +66,7 @@ public class StopWatch {
   }
 
   public void destroy() {
-    destroy(null);
+    destroy((Consumer<StopWatch>) null);
   }
 
   public void destroy(Consumer<StopWatch> consumer) {
@@ -75,6 +82,18 @@ public class StopWatch {
     currentTaskName = null;
     lastTaskInfo = null;
     taskCount = 0;
+  }
+
+  public void destroy(Logger logger) {
+    destroy(sw -> logger.info(() -> String.format("Task %s take %s.",
+        String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
+        sw.getTotalDuration())));
+  }
+
+  public void destroy(PrintStream ps) {
+    destroy(sw -> ps.println(String.format("Task %s take %s.",
+        String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
+        sw.getTotalDuration())));
   }
 
   public String getCurrentTaskName() {
@@ -101,6 +120,10 @@ public class StopWatch {
     return Collections.unmodifiableList(taskInfos);
   }
 
+  public Duration getTotalDuration() {
+    return Duration.ofMillis(totalTimeMillis);
+  }
+
   public long getTotalTimeMillis() {
     return totalTimeMillis;
   }
@@ -120,7 +143,7 @@ public class StopWatch {
   }
 
   public StopWatch stop() throws IllegalStateException {
-    return stop(null);
+    return stop((Consumer<TaskInfo>) null);
   }
 
   public StopWatch stop(Consumer<TaskInfo> consumer) throws IllegalStateException {
@@ -138,19 +161,33 @@ public class StopWatch {
     return this;
   }
 
+  public StopWatch stop(Logger logger) throws IllegalStateException {
+    return stop(t -> logger.info(
+        () -> String.format("Task %s take %s.", defaultString(t.getName()), t.getDuration())));
+  }
+
+  public StopWatch stop(PrintStream ps) throws IllegalStateException {
+    return stop(t -> ps
+        .println(String.format("Task %s take %s.", defaultString(t.getName()), t.getDuration())));
+  }
+
   public static final class TaskInfo {
 
-    private final String taskName;
+    private final String name;
 
     private final long timeMillis;
 
     TaskInfo(String taskName, long timeMillis) {
-      this.taskName = taskName;
+      name = taskName;
       this.timeMillis = timeMillis;
     }
 
-    public String getTaskName() {
-      return taskName;
+    public Duration getDuration() {
+      return Duration.ofMillis(timeMillis);
+    }
+
+    public String getName() {
+      return name;
     }
 
     public long getTimeMillis() {

@@ -85,7 +85,7 @@ public class MessageReceiverManager {
   void postConstruct() {
     extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
         .forEach(receiveMetaDatas::addAll);
-    if (receiveMetaDatas.size() > 0) {
+    if (!receiveMetaDatas.isEmpty()) {
       extesion.getConfigManager().getAllWithNames().values().forEach(cfg -> {
         if (cfg != null && cfg.isEnable()) {
           executorServices.put(cfg.getConnectionFactoryId(),

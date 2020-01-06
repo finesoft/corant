@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-suites-lang-kotlin</module>
+  	<module>corant-suites-lang-javascript</module>
   </modules>
 </project>

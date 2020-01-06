@@ -13,11 +13,12 @@
  */
 package org.corant.suites.query.shared.dynamic.javascript;
 
+import org.corant.suites.lang.javascript.NashornScriptEngines;
+import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**

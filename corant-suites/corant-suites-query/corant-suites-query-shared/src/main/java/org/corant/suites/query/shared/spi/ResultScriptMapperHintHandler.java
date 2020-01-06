@@ -29,10 +29,10 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.script.ScriptEngineManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.lang.javascript.NashornScriptEngines;
+import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**

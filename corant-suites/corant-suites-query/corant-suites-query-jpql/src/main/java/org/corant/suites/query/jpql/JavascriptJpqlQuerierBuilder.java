@@ -15,12 +15,12 @@ package org.corant.suites.query.jpql;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.corant.suites.lang.javascript.NashornScriptEngines;
+import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines;
-import org.corant.suites.query.shared.dynamic.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**

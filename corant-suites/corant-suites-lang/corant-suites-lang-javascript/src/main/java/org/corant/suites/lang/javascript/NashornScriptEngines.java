@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared.dynamic.javascript;
+package org.corant.suites.lang.javascript;
 
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class NashornScriptEngines {
   // -doe Dump a stack trace on errors.
   // --global-per-engine Use single Global instance per script engine instance
   public static final ScriptEngine ENGINE =
-      NASHORN_ENGINE_FACTORY.getScriptEngine(new String[] {"-doe", "--global-per-engine"});
+      NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine");
 
   static final Map<String, ScriptConsumer> consumers = new ConcurrentHashMap<>();
   static final Map<String, ScriptFunction> functions = new ConcurrentHashMap<>();

@@ -23,6 +23,5 @@ The following projects are under the corant project.
 # 6. corant-suites 
     Integration project. This project includes many subprojects that integrate JEE or other open source components
     to make integration and development easier. For now we support JTA/JPA/JMS/JNDI/JAXRS and app-server(Undertow) etc.
-# 7. corant-microprofile 
-    Integration microprofile, include rest client/jwt/faulttolerance/health check/openapi/open tracking/metrics
+
 

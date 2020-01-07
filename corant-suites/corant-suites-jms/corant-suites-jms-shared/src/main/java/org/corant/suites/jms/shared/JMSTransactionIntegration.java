@@ -45,7 +45,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    logger.info(() -> "Resolving JMS XAResources for JTA recovery processes.");
+    logger.fine(() -> "Resolving JMS XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
     List<XAResource> resources = new ArrayList<>();
@@ -59,7 +59,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
                 .ifPresent(xacf -> resources.add(xacf.createXAContext().getXAResource()));
           }
           logger
-              .info(() -> String.format("Added JMS[%s] XAResource to JTA recovery processes.", k));
+              .fine(() -> String.format("Added JMS[%s] XAResource to JTA recovery processes.", k));
         }
       }));
     }

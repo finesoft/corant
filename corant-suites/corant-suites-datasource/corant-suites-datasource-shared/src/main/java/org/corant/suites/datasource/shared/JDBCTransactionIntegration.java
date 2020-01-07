@@ -61,7 +61,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    logger.info(() -> "Resolving JDBC XAResources for JTA recovery processes.");
+    logger.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     List<XAResource> res = new ArrayList<>();
     Instance<AbstractDataSourceExtension> extensions =
@@ -82,7 +82,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
                 } else {
                   res.add(getXAResource(xads, cfg));
                 }
-                logger.info(() -> String.format(
+                logger.fine(() -> String.format(
                     "Added JDBC XA data source[%s] XAResource to JTA recovery processes.",
                     cfg.getName()));
               } catch (SecurityException | SQLException e) {

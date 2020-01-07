@@ -308,6 +308,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     values.add("19791114 111408");
     values.add("14-11-1979 11:14:08");
     values.add("1979-11-14 11:14:08");
+    values.add("1979-11-14T11:14:08");
     values.add("1979-11-14T11:14:08Z");
     values.add("1979-11-14T11:14:08.080Z");
     values.add("1979-11-14T11:14:08+08:00");

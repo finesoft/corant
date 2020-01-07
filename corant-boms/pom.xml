@@ -1212,42 +1212,42 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-healthcheck</artifactId>
+				<artifactId>corant-suites-microprofile-healthcheck</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-faulttolerance</artifactId>
+				<artifactId>corant-suites-microprofile-faulttolerance</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-jwt</artifactId>
+				<artifactId>corant-suites-microprofile-jwt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-metrics</artifactId>
+				<artifactId>corant-suites-microprofile-metrics</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-openapi</artifactId>
+				<artifactId>corant-suites-microprofile-openapi</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-opentracking</artifactId>
+				<artifactId>corant-suites-microprofile-opentracking</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-restclient</artifactId>
+				<artifactId>corant-suites-microprofile-restclient</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-microprofile-config</artifactId>
+				<artifactId>corant-suites-microprofile-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

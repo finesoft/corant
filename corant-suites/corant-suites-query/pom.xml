@@ -16,5 +16,6 @@
 		<module>corant-suites-query-elastic</module>
 		<module>corant-suites-query-mongodb</module>
 		<module>corant-suites-query-redis</module>
+		<module>corant-suites-query-cassandra</module>
 	</modules>
 </project>

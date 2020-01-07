@@ -39,6 +39,8 @@
 		<module>corant-suites-grpc</module>
 		<module>corant-suites-rsocket</module>
 		<module>corant-suites-cdi</module>
+		<module>corant-suites-vertx</module>
+		<module>corant-suites-microprofile</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

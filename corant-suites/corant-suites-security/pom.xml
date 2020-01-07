@@ -8,8 +8,6 @@
   <artifactId>corant-suites-security</artifactId>
   <packaging>pom</packaging>
   <modules>
-  	<module>corant-suites-security-keycloak</module>
   	<module>corant-suites-security-shared</module>
-  	<module>corant-suites-security-web</module>
   </modules>
 </project>

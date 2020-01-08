@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -51,6 +52,34 @@ public class PathUtils {
   /**
    * corant-shared
    *
+   * @author bingo 下午3:48:58
+   *
+   */
+  public static class CaseMatcher implements Predicate<String> {
+
+    private final String express;
+    private final boolean ignoreCase;
+
+    /**
+     * @param express
+     * @param ignoreCase
+     */
+    protected CaseMatcher(String express, boolean ignoreCase) {
+      super();
+      this.express = express;
+      this.ignoreCase = ignoreCase;
+    }
+
+    @Override
+    public boolean test(String t) {
+      return ignoreCase ? express.equalsIgnoreCase(t) : express.equals(t);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
    * Use Glob wildcards for filtering.
    *
    * @author bingo 下午8:32:50
@@ -80,14 +109,17 @@ public class PathUtils {
       return str != null && str.chars().anyMatch(GlobPatterns::isGlobChar);
     }
 
+    public static GlobMatcher of(boolean isDos, String globExpress, boolean ignoreCase) {
+      return new GlobMatcher(isDos, ignoreCase, globExpress);
+    }
+
     public static GlobMatcher of(String globExpress) {
       return new GlobMatcher(false, false, globExpress);
     }
 
     public static GlobMatcher of(String globExpress, boolean ignoreCase) {
-      return new GlobMatcher(
-          System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window"),
-          ignoreCase, globExpress);
+      return of(System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window"),
+          globExpress, ignoreCase);
     }
 
     public static GlobMatcher ofDos(String globExpress) {
@@ -157,8 +189,8 @@ public class PathUtils {
    */
   public static class GlobPatterns {
 
-    public static final String REG_CHARS = ".^$+{[]|()";
-    public static final String GLO_CHARS = "\\*?[{";
+    public static final String DIST_REG_CHARS = ".^$+{[]|()";
+    public static final String DIST_GLO_CHARS = "\\*?[{";
     private static final char EOL = 0;
 
     public static Pattern build(String globExpress, boolean isDos, boolean ignoreCase) {
@@ -180,19 +212,19 @@ public class PathUtils {
     }
 
     public static boolean isGlobChar(char c) {
-      return GLO_CHARS.indexOf(c) != -1;
+      return DIST_GLO_CHARS.indexOf(c) != -1;
     }
 
     public static boolean isGlobChar(int c) {
-      return GLO_CHARS.indexOf(c) != -1;
+      return DIST_GLO_CHARS.indexOf(c) != -1;
     }
 
     public static boolean isRegexChar(char c) {
-      return REG_CHARS.indexOf(c) != -1;
+      return DIST_REG_CHARS.indexOf(c) != -1;
     }
 
     public static boolean isRegexChar(int c) {
-      return REG_CHARS.indexOf(c) != -1;
+      return DIST_REG_CHARS.indexOf(c) != -1;
     }
 
     public static String toUnixRegexPattern(String globExpress) {
@@ -364,4 +396,59 @@ public class PathUtils {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午2:28:39
+   *
+   */
+  public static class RegexMatcher implements Predicate<String> {
+
+    public static final String REG_CHARS = ".+*?^$()[]{}|";
+
+    private final boolean ignoreCase;
+    private final String express;
+    private final Pattern pattern;
+
+    /**
+     * @param ignoreCase
+     * @param express
+     */
+    protected RegexMatcher(boolean ignoreCase, String express) {
+      super();
+      this.ignoreCase = ignoreCase;
+      this.express = shouldNotNull(express);
+      pattern = Pattern.compile(express, ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
+    }
+
+    public static boolean hasRegexChar(String str) {
+      return str != null && str.chars().anyMatch(RegexMatcher::isRegexChar);
+    }
+
+    public static boolean isRegexChar(char c) {
+      return REG_CHARS.indexOf(c) != -1;
+    }
+
+    public static boolean isRegexChar(int c) {
+      return REG_CHARS.indexOf(c) != -1;
+    }
+
+    public String getExpress() {
+      return express;
+    }
+
+    public Pattern getPattern() {
+      return pattern;
+    }
+
+    public boolean isIgnoreCase() {
+      return ignoreCase;
+    }
+
+    @Override
+    public boolean test(String t) {
+      return pattern.matcher(t).matches();
+    }
+
+  }
 }

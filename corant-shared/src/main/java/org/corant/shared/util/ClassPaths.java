@@ -19,7 +19,6 @@ import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.replace;
@@ -38,6 +37,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -45,6 +45,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -53,9 +54,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils.GlobMatcher;
-import org.corant.shared.util.PathUtils.GlobPatterns;
+import org.corant.shared.util.PathUtils.RegexMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
 
 /**
@@ -68,11 +70,14 @@ import org.corant.shared.util.Resources.ClassPathResource;
  */
 public class ClassPaths {
 
+  public static final String REGE_CHARS = "+*?^([{|";
+  public static final String GLOB_CHARS = "*?[{";
+
   public static final char PATH_SEPARATOR = '/';
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String PATH_SEPARATOR_STRING = Character.toString(PATH_SEPARATOR);
   public static final String CLASSES = "classes";
-  public static final String CLASSES_FOLDER = CLASSES + File.separator;
+  public static final String CLASSES_FOLDER = CLASSES + PATH_SEPARATOR_STRING;
   public static final String JAR_EXT = ".jar";
   public static final String WAR_EXT = ".war";
   public static final String META_INF = "META-INF";
@@ -80,30 +85,16 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
+
   protected static final Set<String> sysLibs =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
   protected static final Map<Path, URLClassLoader> cachedClassLoaders = new ConcurrentHashMap<>();
+
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 
   private ClassPaths() {
     super();
-  }
-
-  /**
-   * Build a class path resource scanner with path expression
-   *
-   * @param pathExpression the class path expression, may be glob expression.
-   * @param ignoreCase
-   * @return buildScanner
-   */
-  public static Scanner buildScanner(String pathExpression, boolean ignoreCase) {
-    if (GlobMatcher.hasGlobChar(pathExpression)) {
-      PathFilter pf = new PathFilter(ignoreCase, pathExpression);
-      return new Scanner(pf.getRoot(), pf);
-    } else {
-      return new Scanner(pathExpression);
-    }
   }
 
   /**
@@ -159,8 +150,8 @@ public class ClassPaths {
   }
 
   /**
-   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern, case
-   * insensitive.
+   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex,
+   * case insensitive.
    *
    * @see #from(ClassLoader, String, boolean)
    * @param classLoader
@@ -174,13 +165,16 @@ public class ClassPaths {
   }
 
   /**
-   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern.
+   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex.
+   * If path start with 'glob:' then use Glob pattern else if path start with 'regex:' then use
+   * regex pattern; if pattern not found this method will auto decide matcher, if matcher no found
+   * then use class loader getResources() and the parameter ignoreCase will be abandoned.
    *
    * <pre>
    * for example:
-   * 1.if path is "javax/sql" then will scan all resources that under the javax.sql class path.
+   * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
-   * 3.if path is "META-INF/maven" then will scan all resources under the META-INF/maven.
+   * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
    * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
@@ -188,26 +182,72 @@ public class ClassPaths {
    *
    * @param classLoader
    * @param path
-   * @param ignoreCase
+   * @param ignoreCase only use in pattern matcher
    * @return
    * @throws IOException from
    */
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
       boolean ignoreCase) throws IOException {
-    Scanner scanner = buildScanner(defaultString(path), ignoreCase);
-    for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(
-        defaultObject(classLoader, defaultClassLoader()), scanner.getRoot()).entrySet()) {
-      scanner.scan(entry.getKey(), entry.getValue());
+    final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
+    final Optional<ClassPathMatcher> pathFilter = decideClassPathMatcher(path, ignoreCase);
+    if (pathFilter.isPresent()) {
+      Scanner scanner = new Scanner(pathFilter.get());
+      for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,
+          scanner.getRoot()).entrySet()) {
+        scanner.scan(entry.getKey(), entry.getValue());
+      }
+      return scanner.getResources();
+    } else {
+      return getClassPathResourceUrls(useClassLoader, path).stream().map(u -> {
+        try {
+          return ClassPathResource.of(u.toURI().getRawSchemeSpecificPart(), classLoader, u);
+        } catch (URISyntaxException e) {
+          throw new CorantRuntimeException(e);
+        }
+      }).collect(Collectors.toSet());
     }
-    return scanner.getResources();
+  }
+
+  static Optional<ClassPathMatcher> decideClassPathMatcher(String express, boolean ignoreCase) {
+    String path = express;
+    if (isBlank(path)) {
+      path = "**";
+      return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
+    } else if (path.startsWith("regex:")) {
+      path = path.substring("regex:".length());
+      return Optional.of(new ClassPathMatcher(new RegexMatcher(ignoreCase, path), path));
+    } else if (path.startsWith("glob:")) {
+      path = path.substring("glob:".length());
+      path = path.endsWith(PATH_SEPARATOR_STRING) ? path.concat("**") : path;
+      return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
+    } else {
+      int len = path.length();
+      Set<Character> chars = new HashSet<>();
+      for (int i = 0; i < len; i++) {
+        if (REGE_CHARS.indexOf(path.charAt(i)) != -1) {
+          chars.add(path.charAt(i));
+        }
+      }
+      if (!chars.isEmpty()) {
+        if (chars.stream().map(String::valueOf).allMatch(p -> GLOB_CHARS.indexOf(p) != -1)) {
+          path = path.endsWith(PATH_SEPARATOR_STRING) ? path.concat("**") : path;
+          return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
+        } else {
+          return Optional.of(new ClassPathMatcher(new RegexMatcher(ignoreCase, path), path));
+        }
+      } else if (path.endsWith(PATH_SEPARATOR_STRING)) {
+        path = path.concat("**");
+        return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
+      }
+    }
+    return Optional.empty();
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {
     LinkedHashMap<URI, ClassLoader> entries = new LinkedHashMap<>();
     try {
-      Enumeration<URL> urls = shouldNotNull(classLoader).getResources(path);
-      while (urls.hasMoreElements()) {
-        entries.putIfAbsent(urls.nextElement().toURI(), classLoader);
+      for (URL url : getClassPathResourceUrls(classLoader, path)) {
+        entries.putIfAbsent(url.toURI(), classLoader);
       }
       if (loadAll(path)) {
         ClassLoader currClsLoader = classLoader;
@@ -220,8 +260,14 @@ public class ClassPaths {
             }
           }
           if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
-            for (String classPath : split(System.getProperty("java.class.path"),
-                System.getProperty("path.separator"))) {
+            Set<String> sysClassPaths = new HashSet<>();
+            sysClassPaths.addAll(Arrays.asList(split(System.getProperty("sun.boot.class.path"),
+                System.getProperty("path.separator"))));
+            sysClassPaths.addAll(Arrays.asList(
+                split(System.getProperty("java.ext.dirs"), System.getProperty("path.separator"))));
+            sysClassPaths.addAll(Arrays.asList(split(System.getProperty("java.class.path"),
+                System.getProperty("path.separator"))));
+            for (String classPath : sysClassPaths) {
               try {
                 entries.putIfAbsent(new File(classPath).toURI(), currClsLoader);
               } catch (SecurityException e) {
@@ -239,6 +285,19 @@ public class ClassPaths {
     return entries;
   }
 
+  static List<URL> getClassPathResourceUrls(ClassLoader classLoader, String classPath) {
+    List<URL> entries = new ArrayList<>();
+    try {
+      Enumeration<URL> urls = shouldNotNull(classLoader).getResources(classPath);
+      while (urls.hasMoreElements()) {
+        entries.add(urls.nextElement());
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e);
+    }
+    return entries;
+  }
+
   static boolean loadAll(String path) {
     return isBlank(path) || sysLibs.stream().anyMatch(path::startsWith);
   }
@@ -246,23 +305,31 @@ public class ClassPaths {
   /**
    * corant-shared
    *
-   * Use glob express for filtering.
+   * Use glob/regex express for filtering.
    *
    * @author bingo 下午8:32:50
    *
    */
-  public static final class PathFilter extends GlobMatcher {
+  public static final class ClassPathMatcher implements Predicate<String> {
 
-    protected PathFilter(boolean ignoreCase, String pathExpress) {
-      super(false, ignoreCase, pathExpress);
+    final Predicate<String> matcher;
+    final String pathExpress;
+    final boolean glob;
+
+    protected ClassPathMatcher(Predicate<String> matcher, String pathExpress) {
+      this.matcher = matcher;
+      this.pathExpress = pathExpress;
+      glob = matcher instanceof GlobMatcher;
     }
 
     public String getRoot() {
-      String pathExpress = getGlobExpress();
+      if (pathExpress == null) {
+        return null;
+      }
       int len = pathExpress.length();
       int idx = -1;
       for (int i = 0; i < len; i++) {
-        if (GlobPatterns.isGlobChar(pathExpress.charAt(i))) {
+        if (isSpecChar(pathExpress.charAt(i))) {
           idx = i;
           break;
         }
@@ -280,6 +347,19 @@ public class ClassPaths {
         }
       }
     }
+
+    public boolean isSpecChar(char c) {
+      if (glob) {
+        return GLOB_CHARS.indexOf(c) != -1;
+      } else {
+        return REGE_CHARS.indexOf(c) != -1;
+      }
+    }
+
+    @Override
+    public boolean test(String t) {
+      return matcher.test(t);
+    }
   }
 
   /**
@@ -296,6 +376,10 @@ public class ClassPaths {
     private final Set<URI> scannedUris = new HashSet<>();
     private final String root;
     private Predicate<String> filter = s -> true;
+
+    public Scanner(ClassPathMatcher matcher) {
+      this(matcher.getRoot(), matcher);
+    }
 
     public Scanner(String root) {
       super();
@@ -318,14 +402,14 @@ public class ClassPaths {
     }
 
     /**
-     * Unfinish yet
+     * Unfinish yet // FIXME
      *
      * @param jarFile
      * @param path
      * @return
      * @throws URISyntaxException getClassPathEntry
      */
-    protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException { // FIXME
+    protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException {
       URI uri = new URI(path);
       if (uri.isAbsolute()) {
         return uri;
@@ -336,13 +420,13 @@ public class ClassPaths {
     }
 
     /**
-     * Unfinish yet
+     * Unfinish yet // FIXME
      *
      * @param jarFile
      * @param manifest
      * @return getClassPathFromManifest
      */
-    protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) { // FIXME
+    protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) {
       String attrName = Attributes.Name.CLASS_PATH.toString();
       Attributes attrs = null;
       if (manifest == null || (attrs = manifest.getMainAttributes()) == null
@@ -372,10 +456,17 @@ public class ClassPaths {
     }
 
     protected void scanDirectory(File directory, ClassLoader classloader) throws IOException {
-      scanDirectory(directory, classloader,
-          isNotBlank(root) && !root.endsWith(PATH_SEPARATOR_STRING) ? root + PATH_SEPARATOR_STRING
-              : root,
-          new LinkedHashSet<>());
+      String canonical = getRegularFilePath(directory);
+      if (isBlank(root)) {
+        scanDirectory(directory, classloader, root, new LinkedHashSet<>());
+      } else {
+        int classesPos = canonical.indexOf(CLASSES_FOLDER);
+        if (classesPos != -1 && canonical.indexOf(root, classesPos) != -1) {
+          String packagePrefix =
+              !root.endsWith(PATH_SEPARATOR_STRING) ? root + PATH_SEPARATOR_STRING : root;
+          scanDirectory(directory, classloader, packagePrefix, new LinkedHashSet<>());
+        }
+      }
     }
 
     protected void scanDirectory(File directory, ClassLoader classloader, String packagePrefix,
@@ -466,15 +557,16 @@ public class ClassPaths {
     }
 
     protected void scanSingleFile(File file, ClassLoader classloader) throws IOException {
-      if (!file.getCanonicalPath().equals(JarFile.MANIFEST_NAME)) {
-        String filePath = file.getCanonicalPath();
+      String filePath = replace(file.getCanonicalPath(), File.separator, PATH_SEPARATOR_STRING);
+      if (filePath.endsWith(JAR_EXT)) {
+        scanJar(file.toURI(), file, classloader);
+      } else if (!filePath.equals(JarFile.MANIFEST_NAME)) {
         int classesIdx = -1;
         if ((classesIdx = filePath.indexOf(CLASSES_FOLDER)) != -1) {
           filePath = filePath.substring(classesIdx + CLASSES_FOLDER.length());
         }
-        String resourceName = replace(filePath, File.separator, PATH_SEPARATOR_STRING);
-        if (filter.test(resourceName)) {
-          resources.add(ClassPathResource.of(resourceName, classloader, file.toURI().toURL()));
+        if (filter.test(filePath)) {
+          resources.add(ClassPathResource.of(filePath, classloader, file.toURI().toURL()));
         }
       }
     }
@@ -509,5 +601,10 @@ public class ClassPaths {
       }
       return null;
     }
+
+    String getRegularFilePath(File file) throws IOException {
+      return replace(file.getCanonicalPath(), File.separator, PATH_SEPARATOR_STRING);
+    }
+
   }
 }

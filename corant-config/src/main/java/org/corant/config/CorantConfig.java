@@ -14,7 +14,6 @@
 package org.corant.config;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -86,7 +85,7 @@ public class CorantConfig implements Config, Serializable {
   public String getRawValue(String propertyName) {
     for (ConfigSource cs : sources.get()) {
       String value = cs.getValue(propertyName);
-      if (isNotBlank(value)) {
+      if (value != null) {// FIXME
         return value;
       }
     }

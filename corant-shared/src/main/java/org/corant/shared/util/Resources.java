@@ -97,13 +97,16 @@ public class Resources {
   }
 
   /**
-   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern.
+   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex.
+   * If path start with 'glob:' then use Glob pattern else if path start with 'regex:' then use
+   * regex pattern; if pattern not found this method will auto decide matcher, if matcher no found
+   * then use class loader getResources() and the parameter ignoreCase will be abandoned.
    *
    * <pre>
    * for example:
-   * 1.if path is "javax/sql" then will scan all resources that under the javax.sql class path.
+   * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
-   * 3.if path is "META-INF/maven" then will scan all resources under the META-INF/maven.
+   * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
    * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
@@ -164,7 +167,7 @@ public class Resources {
     if (GlobMatcher.hasGlobChar(usePath)) {
       String resolvedPath = FileUtils.resolveGlobPathPrefix(usePath);
       final GlobMatcher m = new GlobMatcher(false, true, usePath.replace('\\', '/'));
-      return FileUtils.selectFiles(resolvedPath, (f) -> {
+      return FileUtils.selectFiles(resolvedPath, f -> {
         try {
           return m.test(f.getCanonicalPath().replace('\\', '/'));
         } catch (IOException e) {

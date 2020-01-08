@@ -131,55 +131,61 @@ public class CorantConfigConversion implements Serializable {
     Object result = null;
     String value = rawValue;
     if (value != null) {
-      if (type instanceof Class) {
-        Class<?> typeClass = forceCast(type);
-        if (typeClass.isArray()) {
-          result = convertArray(value, typeClass.getComponentType());
-        } else {
-          if (Class.class.isAssignableFrom(typeClass)) {
-            result = convertSingle(value, Class.class);
-          } else if (List.class.isAssignableFrom(typeClass)) {
-            result = convertCollection(value, String.class, ArrayList::new);
-          } else if (Set.class.isAssignableFrom(typeClass)) {
-            result = convertCollection(value, String.class, HashSet::new);
-          } else if (Optional.class.isAssignableFrom(typeClass)) {
-            result = Optional.ofNullable(convert(value, String.class));
-          } else if (Supplier.class.isAssignableFrom(typeClass)) {
-            result = (Supplier<?>) () -> convert(value, String.class);
-          } else if (Provider.class.isAssignableFrom(typeClass)) {
-            result = (Provider<?>) () -> convert(value, String.class);
-          } else if (Map.class.isAssignableFrom(typeClass)) {
-            result = convertMap(value, String.class, String.class);
+      try {
+        if (type instanceof Class) {
+          Class<?> typeClass = forceCast(type);
+          if (typeClass.isArray()) {
+            result = convertArray(value, typeClass.getComponentType());
           } else {
-            result = convertSingle(value, typeClass);
+            if (Class.class.isAssignableFrom(typeClass)) {
+              result = convertSingle(value, Class.class);
+            } else if (List.class.isAssignableFrom(typeClass)) {
+              result = convertCollection(value, String.class, ArrayList::new);
+            } else if (Set.class.isAssignableFrom(typeClass)) {
+              result = convertCollection(value, String.class, HashSet::new);
+            } else if (Optional.class.isAssignableFrom(typeClass)) {
+              result = Optional.ofNullable(convert(value, String.class));
+            } else if (Supplier.class.isAssignableFrom(typeClass)) {
+              result = (Supplier<?>) () -> convert(value, String.class);
+            } else if (Provider.class.isAssignableFrom(typeClass)) {
+              result = (Provider<?>) () -> convert(value, String.class);
+            } else if (Map.class.isAssignableFrom(typeClass)) {
+              result = convertMap(value, String.class, String.class);
+            } else {
+              result = convertSingle(value, typeClass);
+            }
           }
-        }
-      } else if (type instanceof ParameterizedType) {
-        ParameterizedType ptype = (ParameterizedType) type;
-        Class<?> rType = forceCast(ptype.getRawType());
-        Type argType = ptype.getActualTypeArguments()[0];
-        if (Class.class.isAssignableFrom(rType)) {
-          result = convertSingle(value, Class.class);
-        } else if (List.class.isAssignableFrom(rType)) {
-          result = convertCollection(value, argType, ArrayList::new);
-        } else if (Set.class.isAssignableFrom(rType)) {
-          result = convertCollection(value, argType, HashSet::new);
-        } else if (Optional.class.isAssignableFrom(rType)) {
-          result = Optional.ofNullable(convert(value, argType));
-        } else if (Supplier.class.isAssignableFrom(rType)) {
-          result = (Supplier<?>) () -> convert(value, argType);
-        } else if (Provider.class.isAssignableFrom(rType)) {
-          result = (Provider<?>) () -> convert(value, argType);
-        } else if (Map.class.isAssignableFrom(rType)) {
-          result = convertMap(value, ptype);
+        } else if (type instanceof ParameterizedType) {
+          ParameterizedType ptype = (ParameterizedType) type;
+          Class<?> rType = forceCast(ptype.getRawType());
+          Type argType = ptype.getActualTypeArguments()[0];
+          if (Class.class.isAssignableFrom(rType)) {
+            result = convertSingle(value, Class.class);
+          } else if (List.class.isAssignableFrom(rType)) {
+            result = convertCollection(value, argType, ArrayList::new);
+          } else if (Set.class.isAssignableFrom(rType)) {
+            result = convertCollection(value, argType, HashSet::new);
+          } else if (Optional.class.isAssignableFrom(rType)) {
+            result = Optional.ofNullable(convert(value, argType));
+          } else if (Supplier.class.isAssignableFrom(rType)) {
+            result = (Supplier<?>) () -> convert(value, argType);
+          } else if (Provider.class.isAssignableFrom(rType)) {
+            result = (Provider<?>) () -> convert(value, argType);
+          } else if (Map.class.isAssignableFrom(rType)) {
+            result = convertMap(value, ptype);
+          } else {
+            throw new IllegalStateException(
+                "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
+          }
         } else {
-          throw new IllegalStateException(
-              "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
+          throw new IllegalStateException("Cannot support config property for " + type);
         }
-      } else {
-        throw new IllegalStateException("Cannot support config property for " + type);
+      } catch (Exception e) {
+        throw new IllegalArgumentException(
+            String.format("Cannot convert config property value %s with type %s", rawValue, type));
       }
     }
+
     return result;
   }
 

@@ -182,7 +182,8 @@ public class CorantConfigConversion implements Serializable {
         }
       } catch (Exception e) {
         throw new IllegalArgumentException(
-            String.format("Cannot convert config property value %s with type %s", rawValue, type));
+            String.format("Cannot convert config property value %s with type %s", rawValue, type),
+            e);
       }
     }
 

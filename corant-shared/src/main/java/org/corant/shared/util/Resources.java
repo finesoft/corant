@@ -500,8 +500,17 @@ public class Resources {
 
     public ClassResource(String classPath, ClassLoader classLoader, URL url) {
       super(classPath, classLoader, url);
-      int classNameEnd = classPath.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
-      className = classPath.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
+      String useClassPath = classPath;
+      if (useClassPath.indexOf(ClassPaths.JAR_URL_SEPARATOR) != -1) {
+        useClassPath = useClassPath.substring(classPath.indexOf(ClassPaths.JAR_URL_SEPARATOR)
+            + ClassPaths.JAR_URL_SEPARATOR.length());
+      }
+      if (useClassPath.indexOf(ClassPaths.CLASSES_FOLDER) != -1) {
+        useClassPath = useClassPath.substring(
+            useClassPath.indexOf(ClassPaths.CLASSES_FOLDER) + ClassPaths.CLASSES_FOLDER.length());
+      }
+      int classNameEnd = useClassPath.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
+      className = useClassPath.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
           ClassUtils.PACKAGE_SEPARATOR_CHAR);
     }
 

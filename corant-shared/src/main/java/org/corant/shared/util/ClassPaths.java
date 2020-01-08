@@ -363,7 +363,7 @@ public class ClassPaths {
     protected void scan(URI uri, ClassLoader classloader) throws IOException {
       if (uri.getScheme().equals(FILE_SCHEMA) && scannedUris.add(uri)) {
         scanFromFile(new File(uri).getCanonicalFile(), classloader);
-      } else if (uri.getScheme().equals(JAR_SCHEMA) && scannedUris.add(uri)) {
+      } else if (/* uri.getScheme().equals(JAR_SCHEMA) && */ scannedUris.add(uri)) {
         scanFromJar(uri, classloader);
       }
     }

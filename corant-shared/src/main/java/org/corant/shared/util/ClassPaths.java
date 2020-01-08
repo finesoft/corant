@@ -363,8 +363,11 @@ public class ClassPaths {
     protected void scan(URI uri, ClassLoader classloader) throws IOException {
       if (uri.getScheme().equals(FILE_SCHEMA) && scannedUris.add(uri)) {
         scanFromFile(new File(uri).getCanonicalFile(), classloader);
-      } else if (/* uri.getScheme().equals(JAR_SCHEMA) && */ scannedUris.add(uri)) {
+      } else if (uri.getScheme().equals(JAR_SCHEMA) && scannedUris.add(uri)) {
         scanFromJar(uri, classloader);
+      } else if (filter.test(uri.getRawSchemeSpecificPart()) && scannedUris.add(uri)) {
+        resources
+            .add(ClassPathResource.of(uri.getRawSchemeSpecificPart(), classloader, uri.toURL()));
       }
     }
 

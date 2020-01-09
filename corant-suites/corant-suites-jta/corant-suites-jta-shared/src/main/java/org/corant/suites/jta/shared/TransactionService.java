@@ -14,12 +14,15 @@
 package org.corant.suites.jta.shared;
 
 import static org.corant.suites.cdi.Instances.resolveAnyway;
+import java.util.function.Supplier;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.Transactional.TxType;
+import javax.transaction.TransactionalException;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -32,6 +35,11 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public interface TransactionService {
 
+  /**
+   * Get current transaction or null if current has not transaction.
+   *
+   * @return currentTransaction
+   */
   static Transaction currentTransaction() {
     try {
       return resolveAnyway(TransactionService.class).getTransaction();
@@ -40,6 +48,12 @@ public interface TransactionService {
     }
   }
 
+  /**
+   * Delist XAResource and flag to current transaction.
+   *
+   * @param xar
+   * @param flag delistXAResourceFromCurrentTransaction
+   */
   static void delistXAResourceFromCurrentTransaction(XAResource xar, int flag) {
     try {
       resolveAnyway(TransactionService.class).delistXAResource(xar, flag);
@@ -112,5 +126,29 @@ public interface TransactionService {
     } catch (IllegalStateException | RollbackException | SystemException e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  default void runAgent(Runnable runnable, TxType txType, Class<?>... rollbackOn) {
+    supplierAgent(() -> {
+      runnable.run();
+      return null;
+    }, txType, rollbackOn);
+  }
+
+  // Unfinish yet
+  default <T> T supplierAgent(Supplier<T> supplier, TxType txType, Class<?>... rollbackOn) {
+    try {
+      final Transaction tx = getTransaction();
+      if (txType == TxType.MANDATORY) {
+        if (tx == null) {
+          throw new TransactionalException("", null);
+        } else {
+          return supplier.get();
+        }
+      }
+    } catch (SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+    return null;
   }
 }

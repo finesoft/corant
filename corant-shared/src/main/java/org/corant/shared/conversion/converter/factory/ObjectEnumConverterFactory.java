@@ -22,6 +22,7 @@ import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
@@ -50,7 +51,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
         if (throwException) {
           throw new ConversionException(e);
         } else {
-          logger.warning(() -> String.format("Can not convert %s", asString(t)));
+          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(t)));
         }
       }
       return defaultObject(result, defaultValue);
@@ -74,7 +75,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     if (value instanceof Enum<?> && value.getClass().isAssignableFrom(targetClass)) {
       return targetClass.cast(value);
     } else if (value instanceof Number) {
-      return targetClass.getEnumConstants()[((Number)value).intValue()];
+      return targetClass.getEnumConstants()[((Number) value).intValue()];
     } else {
       String name = null;
       if (value instanceof Map) {

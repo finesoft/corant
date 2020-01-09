@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
@@ -134,8 +135,9 @@ public class JPAConfig {
                 m.getPersistenceUnitName());
           });
     } catch (IOException e) {
-      logger.warning(() -> String.format("Parse persistence meta data from %s error %s",
-          DFLT_PU_XML_LOCATION, e.getMessage()));
+      logger.log(Level.WARNING, e,
+          () -> String.format("Parse persistence meta data from %s error %s", DFLT_PU_XML_LOCATION,
+              e.getMessage()));
     }
     return cfgs;
   }

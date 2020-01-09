@@ -16,6 +16,7 @@ package org.corant.shared.conversion.converter;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
@@ -71,7 +72,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
       if (isThrowException()) {
         throw new ConversionException(e);
       } else {
-        logger.warning(() -> String.format("Can not convert %s", asString(value)));
+        logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(value)));
       }
     }
     return defaultObject(result, getDefaultValue());

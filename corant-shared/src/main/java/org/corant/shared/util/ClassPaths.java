@@ -53,9 +53,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.PathUtils.GlobMatcher;
 import org.corant.shared.util.PathUtils.RegexMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -208,6 +210,18 @@ public class ClassPaths {
     }
   }
 
+  /**
+   *
+   * @param relative
+   * @param path
+   * @param ignoreCase
+   * @return fromRelative
+   */
+  public static Set<ClassPathResource> fromRelative(Class<?> relative, String path,
+      boolean ignoreCase) {
+    throw new NotSupportedException();
+  }
+
   static Optional<ClassPathMatcher> decideClassPathMatcher(String express, boolean ignoreCase) {
     String path = express;
     if (isBlank(path)) {
@@ -298,7 +312,7 @@ public class ClassPaths {
     return entries;
   }
 
-  static boolean loadAll(String path) {
+  private static boolean loadAll(String path) {
     return isBlank(path) || sysLibs.stream().anyMatch(path::startsWith);
   }
 
@@ -438,7 +452,7 @@ public class ClassPaths {
         try {
           uriSet.add(getClassPathEntry(jarFile, path));
         } catch (URISyntaxException e) {
-          logger.warning(() -> "Invalid Class-Path entry: " + path);
+          logger.log(Level.WARNING, e, () -> "Invalid Class-Path entry: " + path);
         }
       }
       return uriSet;
@@ -449,30 +463,28 @@ public class ClassPaths {
         scanFromFile(new File(uri).getCanonicalFile(), classloader);
       } else if (uri.getScheme().equals(JAR_SCHEMA) && scannedUris.add(uri)) {
         scanFromJar(uri, classloader);
-      } else if (filter.test(uri.getRawSchemeSpecificPart()) && scannedUris.add(uri)) {
-        resources
-            .add(ClassPathResource.of(uri.getRawSchemeSpecificPart(), classloader, uri.toURL()));
+      } else {
+        logger.warning(() -> "Invalid uri schema " + uri.getScheme());
       }
     }
 
-    protected void scanDirectory(File directory, ClassLoader classloader) throws IOException {
+    protected void scanDirectory(File directory, ClassLoader classLoader, Set<File> ancestors)
+        throws IOException {
       String canonical = getRegularFilePath(directory);
       if (isBlank(root)) {
-        scanDirectory(directory, classloader, root, new LinkedHashSet<>());
+        scanDirectory(directory, classLoader, root, ancestors);
       } else {
-        int classesPos = canonical.indexOf(CLASSES_FOLDER);
-        if (classesPos != -1 && canonical.indexOf(root, classesPos) != -1) {
-          String packagePrefix =
-              !root.endsWith(PATH_SEPARATOR_STRING) ? root + PATH_SEPARATOR_STRING : root;
-          scanDirectory(directory, classloader, packagePrefix, new LinkedHashSet<>());
+        int clsFolderPos = canonical.indexOf(CLASSES_FOLDER);
+        if (clsFolderPos != -1 && canonical.indexOf(root, clsFolderPos) != -1) {
+          String pathPrefix = appendPathSeparatorIfNecessarily(root);
+          scanDirectory(directory, classLoader, pathPrefix, ancestors);
         }
       }
     }
 
-    protected void scanDirectory(File directory, ClassLoader classloader, String packagePrefix,
+    protected void scanDirectory(File directory, ClassLoader classloader, String pathPrefix,
         Set<File> ancestors) throws IOException {
-      File canonical = directory.getCanonicalFile();
-      if (ancestors.contains(canonical)) {
+      if (!ancestors.add(directory)) {
         return;
       }
       File[] files = directory.listFiles();
@@ -480,16 +492,14 @@ public class ClassPaths {
         logger.warning(() -> "Cannot read directory " + directory);
         return;
       }
-      Set<File> fileSet = new LinkedHashSet<>(ancestors);
-      fileSet.add(canonical);
-      for (File f : files) {
-        String name = f.getName();
-        if (f.isDirectory()) {
-          scanDirectory(f, classloader, packagePrefix + name + PATH_SEPARATOR, fileSet);
+      for (File file : files) {
+        String name = file.getName();
+        if (file.isDirectory()) {
+          scanDirectory(file, classloader, pathPrefix + name + PATH_SEPARATOR, ancestors);
         } else {
-          String resourceName = packagePrefix + name;
+          String resourceName = pathPrefix + name;
           if (!resourceName.equals(JarFile.MANIFEST_NAME) && filter.test(resourceName)) {
-            resources.add(ClassPathResource.of(resourceName, classloader, f.toURI().toURL()));
+            resources.add(ClassPathResource.of(resourceName, classloader, file.toURI().toURL()));
           }
         }
       }
@@ -500,7 +510,9 @@ public class ClassPaths {
         return;
       }
       if (file.isDirectory()) {
-        scanDirectory(file, classloader);
+        Set<File> ancestors = new LinkedHashSet<>();
+        scanDirectory(file, classloader, ancestors);
+        ancestors.clear();
       } else {
         scanSingleFile(file, classloader);
       }
@@ -513,7 +525,7 @@ public class ClassPaths {
         if (jarFile.getCanonicalPath().toLowerCase(Locale.getDefault()).endsWith(WAR_EXT)) {
           scanWar(jarFile, classloader);
         } else {
-          scanJar(uri, jarFile.getCanonicalFile(), classloader);
+          scanJar(uri, jarFile, classloader);
         }
       }
     }
@@ -528,7 +540,8 @@ public class ClassPaths {
       try {
         jarFile = new JarFile(file);
       } catch (IOException notJarFile) {
-        logger.warning(() -> String.format("The file %s is not jar file!", file.getName()));
+        logger.log(Level.WARNING, notJarFile,
+            () -> String.format("The file %s is not jar file!", file.getName()));
         return;
       }
       try {
@@ -538,14 +551,14 @@ public class ClassPaths {
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
           JarEntry entry = entries.nextElement();
-          String name = entry.getName();
-          if (entry.isDirectory() || name.equals(JarFile.MANIFEST_NAME)
-              || isNotBlank(root) && !name.startsWith(root) || !filter.test(name)) {
+          String resourceName = entry.getName();
+          if (entry.isDirectory() || resourceName.equals(JarFile.MANIFEST_NAME)
+              || isNotBlank(root) && !resourceName.startsWith(root) || !filter.test(resourceName)) {
             continue;
           }
-          String entryUrl =
-              jarPath.concat(isNotBlank(name) ? JAR_URL_SEPARATOR.concat(name) : name);
-          resources.add(ClassPathResource.of(name, classloader, new URL(entryUrl)));
+          String resourceUrl = jarPath.concat(
+              isNotBlank(resourceName) ? JAR_URL_SEPARATOR.concat(resourceName) : resourceName);
+          resources.add(ClassPathResource.of(resourceName, classloader, new URL(resourceUrl)));
         }
       } finally {
         try {
@@ -597,9 +610,18 @@ public class ClassPaths {
           return new URI(fileUrlStr);
         }
       } catch (URISyntaxException ignore) {
-        logger.warning(() -> String.format("Can not extract file uri from %s.", jarUri.toString()));
+        logger.log(Level.WARNING, ignore,
+            () -> String.format("Can not extract file uri from %s.", jarUri.toString()));
       }
       return null;
+    }
+
+    String appendPathSeparatorIfNecessarily(String path) {
+      if (path == null) {
+        return path;
+      } else {
+        return !path.endsWith(PATH_SEPARATOR_STRING) ? path + PATH_SEPARATOR_STRING : path;
+      }
     }
 
     String getRegularFilePath(File file) throws IOException {

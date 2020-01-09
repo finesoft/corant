@@ -785,6 +785,21 @@ public class Resources {
      * @throws IOException openStream
      */
     InputStream openStream() throws IOException;
+
+    /**
+     * Return an {@link InputStream} for the content of an resource, throws RuntimeException.
+     *
+     * @return tryOpenStream
+     */
+    default InputStream tryOpenStream() {
+      try {
+        return openStream();
+      } catch (IOException e) {
+        logger.log(Level.WARNING, e,
+            () -> String.format("Can't not open stream from %s", getLocation()));
+      }
+      return null;
+    }
   }
 
   /**

@@ -17,7 +17,10 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.toMap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -61,7 +64,7 @@ public class PropertiesConfigSource extends CorantConfigSource {
   }
 
   public static Properties getProperties(URL url) {
-    try (InputStream in = url.openStream()) {
+    try (Reader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
       Properties props = new Properties();
       props.load(in);
       return props;
@@ -72,9 +75,9 @@ public class PropertiesConfigSource extends CorantConfigSource {
   }
 
   static Properties load(InputStream is) throws IOException {
-    Properties pops = new Properties();
-    pops.load(is);
-    return pops;
+    Properties props = new Properties();
+    props.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+    return props;
   }
 
   @Override

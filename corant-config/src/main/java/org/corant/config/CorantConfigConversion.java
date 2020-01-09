@@ -180,7 +180,7 @@ public class CorantConfigConversion implements Serializable {
         } else {
           throw new IllegalStateException("Cannot support config property for " + type);
         }
-      } catch (Exception e) {
+      } catch (RuntimeException e) {
         throw new IllegalArgumentException(
             String.format("Cannot convert config property value %s with type %s", rawValue, type),
             e);

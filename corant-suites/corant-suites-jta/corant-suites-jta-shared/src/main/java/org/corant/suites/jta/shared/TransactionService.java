@@ -128,15 +128,15 @@ public interface TransactionService {
     }
   }
 
-  default void runAgent(Runnable runnable, TxType txType, Class<?>... rollbackOn) {
-    supplierAgent(() -> {
+  default void txRun(Runnable runnable, TxType txType, Class<?>... rollbackOn) {
+    txSupplier(() -> {
       runnable.run();
       return null;
     }, txType, rollbackOn);
   }
 
   // Unfinish yet
-  default <T> T supplierAgent(Supplier<T> supplier, TxType txType, Class<?>... rollbackOn) {
+  default <T> T txSupplier(Supplier<T> supplier, TxType txType, Class<?>... rollbackOn) {
     try {
       final Transaction tx = getTransaction();
       if (txType == TxType.MANDATORY) {

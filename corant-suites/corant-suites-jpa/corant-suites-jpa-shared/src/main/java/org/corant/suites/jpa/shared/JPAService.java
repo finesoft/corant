@@ -67,17 +67,24 @@ public class JPAService implements PersistenceService {
   public EntityManager getEntityManager(PersistenceContext pc) {
     if (pc.type() == PersistenceContextType.TRANSACTION) {
       shouldBeTrue(TransactionService.isCurrentTransactionActive());
-      return tsEmManager
-          .computeIfAbsent(pc,
+      final EntityManager em =
+          tsEmManager.computeIfAbsent(pc,
               p -> getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
                   p.synchronization(),
                   PersistenceContextLiteral.extractProperties(pc.properties())));
+      logger.fine(() -> String.format(
+          "Get transactional scope entity maneger [%s] from persistence unit [%s].", em,
+          pc.unitName()));
+      return em;
     } else {
-      return rsEmManager
-          .computeIfAbsent(pc,
+      final EntityManager em =
+          rsEmManager.computeIfAbsent(pc,
               p -> getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
                   p.synchronization(),
                   PersistenceContextLiteral.extractProperties(pc.properties())));
+      logger.fine(() -> String.format(
+          "Get request scope entity maneger [%s] from persistence unit [%s].", em, pc.unitName()));
+      return em;
     }
   }
 

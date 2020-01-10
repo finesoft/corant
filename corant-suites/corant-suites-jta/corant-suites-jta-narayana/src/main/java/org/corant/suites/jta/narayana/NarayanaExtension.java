@@ -14,6 +14,7 @@
 package org.corant.suites.jta.narayana;
 
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.suites.cdi.Instances.resolve;
@@ -166,6 +167,16 @@ public class NarayanaExtension implements TransactionExtension {
         BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
     final RecoveryEnvironmentBean recoveryEnvironmentBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
+
+    if (getConfig().isAutoRecovery()) {
+      getConfig().getAutoRecoveryPeriod().ifPresent(
+          p -> recoveryEnvironmentBean.setPeriodicRecoveryPeriod(toInteger(p.getSeconds())));
+      getConfig().getAutoRecoveryInitOffset().ifPresent(p -> recoveryEnvironmentBean
+          .setPeriodicRecoveryInitilizationOffset(toInteger(p.getSeconds())));
+      getConfig().getAutoRecoveryBackoffPeriod().ifPresent(
+          p -> recoveryEnvironmentBean.setRecoveryBackoffPeriod(toInteger(p.getSeconds())));
+    }
+
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
         .sorted(Sortable::compare).forEach(cfgr -> {
           logger.info(() -> String.format("Use customer narayana configurator %s.",

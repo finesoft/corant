@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jta.narayana;
 
+import java.time.Duration;
 import java.util.Optional;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
@@ -30,6 +31,43 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   @ConfigKeyItem
   Optional<String> objectsStore;
 
+  @ConfigKeyItem
+  Optional<Duration> autoRecoveryBackoffPeriod;
+
+  @ConfigKeyItem
+  Optional<Duration> autoRecoveryPeriod;
+
+  @ConfigKeyItem
+  Optional<Duration> autoRecoveryInitOffset;
+
+  /**
+   *
+   * @return the autoRecoveryBackoffPeriod
+   */
+  public Optional<Duration> getAutoRecoveryBackoffPeriod() {
+    return autoRecoveryBackoffPeriod;
+  }
+
+  /**
+   * 
+   * @return the autoRecoveryInitOffset
+   */
+  public Optional<Duration> getAutoRecoveryInitOffset() {
+    return autoRecoveryInitOffset;
+  }
+
+  /**
+   *
+   * @return the autoRecoveryPeriod
+   */
+  public Optional<Duration> getAutoRecoveryPeriod() {
+    return autoRecoveryPeriod;
+  }
+
+  /**
+   *
+   * @return getObjectsStore
+   */
   public Optional<String> getObjectsStore() {
     return objectsStore;
   }

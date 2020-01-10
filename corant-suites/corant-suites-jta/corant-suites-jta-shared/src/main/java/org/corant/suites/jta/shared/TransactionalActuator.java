@@ -60,17 +60,6 @@ public abstract class TransactionalActuator<T> {
     this.dontRollbackOn = defaultObject(dontRollbackOn, new Class[0]);
   }
 
-  public static void main(String... strings) throws Exception {
-    new TransactionalActuatorBuilder<Void>().txType(TxType.REQUIRED).runner(() -> {
-      System.out.println("xxx");
-    }).build().execute();
-  }
-
-  public static <T> TransactionalActuator<T> of(Supplier<T> supplier, TxType txType,
-      Class<?>[] rollbackOn) {
-    return null;
-  }
-
   public T execute() throws Exception {
     final TransactionManager tm = TransactionService.transactionManager();
     final Transaction tx = TransactionService.currentTransaction();

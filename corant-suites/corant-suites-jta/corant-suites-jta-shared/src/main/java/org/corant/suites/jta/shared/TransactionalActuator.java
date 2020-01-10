@@ -29,7 +29,10 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-suites-jta-shared
  *
- * NOTE:Some code come from narayana, In case of infringement, please inform me(finesoft@gmail.com).
+ * Unfinish yet!
+ *
+ * NOTE: Some code come from narayana, if there is infringement, please inform
+ * me(finesoft@gmail.com).
  *
  * Thanks for the narayana team!
  *

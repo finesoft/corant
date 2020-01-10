@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import org.bson.Document;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Identifiers;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -88,8 +90,19 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
         } else {
           final String timeSql = s.getFactory().getServiceRegistry().getService(JdbcServices.class)
               .getDialect().getCurrentTimestampSelectString();
-          return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
-              .getTime();
+          // return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
+          // .getTime();
+          // FIXME whether it is necessary? 2020-01-01
+          final FlushMode hfm = s.getHibernateFlushMode();
+          try {
+            s.setHibernateFlushMode(FlushMode.MANUAL);
+            return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
+                .getTime();
+          } catch (Exception e) {
+            throw new CorantRuntimeException(e);
+          } finally {
+            s.setHibernateFlushMode(hfm);
+          }
         }
       };
     }).resolve(session, object);

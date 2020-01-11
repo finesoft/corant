@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jta.shared;
 
+import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.xa.XAResource;
@@ -24,6 +25,8 @@ import javax.transaction.xa.XAResource;
  *
  */
 public interface TransactionIntegration {
+
+  Logger LOGGER = Logger.getLogger(TransactionIntegration.class.getName());
 
   default TransactionConfig getConfig() {
     Instance<TransactionExtension> txExt = CDI.current().select(TransactionExtension.class);

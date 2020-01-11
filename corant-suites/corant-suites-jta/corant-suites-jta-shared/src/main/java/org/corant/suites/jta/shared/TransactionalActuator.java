@@ -29,7 +29,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-suites-jta-shared
  *
- * Unfinish yet!
+ * Unfinish yet! This is an experiential function, used to handle transaction-related operations
+ * manually.
  *
  * NOTE: Some code come from narayana, if there is infringement, please inform
  * me(finesoft@gmail.com).
@@ -282,13 +283,48 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:45:58
    *
    */
-  public static class TransactionalActuatorBuilder<T> {
-    Supplier<T> supplier;
-    Class<?>[] rollbackOn;
-    Class<?>[] dontRollbackOn;
+  public static class TransactionalActuatorPlan<T> {
+
+    Class<?>[] rollbackOn = new Class[0];
+    Class<?>[] dontRollbackOn = new Class[0];
     TxType txType = TxType.REQUIRED;
 
-    public TransactionalActuator<T> build() {
+    public TransactionalActuatorPlan<T> dontRollbackOn(final Class<?>... dontRollbackOn) {
+      this.dontRollbackOn = dontRollbackOn;
+      return this;
+    }
+
+    public T get(final Supplier<T> supplier) {
+      try {
+        return plan(shouldNotNull(supplier)).execute();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+    public TransactionalActuatorPlan<T> rollbackOn(final Class<?>... rollbackOn) {
+      this.rollbackOn = rollbackOn;
+      return this;
+    }
+
+    public void run(final Runnable runner) {
+      shouldNotNull(runner);
+      try {
+        plan(() -> {
+          runner.run();
+          return null;
+        }).execute();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+    public TransactionalActuatorPlan<T> txType(final TxType txType) {
+      this.txType = defaultObject(txType, TxType.REQUIRED);
+      return this;
+    }
+
+    protected TransactionalActuator<T> plan(final Supplier<T> supplier) {
       switch (txType) {
         case MANDATORY:
           return new MandatoryTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
@@ -303,34 +339,6 @@ public abstract class TransactionalActuator<T> {
         default:
           return new RequiredTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
       }
-    }
-
-    public TransactionalActuatorBuilder<T> dontRollbackOn(Class<?>... dontRollbackOn) {
-      this.dontRollbackOn = dontRollbackOn;
-      return this;
-    }
-
-    public TransactionalActuatorBuilder<T> rollbackOn(Class<?>... rollbackOn) {
-      this.rollbackOn = rollbackOn;
-      return this;
-    }
-
-    public TransactionalActuatorBuilder<T> runner(Runnable runner) {
-      this.supplier = () -> {
-        runner.run();
-        return null;
-      };
-      return this;
-    }
-
-    public TransactionalActuatorBuilder<T> supplier(Supplier<T> supplier) {
-      this.supplier = supplier;
-      return this;
-    }
-
-    public TransactionalActuatorBuilder<T> txType(TxType txType) {
-      this.txType = defaultObject(txType, TxType.REQUIRED);
-      return this;
     }
   }
 }

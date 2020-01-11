@@ -23,7 +23,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jta.shared.TransactionalActuator.TransactionalActuatorBuilder;
+import org.corant.suites.jta.shared.TransactionalActuator.TransactionalActuatorPlan;
 
 /**
  * corant-kernel
@@ -34,13 +34,28 @@ import org.corant.suites.jta.shared.TransactionalActuator.TransactionalActuatorB
 public interface TransactionService {
 
   /**
-   * Unfinish yet!
+   * Unfinish yet! This is an experiential function, used to handle transaction-related operations
+   * manually.
+   *
+   * <pre>
+   * example:
+   *
+   * TransactionService.actuatePlan().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
+   *     .run(() -> {
+   *       // the business operation that run in transaction.
+   *     });
+   *
+   * return TransactionService.actuatePlan().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
+   *     .get(() -> {
+   *       // the business operation that run in transaction;
+   *       return operation result;
+   *     });
+   * </pre>
    *
    * @param <T>
-   * @return createActuator
    */
-  static <T> TransactionalActuatorBuilder<T> createActuator() {
-    return new TransactionalActuatorBuilder<>();
+  static <T> TransactionalActuatorPlan<T> actuatePlan() {
+    return new TransactionalActuatorPlan<>();
   }
 
   /**

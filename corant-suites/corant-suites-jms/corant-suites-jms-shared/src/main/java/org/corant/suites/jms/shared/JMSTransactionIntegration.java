@@ -41,11 +41,9 @@ import org.corant.suites.jta.shared.TransactionIntegration;
  */
 public class JMSTransactionIntegration implements TransactionIntegration {
 
-  private static final Logger logger = Logger.getLogger(JMSTransactionIntegration.class.getName());
-
   @Override
   public XAResource[] getRecoveryXAResources() {
-    logger.fine(() -> "Resolving JMS XAResources for JTA recovery processes.");
+    LOGGER.fine(() -> "Resolving JMS XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
     List<XAResource> resources = new ArrayList<>();
@@ -58,7 +56,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
             findNamed(XAConnectionFactory.class, k)
                 .ifPresent(xacf -> resources.add(xacf.createXAContext().getXAResource()));
           }
-          logger
+          LOGGER
               .fine(() -> String.format("Added JMS[%s] XAResource to JTA recovery processes.", k));
         }
       }));

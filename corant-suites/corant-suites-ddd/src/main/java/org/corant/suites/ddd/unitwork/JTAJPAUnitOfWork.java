@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -40,6 +41,7 @@ import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-suites-ddd
@@ -62,6 +64,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   static final String LOG_HDL_MSG_FMT = "Sorted the flushed messages and store them if nessuary,"
       + " dispatch them to the message dispatcher, before %s completion.";
   static final String LOG_MSG_CYCLE_FMT = "Can not handle messages!";
+  static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
+      .getOptionalValue("ddd.unitofwork.use-manual-flush", Boolean.class).orElse(Boolean.FALSE);
 
   final transient Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
@@ -91,7 +95,25 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   @Override
   public void beforeCompletion() {
     logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
-    entityManagers.values().forEach(EntityManager::flush); // flush to dump dirty
+    entityManagers.values().forEach(em -> {
+      if (USE_MANUAL_FLUSH_MODEL) {
+        final FlushModeType fm = em.getFlushMode();
+        try {
+          if (fm != FlushModeType.COMMIT) {
+            em.setFlushMode(FlushModeType.COMMIT);
+          }
+          em.flush();
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        } finally {
+          if (fm != em.getFlushMode()) {
+            em.setFlushMode(fm);
+          }
+        }
+      } else {
+        em.flush();
+      }
+    }); // flush to dump dirty
     handleMessage();
     handlePreComplete();
   }

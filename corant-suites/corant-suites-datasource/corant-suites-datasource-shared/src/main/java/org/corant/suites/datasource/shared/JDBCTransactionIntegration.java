@@ -44,15 +44,13 @@ import org.corant.suites.jta.shared.TransactionIntegration;
  */
 public class JDBCTransactionIntegration implements TransactionIntegration {
 
-  private static final Logger logger = Logger.getLogger(JDBCTransactionIntegration.class.getName());
-
   static Map<String, XADataSource> dataSources = new ConcurrentHashMap<>();
 
   static XAConnection getXAConnection(XADataSource xads, DataSourceConfig cfg) throws SQLException {
     try {
       return xads.getXAConnection();
     } catch (SQLException nfe) {
-      logger.log(Level.WARNING, nfe,
+      LOGGER.log(Level.WARNING, nfe,
           () -> String.format("Connect to xa data source %s occured exception, use another way!",
               cfg.getName()));
       return xads.getXAConnection(cfg.getUsername(), cfg.getPassword());
@@ -61,7 +59,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    logger.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
+    LOGGER.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     List<XAResource> res = new ArrayList<>();
     Instance<AbstractDataSourceExtension> extensions =
@@ -71,7 +69,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
           if (cfg.isJta() && cfg.isXa()) {
             if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-              logger.warning(() -> String.format(
+              LOGGER.warning(() -> String.format(
                   "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",
                   cfg.getName()));
             } else {
@@ -82,7 +80,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
                 } else {
                   res.add(getXAResource(xads, cfg));
                 }
-                logger.fine(() -> String.format(
+                LOGGER.fine(() -> String.format(
                     "Added JDBC XA data source[%s] XAResource to JTA recovery processes.",
                     cfg.getName()));
               } catch (SecurityException | SQLException e) {

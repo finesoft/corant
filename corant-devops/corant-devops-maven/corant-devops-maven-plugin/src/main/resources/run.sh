@@ -20,6 +20,7 @@ ROOT_DIR=$(cd $BIN_DIR/.. && pwd)
 APP_DIR=$ROOT_DIR/app
 LIB_DIR=$ROOT_DIR/lib
 CFG_DIR=$ROOT_DIR/cfg
+LCF_URL=$CFG_DIR/log4j2.xml
 
 CLASSPATH=$(join ':' $LIB_DIR/*.jar $APP_DIR/*.jar $CFG_DIR/*.*)
 
@@ -64,6 +65,10 @@ if [ "x$USED_CONFIG_LOCATION" = "x" ]; then
 fi
 
 SERVER_OPTS="$SERVER_OPTS -cp $CLASSPATH -Dcorant.config.location=$USED_CONFIG_LOCATION"
+
+if [ -f "$LCF_URL" ]; then
+    SERVER_OPTS="$SERVER_OPTS -Dlog4j.configurationFile=$LCF_URL"
+fi
 
 if [ "x$USED_CONFIG_PROFILE" != "x" ]; then
 	SERVER_OPTS="$SERVER_OPTS -Dcorant.config.profile=$USED_CONFIG_PROFILE"

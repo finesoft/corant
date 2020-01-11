@@ -59,7 +59,6 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    LOGGER.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     List<XAResource> res = new ArrayList<>();
     Instance<AbstractDataSourceExtension> extensions =
@@ -68,6 +67,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       extensions.forEach(et -> {
         et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
           if (cfg.isJta() && cfg.isXa()) {
+            LOGGER.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
             if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
               LOGGER.warning(() -> String.format(
                   "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",

@@ -43,13 +43,13 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    LOGGER.fine(() -> "Resolving JMS XAResources for JTA recovery processes.");
     TransactionConfig txCfg = getConfig();
     Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
     List<XAResource> resources = new ArrayList<>();
     if (!extensions.isUnsatisfied()) {
       extensions.forEach(et -> et.getConfigManager().getAllWithNames().forEach((k, v) -> {
         if (v.isXa() && v.isEnable()) {
+          LOGGER.fine(() -> "Resolving JMS XAResources for JTA recovery processes.");
           if (txCfg.isAutoRecovery()) {
             resources.add(new JMSRecoveryXAResource(v));
           } else {

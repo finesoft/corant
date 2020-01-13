@@ -13,7 +13,9 @@
  */
 package org.corant.suites.datasource.shared;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -23,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.sql.XAConnection;
@@ -33,7 +34,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import org.corant.config.PropertyInjector;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jta.shared.TransactionConfig;
+import org.corant.suites.cdi.CDIs;
 import org.corant.suites.jta.shared.TransactionIntegration;
 
 /**
@@ -59,39 +60,41 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
   @Override
   public XAResource[] getRecoveryXAResources() {
-    TransactionConfig txCfg = getConfig();
+    LOGGER.fine(() -> "Searching JDBC XAResources for JTA recovery processes.");
+    if (!CDIs.isEnabled()) {
+      LOGGER.warning(
+          () -> "Current CDI container can't access, so can't find any XAResource for JTA recovery processes.");
+      return new XAResource[0];
+    }
     List<XAResource> res = new ArrayList<>();
     Instance<AbstractDataSourceExtension> extensions =
         CDI.current().select(AbstractDataSourceExtension.class);
     if (!extensions.isUnsatisfied()) {
-      extensions.forEach(et -> {
-        et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
-          if (cfg.isJta() && cfg.isXa()) {
-            LOGGER.fine(() -> "Resolving JDBC XAResources for JTA recovery processes.");
-            if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-              LOGGER.warning(() -> String.format(
-                  "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",
+      extensions.forEach(et -> et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
+        if (cfg.isJta() && cfg.isXa()) {
+          if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
+            LOGGER.warning(() -> String.format(
+                "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",
+                cfg.getName()));
+          } else {
+            try {
+              XADataSource xads = getXADataSource(cfg);
+              // Each time the connection is reestablished and released it after use
+              res.add(new JDBCRecoveryXAResource(xads, cfg));
+              // res.add(getXAResource(xads, cfg));
+              LOGGER.fine(() -> String.format(
+                  "Found JDBC XA data source[%s] XAResource for JTA recovery processes.",
                   cfg.getName()));
-            } else {
-              try {
-                XADataSource xads = getXADataSource(cfg);
-                if (txCfg.isAutoRecovery()) {
-                  res.add(new JDBCRecoveryXAResource(xads, cfg));
-                } else {
-                  res.add(getXAResource(xads, cfg));
-                }
-                LOGGER.fine(() -> String.format(
-                    "Added JDBC XA data source[%s] XAResource to JTA recovery processes.",
-                    cfg.getName()));
-              } catch (SecurityException | SQLException e) {
-                throw new CorantRuntimeException(e, "Unable to instantiate javax.sql.XADataSource");
-              }
+            } catch (SecurityException e) {
+              throw new CorantRuntimeException(e, "Unable to instantiate javax.sql.XADataSource");
             }
           }
-        });
-      });
+        }
+      }));
     }
-
+    if (isEmpty(res)) {
+      LOGGER.fine(() -> "JDBC XAResources for JTA recovery processes not found.");
+    }
     return res.toArray(new XAResource[res.size()]);
   }
 
@@ -125,7 +128,6 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
   }
 
   public static class JDBCRecoveryXAResource implements XAResource {
-    static final Logger logger = Logger.getLogger(JDBCRecoveryXAResource.class.getName());
     final DataSourceConfig config;
     final XADataSource dataSource;
     final AtomicReference<XAConnection> connection = new AtomicReference<>();
@@ -146,6 +148,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         getXAResource().commit(xid, onePhase);
       } finally {
         disconnect();
+        LOGGER.fine(() -> String.format(
+            "Committed the transaction [%s] (onePhase:%s) that run in JTA recovery processes!",
+            xid.toString(), onePhase));
       }
     }
 
@@ -155,6 +160,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         getXAResource().end(xid, flags);
       } finally {
         disconnect();
+        LOGGER.fine(() -> String.format(
+            "Ended the work performed on behalf of a transaction branch [%s] flags [%s] that run in JTA recovery processes!",
+            xid.toString(), flags));
       }
     }
 
@@ -164,6 +172,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         getXAResource().forget(xid);
       } finally {
         disconnect();
+        LOGGER.fine(() -> String.format(
+            "Forgot about a heuristicallycompleted transaction branch [%s] that run in JTA recovery processes!",
+            xid.toString()));
       }
     }
 
@@ -196,13 +207,24 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public Xid[] recover(int flag) throws XAException {
+      Xid[] xids = new Xid[0];
       try {
-        return getXAResource().recover(flag);
+        xids = getXAResource().recover(flag);
       } finally {
         if (flag == XAResource.TMENDRSCAN) {
           disconnect();
+          final Xid[] useXids = xids;
+          if (useXids != null && useXids.length > 0) {
+            LOGGER.fine(() -> String.format(
+                "Obtained prepared transaction branches: [%s] for JTA recovery processes.",
+                String.join(", ", asStrings((Object[]) useXids))));
+          } else {
+            LOGGER
+                .fine(() -> "Prepared transaction branches for JTA recovery processes not found.");
+          }
         }
       }
+      return xids;
     }
 
     @Override
@@ -211,6 +233,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         getXAResource().rollback(xid);
       } finally {
         disconnect();
+        LOGGER.fine(() -> String.format(
+            "Rolled back work done on behalfof a transaction branch [%s] that run in JTA recovery processes!",
+            xid.toString()));
       }
     }
 
@@ -229,6 +254,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         getXAResource().start(xid, flags);
       } finally {
         disconnect();
+        LOGGER.fine(() -> String.format(
+            "Started work on behalf of a transaction branch [%s] flags [%s] that run in JTA recovery processes!",
+            xid.toString(), flags));
       }
     }
 
@@ -239,7 +267,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       try {
         connection.get().close();
       } catch (SQLException e) {
-        logger.log(Level.WARNING, e, () -> String
+        LOGGER.log(Level.WARNING, e, () -> String
             .format("Can not release connection to xa data source %s", config.getName()));
       } finally {
         connection.set(null);
@@ -251,7 +279,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         try {
           connection.set(getXAConnection(dataSource, config));
         } catch (SQLException e) {
-          logger.log(Level.SEVERE, e,
+          LOGGER.log(Level.SEVERE, e,
               () -> String.format("Can not connect to xa data source %s", config.getName()));
           throw new XAException(XAException.XAER_RMFAIL);
         }
@@ -259,7 +287,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       try {
         return connection.get().getXAResource();
       } catch (SQLException e) {
-        logger.log(Level.SEVERE, e, () -> String
+        LOGGER.log(Level.SEVERE, e, () -> String
             .format("Can not get xa resource from xa data source %s", config.getName()));
         throw new XAException(XAException.XAER_RMFAIL);
       }

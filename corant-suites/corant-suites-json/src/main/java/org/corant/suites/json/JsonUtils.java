@@ -126,7 +126,7 @@ public class JsonUtils {
       return objectMapper.readValue(cmd,
           objectMapper.getTypeFactory().constructParametricType(parametrized, parameterClasses));
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd);
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
     }
   }
 
@@ -146,7 +146,7 @@ public class JsonUtils {
       return objectMapper.readValue(cmd,
           objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd);
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
     }
   }
 
@@ -162,8 +162,7 @@ public class JsonUtils {
       try {
         return objectMapper.readValue(cmd, clazz);
       } catch (IOException e) {
-        throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, cmd,
-            clazz.getName());
+        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd, clazz.getName());
       }
     }
     return null;
@@ -219,7 +218,7 @@ public class JsonUtils {
           return objectMapper.writeValueAsString(obj);
         }
       } catch (JsonProcessingException e) {
-        throw new GeneralRuntimeException(e.getCause(), GlobalMessageCodes.ERR_OBJ_SEL, obj);
+        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, obj);
       }
     }
     return null;

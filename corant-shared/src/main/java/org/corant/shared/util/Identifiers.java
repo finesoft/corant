@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -37,8 +38,10 @@ public class Identifiers {
       new ConcurrentHashMap<>();
   static final IdentifierGenerator TIME_UUID_GENERATOR = new TimeBasedUUIDGenerator();
   static final IdentifierGenerator JAVA_UUID_GENERATOR = new JavaUUIDGenerator();
-  static volatile SnowflakeUUIDGenerator lastSnowflakeUUIDGenerator;
-  static volatile SnowflakeBufferUUIDGenerator lastSnowflakeBufferUUIDGenerator;
+  static final AtomicReference<SnowflakeUUIDGenerator> lastSnowflakeUUIDGenerator =
+      new AtomicReference<>();
+  static final AtomicReference<SnowflakeBufferUUIDGenerator> lastSnowflakeBufferUUIDGenerator =
+      new AtomicReference<>();
 
   private Identifiers() {
     super();
@@ -49,7 +52,7 @@ public class Identifiers {
   }
 
   // public static void main(String... strings) throws InterruptedException {
-  // int workers = 16, times = 9876, size = workers * times;
+  // int workers = 2, times = 9876, size = workers * times;
   // final long[][] arr = new long[workers][times];
   // ExecutorService es = Executors.newFixedThreadPool(workers);
   // final CountDownLatch latch = new CountDownLatch(workers);
@@ -58,35 +61,41 @@ public class Identifiers {
   // es.submit(() -> {
   // for (int i = 0; i < times; i++) {
   // arr[workerId][i] =
-  // Identifiers.snowflakeUUID(0, workerId, () -> System.currentTimeMillis());
+  // Identifiers.snowflakeBufferUUID(workerId, true, System::currentTimeMillis);
   // }
   // latch.countDown();
   // });
   // }
   // latch.await();
   // Set<Long> set = new HashSet<>();
+  // Set<Long> timestamps = new HashSet<>();
   // Map<Long, List<Long>> tmp = new LinkedHashMap<>();
   // for (long[] ar : arr) {
   // for (long a : ar) {
   // set.add(a);
-  // // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
-  // // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
-  // // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
-  // // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
-  // // tmp.computeIfAbsent(time, (k) -> new ArrayList<>()).add(seq);
-  // // System.out
-  // // .println(a + "\tdcid" + dcid + "\twid:" + woid + "\ttime:" + time + "\tseq:" + seq);
+  // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
+  // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
+  // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
+  // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
+  // tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
+  // timestamps.add(time);
+  // System.out.println(
+  // String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
   // }
   // }
   // System.out.println("--------------------------------------------------");
-  // // tmp.forEach((k, v) -> {
-  // // v.stream().sorted().forEach((seq) -> System.out.println("time:" + k + "\tseq:" + seq));
-  // // });
+  // tmp.forEach((k, v) -> {
+  // v.stream().sorted()
+  // .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
+  // });
+  //
+  // timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
+  //
   // es.shutdown();
   // if (set.size() != size) {
   // throw new IllegalStateException();
   // } else {
-  // System.out.println("finished \t" + set.size());
+  // System.out.println("FINISHED: " + set.size());
   // }
   // }
 
@@ -97,12 +106,15 @@ public class Identifiers {
 
   public static IdentifierGenerator snowflakeBufferUUIDGenerator(final int workerId,
       final boolean useTimeBuff) {
-    if (lastSnowflakeBufferUUIDGenerator != null
-        && lastSnowflakeBufferUUIDGenerator.workerId == workerId) {
-      return lastSnowflakeBufferUUIDGenerator;
+    SnowflakeBufferUUIDGenerator inst = lastSnowflakeBufferUUIDGenerator.get();
+    if (inst != null && inst.workerId == workerId) {
+      return inst;
     } else {
-      return SNOWFLAKE_BUFFRE_UUID_GENERATOR.computeIfAbsent(workerId,
-          k -> lastSnowflakeBufferUUIDGenerator = new SnowflakeBufferUUIDGenerator(k, useTimeBuff));
+      return SNOWFLAKE_BUFFRE_UUID_GENERATOR.computeIfAbsent(workerId, k -> {
+        SnowflakeBufferUUIDGenerator x = new SnowflakeBufferUUIDGenerator(k, useTimeBuff);
+        lastSnowflakeBufferUUIDGenerator.set(x);
+        return x;
+      });
     }
   }
 
@@ -111,14 +123,17 @@ public class Identifiers {
   }
 
   public static IdentifierGenerator snowflakeUUIDGenerator(int dataCenterId, int workerId) {
-    if (lastSnowflakeUUIDGenerator != null
-        && lastSnowflakeUUIDGenerator.dataCenterId == dataCenterId
-        && lastSnowflakeUUIDGenerator.workerId == workerId) {
-      return lastSnowflakeUUIDGenerator;
+    SnowflakeUUIDGenerator inst = lastSnowflakeUUIDGenerator.get();
+    if (inst != null && inst.dataCenterId == dataCenterId && inst.workerId == workerId) {
+      return inst;
     } else {
       int key = dataCenterId << SnowflakeUUIDGenerator.DATACENTER_ID_BITS | workerId;
-      return SNOWFLAKE_UUID_GENERATOR.computeIfAbsent(key,
-          k -> lastSnowflakeUUIDGenerator = new SnowflakeUUIDGenerator(dataCenterId, workerId));
+      return SNOWFLAKE_UUID_GENERATOR.computeIfAbsent(key, k -> {
+        SnowflakeUUIDGenerator x = new SnowflakeUUIDGenerator(dataCenterId, workerId);
+        lastSnowflakeUUIDGenerator.set(x);
+        return x;
+      });
+
     }
   }
 
@@ -165,18 +180,20 @@ public class Identifiers {
 
   public static class SnowflakeBufferUUIDGenerator implements IdentifierGenerator {
 
-    public static final long WORKER_ID_BITS = 10;// 支持1024个进程
+    public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
     public static final long MAX_WORKER_ID = -1L ^ -1L << WORKER_ID_BITS;
-    public static final long SEQUENCE_BITS = 12L;
+    public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
     public static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
     public static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
     public static final long SEQUENCE_MASK = -1L ^ -1L << SEQUENCE_BITS;
+    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
 
     private final long workerId;
     private final long workerSegm;
     private final boolean useTimeBuffer;
 
     private volatile long lastTimestamp = -1L;
+    private volatile long localLastTimestamp = -1L;
     private AtomicLong sequence = new AtomicLong(0L);
 
     public SnowflakeBufferUUIDGenerator(long workerId) {
@@ -265,9 +282,11 @@ public class Identifiers {
     }
 
     protected synchronized Long doGenerateWithCache(Supplier<?> timeGener) {
+      resetSequenceIfNecessary();
       int cursor = handleSequence(sequence, SEQUENCE_MASK, false);
       if (cursor == 0) {
         lastTimestamp = tilMillis(timeGener, lastTimestamp, false);
+        localLastTimestamp = System.currentTimeMillis();
       }
       return nextId(lastTimestamp, cursor);
     }
@@ -283,11 +302,19 @@ public class Identifiers {
         sequence.set(0L);
       }
       lastTimestamp = timestamp;
+      localLastTimestamp = System.currentTimeMillis();
       return nextId(timestamp, sequence.get());
     }
 
     protected long nextId(long timestamp, long seq) {
       return timestamp - TIME_EPOCH << TIMESTAMP_LEFT_SHIFT | workerSegm | seq;
+    }
+
+    private void resetSequenceIfNecessary() {
+      if (useTimeBuffer && localLastTimestamp != -1
+          && System.currentTimeMillis() - localLastTimestamp > FORCE_EXPEL_CACHE_PERIOD) {
+        sequence.set(0);
+      }
     }
   }
 
@@ -306,12 +333,12 @@ public class Identifiers {
    */
   public static class SnowflakeUUIDGenerator implements IdentifierGenerator {
 
-    public static final long WORKER_ID_BITS = 5L;
-    public static final long DATACENTER_ID_BITS = 5L;
+    public static final long WORKER_ID_BITS = 5L; // Supports 32 workers
+    public static final long DATACENTER_ID_BITS = 5L;// Supports 32 data centers
     public static final long MAX_WORKER_ID = -1L ^ -1L << WORKER_ID_BITS;
     public static final long MAX_DATACENTER_ID = -1L ^ -1L << DATACENTER_ID_BITS;
 
-    public static final long SEQUENCE_BITS = 12L;
+    public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
     public static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
     public static final long DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
     public static final long TIMESTAMP_LEFT_SHIFT =

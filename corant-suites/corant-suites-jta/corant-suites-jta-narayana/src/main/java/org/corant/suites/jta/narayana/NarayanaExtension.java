@@ -153,7 +153,7 @@ public class NarayanaExtension implements TransactionExtension {
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
 
     getConfig().getTimeout().ifPresent(t -> {
-      coordinatorEnvironmentBean.setDefaultTimeout(((Long) t.getSeconds()).intValue());
+      coordinatorEnvironmentBean.setDefaultTimeout(toInteger(t.getSeconds()));
       logger.warning(
           () -> "Use thread interrupt checked action for narayana, It can cause inconsistencies.");
       coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);

@@ -56,8 +56,4 @@ public interface AggregateAssistant {
    */
   Aggregate getAggregate();
 
-  /**
-   * Obtain the message serial number
-   */
-  long getMessageSequenceNumber();
 }

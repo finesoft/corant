@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.model;
 
-import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
@@ -29,33 +28,16 @@ public abstract class AbstractDefaultAggregate extends AbstractAggregate {
 
   protected transient volatile AggregateAssistant assistant;
 
-  /**
-   * Message sequence number
-   */
-  @Column(name = "mn")
-  private volatile long mn = 0L;
-
   protected AbstractDefaultAggregate() {
     super();
-  }
-
-  /**
-   * Message sequence number
-   */
-  public synchronized long getMn() {
-    return mn;
   }
 
   @Override
   protected synchronized AggregateAssistant callAssistant() {
     if (assistant == null) {
-      assistant = new DefaultAggregateAssistant(this, mn);
+      assistant = new DefaultAggregateAssistant(this);
     }
     return assistant;
-  }
-
-  protected synchronized void setMn(long mn) {
-    this.mn = mn;
   }
 
 }

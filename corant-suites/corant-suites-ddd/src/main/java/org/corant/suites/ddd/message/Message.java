@@ -32,8 +32,8 @@ public interface Message extends Serializable {
 
   static int compareSequenceNumber(Message m1, Message m2) {
     if (m1 instanceof AbstractAggregateMessage && m2 instanceof AbstractAggregateMessage) {
-      return Long.compare(((AbstractAggregateMessage) m1).getMetadata().getSequenceNumber(),
-          ((AbstractAggregateMessage) m2).getMetadata().getSequenceNumber());
+      return Long.compare(((AbstractAggregateMessage) m1).getMetadata().getVersionNumber(),
+          ((AbstractAggregateMessage) m2).getMetadata().getVersionNumber());
     }
     return 0;
   }

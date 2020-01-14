@@ -60,14 +60,14 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   static final String LOG_BEGIN_UOW_FMT = "Begin unit of work [%s].";
   static final String LOG_END_UOW_FMT = "End unit of work [%s].";
   static final String LOG_BEF_UOW_CMP_FMT =
-      "Enforce entity managers flush to collect the messages, before %s completion.";
+      "Enforce entity managers %s flush to collect the messages, before %s completion.";
   static final String LOG_HDL_MSG_FMT = "Sorted the flushed messages and store them if nessuary,"
       + " dispatch them to the message dispatcher, before %s completion.";
   static final String LOG_MSG_CYCLE_FMT = "Can not handle messages!";
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("ddd.unitofwork.use-manual-flush", Boolean.class).orElse(Boolean.FALSE);
 
-  final transient Transaction transaction;
+  final Transaction transaction;
   final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
   final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
@@ -94,8 +94,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
 
   @Override
   public void beforeCompletion() {
-    logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, transaction.toString()));
     entityManagers.values().forEach(em -> {
+      logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, em, transaction.toString()));
       if (USE_MANUAL_FLUSH_MODEL) {
         final FlushModeType fm = em.getFlushMode();
         try {

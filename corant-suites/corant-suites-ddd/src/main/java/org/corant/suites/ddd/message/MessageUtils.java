@@ -15,6 +15,7 @@ package org.corant.suites.ddd.message;
 
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 /**
  * corant-suites-ddd
@@ -24,32 +25,39 @@ import java.util.Queue;
  */
 public class MessageUtils {
 
+  static final Logger logger = Logger.getLogger(MessageUtils.class.getName());
+
   public static boolean isCorrelated(Message m, Message o) {
     return m instanceof MergableMessage && o instanceof MergableMessage
         && isEquals(m.getClass(), o.getClass())
         && isEquals(m.getMetadata().getSource(), o.getMetadata().getSource());
   }
 
-  public static void mergeToQueue(Queue<Message> queue, Message msg) {
-    if (msg instanceof MergableMessage) {
-      MergableMessage newMgbMsg = (MergableMessage) msg;
+  public static void mergeToQueue(Queue<Message> queue, Message newMsg) {
+    if (newMsg instanceof MergableMessage) {
       MergableMessage oldMgbMsg = null;
       for (Message queMsg : queue) {
-        if (isCorrelated(queMsg, newMgbMsg)) {
+        if (isCorrelated(queMsg, newMsg)) {
           oldMgbMsg = (MergableMessage) queMsg;
           break;
         }
       }
-      if (oldMgbMsg == null || !newMgbMsg.canMerge(oldMgbMsg)) {
-        queue.add(newMgbMsg);
+      final MergableMessage order = oldMgbMsg;
+      if (order == null || !((MergableMessage) newMsg).canMerge(order)) {
+        logger.fine(() -> String.format("Enqueue message %s", newMsg.getMetadata()));
+        queue.add(newMsg);
       } else {
-        queue.remove(oldMgbMsg);
-        if (newMgbMsg.merge(oldMgbMsg).isValid()) {
-          queue.add(newMgbMsg);
+        logger.fine(() -> String.format("Remove message %s from queue.", order.getMetadata()));
+        queue.remove(order);
+        if (((MergableMessage) newMsg).merge(order).isValid()) {
+          logger.fine(() -> String.format("Merge message %s to %s and enqueue it.",
+              order.getMetadata(), newMsg.getMetadata()));
+          queue.add(newMsg);
         }
       }
-    } else if (msg != null) {
-      queue.add(msg);
+    } else if (newMsg != null) {
+      logger.fine(() -> String.format("Enqueue message %s", newMsg.getMetadata()));
+      queue.add(newMsg);
     }
   }
 }

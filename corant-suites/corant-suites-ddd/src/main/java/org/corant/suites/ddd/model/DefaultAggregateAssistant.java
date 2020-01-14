@@ -13,21 +13,21 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.suites.bundle.Preconditions.requireGaet;
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
+import static org.corant.suites.cdi.Instances.select;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import javax.enterprise.inject.Instance;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.event.Event;
-import org.corant.suites.ddd.message.AggregateMessageMetadata;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
+import org.corant.suites.ddd.unitwork.UnitOfWork;
+import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
 
 /**
  * @author bingo 上午10:57:03
@@ -37,20 +37,12 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   private static final String FIRE_LOG = "Fire event [%s] to event listener!";
   private static final String RISE_LOG = "Register integration message [%s] to message queue!";
 
-  protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-  protected final transient Aggregate aggregate;
-
-  protected final transient Queue<Message> messages = new LinkedList<>();
-  protected transient volatile long lastMessageSequenceNumber = 0L;
+  protected final Logger logger = Logger.getLogger(this.getClass().toString());
+  protected final Aggregate aggregate;
+  protected final Queue<Message> messages = new LinkedList<>();
 
   public DefaultAggregateAssistant(Aggregate aggregate) {
     this.aggregate = requireNotNull(aggregate, GlobalMessageCodes.ERR_PARAM);
-  }
-
-  public DefaultAggregateAssistant(Aggregate aggregate, long lastMessageSequenceNumber) {
-    this(aggregate);
-    this.lastMessageSequenceNumber =
-        requireGaet(lastMessageSequenceNumber, 0L, GlobalMessageCodes.ERR_PARAM);
   }
 
   @Override
@@ -60,13 +52,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
 
   @Override
   public List<Message> dequeueMessages(boolean flush) {
-    final AtomicLong counter = new AtomicLong(lastMessageSequenceNumber);
-    List<Message> exMsgs = messages.stream().map(m -> {
-      if (m.getMetadata() instanceof AggregateMessageMetadata) {
-        ((AggregateMessageMetadata) m.getMetadata()).resetSequenceNumber(counter.incrementAndGet());
-      }
-      return m;
-    }).collect(Collectors.toList());
+    List<Message> exMsgs = new LinkedList<>(messages);
     if (flush) {
       clearMessages();
     }
@@ -82,10 +68,18 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
           MessageUtils.mergeToQueue(this.messages, msg);
         }
       }
-      // FIXME
-      if (aggregate instanceof AbstractDefaultAggregate) {
-        ((AbstractDefaultAggregate) aggregate)
-            .setMn(lastMessageSequenceNumber + this.messages.size());
+    } else {
+      Instance<UnitOfWorksManager> um = select(UnitOfWorksManager.class);
+      if (um.isResolvable()) {
+        UnitOfWork uow = um.get().getCurrentUnitOfWork();
+        for (Message msg : messages) {
+          if (msg != null) {
+            logger.fine(() -> String.format(RISE_LOG, msg.toString()));
+            uow.register(msg);
+          }
+        }
+      } else {
+        logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
       }
     }
   }
@@ -131,15 +125,6 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   @Override
   public Aggregate getAggregate() {
     return aggregate;
-  }
-
-  public long getLastMessageSequenceNumber() {
-    return lastMessageSequenceNumber;
-  }
-
-  @Override
-  public long getMessageSequenceNumber() {
-    return messages.size() + getLastMessageSequenceNumber();
   }
 
   @Override

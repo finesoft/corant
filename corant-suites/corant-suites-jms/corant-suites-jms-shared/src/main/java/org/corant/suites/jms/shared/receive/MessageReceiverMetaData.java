@@ -59,6 +59,7 @@ public class MessageReceiverMetaData {
   private final int tryThreshold;
   private final long loopIntervalMs;
   private final Duration breakedDuration;
+  private final boolean xa;
 
   MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
     this.method = AccessController.doPrivileged((PrivilegedAction<AnnotatedMethod<?>>) () -> {
@@ -83,6 +84,7 @@ public class MessageReceiverMetaData {
     loopIntervalMs = max(500L, ann.loopIntervalMs());
     breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
         : Duration.parse(ann.breakedDuration()), Duration.ofSeconds(8L));
+    xa = ann.xa();
   }
 
   public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
@@ -289,6 +291,6 @@ public class MessageReceiverMetaData {
   }
 
   boolean xa() {
-    return AbstractJMSExtension.getConfig(getConnectionFactoryId()).isXa();
+    return xa;
   }
 }

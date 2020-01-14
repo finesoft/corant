@@ -140,8 +140,6 @@ public @interface MessageReceive {
   String selector() default "";
 
   /**
-   * TODO
-   *
    * @return subscriptionDurable
    */
   boolean subscriptionDurable() default false;
@@ -155,9 +153,15 @@ public @interface MessageReceive {
   int tryThreshold() default 4;
 
   /**
-   * TODO
-   *
    * @return type
    */
   Class<?> type() default String.class;
+
+  /**
+   * Whether to enable XA to receive messages, if true the Connection factory must support
+   * XAConnection and the {@link #acknowledge()} return will be ignored. Default is true.
+   *
+   * @return xa
+   */
+  boolean xa() default true;
 }

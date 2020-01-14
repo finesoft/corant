@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,13 +58,11 @@ public class MessageReceiverManager {
   }
 
   void beforeShutdown(@Observes final BeforeShutdown e) {
-    executorServices.values().forEach(es -> {
-      es.shutdownNow().forEach(r -> {
-        if (r instanceof MessageReceiverTask) {
-          ((MessageReceiverTask) r).release(true);
-        }
-      });
-    });
+    executorServices.values().forEach(es -> es.shutdownNow().forEach(r -> {
+      if (r instanceof MessageReceiverTask) {
+        ((MessageReceiverTask) r).release(true);
+      }
+    }));
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
@@ -71,10 +70,15 @@ public class MessageReceiverManager {
       final AbstractJMSConfig cfg =
           AbstractJMSExtension.getConfig(metaData.getConnectionFactoryId());
       if (cfg != null && cfg.isEnable()) {
-        ScheduledExecutorService ses =
-            shouldNotNull(executorServices.get(cfg.getConnectionFactoryId()),
-                "Can not find any executor service for connection factory id [%s].",
-                cfg.getConnectionFactoryId());
+        if (metaData.xa()) {
+          shouldBeTrue(cfg.isXa(),
+              "Can not schedule xa message receiver, the connection factory [%s] not supported! message receiver [%s].",
+              cfg.getConnectionFactoryId(), metaData);
+        }
+        ScheduledExecutorService ses = shouldNotNull(
+            executorServices.get(cfg.getConnectionFactoryId()),
+            "Can not schedule message receiver, connection factory id [%s] not found. message receiver [%s].",
+            cfg.getConnectionFactoryId(), metaData);
         ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelayMs(),
             cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
       }

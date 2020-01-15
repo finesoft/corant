@@ -29,7 +29,7 @@ import java.util.Set;
  *
  * The annotation utility class.
  *
- * NOTE: Starting with Java8 AnnotatedElement
+ * NOTE: Starting with Java8 we recommend using AnnotatedElement
  *
  * @author bingo 下午10:06:13
  *

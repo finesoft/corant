@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.jpql;
 
-import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapBoolean;
 import static org.corant.shared.util.MapUtils.getMapEnum;
@@ -73,7 +72,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit + 1);
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
-      int size = getSize(list);
+      int size = list.size();
       if (size > 0) {
         if (size > limit) {
           list.remove(size - 1);
@@ -129,7 +128,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       query.setFirstResult(offset).setMaxResults(limit);
       List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
       Paging<T> result = Paging.of(offset, limit);
-      int size = getSize(list);
+      int size = list.size();
       if (size > 0) {
         if (size < limit) {
           result.withTotal(offset + size);
@@ -164,7 +163,8 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       Query query =
           createQuery(em, ql, properties, resultClass, queryParam).setMaxResults(maxSelectSize + 1);
       List<T> result = query.getResultList();
-      if (getSize(result) > maxSelectSize) {
+      int size = result == null ? 0 : result.size();
+      if (size > maxSelectSize) {
         throw new QueryRuntimeException(
             "[%s] Result record number overflow, the allowable range is %s.", queryName,
             maxSelectSize);

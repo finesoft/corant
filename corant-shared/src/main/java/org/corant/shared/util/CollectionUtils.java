@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,55 +66,6 @@ public class CollectionUtils {
     return appendArray;
   }
 
-  public static Object get(final Object object, final int index) {
-    final int i = index;
-    if (i < 0) {
-      throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
-    }
-    if (object == null) {
-      throw new IllegalArgumentException("Unsupported object type: null");
-    }
-    if (object instanceof Iterable<?>) {
-      return IterableUtils.get((Iterable<?>) object, i);
-    } else if (object instanceof Object[]) {
-      return ((Object[]) object)[i];
-    } else if (object instanceof Iterator<?>) {
-      return IterableUtils.get((Iterator<?>) object, index);
-    } else if (object instanceof Enumeration<?>) {
-      return IterableUtils.get((Enumeration<?>) object, index);
-    } else {
-      try {
-        return Array.get(object, i);
-      } catch (final IllegalArgumentException ex) {
-        throw new IllegalArgumentException(
-            "Unsupported object type: " + object.getClass().getName());
-      }
-    }
-  }
-
-  public static int getSize(final Object object) {
-    if (object == null) {
-      return 0;
-    } else if (object instanceof Collection<?>) {
-      return ((Collection<?>) object).size();
-    } else if (object instanceof Object[]) {
-      return ((Object[]) object).length;
-    } else if (object instanceof Iterable<?>) {
-      return IterableUtils.getSize((Iterable<?>) object);
-    } else if (object instanceof Iterator<?>) {
-      return IterableUtils.getSize((Iterator<?>) object);
-    } else if (object instanceof Enumeration<?>) {
-      return IterableUtils.getSize((Enumeration<?>) object);
-    } else {
-      try {
-        return Array.getLength(object);
-      } catch (final IllegalArgumentException ex) {
-        throw new IllegalArgumentException(
-            "Unsupported object type: " + object.getClass().getName());
-      }
-    }
-  }
-
   @SafeVarargs
   public static <T> List<T> immutableListOf(final T... objects) {
     if (objects == null || objects.length == 0) {
@@ -131,15 +83,27 @@ public class CollectionUtils {
   }
 
   @SafeVarargs
-  public static <T> Set<T> linkedHashSetOf(final T... objects) {
+  public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
     if (objects == null || objects.length == 0) {
       return new LinkedHashSet<>();
     }
-    Set<T> set = new LinkedHashSet<>(objects.length);
+    LinkedHashSet<T> set = new LinkedHashSet<>(objects.length);
     for (T obj : objects) {
       set.add(obj);
     }
     return set;
+  }
+
+  @SafeVarargs
+  public static <T> LinkedList<T> linkedListOf(final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return new LinkedList<>();
+    }
+    LinkedList<T> list = new LinkedList<>();
+    for (T obj : objects) {
+      list.add(obj);
+    }
+    return list;
   }
 
   public static <T> List<T> listOf(final Enumeration<T> enumeration) {

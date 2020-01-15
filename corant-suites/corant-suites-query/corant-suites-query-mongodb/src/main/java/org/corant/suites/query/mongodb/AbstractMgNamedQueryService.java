@@ -14,7 +14,6 @@ package org.corant.suites.query.mongodb;
  */
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.getSize;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.MapUtils.getMapEnum;
@@ -115,7 +114,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    int size = getSize(list);
+    int size = list.size();
     if (size > 0) {
       if (size > limit) {
         list.remove(size - 1);
@@ -146,7 +145,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    int size = getSize(list);
+    int size = list.size();
     if (size > 0) {
       if (size < limit) {
         result.withTotal(offset + size);
@@ -166,7 +165,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
         streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
-    int size = getSize(list);
+    int size = list.size();
     if (size > 0) {
       if (size > maxSelectSize) {
         throw new QueryRuntimeException(

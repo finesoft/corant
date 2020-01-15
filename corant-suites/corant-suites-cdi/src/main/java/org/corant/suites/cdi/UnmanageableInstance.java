@@ -13,19 +13,21 @@
  */
 package org.corant.suites.cdi;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.CDI;
 import org.jboss.weld.bean.builtin.BeanManagerProxy;
 import org.jboss.weld.injection.InterceptionFactoryImpl;
 import org.jboss.weld.manager.api.WeldInjectionTarget;
 import org.jboss.weld.manager.api.WeldManager;
 
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.CDI;
+
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+
 /**
- * Hanle CDI unmanageable bean class or object
+ * Handle CDI unmanageable bean class or object
  *
  * corant-kernel
  *

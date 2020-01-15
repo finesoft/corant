@@ -46,7 +46,7 @@ public interface ComponentManager<N, C> extends Serializable {
    * @author bingo 下午5:34:28
    *
    */
-  public abstract static class AbstractComponentManager<N, C> implements ComponentManager<N, C> {
+  abstract class AbstractComponentManager<N, C> implements ComponentManager<N, C> {
 
     private static final long serialVersionUID = -2257315467951134869L;
 

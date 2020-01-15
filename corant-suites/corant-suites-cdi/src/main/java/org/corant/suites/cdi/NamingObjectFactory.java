@@ -35,7 +35,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class NamingObjectFactory implements ObjectFactory {
   @Override
   public Object getObjectInstance(Object obj, Name name, Context nameCtx,
-      Hashtable<?, ?> environment) throws Exception {
+      Hashtable<?, ?> environment) {
     if (obj instanceof NamingReference) {
       NamingReference reference = (NamingReference) obj;
       Class<?> theClass = asClass(reference.getClassName());

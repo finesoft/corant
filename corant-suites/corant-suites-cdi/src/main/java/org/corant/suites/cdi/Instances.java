@@ -143,7 +143,7 @@ public class Instances {
     } else if (inst.isUnsatisfied()) {
       List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
       if (list.size() == 1) {
-        return list.size() == 1 ? list.get(0) : null;
+        return list.get(0);
       } else {
         return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
       }

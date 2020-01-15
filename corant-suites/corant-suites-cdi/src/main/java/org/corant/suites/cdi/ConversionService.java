@@ -53,7 +53,7 @@ public interface ConversionService {
    *
    */
   @ApplicationScoped
-  public static class DefaultConversionService implements ConversionService {
+  class DefaultConversionService implements ConversionService {
 
     @Override
     public <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClazz,

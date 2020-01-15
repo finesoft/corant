@@ -123,7 +123,7 @@ public class JPAService implements PersistenceService {
    * @author bingo 下午4:09:51
    *
    */
-  public static abstract class EntityManagerManager
+  public abstract static class EntityManagerManager
       extends AbstractComponentManager<PersistenceContext, EntityManager> {
 
     private static final long serialVersionUID = 2369488429315443982L;

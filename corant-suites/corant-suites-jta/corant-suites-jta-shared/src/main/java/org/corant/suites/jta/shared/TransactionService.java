@@ -23,7 +23,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.jta.shared.TransactionalActuator.TransactionalActuatorPlan;
+import org.corant.suites.jta.shared.TransactionalAction.TransactionalActuator;
 
 /**
  * corant-kernel
@@ -40,12 +40,12 @@ public interface TransactionService {
    * <pre>
    * example:
    *
-   * TransactionService.actuatePlan().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
+   * TransactionService.actuator().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
    *     .run(() -> {
    *       // the business operation that run in transaction.
    *     });
    *
-   * return TransactionService.actuatePlan().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
+   * return TransactionService.actuator().txType(TxType.REQUIRED).rollbackOn(SomeException.class)
    *     .get(() -> {
    *       // the business operation that run in transaction;
    *       return operation result;
@@ -54,8 +54,8 @@ public interface TransactionService {
    *
    * @param <T>
    */
-  static <T> TransactionalActuatorPlan<T> actuatePlan() {
-    return new TransactionalActuatorPlan<>();
+  static <T> TransactionalActuator<T> actuator() {
+    return new TransactionalActuator<>();
   }
 
   /**

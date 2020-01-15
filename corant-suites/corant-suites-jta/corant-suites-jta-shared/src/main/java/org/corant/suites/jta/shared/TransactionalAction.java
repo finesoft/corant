@@ -15,16 +15,20 @@ package org.corant.suites.jta.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 import javax.transaction.Transactional.TxType;
 import javax.transaction.TransactionalException;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.cdi.Instances;
 
 /**
  * corant-suites-jta-shared
@@ -40,23 +44,29 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 上午9:45:50
  *
  */
-public abstract class TransactionalActuator<T> {
+public abstract class TransactionalAction<T> {
 
-  static final Logger logger = Logger.getLogger(TransactionalActuator.class.getName());
+  static final Logger logger = Logger.getLogger(TransactionalAction.class.getName());
 
   final Supplier<T> supplier;
   final Class<?>[] rollbackOn;
   final Class<?>[] dontRollbackOn;
+  final TxType type;
+  final Synchronization synchronization;
 
   /**
+   * @param type;
    * @param supplier
+   * @param synchronization
    * @param rollbackOn
    * @param dontRollbackOn
    */
-  protected TransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-      Class<?>[] dontRollbackOn) {
+  protected TransactionalAction(TxType type, Supplier<T> supplier, Synchronization synchronization,
+      Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
     super();
+    this.type = type;
     this.supplier = shouldNotNull(supplier, "The supplier can't null");
+    this.synchronization = synchronization;
     this.rollbackOn = defaultObject(rollbackOn, new Class[0]);
     this.dontRollbackOn = defaultObject(dontRollbackOn, new Class[0]);
   }
@@ -64,7 +74,19 @@ public abstract class TransactionalActuator<T> {
   public T execute() throws Exception {
     final TransactionManager tm = TransactionService.transactionManager();
     final Transaction tx = TransactionService.currentTransaction();
-    return doExecute(tm, tx);
+    final Optional<UserTransactionActionHandler> helper =
+        Instances.find(UserTransactionActionHandler.class);
+    boolean prestatus = false;
+    if (helper.isPresent()) {
+      prestatus = helper.get().beforeExecute(tx, tm, type, rollbackOn, dontRollbackOn);
+    }
+    try {
+      return doExecute(tm, tx);
+    } finally {
+      if (helper.isPresent()) {
+        helper.get().afterExecute(prestatus, tx, tm, type);
+      }
+    }
   }
 
   protected abstract T doExecute(TransactionManager tm, Transaction tx) throws Exception;
@@ -83,6 +105,9 @@ public abstract class TransactionalActuator<T> {
 
   protected T executeInCallerTx(Transaction tx) throws Exception {
     try {
+      if (synchronization != null) {
+        tx.registerSynchronization(synchronization);
+      }
       return supplier.get();
     } catch (Exception e) {
       handleException(e, tx);
@@ -98,6 +123,9 @@ public abstract class TransactionalActuator<T> {
     tm.begin();
     Transaction tx = tm.getTransaction();
     try {
+      if (synchronization != null) {
+        tx.registerSynchronization(synchronization);
+      }
       return supplier.get();
     } catch (Exception e) {
       handleException(e, tx);
@@ -135,11 +163,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:45:40
    *
    */
-  public static class MandatoryTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class MandatoryTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected MandatoryTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected MandatoryTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.MANDATORY, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -158,11 +186,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:46:08
    *
    */
-  public static class NeverTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class NeverTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected NeverTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected NeverTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.NEVER, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -181,11 +209,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:45:44
    *
    */
-  public static class NotSupportedTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class NotSupportedTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected NotSupportedTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected NotSupportedTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.NOT_SUPPORTED, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -209,11 +237,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:45:49
    *
    */
-  public static class RequiredTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class RequiredTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected RequiredTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected RequiredTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.REQUIRED, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -232,11 +260,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:45:52
    *
    */
-  public static class RequiresNewTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class RequiresNewTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected RequiresNewTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected RequiresNewTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.REQUIRES_NEW, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -260,11 +288,11 @@ public abstract class TransactionalActuator<T> {
    * @author bingo 上午10:46:01
    *
    */
-  public static class SupportsTransactionalActuator<T> extends TransactionalActuator<T> {
+  public static class SupportsTransactionalAction<T> extends TransactionalAction<T> {
 
-    protected SupportsTransactionalActuator(Supplier<T> supplier, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn) {
-      super(supplier, rollbackOn, dontRollbackOn);
+    protected SupportsTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      super(TxType.SUPPORTS, supplier, synchronization, rollbackOn, dontRollbackOn);
     }
 
     @Override
@@ -277,19 +305,28 @@ public abstract class TransactionalActuator<T> {
     }
   }
 
+  public interface UserTransactionActionHandler {
+
+    void afterExecute(boolean prestatus, Transaction tx, TransactionManager tm, TxType type);
+
+    boolean beforeExecute(Transaction tx, TransactionManager tm, TxType type, Class<?>[] rollbackOn,
+        Class<?>[] dontRollbackOn);
+  }
+
   /**
    * corant-suites-jta-shared
    *
    * @author bingo 上午10:45:58
    *
    */
-  public static class TransactionalActuatorPlan<T> {
+  public static class TransactionalActuator<T> {
 
     Class<?>[] rollbackOn = new Class[0];
     Class<?>[] dontRollbackOn = new Class[0];
     TxType txType = TxType.REQUIRED;
+    Synchronization synchronization;
 
-    public TransactionalActuatorPlan<T> dontRollbackOn(final Class<?>... dontRollbackOn) {
+    public TransactionalActuator<T> dontRollbackOn(final Class<?>... dontRollbackOn) {
       this.dontRollbackOn = dontRollbackOn;
       return this;
     }
@@ -302,7 +339,7 @@ public abstract class TransactionalActuator<T> {
       }
     }
 
-    public TransactionalActuatorPlan<T> rollbackOn(final Class<?>... rollbackOn) {
+    public TransactionalActuator<T> rollbackOn(final Class<?>... rollbackOn) {
       this.rollbackOn = rollbackOn;
       return this;
     }
@@ -319,25 +356,42 @@ public abstract class TransactionalActuator<T> {
       }
     }
 
-    public TransactionalActuatorPlan<T> txType(final TxType txType) {
+    public TransactionalActuator<T> synchronization(final Synchronization synchronization) {
+      if ((txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED) && synchronization != null) {
+        throw new NotSupportedException();
+      }
+      this.synchronization = synchronization;
+      return this;
+    }
+
+    public TransactionalActuator<T> txType(final TxType txType) {
+      if (synchronization != null && (txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED)) {
+        throw new NotSupportedException();
+      }
       this.txType = defaultObject(txType, TxType.REQUIRED);
       return this;
     }
 
-    protected TransactionalActuator<T> plan(final Supplier<T> supplier) {
+    protected TransactionalAction<T> plan(final Supplier<T> supplier) {
       switch (txType) {
         case MANDATORY:
-          return new MandatoryTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new MandatoryTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
         case REQUIRES_NEW:
-          return new RequiresNewTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new RequiresNewTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
         case NEVER:
-          return new NeverTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new NeverTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
         case NOT_SUPPORTED:
-          return new NotSupportedTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new NotSupportedTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
         case SUPPORTS:
-          return new SupportsTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new SupportsTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
         default:
-          return new RequiredTransactionalActuator<>(supplier, rollbackOn, dontRollbackOn);
+          return new RequiredTransactionalAction<>(supplier, synchronization, rollbackOn,
+              dontRollbackOn);
       }
     }
   }

@@ -216,11 +216,12 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
           final Xid[] useXids = xids;
           if (useXids != null && useXids.length > 0) {
             LOGGER.fine(() -> String.format(
-                "Obtained prepared transaction branches: [%s] for JTA recovery processes.",
-                String.join(", ", asStrings((Object[]) useXids))));
+                "Obtained prepared JDBC XA %s transaction branches: [%s] for JTA recovery processes.",
+                config.getName(), String.join(", ", asStrings((Object[]) useXids))));
           } else {
-            LOGGER
-                .fine(() -> "Prepared transaction branches for JTA recovery processes not found.");
+            LOGGER.fine(() -> String.format(
+                "Prepared JDBC XA %s transaction branches for JTA recovery processes not found.",
+                config.getName()));
           }
         }
       }

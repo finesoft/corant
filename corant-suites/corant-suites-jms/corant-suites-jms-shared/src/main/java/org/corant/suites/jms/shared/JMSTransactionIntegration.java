@@ -167,11 +167,12 @@ public class JMSTransactionIntegration implements TransactionIntegration {
           final Xid[] useXids = xids;
           if (useXids != null && useXids.length > 0) {
             LOGGER.fine(() -> String.format(
-                "Obtained prepared transaction branches: [%s] for JTA recovery processes.",
-                String.join(", ", asStrings((Object[]) useXids))));
+                "Obtained prepared JMS XA %s transaction branches: [%s] for JTA recovery processes.",
+                config.getConnectionFactoryId(), String.join(", ", asStrings((Object[]) useXids))));
           } else {
-            LOGGER
-                .fine(() -> "Prepared transaction branches for JTA recovery processes not found.");
+            LOGGER.fine(() -> String.format(
+                "Prepared JMS XA %s transaction branches for JTA recovery processes not found.",
+                config.getConnectionFactoryId()));
           }
         }
       }

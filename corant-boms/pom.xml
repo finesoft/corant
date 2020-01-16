@@ -116,6 +116,7 @@
 		<version.rest-assured>4.1.2</version.rest-assured>
 		<version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
 		<version.swagger>2.0.8</version.swagger>
+		<version.zxing>3.4.0</version.zxing>
 
 	</properties>
 
@@ -1007,6 +1008,12 @@
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
 				<version>${version.swagger}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.zxing</groupId>
+				<artifactId>core</artifactId>
+				<version>${version.zxing}</version>
 			</dependency>
 
 			<!-- Corant -->

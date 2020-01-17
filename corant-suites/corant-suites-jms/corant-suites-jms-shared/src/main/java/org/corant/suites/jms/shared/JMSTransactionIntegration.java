@@ -94,8 +94,8 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         disconnect();
         LOGGER.fine(() -> String.format(
-            "Committed the transaction [%s] (onePhase:%s) that run in JTA recovery processes!",
-            xid.toString(), onePhase));
+            "Committed the JMS XA %s transaction [%s] (onePhase:%s) that run in JTA recovery processes!",
+            config.getConnectionFactoryId(), xid.toString(), onePhase));
       }
     }
 
@@ -107,8 +107,8 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         disconnect();
         LOGGER.fine(() -> String.format(
-            "Ended the work performed on behalf of a transaction branch [%s] flags [%s] that run in JTA recovery processes!",
-            xid.toString(), flags));
+            "Ended the work performed on behalf of the JMS XA %s transaction branch [%s] flags [%s] that run in JTA recovery processes!",
+            config.getConnectionFactoryId(), xid.toString(), flags));
       }
     }
 
@@ -120,8 +120,8 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         disconnect();
         LOGGER.fine(() -> String.format(
-            "Forgot about a heuristicallycompleted transaction branch [%s] that run in JTA recovery processes!",
-            xid.toString()));
+            "Forgot about the JMS XA %s heuristicallycompleted transaction branch [%s] that run in JTA recovery processes!",
+            config.getConnectionFactoryId(), xid.toString()));
       }
     }
 
@@ -187,8 +187,8 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         disconnect();
         LOGGER.fine(() -> String.format(
-            "Rolled back work done on behalfof a transaction branch [%s] that run in JTA recovery processes!",
-            xid.toString()));
+            "Rolled back work done on behalfof the JMS XA %s transaction branch [%s] that run in JTA recovery processes!",
+            config.getConnectionFactoryId(), xid.toString()));
       }
     }
 
@@ -210,8 +210,8 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         disconnect();
         LOGGER.fine(() -> String.format(
-            "Started work on behalf of a transaction branch [%s] flags [%s] that run in JTA recovery processes!",
-            xid.toString(), flags));
+            "Started work on behalf of a JMS XA %s transaction branch [%s] flags [%s] that run in JTA recovery processes!",
+            config.getConnectionFactoryId(), xid.toString(), flags));
       }
     }
 

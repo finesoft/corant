@@ -11,11 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.datasource.agroal;
+package org.corant.suites.datasource.dbcp;
 
+import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.config.spi.Sortable;
 import org.corant.suites.datasource.shared.DataSourceConfig;
-import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
 
 /**
  * corant-suites-datasource-agroal
@@ -23,8 +23,8 @@ import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplie
  * @author bingo 下午8:10:27
  *
  */
-public interface AgroalCPDataSourceConfigurator extends Sortable {
+public interface DBCPDataSourceConfigurator extends Sortable {
 
-  void config(DataSourceConfig config, AgroalDataSourceConfigurationSupplier agroalConfig);
+  void config(DataSourceConfig config, BasicManagedDataSource basicManagedDataSource);
 
 }

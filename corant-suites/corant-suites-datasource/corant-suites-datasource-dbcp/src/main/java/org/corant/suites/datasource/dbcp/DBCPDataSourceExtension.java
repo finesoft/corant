@@ -13,6 +13,9 @@
  */
 package org.corant.suites.datasource.dbcp;
 
+import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -30,6 +34,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
+import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -129,6 +134,17 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
   BasicManagedDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
     BasicManagedDataSource ds = new BasicManagedDataSource();
+    // ds.setAbandonedUsageTracking(usageTracking); // use DBCPDataSourceConfigurator
+    // ds.setAbandonedLogWriter(logWriter); // use DBCPDataSourceConfigurator
+    // ds.setAccessToUnderlyingConnectionAllowed(allow); // use DBCPDataSourceConfigurator
+    ds.setAutoCommitOnReturn(cfg.isAutoCommit());
+    // ds.setCacheState(cacheState);// use DBCPDataSourceConfigurator
+    // ds.setConnectionFactoryClassName(cfn); // use DBCPDataSourceConfigurator
+    if (isNotBlank(cfg.getInitialSql())) {
+      ds.setConnectionInitSqls(listOf(cfg.getInitialSql()));
+    }
+    // ds.setConnectionProperties(connectionProperties);
+
     ds.setTransactionManager(instance.select(TransactionManager.class).get());
     ds.setDriverClassName(cfg.getDriver().getName());
     ds.setUrl(cfg.getConnectionUrl());
@@ -140,6 +156,9 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setMaxConnLifetimeMillis(cfg.getMaxLifetime().get(ChronoUnit.MILLIS));
     ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
     ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
+
+    streamOf(ServiceLoader.load(DBCPDataSourceConfigurator.class, defaultClassLoader()))
+        .sorted(Sortable::compare).forEach(c -> c.config(cfg, ds));
     return ds;
   }
 

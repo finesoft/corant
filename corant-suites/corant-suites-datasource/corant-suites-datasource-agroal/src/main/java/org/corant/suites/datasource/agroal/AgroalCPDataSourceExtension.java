@@ -151,7 +151,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       }
     }
     streamOf(ServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader()))
-        .sorted(Sortable::compare).forEach(c -> c.config(cfgs));
+        .sorted(Sortable::compare).forEach(c -> c.config(cfg, cfgs));
     AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
     if (cfg.isEnableMetrics()) {
       registerMetricsMBean(agroalDataSource, cfg.getName());

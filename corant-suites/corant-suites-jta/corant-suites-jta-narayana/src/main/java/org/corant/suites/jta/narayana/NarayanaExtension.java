@@ -49,7 +49,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.suites.jta.shared.TransactionExtension;
 import org.corant.suites.jta.shared.TransactionIntegration;
-import org.jboss.tm.XAResourceRecovery;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
@@ -58,6 +57,7 @@ import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.coordinator.CheckedAction;
 import com.arjuna.ats.arjuna.logging.tsLogger;
 import com.arjuna.ats.arjuna.recovery.RecoveryManager;
+import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
@@ -200,9 +200,6 @@ public class NarayanaExtension implements TransactionExtension {
       RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
       RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();
-      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-          .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
-          .forEach(rms::addXAResourceRecovery);
       rms.start();
       logger.info(() -> "JTA automatic recovery processes has been started.");
     } else {
@@ -210,11 +207,13 @@ public class NarayanaExtension implements TransactionExtension {
       RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
       RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();
-      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-          .map(ti -> (XAResourceRecovery) ti::getRecoveryXAResources)
-          .forEach(rms::addXAResourceRecovery);
     }
-
+    final XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
+    if (xaRecoveryModule != null) {
+      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
+          .map(NarayanaXAResourceRecoveryHelper::new)
+          .forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
+    }
   }
 
   public static class InterruptCheckedAction extends CheckedAction {

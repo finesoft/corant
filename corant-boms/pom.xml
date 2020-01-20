@@ -1006,7 +1006,7 @@
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
+				<artifactId>swagger-annotations</artifactId>
 				<version>${version.swagger}</version>
 			</dependency>
 

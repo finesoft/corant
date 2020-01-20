@@ -77,7 +77,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     String dataBaseName;
     if (qualifier instanceof MgQuery) {
       MgQuery q = forceCast(qualifier);
-      dataBaseName = q == null ? null : defaultString(q.value());
+      dataBaseName = defaultString(q.value());
     } else {
       dataBaseName = asDefaultString(qualifier);
     }
@@ -85,7 +85,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
       dataBaseName = defaultQualifierValue.get();
     }
     final String dataBase = dataBaseName;
-    return services.computeIfAbsent(dataBase, (db) -> {
+    return services.computeIfAbsent(dataBase, db -> {
       logger.info(() -> String
           .format("Create default mongodb named query service, the data base is [%s].", db));
       return new DefaultMgNamedQueryService(db, this);

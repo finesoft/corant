@@ -14,7 +14,6 @@
 package org.corant.suites.query.elastic.cdi;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
@@ -81,7 +80,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
     String clusterName;
     if (qualifier instanceof EsQuery) {
       EsQuery q = forceCast(qualifier);
-      clusterName = q == null ? EMPTY : defaultString(q.value());
+      clusterName = defaultString(q.value());
     } else {
       clusterName = asDefaultString(qualifier);
     }

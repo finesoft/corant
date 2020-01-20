@@ -109,8 +109,8 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     String dialectName = null;
     if (qualifier instanceof SqlQuery) {
       SqlQuery q = forceCast(qualifier);
-      dataSourceName = q == null ? null : defaultString(q.value());
-      dialectName = q == null ? null : defaultString(q.dialect());
+      dataSourceName = defaultString(q.value());
+      dialectName = defaultString(q.dialect());
     } else {
       String[] qs = split(asDefaultString(qualifier), ":", true, true);
       if (qs.length > 0) {

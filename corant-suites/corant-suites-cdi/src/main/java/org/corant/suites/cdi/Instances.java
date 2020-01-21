@@ -183,6 +183,9 @@ public class Instances {
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
+    if (!CDIs.isEnabled()) {
+      throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
+    }
     return CDI.current().select(shouldNotNull(instanceClass), qualifiers);
   }
 

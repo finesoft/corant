@@ -14,6 +14,7 @@
 package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.ObjectUtils.max;
+import java.time.Duration;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -47,11 +48,14 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
   @ConfigKeyItem
   protected Boolean xa = true;
 
-  @ConfigKeyItem(defaultValue = "30000")
-  protected Long receiveTaskInitialDelayMs = 30000L;
+  @ConfigKeyItem(defaultValue = "PT30S")
+  protected Duration receiveTaskInitialDelay;
 
-  @ConfigKeyItem(defaultValue = "1000")
-  protected Long receiveTaskDelayMs = 1000L;
+  @ConfigKeyItem(defaultValue = "PT1S")
+  protected Duration receiveTaskDelay;
+
+  @ConfigKeyItem(defaultValue = "PT4S")
+  protected Duration receiverExecutorAwaitTermination;
 
   @ConfigKeyItem(defaultValue = "2")
   protected Integer receiveTaskThreads = max(2, Runtime.getRuntime().availableProcessors());
@@ -97,18 +101,26 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
 
   /**
    *
-   * @return the receiveTaskDelayMs
+   * @return the receiverExecutorAwaitTermination
    */
-  public Long getReceiveTaskDelayMs() {
-    return receiveTaskDelayMs;
+  public Duration getReceiverExecutorAwaitTermination() {
+    return receiverExecutorAwaitTermination;
   }
 
   /**
    *
-   * @return the receiveTaskInitialDelayMs
+   * @return the receiveTaskDelay
    */
-  public Long getReceiveTaskInitialDelayMs() {
-    return receiveTaskInitialDelayMs;
+  public Duration getReceiveTaskDelay() {
+    return receiveTaskDelay;
+  }
+
+  /**
+   *
+   * @return the receiveTaskInitialDelay
+   */
+  public Duration getReceiveTaskInitialDelay() {
+    return receiveTaskInitialDelay;
   }
 
   /**

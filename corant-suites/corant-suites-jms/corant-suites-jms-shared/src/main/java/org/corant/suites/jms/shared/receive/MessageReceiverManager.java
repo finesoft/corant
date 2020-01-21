@@ -24,13 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.inject.Inject;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
@@ -50,7 +51,7 @@ public class MessageReceiverManager {
   @Inject
   AbstractJMSExtension extesion;
 
-  final Map<Object, ScheduledExecutorService> executorServices = new HashMap<>();
+  final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices = new HashMap<>();
 
   final Set<MessageReceiverMetaData> receiveMetaDatas =
       Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
@@ -59,13 +60,18 @@ public class MessageReceiverManager {
     return new MessageReceiverTask(metaData);
   }
 
-  void beforeShutdown(@Observes final BeforeShutdown e) {
+  void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.info(() -> "Shut down the message receiver executor services");
-    executorServices.values().forEach(es -> es.shutdownNow().forEach(r -> {
-      if (r instanceof MessageReceiverTask) {
-        ((MessageReceiverTask) r).release(true);
+    executorServices.forEach((cfg, es) -> {
+      try {
+        es.awaitTermination(cfg.getReceiverExecutorAwaitTermination().toMillis(),
+            TimeUnit.MICROSECONDS);
+      } catch (InterruptedException e) {
+        logger.log(Level.WARNING, e, () -> String.format("Can not terminate [%s] executor service.",
+            cfg.getConnectionFactoryId()));
+        Thread.currentThread().interrupt();
       }
-    }));
+    });
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
@@ -85,16 +91,15 @@ public class MessageReceiverManager {
               "Can not schedule xa message receiver task, the connection factory [%s] not supported! message receiver [%s].",
               cfg.getConnectionFactoryId(), metaData);
         }
-        ScheduledExecutorService ses = shouldNotNull(
-            executorServices.get(cfg.getConnectionFactoryId()),
+        ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
             "Can not schedule message receiver task, connection factory id [%s] not found. message receiver [%s].",
             cfg.getConnectionFactoryId(), metaData);
-        ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelayMs(),
-            cfg.getReceiveTaskDelayMs(), TimeUnit.MICROSECONDS);
+        ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelay().toMillis(),
+            cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
         logger.fine(() -> String.format(
             "Scheduled message receiver task, connection factory id [%s], destination [%s], initial delay [%s]Ms",
             metaData.getConnectionFactoryId(), metaData.getDestination(),
-            cfg.getReceiveTaskInitialDelayMs()));
+            cfg.getReceiveTaskInitialDelay()));
       }
     }
     anycasts.clear();
@@ -107,8 +112,7 @@ public class MessageReceiverManager {
     if (!receiveMetaDatas.isEmpty()) {
       extesion.getConfigManager().getAllWithNames().values().forEach(cfg -> {
         if (cfg != null && cfg.isEnable()) {
-          executorServices.put(cfg.getConnectionFactoryId(),
-              Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
+          executorServices.put(cfg, Executors.newScheduledThreadPool(cfg.getReceiveTaskThreads()));
         }
       });
       logger.info(

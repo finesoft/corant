@@ -15,6 +15,7 @@ package org.corant.suites.query.shared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -323,5 +324,21 @@ public interface QueryService<Q, P> {
       }
     }
 
+  }
+
+  public enum QueryWay {
+
+    FORWARD, GET, PAGE, SELECT, STREAM;
+
+    public static QueryWay fromMethodName(String methodName) {
+      if (methodName != null) {
+        for (QueryWay qw : QueryWay.values()) {
+          if (methodName.startsWith(qw.name().toLowerCase(Locale.ENGLISH))) {
+            return qw;
+          }
+        }
+      }
+      return null;
+    }
   }
 }

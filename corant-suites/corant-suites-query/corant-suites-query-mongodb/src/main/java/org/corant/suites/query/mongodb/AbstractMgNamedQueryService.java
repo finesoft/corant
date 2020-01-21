@@ -58,6 +58,8 @@ import com.mongodb.client.model.CountOptions;
  */
 public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService {
 
+  public static final String PRO_KEY_COLLECTION_NAME = ".collection-name";
+
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
   public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeout";
@@ -193,8 +195,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
-    FindIterable<Document> fi =
-        getDataBase().getCollection(resolveCollectionName(querier.getName())).find();
+    FindIterable<Document> fi = getDataBase().getCollection(resolveCollectionName(querier)).find();
     EnumMap<MgOperator, Bson> script = querier.getScript(null);
     for (MgOperator op : MgOperator.values()) {
       switch (op) {
@@ -259,12 +260,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       co.limit(max(resolveCountOptionsLimit(), 1));
     }
     Bson bson = querier.getScript(null).getOrDefault(MgOperator.FILTER, new BasicDBObject());
-    return getDataBase().getCollection(resolveCollectionName(querier.getName()))
-        .countDocuments(bson, co);
+    return getDataBase().getCollection(resolveCollectionName(querier)).countDocuments(bson, co);
   }
 
-  protected String resolveCollectionName(String q) {
+  protected String resolveCollectionName(MgNamedQuerier querier) {
+    if (querier.getQuery().getProperties().containsKey(PRO_KEY_COLLECTION_NAME)) {
+      return querier.getQuery().getProperty(PRO_KEY_COLLECTION_NAME, String.class);
+    }
     int pos = 0;
+    String q = querier.getName();
     shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
     return q.substring(0, pos);
   }

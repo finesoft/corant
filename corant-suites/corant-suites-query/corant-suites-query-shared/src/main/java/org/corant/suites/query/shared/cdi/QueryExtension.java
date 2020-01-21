@@ -13,14 +13,60 @@
  */
 package org.corant.suites.query.shared.cdi;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.logging.Logger;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.suites.query.shared.declarative.DeclarativeQueryService;
+import org.corant.suites.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
 
 /**
  * corant-suites-query-shared
- * 
+ *
+ * Unfinish yet
+ *
  * @author bingo 下午2:39:57
  *
  */
 public class QueryExtension implements Extension {
 
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
+
+  Set<Class<?>> declarativeQueryServiceClasses = new LinkedHashSet<>();
+
+  void findDeclarativeQueryServices(
+      @Observes @WithAnnotations(DeclarativeQueryService.class) ProcessAnnotatedType<?> pat) {
+    Class<?> klass = pat.getAnnotatedType().getJavaClass();
+    if (!klass.isInterface()) {
+      logger.warning(() -> String.format(
+          "Found %s with annotation @DeclarativeQueryService, but it not an interface.", klass));
+      return;
+    }
+    if (isEmpty(klass.getDeclaredMethods())) {
+      logger.warning(() -> String.format(
+          "Found %s with annotation @DeclarativeQueryService, but it didn't declare any methods.",
+          klass));
+      return;
+    }
+    declarativeQueryServiceClasses.add(klass);
+  }
+
+  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event, BeanManager beanManager) {
+    if (event != null) {
+      for (Class<?> klass : declarativeQueryServiceClasses) {
+        event.addBean(new DeclarativeQueryServiceDelegateBean(beanManager, klass));
+      }
+    }
+  }
+
+  void onAfterDeploymentValidation(@Observes final AfterDeploymentValidation event) {
+    // TODO check whether the declarative query service fit the query define
+  }
 }

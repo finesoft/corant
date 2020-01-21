@@ -40,13 +40,15 @@ import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryService
     implements EsNamedQueryService {
 
+  public static final String PRO_KEY_INDEX_NAME = ".index-name";
+
   @Override
   public Map<String, Object> aggregate(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(null), null, null);
     try {
       Map<String, Object> result =
-          getExecutor().searchAggregation(resolveIndexName(queryName), script);
+          getExecutor().searchAggregation(resolveIndexName(querier), script);
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
@@ -65,7 +67,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     try {
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList =
-          getExecutor().searchHits(resolveIndexName(refQueryName), script).getValue();
+          getExecutor().searchHits(resolveIndexName(querier), script).getValue();
       if (result instanceof List) {
         parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
       } else {
@@ -115,7 +117,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(null), null, null);
     try {
-      Map<String, Object> result = getExecutor().search(resolveIndexName(queryName), script);
+      Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script);
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
@@ -137,7 +139,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     String script = resolveScript(querier.getScript(null), null, null);
     log("stream-> " + q, querier.getQueryParameter(), script);
     try {
-      return getExecutor().stream(resolveIndexName(q), script).map(result -> {
+      return getExecutor().stream(resolveIndexName(querier), script).map(result -> {
         this.fetch(result, querier);
         return querier.resolveResult(result);
       });
@@ -151,7 +153,11 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   protected abstract AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver();
 
-  protected String resolveIndexName(String q) {
+  protected String resolveIndexName(EsNamedQuerier querier) {
+    if (querier.getQuery().getProperties().containsKey(PRO_KEY_INDEX_NAME)) {
+      return querier.getQuery().getProperty(PRO_KEY_INDEX_NAME, String.class);
+    }
+    String q = querier.getName();
     int pos = 0;
     shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
     return q.substring(0, pos);
@@ -177,7 +183,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     try {
       log(q, querier.getQueryParameter(), script);
       Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(q), script);
+          getExecutor().searchHits(resolveIndexName(querier), script);
       List<T> result = new ArrayList<>();
       if (!isEmpty(hits.getValue())) {
         this.fetch(hits.getValue(), querier);

@@ -13,12 +13,63 @@
  */
 package org.corant.suites.query.shared.declarative;
 
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.util.AnnotationLiteral;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
+
 /**
- * corant-suites-query-shared
- * 
- * @author bingo 下午2:39:00
+ * @author bingo 下午6:30:18
  *
  */
-public interface DeclarativeQueryService {
+@Documented
+@Retention(RUNTIME)
+@Target({TYPE})
+@Inherited
+@ApplicationScoped
+@Stereotype
+public @interface DeclarativeQueryService {
 
+  String qualifier();
+
+  QueryType type() default QueryType.SQL;
+
+  public static class DeclarativeQueryServiceLiteral
+      extends AnnotationLiteral<DeclarativeQueryService> implements DeclarativeQueryService {
+
+    private static final long serialVersionUID = 8160691461505134491L;
+
+    final String qualifier;
+    final QueryType type;
+
+    /**
+     * @param type
+     * @param qualifier
+     */
+    DeclarativeQueryServiceLiteral(QueryType type, String qualifier) {
+      super();
+      this.qualifier = qualifier;
+      this.type = type;
+    }
+
+    public static DeclarativeQueryServiceLiteral of(QueryType type, String qualifier) {
+      return new DeclarativeQueryServiceLiteral(type, qualifier);
+    }
+
+    @Override
+    public String qualifier() {
+      return qualifier;
+    }
+
+    @Override
+    public QueryType type() {
+      return type;
+    }
+  }
 }

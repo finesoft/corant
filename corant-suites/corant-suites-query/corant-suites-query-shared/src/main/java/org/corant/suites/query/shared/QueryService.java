@@ -338,7 +338,7 @@ public interface QueryService<Q, P> {
           }
         }
       }
-      return null;
+      return SELECT;
     }
   }
 }

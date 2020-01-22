@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -46,6 +47,16 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
   public AbstractBean(BeanManager beanManager) {
     super();
     this.beanManager = beanManager;
+  }
+
+  @Override
+  public T create(CreationalContext<T> creationalContext) {
+    return null;
+  }
+
+  @Override
+  public void destroy(T instance, CreationalContext<T> creationalContext) {
+
   }
 
   @Override

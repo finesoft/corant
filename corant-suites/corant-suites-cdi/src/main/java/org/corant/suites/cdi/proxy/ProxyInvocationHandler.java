@@ -11,27 +11,42 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.cdi;
+package org.corant.suites.cdi.proxy;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
+ * corant-suites-cdi
  *
- * @author bingo 下午2:12:51
+ * @author bingo 下午3:20:16
  *
  */
 public class ProxyInvocationHandler implements InvocationHandler {
 
-  private Map<Method, MethodInvoker> methodMap;
-  private Class<?> clazz;
+  private final Class<?> clazz;
+  private final Map<Method, MethodInvoker> invokers;
 
-  public ProxyInvocationHandler(final Class<?> clazz, final Map<Method, MethodInvoker> methodMap) {
-    super();
-    this.clazz = clazz;
-    this.methodMap = methodMap;
+  public ProxyInvocationHandler(final Class<?> clazz,
+      final Function<Method, MethodInvoker> invokerHandler) {
+    this.clazz = shouldNotNull(clazz);
+    Map<Method, MethodInvoker> methodInvokers = new HashMap<>();
+    for (Method method : clazz.getDeclaredMethods()) {
+      if (method.getName().equals("equals") || method.getName().equals("hashCode")
+          || method.getName().equals("toString") || method.isDefault()
+          || Modifier.isStatic(method.getModifiers())) {
+        continue;
+      }
+      methodInvokers.put(method, invokerHandler.apply(method));
+    }
+    invokers = Collections.unmodifiableMap(methodInvokers);
   }
 
   @Override
@@ -60,7 +75,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
   @Override
   public Object invoke(Object o, Method method, Object[] args) throws Throwable {
-    MethodInvoker methodInvoker = methodMap.get(method);
+    MethodInvoker methodInvoker = invokers.get(method);
     if (methodInvoker == null) {
       // The java.lang.Object methods use for hq in Collection
       if (method.getName().equals("equals")) {
@@ -69,19 +84,19 @@ public class ProxyInvocationHandler implements InvocationHandler {
         return hashCode();
       } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
         return toString();
+      } else {
+        throw new CorantRuntimeException("Can not find method %s.", method);
       }
-    }
-    if (methodInvoker == null) {
-      throw new CorantRuntimeException("Can not find method %s.", method);
     }
     return methodInvoker.invoke(args);
   }
 
-  @Override
-  public String toString() {
-    return clazz.getName();
-  }
-
+  /**
+   * corant-suites-cdi
+   *
+   * @author bingo 上午10:38:27
+   *
+   */
   @FunctionalInterface
   public interface MethodInvoker {
     Object invoke(Object[] args);

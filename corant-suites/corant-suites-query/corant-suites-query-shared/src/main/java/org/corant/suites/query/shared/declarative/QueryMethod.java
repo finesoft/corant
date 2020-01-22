@@ -45,5 +45,5 @@ public @interface QueryMethod {
    *
    * @return way
    */
-  QueryWay way();
+  QueryWay way() default QueryWay.SELECT;
 }

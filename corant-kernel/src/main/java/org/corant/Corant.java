@@ -331,7 +331,7 @@ public class Corant implements AutoCloseable {
         LaunchUtils.getUsedMemoryMb(), LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(),
         LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
         TimeZone.getDefault().getID());
-    printBoostLine();
+    printBoostLine(logger);
 
     doOnReady();
   }
@@ -382,10 +382,11 @@ public class Corant implements AutoCloseable {
     }
   }
 
-  private void printBoostLine() {
+  private void printBoostLine(Logger logger) {
     if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
-      String spLine = "--------------------------------------------------";
-      System.out.println(spLine.concat(spLine).concat("\n"));
+      String spLine = "----------------------------------------------------------------";
+      // System.out.println(spLine.concat(spLine).concat("\n"));
+      logger.info(() -> spLine.concat(spLine));
     }
   }
 

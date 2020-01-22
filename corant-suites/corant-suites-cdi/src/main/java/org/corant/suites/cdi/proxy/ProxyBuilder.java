@@ -35,9 +35,9 @@ public class ProxyBuilder {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T buildContextual(final Class<?> clazz, final BeanManager beanManager,
+  public static <T> T buildContextual(final BeanManager beanManager, final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerHandler) {
     return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz},
-        new ContextualInvocationHandler(clazz, beanManager, invokerHandler));
+        new ContextualInvocationHandler(beanManager, clazz, invokerHandler));
   }
 }

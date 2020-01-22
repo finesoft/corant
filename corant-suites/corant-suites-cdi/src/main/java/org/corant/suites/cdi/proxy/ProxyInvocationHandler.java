@@ -31,8 +31,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class ProxyInvocationHandler implements InvocationHandler {
 
-  private final Class<?> clazz;
-  private final Map<Method, MethodInvoker> invokers;
+  protected final Class<?> clazz;
+  protected final Map<Method, MethodInvoker> invokers;
 
   public ProxyInvocationHandler(final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerHandler) {

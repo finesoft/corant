@@ -14,8 +14,6 @@
 package org.corant.suites.cdi.proxy;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -29,8 +27,6 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
-import javax.interceptor.InvocationContext;
-import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-cdi
@@ -97,146 +93,5 @@ public class InterceptorInvocations {
       }
     }
     return merged;
-  }
-
-  /**
-   * corant-suites-cdi
-   *
-   * @author bingo 上午10:41:54
-   *
-   */
-  public static class InterceptorInvocation {
-
-    @SuppressWarnings("rawtypes")
-    private final Interceptor interceptor;
-
-    private final Object interceptorInstance;
-
-    public InterceptorInvocation(final Interceptor<?> interceptor,
-        final Object interceptorInstance) {
-      this.interceptor = interceptor;
-      this.interceptorInstance = interceptorInstance;
-    }
-
-    @SuppressWarnings("unchecked")
-    Object invoke(InvocationContext ctx) throws Exception {
-      return interceptor.intercept(InterceptionType.AROUND_INVOKE, interceptorInstance, ctx);
-    }
-  }
-
-  /**
-   * corant-suites-cdi
-   *
-   * @author bingo 上午11:10:02
-   *
-   */
-  public static class InvocationContextImpl implements InvocationContext {
-
-    private final Object target;
-
-    private final Method method;
-
-    private Object[] args;
-
-    private final int position;
-
-    private final Map<String, Object> contextData;
-
-    private final List<InterceptorInvocation> chain;
-
-    /**
-     * @param target
-     * @param method
-     * @param args
-     * @param chain
-     */
-    public InvocationContextImpl(final Object target, final Method method, final Object[] args,
-        final List<InterceptorInvocation> chain) {
-      this(target, method, args, chain, 0);
-    }
-
-    private InvocationContextImpl(final Object target, final Method method, final Object[] args,
-        final List<InterceptorInvocation> chain, final int position) {
-      this.target = target;
-      this.method = method;
-      this.args = args;
-      contextData = new HashMap<>();
-      this.position = position;
-      this.chain = chain;
-    }
-
-    @Override
-    public Constructor<?> getConstructor() {
-      return null;
-    }
-
-    @Override
-    public Map<String, Object> getContextData() {
-      return contextData;
-    }
-
-    @Override
-    public Method getMethod() {
-      return method;
-    }
-
-    @Override
-    public Object[] getParameters() throws IllegalStateException {
-      return args;
-    }
-
-    @Override
-    public Object getTarget() {
-      return target;
-    }
-
-    @Override
-    public Object getTimer() {
-      return null;
-    }
-
-    @Override
-    public Object proceed() throws Exception {
-      try {
-        if (hasNextInterceptor()) {
-          return invokeNext();
-        } else {
-          return interceptorChainCompleted();
-        }
-      } catch (InvocationTargetException e) {
-        Throwable cause = e.getCause();
-        if (cause instanceof Error) {
-          throw (Error) cause;
-        }
-        if (cause instanceof Exception) {
-          throw (Exception) cause;
-        }
-        throw new CorantRuntimeException(cause);
-      }
-    }
-
-    @Override
-    public void setParameters(Object[] params)
-        throws IllegalStateException, IllegalArgumentException {
-      args = params;
-    }
-
-    protected Object interceptorChainCompleted()
-        throws InvocationTargetException, IllegalAccessException, IllegalArgumentException {
-      return method.invoke(target, args);
-    }
-
-    protected Object invokeNext() throws Exception {
-      return chain.get(position).invoke(nextContext());
-    }
-
-    boolean hasNextInterceptor() {
-      return position < chain.size();
-    }
-
-    private InvocationContext nextContext() {
-      return new InvocationContextImpl(target, method, args, chain, position + 1);
-    }
-
   }
 }

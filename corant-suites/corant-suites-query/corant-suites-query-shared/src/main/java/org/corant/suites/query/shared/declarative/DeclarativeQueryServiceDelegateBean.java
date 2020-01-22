@@ -68,7 +68,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 
   @Override
   public Object create(CreationalContext<Object> creationalContext) {
-    return ProxyBuilder.buildContextual(proxyType, beanManager, this::getExecution);
+    return ProxyBuilder.buildContextual(beanManager, proxyType, this::getExecution);
   }
 
   MethodInvoker getExecution(Method method) {

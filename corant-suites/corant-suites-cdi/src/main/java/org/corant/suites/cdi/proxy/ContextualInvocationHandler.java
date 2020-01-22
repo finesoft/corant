@@ -14,37 +14,27 @@
 package org.corant.suites.cdi.proxy;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
-import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
-import org.corant.suites.cdi.proxy.InterceptorInvocations.InterceptorInvocation;
-import org.corant.suites.cdi.proxy.InterceptorInvocations.InvocationContextImpl;
 
 /**
  *
  * @author bingo 下午2:12:51
  *
  */
-public class ContextualInvocationHandler implements InvocationHandler {
+public class ContextualInvocationHandler extends ProxyInvocationHandler {
 
-  private final Class<?> clazz;
   private final CreationalContext<?> creationalContext;
-  private final Object proxyObject;
   private final Map<Method, List<InterceptorInvocation>> interceptorChains;
 
-  public ContextualInvocationHandler(final Class<?> clazz, final BeanManager beanManager,
+  public ContextualInvocationHandler(final BeanManager beanManager, final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerHandler) {
-    super();
-    this.clazz = clazz;
-    proxyObject = Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz},
-        new ProxyInvocationHandler(clazz, invokerHandler));
+    super(clazz, invokerHandler);
     if (beanManager != null) {
       creationalContext = beanManager.createCreationalContext(null);
       interceptorChains =
@@ -59,10 +49,11 @@ public class ContextualInvocationHandler implements InvocationHandler {
   public Object invoke(Object o, Method method, Object[] args) throws Throwable {
     List<InterceptorInvocation> interceptorInvocations = interceptorChains.get(method);
     if (isNotEmpty(interceptorInvocations)) {
-      return new InvocationContextImpl(proxyObject, method, args, interceptorInvocations)
-          .proceed();
+      return new InvocationContextImpl(o, method, invokers.get(method), args,
+          interceptorInvocations).proceed();
     } else {
-      return method.invoke(proxyObject, args);
+      return new InvocationContextImpl(o, method, invokers.get(method), args,
+          Collections.emptyList()).proceed();
     }
   }
 

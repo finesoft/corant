@@ -384,9 +384,9 @@ public class Corant implements AutoCloseable {
 
   private void printBoostLine(Logger logger) {
     if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
-      String spLine = "----------------------------------------------------------------";
+      String spLine = "--------------------------------------------------";
       // System.out.println(spLine.concat(spLine).concat("\n"));
-      logger.info(() -> spLine.concat(spLine));
+      logger.info(() -> "\n".concat(spLine).concat(spLine));
     }
   }
 

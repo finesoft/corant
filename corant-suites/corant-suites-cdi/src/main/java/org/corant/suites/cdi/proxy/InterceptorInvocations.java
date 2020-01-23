@@ -58,8 +58,8 @@ public class InterceptorInvocations {
         getInterceptorBindings(interfaceType.getAnnotations(), beanManager);
 
     for (Method method : interfaceType.getMethods()) {
-      if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
-        continue;
+      if ( /* method.isDefault() || */ Modifier.isStatic(method.getModifiers())) {
+        continue; // FIXME for now I am not sure yet, the default method interceptor?
       }
       List<Annotation> methodLevelBindings =
           getInterceptorBindings(method.getAnnotations(), beanManager);

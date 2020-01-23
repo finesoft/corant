@@ -14,6 +14,8 @@
 package org.corant.suites.cdi.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -39,14 +41,33 @@ public class ProxyInvocationHandler implements InvocationHandler {
     this.clazz = shouldNotNull(clazz);
     Map<Method, MethodInvoker> methodInvokers = new HashMap<>();
     for (Method method : clazz.getDeclaredMethods()) {
-      if (method.getName().equals("equals") || method.getName().equals("hashCode")
-          || method.getName().equals("toString") || method.isDefault()
-          || Modifier.isStatic(method.getModifiers())) {
+      if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
         continue;
       }
       methodInvokers.put(method, invokerHandler.apply(method));
     }
     invokers = Collections.unmodifiableMap(methodInvokers);
+  }
+
+  /**
+   * FIXME UNFINISH YET! NOTE: FOR JAVA 8 ONLY!
+   * 
+   * @param o
+   * @param method
+   * @param args
+   * @return invokeDefaultMethod
+   */
+  static Object invokeDefaultMethod(Object o, Method method, Object[] args) {
+    try {
+      Class<?> declaringClass = method.getDeclaringClass();
+      Constructor<MethodHandles.Lookup> constructor =
+          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+      constructor.setAccessible(true);
+      return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
+          .unreflectSpecial(method, declaringClass).bindTo(o).invokeWithArguments(args);
+    } catch (Throwable e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   @Override
@@ -77,8 +98,10 @@ public class ProxyInvocationHandler implements InvocationHandler {
   public Object invoke(Object o, Method method, Object[] args) throws Throwable {
     MethodInvoker methodInvoker = invokers.get(method);
     if (methodInvoker == null) {
-      // The java.lang.Object methods use for hq in Collection
-      if (method.getName().equals("equals")) {
+      // The default method and java.lang.Object methods use for hq in Collection
+      if (method.isDefault()) {
+        return invokeDefaultMethod(o, method, args);
+      } else if (method.getName().equals("equals")) {
         return o == args[0];
       } else if (method.getName().equals("hashCode")) {
         return hashCode();
@@ -89,6 +112,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
       }
     }
     return methodInvoker.invoke(args);
+
   }
 
   @Override

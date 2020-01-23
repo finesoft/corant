@@ -145,7 +145,9 @@ public class InvocationContextImpl implements InvocationContext {
     if (methodInvoker != null) {
       return methodInvoker.invoke(args);
     } else {
-      if (method.getName().equals("equals")) {
+      if (method.isDefault()) {
+        return ProxyInvocationHandler.invokeDefaultMethod(target, method, args);
+      } else if (method.getName().equals("equals")) {
         return target == args[0];
       } else if (method.getName().equals("hashCode")) {
         return targetClass.hashCode();

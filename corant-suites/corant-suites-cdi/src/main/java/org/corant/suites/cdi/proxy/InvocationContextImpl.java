@@ -31,6 +31,8 @@ import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
  */
 public class InvocationContextImpl implements InvocationContext {
 
+  private final Class<?> targetClass;
+
   private final Object target;
 
   private final Method method;
@@ -46,32 +48,35 @@ public class InvocationContextImpl implements InvocationContext {
   private final MethodInvoker methodInvoker;
 
   /**
+   * @param targetClass
    * @param target
    * @param method
    * @param methodInvoker
    * @param args
    * @param chain
    */
-  public InvocationContextImpl(final Object target, final Method method,
+  public InvocationContextImpl(final Class<?> targetClass, final Object target, final Method method,
       final MethodInvoker methodInvoker, final Object[] args,
       final List<InterceptorInvocation> chain) {
-    this(target, method, methodInvoker, args, chain, 0);
+    this(targetClass, target, method, methodInvoker, args, chain, 0);
   }
 
   /**
+   * @param targetClass
    * @param target
    * @param method
    * @param args
    * @param chain
    */
-  public InvocationContextImpl(final Object target, final Method method, final Object[] args,
-      final List<InterceptorInvocation> chain) {
-    this(target, method, null, args, chain, 0);
+  public InvocationContextImpl(final Class<?> targetClass, final Object target, final Method method,
+      final Object[] args, final List<InterceptorInvocation> chain) {
+    this(targetClass, target, method, null, args, chain, 0);
   }
 
-  private InvocationContextImpl(final Object target, final Method method,
-      final MethodInvoker methodInvoker, final Object[] args,
+  private InvocationContextImpl(final Class<?> targetClass, final Object target,
+      final Method method, final MethodInvoker methodInvoker, final Object[] args,
       final List<InterceptorInvocation> chain, final int position) {
+    this.targetClass = targetClass;
     this.target = target;
     this.method = method;
     this.methodInvoker = methodInvoker;
@@ -136,12 +141,20 @@ public class InvocationContextImpl implements InvocationContext {
     args = params;
   }
 
-  protected Object interceptorChainCompleted()
-      throws InvocationTargetException, IllegalAccessException {
+  protected Object interceptorChainCompleted() {
     if (methodInvoker != null) {
       return methodInvoker.invoke(args);
+    } else {
+      if (method.getName().equals("equals")) {
+        return target == args[0];
+      } else if (method.getName().equals("hashCode")) {
+        return targetClass.hashCode();
+      } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
+        return "Corant proxy for ".concat(targetClass.getName());
+      } else {
+        throw new CorantRuntimeException("Can not find method %s.", method);
+      }
     }
-    return method.invoke(target, args);
   }
 
   protected Object invokeNext() throws Exception {
@@ -153,7 +166,8 @@ public class InvocationContextImpl implements InvocationContext {
   }
 
   private InvocationContext nextContext() {
-    return new InvocationContextImpl(target, method, methodInvoker, args, chain, position + 1);
+    return new InvocationContextImpl(targetClass, target, method, methodInvoker, args, chain,
+        position + 1);
   }
 
 }

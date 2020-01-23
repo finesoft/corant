@@ -49,10 +49,10 @@ public class ContextualInvocationHandler extends ProxyInvocationHandler {
   public Object invoke(Object o, Method method, Object[] args) throws Throwable {
     List<InterceptorInvocation> interceptorInvocations = interceptorChains.get(method);
     if (isNotEmpty(interceptorInvocations)) {
-      return new InvocationContextImpl(o, method, invokers.get(method), args,
+      return new InvocationContextImpl(clazz, o, method, invokers.get(method), args,
           interceptorInvocations).proceed();
     } else {
-      return new InvocationContextImpl(o, method, invokers.get(method), args,
+      return new InvocationContextImpl(clazz, o, method, invokers.get(method), args,
           Collections.emptyList()).proceed();
     }
   }

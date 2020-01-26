@@ -51,7 +51,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
   /**
    * FIXME UNFINISH YET! NOTE: FOR JAVA 8 ONLY!
-   * 
+   *
    * @param o
    * @param method
    * @param args
@@ -111,7 +111,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
         throw new CorantRuntimeException("Can not find method %s.", method);
       }
     }
-    return methodInvoker.invoke(args);
+    return methodInvoker.invoke(o, args);
 
   }
 
@@ -128,6 +128,6 @@ public class ProxyInvocationHandler implements InvocationHandler {
    */
   @FunctionalInterface
   public interface MethodInvoker {
-    Object invoke(Object[] args);
+    Object invoke(Object target, Object[] args);
   }
 }

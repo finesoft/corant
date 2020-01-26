@@ -143,7 +143,7 @@ public class InvocationContextImpl implements InvocationContext {
 
   protected Object interceptorChainCompleted() {
     if (methodInvoker != null) {
-      return methodInvoker.invoke(args);
+      return methodInvoker.invoke(target, args);
     } else {
       if (method.isDefault()) {
         return ProxyInvocationHandler.invokeDefaultMethod(target, method, args);

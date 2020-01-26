@@ -98,15 +98,15 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   private MethodInvoker createExecution(QueryService queryService, String queryName,
       QueryWay queryWay) {
     if (queryWay == QueryWay.GET) {
-      return (Object[] args) -> queryService.get(queryName, isEmpty(args) ? null : args[0]);
+      return (target, args) -> queryService.get(queryName, isEmpty(args) ? null : args[0]);
     } else if (queryWay == QueryWay.SELECT) {
-      return (Object[] args) -> queryService.select(queryName, isEmpty(args) ? null : args[0]);
+      return (target, args) -> queryService.select(queryName, isEmpty(args) ? null : args[0]);
     } else if (queryWay == QueryWay.PAGE) {
-      return (Object[] args) -> queryService.page(queryName, isEmpty(args) ? null : args[0]);
+      return (target, args) -> queryService.page(queryName, isEmpty(args) ? null : args[0]);
     } else if (queryWay == QueryWay.FORWARD) {
-      return (Object[] args) -> queryService.forward(queryName, isEmpty(args) ? null : args[0]);
+      return (target, args) -> queryService.forward(queryName, isEmpty(args) ? null : args[0]);
     } else {
-      return (Object[] args) -> queryService.stream(queryName, isEmpty(args) ? null : args[0]);
+      return (target, args) -> queryService.stream(queryName, isEmpty(args) ? null : args[0]);
     }
   }
 

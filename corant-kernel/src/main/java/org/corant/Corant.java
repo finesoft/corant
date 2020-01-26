@@ -318,20 +318,19 @@ public class Corant implements AutoCloseable {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {
             log(logger,
-                "Finished all initialization in %s seconds. It's been a long way, but we're here.",
-                tt);
+                "Finished all initialization at %s, take %s seconds. It's been a long way, but we're here.",
+                Instant.now(), tt);
           } else {
-            log(logger, "Finished all initialization in %s seconds.", tt);
+            log(logger, "Finished all initialization at %s, take %s seconds.", Instant.now(), tt);
           }
         });
 
-    log(logger, "Finished at: %s.", Instant.now());
+    // log(logger, "Finished at: %s.", Instant.now());
     log(logger,
-        "Final memory: %sM/%sM/%sM, process id: %s, java version: %s, default locale: %s, default timezone: %s.",
+        "Final memory: %sM/%sM/%sM, process id: %s, java version: %s, default locale: %s, default timezone: %s.%s",
         LaunchUtils.getUsedMemoryMb(), LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(),
         LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
-        TimeZone.getDefault().getID());
-    printBoostLine(logger);
+        TimeZone.getDefault().getID(), boostLine());
 
     doOnReady();
   }
@@ -374,19 +373,19 @@ public class Corant implements AutoCloseable {
     emitter.fire(new PostCorantReadyEvent(arguments));
   }
 
+  private String boostLine() {
+    if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
+      String spLine = "--------------------------------------------------";
+      return "\n".concat(spLine).concat(spLine);
+    }
+    return "";
+  }
+
   private void log(Logger logger, String msgOrFmt, Object... arguments) {
     if (arguments.length > 0) {
       logger.info(() -> String.format(msgOrFmt, arguments));
     } else {
       logger.info(() -> msgOrFmt);
-    }
-  }
-
-  private void printBoostLine(Logger logger) {
-    if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
-      String spLine = "--------------------------------------------------";
-      // System.out.println(spLine.concat(spLine).concat("\n"));
-      logger.info(() -> "\n".concat(spLine).concat(spLine));
     }
   }
 

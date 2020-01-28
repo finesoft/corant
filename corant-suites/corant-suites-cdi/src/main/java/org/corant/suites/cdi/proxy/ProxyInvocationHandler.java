@@ -14,11 +14,10 @@
 package org.corant.suites.cdi.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,52 +36,38 @@ public class ProxyInvocationHandler implements InvocationHandler {
   protected final Map<Method, MethodInvoker> invokers;
 
   public ProxyInvocationHandler(final Class<?> clazz,
-      final Function<Method, MethodInvoker> invokerHandler) {
+      final Function<Method, MethodInvoker> invokerBuilder) {
     this.clazz = shouldNotNull(clazz);
     Map<Method, MethodInvoker> methodInvokers = new HashMap<>();
-    for (Method method : clazz.getDeclaredMethods()) {
+    for (Method method : clazz.getMethods()) {
       if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
         continue;
       }
-      methodInvokers.put(method, invokerHandler.apply(method));
+      methodInvokers.put(method, invokerBuilder.apply(method));
     }
     invokers = Collections.unmodifiableMap(methodInvokers);
   }
 
-  /**
-   * FIXME UNFINISH YET! NOTE: FOR JAVA 8 ONLY!
-   *
-   * @param o
-   * @param method
-   * @param args
-   * @return invokeDefaultMethod
-   */
-  static Object invokeDefaultMethod(Object o, Method method, Object[] args) {
-    try {
-      Class<?> declaringClass = method.getDeclaringClass();
-      Constructor<MethodHandles.Lookup> constructor =
-          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-      constructor.setAccessible(true);
-      return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
-          .unreflectSpecial(method, declaringClass).bindTo(o).invokeWithArguments(args);
-    } catch (Throwable e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof ProxyInvocationHandler)) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
       return false;
     }
     ProxyInvocationHandler other = (ProxyInvocationHandler) obj;
-    if (other == this) {
-      return true;
-    }
-    if (other.clazz != clazz) {
+    if (clazz == null) {
+      if (other.clazz != null) {
+        return false;
+      }
+    } else if (!clazz.equals(other.clazz)) {
       return false;
     }
-    return super.equals(obj);
+    return true;
   }
 
   public Class<?> getClazz() {
@@ -91,7 +76,10 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
   @Override
   public int hashCode() {
-    return clazz.hashCode();
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (clazz == null ? 0 : clazz.hashCode());
+    return result;
   }
 
   @Override
@@ -100,10 +88,18 @@ public class ProxyInvocationHandler implements InvocationHandler {
     if (methodInvoker == null) {
       // The default method and java.lang.Object methods use for hq in Collection
       if (method.isDefault()) {
-        return invokeDefaultMethod(o, method, args);
-      } else if (method.getName().equals("equals")) {
-        return o == args[0];
-      } else if (method.getName().equals("hashCode")) {
+        return ProxyUtils.invokeDefaultMethod(o, method, args);
+      } else if (method.getName().equals("equals") && method.getParameterTypes()[0] == Object.class
+          && args != null && args.length == 1) {
+        if (args[0] == null) {
+          return false;
+        }
+        if (o == args[0]) {
+          return true;
+        }
+        return ProxyUtils.isProxyOfSameInterfaces(args[0], getClazz())
+            && equals(Proxy.getInvocationHandler(args[0]));
+      } else if (method.getName().equals("hashCode") && (args == null || args.length == 0)) {
         return hashCode();
       } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
         return toString();

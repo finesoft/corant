@@ -21,7 +21,6 @@ import static org.corant.shared.util.StringUtils.defaultBlank;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
@@ -30,10 +29,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import org.corant.shared.normal.Names;
 import org.corant.suites.cdi.AbstractBean;
 import org.corant.suites.cdi.AutoCreated;
-import org.corant.suites.cdi.Instances;
 import org.corant.suites.cdi.proxy.ProxyBuilder;
 import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
-import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.QueryService.QueryWay;
@@ -112,13 +109,8 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 
   @SuppressWarnings("rawtypes")
   private QueryService resolveQueryService(DeclarativeQueryService declaratives) {
-    AtomicReference<NamedQueryService> ref = new AtomicReference<>();
-    Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
-      if (nqs.getType() == declaratives.type()) {
-        ref.set(nqs.get(declaratives.qualifier()));
-      }
-    });
-    return shouldNotNull(ref.get(),
+    return shouldNotNull(
+        NamedQueryServiceManager.resolveQueryService(declaratives.type(), declaratives.qualifier()),
         "Can't find any query service to execute declarative query %s %s %s", proxyType,
         declaratives.type(), declaratives.qualifier());
   }

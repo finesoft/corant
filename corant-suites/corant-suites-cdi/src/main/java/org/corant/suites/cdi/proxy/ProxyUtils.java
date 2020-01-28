@@ -14,9 +14,13 @@
 package org.corant.suites.cdi.proxy;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,14 +31,15 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-cdi
  *
- * @author bingo 上午11:08:57
+ * @author bingo 下午10:09:48
  *
  */
-public class InterceptorInvocations {
+public class ProxyUtils {
 
   public static List<Annotation> getInterceptorBindings(Annotation[] annotations,
       BeanManager beanManager) {
@@ -80,6 +85,32 @@ public class InterceptorInvocations {
       }
     }
     return chains;
+  }
+
+  /**
+   * FIXME UNFINISH YET! NOTE: FOR JAVA 8 ONLY!
+   *
+   * @param o
+   * @param method
+   * @param args
+   * @return invokeDefaultMethod
+   */
+  public static Object invokeDefaultMethod(Object o, Method method, Object[] args) {
+    try {
+      Class<?> declaringClass = method.getDeclaringClass();
+      Constructor<MethodHandles.Lookup> constructor =
+          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+      constructor.setAccessible(true);
+      return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
+          .unreflectSpecial(method, declaringClass).bindTo(o).invokeWithArguments(args);
+    } catch (Throwable e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static boolean isProxyOfSameInterfaces(Object arg, Class<?> proxyClass) {
+    return proxyClass.isInstance(arg) || Proxy.isProxyClass(arg.getClass())
+        && Arrays.equals(arg.getClass().getInterfaces(), proxyClass.getInterfaces());
   }
 
   static List<Annotation> merge(List<Annotation> methodLevelBindings,

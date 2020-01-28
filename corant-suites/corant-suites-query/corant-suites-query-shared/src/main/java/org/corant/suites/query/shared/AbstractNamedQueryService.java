@@ -20,6 +20,7 @@ import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
  * corant-suites-query-shared
@@ -141,20 +142,16 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
+    final QueryType type = fq.getReferenceQueryType();
+    final String qualifier = fq.getReferenceQueryQualifier();
     return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
-      AtomicReference<NamedQueryService> ref = new AtomicReference<>();
-      if (fq.getReferenceQueryType() == null) {
-        ref.set(this);
+      if (type == null && isBlank(qualifier)) {
+        return this;
       } else {
-        Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
-          if (nqs.getType() == fq.getReferenceQueryType()) {
-            ref.set(nqs.get(fq.getReferenceQueryQualifier()));
-          }
-        });
+        return shouldNotNull(NamedQueryServiceManager.resolveQueryService(type, qualifier),
+            "Can't find any query service to execute fetch query %s %s %s", fq.getReferenceQuery(),
+            type, qualifier);
       }
-      return shouldNotNull(ref.get(),
-          "Can't find any query service to execute fetch query %s %s %s", fq.getReferenceQuery(),
-          fq.getReferenceQueryType(), fq.getReferenceQueryQualifier());
     });
   }
 

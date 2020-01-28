@@ -146,11 +146,15 @@ public class InvocationContextImpl implements InvocationContext {
       return methodInvoker.invoke(target, args);
     } else {
       if (method.isDefault()) {
-        return ProxyInvocationHandler.invokeDefaultMethod(target, method, args);
-      } else if (method.getName().equals("equals")) {
+        return ProxyUtils.invokeDefaultMethod(target, method, args);
+      } else if (method.getName().equals("equals") && method.getParameterTypes()[0] == Object.class
+          && args != null && args.length == 1) {
+        if (args[0] == null) {
+          return false;
+        }
         return target == args[0];
-      } else if (method.getName().equals("hashCode")) {
-        return targetClass.hashCode();
+      } else if (method.getName().equals("hashCode") && (args == null || args.length == 0)) {
+        return hashCode();
       } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
         return "Corant proxy for ".concat(targetClass.getName());
       } else {

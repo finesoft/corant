@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.shared;
 
+import java.util.concurrent.atomic.AtomicReference;
+import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
@@ -23,6 +25,30 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
  */
 public interface NamedQueryServiceManager {
 
+  /**
+   * Resolve the named query service by query type and qualifier
+   *
+   * @param queryType
+   * @param qualifier
+   * @return NamedQueryService
+   */
+  static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
+    AtomicReference<NamedQueryService> ref = new AtomicReference<>();
+    Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
+      if (nqs.getType() == queryType) {
+        ref.set(nqs.get(qualifier));
+      }
+    });
+    return ref.get();
+  }
+
+  /**
+   * Obtain a named query service, the parameter can be a MgQuery/SqlQuery/EsQuery/JpqlQuery or a
+   * string
+   *
+   * @param qualifier
+   * @return get
+   */
   NamedQueryService get(Object qualifier);
 
   QueryType getType();

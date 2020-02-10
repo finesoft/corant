@@ -33,6 +33,7 @@
 		<version.commons-codec>1.13</version.commons-codec>
 		<version.commons-vfs2>2.4.1</version.commons-vfs2>
 		<version.commons-cli>1.4</version.commons-cli>
+		<version.commons-net>3.6</version.commons-net>
 		<version.apache-poi>4.1.1</version.apache-poi>
 		<version.apache.johnzon-core>1.1.13</version.apache.johnzon-core>
 		<version.log4j2>2.13.0</version.log4j2>
@@ -193,6 +194,11 @@
 				<groupId>commons-dbutils</groupId>
 				<artifactId>commons-dbutils</artifactId>
 				<version>${version.commons-dbutils}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>${version.commons-net}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.calcite</groupId>

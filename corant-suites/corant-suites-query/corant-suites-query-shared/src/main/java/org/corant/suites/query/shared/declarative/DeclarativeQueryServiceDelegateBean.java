@@ -86,7 +86,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
       queryName = defaultBlank(queryMethod.name(), queryName);
       queryWay = queryMethod.way();
     } else {
-      queryWay = QueryWay.fromMethodName(queryName);
+      queryWay = QueryWay.fromMethodName(method.getName());
     }
     return createExecution(queryService, queryName, queryWay);
   }

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.emptyConsumer;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.sql.Connection;
@@ -759,8 +760,7 @@ public class JDBCTemplate {
         throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
       }
       PreparedStatement stmt = null;
-      final Consumer<T> useConsumer = consumer == null ? t -> {
-      } : consumer;
+      final Consumer<T> useConsumer = consumer == null ? emptyConsumer() : consumer;
       try {
         final PreparedStatement stmtx =
             stmt = this.prepareStatement(conn, sql, Statement.RETURN_GENERATED_KEYS);

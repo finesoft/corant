@@ -23,6 +23,9 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -35,6 +38,26 @@ import org.corant.shared.exception.NotSupportedException;
  *
  */
 public class ObjectUtils {
+
+  @SuppressWarnings("rawtypes")
+  public static final Consumer EMPTY_CONSUMER = o -> {
+  };
+  @SuppressWarnings("rawtypes")
+  public static final Supplier EMPTY_SUPPLIER = () -> {
+    return null;
+  };
+  @SuppressWarnings("rawtypes")
+  public static final Function EMPTY_FUNCTION = p -> {
+    return null;
+  };
+  @SuppressWarnings("rawtypes")
+  public static final Predicate EMPTY_PREDICATE_TRUE = p -> {
+    return true;
+  };
+  @SuppressWarnings("rawtypes")
+  public static final Predicate EMPTY_PREDICATE_FALSE = p -> {
+    return true;
+  };
 
   protected ObjectUtils() {}
 
@@ -72,6 +95,21 @@ public class ObjectUtils {
 
   public static <T> T defaultObject(T obj, T altObj) {
     return obj != null ? obj : altObj;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Consumer<T> emptyConsumer() {
+    return EMPTY_CONSUMER;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Predicate<T> emptyPredicate(boolean bool) {
+    return bool ? EMPTY_PREDICATE_TRUE : EMPTY_PREDICATE_FALSE;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Supplier<T> emptySupplier() {
+    return EMPTY_SUPPLIER;
   }
 
   @SuppressWarnings("unchecked")

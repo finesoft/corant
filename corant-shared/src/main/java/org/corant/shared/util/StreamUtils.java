@@ -14,10 +14,10 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ObjectUtils.emptyConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,10 +25,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.Spliterators.AbstractSpliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -42,7 +45,11 @@ public class StreamUtils {
   private StreamUtils() {}
 
   public static <T> Stream<List<T>> batchCollectStream(int forEachBatchSize, Stream<T> source) {
-    return new BatchCollectStreams<>(source, forEachBatchSize).stream();
+    final int useBatchSize = forEachBatchSize < 0 ? DFLE_BATCH_SIZE : forEachBatchSize;
+    final AtomicInteger counter = new AtomicInteger();
+    return shouldNotNull(source)
+        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
+        .stream();
   }
 
   public static long copy(InputStream input, OutputStream output) throws IOException {
@@ -92,7 +99,10 @@ public class StreamUtils {
 
         @Override
         public T next() {
-          return enumeration.nextElement();
+          if (enumeration.hasMoreElements()) {
+            return enumeration.nextElement();
+          }
+          throw new NoSuchElementException();
         }
       });
     }
@@ -138,8 +148,7 @@ public class StreamUtils {
         int forEachBathSize, Consumer<Long> handler) {
       super(est, additionalCharacteristics);
       this.batchSize = forEachBathSize;
-      this.handler = handler == null ? t -> {
-      } : handler;
+      this.handler = handler == null ? emptyConsumer() : handler;
     }
 
     @Override
@@ -164,37 +173,4 @@ public class StreamUtils {
 
   }
 
-  public static class BatchCollectStreams<T> {
-    protected final Stream<T> source;
-    protected final int batchSize;
-
-    public BatchCollectStreams(Stream<T> source, int forEachBathSize) {
-      this.source = shouldNotNull(source);
-      this.batchSize = forEachBathSize < 0 ? DFLE_BATCH_SIZE : forEachBathSize;
-    }
-
-    public Stream<List<T>> stream() {
-      final Iterator<T> sourceIt = this.source.iterator();
-      return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<List<T>>() {
-        @Override
-        public boolean hasNext() {
-          return sourceIt.hasNext();
-        }
-
-        @Override
-        public List<T> next() {
-          List<T> tmpList = new ArrayList<>(BatchCollectStreams.this.batchSize);
-          int seq = 0;
-          while (sourceIt.hasNext()) {
-            tmpList.add(sourceIt.next());
-            seq++;
-            if (seq >= BatchCollectStreams.this.batchSize) {
-              break;
-            }
-          }
-          return tmpList;
-        }
-      }, Spliterator.IMMUTABLE), false);
-    }
-  }
 }

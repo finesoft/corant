@@ -56,7 +56,7 @@ public class ObjectUtils {
   };
   @SuppressWarnings("rawtypes")
   public static final Predicate EMPTY_PREDICATE_FALSE = p -> {
-    return true;
+    return false;
   };
 
   protected ObjectUtils() {}

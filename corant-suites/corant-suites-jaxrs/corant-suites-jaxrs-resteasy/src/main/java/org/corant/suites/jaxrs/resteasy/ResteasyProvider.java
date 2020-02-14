@@ -13,11 +13,14 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
+import static org.corant.shared.util.AnnotationUtils.findAnnotation;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
@@ -26,7 +29,6 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import org.corant.shared.util.AnnotationUtils;
 import org.corant.shared.util.ClassUtils;
 import org.corant.suites.servlet.WebMetaDataProvider;
 import org.corant.suites.servlet.metadata.WebInitParamMetaData;
@@ -35,6 +37,7 @@ import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyDeploymentImpl;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
+import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
@@ -48,11 +51,11 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 public class ResteasyProvider implements WebMetaDataProvider {
 
   @Inject
-  ResteasyCdiExtension extension;
+  protected ResteasyCdiExtension extension;
 
-  final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
+  protected final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
 
-  final Map<String, Object> servletContextAttributes = new HashMap<>();
+  protected final Map<String, Object> servletContextAttributes = new HashMap<>();
 
   @Override
   public Map<String, Object> servletContextAttributes() {
@@ -65,40 +68,146 @@ public class ResteasyProvider implements WebMetaDataProvider {
   }
 
   @PostConstruct
-  void onPostConstruct() {
+  protected void onPostConstruct() {
     Instance<Application> applications = select(Application.class);
     if (applications.isResolvable()) {
-      applications.stream().forEach(this::handle);
-      servletContextAttributes.put(ResteasyContextParameters.RESTEASY_ROLE_BASED_SECURITY, true);
+      ApplicationInfo appInfo = new ApplicationInfo(applications.get());
+      servletMetaDatas.add(appInfo.toWebServletMetaData());
+      servletContextAttributes.put(ResteasyDeployment.class.getName(),
+          appInfo.toResteasyDeployment(d -> {
+            d.setScannedResourceClasses(extension.getResources().stream()
+                .map(ClassUtils::getUserClass).map(Class::getName).collect(Collectors.toList()));
+            d.setScannedProviderClasses(extension.getProviders().stream()
+                .map(ClassUtils::getUserClass).map(Class::getName).collect(Collectors.toList()));
+          }));
     }
   }
 
-  private void handle(Application app) {
-    ApplicationPath ap =
-        AnnotationUtils.findAnnotation(app.getClass(), ApplicationPath.class, true);
-    String contextPath = ap == null ? "/" : ap.value();
-    if (!contextPath.startsWith("/")) {
-      contextPath = "/" + contextPath;
-    }
-    ResteasyDeployment deployment = new ResteasyDeploymentImpl();
-    deployment.setAddCharset(true);
-    deployment.setApplication(app);
-    deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
-    deployment.setScannedResourceClasses(
-        extension.getResources().stream().map(e -> e.getName()).collect(Collectors.toList()));
-    deployment.setScannedProviderClasses(
-        extension.getProviders().stream().map(e -> e.getName()).collect(Collectors.toList()));
-    handle(app, deployment, contextPath);
-  }
+  /**
+   * corant-suites-jaxrs-resteasy
+   *
+   * @author bingo 下午9:06:17
+   *
+   */
+  public static class ApplicationInfo {
 
-  private void handle(Application app, ResteasyDeployment deployment, String contextPath) {
-    String pattern = contextPath.endsWith("/") ? contextPath.concat("*") : contextPath.concat("/*");
-    WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
-        ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
-    servletMetaDatas.add(new WebServletMetaData("ResteasyServlet", new String[] {pattern},
-        new String[] {pattern}, 1, ipmds, true, null, null, null,
-        "jaxrs-" + ClassUtils.getShortClassName(app.getClass().getName()),
-        HttpServlet30Dispatcher.class, null, null));
-    servletContextAttributes.put(ResteasyDeployment.class.getName(), deployment);
+    final Application application;
+    final Class<?> applicationClass;
+    final Class<? extends HttpServletDispatcher> dispatcherClass;
+    final String contextPath;
+    final int loadOnStartup;
+
+    /**
+     * @param application
+     */
+    public ApplicationInfo(Application application) {
+      super();
+      this.application = application;
+      applicationClass = getUserClass(application.getClass());
+      ApplicationPath ap = findAnnotation(applicationClass, ApplicationPath.class, true);
+      String cp = ap == null ? "/" : ap.value();
+      if (!cp.startsWith("/")) {
+        cp = "/" + cp;
+      }
+      contextPath = cp;
+      ResteasyApplication restApp =
+          findAnnotation(applicationClass, ResteasyApplication.class, true);
+      dispatcherClass = restApp == null ? HttpServlet30Dispatcher.class : restApp.value();
+      loadOnStartup = restApp == null ? 1 : restApp.loadOnStartup();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      ApplicationInfo other = (ApplicationInfo) obj;
+      if (contextPath == null) {
+        if (other.contextPath != null) {
+          return false;
+        }
+      } else if (!contextPath.equals(other.contextPath)) {
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     *
+     * @return the application
+     */
+    public Application getApplication() {
+      return application;
+    }
+
+    /**
+     *
+     * @return the applicationClass
+     */
+    public Class<?> getApplicationClass() {
+      return applicationClass;
+    }
+
+    /**
+     *
+     * @return the contextPath
+     */
+    public String getContextPath() {
+      return contextPath;
+    }
+
+    /**
+     *
+     * @return the dispatcherClass
+     */
+    public Class<? extends HttpServletDispatcher> getDispatcherClass() {
+      return dispatcherClass;
+    }
+
+    /**
+     *
+     * @return the loadOnStartup
+     */
+    public int getLoadOnStartup() {
+      return loadOnStartup;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (contextPath == null ? 0 : contextPath.hashCode());
+      return result;
+    }
+
+    public ResteasyDeployment toResteasyDeployment(Consumer<ResteasyDeployment> handler) {
+      ResteasyDeployment deploy = new ResteasyDeploymentImpl();
+      deploy.setAddCharset(true);
+      deploy.setApplication(application);
+      deploy.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
+      if (handler != null) {
+        handler.accept(deploy);
+      }
+      return deploy;
+    }
+
+    public WebServletMetaData toWebServletMetaData() {
+      String pattern =
+          contextPath.endsWith("/") ? contextPath.concat("*") : contextPath.concat("/*");
+      String diapatchName = dispatcherClass.getSimpleName();
+      String appName = getUserClass(applicationClass.getClass()).getSimpleName();
+      WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
+          ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
+      return new WebServletMetaData(diapatchName, new String[] {pattern}, new String[] {pattern},
+          loadOnStartup, ipmds, true, null, null, null, diapatchName.concat("-").concat(appName),
+          dispatcherClass, null, null);
+    }
+
   }
 }

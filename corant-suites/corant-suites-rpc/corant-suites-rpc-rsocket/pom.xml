@@ -2,12 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.corant</groupId>
-    <artifactId>corant-suites</artifactId>
+    <artifactId>corant-suites-rpc</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-suites-vertx</artifactId>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>corant-suites-vertx-web</module>
-  </modules>
+  <artifactId>corant-suites-rpc-rsocket</artifactId>
 </project>

@@ -5,9 +5,10 @@
     <artifactId>corant-suites</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-suites-vertx</artifactId>
+  <artifactId>corant-suites-rpc</artifactId>
   <packaging>pom</packaging>
   <modules>
-  	<module>corant-suites-vertx-web</module>
+  	<module>corant-suites-rpc-grpc</module>
+  	<module>corant-suites-rpc-rsocket</module>
   </modules>
 </project>

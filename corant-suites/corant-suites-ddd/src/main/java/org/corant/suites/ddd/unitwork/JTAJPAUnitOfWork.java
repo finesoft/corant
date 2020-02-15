@@ -237,8 +237,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         }
       } else if (obj instanceof Message) {
         MessageUtils.mergeToQueue(registeredMessages, (Message) obj);
-      } else if (obj instanceof Pair<?, ?>) {
-        Pair<?, ?> p = (Pair<?, ?>) obj;
+      } else if (obj instanceof Map.Entry<?, ?>) {
+        Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
         registeredVariables.put(p.getKey(), p.getValue());
       }
     } else {

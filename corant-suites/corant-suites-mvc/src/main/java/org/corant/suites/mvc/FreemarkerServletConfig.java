@@ -27,14 +27,14 @@ import org.corant.config.declarative.DeclarativePattern;
  * @author bingo 下午9:18:05
  *
  */
-@ConfigKeyRoot(value = "mvc", keyIndex = 1)
+@ConfigKeyRoot(value = "mvc", keyIndex = 0)
 public class FreemarkerServletConfig implements DeclarativeConfig {
 
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> initParams = new HashMap<>();
 
   @ConfigKeyItem
-  protected String path;
+  protected String urlPattern;
 
   /**
    *
@@ -45,11 +45,11 @@ public class FreemarkerServletConfig implements DeclarativeConfig {
   }
 
   /**
-   * 
-   * @return the path
+   *
+   * @return the urlPattern
    */
-  public String getPath() {
-    return path;
+  public String getUrlPattrn() {
+    return urlPattern;
   }
 
   @Override

@@ -41,7 +41,7 @@ public class FreemarkerServletProiver implements WebMetaDataProvider {
       WebInitParamMetaData[] params = streamOf(config.getInitParams())
           .map(e -> new WebInitParamMetaData(e.getKey(), e.getValue(), e.getValue()))
           .toArray(WebInitParamMetaData[]::new);
-      String pattern = defaultString(config.getPath());
+      String pattern = defaultString(config.getUrlPattrn());
       return streamOf(new WebServletMetaData(name, new String[] {pattern}, new String[] {pattern},
           1, params, true, null, null, null, name, FreemarkerServlet.class, null, null));
     }
@@ -56,7 +56,7 @@ public class FreemarkerServletProiver implements WebMetaDataProvider {
       WebInitParamMetaData[] params = streamOf(config.getInitParams())
           .map(e -> new WebInitParamMetaData(e.getKey(), e.getValue(), e.getValue()))
           .toArray(WebInitParamMetaData[]::new);
-      String pattern = defaultString(config.getPath());
+      String pattern = defaultString(config.getUrlPattrn());
       return new WebServletMetaData(name, new String[] {pattern}, new String[] {pattern}, 1, params,
           true, null, null, null, name, FreemarkerServlet.class, null, null);
     }

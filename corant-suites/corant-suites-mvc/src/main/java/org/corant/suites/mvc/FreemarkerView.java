@@ -24,14 +24,14 @@ import org.jboss.resteasy.plugins.providers.html.View;
 public class FreemarkerView extends View {
 
   /**
-   * @param path
+   * @param urlPattern
    */
   FreemarkerView(String path) {
     super(path);
   }
 
   /**
-   * @param path
+   * @param urlPattern
    * @param model
    */
   FreemarkerView(String path, Object model) {
@@ -39,7 +39,7 @@ public class FreemarkerView extends View {
   }
 
   /**
-   * @param path
+   * @param urlPattern
    * @param model
    * @param modelName
    */

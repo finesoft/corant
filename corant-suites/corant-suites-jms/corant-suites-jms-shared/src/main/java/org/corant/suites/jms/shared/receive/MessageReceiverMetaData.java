@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.jms.ConnectionFactory;
 import org.corant.config.spi.Sortable;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
@@ -43,6 +44,7 @@ import org.corant.suites.jms.shared.context.JMSExceptionListener;
  */
 public class MessageReceiverMetaData {
 
+  private final AnnotatedType<?> methodDeclaringType;
   private final AnnotatedMethod<?> method;
   private final int acknowledge;
   private final String clientID;
@@ -61,7 +63,9 @@ public class MessageReceiverMetaData {
   private final Duration breakedDuration;
   private final boolean xa;
 
-  MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
+  MessageReceiverMetaData(AnnotatedType<?> methodDeclaringType, AnnotatedMethod<?> method,
+      String destinationName) {
+    this.methodDeclaringType = methodDeclaringType;
     this.method = AccessController.doPrivileged((PrivilegedAction<AnnotatedMethod<?>>) () -> {
       shouldNotNull(method).getJavaMember().setAccessible(true);
       return method;
@@ -87,13 +91,14 @@ public class MessageReceiverMetaData {
     xa = ann.xa();
   }
 
-  public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
+  public static Set<MessageReceiverMetaData> of(AnnotatedType<?> methodDeclaringType,
+      AnnotatedMethod<?> method) {
     shouldBeTrue(method.isAnnotationPresent(MessageReceive.class));
     final MessageReceive ann = method.getAnnotation(MessageReceive.class);
     shouldBeTrue(isNoneBlank(ann.destinations()));
     Set<MessageReceiverMetaData> beans = new LinkedHashSet<>();
     linkedHashSetOf(ann.destinations()).forEach(d -> {
-      shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),
+      shouldBeTrue(beans.add(new MessageReceiverMetaData(methodDeclaringType, method, d)),
           "The message receive method %s dup!", method.toString());
     });
     return beans;
@@ -204,6 +209,14 @@ public class MessageReceiverMetaData {
    */
   public AnnotatedMethod<?> getMethod() {
     return method;
+  }
+
+  /**
+   *
+   * @return the methodDeclaringType
+   */
+  public AnnotatedType<?> getMethodDeclaringType() {
+    return methodDeclaringType;
   }
 
   /**

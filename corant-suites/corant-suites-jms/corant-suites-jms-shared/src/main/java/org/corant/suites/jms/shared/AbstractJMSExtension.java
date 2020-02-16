@@ -13,10 +13,11 @@
  */
 package org.corant.suites.jms.shared;
 
-import static java.util.Collections.newSetFromMap;
 import static org.corant.suites.cdi.Instances.findNamed;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -43,8 +44,10 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
-  protected final Set<AnnotatedMethod<?>> receiveMethods = newSetFromMap(new ConcurrentHashMap<>());
-  protected final Set<AnnotatedMethod<?>> streamMethods = newSetFromMap(new ConcurrentHashMap<>());
+  protected final Map<AnnotatedType<?>, Set<AnnotatedMethod<?>>> receiveMethods =
+      new ConcurrentHashMap<>();
+  protected final Map<AnnotatedType<?>, Set<AnnotatedMethod<?>>> streamMethods =
+      new ConcurrentHashMap<>();
   protected volatile NamedQualifierObjectManager<? extends AbstractJMSConfig> configManager =
       NamedQualifierObjectManager.empty();
 
@@ -65,12 +68,12 @@ public abstract class AbstractJMSExtension implements Extension {
     return configManager;
   }
 
-  public Set<AnnotatedMethod<?>> getReceiveMethods() {
-    return Collections.unmodifiableSet(receiveMethods);
+  public Map<AnnotatedType<?>, Set<AnnotatedMethod<?>>> getReceiveMethods() {
+    return Collections.unmodifiableMap(receiveMethods);
   }
 
-  public Set<AnnotatedMethod<?>> getStreamMethods() {
-    return Collections.unmodifiableSet(streamMethods);
+  public Map<AnnotatedType<?>, Set<AnnotatedMethod<?>>> getStreamMethods() {
+    return Collections.unmodifiableMap(streamMethods);
   }
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
@@ -83,12 +86,12 @@ public abstract class AbstractJMSExtension implements Extension {
         logger.info(() -> String.format(
             "Found annotated JMS message consumer method %s.%s, adding for further processing.",
             at.getJavaClass().getName(), am.getJavaMember().getName()));
-        receiveMethods.add(am);
+        receiveMethods.computeIfAbsent(at, t -> new HashSet<>()).add(am);
       } else if (am.isAnnotationPresent(MessageStream.class)) {
         logger.warning(() -> String.format(
             "Found annotated JMS message stream method %s.%s, for now we do not support it.",
             at.getJavaClass().getName(), am.getJavaMember().getName()));
-        streamMethods.add(am);
+        streamMethods.computeIfAbsent(at, t -> new HashSet<>()).add(am);
       }
     }
   }

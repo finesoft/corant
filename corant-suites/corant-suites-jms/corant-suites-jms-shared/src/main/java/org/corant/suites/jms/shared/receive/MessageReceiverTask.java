@@ -23,11 +23,8 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -50,6 +47,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.cdi.AnnotatedMethodInvoker;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
@@ -119,7 +117,7 @@ public class MessageReceiverTask implements Runnable {
     meta = metaData;
     xa = metaData.xa();
     connectionFactory = metaData.connectionFactory();
-    messageListener = new MessageHandler(metaData.getMethod());
+    messageListener = new MessageHandler(metaData.getMethodDeclaringType(), metaData.getMethod());
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     breakedDuration = metaData.getBreakedDuration();
@@ -513,31 +511,23 @@ public class MessageReceiverTask implements Runnable {
 
   static class MessageHandler implements MessageListener {
 
-    final Object object;
-    final AnnotatedMethod<?> method;
+    final AnnotatedMethodInvoker invoker;
     final Class<?> messageClass;
 
-    MessageHandler(AnnotatedMethod<?> method) {
+    MessageHandler(AnnotatedType<?> type, AnnotatedMethod<?> method) {
       super();
-      this.method = method;
-      final BeanManager beanManager = CDI.current().getBeanManager();
-      final Bean<?> propertyResolverBean =
-          beanManager.resolve(beanManager.getBeans(method.getJavaMember().getDeclaringClass()));
-      final CreationalContext<?> creationalContext =
-          beanManager.createCreationalContext(propertyResolverBean);
-      object = beanManager.getReference(propertyResolverBean,
-          method.getJavaMember().getDeclaringClass(), creationalContext);
+      invoker = new AnnotatedMethodInvoker(type, method);
       messageClass = method.getParameters().get(0).getJavaParameter().getType();
     }
 
     @Override
     public void onMessage(Message message) {
       try {
-        method.getJavaMember().invoke(object, resolvePayload(message));
+        invoker.invoke(resolvePayload(message));
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
           | JMSException e) {
         log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
-            method.getJavaMember());
+            invoker.getBeanMethod());
         throw new CorantRuntimeException(e);
       }
     }

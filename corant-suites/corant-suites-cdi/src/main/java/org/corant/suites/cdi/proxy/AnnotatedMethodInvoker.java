@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.cdi;
+package org.corant.suites.cdi.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.reflect.InvocationTargetException;

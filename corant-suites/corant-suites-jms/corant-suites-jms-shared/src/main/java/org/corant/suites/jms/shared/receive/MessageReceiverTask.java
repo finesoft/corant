@@ -47,7 +47,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.cdi.AnnotatedMethodInvoker;
+import org.corant.suites.cdi.proxy.AnnotatedMethodInvoker;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;

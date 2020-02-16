@@ -1,5 +1,4 @@
 # !/bin/sh
-
 function join() {
   local IFS=$1
   shift

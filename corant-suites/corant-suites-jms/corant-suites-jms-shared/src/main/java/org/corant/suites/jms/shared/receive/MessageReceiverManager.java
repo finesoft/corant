@@ -107,9 +107,8 @@ public class MessageReceiverManager {
 
   @PostConstruct
   void postConstruct() {
-    extesion.getReceiveMethods().forEach((t, m) -> {
-      m.forEach(x -> receiveMetaDatas.addAll(MessageReceiverMetaData.of(t, x)));
-    });
+    extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
+        .forEach(receiveMetaDatas::addAll);
     if (!receiveMetaDatas.isEmpty()) {
       extesion.getConfigManager().getAllWithNames().values().forEach(cfg -> {
         if (cfg != null && cfg.isEnable()) {

@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -47,7 +46,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.cdi.proxy.AnnotatedMethodInvoker;
+import org.corant.suites.cdi.proxy.ProxyMethod;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
@@ -117,7 +116,7 @@ public class MessageReceiverTask implements Runnable {
     meta = metaData;
     xa = metaData.xa();
     connectionFactory = metaData.connectionFactory();
-    messageListener = new MessageHandler(metaData.getMethodDeclaringType(), metaData.getMethod());
+    messageListener = new MessageHandler(metaData.getMethod());
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     breakedDuration = metaData.getBreakedDuration();
@@ -511,23 +510,23 @@ public class MessageReceiverTask implements Runnable {
 
   static class MessageHandler implements MessageListener {
 
-    final AnnotatedMethodInvoker invoker;
+    final ProxyMethod method;
     final Class<?> messageClass;
 
-    MessageHandler(AnnotatedType<?> type, AnnotatedMethod<?> method) {
+    MessageHandler(AnnotatedMethod<?> method) {
       super();
-      invoker = new AnnotatedMethodInvoker(type, method);
+      this.method = new ProxyMethod(method);
       messageClass = method.getParameters().get(0).getJavaParameter().getType();
     }
 
     @Override
     public void onMessage(Message message) {
       try {
-        invoker.invoke(resolvePayload(message));
+        method.invoke(resolvePayload(message));
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
           | JMSException e) {
         log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
-            invoker.getBeanMethod());
+            method.getBeanMethod());
         throw new CorantRuntimeException(e);
       }
     }

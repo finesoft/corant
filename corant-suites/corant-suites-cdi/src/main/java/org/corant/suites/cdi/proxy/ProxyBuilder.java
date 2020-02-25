@@ -15,7 +15,12 @@ package org.corant.suites.cdi.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
 
@@ -39,5 +44,16 @@ public class ProxyBuilder {
       final Function<Method, MethodInvoker> invokerHandler) {
     return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz},
         new ContextualInvocationHandler(beanManager, clazz, invokerHandler));
+  }
+
+  public static Set<ProxyMethod> buildMethods(AnnotatedType<?> annotatedType,
+      Predicate<AnnotatedMethod<?>> methodPredicate) {
+    Set<ProxyMethod> annotatedMethods = new LinkedHashSet<>();
+    for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
+      if (methodPredicate.test(am)) {
+        annotatedMethods.add(new ProxyMethod(am));
+      }
+    }
+    return annotatedMethods;
   }
 }

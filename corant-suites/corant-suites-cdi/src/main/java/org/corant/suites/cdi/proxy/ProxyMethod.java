@@ -18,12 +18,8 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.function.Predicate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
@@ -53,17 +49,6 @@ public class ProxyMethod {
 
   public ProxyMethod(Method method) {
     this(null, method);
-  }
-
-  public static Set<ProxyMethod> from(AnnotatedType<?> annotatedType,
-      Predicate<AnnotatedMethod<?>> methodPredicate) {
-    Set<ProxyMethod> annotatedMethods = new LinkedHashSet<>();
-    for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
-      if (methodPredicate.test(am)) {
-        annotatedMethods.add(new ProxyMethod(am));
-      }
-    }
-    return annotatedMethods;
   }
 
   /**

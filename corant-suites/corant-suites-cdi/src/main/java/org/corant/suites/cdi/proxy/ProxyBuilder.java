@@ -52,15 +52,15 @@ public class ProxyBuilder {
    *
    * @param <T>
    * @param beanManager
-   * @param clazz
+   * @param interfaceType
    * @param invokerHandler
    * @return buildContextual
    */
   @SuppressWarnings("unchecked")
-  public static <T> T buildContextual(final BeanManager beanManager, final Class<?> clazz,
+  public static <T> T buildContextual(final BeanManager beanManager, final Class<?> interfaceType,
       final Function<Method, MethodInvoker> invokerHandler) {
-    return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz},
-        new ContextualInvocationHandler(beanManager, clazz, invokerHandler));
+    return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] {interfaceType},
+        new ContextualInvocationHandler(beanManager, interfaceType, invokerHandler));
   }
 
   /**

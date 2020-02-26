@@ -13,14 +13,12 @@
  */
 package org.corant.suites.cdi.proxy;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
 
@@ -32,13 +30,32 @@ import org.corant.suites.cdi.proxy.ProxyInvocationHandler.MethodInvoker;
  */
 public class ProxyBuilder {
 
+  /**
+   * Build normal Interface-based dynamic proxy instance.
+   *
+   * @see MethodInvoker
+   *
+   * @param <T>
+   * @param interfaceType
+   * @param invokerHandler
+   * @return build
+   */
   @SuppressWarnings("unchecked")
-  public static <T> T build(final Class<?> clazz,
+  public static <T> T build(final Class<?> interfaceType,
       final Function<Method, MethodInvoker> invokerHandler) {
-    return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz},
-        new ProxyInvocationHandler(clazz, invokerHandler));
+    return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] {interfaceType},
+        new ProxyInvocationHandler(interfaceType, invokerHandler));
   }
 
+  /**
+   * Build contextual Interface-based dynamic proxy instance.
+   *
+   * @param <T>
+   * @param beanManager
+   * @param clazz
+   * @param invokerHandler
+   * @return buildContextual
+   */
   @SuppressWarnings("unchecked")
   public static <T> T buildContextual(final BeanManager beanManager, final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerHandler) {
@@ -46,14 +63,16 @@ public class ProxyBuilder {
         new ContextualInvocationHandler(beanManager, clazz, invokerHandler));
   }
 
-  public static Set<ProxyMethod> buildMethods(AnnotatedType<?> annotatedType,
-      Predicate<AnnotatedMethod<?>> methodPredicate) {
-    Set<ProxyMethod> annotatedMethods = new LinkedHashSet<>();
-    for (AnnotatedMethod<?> am : annotatedType.getMethods()) {
-      if (methodPredicate.test(am)) {
-        annotatedMethods.add(new ProxyMethod(am));
-      }
-    }
-    return annotatedMethods;
+  /**
+   * Build contextual bean method handler instance.
+   *
+   * @param clazz
+   * @param methodPredicate
+   * @param appendQualifierss
+   * @return buildMethods
+   */
+  public static Set<ContextualMethodHandler> buildMethods(final Class<?> clazz,
+      Predicate<Method> methodPredicate, Annotation... appendQualifierss) {
+    return ContextualMethodHandler.from(clazz, methodPredicate, appendQualifierss);
   }
 }

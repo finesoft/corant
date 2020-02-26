@@ -22,15 +22,13 @@ import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNoneBlank;
 import static org.corant.suites.cdi.Instances.select;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.jms.ConnectionFactory;
 import org.corant.config.spi.Sortable;
+import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.context.JMSExceptionListener;
@@ -43,7 +41,7 @@ import org.corant.suites.jms.shared.context.JMSExceptionListener;
  */
 public class MessageReceiverMetaData {
 
-  private final AnnotatedMethod<?> method;
+  private final ContextualMethodHandler method;
   private final int acknowledge;
   private final String clientID;
   private final String connectionFactoryId;
@@ -61,13 +59,9 @@ public class MessageReceiverMetaData {
   private final Duration breakedDuration;
   private final boolean xa;
 
-  MessageReceiverMetaData(AnnotatedMethod<?> method, String destinationName) {
-    this.method = AccessController.doPrivileged((PrivilegedAction<AnnotatedMethod<?>>) () -> {
-      shouldNotNull(method).getJavaMember().setAccessible(true);
-      return method;
-    });
-    shouldBeTrue(method.isAnnotationPresent(MessageReceive.class));
-    final MessageReceive ann = method.getAnnotation(MessageReceive.class);
+  MessageReceiverMetaData(ContextualMethodHandler method, String destinationName) {
+    this.method = method;
+    final MessageReceive ann = method.getMethod().getAnnotation(MessageReceive.class);
     acknowledge = ann.acknowledge();
     clientID = ann.clientId();
     connectionFactoryId = defaultTrim(ann.connectionFactoryId());
@@ -87,9 +81,9 @@ public class MessageReceiverMetaData {
     xa = ann.xa();
   }
 
-  public static Set<MessageReceiverMetaData> of(AnnotatedMethod<?> method) {
-    shouldBeTrue(method.isAnnotationPresent(MessageReceive.class));
-    final MessageReceive ann = method.getAnnotation(MessageReceive.class);
+  public static Set<MessageReceiverMetaData> of(ContextualMethodHandler method) {
+    final MessageReceive ann =
+        shouldNotNull(shouldNotNull(method).getMethod().getAnnotation(MessageReceive.class));
     shouldBeTrue(isNoneBlank(ann.destinations()));
     Set<MessageReceiverMetaData> beans = new LinkedHashSet<>();
     linkedHashSetOf(ann.destinations()).forEach(d -> {
@@ -202,7 +196,7 @@ public class MessageReceiverMetaData {
    *
    * @return the method
    */
-  public AnnotatedMethod<?> getMethod() {
+  public ContextualMethodHandler getMethod() {
     return method;
   }
 

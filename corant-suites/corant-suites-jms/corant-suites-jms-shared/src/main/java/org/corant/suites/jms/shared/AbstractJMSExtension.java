@@ -22,8 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
@@ -31,6 +29,7 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.ConnectionFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
+import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
@@ -43,8 +42,10 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
-  protected final Set<AnnotatedMethod<?>> receiveMethods = newSetFromMap(new ConcurrentHashMap<>());
-  protected final Set<AnnotatedMethod<?>> streamMethods = newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<ContextualMethodHandler> receiveMethods =
+      newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<ContextualMethodHandler> streamMethods =
+      newSetFromMap(new ConcurrentHashMap<>());
   protected volatile NamedQualifierObjectManager<? extends AbstractJMSConfig> configManager =
       NamedQualifierObjectManager.empty();
 
@@ -65,32 +66,32 @@ public abstract class AbstractJMSExtension implements Extension {
     return configManager;
   }
 
-  public Set<AnnotatedMethod<?>> getReceiveMethods() {
+  public Set<ContextualMethodHandler> getReceiveMethods() {
     return Collections.unmodifiableSet(receiveMethods);
   }
 
-  public Set<AnnotatedMethod<?>> getStreamMethods() {
+  public Set<ContextualMethodHandler> getStreamMethods() {
     return Collections.unmodifiableSet(streamMethods);
   }
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
-    logger.info(() -> String.format("Scanning JMS message consumer type: %s",
-        pat.getAnnotatedType().getJavaClass().getName()));
-    final AnnotatedType<?> at = pat.getAnnotatedType();
-    for (AnnotatedMethod<?> am : at.getMethods()) {
-      if (am.isAnnotationPresent(MessageReceive.class)) {
-        logger.info(() -> String.format(
-            "Found annotated JMS message consumer method %s.%s, adding for further processing.",
-            at.getJavaClass().getName(), am.getJavaMember().getName()));
-        receiveMethods.add(am);
-      } else if (am.isAnnotationPresent(MessageStream.class)) {
-        logger.warning(() -> String.format(
-            "Found annotated JMS message stream method %s.%s, for now we do not support it.",
-            at.getJavaClass().getName(), am.getJavaMember().getName()));
-        streamMethods.add(am);
-      }
-    }
+    final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
+    logger.info(() -> String.format("Scanning JMS message consumer type: %s", beanClass.getName()));
+    ContextualMethodHandler.from(beanClass, m -> m.isAnnotationPresent(MessageReceive.class))
+        .forEach(cm -> {
+          logger.info(() -> String.format(
+              "Found annotated JMS message consumer method %s.%s, adding for further processing.",
+              beanClass.getName(), cm.getMethod().getName()));
+          receiveMethods.add(cm);
+        });
+    ContextualMethodHandler.from(beanClass, m -> m.isAnnotationPresent(MessageStream.class))
+        .forEach(cm -> {
+          logger.info(() -> String.format(
+              "Found annotated JMS message stream method %s.%s, for now we do not support it.",
+              beanClass.getName(), cm.getMethod().getName()));
+          streamMethods.add(cm);
+        });
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {

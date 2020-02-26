@@ -44,22 +44,52 @@ public class Empties {
     return object == null || object.length() == 0;
   }
 
+  /**
+   * Return true if object is null or object.size() == 0
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Collection<?> object) {
     return object == null || object.isEmpty();
   }
 
+  /**
+   * Return true if object is null or object.hasMoreElements() == false
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Enumeration<?> object) {
     return object == null || !object.hasMoreElements();
   }
 
+  /**
+   * Return true if object is null or object.iterator().hasNext() == false
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Iterable<?> object) {
     return object == null || !object.iterator().hasNext();
   }
 
+  /**
+   * Return true if object is null and object.hasNext() == false
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Iterator<?> object) {
     return object == null || !object.hasNext();
   }
 
+  /**
+   * Return true if object is null and object.isEmpty() == true
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Map<?, ?> object) {
     return object == null || object.isEmpty();
   }
@@ -91,6 +121,12 @@ public class Empties {
     }
   }
 
+  /**
+   * Return true if object is null and object.length == 0
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Object[] object) {
     return object == null || object.length == 0;
   }
@@ -111,22 +147,52 @@ public class Empties {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.isEmpty() == false
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Collection<?> object) {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.hasMoreElements() == true
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Enumeration<?> object) {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.iterator().hasNext() == true
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Iterable<?> object) {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.hasNext() == true
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Iterator<?> object) {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.isEmpty() == false
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Map<?, ?> object) {
     return !isEmpty(object);
   }
@@ -135,8 +201,53 @@ public class Empties {
     return !isEmpty(object);
   }
 
+  /**
+   * Return true if only if object is not null and object.length > 0
+   *
+   * @param object
+   * @return isNotEmpty
+   */
   public static boolean isNotEmpty(final Object[] object) {
     return !isEmpty(object);
   }
 
+  /**
+   * If object is null return 0 else return object.length();
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final CharSequence object) {
+    return isEmpty(object) ? 0 : object.length();
+  }
+
+  /**
+   * If object is null return 0 else return object.size();
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final Collection<?> object) {
+    return isEmpty(object) ? 0 : object.size();
+  }
+
+  /**
+   * If object is null return 0 else return object.size();
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final Map<?, ?> object) {
+    return isEmpty(object) ? 0 : object.size();
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final Object[] object) {
+    return isEmpty(object) ? 0 : object.length;
+  }
 }

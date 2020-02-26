@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -46,7 +45,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.cdi.proxy.ProxyMethod;
+import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
@@ -510,13 +509,13 @@ public class MessageReceiverTask implements Runnable {
 
   static class MessageHandler implements MessageListener {
 
-    final ProxyMethod method;
+    final ContextualMethodHandler method;
     final Class<?> messageClass;
 
-    MessageHandler(AnnotatedMethod<?> method) {
+    MessageHandler(ContextualMethodHandler method) {
       super();
-      this.method = new ProxyMethod(method);
-      messageClass = method.getParameters().get(0).getJavaParameter().getType();
+      this.method = method;
+      messageClass = method.getMethod().getParameters()[0].getType();
     }
 
     @Override
@@ -526,7 +525,7 @@ public class MessageReceiverTask implements Runnable {
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
           | JMSException e) {
         log(Level.SEVERE, e, "5-x. Invok message receive method %s occurred error.",
-            method.getBeanMethod());
+            method.getMethod());
         throw new CorantRuntimeException(e);
       }
     }

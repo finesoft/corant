@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.sql;
+package org.corant.suites.query.shared.dynamic;
 
 import java.util.ArrayList;
 import java.util.List;

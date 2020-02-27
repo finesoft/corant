@@ -43,7 +43,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  @ConfigProperty(name = "query.cas.mapping-file.paths")
+  @ConfigProperty(name = "query.cassandra.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
 
   @Override

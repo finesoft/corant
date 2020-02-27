@@ -13,7 +13,6 @@
  */
 package org.corant.suites.query.cassandra;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  */
 public abstract class AbstractCasNamedQueryService extends AbstractNamedQueryService {
 
-  public static final String PRO_KEY_KEYSPACE = "cas.query.keyspace";
+  public static final String PRO_KEY_KEYSPACE = "cassandra.query.keyspace";
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
@@ -78,7 +77,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       log(queryName, scriptParameter, cql);
       Forwarding<T> result = Forwarding.inst();
       List<Map<String, Object>> list =
-          getExecutor().select(ks, cql, offset, limit + 1, scriptParameter);
+          getExecutor().paging(ks, cql, offset, limit + 1, scriptParameter);
       int size = list == null ? 0 : list.size();
       if (size > 0) {
         if (size > limit) {
@@ -129,10 +128,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         if (size < limit) {
           result.withTotal(offset + size);
         } else {
-          String totalSql = getExecutor().resolveCountCql(cql);
-          log("total-> " + queryName, scriptParameter, totalSql);
-          result
-              .withTotal(getMapInteger(getExecutor().get(ks, totalSql, scriptParameter), "_total"));
+          result.withTotal(getExecutor().total(ks, cql, scriptParameter));
         }
         this.fetch(list, querier);
       }
@@ -170,7 +166,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     }
   }
 
-  protected abstract CasQueryExecutor getExecutor();// FIXME use one connection for one method stack
+  protected abstract CasQueryExecutor getExecutor();
 
   @Override
   protected abstract AbstractNamedQuerierResolver<CasNamedQuerier> getQuerierResolver();

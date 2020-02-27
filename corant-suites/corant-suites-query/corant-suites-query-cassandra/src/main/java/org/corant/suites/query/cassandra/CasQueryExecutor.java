@@ -13,8 +13,10 @@
  */
 package org.corant.suites.query.cassandra;
 
+import static org.corant.shared.util.MapUtils.getMapInteger;
 import java.util.List;
 import java.util.Map;
+import org.corant.suites.query.shared.dynamic.SqlHelper;
 
 /**
  * corant-suites-query
@@ -29,8 +31,11 @@ public interface CasQueryExecutor {
   List<Map<String, Object>> paging(String keyspace, String cql, int offset, int limit,
       Object... args);
 
-  String resolveCountCql(String cql);
-
   List<Map<String, Object>> select(String keyspace, String cql, Object... args);
+
+  default int total(String keyspace, String cql, Object... args) {
+    String totalCql = "SELECT COUNT(*) AS total ".concat(SqlHelper.removeSelect(cql));
+    return getMapInteger(get(keyspace, totalCql, args), "total", 0);
+  }
 
 }

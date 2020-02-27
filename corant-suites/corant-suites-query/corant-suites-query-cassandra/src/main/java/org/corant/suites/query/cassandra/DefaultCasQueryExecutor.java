@@ -15,14 +15,16 @@ package org.corant.suites.query.cassandra;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.max;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
 import org.corant.shared.exception.CorantRuntimeException;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 
@@ -36,23 +38,24 @@ import com.datastax.driver.core.Statement;
  */
 public class DefaultCasQueryExecutor implements CasQueryExecutor {
 
-  final Function<String, Cluster> clusterFactory;
+  final Cluster cluster;
+
+  final int fetchSize;
 
   /**
    * @param cluster
    */
-  public DefaultCasQueryExecutor(Function<String, Cluster> clusterFactory) {
+  public DefaultCasQueryExecutor(Cluster cluster, int fetchSize) {
     super();
-    this.clusterFactory = shouldNotNull(clusterFactory);
+    this.cluster = shouldNotNull(cluster);
+    this.fetchSize = max(fetchSize, 1);
   }
 
   @Override
   public Map<String, Object> get(String keyspace, String cql, Object... args) {
     Map<String, Object> map = new LinkedHashMap<>();
-    try (Cluster cluster = clusterFactory.apply(keyspace)) {
-      final Session session = cluster.connect(keyspace);
-      final Statement stm = prepare(session, cql, args);
-      stm.setFetchSize(1);
+    try (Session session = cluster.connect(keyspace)) {
+      final Statement stm = prepare(session, cql, args).setFetchSize(1);
       ResultSet rs = session.execute(stm);
       if (rs != null) {
         CasMapHandler.get(rs).forEach(x -> x.forEach((k, v) -> map.put(k.toString(), v)));
@@ -66,26 +69,58 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
   @Override
   public List<Map<String, Object>> paging(String keyspace, String cql, int offset, int limit,
       Object... args) {
-    if (offset == 0) {
+    if (offset <= 0) {
+      int af = cql.toUpperCase(Locale.ROOT).lastIndexOf("ALLOW FILTERING");
+      if (af != -1) {
+        return select(keyspace, cql.substring(0, af) + " LIMIT " + limit + " ALLOW FILTERING",
+            args);
+      }
       return select(keyspace, cql + " LIMIT " + limit, args);
     } else {
-
+      List<Map<String, Object>> list = new ArrayList<>();
+      try (Session session = cluster.connect(keyspace)) {
+        final Statement stm = prepare(session, cql, args).setFetchSize(limit);
+        ResultSet rs = session.execute(stm);
+        if (rs != null) {
+          int currentRow = 0;
+          int fetchedSize = rs.getAvailableWithoutFetching();
+          byte[] nextState = rs.getExecutionInfo().getPagingStateUnsafe();
+          while (fetchedSize > 0 && nextState != null && currentRow + fetchedSize < offset) {
+            rs = session.execute(stm.setPagingStateUnsafe(nextState));
+            currentRow += fetchedSize;
+            fetchedSize = rs.getAvailableWithoutFetching();
+            nextState = rs.getExecutionInfo().getPagingStateUnsafe();
+          }
+          if (currentRow < offset) {
+            for (@SuppressWarnings("unused")
+            Row row : rs) {
+              if (++currentRow == offset) {
+                break;
+              }
+            }
+          }
+          int remaining = limit;
+          for (Row row : rs) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            CasMapHandler.get(row).forEach((k, v) -> map.put(k.toString(), v));
+            list.add(map);
+            if (--remaining == 0) {
+              break;
+            }
+          }
+        }
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+      return list;
     }
-    return null;
-  }
-
-  @Override
-  public String resolveCountCql(String cql) {
-    return null;
   }
 
   @Override
   public List<Map<String, Object>> select(String keyspace, String cql, Object... args) {
     List<Map<String, Object>> list = new ArrayList<>();
-    try (Cluster cluster = clusterFactory.apply(keyspace)) {
-      final Session session = cluster.connect(keyspace);
-      final Statement stm = prepare(session, cql, args);
-      stm.setFetchSize(1);
+    try (Session session = cluster.connect(keyspace)) {
+      final Statement stm = prepare(session, cql, args).setFetchSize(fetchSize);
       ResultSet rs = session.execute(stm);
       if (rs != null) {
         CasMapHandler.get(rs).forEach(x -> {

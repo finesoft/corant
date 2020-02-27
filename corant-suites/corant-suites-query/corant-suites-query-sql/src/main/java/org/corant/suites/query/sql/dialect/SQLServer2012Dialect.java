@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sql.dialect;
 
-import org.corant.suites.query.sql.SqlHelper;
+import org.corant.suites.query.shared.dynamic.SqlHelper;
 
 /**
  * corant-suites-query

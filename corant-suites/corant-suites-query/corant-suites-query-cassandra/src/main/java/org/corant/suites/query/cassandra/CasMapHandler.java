@@ -34,12 +34,12 @@ import com.google.common.reflect.TypeToken;
  * @author bingo 上午11:40:06
  *
  */
-public class CassandraMapHandler {
+public class CasMapHandler {
 
   static final CodecRegistry CODE_REGISTRY = CodecRegistry.DEFAULT_INSTANCE;
 
   public static List<Map<Object, Object>> get(ResultSet resultSet) {
-    return resultSet.all().stream().map(CassandraMapHandler::get).collect(Collectors.toList());
+    return resultSet.all().stream().map(CasMapHandler::get).collect(Collectors.toList());
   }
 
   public static Map<Object, Object> get(Row row) {
@@ -56,12 +56,12 @@ public class CassandraMapHandler {
       case LIST:
         DataType typeList = dataType.getTypeArguments().get(0);
         TypeToken<Object> javaTypeList = CODE_REGISTRY.codecFor(typeList).getJavaType();
-        return row.getList(name, javaTypeList).stream().map(CassandraMapHandler::convertValue)
+        return row.getList(name, javaTypeList).stream().map(CasMapHandler::convertValue)
             .collect(Collectors.toList());
       case SET:
         DataType typeSet = dataType.getTypeArguments().get(0);
         TypeToken<Object> javaTypeSet = CODE_REGISTRY.codecFor(typeSet).getJavaType();
-        return row.getSet(name, javaTypeSet).stream().map(CassandraMapHandler::convertValue)
+        return row.getSet(name, javaTypeSet).stream().map(CasMapHandler::convertValue)
             .collect(Collectors.toSet());
       case MAP:
         DataType typeKey = dataType.getTypeArguments().get(0);

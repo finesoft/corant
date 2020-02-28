@@ -16,7 +16,6 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
-import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import java.math.BigDecimal;
@@ -24,8 +23,9 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -43,6 +43,7 @@ import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodMo
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -55,12 +56,14 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
 
   static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
   static {
-    converters.put(Date.class,
-        o -> mapOf("$date", DateTimeFormatter.ISO_DATE.format(toObject(o, LocalDateTime.class))));
-    converters.put(LocalDateTime.class, o -> mapOf("$date",
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(toObject(o, LocalDateTime.class))));
-    converters.put(LocalDate.class,
-        o -> mapOf("$date", DateTimeFormatter.ISO_LOCAL_DATE.format(toObject(o, LocalDate.class))));
+
+    // converters.put(Date.class,
+    // o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT.format(((Date) o).toInstant())));
+    // converters.put(LocalDateTime.class, o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT
+    // .format(((LocalDateTime) o).atZone(ZoneId.systemDefault()).toInstant())));
+    // converters.put(LocalDate.class, o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT
+    // .format(((LocalDate) o).atStartOfDay(ZoneId.systemDefault()).toInstant())));
+
     converters.put(ZonedDateTime.class, o -> mapOf("$date",
         mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
     converters.put(Instant.class,
@@ -135,6 +138,24 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   @Override
   public String getType() {
     return TYPE;
+  }
+
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Object getWrappedParamValue(WrapperTemplateModel arg) {
+    Object obj = DynamicTemplateMethodModelEx.super.getWrappedParamValue(arg);
+    if (Enum.class.isAssignableFrom(obj.getClass())) {
+      return ((Enum) obj).name();
+    } else if (Date.class.isAssignableFrom(obj.getClass())) {
+      return ((Date) obj).toInstant();
+    } else if (LocalDateTime.class.isAssignableFrom(obj.getClass())) {
+      return ((LocalDateTime) obj).atOffset(ZoneOffset.UTC).toInstant();
+    } else if (LocalDate.class.isAssignableFrom(obj.getClass())) {
+      return ((LocalDate) obj).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant();
+    } else if (OffsetDateTime.class.isAssignableFrom(obj.getClass())) {
+      return ((OffsetDateTime) obj).toInstant();
+    }
+    return obj;
   }
 
   @Override

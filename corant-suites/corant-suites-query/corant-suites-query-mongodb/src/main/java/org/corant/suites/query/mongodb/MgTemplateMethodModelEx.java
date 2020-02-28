@@ -139,8 +139,7 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
 
   @Override
   public boolean isSimpleType(Class<?> cls) {
-    boolean iss = DynamicTemplateMethodModelEx.super.isSimpleType(cls);
-    if (iss) {
+    if (DynamicTemplateMethodModelEx.super.isSimpleType(cls)) {
       return true;
     } else {
       return BsonMinKey.class.equals(cls) || BsonMaxKey.class.isAssignableFrom(cls)

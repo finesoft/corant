@@ -15,7 +15,6 @@ package org.corant.suites.query.cassandra;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
@@ -46,7 +45,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     try {
       log("fetch-> " + refQueryName, scriptParameter, cql);
-      List<Map<String, Object>> fetchedList = new ArrayList<>();
+      List<Map<String, Object>> fetchedList;
       if (maxSize > 0) {
         fetchedList = getExecutor().paging(ks, cql, 0, maxSize, scriptParameter);
       } else {

@@ -55,12 +55,12 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
 
   static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
   static {
-    converters.put(Date.class, o -> mapOf("$date",
-        DateTimeFormatter.ISO_DATE_TIME.format(toObject(o, LocalDateTime.class))));
+    converters.put(Date.class,
+        o -> mapOf("$date", DateTimeFormatter.ISO_DATE.format(toObject(o, LocalDateTime.class))));
     converters.put(LocalDateTime.class, o -> mapOf("$date",
-        DateTimeFormatter.ISO_DATE_TIME.format(toObject(o, LocalDateTime.class))));
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(toObject(o, LocalDateTime.class))));
     converters.put(LocalDate.class,
-        o -> mapOf("$date", DateTimeFormatter.ISO_DATE_TIME.format(toObject(o, LocalDate.class))));
+        o -> mapOf("$date", DateTimeFormatter.ISO_LOCAL_DATE.format(toObject(o, LocalDate.class))));
     converters.put(ZonedDateTime.class, o -> mapOf("$date",
         mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
     converters.put(Instant.class,

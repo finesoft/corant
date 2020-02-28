@@ -11,15 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared.dynamic.freemarker;
+package org.corant.suites.query.elastic;
 
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
-import java.time.temporal.Temporal;
-import java.util.Date;
+import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,8 +31,7 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class DynamicTemplateMethodModelExJson
-    implements DynamicTemplateMethodModelEx<Map<String, Object>> {
+public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map<String, Object>> {
 
   public static final String TYPE = "JP";
   public static final ObjectMapper OM = new ObjectMapper();
@@ -45,13 +44,14 @@ public class DynamicTemplateMethodModelExJson
       Object arg = getParamValue(arguments.get(0));
       try {
         if (arg != null) {
-          if (isPrimitiveOrWrapper(arg.getClass())) {
-            return arg;
-          } else if (isSimpleType(arg)) {
-            return OM.writeValueAsString(arg);
+          Class<?> argCls = primitiveToWrapper(arg.getClass());
+          if (isPrimitiveOrWrapper(argCls)) {
+            return convertParamValue(arg);
+          } else if (isSimpleType(getComponentClass(argCls))) {
+            return OM.writeValueAsString(convertParamValue(arg));
           } else {
             return OM.writer(JsonpCharacterEscapes.instance())
-                .writeValueAsString(OM.writer().writeValueAsString(arg));
+                .writeValueAsString(OM.writer().writeValueAsString(convertParamValue(arg)));
           }
         }
       } catch (JsonProcessingException e) {
@@ -71,10 +71,13 @@ public class DynamicTemplateMethodModelExJson
     return TYPE;
   }
 
-  boolean isSimpleType(Object arg) {
-    Class<?> cls = getComponentClass(arg);
-    return String.class.equals(cls) || Number.class.isAssignableFrom(cls)
-        || Boolean.class.isAssignableFrom(cls) || Temporal.class.isAssignableFrom(cls)
-        || Date.class.isAssignableFrom(cls) || Enum.class.isAssignableFrom(cls);
+  @Override
+  public boolean isSimpleType(Class<?> cls) {
+    return DynamicTemplateMethodModelEx.super.isSimpleType(cls);
   }
+
+  protected Object convertParamValue(Object arg) {
+    return arg;
+  }
+
 }

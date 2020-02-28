@@ -18,7 +18,6 @@ import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -52,7 +51,7 @@ public class FreemarkerSqlQuerierBuilder
 
   @Override
   protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
-    return new DynamicTemplateMethodModelExSql();
+    return new SqlTemplateMethodModelEx();
   }
 
 }

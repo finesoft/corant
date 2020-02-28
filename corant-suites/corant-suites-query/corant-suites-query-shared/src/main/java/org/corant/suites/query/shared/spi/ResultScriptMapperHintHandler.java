@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -30,7 +31,6 @@ import javax.inject.Inject;
 import javax.script.ScriptEngineManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptConsumer;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -93,7 +93,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static final String HINT_SCRIPT_RESU = "r";
 
   static final ScriptEngineManager sm = new ScriptEngineManager();
-  static final Map<String, ScriptConsumer> mappers = new ConcurrentHashMap<>();
+  static final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
   static final Set<String> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
@@ -109,7 +109,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @SuppressWarnings("rawtypes")
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    ScriptConsumer func = null;
+    Consumer<Object[]> func = null;
     if (brokens.contains(qh.getId()) || (func = resolveMapper(qh)) == null) {
       return;
     }
@@ -134,8 +134,8 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     }
   }
 
-  protected ScriptConsumer resolveMapper(QueryHint qh) {
-    return mappers.computeIfAbsent(qh.getId(), (k) -> {
+  protected Consumer<Object[]> resolveMapper(QueryHint qh) {
+    return mappers.computeIfAbsent(qh.getId(), k -> {
       if (!mapperResolvers.isUnsatisfied()) {
         Optional<ResultMapperResolver> op =
             mapperResolvers.stream().filter(rmr -> rmr.accept(qh)).findFirst();
@@ -149,7 +149,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
         }
       }
       brokens.add(qh.getId());
-      return (ps) -> {
+      return ps -> {
       };
     });
   }
@@ -169,7 +169,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     }
 
     @Override
-    public ScriptConsumer resolve(QueryHint qh) throws Exception {
+    public Consumer<Object[]> resolve(QueryHint qh) throws Exception {
       return NashornScriptEngines.compileConsumer(qh.getScript().getCode(), "p", "r");
     }
 
@@ -179,7 +179,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     boolean accept(QueryHint qh);
 
-    ScriptConsumer resolve(QueryHint qh) throws Exception;
+    Consumer<Object[]> resolve(QueryHint qh) throws Exception;
   }
 
 }

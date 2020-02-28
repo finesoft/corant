@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.shared.dynamic.javascript;
 
+import java.util.function.Function;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
@@ -30,7 +30,7 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class JavascriptDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
-  protected final ScriptFunction execution;
+  protected final Function<Object[], Object> execution;
 
   /**
    * @param query

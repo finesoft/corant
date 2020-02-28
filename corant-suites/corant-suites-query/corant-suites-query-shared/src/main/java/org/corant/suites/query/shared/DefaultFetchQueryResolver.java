@@ -29,13 +29,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.cdi.ConversionService;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
@@ -52,15 +52,15 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
 @ApplicationScoped
 public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
-  protected final Map<String, ScriptFunction> predicates = new ConcurrentHashMap<>();
-  protected final Map<String, ScriptFunction> injections = new ConcurrentHashMap<>();
+  protected final Map<String, Function<Object[], Object>> predicates = new ConcurrentHashMap<>();
+  protected final Map<String, Function<Object[], Object>> injections = new ConcurrentHashMap<>();
 
   @Inject
   ConversionService conversionService;
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
-    ScriptFunction sf = resolveFetchPredicate(fetchQuery);
+    Function<Object[], Object> sf = resolveFetchPredicate(fetchQuery);
     if (sf != null) {
       Boolean b = toBoolean(sf.apply(new Object[] {queryParameter, result}));
       if (b == null || !b.booleanValue()) {
@@ -75,7 +75,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (isEmpty(results)) {
       return;
     }
-    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
     final String injectProName = fetchQuery.getInjectPropertyName();
     if (injection == null) {
       // use inject pro name
@@ -107,7 +107,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (result == null) {
       return;
     }
-    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
     final String injectProName = fetchQuery.getInjectPropertyName();
     if (injection == null) {
       // use inject pro name
@@ -173,7 +173,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     }
   }
 
-  protected ScriptFunction resolveFetchInjection(FetchQuery fetchQuery) {
+  protected Function<Object[], Object> resolveFetchInjection(FetchQuery fetchQuery) {
     return injections.computeIfAbsent(fetchQuery.getId(), id -> {
       if (fetchQuery.getInjectionScript().isValid()) {
         if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
@@ -187,7 +187,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     });
   }
 
-  protected ScriptFunction resolveFetchPredicate(FetchQuery fetchQuery) {
+  protected Function<Object[], Object> resolveFetchPredicate(FetchQuery fetchQuery) {
     return predicates.computeIfAbsent(fetchQuery.getId(), k -> {
       if (fetchQuery.getPredicateScript().isValid()) {
         if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
@@ -271,7 +271,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       }
       return;
     }
-    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
     if (injection != null) {
       List<Object> useFetchedResultList = new ArrayList<>();
       for (Object result : results) {
@@ -328,7 +328,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       injectFetchedResult(result, null, injectProName);
       return;
     }
-    final ScriptFunction injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
     if (injection != null) {
       fetchedResults.removeIf(fri -> {
         Boolean fit = toBoolean(injection.apply(new Object[] {result, fri}));

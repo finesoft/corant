@@ -14,8 +14,6 @@
 package org.corant.suites.lang.javascript;
 
 import static org.corant.shared.util.StringUtils.isBlank;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.script.Bindings;
@@ -44,67 +42,49 @@ public class NashornScriptEngines {
   public static final ScriptEngine ENGINE =
       NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine");
 
-  static final Map<String, ScriptConsumer> consumers = new ConcurrentHashMap<>();
-  static final Map<String, ScriptFunction> functions = new ConcurrentHashMap<>();
-
-  public static ScriptConsumer compileConsumer(String funcScript, String... paraNames) {
+  public static Consumer<Object[]> compileConsumer(String funcScript, String... paraNames) {
     if (isBlank(funcScript)) {
       return null;
     }
-    return consumers.computeIfAbsent(funcScript, (s) -> {
-      CompiledScript compiled;
-      try {
-        compiled = ((Compilable) ENGINE).compile(s);
-      } catch (ScriptException e) {
-        throw new CorantRuntimeException(e);
-      }
-      final CompiledScript useCompiled = compiled;
-      return (pns) -> {
+    try {
+      final CompiledScript compiled = ((Compilable) ENGINE).compile(funcScript);
+      return pns -> {
         Bindings bindings = new SimpleBindings();
         for (int i = 0; i < pns.length; i++) {
           bindings.put(paraNames[i], pns[i]);
         }
         try {
-          useCompiled.eval(bindings);
+          compiled.eval(bindings);
         } catch (ScriptException e) {
           throw new CorantRuntimeException(e);
         }
       };
-    });
+    } catch (ScriptException e) {
+      throw new CorantRuntimeException(e);
+    }
 
   }
 
-  public static ScriptFunction compileFunction(String funcScript, String... paraNames) {
+  public static Function<Object[], Object> compileFunction(String funcScript, String... paraNames) {
     if (isBlank(funcScript)) {
       return null;
     }
-    return functions.computeIfAbsent(funcScript, (s) -> {
-      CompiledScript compiled;
-      try {
-        compiled = ((Compilable) ENGINE).compile(s);
-      } catch (ScriptException e) {
-        throw new CorantRuntimeException(e);
-      }
-      final CompiledScript useCompiled = compiled;
-      return (pns) -> {
+    try {
+      final CompiledScript compiled = ((Compilable) ENGINE).compile(funcScript);
+      return pns -> {
         Bindings bindings = new SimpleBindings();
         for (int i = 0; i < pns.length; i++) {
           bindings.put(paraNames[i], pns[i]);
         }
         try {
-          return useCompiled.eval(bindings);
+          return compiled.eval(bindings);
         } catch (ScriptException e) {
           throw new CorantRuntimeException(e);
         }
       };
-    });
+    } catch (ScriptException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  @FunctionalInterface
-  public interface ScriptConsumer extends Consumer<Object[]> {
-  }
-
-  @FunctionalInterface
-  public interface ScriptFunction extends Function<Object[], Object> {
-  }
 }

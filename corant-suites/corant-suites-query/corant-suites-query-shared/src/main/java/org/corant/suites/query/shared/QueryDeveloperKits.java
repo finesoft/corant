@@ -26,8 +26,6 @@ import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerConfigurations;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
@@ -114,12 +112,13 @@ public class QueryDeveloperKits {
             FreemarkerConfigurations.FM_CFG);
         tpl.dump(System.out);
         if (isNotEmpty(parameter)) {
-          DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql();
-          DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
+          // DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql(); FIXME
+          // DynamicTemplateMethodModelExJson jsonTmm = new DynamicTemplateMethodModelExJson();
+          // FIXME
           System.out.println("\n\n[Empty parameter process]:\n");
           Environment e = tpl.createProcessingEnvironment(parameter, sw);
-          e.setVariable(sqlTmm.getType(), sqlTmm);
-          e.setVariable(jsonTmm.getType(), jsonTmm);
+          // e.setVariable(sqlTmm.getType(), sqlTmm); FIXME
+          // e.setVariable(jsonTmm.getType(), jsonTmm); FIXME
           e.process();
           System.out.println(sw.toString());
         }

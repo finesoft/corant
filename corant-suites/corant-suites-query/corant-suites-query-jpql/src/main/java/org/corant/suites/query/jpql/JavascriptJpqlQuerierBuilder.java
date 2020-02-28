@@ -15,8 +15,8 @@ package org.corant.suites.query.jpql;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.javascript.NashornScriptEngines.ScriptFunction;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
@@ -32,7 +32,7 @@ import org.corant.suites.query.shared.mapping.Query;
 public class JavascriptJpqlQuerierBuilder
     extends AbstractDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
 
-  final ScriptFunction execution;
+  final Function<Object[], Object> execution;
 
   /**
    * @param query
@@ -57,7 +57,7 @@ public class JavascriptJpqlQuerierBuilder
         getFetchQueryResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
   }
 
-  public ScriptFunction getExecution() {
+  public Function<Object[], Object> getExecution() {
     return execution;
   }
 

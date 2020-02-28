@@ -14,7 +14,9 @@
 package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -79,6 +81,12 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
 
   default Object getWrappedParamValue(WrapperTemplateModel arg) {
     return arg.getWrappedObject();
+  }
+
+  default boolean isSimpleType(Class<?> cls) {
+    return String.class.equals(cls) || Number.class.isAssignableFrom(cls)
+        || Boolean.class.isAssignableFrom(cls) || Temporal.class.isAssignableFrom(cls)
+        || Date.class.isAssignableFrom(cls) || Enum.class.isAssignableFrom(cls);
   }
 
   /**

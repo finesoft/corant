@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared.dynamic.freemarker;
+package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.ConversionUtils.toObject;
 import java.sql.Date;
@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
@@ -31,7 +32,7 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class DynamicTemplateMethodModelExSql implements DynamicTemplateMethodModelEx<Object[]> {
+public class SqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Object[]> {
 
   public static final String TYPE = "SP";
   public static final String SQL_PS_PLACE_HOLDER = "?";

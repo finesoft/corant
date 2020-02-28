@@ -21,7 +21,6 @@ import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExJson;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +62,7 @@ public class FreemarkerEsQuerierBuilder extends
 
   @Override
   protected DynamicTemplateMethodModelEx<Map<String, Object>> getTemplateMethodModelEx() {
-    return new DynamicTemplateMethodModelExJson();
+    return new EsTemplateMethodModelEx();
   }
 
 }

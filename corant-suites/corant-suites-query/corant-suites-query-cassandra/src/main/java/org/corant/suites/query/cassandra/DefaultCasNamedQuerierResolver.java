@@ -25,7 +25,6 @@ import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelExSql;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -74,7 +73,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
       @SuppressWarnings("unchecked")
       @Override
       protected DynamicTemplateMethodModelEx getTemplateMethodModelEx() {
-        return new DynamicTemplateMethodModelExSql();
+        return new CasTemplateMethodModelEx();
       }
 
     };

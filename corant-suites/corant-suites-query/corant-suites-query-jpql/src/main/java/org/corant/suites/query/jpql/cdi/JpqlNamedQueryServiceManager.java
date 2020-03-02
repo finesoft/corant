@@ -35,7 +35,6 @@ import org.corant.suites.query.jpql.JpqlNamedQuerier;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
-import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -148,6 +147,16 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
+    protected int getDefaultLimit() {
+      return defaultLimit;
+    }
+
+    @Override
+    protected int getDefaultMaxSelectSize() {
+      return defaultMaxSelectSize;
+    }
+
+    @Override
     protected EntityManagerFactory getEntityManagerFactory() {
       return emf;
     }
@@ -157,16 +166,6 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
       return resolver;
     }
 
-    @Override
-    protected int resolveDefaultLimit(Querier querier) {
-      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
-    }
-
-    @Override
-    protected int resolveMaxSelectSize(Querier querier) {
-      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
-          defaultMaxSelectSize);
-    }
   }
 
 }

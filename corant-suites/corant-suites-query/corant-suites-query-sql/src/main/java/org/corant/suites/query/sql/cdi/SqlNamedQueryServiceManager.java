@@ -37,7 +37,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
-import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.corant.suites.query.sql.AbstractSqlNamedQueryService;
 import org.corant.suites.query.sql.DefaultSqlQueryExecutor;
@@ -199,6 +198,16 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
+    protected int getDefaultLimit() {
+      return defaultLimit;
+    }
+
+    @Override
+    protected int getDefaultMaxSelectSize() {
+      return defaultMaxSelectSize;
+    }
+
+    @Override
     protected SqlQueryExecutor getExecutor() {
       return executor;
     }
@@ -206,17 +215,6 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     @Override
     protected AbstractNamedQuerierResolver<SqlNamedQuerier> getQuerierResolver() {
       return resolver;
-    }
-
-    @Override
-    protected int resolveDefaultLimit(Querier querier) {
-      return querier.getQuery().getProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, defaultLimit);
-    }
-
-    @Override
-    protected int resolveMaxSelectSize(Querier querier) {
-      return querier.getQuery().getProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class,
-          defaultMaxSelectSize);
     }
 
   }

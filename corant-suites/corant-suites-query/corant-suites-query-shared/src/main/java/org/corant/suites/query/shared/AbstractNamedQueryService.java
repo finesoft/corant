@@ -63,7 +63,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public <T> Stream<T> stream(String queryName, Object parameter) {
     QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
     final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
-    final int limit = max(defaultObject(queryParam.getLimit(), DEFAULT_LIMIT), 1);
+    final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
     final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
     final Forwarding<T> empty = Forwarding.inst();
     final Iterator<T> iterator = new Iterator<T>() {
@@ -131,6 +131,14 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     }
   }
 
+  protected int getDefaultLimit() {
+    return DEFAULT_LIMIT;
+  }
+
+  protected int getDefaultMaxSelectSize() {
+    return MAX_SELECT_SIZE;
+  }
+
   protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
 
   protected void log(String name, Object param, String... script) {
@@ -152,7 +160,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    * @return resolveDefaultLimit
    */
   protected int resolveDefaultLimit(Querier querier) {
-    int limit = resolveProperties(querier, PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT);
+    int limit = resolveProperties(querier, PRO_KEY_DEFAULT_LIMIT, Integer.class, getDefaultLimit());
     return limit <= 0 ? Integer.MAX_VALUE : limit;
   }
 
@@ -201,7 +209,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    * @see #PRO_KEY_MAX_SELECT_SIZE
    */
   protected int resolveMaxSelectSize(Querier querier) {
-    int mss = resolveProperties(querier, PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
+    int mss = resolveProperties(querier, PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+        getDefaultMaxSelectSize());
     return mss <= 0 ? Integer.MAX_VALUE : mss;
   }
 

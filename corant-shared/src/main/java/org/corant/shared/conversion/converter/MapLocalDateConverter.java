@@ -13,8 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
-import static org.corant.shared.util.MapUtils.getMapLong;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.time.LocalDate;
 import java.util.Map;
@@ -27,7 +25,7 @@ import org.corant.shared.conversion.ConversionException;
  *
  */
 @SuppressWarnings("rawtypes")
-public class MapLocalDateConverter extends AbstractConverter<Map, LocalDate> {
+public class MapLocalDateConverter extends AbstractTemporalConverter<Map, LocalDate> {
 
   public MapLocalDateConverter() {
     super();
@@ -59,12 +57,13 @@ public class MapLocalDateConverter extends AbstractConverter<Map, LocalDate> {
   protected LocalDate convert(Map value, Map<String, ?> hints) throws Exception {
     if (value != null && value.containsKey("year") && value.containsKey("month")
         && (value.containsKey("day") || value.containsKey("dayOfMonth"))) {
-      return LocalDate.of(getMapInteger(value, "year"), getMapInteger(value, "month"),
-          defaultObject(getMapInteger(value, "dayOfMonth"), getMapInteger(value, "day")));
+      return LocalDate.of(resolveInteger(value.get("year")), resolveInteger(value.get("month")),
+          defaultObject(resolveInteger(value.get("dayOfMonth")), resolveInteger(value.get("day"))));
     } else if (value != null && value.containsKey("year") && value.containsKey("dayOfYear")) {
-      return LocalDate.ofYearDay(getMapInteger(value, "year"), getMapInteger(value, "dayOfYear"));
+      return LocalDate.ofYearDay(resolveInteger(value.get("year")),
+          resolveInteger(value.get("dayOfYear")));
     } else if (value != null && value.containsKey("epochDay")) {
-      return LocalDate.ofEpochDay(getMapLong(value, "epochDay"));
+      return LocalDate.ofEpochDay(resolveLong(value.get("epochDay")));
     }
     throw new ConversionException("Can't convert value to LocalDate from Map object.");
   }

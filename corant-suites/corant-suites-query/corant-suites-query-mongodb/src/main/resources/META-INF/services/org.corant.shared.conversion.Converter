@@ -1,0 +1,5 @@
+org.corant.suites.query.mongodb.converter.LongDateTimeConverter
+org.corant.suites.query.mongodb.converter.LongTimeStampConverter
+org.corant.suites.query.mongodb.converter.MapRegexConverter
+org.corant.suites.query.mongodb.converter.StringObjectIdConverter
+org.corant.suites.query.mongodb.converter.StringRegexConverter

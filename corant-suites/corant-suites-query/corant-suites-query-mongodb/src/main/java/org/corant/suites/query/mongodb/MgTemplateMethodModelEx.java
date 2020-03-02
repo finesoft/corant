@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import org.bson.BsonDateTime;
 import org.bson.BsonMaxKey;
 import org.bson.BsonMinKey;
 import org.bson.BsonObjectId;
@@ -57,17 +58,13 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
   static {
 
-    // converters.put(Date.class,
-    // o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT.format(((Date) o).toInstant())));
-    // converters.put(LocalDateTime.class, o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT
-    // .format(((LocalDateTime) o).atZone(ZoneId.systemDefault()).toInstant())));
-    // converters.put(LocalDate.class, o -> mapOf("$date", DateTimeFormatter.ISO_INSTANT
-    // .format(((LocalDate) o).atStartOfDay(ZoneId.systemDefault()).toInstant())));
-
     converters.put(ZonedDateTime.class, o -> mapOf("$date",
         mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
     converters.put(Instant.class,
         o -> mapOf("$date", mapOf("$numberLong", asString(((Instant) o).toEpochMilli()))));
+    converters.put(BsonDateTime.class,
+        o -> mapOf("$date", mapOf("$numberLong", asString(((BsonDateTime) o).getValue()))));
+
     converters.put(BigDecimal.class, o -> mapOf("$numberDecimal", o.toString()));
     converters.put(Decimal128.class, o -> mapOf("$numberDecimal", o.toString()));
     converters.put(BigInteger.class, o -> mapOf("$numberDecimal", o.toString()));
@@ -166,7 +163,7 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
       return BsonMinKey.class.equals(cls) || BsonMaxKey.class.isAssignableFrom(cls)
           || BsonObjectId.class.isAssignableFrom(cls) || Decimal128.class.isAssignableFrom(cls)
           || BsonRegularExpression.class.isAssignableFrom(cls)
-          || BsonTimestamp.class.isAssignableFrom(cls);
+          || BsonDateTime.class.isAssignableFrom(cls) || BsonTimestamp.class.isAssignableFrom(cls);
     }
   }
 

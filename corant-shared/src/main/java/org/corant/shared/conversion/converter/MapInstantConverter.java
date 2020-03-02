@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.MapUtils.getMapLong;
 import java.time.Instant;
 import java.util.Map;
 import org.corant.shared.conversion.ConversionException;
@@ -25,7 +24,7 @@ import org.corant.shared.conversion.ConversionException;
  *
  */
 @SuppressWarnings("rawtypes")
-public class MapInstantConverter extends AbstractConverter<Map, Instant> {
+public class MapInstantConverter extends AbstractTemporalConverter<Map, Instant> {
 
   public MapInstantConverter() {
     super();
@@ -56,10 +55,12 @@ public class MapInstantConverter extends AbstractConverter<Map, Instant> {
   @Override
   protected Instant convert(Map value, Map<String, ?> hints) throws Exception {
     if (value != null && value.containsKey("epochSecond") && value.containsKey("nano")) {
-      return Instant.ofEpochSecond(getMapLong(value, "epochSecond"), getMapLong(value, "nano"));
+      return Instant.ofEpochSecond(resolveLong(value.get("epochSecond")),
+          resolveLong(value.get("nano")));
     } else if (value != null && value.containsKey("epochSecond")) {
-      return Instant.ofEpochSecond(getMapLong(value, "epochSecond"));
+      return Instant.ofEpochSecond(resolveLong(value.get("epochSecond")));
     }
     throw new ConversionException("Can't found the value of 'epochSecond'");
   }
+
 }

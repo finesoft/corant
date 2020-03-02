@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.time.LocalTime;
 import java.util.Map;
@@ -26,7 +25,7 @@ import org.corant.shared.conversion.ConversionException;
  *
  */
 @SuppressWarnings("rawtypes")
-public class MapLocalTimeConverter extends AbstractConverter<Map, LocalTime> {
+public class MapLocalTimeConverter extends AbstractTemporalConverter<Map, LocalTime> {
 
   public MapLocalTimeConverter() {
     super();
@@ -60,15 +59,16 @@ public class MapLocalTimeConverter extends AbstractConverter<Map, LocalTime> {
     if (value != null && value.containsKey("hour") && value.containsKey("minute")) {
       if (value.containsKey("second")) {
         if (value.containsKey("nanoOfSecond") || value.containsKey("nano")) {
-          return LocalTime.of(getMapInteger(value, "hour"), getMapInteger(value, "minute"),
-              getMapInteger(value, "second"),
-              defaultObject(getMapInteger(value, "nanoOfSecond"), getMapInteger(value, "nano")));
+          return LocalTime.of(resolveInteger(value.get("hour")),
+              resolveInteger(value.get("minute")), resolveInteger(value.get("second")),
+              defaultObject(resolveInteger(value.get("nanoOfSecond")),
+                  resolveInteger(value.get("nano"))));
         } else {
-          return LocalTime.of(getMapInteger(value, "hour"), getMapInteger(value, "minute"),
-              getMapInteger(value, "second"));
+          return LocalTime.of(resolveInteger(value.get("hour")),
+              resolveInteger(value.get("minute")), resolveInteger(value.get("second")));
         }
       } else {
-        return LocalTime.of(getMapInteger(value, "hour"), getMapInteger(value, "minute"));
+        return LocalTime.of(resolveInteger(value.get("hour")), resolveInteger(value.get("minute")));
       }
     }
     throw new ConversionException("Can't convert value to LocalDate from Map object.");

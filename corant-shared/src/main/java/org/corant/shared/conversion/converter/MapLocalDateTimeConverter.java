@@ -13,10 +13,8 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
-import static org.corant.shared.util.MapUtils.getMapLong;
-import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -29,7 +27,7 @@ import org.corant.shared.conversion.ConversionException;
  *
  */
 @SuppressWarnings("rawtypes")
-public class MapLocalDateTimeConverter extends AbstractConverter<Map, LocalDateTime> {
+public class MapLocalDateTimeConverter extends AbstractTemporalConverter<Map, LocalDateTime> {
 
   public MapLocalDateTimeConverter() {
     super();
@@ -64,26 +62,33 @@ public class MapLocalDateTimeConverter extends AbstractConverter<Map, LocalDateT
         && value.containsKey("hour") && value.containsKey("minute")) {
       if (value.containsKey("second")) {
         if (value.containsKey("nanoOfSecond") || value.containsKey("nano")) {
-          return LocalDateTime.of(getMapInteger(value, "year"), getMapInteger(value, "month"),
-              defaultObject(getMapInteger(value, "dayOfMonth"), getMapInteger(value, "day")),
-              getMapInteger(value, "hour"), getMapInteger(value, "minute"),
-              getMapInteger(value, "second"),
-              defaultObject(getMapInteger(value, "nanoOfSecond"), getMapInteger(value, "nano")));
+          return LocalDateTime.of(resolveInteger(value.get("year")),
+              resolveInteger(value.get("month")),
+              defaultObject(resolveInteger(value.get("dayOfMonth")),
+                  resolveInteger(value.get("day"))),
+              resolveInteger(value.get("hour")), resolveInteger(value.get("minute")),
+              resolveInteger(value.get("second")), defaultObject(
+                  resolveInteger(value.get("nanoOfSecond")), resolveInteger(value.get("nano"))));
         } else {
-          return LocalDateTime.of(getMapInteger(value, "year"), getMapInteger(value, "month"),
-              defaultObject(getMapInteger(value, "dayOfMonth"), getMapInteger(value, "day")),
-              getMapInteger(value, "hour"), getMapInteger(value, "minute"),
-              getMapInteger(value, "second"));
+          return LocalDateTime.of(resolveInteger(value.get("year")),
+              resolveInteger(value.get("month")),
+              defaultObject(resolveInteger(value.get("dayOfMonth")),
+                  resolveInteger(value.get("day"))),
+              resolveInteger(value.get("hour")), resolveInteger(value.get("minute")),
+              resolveInteger(value.get("second")));
         }
       } else {
-        return LocalDateTime.of(getMapInteger(value, "year"), getMapInteger(value, "month"),
-            defaultObject(getMapInteger(value, "dayOfMonth"), getMapInteger(value, "day")),
-            getMapInteger(value, "hour"), getMapInteger(value, "minute"));
+        return LocalDateTime.of(resolveInteger(value.get("year")),
+            resolveInteger(value.get("month")),
+            defaultObject(resolveInteger(value.get("dayOfMonth")),
+                resolveInteger(value.get("day"))),
+            resolveInteger(value.get("hour")), resolveInteger(value.get("minute")));
       }
     } else if (value != null && value.containsKey("epochSecond")
         && value.containsKey("nanoOfSecond") && value.containsKey("offsetId")) {
-      return LocalDateTime.ofEpochSecond(getMapLong(value, "epochSecond"),
-          getMapInteger(value, "nanoOfSecond"), ZoneOffset.of(getMapString(value, "offsetId")));
+      return LocalDateTime.ofEpochSecond(resolveLong(value.get("epochSecond")),
+          resolveInteger(value.get("nanoOfSecond")),
+          ZoneOffset.of(asDefaultString(value.get("offsetId"))));
     }
     throw new ConversionException("Can't convert value to LocalDateTime from Map object.");
   }

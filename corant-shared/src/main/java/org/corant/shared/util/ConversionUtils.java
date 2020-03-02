@@ -308,6 +308,10 @@ public class ConversionUtils {
     return Conversions.convert(obj, clazz);
   }
 
+  public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    return Conversions.convert(obj, clazz, hints);
+  }
+
   public static <T> Set<T> toSet(Object obj, Class<T> clazz) {
     return Conversions.convert(obj, clazz, HashSet::new, null);
   }

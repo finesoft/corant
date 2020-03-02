@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -88,9 +89,7 @@ public class CollectionUtils {
       return new LinkedHashSet<>();
     }
     LinkedHashSet<T> set = new LinkedHashSet<>(objects.length);
-    for (T obj : objects) {
-      set.add(obj);
-    }
+    Collections.addAll(set, objects);
     return set;
   }
 
@@ -100,9 +99,7 @@ public class CollectionUtils {
       return new LinkedList<>();
     }
     LinkedList<T> list = new LinkedList<>();
-    for (T obj : objects) {
-      list.add(obj);
-    }
+    Collections.addAll(list, objects);
     return list;
   }
 
@@ -144,10 +141,15 @@ public class CollectionUtils {
       return new ArrayList<>();
     }
     ArrayList<T> list = new ArrayList<>(objects.length);
-    for (T obj : objects) {
-      list.add(obj);
-    }
+    Collections.addAll(list, objects);
     return list;
+  }
+
+  public static void main(String... f) {
+    List<String> list = listOf("1", "2", "3");
+    for (String s : subList(list, 1)) {
+      System.out.println(s);
+    }
   }
 
   public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
@@ -183,10 +185,35 @@ public class CollectionUtils {
       return new HashSet<>();
     }
     Set<T> set = new HashSet<>(objects.length);
-    for (T obj : objects) {
-      set.add(obj);
-    }
+    Collections.addAll(set, objects);
     return set;
+  }
+
+  public static <T> List<T> subList(final List<T> list, int beginIndex) {
+    return subList(list, beginIndex, sizeOf(list));
+  }
+
+  public static <T> List<T> subList(final List<T> list, int beginIndex, int endIndex) {
+    int size = sizeOf(list);
+    if (beginIndex < 0) {
+      throw new ArrayIndexOutOfBoundsException(beginIndex);
+    }
+    if (endIndex > size) {
+      throw new ArrayIndexOutOfBoundsException(endIndex);
+    }
+    int subLen = endIndex - beginIndex;
+    if (subLen < 0) {
+      throw new ArrayIndexOutOfBoundsException(subLen);
+    }
+    if (beginIndex == 0 && endIndex == size) {
+      return list;
+    } else {
+      List<T> sub = new ArrayList<>();
+      for (int i = 0; i < subLen; i++) {
+        sub.add(list.get(beginIndex + i));
+      }
+      return sub;
+    }
   }
 
   public static <T> void swap(List<T> l, int i, int j) {

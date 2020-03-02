@@ -13,7 +13,9 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.ClassUtils.getComponentClass;
+import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -22,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
-import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -39,11 +40,31 @@ public class SqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Ob
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
   private final List<Object> parameters = new ArrayList<>();
 
+  @Override
+  public Object convertUnknowTypeParamValue(Object value) {
+    Class<?> type = getComponentClass(value);
+    if (Instant.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Timestamp.class, null);
+    } else if (LocalDateTime.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Timestamp.class, null);
+    } else if (LocalDate.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Date.class, null);
+    } else if (Enum.class.isAssignableFrom(type)) {
+      if (value instanceof Iterable || value.getClass().isArray()) {
+        return toList(value, t -> t == null ? null : t.toString());
+      } else {
+        return value.toString();
+      }
+    } else {
+      return value;
+    }
+  }
+
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
-    if (arguments != null && arguments.size() == 1) {
-      Object arg = getParamValue(arguments.get(0));
+    if (isNotEmpty(arguments)) {
+      Object arg = getParamValue(arguments);
       if (arg instanceof List) {
         List argList = (List) arg;
         int argSize = argList.size();
@@ -69,21 +90,5 @@ public class SqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Ob
   @Override
   public String getType() {
     return TYPE;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public Object getWrappedParamValue(WrapperTemplateModel arg) {
-    Object obj = DynamicTemplateMethodModelEx.super.getWrappedParamValue(arg);
-    if (Enum.class.isAssignableFrom(obj.getClass())) {
-      return ((Enum) obj).name();
-    } else if (Instant.class.isAssignableFrom(obj.getClass())) {
-      return toObject(obj, Timestamp.class);
-    } else if (LocalDateTime.class.isAssignableFrom(obj.getClass())) {
-      return toObject(obj, Timestamp.class);
-    } else if (LocalDate.class.isAssignableFrom(obj.getClass())) {
-      return toObject(obj, Date.class);
-    }
-    return obj;
   }
 }

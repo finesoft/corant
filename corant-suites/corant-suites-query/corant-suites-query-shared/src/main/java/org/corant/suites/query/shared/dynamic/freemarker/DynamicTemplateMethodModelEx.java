@@ -14,11 +14,17 @@
 package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.CollectionUtils.subList;
+import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.MapUtils.mapOf;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.TemplateBooleanModel;
@@ -40,11 +46,25 @@ import freemarker.template.TemplateSequenceModel;
  */
 public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
 
-  P getParameters();
+  default Object convertParamValue(Object value, Class<?> type, Map<String, ?> hints) {
+    if (value == null) {
+      return null;
+    } else if (type == null) {
+      return convertUnknowTypeParamValue(value);
+    } else if (value instanceof Iterable || value.getClass().isArray()) {
+      return toList(value, type, hints);
+    } else {
+      return toObject(value, type, hints);
+    }
+  }
 
-  default Object getParamValue(Object arg) throws TemplateModelException {
+  default Object convertUnknowTypeParamValue(Object value) {
+    return value;
+  }
+
+  default Object extractParamValue(Object arg) throws TemplateModelException {
     if (arg instanceof WrapperTemplateModel) {
-      return getWrappedParamValue((WrapperTemplateModel) arg);
+      return extractWrappedParamValue((WrapperTemplateModel) arg);
     } else if (arg instanceof TemplateScalarModel) {
       return ((TemplateScalarModel) arg).getAsString().trim();
     } else if (arg instanceof TemplateDateModel) {
@@ -58,7 +78,7 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
       int size = tsm.size();
       List<Object> list = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-        list.add(getParamValue(tsm.get(i)));
+        list.add(extractParamValue(tsm.get(i)));
       }
       return list;
     } else if (arg instanceof TemplateCollectionModel) {
@@ -67,7 +87,7 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
       int size = tsm.size();
       List<Object> list = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-        list.add(getParamValue(tsm.get(i)));
+        list.add(extractParamValue(tsm.get(i)));
       }
       return list;
     } else {
@@ -77,11 +97,25 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
     }
   }
 
-  String getType();
-
-  default Object getWrappedParamValue(WrapperTemplateModel arg) {
+  default Object extractWrappedParamValue(WrapperTemplateModel arg) {
     return arg.getWrappedObject();
   }
+
+  P getParameters();
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  default Object getParamValue(List args) throws TemplateModelException {
+    int argsLen = sizeOf(args);
+    if (argsLen > 0) {
+      Object extVal = extractParamValue(args.get(0));
+      Class<?> extTyp = argsLen > 1 ? toObject(args.get(1), Class.class) : null;
+      Map<String, ?> extHints = argsLen > 3 ? mapOf(subList(args, 2).toArray()) : null;
+      return convertParamValue(extVal, extTyp, extHints);
+    }
+    return null;
+  }
+
+  String getType();
 
   default boolean isSimpleType(Class<?> cls) {
     return String.class.equals(cls) || Number.class.isAssignableFrom(cls)

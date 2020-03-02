@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.jpql;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
@@ -25,7 +26,7 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class DynamicTemplateMethodModelExJpql implements DynamicTemplateMethodModelEx<Object[]> {
+public class JpqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Object[]> {
 
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
@@ -37,14 +38,14 @@ public class DynamicTemplateMethodModelExJpql implements DynamicTemplateMethodMo
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
-    if (arguments != null && arguments.size() == 1) {
-      Object arg = getParamValue(arguments.get(0));
-      if (arg instanceof Object[]) {
-        Object[] argList = (Object[]) arg;
-        int argSize = argList.length;
+    if (isNotEmpty(arguments)) {
+      Object arg = getParamValue(arguments);
+      if (arg instanceof List) {
+        List argList = (List) arg;
+        int argSize = argList.size();
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
-          parameters.add(argList[i]);
+          parameters.add(argList.get(i));
           placeHolders[i] = getPlaceHolder();
         }
         return new SimpleScalar(String.join(",", placeHolders));

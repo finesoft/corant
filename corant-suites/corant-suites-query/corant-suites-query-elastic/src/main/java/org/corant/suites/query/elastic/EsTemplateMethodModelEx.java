@@ -16,6 +16,7 @@ package org.corant.suites.query.elastic;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,8 @@ public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
-    if (arguments != null && arguments.size() == 1) {
-      Object arg = getParamValue(arguments.get(0));
+    if (isNotEmpty(arguments)) {
+      Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
           Class<?> argCls = primitiveToWrapper(arg.getClass());
@@ -69,11 +70,6 @@ public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   @Override
   public String getType() {
     return TYPE;
-  }
-
-  @Override
-  public boolean isSimpleType(Class<?> cls) {
-    return DynamicTemplateMethodModelEx.super.isSimpleType(cls);
   }
 
   protected Object convertParamValue(Object arg) {

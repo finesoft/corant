@@ -16,6 +16,7 @@ package org.corant.suites.query.mongodb.converter;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 import org.bson.BsonRegularExpression;
+import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
@@ -25,6 +26,8 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  *
  */
 public class StringRegexConverter extends AbstractConverter<String, BsonRegularExpression> {
+
+  public static final String REGEX_KEY = "regex.option";
 
   /**
    *
@@ -60,7 +63,6 @@ public class StringRegexConverter extends AbstractConverter<String, BsonRegularE
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return new BsonRegularExpression(value, "i");
+    return new BsonRegularExpression(value, ConverterHints.getHint(hints, REGEX_KEY, "i"));
   }
-
 }

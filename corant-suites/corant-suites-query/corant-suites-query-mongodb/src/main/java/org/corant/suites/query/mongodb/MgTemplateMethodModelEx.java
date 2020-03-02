@@ -16,6 +16,8 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
+import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import java.math.BigDecimal;
@@ -24,7 +26,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,11 +42,11 @@ import org.bson.BsonObjectId;
 import org.bson.BsonRegularExpression;
 import org.bson.BsonTimestamp;
 import org.bson.types.Decimal128;
+import org.corant.shared.conversion.ConverterHints;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -55,9 +57,10 @@ import freemarker.template.TemplateModelException;
  */
 public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map<String, Object>> {
 
+  static final Map<String, ?> zoneIdHints = mapOf(ConverterHints.CVT_ZONE_ID_KEY, ZoneId.of("UTC"));
   static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
-  static {
 
+  static {
     converters.put(ZonedDateTime.class, o -> mapOf("$date",
         mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
     converters.put(Instant.class,
@@ -101,11 +104,33 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   public static final ObjectMapper OM = new ObjectMapper();
   private final Map<String, Object> parameters = new HashMap<>();
 
+  @Override
+  public Object convertUnknowTypeParamValue(Object value) {
+    Class<?> type = getComponentClass(value);
+    if (Date.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Instant.class, null);
+    } else if (LocalDateTime.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Instant.class, zoneIdHints);
+    } else if (LocalDate.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Instant.class, zoneIdHints);
+    } else if (OffsetDateTime.class.isAssignableFrom(type)) {
+      return convertParamValue(value, Instant.class, null);
+    } else if (Enum.class.isAssignableFrom(type)) {
+      if (value instanceof Iterable || value.getClass().isArray()) {
+        return toList(value, t -> t == null ? null : t.toString());
+      } else {
+        return value.toString();
+      }
+    } else {
+      return value;
+    }
+  }
+
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
-    if (arguments != null && arguments.size() == 1) {
-      Object arg = getParamValue(arguments.get(0));
+    if (isNotEmpty(arguments)) {
+      Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
           Class<?> argCls = primitiveToWrapper(arg.getClass());
@@ -135,24 +160,6 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   @Override
   public String getType() {
     return TYPE;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public Object getWrappedParamValue(WrapperTemplateModel arg) {
-    Object obj = DynamicTemplateMethodModelEx.super.getWrappedParamValue(arg);
-    if (Enum.class.isAssignableFrom(obj.getClass())) {
-      return ((Enum) obj).name();
-    } else if (Date.class.isAssignableFrom(obj.getClass())) {
-      return ((Date) obj).toInstant();
-    } else if (LocalDateTime.class.isAssignableFrom(obj.getClass())) {
-      return ((LocalDateTime) obj).atOffset(ZoneOffset.UTC).toInstant();
-    } else if (LocalDate.class.isAssignableFrom(obj.getClass())) {
-      return ((LocalDate) obj).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant();
-    } else if (OffsetDateTime.class.isAssignableFrom(obj.getClass())) {
-      return ((OffsetDateTime) obj).toInstant();
-    }
-    return obj;
   }
 
   @Override

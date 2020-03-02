@@ -51,7 +51,7 @@ public class FreemarkerJpqlQuerierBuilder
 
   @Override
   protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
-    return new DynamicTemplateMethodModelExJpql();
+    return new JpqlTemplateMethodModelEx();
   }
 
 }

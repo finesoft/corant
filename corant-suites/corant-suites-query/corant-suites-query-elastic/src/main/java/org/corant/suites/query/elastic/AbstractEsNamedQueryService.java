@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -154,13 +154,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver();
 
   protected String resolveIndexName(EsNamedQuerier querier) {
-    if (querier.getQuery().getProperties().containsKey(PRO_KEY_INDEX_NAME)) {
-      return querier.getQuery().getProperty(PRO_KEY_INDEX_NAME, String.class);
-    }
-    String q = querier.getName();
-    int pos = 0;
-    shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
-    return q.substring(0, pos);
+    String indexName = resolveProperties(querier, PRO_KEY_INDEX_NAME, String.class, null);
+    return isNotBlank(indexName) ? indexName : split(querier.getQuery().getName(), ".")[0];
   }
 
   protected String resolveScript(Map<Object, Object> s, Integer offset, Integer limit) {

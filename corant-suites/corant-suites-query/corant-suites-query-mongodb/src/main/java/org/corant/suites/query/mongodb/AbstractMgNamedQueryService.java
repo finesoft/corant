@@ -13,7 +13,6 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.MapUtils.getMapEnum;
@@ -22,6 +21,7 @@ import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -264,13 +264,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected String resolveCollectionName(MgNamedQuerier querier) {
-    if (querier.getQuery().getProperties().containsKey(PRO_KEY_COLLECTION_NAME)) {
-      return querier.getQuery().getProperty(PRO_KEY_COLLECTION_NAME, String.class);
-    }
-    int pos = 0;
-    String q = querier.getName();
-    shouldBeTrue(isNotBlank(q) && (pos = q.indexOf('.')) != -1);
-    return q.substring(0, pos);
+    String colName = resolveProperties(querier, PRO_KEY_COLLECTION_NAME, String.class, null);
+    return isNotBlank(colName) ? colName : split(querier.getQuery().getName(), ".")[0];
   }
 
   protected int resolveCountOptionsLimit() {

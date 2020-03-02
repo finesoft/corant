@@ -66,7 +66,7 @@ public class MapRegexConverter extends AbstractConverter<Map, BsonRegularExpress
     if (isEmpty(value) || isBlank(pattern = asDefaultString(value.get("pattern")))) {
       return getDefaultValue();
     }
-    option = asDefaultString(value.get("pattern"));
+    option = asDefaultString(value.get("option"));
     if (isNotBlank(option)) {
       return new BsonRegularExpression(pattern);
     } else {

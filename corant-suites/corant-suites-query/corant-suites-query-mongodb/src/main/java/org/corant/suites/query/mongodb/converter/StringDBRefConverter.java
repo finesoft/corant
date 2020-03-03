@@ -39,7 +39,7 @@ public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
         ConverterHints.getHint(hints, StringDBPointerConverter.SEPARATOR_KEY, ":"), true, true);
     if (array.length < 2) {
       throw new ConversionException(
-          "Can't convert string %s to BsonDbPointer, the source string must represent like 'database:collection:id'",
+          "Can't convert string %s to DBRef, the source string must be represented like 'database:collection:id'",
           value);
     }
     if (array.length == 2) {

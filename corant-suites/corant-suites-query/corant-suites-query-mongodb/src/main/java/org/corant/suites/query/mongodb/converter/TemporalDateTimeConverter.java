@@ -17,10 +17,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.Map;
-import java.util.Optional;
 import org.bson.BsonDateTime;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
@@ -61,27 +61,28 @@ public class TemporalDateTimeConverter extends AbstractConverter<Temporal, BsonD
 
   @Override
   protected BsonDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
-    ZoneId zoneId = resolveHintZoneId(hints).orElse(null);
-    if (zoneId != null) {
-      // violate JSR-310
-      if (value instanceof LocalDateTime) {
-        return new BsonDateTime(((LocalDateTime) value).atZone(zoneId).toInstant().toEpochMilli());
-      } else if (value instanceof LocalDate) {
-        return new BsonDateTime(((LocalDate) value).atTime(LocalTime.ofNanoOfDay(0L)).atZone(zoneId)
-            .toInstant().toEpochMilli());
-      }
+    // violate JSR-310
+    if (value instanceof LocalDateTime) {
+      return new BsonDateTime(
+          ((LocalDateTime) value).atZone(resolveHintZoneId(hints)).toInstant().toEpochMilli());
+    } else if (value instanceof LocalDate) {
+      return new BsonDateTime(((LocalDate) value).atTime(LocalTime.ofNanoOfDay(0L))
+          .atZone(resolveHintZoneId(hints)).toInstant().toEpochMilli());
+    } else if (value instanceof OffsetDateTime) {
+      return new BsonDateTime(((OffsetDateTime) value).atZoneSameInstant(resolveHintZoneId(hints))
+          .toInstant().toEpochMilli());
     }
     return new BsonDateTime(Instant.from(value).toEpochMilli());
   }
 
-  Optional<ZoneId> resolveHintZoneId(Map<String, ?> hints) {
-    ZoneId zoneId = null;
+  ZoneId resolveHintZoneId(Map<String, ?> hints) {
+    ZoneId zoneId = ZoneId.systemDefault();
     Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
     if (hintZoneId instanceof ZoneId) {
       zoneId = (ZoneId) hintZoneId;
     } else if (hintZoneId instanceof String) {
       zoneId = ZoneId.of(hintZoneId.toString());
     }
-    return Optional.ofNullable(zoneId);
+    return zoneId;
   }
 }

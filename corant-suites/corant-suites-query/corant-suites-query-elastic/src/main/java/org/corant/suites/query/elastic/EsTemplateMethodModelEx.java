@@ -14,13 +14,13 @@
 package org.corant.suites.query.elastic;
 
 import static org.corant.shared.util.ClassUtils.getComponentClass;
+import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
-import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,9 +32,8 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map<String, Object>> {
+public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 
-  public static final String TYPE = "JP";
   public static final ObjectMapper OM = new ObjectMapper();
   private final Map<String, Object> parameters = new HashMap<>();
 
@@ -45,14 +44,15 @@ public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
       Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
-          Class<?> argCls = primitiveToWrapper(arg.getClass());
+          Class<?> argCls = getUserClass(arg.getClass());
           if (isPrimitiveOrWrapper(argCls)) {
-            return convertParamValue(arg);
+            return arg;
           } else if (isSimpleType(getComponentClass(argCls))) {
-            return OM.writeValueAsString(convertParamValue(arg));
+            return OM.writeValueAsString(arg);
           } else {
+            // FIXME throw exception or not ?
             return OM.writer(JsonpCharacterEscapes.instance())
-                .writeValueAsString(OM.writer().writeValueAsString(convertParamValue(arg)));
+                .writeValueAsString(OM.writer().writeValueAsString(arg));
           }
         }
       } catch (JsonProcessingException e) {
@@ -65,15 +65,6 @@ public class EsTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   @Override
   public Map<String, Object> getParameters() {
     return parameters;
-  }
-
-  @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  protected Object convertParamValue(Object arg) {
-    return arg;
   }
 
 }

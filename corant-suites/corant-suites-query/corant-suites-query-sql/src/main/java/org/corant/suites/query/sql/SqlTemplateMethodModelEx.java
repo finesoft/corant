@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -33,15 +33,14 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class SqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Object[]> {
+public class SqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Object[]> {
 
-  public static final String TYPE = "SP";
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
   private final List<Object> parameters = new ArrayList<>();
 
   @Override
-  public Object convertUnknowTypeParamValue(Object value) {
+  public Object defaultConvertParamValue(Object value) {
     Class<?> type = getComponentClass(value);
     if (Instant.class.isAssignableFrom(type)) {
       return convertParamValue(value, Timestamp.class, null);
@@ -87,8 +86,4 @@ public class SqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Ob
     return parameters.toArray(new Object[parameters.size()]);
   }
 
-  @Override
-  public String getType() {
-    return TYPE;
-  }
 }

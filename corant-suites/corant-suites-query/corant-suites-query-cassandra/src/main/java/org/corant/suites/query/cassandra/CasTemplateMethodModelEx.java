@@ -15,7 +15,6 @@ package org.corant.suites.query.cassandra;
 
 import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ConversionUtils.toList;
-import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -24,8 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -35,26 +33,14 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class CasTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Object[]> {
+public class CasTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Object[]> {
 
-  public static final String TYPE = "SP";
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
   private final List<Object> parameters = new ArrayList<>();
 
   @Override
-  public Object convertParamValue(Object value, Class<?> type, Map<String, ?> hints) {
-    if (type == null || value == null) {
-      return value;
-    } else if (value instanceof Iterable || value.getClass().isArray()) {
-      return toList(value, type, hints);
-    } else {
-      return toObject(value, type, hints);
-    }
-  }
-
-  @Override
-  public Object convertUnknowTypeParamValue(Object value) {
+  public Object defaultConvertParamValue(Object value) {
     Class<?> type = getComponentClass(value);
     if (Instant.class.isAssignableFrom(type)) {
       return convertParamValue(value, Timestamp.class, null);
@@ -100,8 +86,4 @@ public class CasTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Ob
     return parameters.toArray(new Object[parameters.size()]);
   }
 
-  @Override
-  public String getType() {
-    return TYPE;
-  }
 }

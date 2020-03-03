@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.util.CollectionUtils.ListJoins.JoinType;
@@ -68,6 +69,20 @@ public class CollectionUtils {
   }
 
   @SafeVarargs
+  public static <T, C extends Collection<T>> C collectionOf(IntFunction<C> supplier,
+      final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return supplier.apply(0);
+    } else {
+      final C collection = supplier.apply(objects.length);
+      for (T object : objects) {
+        collection.add(object);
+      }
+      return collection;
+    }
+  }
+
+  @SafeVarargs
   public static <T> List<T> immutableListOf(final T... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptyList();
@@ -85,21 +100,17 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return new LinkedHashSet<>();
-    }
-    LinkedHashSet<T> set = new LinkedHashSet<>(objects.length);
-    Collections.addAll(set, objects);
-    return set;
+    return collectionOf(LinkedHashSet::new, objects);
   }
 
   @SafeVarargs
   public static <T> LinkedList<T> linkedListOf(final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return new LinkedList<>();
-    }
     LinkedList<T> list = new LinkedList<>();
-    Collections.addAll(list, objects);
+    if (objects != null) {
+      for (T object : objects) {
+        list.add(object);
+      }
+    }
     return list;
   }
 
@@ -137,19 +148,7 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> List<T> listOf(final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return new ArrayList<>();
-    }
-    ArrayList<T> list = new ArrayList<>(objects.length);
-    Collections.addAll(list, objects);
-    return list;
-  }
-
-  public static void main(String... f) {
-    List<String> list = listOf("1", "2", "3");
-    for (String s : subList(list, 1)) {
-      System.out.println(s);
-    }
+    return collectionOf(ArrayList::new, objects);
   }
 
   public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
@@ -181,12 +180,7 @@ public class CollectionUtils {
 
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return new HashSet<>();
-    }
-    Set<T> set = new HashSet<>(objects.length);
-    Collections.addAll(set, objects);
-    return set;
+    return collectionOf(HashSet::new, objects);
   }
 
   public static <T> List<T> subList(final List<T> list, int beginIndex) {

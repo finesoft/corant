@@ -17,6 +17,7 @@ import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
 import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.asString;
@@ -26,10 +27,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +40,7 @@ import org.bson.BsonObjectId;
 import org.bson.BsonRegularExpression;
 import org.bson.BsonTimestamp;
 import org.bson.types.Decimal128;
-import org.corant.shared.conversion.ConverterHints;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,18 +52,31 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午2:00:47
  *
  */
-public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map<String, Object>> {
+public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 
-  static final Map<String, ?> zoneIdHints = mapOf(ConverterHints.CVT_ZONE_ID_KEY, ZoneId.of("UTC"));
   static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
 
   static {
+
+    converters.put(BsonDateTime.class,
+        o -> mapOf("$date", mapOf("$numberLong", asString(((BsonDateTime) o).getValue()))));
     converters.put(ZonedDateTime.class, o -> mapOf("$date",
         mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
     converters.put(Instant.class,
         o -> mapOf("$date", mapOf("$numberLong", asString(((Instant) o).toEpochMilli()))));
-    converters.put(BsonDateTime.class,
-        o -> mapOf("$date", mapOf("$numberLong", asString(((BsonDateTime) o).getValue()))));
+    converters.put(LocalDate.class, o -> mapOf("$date",
+        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
+    converters.put(Date.class,
+        o -> mapOf("$date", mapOf("$numberLong", asString(((Date) o).toInstant().toEpochMilli()))));
+    converters.put(LocalDateTime.class, o -> mapOf("$date",
+        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
+    converters.put(OffsetDateTime.class, o -> mapOf("$date",
+        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
+
+    converters.put(BsonTimestamp.class, o -> {
+      BsonTimestamp bto = (BsonTimestamp) o;
+      return mapOf("$timestamp", mapOf("t", bto.getTime(), "i", bto.getInc()));
+    });
 
     converters.put(BigDecimal.class, o -> mapOf("$numberDecimal", o.toString()));
     converters.put(Decimal128.class, o -> mapOf("$numberDecimal", o.toString()));
@@ -85,8 +95,10 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
     });
     converters.put(Long.class, o -> mapOf("$numberLong", o.toString()));
     converters.put(Integer.class, o -> mapOf("$numberInt", o.toString()));
+
     converters.put(BsonMaxKey.class, o -> mapOf("$maxKey", 1));
     converters.put(BsonMinKey.class, o -> mapOf("$minKey", 1));
+
     converters.put(BsonObjectId.class,
         o -> mapOf("$oid", ((BsonObjectId) o).getValue().toHexString()));
     converters.put(BsonRegularExpression.class, o -> {
@@ -94,28 +106,17 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
       return mapOf("$regularExpression",
           mapOf("pattern", breo.getPattern(), "options", breo.getOptions()));
     });
-    converters.put(BsonTimestamp.class, o -> {
-      BsonTimestamp bto = (BsonTimestamp) o;
-      return mapOf("$timestamp", mapOf("t", bto.getTime(), "i", bto.getInc()));
-    });
+
   }
 
-  public static final String TYPE = "JP";
   public static final ObjectMapper OM = new ObjectMapper();
+
   private final Map<String, Object> parameters = new HashMap<>();
 
   @Override
-  public Object convertUnknowTypeParamValue(Object value) {
+  public Object defaultConvertParamValue(Object value) {
     Class<?> type = getComponentClass(value);
-    if (Date.class.isAssignableFrom(type)) {
-      return convertParamValue(value, Instant.class, null);
-    } else if (LocalDateTime.class.isAssignableFrom(type)) {
-      return convertParamValue(value, Instant.class, zoneIdHints);
-    } else if (LocalDate.class.isAssignableFrom(type)) {
-      return convertParamValue(value, Instant.class, zoneIdHints);
-    } else if (OffsetDateTime.class.isAssignableFrom(type)) {
-      return convertParamValue(value, Instant.class, null);
-    } else if (Enum.class.isAssignableFrom(type)) {
+    if (Enum.class.isAssignableFrom(type)) {
       if (value instanceof Iterable || value.getClass().isArray()) {
         return toList(value, t -> t == null ? null : t.toString());
       } else {
@@ -135,14 +136,14 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
         if (arg != null) {
           Class<?> argCls = primitiveToWrapper(arg.getClass());
           if (converters.containsKey(argCls)) {
-            return OM.writeValueAsString(convertParamValue(arg));
+            return OM.writeValueAsString(toBsonValue(arg));
           } else if (isPrimitiveOrWrapper(argCls)) {
             return arg;
           } else if (isSimpleType(getComponentClass(arg))) {
-            return OM.writeValueAsString(convertParamValue(arg));
+            return OM.writeValueAsString(toBsonValue(arg));
           } else {
             return OM.writer(JsonpCharacterEscapes.instance())
-                .writeValueAsString(OM.writer().writeValueAsString(convertParamValue(arg)));
+                .writeValueAsString(OM.writer().writeValueAsString(arg));
           }
         }
       } catch (JsonProcessingException e) {
@@ -158,13 +159,8 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
   }
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
   public boolean isSimpleType(Class<?> cls) {
-    if (DynamicTemplateMethodModelEx.super.isSimpleType(cls)) {
+    if (super.isSimpleType(cls)) {
       return true;
     } else {
       return BsonMinKey.class.equals(cls) || BsonMaxKey.class.isAssignableFrom(cls)
@@ -174,31 +170,17 @@ public class MgTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Map
     }
   }
 
-  @SuppressWarnings("rawtypes")
-  protected Object convertParamValue(Object arg) {
-    if (arg == null) {
-      return arg;
+  protected Object toBsonValue(Object args) {
+    if (args == null) {
+      return args;
     }
-    Class<?> cls = primitiveToWrapper(getComponentClass(arg));
+    Class<?> cls = primitiveToWrapper(getComponentClass(args));
     if (!converters.containsKey(cls)) {
-      return arg;
+      return args;
+    } else if (args.getClass().isArray() || args instanceof Iterable) {
+      return toList(args, converters.get(cls)::apply);
     } else {
-      if (arg.getClass().isArray()) {
-        int len = ((Object[]) arg).length;
-        Object[] objs = new Object[len];
-        for (int i = 0; i < len; i++) {
-          objs[i] = converters.get(cls).apply(((Object[]) arg)[i]);
-        }
-        return objs;
-      } else if (arg instanceof Collection) {
-        List<Object> objs = new ArrayList<>();
-        for (Object o : (Collection) arg) {
-          objs.add(converters.get(cls).apply(o));
-        }
-        return objs;
-      } else {
-        return converters.get(cls).apply(arg);
-      }
+      return converters.get(cls).apply(args);
     }
   }
 

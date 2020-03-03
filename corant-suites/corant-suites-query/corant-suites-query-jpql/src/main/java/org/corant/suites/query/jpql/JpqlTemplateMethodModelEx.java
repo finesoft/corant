@@ -16,7 +16,7 @@ package org.corant.suites.query.jpql;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
+import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
 
@@ -26,11 +26,10 @@ import freemarker.template.TemplateModelException;
  * @author bingo 下午7:56:57
  *
  */
-public class JpqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<Object[]> {
+public class JpqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Object[]> {
 
   public static final String SQL_PS_PLACE_HOLDER = "?";
   public static final SimpleScalar SQL_SS_PLACE_HOLDER = new SimpleScalar(SQL_PS_PLACE_HOLDER);
-  public static final String TYPE = "JPQL";
 
   private List<Object> parameters = new ArrayList<>();
   private int seq = 0;
@@ -60,11 +59,6 @@ public class JpqlTemplateMethodModelEx implements DynamicTemplateMethodModelEx<O
   @Override
   public Object[] getParameters() {
     return parameters.toArray(new Object[parameters.size()]);
-  }
-
-  @Override
-  public String getType() {
-    return TYPE;
   }
 
   String getPlaceHolder() {

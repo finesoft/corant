@@ -34,16 +34,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.bson.BsonDateTime;
+import org.bson.BsonDbPointer;
 import org.bson.BsonMaxKey;
 import org.bson.BsonMinKey;
 import org.bson.BsonObjectId;
 import org.bson.BsonRegularExpression;
+import org.bson.BsonSymbol;
 import org.bson.BsonTimestamp;
 import org.bson.types.Decimal128;
+import org.bson.types.ObjectId;
 import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.DBRef;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -106,7 +110,21 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       return mapOf("$regularExpression",
           mapOf("pattern", breo.getPattern(), "options", breo.getOptions()));
     });
-
+    converters.put(BsonDbPointer.class, o -> {
+      BsonDbPointer dp = (BsonDbPointer) o;
+      return mapOf("$dbPointer",
+          mapOf("$ref", dp.getNamespace(), "$id", mapOf("$oid", dp.getId().toHexString())));
+    });
+    converters.put(BsonSymbol.class, o -> mapOf("$symbol", ((BsonSymbol) o).getSymbol()));
+    converters.put(DBRef.class, o -> {
+      DBRef r = (DBRef) o;
+      Map<Object, Object> map = mapOf("$ref", r.getCollectionName(), "$id",
+          mapOf("$oid", ((ObjectId) r.getId()).toHexString()));
+      if (r.getDatabaseName() != null) {
+        map.put("$db", r.getDatabaseName());
+      }
+      return map;
+    });
   }
 
   public static final ObjectMapper OM = new ObjectMapper();
@@ -160,14 +178,13 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
 
   @Override
   public boolean isSimpleType(Class<?> cls) {
-    if (super.isSimpleType(cls)) {
-      return true;
-    } else {
-      return BsonMinKey.class.equals(cls) || BsonMaxKey.class.isAssignableFrom(cls)
-          || BsonObjectId.class.isAssignableFrom(cls) || Decimal128.class.isAssignableFrom(cls)
-          || BsonRegularExpression.class.isAssignableFrom(cls)
-          || BsonDateTime.class.isAssignableFrom(cls) || BsonTimestamp.class.isAssignableFrom(cls);
-    }
+    return super.isSimpleType(cls) || BsonMinKey.class.equals(cls)
+        || BsonMaxKey.class.isAssignableFrom(cls) || BsonObjectId.class.isAssignableFrom(cls)
+        || Decimal128.class.isAssignableFrom(cls)
+        || BsonRegularExpression.class.isAssignableFrom(cls)
+        || BsonDateTime.class.isAssignableFrom(cls) || BsonTimestamp.class.isAssignableFrom(cls)
+        || BsonSymbol.class.isAssignableFrom(cls) || BsonDbPointer.class.isAssignableFrom(cls)
+        || DBRef.class.isAssignableFrom(cls);
   }
 
   protected Object toBsonValue(Object args) {

@@ -45,7 +45,7 @@ public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
     if (array.length == 2) {
       return new DBRef(array[0], new ObjectId(array[1]));
     } else {
-      return new DBRef(array[0], array[1], new ObjectId(array[1]));
+      return new DBRef(array[0], array[1], new ObjectId(array[2]));
     }
   }
 

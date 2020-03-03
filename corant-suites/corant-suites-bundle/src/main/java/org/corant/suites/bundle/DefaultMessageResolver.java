@@ -13,9 +13,18 @@
  */
 package org.corant.suites.bundle;
 
+import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_ERR_CODE;
+import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_INF_CODE;
+
 import java.lang.annotation.Annotation;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.enterprise.context.ApplicationScoped;
@@ -24,17 +33,17 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.shared.ubiquity.Readable;
-
 /**
  * corant-suites-bundle
- *
  * @author bingo 下午8:01:13
- *
  */
 @ApplicationScoped
 public class DefaultMessageResolver implements MessageResolver {
 
   static final Object[] EMPTY_ARGS = new Object[0];
+
+  static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")
+      .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 
   @Inject
   private PropertyMessageBundle messageBundle;
@@ -55,25 +64,24 @@ public class DefaultMessageResolver implements MessageResolver {
       return null;
     }
     String codes = asDefaultString(messageSource.getCodes());
-    Locale localeToUse = locale == null ? Locale.getDefault() : locale;
-    Object[] parameters = genParameters(localeToUse, messageSource.getParameters());
+    locale = defaultObject(locale, Locale.getDefault());
+    Object[] parameters = genParameters(locale, messageSource.getParameters());
     return messageBundle.getMessage(locale, codes, parameters,
-        (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
+                                    (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
-    return messageBundle.getMessage(locale, codes, params, (l) -> null);
+    locale = defaultObject(locale, Locale.getDefault());
+    Object[] parameters = genParameters(locale, params);
+    return messageBundle.getMessage(locale, codes, parameters,
+                                    (l) -> String.format("Can't find any message for %s", codes));
   }
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
-    if (ser == MessageSeverity.INF) {
-      return messageBundle.getMessage(locale, MessageSource.UNKNOW_INF_CODE, new Object[] {code},
-          (l) -> String.format("Can't find any message for %s", code));
-    } else {
-      return messageBundle.getMessage(locale, MessageSource.UNKNOW_ERR_CODE, new Object[] {code},
-          (l) -> String.format("Can't find any message for %s", code));
-    }
+    String unknow = (ser == MessageSeverity.INF) ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
+    return messageBundle.getMessage(locale, unknow, new Object[]{code},
+                                    (l) -> String.format("Can't find any message for %s", code));
   }
 
   @Produces
@@ -102,6 +110,8 @@ public class DefaultMessageResolver implements MessageResolver {
     if (obj instanceof Enum) {
       String literal = enumBundle.getEnumItemLiteral((Enum) obj, locale);
       return literal == null ? obj : literal;
+    } else if (obj instanceof Instant || obj instanceof ZonedDateTime) {
+      return DATE_TIME_FMT.format((TemporalAccessor) obj);
     } else if (obj instanceof Readable) {
       return ((Readable) obj).toHumanReader(locale);
     }

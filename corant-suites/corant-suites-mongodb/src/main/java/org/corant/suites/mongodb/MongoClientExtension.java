@@ -204,9 +204,8 @@ public class MongoClientExtension implements Extension {
       beans.select(MongoClientConfigurator.class, qualifiers).forEach(h -> h.configure(builder));
     }
     MongoClientOptions clientOptions = builder.build();
-    MongoClient mc = credential == null ? new MongoClient(seeds, clientOptions)
+    return credential == null ? new MongoClient(seeds, clientOptions)
         : new MongoClient(seeds, credential, clientOptions);
-    return mc;
   }
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {

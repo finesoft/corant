@@ -112,14 +112,14 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    logger.info(
+    logger.fine(
         () -> String.format("Add config converter, name:[%s], target type:[%s], class loader:[%s].",
             cls.getName(), type.getName(), getClassLoader()));
   }
 
   void addSource(ConfigSource source) {
     sources.add(shouldNotNull(source, "Config source can not null."));
-    logger.info(() -> String.format(
+    logger.fine(() -> String.format(
         "Add config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
         getClassLoader().getClass().getName(), source.getClass().getName()));

@@ -58,6 +58,9 @@ public class DateInstantConverter extends AbstractConverter<Date, Instant> {
 
   @Override
   protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     return value.toInstant();
   }
 

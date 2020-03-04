@@ -18,7 +18,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.MapUtils.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +71,10 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
   @SuppressWarnings("rawtypes")
   protected <T extends Enum<?>> T convert(Object value, Class<T> targetClass, Map<String, ?> hints)
       throws Exception {
-    if (value instanceof Enum<?> && value.getClass().isAssignableFrom(targetClass)) {
+    if (value == null) {
+      return null;
+    }
+    if (targetClass.isAssignableFrom(value.getClass())) {
       return targetClass.cast(value);
     } else if (value instanceof Number) {
       return targetClass.getEnumConstants()[((Number) value).intValue()];
@@ -81,7 +83,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       if (value instanceof Map) {
         name = getMapString((Map) value, "name");
       } else {
-        String[] values = split(asDefaultString(value), ".", true, true);
+        String[] values = split(value.toString(), ".", true, true);
         if (!isEmpty(values)) {
           name = values[values.length - 1];
         }

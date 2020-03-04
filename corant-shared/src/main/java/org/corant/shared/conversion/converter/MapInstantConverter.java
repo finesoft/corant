@@ -54,10 +54,13 @@ public class MapInstantConverter extends AbstractTemporalConverter<Map, Instant>
 
   @Override
   protected Instant convert(Map value, Map<String, ?> hints) throws Exception {
-    if (value != null && value.containsKey("epochSecond") && value.containsKey("nano")) {
+    if (value == null) {
+      return getDefaultValue();
+    }
+    if (value.containsKey("epochSecond") && value.containsKey("nano")) {
       return Instant.ofEpochSecond(resolveLong(value.get("epochSecond")),
           resolveLong(value.get("nano")));
-    } else if (value != null && value.containsKey("epochSecond")) {
+    } else if (value.containsKey("epochSecond")) {
       return Instant.ofEpochSecond(resolveLong(value.get("epochSecond")));
     }
     throw new ConversionException("Can't found the value of 'epochSecond'");

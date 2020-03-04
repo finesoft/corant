@@ -58,6 +58,9 @@ public class SqlDateInstantConverter extends AbstractConverter<Date, Instant> {
 
   @Override
   protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     return Instant.ofEpochMilli(((java.util.Date) value).getTime());
   }
 

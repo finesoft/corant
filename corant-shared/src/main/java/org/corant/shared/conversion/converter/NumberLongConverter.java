@@ -51,6 +51,11 @@ public class NumberLongConverter extends AbstractConverter<Number, Long> {
 
   @Override
   protected Long convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Long) {
+      return (Long) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     return Long.valueOf(value.longValue());
   }
 

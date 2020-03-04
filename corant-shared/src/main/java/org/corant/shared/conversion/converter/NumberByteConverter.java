@@ -52,6 +52,11 @@ public class NumberByteConverter extends AbstractConverter<Number, Byte> {
 
   @Override
   protected Byte convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Byte) {
+      return (Byte) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     final long longValue = value.longValue();
     if (longValue > Byte.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is to big for byte!");

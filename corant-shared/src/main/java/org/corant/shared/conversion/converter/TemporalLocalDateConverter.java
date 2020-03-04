@@ -61,6 +61,9 @@ public class TemporalLocalDateConverter extends AbstractTemporalConverter<Tempor
 
   @Override
   protected LocalDate convert(Temporal value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (value instanceof Instant) {
       // violate JSR-310

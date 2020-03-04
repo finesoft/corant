@@ -57,6 +57,9 @@ public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal
 
   @Override
   protected Instant convert(Temporal value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     ZoneId zoneId = resolveHintZoneId(hints).orElse(null);
     if (zoneId != null) {
       // violate JSR-310

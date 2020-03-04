@@ -65,6 +65,9 @@ public class TemporalZonedDateTimeConverter
 
   @Override
   protected ZonedDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       // violate JSR-310

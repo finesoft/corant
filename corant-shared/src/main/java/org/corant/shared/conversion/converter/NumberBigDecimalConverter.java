@@ -53,6 +53,9 @@ public class NumberBigDecimalConverter extends AbstractConverter<Number, BigDeci
 
   @Override
   protected BigDecimal convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     if (value instanceof BigDecimal) {
       return (BigDecimal) value;
     } else if (value instanceof BigInteger) {

@@ -43,6 +43,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import org.corant.shared.exception.CorantRuntimeException;
 
 public class MapUtils {
@@ -392,25 +393,19 @@ public class MapUtils {
     return result;
   }
 
-  public static <K, V> Map<K, V> linkedHashMapOf(Object... objects) {
-    return mapOf(true, objects);
+  @SafeVarargs
+  public static <K, V> Map<K, V> linkedHashMapOf(Entry<? extends K, ? extends V>... entries) {
+    Object[] array = new Object[entries.length << 1];
+    int len = 0;
+    for (Entry<? extends K, ? extends V> entry : entries) {
+      array[len++] = entry.getKey();
+      array[len++] = entry.getValue();
+    }
+    return mapOf(LinkedHashMap::new, array);
   }
 
-  public static <K, V> Map<K, V> mapOf(boolean linked, Object... objects) {
-    int oLen;
-    if (objects == null || (oLen = objects.length) == 0) {
-      return linked ? new LinkedHashMap<>(0) : new HashMap<>(0);
-    }
-    int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
-    int size = (rLen >> 1) + 1;
-    Map<K, V> map = linked ? new LinkedHashMap<>(size) : new HashMap<>(size);
-    for (int i = 0; i < rLen; i += 2) {
-      map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
-    }
-    if (rLen < oLen) {
-      map.put(forceCast(objects[rLen]), null);
-    }
-    return map;
+  public static <K, V> Map<K, V> linkedHashMapOf(Object... objects) {
+    return mapOf(LinkedHashMap::new, objects);
   }
 
   @SafeVarargs
@@ -421,11 +416,28 @@ public class MapUtils {
       array[len++] = entry.getKey();
       array[len++] = entry.getValue();
     }
-    return mapOf(array);
+    return mapOf(HashMap::new, array);
+  }
+
+  public static <K, V, M extends Map<K, V>> M mapOf(IntFunction<M> factory, Object... objects) {
+    int oLen;
+    if (objects == null || (oLen = objects.length) == 0) {
+      return factory.apply(0);
+    }
+    int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
+    int size = (rLen >> 1) + 1;
+    M map = factory.apply(size);
+    for (int i = 0; i < rLen; i += 2) {
+      map.put(forceCast(objects[i]), forceCast(objects[i + 1]));
+    }
+    if (rLen < oLen) {
+      map.put(forceCast(objects[rLen]), null);
+    }
+    return map;
   }
 
   public static <K, V> Map<K, V> mapOf(Object... objects) {
-    return mapOf(false, objects);
+    return mapOf(HashMap::new, objects);
   }
 
   public static Properties propertiesOf(String... strings) {

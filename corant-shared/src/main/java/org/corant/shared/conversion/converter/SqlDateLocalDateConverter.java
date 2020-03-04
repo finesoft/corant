@@ -58,6 +58,9 @@ public class SqlDateLocalDateConverter extends AbstractConverter<Date, LocalDate
 
   @Override
   protected LocalDate convert(Date value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     return value.toLocalDate();
   }
 

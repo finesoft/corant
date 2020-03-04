@@ -58,6 +58,9 @@ public class TimestampInstantConverter extends AbstractConverter<Timestamp, Inst
 
   @Override
   protected Instant convert(Timestamp value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     return value.toInstant();
   }
 

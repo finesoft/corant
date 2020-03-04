@@ -57,7 +57,10 @@ public class MapLocalDateTimeConverter extends AbstractTemporalConverter<Map, Lo
 
   @Override
   protected LocalDateTime convert(Map value, Map<String, ?> hints) throws Exception {
-    if (value != null && value.containsKey("year") && value.containsKey("month")
+    if (value == null) {
+      return getDefaultValue();
+    }
+    if (value.containsKey("year") && value.containsKey("month")
         && (value.containsKey("day") || value.containsKey("dayOfMonth"))
         && value.containsKey("hour") && value.containsKey("minute")) {
       if (value.containsKey("second")) {
@@ -84,8 +87,8 @@ public class MapLocalDateTimeConverter extends AbstractTemporalConverter<Map, Lo
                 resolveInteger(value.get("day"))),
             resolveInteger(value.get("hour")), resolveInteger(value.get("minute")));
       }
-    } else if (value != null && value.containsKey("epochSecond")
-        && value.containsKey("nanoOfSecond") && value.containsKey("offsetId")) {
+    } else if (value.containsKey("epochSecond") && value.containsKey("nanoOfSecond")
+        && value.containsKey("offsetId")) {
       return LocalDateTime.ofEpochSecond(resolveLong(value.get("epochSecond")),
           resolveInteger(value.get("nanoOfSecond")),
           ZoneOffset.of(asDefaultString(value.get("offsetId"))));

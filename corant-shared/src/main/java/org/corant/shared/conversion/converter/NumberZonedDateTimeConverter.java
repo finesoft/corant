@@ -64,6 +64,9 @@ public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Numb
 
   @Override
   protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (!ozoneId.isPresent()) {
       if (!isStrict(hints)) {

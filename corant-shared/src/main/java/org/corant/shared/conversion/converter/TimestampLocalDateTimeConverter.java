@@ -58,6 +58,9 @@ public class TimestampLocalDateTimeConverter extends AbstractConverter<Timestamp
 
   @Override
   protected LocalDateTime convert(Timestamp value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     return value.toLocalDateTime();
   }
 

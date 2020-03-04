@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.BufferedReader;
@@ -237,6 +238,41 @@ public class StringUtils {
    */
   public static boolean isNotBlank(final CharSequence cs) {
     return !isBlank(cs);
+  }
+
+  /**
+   * Determine if a string is numeric.
+   *
+   * @param obj
+   * @return isNumeric
+   */
+  public static boolean isNumeric(final String obj) {
+    int len;
+    if ((len = sizeOf(obj)) == 0) {
+      return false;
+    }
+    if (obj.charAt(len - 1) == '.') {
+      return false;
+    }
+    int idx = 0;
+    if (obj.charAt(0) == '-') {
+      if (len == 1) {
+        return false;
+      }
+      idx = 1;
+    }
+    int point = 0;
+    for (int i = idx; i < len; i++) {
+      char c = obj.charAt(i);
+      boolean isPoint = c == '.';
+      if (isPoint && ++point > 1) {
+        return false;
+      }
+      if (!isPoint && !Character.isDigit(c)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

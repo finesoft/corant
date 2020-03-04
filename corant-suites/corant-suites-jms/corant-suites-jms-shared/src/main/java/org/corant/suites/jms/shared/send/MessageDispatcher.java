@@ -62,6 +62,61 @@ public interface MessageDispatcher {
   }
 
   /**
+   * corant-suites-jms-shared
+   *
+   * @author bingo 下午7:45:18
+   *
+   */
+  public static class GroupMessageDispatcherImpl implements MessageDispatcher {
+
+    final List<MessageDispatcher> dispatchers;
+
+    /**
+     * @param dispatchers
+     */
+    protected GroupMessageDispatcherImpl(List<MessageDispatcher> dispatchers) {
+      super();
+      this.dispatchers = dispatchers;
+    }
+
+    @Override
+    public void dispatch(byte[] message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Map<String, Object> message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Message message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Serializable message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(String message) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(message);
+      }
+    }
+
+  }
+
+  /**
    * corant-suites-jms-artemis
    *
    * @author bingo 下午4:29:24
@@ -75,7 +130,7 @@ public interface MessageDispatcher {
     protected final int sessionMode;
 
     public MessageDispatcherImpl(JMSDestinationDefinition dann, JMSSessionMode sann) {
-      multicast = tryAsClass(dann.description()).isAssignableFrom(Queue.class);
+      multicast = Queue.class.isAssignableFrom(tryAsClass(dann.description()));
       destination = shouldNotNull(dann.destinationName());
       connectionFactoryId = shouldNotNull(dann.name());
       sessionMode = sann == null ? Session.AUTO_ACKNOWLEDGE : sann.value();
@@ -144,60 +199,5 @@ public interface MessageDispatcher {
         throw new CorantRuntimeException(e);
       }
     }
-  }
-
-  /**
-   * corant-suites-jms-shared
-   *
-   * @author bingo 下午7:45:18
-   *
-   */
-  public static class GroupMessageDispatcherImpl implements MessageDispatcher {
-
-    final List<MessageDispatcher> dispatchers;
-
-    /**
-     * @param dispatchers
-     */
-    protected GroupMessageDispatcherImpl(List<MessageDispatcher> dispatchers) {
-      super();
-      this.dispatchers = dispatchers;
-    }
-
-    @Override
-    public void dispatch(byte[] message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
-    @Override
-    public void dispatch(Map<String, Object> message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
-    @Override
-    public void dispatch(Message message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
-    @Override
-    public void dispatch(Serializable message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
-    @Override
-    public void dispatch(String message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
   }
 }

@@ -52,6 +52,11 @@ public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
 
   @Override
   protected Integer convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Integer) {
+      return (Integer) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     final long longValue = value.longValue();
     if (longValue > Integer.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is to big for integer!");

@@ -64,6 +64,9 @@ public class TemporalLocalDateTimeConverter
 
   @Override
   protected LocalDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       // violate JSR-310

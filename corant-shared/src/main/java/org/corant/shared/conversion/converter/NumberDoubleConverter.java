@@ -51,6 +51,11 @@ public class NumberDoubleConverter extends AbstractConverter<Number, Double> {
 
   @Override
   protected Double convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Double) {
+      return (Double) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     return Double.valueOf(value.doubleValue());
   }
 

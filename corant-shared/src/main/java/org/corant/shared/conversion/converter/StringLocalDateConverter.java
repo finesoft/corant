@@ -64,7 +64,6 @@ public class StringLocalDateConverter extends AbstractTemporalConverter<String, 
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-
     Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     boolean strictly = isStrict(hints);

@@ -55,14 +55,17 @@ public class MapLocalDateConverter extends AbstractTemporalConverter<Map, LocalD
 
   @Override
   protected LocalDate convert(Map value, Map<String, ?> hints) throws Exception {
-    if (value != null && value.containsKey("year") && value.containsKey("month")
+    if (value == null) {
+      return getDefaultValue();
+    }
+    if (value.containsKey("year") && value.containsKey("month")
         && (value.containsKey("day") || value.containsKey("dayOfMonth"))) {
       return LocalDate.of(resolveInteger(value.get("year")), resolveInteger(value.get("month")),
           defaultObject(resolveInteger(value.get("dayOfMonth")), resolveInteger(value.get("day"))));
-    } else if (value != null && value.containsKey("year") && value.containsKey("dayOfYear")) {
+    } else if (value.containsKey("year") && value.containsKey("dayOfYear")) {
       return LocalDate.ofYearDay(resolveInteger(value.get("year")),
           resolveInteger(value.get("dayOfYear")));
-    } else if (value != null && value.containsKey("epochDay")) {
+    } else if (value.containsKey("epochDay")) {
       return LocalDate.ofEpochDay(resolveLong(value.get("epochDay")));
     }
     throw new ConversionException("Can't convert value to LocalDate from Map object.");

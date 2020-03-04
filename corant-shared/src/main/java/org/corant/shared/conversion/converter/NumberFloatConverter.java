@@ -52,6 +52,11 @@ public class NumberFloatConverter extends AbstractConverter<Number, Float> {
 
   @Override
   protected Float convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Float) {
+      return (Float) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     if (value.doubleValue() > Float.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is to big for float!");
     }

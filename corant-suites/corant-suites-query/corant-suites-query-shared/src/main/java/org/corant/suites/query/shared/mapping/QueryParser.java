@@ -54,7 +54,7 @@ public class QueryParser {
     final SAXParserFactory factory = createSAXParserFactory();
     final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpresses);
     fileMap.entrySet().stream().parallel().forEach(entry -> {
-      logger.info(() -> String.format("Parse query mapping file %s.", entry.getKey()));
+      logger.fine(() -> String.format("Parse query mapping file %s.", entry.getKey()));
       try (InputStream is = entry.getValue().openStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
         XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -63,8 +63,7 @@ public class QueryParser {
         reader.parse(new InputSource(is));
         qmList.add(handler.getMapping());
       } catch (IOException | SAXException | ParserConfigurationException ex) {
-        String errMsg = String.format("Parse query mapping file [%s] error!", entry.getKey());
-        throw new QueryRuntimeException(ex, errMsg);
+        throw new QueryRuntimeException(ex, "Parse query mapping file [%s] error!", entry.getKey());
       }
     });
     return qmList;

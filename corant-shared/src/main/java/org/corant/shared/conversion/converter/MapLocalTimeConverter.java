@@ -55,8 +55,11 @@ public class MapLocalTimeConverter extends AbstractTemporalConverter<Map, LocalT
 
   @Override
   protected LocalTime convert(Map value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     // int hour, int minute, int second, int nanoOfSecond
-    if (value != null && value.containsKey("hour") && value.containsKey("minute")) {
+    if (value.containsKey("hour") && value.containsKey("minute")) {
       if (value.containsKey("second")) {
         if (value.containsKey("nanoOfSecond") || value.containsKey("nano")) {
           return LocalTime.of(resolveInteger(value.get("hour")),

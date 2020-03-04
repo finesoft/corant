@@ -62,6 +62,9 @@ public class NumberLocalDateConverter extends AbstractTemporalConverter<Number, 
 
   @Override
   protected LocalDate convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return getDefaultValue();
+    }
     ChronoUnit cu = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY);
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (ozoneId.isPresent()) {

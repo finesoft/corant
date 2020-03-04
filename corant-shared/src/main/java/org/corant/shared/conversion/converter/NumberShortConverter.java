@@ -52,6 +52,11 @@ public class NumberShortConverter extends AbstractConverter<Number, Short> {
 
   @Override
   protected Short convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value instanceof Short) {
+      return (Short) value;
+    } else if (value == null) {
+      return getDefaultValue();
+    }
     final long longValue = value.longValue();
     if (longValue > Short.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is to big for short!");

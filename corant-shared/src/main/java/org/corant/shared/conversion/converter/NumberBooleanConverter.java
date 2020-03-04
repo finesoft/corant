@@ -26,6 +26,9 @@ public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
 
   @Override
   protected Boolean convert(Number value, Map<String, ?> hints) throws Exception {
+    if (value == null) {
+      return Boolean.FALSE;
+    }
     final long v = value.longValue();
     if (v == 1) {
       return Boolean.TRUE;

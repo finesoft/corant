@@ -201,8 +201,7 @@ public class UndertowWebServer extends AbstractWebServer {
           Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
       resolveStaticContent(handler);
       builder.setHandler(handler);
-      Undertow server = builder.build();
-      return server;
+      return builder.build();
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }

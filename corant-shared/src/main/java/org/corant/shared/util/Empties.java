@@ -232,6 +232,53 @@ public class Empties {
   }
 
   /**
+   * Returns the number of enumeration elements passed in
+   *
+   * @param enums
+   * @return sizeOf
+   */
+  public static int sizeOf(final Enumeration<?> enums) {
+    int size = 0;
+    while (enums.hasMoreElements()) {
+      size++;
+      enums.nextElement();
+    }
+    return size;
+  }
+
+  /**
+   * Returns the number of times the passed in iterable can iterate
+   *
+   * @param iterable
+   * @return sizeOf
+   */
+  public static int sizeOf(final Iterable<?> iterable) {
+    if (iterable instanceof Collection) {
+      return ((Collection<?>) iterable).size();
+    } else if (iterable != null) {
+      sizeOf(iterable.iterator());
+    }
+    return 0;
+  }
+
+  /**
+   * Returns the number of times the passed in iterator can iterate
+   *
+   * @param iterator
+   * @return sizeOf
+   */
+  public static int sizeOf(final Iterator<?> iterator) {
+    int size = 0;
+    if (iterator != null) {
+      while (iterator.hasNext()) {
+        iterator.next();
+        size++;
+      }
+    }
+    return size;
+  }
+
+  /**
    * If object is null return 0 else return object.size();
    *
    * @param object

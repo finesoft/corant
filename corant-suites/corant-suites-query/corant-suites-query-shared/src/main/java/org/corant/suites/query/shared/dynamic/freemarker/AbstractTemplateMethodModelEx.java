@@ -15,7 +15,7 @@ package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.CollectionUtils.subList;
+import static org.corant.shared.util.CollectionUtils.sublist;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -157,7 +158,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       Class<?> extTyp = argsLen > 1 ? toObject(extractParamValue(args.get(1)), Class.class) : null;
       Map<String, ?> extHints = null;
       if (extTyp != null && argsLen > 3) {
-        extHints = mapOf(subList(args, 2).stream().map(a -> {
+        extHints = mapOf(sublist(args, 2).stream().map(a -> {
           try {
             return extractParamValue(a);
           } catch (TemplateModelException e) {
@@ -208,6 +209,9 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
 
     @Override
     public TemplateModel next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       try {
         return it.next();
       } catch (TemplateModelException e) {

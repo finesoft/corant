@@ -15,7 +15,6 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,7 +60,7 @@ public class IterableUtils {
   }
 
   public static <T> Iterable<T> emptyIterable() {
-    return () -> emptyIterator();
+    return IterableUtils::emptyIterator;
   }
 
   public static <T> Iterator<T> emptyIterator() {
@@ -134,35 +133,6 @@ public class IterableUtils {
       iterator.next();
     }
     throw new IndexOutOfBoundsException("Entry does not exist: " + i);
-  }
-
-  public static int getSize(final Enumeration<?> enums) {
-    int size = 0;
-    while (enums.hasMoreElements()) {
-      size++;
-      enums.nextElement();
-    }
-    return size;
-  }
-
-  public static int getSize(final Iterable<?> iterable) {
-    if (iterable instanceof Collection) {
-      return ((Collection<?>) iterable).size();
-    } else if (iterable != null) {
-      getSize(iterable.iterator());
-    }
-    return 0;
-  }
-
-  public static int getSize(final Iterator<?> iterator) {
-    int size = 0;
-    if (iterator != null) {
-      while (iterator.hasNext()) {
-        iterator.next();
-        size++;
-      }
-    }
-    return size;
   }
 
   public static <T> Iterable<T> iterableOf(final Enumeration<T> enums) {

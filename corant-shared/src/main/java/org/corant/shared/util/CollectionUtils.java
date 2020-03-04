@@ -47,6 +47,18 @@ public class CollectionUtils {
     super();
   }
 
+  /**
+   * <p>
+   * Appends all the elements of the given arrays into a new array.
+   * <p>
+   * The new array contains all of the element of {@code src} followed by all of the elements
+   * {@code ts}. When an array is returned, it is always a new array.
+   *
+   * @param <T>
+   * @param src
+   * @param ts
+   * @return append
+   */
   @SuppressWarnings("unchecked")
   public static <T> T[] append(T[] src, T... ts) {
     if (src == null) {
@@ -68,6 +80,15 @@ public class CollectionUtils {
     return appendArray;
   }
 
+  /**
+   * Convert an array to a collection
+   *
+   * @param <T>
+   * @param <C>
+   * @param supplier the collection instance builder
+   * @param objects the array
+   * @return an collection that combined by the passed in array
+   */
   @SafeVarargs
   public static <T, C extends Collection<T>> C collectionOf(IntFunction<C> supplier,
       final T... objects) {
@@ -82,6 +103,13 @@ public class CollectionUtils {
     }
   }
 
+  /**
+   * Convert an array to immutable list
+   *
+   * @param <T>
+   * @param objects
+   * @return an immutable list that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> List<T> immutableListOf(final T... objects) {
     if (objects == null || objects.length == 0) {
@@ -90,6 +118,13 @@ public class CollectionUtils {
     return Collections.unmodifiableList(listOf(objects));
   }
 
+  /**
+   * Convert an array to immutable set
+   *
+   * @param <T>
+   * @param objects the array
+   * @return an immutable set that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> Set<T> immutableSetOf(final T... objects) {
     if (objects == null || objects.length == 0) {
@@ -98,11 +133,25 @@ public class CollectionUtils {
     return Collections.unmodifiableSet(setOf(objects));
   }
 
+  /**
+   * Convert an array to linked hash set
+   *
+   * @param <T>
+   * @param objects
+   * @return a linked hash set that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
     return collectionOf(LinkedHashSet::new, objects);
   }
 
+  /**
+   * Convert an array to linked list
+   *
+   * @param <T>
+   * @param objects
+   * @return a linked list that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> LinkedList<T> linkedListOf(final T... objects) {
     LinkedList<T> list = new LinkedList<>();
@@ -114,6 +163,13 @@ public class CollectionUtils {
     return list;
   }
 
+  /**
+   * Convert an enumeration to list
+   *
+   * @param <T>
+   * @param objects
+   * @return a list that combined by the passed in enumeration
+   */
   public static <T> List<T> listOf(final Enumeration<T> enumeration) {
     List<T> list = new ArrayList<>();
     if (enumeration != null) {
@@ -124,6 +180,13 @@ public class CollectionUtils {
     return list;
   }
 
+  /**
+   * Convert an iterable to list
+   *
+   * @param <T>
+   * @param iterable
+   * @return a list that combined by the passed in iterable
+   */
   public static <T> List<T> listOf(final Iterable<T> iterable) {
     if (iterable instanceof List) {
       return forceCast(iterable);
@@ -136,6 +199,13 @@ public class CollectionUtils {
     }
   }
 
+  /**
+   * Convert an iterator to list
+   *
+   * @param <T>
+   * @param iterator
+   * @return a list that combined by the passed in iterator
+   */
   public static <T> List<T> listOf(final Iterator<T> iterator) {
     List<T> list = new ArrayList<>();
     if (iterator != null) {
@@ -146,17 +216,45 @@ public class CollectionUtils {
     return list;
   }
 
+  /**
+   * Convert an array to list
+   *
+   * @param <T>
+   * @param objects
+   * @return a list that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> List<T> listOf(final T... objects) {
     return collectionOf(ArrayList::new, objects);
   }
 
+  /**
+   * Merge a list and another list elements to a new list. Like SQL select join clause.
+   *
+   * @param <F> a list element type
+   * @param <J> another list element type
+   * @param <T> the return element type
+   * @param from a list
+   * @param join another list
+   * @param combination the combination function that merge two element objects to a new object
+   * @param condition the join conditions like SQL ON clause
+   * @param type the join type INNER LEFT CARTESIAN(CROSS-JOIN)
+   * @return the merged new list
+   */
   public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
       final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
     return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
         .execute();
   }
 
+  /**
+   * Break a collection into smaller pieces
+   *
+   * @param <T>
+   * @param collection
+   * @param size
+   * @return partition
+   */
   public static <T> List<List<T>> partition(final Collection<T> collection, int size) {
     List<List<T>> result = new ArrayList<>();
     if (collection != null) {
@@ -167,6 +265,15 @@ public class CollectionUtils {
     return result;
   }
 
+  /**
+   * Null safe removeIf, execution begins only if the parameters passed in are not null.
+   *
+   * @param <C>
+   * @param <T>
+   * @param collection
+   * @param p
+   * @return removeIf
+   */
   public static <C extends Collection<T>, T> C removeIf(C collection, Predicate<T> p) {
     if (collection == null) {
       return null;
@@ -178,16 +285,50 @@ public class CollectionUtils {
     }
   }
 
+  /**
+   * Convert an array to set
+   *
+   * @param <T>
+   * @param objects
+   * @return a set that combined by the passed in array
+   */
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
     return collectionOf(HashSet::new, objects);
   }
 
-  public static <T> List<T> subList(final List<T> list, int beginIndex) {
-    return subList(list, beginIndex, sizeOf(list));
+  /**
+   * Returns a list that is a sublist of passed in list. The sublist begins with the character at
+   * the specified index and extends to the end of passed in list.
+   *
+   * @param <T>
+   * @param list
+   * @param beginIndex the beginning index, inclusive.
+   * @return sublist the specified sublist
+   */
+  public static <T> List<T> sublist(final List<T> list, int beginIndex) {
+    return sublist(list, beginIndex, sizeOf(list));
   }
 
-  public static <T> List<T> subList(final List<T> list, int beginIndex, int endIndex) {
+  /**
+   * Returns a list that is a sublist of passed in list. The sublist begins at the specified
+   * {@code beginIndex} and extends to the character at index {@code endIndex - 1}. Thus the size of
+   * the sublist is {@code endIndex-beginIndex}.
+   *
+   * <pre>
+   * Examples:
+   *
+   * [a,b,c,d].substring(1, 3) returns [b,c]
+   *
+   * </pre>
+   *
+   * @param <T>
+   * @param list
+   * @param beginIndex the beginning index, inclusive
+   * @param endIndex the ending index, exclusive
+   * @return sublist the specified sublist
+   */
+  public static <T> List<T> sublist(final List<T> list, int beginIndex, int endIndex) {
     int size = sizeOf(list);
     if (beginIndex < 0) {
       throw new ArrayIndexOutOfBoundsException(beginIndex);
@@ -210,16 +351,39 @@ public class CollectionUtils {
     }
   }
 
+  /**
+   * Swaps the elements at the specified positions in the specified list.(If the specified positions
+   * are equal, invoking this method leaves the list unchanged.)
+   *
+   * @param <T>
+   * @param l
+   * @param i
+   * @param j swap
+   */
   public static <T> void swap(List<T> l, int i, int j) {
     Collections.swap(l, i, j);
   }
 
+  /**
+   * Swaps the two specified elements in the specified array.
+   *
+   * @param <T>
+   * @param a
+   * @param i
+   * @param j swap
+   */
   public static <T> void swap(T[] a, int i, int j) {
     final T t = a[i];
     a[i] = a[j];
     a[j] = t;
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午2:36:15
+   *
+   */
   public static class ListJoins<F, J, T> {
 
     private List<F> from;

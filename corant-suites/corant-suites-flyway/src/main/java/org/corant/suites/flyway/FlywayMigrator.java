@@ -164,7 +164,7 @@ public class FlywayMigrator {
   }
 
   protected String getLocation(String name) {
-    return globalFlywayConfig.getLocationPrefix() + "/" + name;
+    return globalFlywayConfig.getLocationPrefix() + "/" + name + "/";
   }
 
   protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {

@@ -22,7 +22,7 @@ import java.util.Map;
  * @author bingo 下午5:40:35
  *
  */
-public class StringLongConverter extends AbstractConverter<String, Long> {
+public class StringLongConverter extends AbstractNumberConverter<String, Long> {
 
   public StringLongConverter() {
     super();
@@ -54,8 +54,24 @@ public class StringLongConverter extends AbstractConverter<String, Long> {
   protected Long convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
+    } else if (hasHex(value)) {
+      return Long.decode(value);
+    } else {
+      Integer radix = getHintsRadix(hints);
+      if (isHintsUnsigned(hints)) {
+        if (radix != null) {
+          return Long.parseUnsignedLong(value, radix);
+        } else {
+          return Long.parseUnsignedLong(value);
+        }
+      } else {
+        if (radix != null) {
+          return Long.valueOf(value, radix);
+        } else {
+          return Long.valueOf(value);
+        }
+      }
     }
-    return Long.valueOf(value);
   }
 
 }

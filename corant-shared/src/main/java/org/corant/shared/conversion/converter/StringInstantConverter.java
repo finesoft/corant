@@ -14,7 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.isNumeric;
+import static org.corant.shared.util.StringUtils.isDecimalNumber;
 import static org.corant.shared.util.StringUtils.split;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -71,11 +71,11 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    if (isNumeric(value)) {
+    if (isDecimalNumber(value)) {
       return Instant.ofEpochMilli(Long.parseLong(value));
     } else if (value.contains(",")) {
       String[] arr = split(value, ",", true, true);
-      if (arr.length == 2 && isNumeric(arr[0]) && isNumeric(arr[1])) {
+      if (arr.length == 2 && isDecimalNumber(arr[0]) && isDecimalNumber(arr[1])) {
         return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]));
       }
     }

@@ -165,7 +165,7 @@ public class StringUtils {
     if (iterable != null && filter != null) {
       streamOf(iterable).filter(filter).sorted().map(func).forEach(s -> {
         if (s.length > 1) {
-          map.computeIfAbsent(s[0], (k) -> new ArrayList<>()).add(s[1]);
+          map.computeIfAbsent(s[0], k -> new ArrayList<>()).add(s[1]);
         }
       });
     }
@@ -191,6 +191,62 @@ public class StringUtils {
     }
     for (int i = 0; i < len; i++) {
       if (!Character.isWhitespace(cs.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Determine if a string is decimal number. Hexadecimal and scientific notations and octal number
+   * are not considered
+   *
+   * <pre>
+   * StringUtils.isDecimalNumber(null)      =false
+   * StringUtils.isDecimalNumber("")        =false
+   * StringUtils.isDecimalNumber(" ")       =false
+   * StringUtils.isDecimalNumber("123")     =true
+   * StringUtils.isDecimalNumber("0123")    =true
+   * StringUtils.isDecimalNumber("1.23")    =true
+   * StringUtils.isDecimalNumber(".123")    =true
+   * StringUtils.isDecimalNumber("-123")    =true
+   * StringUtils.isDecimalNumber("-.123")   =true
+   * StringUtils.isDecimalNumber("+123")    =true
+   * StringUtils.isDecimalNumber("+.123")   =true
+   * StringUtils.isDecimalNumber("-.")      =false
+   * StringUtils.isDecimalNumber(".0")      =true
+   * StringUtils.isDecimalNumber("12 3")    =false
+   * StringUtils.isDecimalNumber(" 123")    =false
+   * StringUtils.isDecimalNumber("a123")    =false
+   * </pre>
+   *
+   * @param obj
+   * @return isDecimalNumber
+   */
+  public static boolean isDecimalNumber(final String obj) {
+    int len;
+    if ((len = sizeOf(obj)) == 0) {
+      return false;
+    }
+    if (obj.charAt(len - 1) == '.') {
+      return false;
+    }
+    int idx = 0;
+    if (obj.charAt(0) == '-' || obj.charAt(0) == '+') {
+      if (len == 1) {
+        return false;
+      }
+      idx = 1;
+    }
+    int point = 0;
+    for (int i = idx; i < len; i++) {
+      if (obj.charAt(i) == '.') {
+        if (++point > 1) {
+          return false;
+        }
+        continue;
+      }
+      if (!Character.isDigit(obj.charAt(i))) {
         return false;
       }
     }
@@ -241,41 +297,6 @@ public class StringUtils {
   }
 
   /**
-   * Determine if a string is numeric.
-   *
-   * @param obj
-   * @return isNumeric
-   */
-  public static boolean isNumeric(final String obj) {
-    int len;
-    if ((len = sizeOf(obj)) == 0) {
-      return false;
-    }
-    if (obj.charAt(len - 1) == '.') {
-      return false;
-    }
-    int idx = 0;
-    if (obj.charAt(0) == '-') {
-      if (len == 1) {
-        return false;
-      }
-      idx = 1;
-    }
-    int point = 0;
-    for (int i = idx; i < len; i++) {
-      char c = obj.charAt(i);
-      boolean isPoint = c == '.';
-      if (isPoint && ++point > 1) {
-        return false;
-      }
-      if (!isPoint && !Character.isDigit(c)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
    * <pre>
    * StringUtils.left(null, *)    = null
    * StringUtils.left(*, -ve)     = ""
@@ -314,7 +335,8 @@ public class StringUtils {
     if (seq == null || regex.length == 0) {
       return false;
     } else {
-      return streamOf(regex).map(ps -> Pattern.compile(ps, 0)).allMatch(p -> p.matcher(seq).find());
+      return streamOf(regex).map(ps -> Pattern.compile(ps, flags))
+          .allMatch(p -> p.matcher(seq).find());
     }
   }
 

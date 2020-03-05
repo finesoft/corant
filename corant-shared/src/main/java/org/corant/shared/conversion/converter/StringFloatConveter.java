@@ -22,7 +22,7 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringFloatConveter extends AbstractConverter<String, Float> {
+public class StringFloatConveter extends AbstractNumberConverter<String, Float> {
 
   public StringFloatConveter() {
     super();

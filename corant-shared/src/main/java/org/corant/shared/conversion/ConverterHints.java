@@ -36,6 +36,10 @@ public class ConverterHints {
 
   public static final String CVT_NEST_DEPT_KEY = "converter.max.nest.dept";
 
+  public static final String CVT_NUMBER_RADIX_KEY = "converter.number.radix";
+
+  public static final String CVT_NUMBER_UNSIGNED_KEY = "converter.number.unsigned";
+
   public static final String CVT_TEMPORAL_FMT_PTN_KEY = "converter.temporal.formater.pattern";
 
   public static final String CVT_TEMPORAL_FMT_KEY = "converter.temporal.formater";

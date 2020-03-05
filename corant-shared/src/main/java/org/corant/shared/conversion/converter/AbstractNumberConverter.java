@@ -13,32 +13,38 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
  *
- * @author bingo 下午5:40:35
+ * @author bingo 上午11:03:47
  *
  */
-public class StringShortConverter extends AbstractNumberConverter<String, Short> {
+public abstract class AbstractNumberConverter<S, T extends Number> extends AbstractConverter<S, T> {
 
-  public StringShortConverter() {
+  public static final String[] HEX_PREFIXES =
+      {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#"};
+
+  /**
+   *
+   */
+  public AbstractNumberConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringShortConverter(boolean throwException) {
+  public AbstractNumberConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringShortConverter(Short defaultValue) {
+  public AbstractNumberConverter(T defaultValue) {
     super(defaultValue);
   }
 
@@ -46,23 +52,28 @@ public class StringShortConverter extends AbstractNumberConverter<String, Short>
    * @param defaultValue
    * @param throwException
    */
-  public StringShortConverter(Short defaultValue, boolean throwException) {
+  public AbstractNumberConverter(T defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
-  @Override
-  protected Short convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
-      return getDefaultValue();
-    } else if (hasHex(value)) {
-      return Short.decode(value);
+  public boolean hasHex(String value) {
+    if (value == null) {
+      return false;
     } else {
-      Integer radix = getHintsRadix(hints);
-      if (radix != null) {
-        return Short.valueOf(value, radix);
+      for (String hp : HEX_PREFIXES) {
+        if (value.startsWith(hp)) {
+          return true;
+        }
       }
-      return Short.valueOf(value);
     }
+    return false;
   }
 
+  protected Integer getHintsRadix(Map<String, ?> hints) {
+    return ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_RADIX_KEY);
+  }
+
+  protected boolean isHintsUnsigned(Map<String, ?> hints) {
+    return ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_UNSIGNED_KEY, false);
+  }
 }

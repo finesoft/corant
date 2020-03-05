@@ -23,7 +23,7 @@ import java.util.Map;
  * @author bingo 下午6:10:26
  *
  */
-public class StringBigIntegerConverter extends AbstractConverter<String, BigInteger> {
+public class StringBigIntegerConverter extends AbstractNumberConverter<String, BigInteger> {
 
   public StringBigIntegerConverter() {
     super();
@@ -55,8 +55,11 @@ public class StringBigIntegerConverter extends AbstractConverter<String, BigInte
   protected BigInteger convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
+    } else if (hasHex(value)) {
+      return BigInteger.valueOf(Long.decode(value));
     }
-    return new BigInteger(value);
+    Integer radix = getHintsRadix(hints);
+    return radix != null ? new BigInteger(value, radix) : new BigInteger(value);
   }
 
 }

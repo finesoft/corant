@@ -23,7 +23,7 @@ import java.util.Map;
  * @author bingo 下午6:10:26
  *
  */
-public class StringBigDecimalConverter extends AbstractConverter<String, BigDecimal> {
+public class StringBigDecimalConverter extends AbstractNumberConverter<String, BigDecimal> {
 
   public StringBigDecimalConverter() {
     super();

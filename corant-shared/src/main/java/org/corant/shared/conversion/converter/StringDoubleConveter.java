@@ -22,7 +22,7 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringDoubleConveter extends AbstractConverter<String, Double> {
+public class StringDoubleConveter extends AbstractNumberConverter<String, Double> {
 
   public StringDoubleConveter() {
     super();

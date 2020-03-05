@@ -66,7 +66,7 @@ public class ConfigProducer implements Serializable {
     final String useKey = key;
     Object value =
         config.getConvertedValue(useKey, injectionPoint.getType(), property.defaultValue());
-    logger.fine(() -> String.format("Inject config property to [%s.%s] with key [%s] value [%s]",
+    logger.finer(() -> String.format("Inject config property to [%s.%s] with key [%s] value [%s]",
         injectionPoint.getMember().getDeclaringClass().getName(),
         injectionPoint.getMember().getName(), useKey, value));
     return value;

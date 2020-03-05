@@ -67,7 +67,7 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-    logger.fine(() -> String.format("Retrive optional config property key [%s] type [%s]",
+    logger.finer(() -> String.format("Retrive optional config property key [%s] type [%s]",
         propertyName, propertyType.getName()));
     return Optional
         .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));

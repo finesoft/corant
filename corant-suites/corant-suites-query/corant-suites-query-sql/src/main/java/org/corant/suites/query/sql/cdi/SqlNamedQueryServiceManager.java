@@ -114,7 +114,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           dialect = toObject(qs[1], DBMS.class);
         }
       }
-      logger.info(String.format(
+      logger.fine(String.format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
           dataSourceName, dialect));
       return new DefaultSqlNamedQueryService(dataSourceName, dialect, this);

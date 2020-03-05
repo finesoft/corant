@@ -23,7 +23,7 @@ public class TracerProducer {
   public Tracer produceTracer() {
     final Tracer tracer = defaultObject(TracerResolver.resolveTracer(), GlobalTracer.get());
     GlobalTracer.register(tracer);
-    logger.info(() -> String.format("Registering %s to GlobalTracer and providing it as CDI bean.",
+    logger.fine(() -> String.format("Registering %s to GlobalTracer and providing it as CDI bean.",
         tracer));
     return tracer;
   }

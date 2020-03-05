@@ -161,7 +161,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   void registerMetricsMBean(AgroalDataSource agroalDataSource, String name) {
     final String useName = defaultString(name, "unnamed");
-    logger.info(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
+    logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
     ObjectName objectName = null;
     try {
       objectName = new ObjectName(

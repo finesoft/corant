@@ -78,7 +78,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
-      logger.info(() -> String.format(
+      logger.fine(() -> String.format(
           "Create default elastic named query service, the data center is [%s]. ", clusterName));
       return new DefaultEsNamedQueryService(transportClientManager.apply(clusterName), this);
     });

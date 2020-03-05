@@ -95,7 +95,7 @@ public class JPAExtension implements Extension {
         }
         String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName, new NamingReference(EntityManagerFactory.class, quas));
-        logger.info(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
+        logger.fine(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

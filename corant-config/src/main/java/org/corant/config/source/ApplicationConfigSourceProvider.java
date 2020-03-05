@@ -73,11 +73,11 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
     try {
       if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment
-        logger.info(() -> String.format("Load config source from designated locations %s",
+        logger.fine(() -> String.format("Load config source from designated locations %s",
             String.join(",", locations)));
         list.addAll(ConfigSourceLoader.load(APPLICATION_ORDINAL, filter, locations));
       } else {
-        logger.info(() -> String.format("Load config source from class paths %s",
+        logger.fine(() -> String.format("Load config source from class paths %s",
             String.join(",", classPaths)));
         list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
       }

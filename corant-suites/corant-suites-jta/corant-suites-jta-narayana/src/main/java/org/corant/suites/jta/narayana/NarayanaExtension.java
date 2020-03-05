@@ -89,7 +89,7 @@ public class NarayanaExtension implements TransactionExtension {
     if (getConfig().isBindToJndi()) {
       try {
         JNDIManager.bindJTAImplementation();
-        logger.info(() -> "Bind JTA implementations to Jndi.");
+        logger.fine(() -> "Bind JTA implementations to Jndi.");
       } catch (NamingException e) {
         throw new CorantRuntimeException(e,
             "An error occurred while registering Transaction Manager to JNDI");
@@ -154,7 +154,7 @@ public class NarayanaExtension implements TransactionExtension {
 
     getConfig().getTimeout().ifPresent(t -> {
       coordinatorEnvironmentBean.setDefaultTimeout(toInteger(t.getSeconds()));
-      logger.info(
+      logger.fine(
           () -> "Use thread interrupt checked action for narayana, it can cause inconsistencies.");
       coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
       coordinatorEnvironmentBean
@@ -179,7 +179,7 @@ public class NarayanaExtension implements TransactionExtension {
 
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
         .sorted(Sortable::compare).forEach(cfgr -> {
-          logger.info(() -> String.format("Use customer narayana configurator %s.",
+          logger.fine(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));
           cfgr.configCoreEnvironment(coreEnvironmentBean);
           cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);

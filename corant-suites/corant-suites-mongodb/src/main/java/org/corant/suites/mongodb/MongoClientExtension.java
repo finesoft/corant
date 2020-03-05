@@ -188,7 +188,7 @@ public class MongoClientExtension implements Extension {
     if (databaseConfigManager.isEmpty()) {
       logger.info(() -> "Can not find any mongodb databases!");
     } else {
-      logger.info(
+      logger.fine(
           () -> String.format("Find %s mongodb databases named [%s].", databaseConfigManager.size(),
               String.join(",", databaseConfigManager.getAllDisplayNames())));
     }
@@ -248,7 +248,7 @@ public class MongoClientExtension implements Extension {
           }
           String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + name;
           jndi.bind(jndiName, new NamingReference(MongoClient.class, qualifiers));
-          logger.info(() -> String.format("Bind mongo client %s to jndi.", jndiName));
+          logger.fine(() -> String.format("Bind mongo client %s to jndi.", jndiName));
         } catch (NamingException e) {
           throw new CorantRuntimeException(e);
         }

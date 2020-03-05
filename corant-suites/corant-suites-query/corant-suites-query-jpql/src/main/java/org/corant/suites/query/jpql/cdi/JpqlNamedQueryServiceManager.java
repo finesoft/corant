@@ -77,7 +77,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String pu = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
-      logger.info(() -> String
+      logger.fine(() -> String
           .format("Create default jpql named query service, the persistence unit is [%s].", pu));
       return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(pu), this);
     });

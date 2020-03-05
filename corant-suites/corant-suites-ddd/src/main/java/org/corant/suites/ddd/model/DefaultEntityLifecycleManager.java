@@ -115,6 +115,6 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
       entities.stream().map(ManagedType::getJavaType)
           .forEach(cls -> clsUns.put(cls, persistenceService.getPersistenceContext(puNme)));
     });
-    logger.info(() -> "Initialized JPAPersistenceService.");
+    logger.fine(() -> "Initialized JPAPersistenceService.");
   }
 }

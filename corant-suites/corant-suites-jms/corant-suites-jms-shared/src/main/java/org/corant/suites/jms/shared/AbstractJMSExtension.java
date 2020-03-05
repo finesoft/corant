@@ -77,17 +77,17 @@ public abstract class AbstractJMSExtension implements Extension {
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
-    logger.info(() -> String.format("Scanning JMS message consumer type: %s", beanClass.getName()));
+    logger.fine(() -> String.format("Scanning JMS message consumer type: %s", beanClass.getName()));
     ContextualMethodHandler.from(beanClass, m -> m.isAnnotationPresent(MessageReceive.class))
         .forEach(cm -> {
-          logger.info(() -> String.format(
+          logger.fine(() -> String.format(
               "Found annotated JMS message consumer method %s.%s, adding for further processing.",
               beanClass.getName(), cm.getMethod().getName()));
           receiveMethods.add(cm);
         });
     ContextualMethodHandler.from(beanClass, m -> m.isAnnotationPresent(MessageStream.class))
         .forEach(cm -> {
-          logger.info(() -> String.format(
+          logger.fine(() -> String.format(
               "Found annotated JMS message stream method %s.%s, for now we do not support it.",
               beanClass.getName(), cm.getMethod().getName()));
           streamMethods.add(cm);

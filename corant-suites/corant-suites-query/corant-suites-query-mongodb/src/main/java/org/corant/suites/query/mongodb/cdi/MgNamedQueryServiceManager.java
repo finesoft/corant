@@ -75,7 +75,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String databaseName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
-      logger.info(() -> String.format(
+      logger.fine(() -> String.format(
           "Create default mongodb named query service, the data base is [%s].", databaseName));
       return new DefaultMgNamedQueryService(databaseName, this);
     });

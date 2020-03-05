@@ -60,7 +60,7 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      logger.info(
+      logger.fine(
           () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
               defaultBlank(pu.unitName(), "unnamed")));
     }

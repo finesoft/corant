@@ -92,7 +92,7 @@ public class FlywayMigrator {
       getConfigProviders().map(this::build).filter(ObjectUtils::isNotNull).forEach(this::doMigrate);
       logger.info(() -> "Finished migrate process.");
     } else {
-      logger.info(() -> String.format(
+      logger.fine(() -> String.format(
           "Disable migrate process, If you want to migrate, set %s in the configuration file!",
           "flyway.migrate.enable=true"));
     }

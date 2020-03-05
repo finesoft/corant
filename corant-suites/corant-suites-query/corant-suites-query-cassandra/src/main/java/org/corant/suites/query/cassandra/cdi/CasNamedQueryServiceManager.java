@@ -77,7 +77,7 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
-      logger.info(() -> String.format(
+      logger.fine(() -> String.format(
           "Create default cassandra named query service, the cluster is [%s].", clusterName));
       return new DefaultCasNamedQueryService(clusterName, this);
     });

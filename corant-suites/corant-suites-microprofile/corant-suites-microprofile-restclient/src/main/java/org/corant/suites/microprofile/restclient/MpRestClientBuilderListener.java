@@ -37,7 +37,7 @@ public class MpRestClientBuilderListener implements RestClientBuilderListener {
   @Override
   public void onNewBuilder(RestClientBuilder builder) {
     if (enableDefaultContextResolver) {
-      logger.info("Register default mp context resolver to RestClientBuilder");
+      logger.fine("Register default mp context resolver to RestClientBuilder");
       builder.register(MpDefaultContextResolver.class, Priorities.USER);
     }
     select(MpRestClientBuilderConfigurator.class).stream().sorted(Sortable::compare)

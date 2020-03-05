@@ -39,7 +39,7 @@ import org.keycloak.util.JsonSerialization;
 
 /**
  * corant-suites-keycloak-admin
- * 
+ *
  * @author bingo 上午11:22:03
  */
 @ApplicationScoped
@@ -87,14 +87,14 @@ public class KeycloakAdmin {
     synchronized (this) {
       try {
         if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
-          logger.info(
+          logger.fine(
               () -> String.format("Find keycloak admin client config json %s", keycloakJson.get()));
           adminConfig = JsonSerialization.readValue(keycloakJson.get(), AdapterConfig.class);
         } else if (keycloakJsonLocation.isPresent()) {
           Resource resource =
               Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
           if (resource != null) {
-            logger.info(() -> String.format("Find keycloak admin client config json %s",
+            logger.fine(() -> String.format("Find keycloak admin client config json %s",
                 keycloakJsonLocation.get()));
             try (InputStream is = resource.openStream()) {
               adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);
@@ -110,7 +110,7 @@ public class KeycloakAdmin {
   @Produces
   Keycloak produce() {
     if (adminConfig != null) {
-      logger.info(() -> "Use keycloak admin config json to build Keycloak instance.");
+      logger.fine(() -> "Use keycloak admin config json to build Keycloak instance.");
       KeycloakBuilder builder = KeycloakBuilder.builder().serverUrl(adminConfig.getAuthServerUrl())
           .realm(adminConfig.getRealm()).grantType(OAuth2Constants.CLIENT_CREDENTIALS)
           .clientId(adminConfig.getResource())
@@ -122,7 +122,7 @@ public class KeycloakAdmin {
     } else {
       shouldBeTrue(serverUrl.isPresent() && realm.isPresent() && username.isPresent()
           && password.isPresent() && clientId.isPresent());
-      logger.info(() -> "Use keycloak admin config to build Keycloak instance.");
+      logger.fine(() -> "Use keycloak admin config to build Keycloak instance.");
       KeycloakBuilder builder =
           KeycloakBuilder.builder().serverUrl(serverUrl.get()).realm(realm.get())
               .username(username.get()).password(password.get()).clientId(clientId.get());

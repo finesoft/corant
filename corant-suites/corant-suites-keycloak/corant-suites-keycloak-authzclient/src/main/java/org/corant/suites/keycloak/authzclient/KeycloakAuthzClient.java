@@ -14,7 +14,6 @@
 package org.corant.suites.keycloak.authzclient;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
-
 import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -106,12 +105,15 @@ public class KeycloakAuthzClient {
   @PostConstruct
   protected void onPostConstruct() {
     try {
-      if(keycloakJson.isPresent() && isNotBlank(keycloakJson.get())){
-        authzClient = AuthzClient.create(JsonSerialization.readValue(keycloakJson.get(), Configuration.class));
-        logger.info(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
-      }else{
-        authzClient = AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
-        logger.info( () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
+      if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
+        authzClient = AuthzClient
+            .create(JsonSerialization.readValue(keycloakJson.get(), Configuration.class));
+        logger.fine(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
+      } else {
+        authzClient =
+            AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
+        logger.fine(
+            () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       }
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();

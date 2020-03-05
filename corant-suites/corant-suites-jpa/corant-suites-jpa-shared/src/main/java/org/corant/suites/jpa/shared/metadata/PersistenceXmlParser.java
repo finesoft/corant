@@ -58,7 +58,7 @@ public class PersistenceXmlParser {
   public static Set<PersistenceUnitInfoMetaData> parse(URL url) {
     Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     doParse(url, cfgs);
-    logger.info(() -> String.format("Parsed persistence unit from [%s]", url.toExternalForm()));
+    logger.fine(() -> String.format("Parsed persistence unit from [%s]", url.toExternalForm()));
     return cfgs;
   }
 

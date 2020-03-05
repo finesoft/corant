@@ -17,6 +17,7 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -164,7 +165,8 @@ public class FlywayMigrator {
   }
 
   protected String getLocation(String name) {
-    return globalFlywayConfig.getLocationPrefix() + "/" + name + "/";
+    return isNotBlank(name) ? globalFlywayConfig.getLocationPrefix() + "/" + name + "/"
+        : globalFlywayConfig.getLocationPrefix() + "/";
   }
 
   protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {

@@ -14,9 +14,8 @@
 package org.corant.suites.query.cassandra.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
@@ -75,27 +74,23 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    String clusterName;
-    if (qualifier instanceof CasQuery) {
-      CasQuery q = forceCast(qualifier);
-      clusterName = defaultString(q.value());
-    } else {
-      clusterName = asDefaultString(qualifier);
-    }
-    if (isBlank(clusterName) && defaultQualifierValue.isPresent()) {
-      clusterName = defaultQualifierValue.get();
-    }
-    final String dataBase = clusterName;
-    return services.computeIfAbsent(dataBase, db -> {
-      logger.info(() -> String
-          .format("Create default cassandra named query service, the cluster is [%s].", db));
-      return new DefaultCasNamedQueryService(db, this);
+    String key = resolveQualifier(qualifier);
+    return services.computeIfAbsent(key, k -> {
+      final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      logger.info(() -> String.format(
+          "Create default cassandra named query service, the cluster is [%s].", clusterName));
+      return new DefaultCasNamedQueryService(clusterName, this);
     });
   }
 
   @Override
   public QueryType getType() {
     return QueryType.MG;
+  }
+
+  protected String resolveQualifier(Object qualifier) {
+    return qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
+        : asDefaultString(qualifier);
   }
 
   @Produces

@@ -16,9 +16,8 @@ package org.corant.suites.query.sql.cdi;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
@@ -100,38 +99,25 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Inject
   @ConfigProperty(name = "query.sql.default-qualifier-dialect", defaultValue = "MYSQL")
-  protected String defaultQualifierDialect;
+  protected DBMS defaultQualifierDialect;
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    String dataSourceName = null;
-    String dialectName = null;
-    if (qualifier instanceof SqlQuery) {
-      SqlQuery q = forceCast(qualifier);
-      dataSourceName = defaultString(q.value());
-      dialectName = defaultString(q.dialect());
-    } else {
+    String key = resolveQualifer(qualifier);
+    return services.computeIfAbsent(key, k -> {
+      String dataSourceName = defaultQualifierValue.orElse(EMPTY);
+      DBMS dialect = defaultQualifierDialect;
       String[] qs = split(asDefaultString(qualifier), ":", true, true);
       if (qs.length > 0) {
         dataSourceName = qs[0];
         if (qs.length > 1) {
-          dialectName = qs[1];
+          dialect = toObject(qs[1], DBMS.class);
         }
       }
-    }
-    if (isBlank(dataSourceName) && defaultQualifierValue.isPresent()) {
-      dataSourceName = defaultQualifierValue.get();
-    }
-    if (isBlank(dialectName)) {
-      dialectName = defaultQualifierDialect;
-    }
-    final String dsn = dataSourceName;
-    final DBMS dialect = toObject(dialectName, DBMS.class);
-    return services.computeIfAbsent(dsn, ds -> {
-      logger.info(() -> String.format(
+      logger.info(String.format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
-          ds, dialect.name()));
-      return new DefaultSqlNamedQueryService(ds, dialect, this);
+          dataSourceName, dialect));
+      return new DefaultSqlNamedQueryService(dataSourceName, dialect, this);
     });
   }
 
@@ -146,6 +132,15 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     final Annotated annotated = ip.getAnnotated();
     final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
     return get(sc);
+  }
+
+  String resolveQualifer(Object qualifier) {
+    if (qualifier instanceof SqlQuery) {
+      SqlQuery q = forceCast(qualifier);
+      return q.value().concat(":").concat(q.dialect());
+    } else {
+      return asDefaultString(qualifier);
+    }
   }
 
   /**

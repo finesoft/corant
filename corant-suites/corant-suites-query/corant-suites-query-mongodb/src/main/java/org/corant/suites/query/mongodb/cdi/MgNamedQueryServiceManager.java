@@ -14,9 +14,8 @@
 package org.corant.suites.query.mongodb.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
@@ -73,21 +72,12 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public NamedQueryService get(Object qualifier) {
-    String dataBaseName;
-    if (qualifier instanceof MgQuery) {
-      MgQuery q = forceCast(qualifier);
-      dataBaseName = defaultString(q.value());
-    } else {
-      dataBaseName = asDefaultString(qualifier);
-    }
-    if (isBlank(dataBaseName) && defaultQualifierValue.isPresent()) {
-      dataBaseName = defaultQualifierValue.get();
-    }
-    final String dataBase = dataBaseName;
-    return services.computeIfAbsent(dataBase, db -> {
-      logger.info(() -> String
-          .format("Create default mongodb named query service, the data base is [%s].", db));
-      return new DefaultMgNamedQueryService(db, this);
+    String key = resolveQualifier(qualifier);
+    return services.computeIfAbsent(key, k -> {
+      final String databaseName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      logger.info(() -> String.format(
+          "Create default mongodb named query service, the data base is [%s].", databaseName));
+      return new DefaultMgNamedQueryService(databaseName, this);
     });
   }
 
@@ -102,6 +92,14 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     final Annotated annotated = ip.getAnnotated();
     final MgQuery sc = shouldNotNull(annotated.getAnnotation(MgQuery.class));
     return get(sc);
+  }
+
+  String resolveQualifier(Object qualifier) {
+    if (qualifier instanceof MgQuery) {
+      return ((MgQuery) qualifier).value();
+    } else {
+      return asDefaultString(qualifier);
+    }
   }
 
   /**

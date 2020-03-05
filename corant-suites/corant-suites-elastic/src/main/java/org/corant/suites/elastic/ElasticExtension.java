@@ -15,6 +15,7 @@ package org.corant.suites.elastic;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.cdi.Instances.findNamed;
@@ -77,7 +78,10 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   public PreBuiltTransportClient getTransportClient(String clusterName) {
-    if (isBlank(clusterName) && clients.size() == 1) {
+    if (isBlank(clusterName) && sizeOf(configManager.getAllWithQualifiers()) == 1) {
+      if (sizeOf(clients) == 0) {
+        configManager.getAllNames().forEach(name -> clients.computeIfAbsent(name, this::produce));
+      }
       return clients.values().iterator().next();
     }
     return clients.computeIfAbsent(clusterName, this::produce);

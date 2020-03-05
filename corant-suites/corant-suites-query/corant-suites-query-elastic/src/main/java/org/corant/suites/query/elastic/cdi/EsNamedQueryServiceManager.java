@@ -13,9 +13,8 @@
  */
 package org.corant.suites.query.elastic.cdi;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
 import java.util.Optional;
@@ -76,27 +75,23 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Override
   public EsNamedQueryService get(Object qualifier) {
-    String clusterName;
-    if (qualifier instanceof EsQuery) {
-      EsQuery q = forceCast(qualifier);
-      clusterName = defaultString(q.value());
-    } else {
-      clusterName = asDefaultString(qualifier);
-    }
-    if (isBlank(clusterName) && defaultQualifierValue.isPresent()) {
-      clusterName = defaultQualifierValue.get();
-    }
-    final String useClusterName = clusterName;
-    return services.computeIfAbsent(useClusterName, cn -> {
-      logger.info(() -> String
-          .format("Create default elastic named query service, the data center is [%s]. ", cn));
-      return new DefaultEsNamedQueryService(transportClientManager.apply(cn), this);
+    String key = resolveQualifier(qualifier);
+    return services.computeIfAbsent(key, k -> {
+      final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      logger.info(() -> String.format(
+          "Create default elastic named query service, the data center is [%s]. ", clusterName));
+      return new DefaultEsNamedQueryService(transportClientManager.apply(clusterName), this);
     });
   }
 
   @Override
   public QueryType getType() {
     return QueryType.ES;
+  }
+
+  protected String resolveQualifier(Object qualifier) {
+    return qualifier instanceof EsQuery ? ((EsQuery) qualifier).value()
+        : asDefaultString(qualifier);
   }
 
   @Produces

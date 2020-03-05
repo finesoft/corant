@@ -38,7 +38,7 @@ public @interface QueryMethod {
    *
    * @return name
    */
-  String name();
+  String name() default "";
 
   /**
    * The method that query service execute

@@ -19,6 +19,8 @@ import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
@@ -27,6 +29,9 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassResource;
 import org.corant.shared.util.TypeUtils;
 
 /**
@@ -64,6 +69,19 @@ public class ConverterRegistry {
 
   public static Map<ConverterType<?, ?>, Converter<?, ?>> getSupportConverters() {
     return Collections.unmodifiableMap(SUPPORT_CONVERTERS);
+  }
+
+  public static void main(String... strings) throws IOException {
+    String path = "org/corant/shared/conversion/converter/";
+    Resources.fromClassPath(path).forEach(x -> {
+      if (x instanceof ClassResource) {
+        Class<?> cls = ((ClassResource) x).load();
+        if (!Modifier.isAbstract(cls.getModifiers())
+            && AbstractConverter.class.isAssignableFrom(cls)) {
+          System.out.println(((ClassResource) x).getClassName());
+        }
+      }
+    });
   }
 
   public static synchronized <S, T> void register(Converter<S, T> converter) {

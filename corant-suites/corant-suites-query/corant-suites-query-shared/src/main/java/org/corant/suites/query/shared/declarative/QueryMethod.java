@@ -19,6 +19,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.QueryService.QueryWay;
 
 /**
@@ -43,6 +44,11 @@ public @interface QueryMethod {
   /**
    * The method that query service execute
    *
+   * @see QueryService#forward(Object, Object)
+   * @see QueryService#get(Object, Object)
+   * @see QueryService#select(Object, Object)
+   * @see QueryService#page(Object, Object)
+   * @see QueryService#stream(Object, Object)
    * @return way
    */
   QueryWay way() default QueryWay.SELECT;

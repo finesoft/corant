@@ -147,6 +147,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    * </pre>
    *
    * @param args
+   * @see ConverterHints
    * @return
    * @throws TemplateModelException getParamValue
    */

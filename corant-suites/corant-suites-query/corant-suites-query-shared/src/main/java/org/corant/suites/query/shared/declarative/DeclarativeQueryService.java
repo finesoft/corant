@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
+import org.corant.suites.query.shared.QueryService;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
@@ -36,7 +37,7 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
  *
  * 1. The interface method with default static modifier will not be dynamic implemented.
  *
- * 2. If use JVAVA8 then default method will avaliable, this may be changed in the future.
+ * 2. If use Java8 then default method will avaliable, this may be changed in the future.
  *
  * 3. For now If the method without default and static modifier and has more than one parameter,
  * the second parameter will not be use, we only use first parameter as query parameter,
@@ -46,6 +47,13 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
  *
  * 5. Dynamically generated methods support facilities such as CDI interceptors
  *
+ * 6. If the method is not annotated @QueryMethod, then the interface class simple name and
+ * the method name are joined with a dot(.) as the name of the named query.
+ * If the method name start with 'page' then implement as paging query {@link QueryService#page(Object, Object)};
+ * If the method name start with 'forward' then implement as forwarding query {@link QueryService#forward(Object, Object)};
+ * If the method name start with 'get' then implement as get query {@link QueryService#get(Object, Object)};
+ * If the method name start with 'stream' then implement as stream query {@link QueryService#stream(Object, Object)};
+ * If the method not start with above then implement as select query  {@link QueryService#select(Object, Object)}
  * </pre>
  *
  * @author bingo 下午6:30:18
@@ -60,7 +68,8 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
 public @interface DeclarativeQueryService {
 
   /**
-   * The query qualifier, typically represents a data source.
+   * The query qualifier, typically represents a data source, here data source means sql data source
+   * or mongodb database or elastic and cassandra cluster.
    *
    * <pre>
    *
@@ -75,8 +84,7 @@ public @interface DeclarativeQueryService {
    *  the qualifier represents the cluster name.
    *
    *  Default is empty string, meaning that if there is only one data source for the particular
-   *  query type ({@code type()}) in the application, then the qualifier represents that data source
-   *   , here data source means sql data source or mongodb database or elastic and cassandra cluster.
+   *  query type ({@code type()}) in the application, then the qualifier represents that data source.
    *
    * </pre>
    *
@@ -86,11 +94,17 @@ public @interface DeclarativeQueryService {
 
   /**
    * The query type
-   * 
+   *
    * @return type
    */
   QueryType type() default QueryType.SQL;
 
+  /**
+   * corant-suites-query-shared
+   *
+   * @author bingo 下午7:20:19
+   *
+   */
   public static class DeclarativeQueryServiceLiteral
       extends AnnotationLiteral<DeclarativeQueryService> implements DeclarativeQueryService {
 

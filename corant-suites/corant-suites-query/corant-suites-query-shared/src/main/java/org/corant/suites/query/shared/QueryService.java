@@ -328,7 +328,26 @@ public interface QueryService<Q, P> {
 
   public enum QueryWay {
 
-    FORWARD, GET, PAGE, SELECT, STREAM;
+    /**
+     * @see QueryService#forward(Object, Object)
+     */
+    FORWARD,
+    /**
+     * @see QueryService#get(Object, Object)
+     */
+    GET,
+    /**
+     * @see QueryService#page(Object, Object)
+     */
+    PAGE,
+    /**
+     * @see QueryService#select(Object, Object)
+     */
+    SELECT,
+    /**
+     * @see QueryService#stream(Object, Object)
+     */
+    STREAM;
 
     public static QueryWay fromMethodName(String methodName) {
       if (methodName != null) {

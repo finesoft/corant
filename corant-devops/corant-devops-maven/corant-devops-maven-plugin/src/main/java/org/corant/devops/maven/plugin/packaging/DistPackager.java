@@ -15,7 +15,6 @@ package org.corant.devops.maven.plugin.packaging;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -223,8 +222,7 @@ public class DistPackager implements Packager {
     log.debug(String.format("(corant) packaged entry %s", entryName));
   }
 
-  private ArchiveOutputStream packArchiveOutput(OutputStream os)
-      throws FileNotFoundException, IOException, ArchiveException {
+  private ArchiveOutputStream packArchiveOutput(OutputStream os) throws ArchiveException {
     return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(), os);
   }
 

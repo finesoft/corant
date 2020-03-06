@@ -146,7 +146,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public String getSysPros() {
-    return sysPros != null && !sysPros.isEmpty() ? sysPros.trim() : "";
+    return sysPros != null && !sysPros.isEmpty() ? sysPros.trim().replace('\n', ' ') : "";
   }
 
   public String getUsedConfigLocation() {
@@ -154,7 +154,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public String getVmArgs() {
-    return vmArgs != null && !vmArgs.isEmpty() ? vmArgs.trim() : "";
+    return vmArgs != null && !vmArgs.isEmpty() ? vmArgs.trim().replace('\n', ' ') : "";
   }
 
   public boolean isJar() {

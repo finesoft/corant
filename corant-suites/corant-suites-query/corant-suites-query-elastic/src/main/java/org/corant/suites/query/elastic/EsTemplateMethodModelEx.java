@@ -17,7 +17,7 @@ import static org.corant.shared.util.ClassUtils.getComponentClass;
 import static org.corant.shared.util.ClassUtils.getUserClass;
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
@@ -35,7 +35,6 @@ import freemarker.template.TemplateModelException;
 public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 
   public static final ObjectMapper OM = new ObjectMapper();
-  private final Map<String, Object> parameters = new HashMap<>();
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -64,7 +63,7 @@ public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
 
   @Override
   public Map<String, Object> getParameters() {
-    return parameters;
+    return Collections.emptyMap();// elastic search query we use inline
   }
 
 }

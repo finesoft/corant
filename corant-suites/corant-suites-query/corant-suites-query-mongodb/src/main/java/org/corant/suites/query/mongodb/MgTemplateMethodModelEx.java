@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -129,8 +130,6 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
 
   public static final ObjectMapper OM = new ObjectMapper();
 
-  private final Map<String, Object> parameters = new HashMap<>();
-
   @Override
   public Object defaultConvertParamValue(Object value) {
     Class<?> type = getComponentClass(value);
@@ -173,7 +172,7 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
 
   @Override
   public Map<String, Object> getParameters() {
-    return parameters;
+    return Collections.emptyMap();// mongodb query we use inline
   }
 
   @Override

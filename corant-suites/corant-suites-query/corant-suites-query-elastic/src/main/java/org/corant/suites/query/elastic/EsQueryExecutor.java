@@ -94,7 +94,7 @@ public interface EsQueryExecutor {
         Map<String, Object> result =
             XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
         List<Object> extracted = new ArrayList<>();
-        QueryUtils.extractResult(result, HIT_RS_ETR_PATHS, false, extracted);
+        QueryUtils.extractMapValue(result, HIT_RS_ETR_PATHS, false, extracted);
         extracted.forEach(obj -> list.add(forceCast(obj)));
       }
     }

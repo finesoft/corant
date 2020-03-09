@@ -58,7 +58,7 @@ public class Query implements Serializable {
 
   public Query(String mappingFilePath) {
     this();
-    this.mappingFilePath = mappingFilePath;
+    setMappingFilePath(mappingFilePath);
   }
 
   /**
@@ -83,22 +83,26 @@ public class Query implements Serializable {
       Map<String, ParameterMapping> paramMappings, Map<String, String> properties,
       String mappingFilePath, String macroScript) {
     super();
-    this.name = name;
+    setName(name);
     setResultClass(resultClass);
-    this.resultSetMapping = resultSetMapping;
-    this.cache = cache;
-    this.cacheResultSetMetadata = cacheResultSetMetadata;
-    this.description = description;
+    setResultSetMapping(resultSetMapping);
+    setCache(cache);
+    setCacheResultSetMetadata(cacheResultSetMetadata);
+    setDescription(description);
     if (script != null) {
-      this.script = script;
+      setScript(script);
     }
-    this.fetchQueries = fetchQueries;
-    this.hints = hints;
-    this.version = version;
-    this.paramMappings = paramMappings;
-    this.properties = properties;
-    this.mappingFilePath = defaultTrim(mappingFilePath);
-    this.macroScript = macroScript;
+    if (fetchQueries != null) {
+      this.fetchQueries.addAll(fetchQueries);
+    }
+    if (hints != null) {
+      this.hints.addAll(hints);
+    }
+    setVersion(version);
+    setParamMappings(paramMappings);
+    setProperties(properties);
+    setMappingFilePath(defaultTrim(mappingFilePath));
+    setMacroScript(macroScript);
   }
 
   /**
@@ -147,7 +151,7 @@ public class Query implements Serializable {
   }
 
   public Map<String, Class<?>> getParamConvertSchema() {
-    return Collections.unmodifiableMap(paramMappings.entrySet().stream()
+    return Collections.unmodifiableMap(getParamMappings().entrySet().stream()
         .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getType())));
   }
 
@@ -175,7 +179,7 @@ public class Query implements Serializable {
    * @return getProperty
    */
   public <T> T getProperty(String name, Class<T> cls) {
-    return isEmpty(properties) ? null : toObject(properties.get(name), cls);
+    return isEmpty(getProperties()) ? null : toObject(getProperties().get(name), cls);
   }
 
   /**
@@ -228,7 +232,7 @@ public class Query implements Serializable {
   }
 
   public String getVersionedName() {
-    return defaultString(name) + (isNotBlank(version) ? "_" + version : "");
+    return defaultString(getName()) + (isNotBlank(getVersion()) ? "_" + getVersion() : "");
   }
 
   /**
@@ -254,7 +258,7 @@ public class Query implements Serializable {
   }
 
   protected void addProperty(String name, String value) {
-    properties.put(name, value);
+    getProperties().put(name, value);
   }
 
   protected void setCache(boolean cache) {
@@ -325,10 +329,10 @@ public class Query implements Serializable {
     } else {
       hints = Collections.emptyList();
     }
-    paramMappings =
-        paramMappings == null ? Collections.emptyMap() : Collections.unmodifiableMap(paramMappings);
-    properties =
-        properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+    setParamMappings(getParamMappings() == null ? Collections.emptyMap()
+        : Collections.unmodifiableMap(getParamMappings()));
+    setProperties(getProperties() == null ? Collections.emptyMap()
+        : Collections.unmodifiableMap(getProperties()));
 
   }
 

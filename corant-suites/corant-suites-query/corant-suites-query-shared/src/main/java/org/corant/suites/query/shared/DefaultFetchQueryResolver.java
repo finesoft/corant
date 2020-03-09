@@ -13,12 +13,11 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.putKeyPathMapValue;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.normal.Names;
 import org.corant.suites.cdi.ConversionService;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
@@ -76,20 +76,20 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       return;
     }
     final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
-    final String injectProName = fetchQuery.getInjectPropertyName();
+    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
     if (injection == null) {
       // use inject pro name
-      shouldNotBlank(injectProName);
+      shouldNotEmpty(injectProNamePath);
       if (isEmpty(fetchedResults)) {
         for (Object result : results) {
-          injectFetchedResult(result, null, injectProName);
+          injectFetchedResult(result, null, injectProNamePath);
         }
       } else {
         for (Object result : results) {
           if (fetchQuery.isMultiRecords()) {
-            injectFetchedResult(result, fetchedResults, injectProName);
+            injectFetchedResult(result, fetchedResults, injectProNamePath);
           } else {
-            injectFetchedResult(result, fetchedResults.get(0), injectProName);
+            injectFetchedResult(result, fetchedResults.get(0), injectProNamePath);
           }
         }
       }
@@ -108,17 +108,17 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       return;
     }
     final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
-    final String injectProName = fetchQuery.getInjectPropertyName();
+    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
     if (injection == null) {
       // use inject pro name
-      shouldNotBlank(injectProName);
+      shouldNotEmpty(injectProNamePath);
       if (isEmpty(fetchedResults)) {
-        injectFetchedResult(result, null, injectProName);
+        injectFetchedResult(result, null, injectProNamePath);
       } else {
         if (fetchQuery.isMultiRecords()) {
-          injectFetchedResult(result, fetchedResults, injectProName);
+          injectFetchedResult(result, fetchedResults, injectProNamePath);
         } else {
-          injectFetchedResult(result, fetchedResults.iterator().next(), injectProName);
+          injectFetchedResult(result, fetchedResults.iterator().next(), injectProNamePath);
         }
       }
     } else {
@@ -156,17 +156,14 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return map;
   }
 
-  protected void injectFetchedResult(Object result, Object fetchedResult, String injectProName) {
+  protected void injectFetchedResult(Object result, Object fetchedResult,
+      String[] injectProNamePath) {
     if (result instanceof Map) {
-      Map<String, Object> mapResult = (Map) result;
-      if (injectProName.indexOf('.') != -1) {
-        putKeyPathMapValue(mapResult, injectProName, ".", fetchedResult);
-      } else {
-        mapResult.put(injectProName, fetchedResult);
-      }
+      QueryUtils.implantMapValue((Map) result, injectProNamePath, fetchedResult);
     } else if (result != null) {
       try {
-        BeanUtils.setProperty(result, injectProName, fetchedResult);
+        BeanUtils.setProperty(result, String.join(Names.NAME_SPACE_SEPARATORS, injectProNamePath),
+            fetchedResult);
       } catch (IllegalAccessException | InvocationTargetException e) {
         throw new QueryRuntimeException(e);
       }
@@ -213,7 +210,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
             convertIfNecessarily(criteria.get(parameter.getSourceName()), type));
       } else if (result != null) {
         String parameterName = parameter.getName();
-        String sourceName = parameter.getSourceName();
+        String[] sourceNamePath = parameter.getSourceNamePath();
         try {
           Object parameterValue = null;
           // handle multi results
@@ -222,7 +219,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
                 distinct ? new LinkedHashSet<>() : new ArrayList<>();
             List<?> resultList = (List<?>) result;
             for (Object resultItem : resultList) {
-              Object itemParameterValue = resolveFetchQueryCriteriaValue(resultItem, sourceName);
+              Object itemParameterValue =
+                  resolveFetchQueryCriteriaValue(resultItem, sourceNamePath);
               if (itemParameterValue != null) {
                 listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
               }
@@ -230,7 +228,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
             parameterValue = listParameterValue;
           } else {
             parameterValue =
-                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceName), type);
+                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceNamePath), type);
           }
           fetchCriteria.put(parameterName, parameterValue);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -243,18 +241,18 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return fetchCriteria;
   }
 
-  protected Object resolveFetchQueryCriteriaValue(Object result, String sourceName)
+  protected Object resolveFetchQueryCriteriaValue(Object result, String[] sourceNamePath)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     if (result instanceof Map) {
-      if (sourceName.indexOf('.') != -1) {
+      if (sourceNamePath.length > 1) {
         List<Object> values = new ArrayList<>();
-        QueryUtils.extractResult(result, sourceName, true, values);
+        QueryUtils.extractMapValue(result, sourceNamePath, true, values);
         return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
       } else {
-        return ((Map) result).get(sourceName);
+        return ((Map) result).get(sourceNamePath[0]);
       }
     } else {
-      return BeanUtils.getProperty(result, sourceName);
+      return BeanUtils.getProperty(result, String.join(".", sourceNamePath));
     }
   }
 
@@ -264,7 +262,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (isEmpty(results)) {
       return;
     }
-    final String injectProName = fetchQuery.getInjectPropertyName();
+    final String[] injectProName = fetchQuery.getInjectPropertyNamePath();
     if (isEmpty(fetchedResults)) {
       for (Object result : results) {
         injectFetchedResult(result, null, injectProName);
@@ -323,7 +321,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (result == null) {
       return;
     }
-    final String injectProName = fetchQuery.getInjectPropertyName();
+    final String[] injectProName = fetchQuery.getInjectPropertyNamePath();
     if (isEmpty(fetchedResults)) {
       injectFetchedResult(result, null, injectProName);
       return;

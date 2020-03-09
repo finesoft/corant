@@ -13,12 +13,11 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StringUtils.split;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.normal.Names;
 
 /**
  * corant-suites-query
@@ -26,46 +25,113 @@ import java.util.Map;
  * @author bingo 上午10:54:15
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class QueryUtils {
 
-  public static void extractResult(Object result, String paths, boolean flatList,
+  public static void extractMapValue(Object value, String paths, boolean flatList,
       List<Object> list) {
-    extractResult(result, split(paths, ".", true, false), flatList, list);
+    extractMapValue(value, split(paths, Names.NAME_SPACE_SEPARATORS, true, false), 0, flatList,
+        list);
   }
 
-  @SuppressWarnings("rawtypes")
-  public static void extractResult(Object result, String[] paths, boolean flatList,
+  public static void extractMapValue(Object value, String[] paths, boolean flatList,
       List<Object> list) {
-    if (!interruptExtract(result, paths, flatList, list)) {
-      if (result instanceof Map) {
-        String path = paths[0];
-        Object next = ((Map) result).get(path);
-        if (next != null) {
-          extractResult(next, Arrays.copyOfRange(paths, 1, paths.length), flatList, list);
+    extractMapValue(value, paths, 0, flatList, list);
+  }
+
+  public static void extractMapValue(Object value, String[] paths, int deep, boolean flatList,
+      List<Object> list) {
+    if (paths.length > deep) {
+      if (value instanceof Map) {
+        final Object next;
+        if ((next = ((Map) value).get(paths[deep])) != null) {
+          extractMapValue(next, paths, deep + 1, flatList, list);
         }
-      } else if (result instanceof Iterable) {
-        Iterable<?> resultIterable = (Iterable<?>) result;
-        for (Object next : resultIterable) {
+      } else if (value instanceof Iterable) {
+        for (Object next : (Iterable<?>) value) {
           if (next != null) {
-            extractResult(next, paths, flatList, list);
+            extractMapValue(next, paths, deep, flatList, list);
           }
         }
-      } else if (result != null) {
-        extractResult(listOf((Object[]) result), paths, flatList, list);// may be array
+      } else if (value instanceof Object[]) {
+        for (Object next : (Object[]) value) {
+          extractMapValue(next, paths, deep, flatList, list);
+        }
+      } else {
+        throw new NotSupportedException("We only extract value from map object");
+      }
+    } else {
+      if (value instanceof Iterable && flatList) {
+        for (Object next : (Iterable<?>) value) {
+          list.add(next);
+        }
+      } else {
+        list.add(value);
       }
     }
   }
 
-  static boolean interruptExtract(Object result, String[] paths, boolean flatList,
-      List<Object> list) {
-    if (isEmpty(paths)) {
-      if (result instanceof Iterable && flatList) {
-        listOf((Iterable<?>) result).forEach(list::add);
-      } else {
-        list.add(result);
-      }
-      return true;
-    }
-    return false;
+  public static void implantMapValue(Map<String, Object> target, String paths, Object value) {
+    implantMapValue(target, split(paths, Names.NAME_SPACE_SEPARATORS, true, false), 0, value);
   }
+
+  public static void implantMapValue(Map<String, Object> target, String[] paths, int deep,
+      Object value) {
+    String key;
+    if (target != null && paths.length > deep && target.containsKey(key = paths[deep])) {
+      if (paths.length - deep == 1) {
+        target.put(key, value);
+      } else {
+        Object tmp = target.get(key);
+        deep++;
+        if (tmp instanceof Map) {
+          implantMapValue((Map) tmp, paths, deep, value);
+        } else if (tmp instanceof Iterable) {
+          for (Object item : (Iterable) tmp) {
+            if (item instanceof Map) {
+              implantMapValue((Map) item, paths, deep, value);
+            } else if (item != null) {
+              throw new NotSupportedException("We only implant value to map object");
+            }
+          }
+        } else if (tmp instanceof Object[]) {
+          for (Object item : (Object[]) tmp) {
+            if (item instanceof Map) {
+              implantMapValue((Map) item, paths, deep, value);
+            } else if (item != null) {
+              throw new NotSupportedException("We only implant value to map object");
+            }
+          }
+        } else {
+          throw new NotSupportedException("We only implant value to map object");
+        }
+      }
+    }
+  }
+
+  public static void implantMapValue(Map<String, Object> target, String[] paths, Object value) {
+    implantMapValue(target, paths, 0, value);
+  }
+
+  // public static void main(String... strings) {
+  // Map<String, Object> map = mapOf("a", mapOf("a1", "a1_v", "a2",
+  // listOf(mapOf("a3_1",
+  // mapOf("a3_1_1",
+  // listOf(mapOf("a3_1_1_list_1", "a3_1_1_v1"), mapOf("a3_1_1_list_2", "a3_1_1_v2"))),
+  // "a3_2", "a3_v2")).stream().toArray(Object[]::new)),
+  // "b", 12);
+  // String key = "a.a2.a3_1.a3_1_1.a3_1_1_list_1";
+  // List<Object> vl = new ArrayList<>();
+  // System.out.println(JsonUtils.toString(map, true));
+  // extractMapValue(map, key, true, vl);
+  // System.out.println(JsonUtils.toString(vl, true));
+  // vl.clear();
+  // implantMapValue(map, split(key, ".", true, true), 0, "bingo");
+  // System.out.println("-----------------------------");
+  // System.out.println(JsonUtils.toString(map, true));
+  // extractMapValue(map, key, true, vl);
+  // System.out.println(JsonUtils.toString(vl, true));
+  //
+  // }
+
 }

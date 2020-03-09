@@ -16,12 +16,14 @@ package org.corant.suites.query.shared.mapping;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.corant.shared.normal.Names;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
@@ -37,6 +39,7 @@ public class FetchQuery implements Serializable {
   private QueryType referenceQueryType;
   private String referenceQueryQualifier;
   private String injectPropertyName;
+  private String[] injectPropertyNamePath = new String[0];
   private Class<?> resultClass = Map.class;
   private int maxSize = 1024;
   private List<FetchQueryParameter> parameters = new ArrayList<>();
@@ -71,22 +74,24 @@ public class FetchQuery implements Serializable {
       boolean multiRecords, Script predicate, Script injection, boolean eagerInject,
       QueryType referenceQueryType, String referenceQueryQualifier) {
     super();
-    this.referenceQuery = referenceQuery;
-    this.injectPropertyName = injectPropertyName;
+    setReferenceQuery(referenceQuery);
+    setInjectPropertyName(injectPropertyName);
     setResultClass(resultClass);
-    this.maxSize = maxSize;
-    this.parameters = parameters;
-    this.referenceQueryversion = referenceQueryversion;
-    this.multiRecords = multiRecords;
+    setMaxSize(maxSize);
+    if (parameters != null) {
+      this.parameters.addAll(parameters);
+    }
+    setReferenceQueryversion(referenceQueryversion);
+    setMultiRecords(multiRecords);
     if (predicate != null) {
-      predicateScript = predicate;
+      setPredicateScript(predicate);
     }
     if (injection != null) {
-      injectionScript = injection;
+      setInjectionScript(injection);
     }
-    this.eagerInject = eagerInject;
-    this.referenceQueryType = referenceQueryType;
-    this.referenceQueryQualifier = referenceQueryQualifier;
+    setEagerInject(eagerInject);
+    setReferenceQueryType(referenceQueryType);
+    setReferenceQueryQualifier(referenceQueryQualifier);
   }
 
   /**
@@ -106,6 +111,14 @@ public class FetchQuery implements Serializable {
    */
   public String getInjectPropertyName() {
     return injectPropertyName;
+  }
+
+  /**
+   *
+   * @return the injectPropertyNamePath
+   */
+  public String[] getInjectPropertyNamePath() {
+    return injectPropertyNamePath;
   }
 
   /**
@@ -206,6 +219,7 @@ public class FetchQuery implements Serializable {
 
   protected void setInjectPropertyName(String injectPropertyName) {
     this.injectPropertyName = injectPropertyName;
+    injectPropertyNamePath = split(injectPropertyName, Names.NAME_SPACE_SEPARATORS, true, false);
   }
 
   protected void setMaxSize(int maxSize) {
@@ -262,6 +276,7 @@ public class FetchQuery implements Serializable {
 
     private String name;
     private String sourceName;
+    private String[] sourceNamePath = new String[0];
     private FetchQueryParameterSource source;
     private String value;
     private Class<?> type;
@@ -282,12 +297,12 @@ public class FetchQuery implements Serializable {
     public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
         String value, Class<?> type, boolean distinct) {
       super();
-      this.name = name;
-      this.sourceName = sourceName;
-      this.source = source;
-      this.value = value;
-      this.type = type;
-      this.distinct = distinct;
+      setName(name);
+      setSourceName(sourceName);
+      setSource(source);
+      setValue(value);
+      setType(type);
+      setDistinct(distinct);
     }
 
     /**
@@ -309,6 +324,14 @@ public class FetchQuery implements Serializable {
      */
     public String getSourceName() {
       return sourceName;
+    }
+
+    /**
+     *
+     * @return the sourceNamePath
+     */
+    public String[] getSourceNamePath() {
+      return sourceNamePath;
     }
 
     /**
@@ -345,6 +368,7 @@ public class FetchQuery implements Serializable {
 
     protected void setSourceName(String sourceName) {
       this.sourceName = sourceName;
+      sourceNamePath = split(sourceName, Names.NAME_SPACE_SEPARATORS, true, false);
     }
 
     protected void setType(Class<?> type) {

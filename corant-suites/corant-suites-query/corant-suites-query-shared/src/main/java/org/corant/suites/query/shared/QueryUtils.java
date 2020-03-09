@@ -83,13 +83,13 @@ public class QueryUtils {
         target.put(key, value);
       } else {
         Object tmp = target.get(key);
-        deep++;
+        int next = deep + 1;
         if (tmp instanceof Map) {
-          implantMapValue((Map) tmp, paths, deep, value);
+          implantMapValue((Map) tmp, paths, next, value);
         } else if (tmp instanceof Iterable) {
           for (Object item : (Iterable) tmp) {
             if (item instanceof Map) {
-              implantMapValue((Map) item, paths, deep, value);
+              implantMapValue((Map) item, paths, next, value);
             } else if (item != null) {
               throw new NotSupportedException("We only implant value to map object");
             }
@@ -97,7 +97,7 @@ public class QueryUtils {
         } else if (tmp instanceof Object[]) {
           for (Object item : (Object[]) tmp) {
             if (item instanceof Map) {
-              implantMapValue((Map) item, paths, deep, value);
+              implantMapValue((Map) item, paths, next, value);
             } else if (item != null) {
               throw new NotSupportedException("We only implant value to map object");
             }
@@ -113,25 +113,15 @@ public class QueryUtils {
     implantMapValue(target, paths, 0, value);
   }
 
-  // public static void main(String... strings) {
-  // Map<String, Object> map = mapOf("a", mapOf("a1", "a1_v", "a2",
-  // listOf(mapOf("a3_1",
-  // mapOf("a3_1_1",
-  // listOf(mapOf("a3_1_1_list_1", "a3_1_1_v1"), mapOf("a3_1_1_list_2", "a3_1_1_v2"))),
-  // "a3_2", "a3_v2")).stream().toArray(Object[]::new)),
-  // "b", 12);
-  // String key = "a.a2.a3_1.a3_1_1.a3_1_1_list_1";
-  // List<Object> vl = new ArrayList<>();
-  // System.out.println(JsonUtils.toString(map, true));
-  // extractMapValue(map, key, true, vl);
-  // System.out.println(JsonUtils.toString(vl, true));
-  // vl.clear();
-  // implantMapValue(map, split(key, ".", true, true), 0, "bingo");
-  // System.out.println("-----------------------------");
-  // System.out.println(JsonUtils.toString(map, true));
-  // extractMapValue(map, key, true, vl);
-  // System.out.println(JsonUtils.toString(vl, true));
-  //
-  // }
-
+  /*
+   * public static void main(String... strings) { Map<String, Object> map = mapOf("a", mapOf("a1",
+   * "a1_v", "a2", listOf(mapOf("a3_1", mapOf("a3_1_1", listOf(mapOf("a3_1_1_list_1", "a3_1_1_v1"),
+   * mapOf("a3_1_1_list_2", "a3_1_1_v2"))), "a3_2", "a3_v2")).stream().toArray(Object[]::new)), "b",
+   * 12); String key = "a.a2.a3_1.a3_1_1.a3_1_1_list_1"; List<Object> vl = new ArrayList<>();
+   * System.out.println(JsonUtils.toString(map, true)); extractMapValue(map, key, true, vl);
+   * System.out.println(JsonUtils.toString(vl, true)); vl.clear(); implantMapValue(map, split(key,
+   * ".", true, true), 0, "bingo"); System.out.println("-----------------------------");
+   * System.out.println(JsonUtils.toString(map, true)); extractMapValue(map, key, true, vl);
+   * System.out.println(JsonUtils.toString(vl, true)); }
+   */
 }

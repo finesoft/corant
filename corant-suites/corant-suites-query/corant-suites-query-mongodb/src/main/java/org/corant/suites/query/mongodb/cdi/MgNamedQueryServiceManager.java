@@ -29,8 +29,10 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.bson.Document;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
+import org.corant.suites.query.mongodb.Decimal128Utils;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
@@ -69,6 +71,10 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   @Inject
   @ConfigProperty(name = "query.mongodb.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
+
+  @Inject
+  @ConfigProperty(name = "query.mongodb.convert-decimal", defaultValue = "true")
+  protected boolean convertDecimal;
 
   @Override
   public NamedQueryService get(Object qualifier) {
@@ -114,6 +120,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final int defaultMaxSelectSize;
     protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
+    protected final boolean convertDecimal;
 
     /**
      * @param dataBase
@@ -127,21 +134,30 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
       resolver = manager.resolver;
       defaultMaxSelectSize = manager.maxSelectSize;
       defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
+      convertDecimal = manager.convertDecimal;
     }
 
     /**
      * @param dataBase
      * @param defaultMaxSelectSize
      * @param defaultLimit
+     * @param convertDecimal
      * @param resolver
      */
     protected DefaultMgNamedQueryService(MongoDatabase dataBase, int defaultMaxSelectSize,
-        int defaultLimit, AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
+        int defaultLimit, boolean convertDecimal,
+        AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
       super();
       this.dataBase = dataBase;
       this.defaultMaxSelectSize = defaultMaxSelectSize;
       this.defaultLimit = defaultLimit;
       this.resolver = resolver;
+      this.convertDecimal = convertDecimal;
+    }
+
+    @Override
+    protected Document convertDocument(Document doc) {
+      return convertDecimal ? Decimal128Utils.convert(doc) : doc;
     }
 
     @Override

@@ -115,7 +115,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
+        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > limit) {
@@ -132,7 +132,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result = Decimal128Utils.convert(fi.iterator().tryNext());
+    Map<String, Object> result = convertDocument(fi.iterator().tryNext());
     this.fetch(result, querier);
     return querier.resolveResult(result);
   }
@@ -146,7 +146,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
-        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
+        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size < limit) {
@@ -166,7 +166,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(Decimal128Utils::convert).collect(Collectors.toList());
+        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > maxSelectSize) {
@@ -184,9 +184,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     return streamOf(query(querier)).map(result -> {
-      this.fetch(Decimal128Utils.convert(result), querier);
+      this.fetch(convertDocument(result), querier);
       return querier.resolveResult(result);
     });
+  }
+
+  protected Document convertDocument(Document doc) {
+    return doc;
   }
 
   protected abstract MongoDatabase getDataBase();

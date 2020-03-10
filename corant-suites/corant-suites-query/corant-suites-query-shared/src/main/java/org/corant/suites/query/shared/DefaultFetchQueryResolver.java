@@ -247,7 +247,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     if (result instanceof Map) {
       if (sourceNamePath.length > 1) {
-        List<Object> values = extractMapValue(result, sourceNamePath, true, false, false);
+        List<Object> values = extractMapValue(result, sourceNamePath, false, false);
         return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
       } else {
         return ((Map) result).get(sourceNamePath[0]);

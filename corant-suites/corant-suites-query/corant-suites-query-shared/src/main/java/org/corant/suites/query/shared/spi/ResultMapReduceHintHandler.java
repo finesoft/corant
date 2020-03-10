@@ -115,7 +115,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
             Map<String, Object> obj = new HashMap<>();
             for (Pair<String, String[]> rfn : useReduceFieldNames) {
-              obj.put(rfn.getLeft(), extractMapValue(map, rfn.getRight(), true, true, true));
+              obj.put(rfn.getLeft(), extractMapValue(map, rfn.getRight(), true, true));
             }
             map.put(useMapFieldName, obj);
           });

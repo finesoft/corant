@@ -93,7 +93,7 @@ public interface EsQueryExecutor {
       if (total > 0) {
         Map<String, Object> result =
             XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
-        List<Object> extracted = extractMapValue(result, HIT_RS_ETR_PATHS, true, false, false);
+        List<Object> extracted = extractMapValue(result, HIT_RS_ETR_PATHS, false, false);
         extracted.forEach(obj -> list.add(forceCast(obj)));
       }
     }

@@ -66,10 +66,10 @@ public class MapUtils {
    * @param single
    * @return extractMapValue
    */
-  public static <T> T extractMapValue(Object value, Object[] keyPath, boolean flat, boolean remove,
+  public static <T> T extractMapValue(Object value, Object[] keyPath, boolean remove,
       boolean single) {
     List<Object> holder = new ArrayList<>();
-    doExtractMapValue(value, keyPath, 0, flat, remove, holder);
+    doExtractMapValue(value, keyPath, 0, true, remove, holder);
     return forceCast(single ? !holder.isEmpty() ? holder.get(0) : null : holder);
   }
 

@@ -18,6 +18,8 @@ import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.MapUtils.extractMapValue;
+import static org.corant.shared.util.MapUtils.implantMapValue;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
@@ -159,7 +161,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   protected void injectFetchedResult(Object result, Object fetchedResult,
       String[] injectProNamePath) {
     if (result instanceof Map) {
-      QueryUtils.implantMapValue((Map) result, injectProNamePath, fetchedResult);
+      implantMapValue((Map) result, injectProNamePath, fetchedResult);
     } else if (result != null) {
       try {
         BeanUtils.setProperty(result, String.join(Names.NAME_SPACE_SEPARATORS, injectProNamePath),
@@ -245,8 +247,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     if (result instanceof Map) {
       if (sourceNamePath.length > 1) {
-        List<Object> values = new ArrayList<>();
-        QueryUtils.extractMapValue(result, sourceNamePath, true, values);
+        List<Object> values = extractMapValue(result, sourceNamePath, true, false, false);
         return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
       } else {
         return ((Map) result).get(sourceNamePath[0]);

@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isEmptyOrNull;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -27,11 +28,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,11 +48,30 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 
 public class MapUtils {
 
   private MapUtils() {
     super();
+  }
+
+  /**
+   * extract value from map object, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   * @param flat
+   * @param remove
+   * @param single
+   * @return extractMapValue
+   */
+  public static <T> T extractMapValue(Object value, Object[] keyPath, boolean flat, boolean remove,
+      boolean single) {
+    List<Object> holder = new ArrayList<>();
+    doExtractMapValue(value, keyPath, 0, flat, remove, holder);
+    return forceCast(single ? !holder.isEmpty() ? holder.get(0) : null : holder);
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
@@ -385,6 +407,11 @@ public class MapUtils {
     return Collections.unmodifiableMap(mapOf(objects));
   }
 
+  @SuppressWarnings("rawtypes")
+  public static void implantMapValue(Map target, Object[] paths, Object value) {
+    doImplantMapValue(target, paths, 0, value);
+  }
+
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
     Map<V, K> result = new HashMap<>();
     if (map != null) {
@@ -446,29 +473,6 @@ public class MapUtils {
     return result;
   }
 
-  public static void putKeyPathMapValue(Map<String, Object> map, String key, String keySplitor,
-      Object value) {
-    if (map == null) {
-      return;
-    }
-    Map<String, Object> useMap = map;
-    String[] keys = split(key, keySplitor, true, false);
-    int len = keys.length - 1;
-    if (len == -1) {
-      return;
-    } else {
-      String putKey = keys[len];
-      for (int i = 0; i < len; i++) {
-        if ((useMap = getMapMap(useMap, keys[i])) == null) {
-          break;
-        }
-      }
-      if (useMap != null) {
-        useMap.put(putKey, value);
-      }
-    }
-  }
-
   public static void replaceKeyPathMapValue(Map<String, Object> map, String key, String keySplitor,
       Function<Object, Object> func) {
     replaceKeyPathMapValue(map, split(key, keySplitor, true, false), func);
@@ -509,6 +513,58 @@ public class MapUtils {
     return pops;
   }
 
+  @SuppressWarnings("rawtypes")
+  static void doExtractMapValue(Object value, Object[] keyPath, int deep, boolean flat,
+      boolean remove, List<Object> holder) {
+    if (value == null) {
+      return;
+    }
+    final int index = keyPath.length - deep;
+    final boolean removed = remove && index == 1;
+    if (index > 0) {
+      if (value instanceof Map) {
+        final Object key = keyPath[deep];
+        final Map mapValue = (Map) value;
+        final Object next = removed ? mapValue.remove(key) : mapValue.get(key);
+        if (next != null) {
+          doExtractMapValue(next, keyPath, deep + 1, flat, remove, holder);
+        }
+      } else if (value instanceof Iterable) {
+        final Iterator it = ((Iterable<?>) value).iterator();
+        while (it.hasNext()) {
+          Object next = it.next();
+          if (next != null) {
+            doExtractMapValue(next, keyPath, deep, flat, remove, holder);
+          }
+          if (removed && isEmptyOrNull(next)) {
+            it.remove();
+          }
+        }
+      } else if (value instanceof Object[]) {
+        final Object[] arrayValue = (Object[]) value;
+        final int arrayLength = arrayValue.length;
+        for (int i = 0; i < arrayLength; i++) {
+          if (arrayValue[i] != null) {
+            doExtractMapValue(arrayValue[i], keyPath, deep, flat, remove, holder);
+          }
+          if (removed && isEmptyOrNull(arrayValue[i])) {
+            arrayValue[i] = null;
+          }
+        }
+      } else {
+        throw new NotSupportedException("We only extract value from map object");
+      }
+    } else {
+      if (value instanceof Iterable && flat) {
+        for (Object next : (Iterable<?>) value) {
+          holder.add(next);
+        }
+      } else {
+        holder.add(value);
+      }
+    }
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   static void doFlatMap(Map<FlatMapKey, Object> resultMap, FlatMapKey key, Object val,
       int maxDepth) {
@@ -532,6 +588,40 @@ public class MapUtils {
           (k, nextVal) -> doFlatMap(resultMap, FlatMapKey.of(key).append(k), nextVal, maxDepth));
     } else if (resultMap.put(key, val) != null) {
       throw new CorantRuntimeException("FlatMap with key %s dup!", key);
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  static void doImplantMapValue(Map target, Object[] paths, int deep, Object implantedValue) {
+    Object key;
+    if (target != null && paths.length > deep && target.containsKey(key = paths[deep])) {
+      if (paths.length - deep == 1) {
+        target.put(key, implantedValue);
+      } else {
+        Object value = target.get(key);
+        int next = deep + 1;
+        if (value instanceof Map) {
+          doImplantMapValue((Map) value, paths, next, implantedValue);
+        } else if (value instanceof Iterable) {
+          for (Object item : (Iterable) value) {
+            if (item instanceof Map) {
+              doImplantMapValue((Map) item, paths, next, implantedValue);
+            } else if (item != null) {
+              throw new NotSupportedException("We only implant value to map object");
+            }
+          }
+        } else if (value instanceof Object[]) {
+          for (Object item : (Object[]) value) {
+            if (item instanceof Map) {
+              doImplantMapValue((Map) item, paths, next, implantedValue);
+            } else if (item != null) {
+              throw new NotSupportedException("We only implant value to map object");
+            }
+          }
+        } else {
+          throw new NotSupportedException("We only implant value to map object");
+        }
+      }
     }
   }
 

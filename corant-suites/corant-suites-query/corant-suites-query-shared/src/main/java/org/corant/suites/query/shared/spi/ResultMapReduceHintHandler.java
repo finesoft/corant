@@ -16,6 +16,7 @@ package org.corant.suites.query.shared.spi;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.MapUtils.extractMapValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
@@ -28,8 +29,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -103,10 +106,16 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
             && isNotEmpty(reduceFieldNames = linkedHashSetOf(
                 split(reduceFieldNamesParams.get(0).getValue(), ",", true, true)))) {
           final String useMapFieldName = mapFieldName;
+          final List<Pair<String, String[]>> useReduceFieldNames =
+              reduceFieldNames.stream().map(x -> {
+                String[] kv = split(x, ":", true, true);
+                return kv.length == 2 ? Pair.of(kv[1], split(kv[0], ".", true, true))
+                    : Pair.of(kv[0], split(kv[0], ".", true, true));
+              }).collect(Collectors.toList());
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
             Map<String, Object> obj = new HashMap<>();
-            for (String rfn : reduceFieldNames) {
-              obj.put(rfn, map.remove(rfn));
+            for (Pair<String, String[]> rfn : useReduceFieldNames) {
+              obj.put(rfn.getLeft(), extractMapValue(map, rfn.getRight(), true, true, true));
             }
             map.put(useMapFieldName, obj);
           });

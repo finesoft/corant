@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
+import static org.corant.shared.util.MapUtils.extractMapValue;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryRuntimeException;
-import org.corant.suites.query.shared.QueryUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.xcontent.XContentParser;
@@ -93,8 +93,7 @@ public interface EsQueryExecutor {
       if (total > 0) {
         Map<String, Object> result =
             XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
-        List<Object> extracted = new ArrayList<>();
-        QueryUtils.extractMapValue(result, HIT_RS_ETR_PATHS, false, extracted);
+        List<Object> extracted = extractMapValue(result, HIT_RS_ETR_PATHS, true, false, false);
         extracted.forEach(obj -> list.add(forceCast(obj)));
       }
     }

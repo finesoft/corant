@@ -24,8 +24,7 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public abstract class AbstractNumberConverter<S, T extends Number> extends AbstractConverter<S, T> {
 
-  public static final String[] HEX_PREFIXES =
-      {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#"};
+  static final String[] HEX_PREFIXES = {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#"};
 
   /**
    *

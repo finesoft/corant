@@ -149,7 +149,7 @@ public class Empties {
     } else if (object instanceof Enumeration<?>) {
       return isEmpty((Enumeration<?>) object);
     } else {
-      return object != null;
+      return false;
     }
   }
 

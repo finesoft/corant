@@ -132,9 +132,7 @@ public class Empties {
   }
 
   public static boolean isEmptyOrNull(final Object object) {
-    if (object == null) {
-      return true;
-    } else if (object instanceof Collection<?>) {
+    if (object instanceof Collection<?>) {
       return isEmpty((Collection<?>) object);
     } else if (object instanceof Map<?, ?>) {
       return isEmpty((Map<?, ?>) object);
@@ -149,7 +147,7 @@ public class Empties {
     } else if (object instanceof Enumeration<?>) {
       return isEmpty((Enumeration<?>) object);
     } else {
-      return false;
+      return object == null;
     }
   }
 

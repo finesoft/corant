@@ -107,7 +107,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     return services.computeIfAbsent(key, k -> {
       String dataSourceName = defaultQualifierValue.orElse(EMPTY);
       DBMS dialect = defaultQualifierDialect;
-      String[] qs = split(asDefaultString(qualifier), ":", true, true);
+      String[] qs = split(asDefaultString(k), ":", true, true);
       if (qs.length > 0) {
         dataSourceName = qs[0];
         if (qs.length > 1) {

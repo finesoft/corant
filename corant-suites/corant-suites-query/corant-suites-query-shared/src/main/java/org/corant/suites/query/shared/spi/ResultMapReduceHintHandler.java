@@ -16,10 +16,11 @@ package org.corant.suites.query.shared.spi;
 import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.extractMapValue;
+import static org.corant.shared.util.MapUtils.extractMapKeyPathValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.util.ObjectUtils.Pair;
@@ -94,30 +94,16 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
     } else {
-      List<QueryHintParameter> mapFieldNameParams = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
-      List<QueryHintParameter> reduceFieldNamesParams =
-          qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
-      // List<QueryHintParameter> mapFieldTypeParams = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
       try {
-        Set<String> reduceFieldNames;
-        String mapFieldName = null;
-        if (isNotEmpty(reduceFieldNamesParams) && isNotEmpty(mapFieldNameParams)
-            && isNotBlank(mapFieldName = mapFieldNameParams.get(0).getValue())
-            && isNotEmpty(reduceFieldNames = linkedHashSetOf(
-                split(reduceFieldNamesParams.get(0).getValue(), ",", true, true)))) {
-          final String useMapFieldName = mapFieldName;
-          final List<Pair<String, String[]>> useReduceFieldNames =
-              reduceFieldNames.stream().map(x -> {
-                String[] kv = split(x, ":", true, true);
-                return kv.length == 2 ? Pair.of(kv[1], split(kv[0], ".", true, true))
-                    : Pair.of(kv[0], split(kv[0], ".", true, true));
-              }).collect(Collectors.toList());
+        final String mapFieldName = resolveMapFieldname(qh);
+        final List<Pair<String, String[]>> reduceFields = resolveReduceFields(qh);
+        if (isNotEmpty(reduceFields) && isNotBlank(mapFieldName)) {
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
             Map<String, Object> obj = new HashMap<>();
-            for (Pair<String, String[]> rfn : useReduceFieldNames) {
-              obj.put(rfn.getLeft(), extractMapValue(map, rfn.getRight(), true, true));
+            for (Pair<String, String[]> rfn : reduceFields) {
+              obj.put(rfn.getLeft(), extractMapKeyPathValue(map, rfn.getRight()));
             }
-            map.put(useMapFieldName, obj);
+            map.put(mapFieldName, obj);
           });
         }
       } catch (Exception e) {
@@ -126,5 +112,26 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
+  }
+
+  String resolveMapFieldname(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
+    return isNotEmpty(params) ? params.get(0).getValue() : null;
+  }
+
+  List<Pair<String, String[]>> resolveReduceFields(QueryHint qh) {
+    List<Pair<String, String[]>> fields = new ArrayList<>();
+    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
+    if (isNotEmpty(params)) {
+      linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).forEach(fn -> {
+        String[] pathAndKey = split(fn, ":", true, true);
+        if (pathAndKey.length > 1) {
+          fields.add(Pair.of(pathAndKey[1], split(pathAndKey[0], ".", true, true)));
+        } else if (pathAndKey.length > 0) {
+          fields.add(Pair.of(pathAndKey[0], split(pathAndKey[0], ".", true, true)));
+        }
+      });
+    }
+    return fields;
   }
 }

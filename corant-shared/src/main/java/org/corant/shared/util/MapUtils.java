@@ -56,21 +56,28 @@ public class MapUtils {
   }
 
   /**
-   * extract value from map object, use key path
+   * extract value from map object and remove the entry, use key path
    *
    * @param <T>
    * @param value
    * @param keyPath
-   * @param flat
-   * @param remove
-   * @param single
-   * @return extractMapValue
    */
-  public static <T> T extractMapValue(Object value, Object[] keyPath, boolean remove,
-      boolean single) {
+  public static <T> T extractMapKeyPathValue(Object value, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
-    doExtractMapValue(value, keyPath, 0, true, remove, holder);
-    return forceCast(single ? !holder.isEmpty() ? holder.get(0) : null : holder);
+    iterateMapValue(value, keyPath, 0, true, true, holder);
+    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
+  }
+
+  /**
+   * extract value from map object and remove the entry, use key path
+   *
+   * @param value
+   * @param keyPath
+   */
+  public static List<Object> extractMapKeyPathValues(Object value, Object[] keyPath) {
+    List<Object> holder = new ArrayList<>();
+    iterateMapValue(value, keyPath, 0, true, true, holder);
+    return holder;
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
@@ -107,6 +114,18 @@ public class MapUtils {
     Map<String, String> stringMap = new HashMap<>(stringKeyMap.size());
     stringKeyMap.forEach((k, v) -> stringMap.put(k, asString(v, null)));
     return stringMap;
+  }
+
+  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath) {
+    List<Object> holder = new ArrayList<>();
+    iterateMapValue(value, keyPath, 0, true, false, holder);
+    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
+  }
+
+  public static List<Object> getMapKeyPathValues(Object value, Object[] keyPath) {
+    List<Object> holder = new ArrayList<>();
+    iterateMapValue(value, keyPath, 0, true, false, holder);
+    return holder;
   }
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
@@ -382,8 +401,8 @@ public class MapUtils {
   }
 
   @SuppressWarnings("rawtypes")
-  public static void implantMapValue(Map target, Object[] paths, Object value) {
-    doImplantMapValue(target, paths, 0, value);
+  public static void putMapKeyPathValue(Map target, Object[] paths, Object value) {
+    implantMapValue(target, paths, 0, value);
   }
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
@@ -463,58 +482,6 @@ public class MapUtils {
     return pops;
   }
 
-  @SuppressWarnings("rawtypes")
-  static void doExtractMapValue(Object value, Object[] keyPath, int deep, boolean flat,
-      boolean remove, List<Object> holder) {
-    if (value == null) {
-      return;
-    }
-    final int index = keyPath.length - deep;
-    final boolean removed = remove && index == 1;
-    if (index > 0) {
-      if (value instanceof Map) {
-        final Object key = keyPath[deep];
-        final Map mapValue = (Map) value;
-        final Object next = removed ? mapValue.remove(key) : mapValue.get(key);
-        if (next != null) {
-          doExtractMapValue(next, keyPath, deep + 1, flat, remove, holder);
-        }
-      } else if (value instanceof Iterable) {
-        final Iterator it = ((Iterable<?>) value).iterator();
-        while (it.hasNext()) {
-          Object next = it.next();
-          if (next != null) {
-            doExtractMapValue(next, keyPath, deep, flat, remove, holder);
-          }
-          if (removed && isEmptyOrNull(next)) {
-            it.remove();
-          }
-        }
-      } else if (value instanceof Object[]) {
-        final Object[] arrayValue = (Object[]) value;
-        final int arrayLength = arrayValue.length;
-        for (int i = 0; i < arrayLength; i++) {
-          if (arrayValue[i] != null) {
-            doExtractMapValue(arrayValue[i], keyPath, deep, flat, remove, holder);
-          }
-          if (removed && isEmptyOrNull(arrayValue[i])) {
-            arrayValue[i] = null;
-          }
-        }
-      } else {
-        throw new NotSupportedException("We only extract value from map object");
-      }
-    } else {
-      if (value instanceof Iterable && flat) {
-        for (Object next : (Iterable<?>) value) {
-          holder.add(next);
-        }
-      } else {
-        holder.add(value);
-      }
-    }
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   static void doFlatMap(Map<FlatMapKey, Object> resultMap, FlatMapKey key, Object val,
       int maxDepth) {
@@ -542,35 +509,87 @@ public class MapUtils {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  static void doImplantMapValue(Map target, Object[] paths, int deep, Object implantedValue) {
+  static void implantMapValue(Map target, Object[] paths, int deep, Object value) {
     Object key;
     if (target != null && paths.length > deep && target.containsKey(key = paths[deep])) {
       if (paths.length - deep == 1) {
-        target.put(key, implantedValue);
+        target.put(key, value);
       } else {
-        Object value = target.get(key);
-        int next = deep + 1;
-        if (value instanceof Map) {
-          doImplantMapValue((Map) value, paths, next, implantedValue);
-        } else if (value instanceof Iterable) {
-          for (Object item : (Iterable) value) {
+        Object next = target.get(key);
+        int nextDeep = deep + 1;
+        if (next instanceof Map) {
+          implantMapValue((Map) next, paths, nextDeep, value);
+        } else if (next instanceof Iterable) {
+          for (Object item : (Iterable) next) {
             if (item instanceof Map) {
-              doImplantMapValue((Map) item, paths, next, implantedValue);
+              implantMapValue((Map) item, paths, nextDeep, value);
             } else if (item != null) {
-              throw new NotSupportedException("We only implant value to map object");
+              throw new NotSupportedException("We only support implants for a map object!");
             }
           }
-        } else if (value instanceof Object[]) {
-          for (Object item : (Object[]) value) {
+        } else if (next instanceof Object[]) {
+          for (Object item : (Object[]) next) {
             if (item instanceof Map) {
-              doImplantMapValue((Map) item, paths, next, implantedValue);
+              implantMapValue((Map) item, paths, nextDeep, value);
             } else if (item != null) {
-              throw new NotSupportedException("We only implant value to map object");
+              throw new NotSupportedException("We only support implants for a map object!");
             }
           }
         } else {
-          throw new NotSupportedException("We only implant value to map object");
+          throw new NotSupportedException("We only support implants for a map object!");
         }
+      }
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  static void iterateMapValue(Object value, Object[] keyPath, int deep, boolean flat,
+      boolean remove, List<Object> holder) {
+    if (value == null) {
+      return;
+    }
+    final int index = keyPath.length - deep;
+    final boolean removed = remove && index == 1;
+    if (index > 0) {
+      if (value instanceof Map) {
+        final Object key = keyPath[deep];
+        final Map mapValue = (Map) value;
+        final Object next = removed ? mapValue.remove(key) : mapValue.get(key);
+        if (next != null) {
+          iterateMapValue(next, keyPath, deep + 1, flat, remove, holder);
+        }
+      } else if (value instanceof Iterable) {
+        final Iterator it = ((Iterable<?>) value).iterator();
+        while (it.hasNext()) {
+          Object next = it.next();
+          if (next != null) {
+            iterateMapValue(next, keyPath, deep, flat, remove, holder);
+          }
+          if (removed && isEmptyOrNull(next)) {
+            it.remove();
+          }
+        }
+      } else if (value instanceof Object[]) {
+        final Object[] arrayValue = (Object[]) value;
+        final int arrayLength = arrayValue.length;
+        for (int i = 0; i < arrayLength; i++) {
+          if (arrayValue[i] != null) {
+            iterateMapValue(arrayValue[i], keyPath, deep, flat, remove, holder);
+          }
+          if (removed && isEmptyOrNull(arrayValue[i])) {
+            arrayValue[i] = null;
+          }
+        }
+      } else {
+        throw new NotSupportedException("We only extract value from map/iterable/array object");
+      }
+    } else {
+      if (value instanceof Iterable && flat) {
+        for (Object next : (Iterable<?>) value) {
+          holder.add(next);
+        }
+      } else {
+        holder.add(value);
       }
     }
   }

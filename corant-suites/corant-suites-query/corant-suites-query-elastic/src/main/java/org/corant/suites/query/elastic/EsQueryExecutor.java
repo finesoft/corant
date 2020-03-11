@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.MapUtils.extractMapValue;
+import static org.corant.shared.util.MapUtils.getMapKeyPathValues;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
@@ -93,7 +93,7 @@ public interface EsQueryExecutor {
       if (total > 0) {
         Map<String, Object> result =
             XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
-        List<Object> extracted = extractMapValue(result, HIT_RS_ETR_PATHS, false, false);
+        List<Object> extracted = getMapKeyPathValues(result, HIT_RS_ETR_PATHS);
         extracted.forEach(obj -> list.add(forceCast(obj)));
       }
     }

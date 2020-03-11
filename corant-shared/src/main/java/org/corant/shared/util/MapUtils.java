@@ -14,6 +14,8 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmptyOrNull;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
@@ -69,7 +71,20 @@ public class MapUtils {
   }
 
   /**
-   * extract value from map object and remove the entry, use key path
+   * extract and convert value from map object and remove the entry, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   * @param expectedType
+   */
+  public static <T> T extractMapKeyPathValue(Object value, Object[] keyPath,
+      Class<T> expectedType) {
+    return toObject(extractMapKeyPathValue(value, keyPath), expectedType);
+  }
+
+  /**
+   * extract list value from map object and remove the entry, use key path
    *
    * @param value
    * @param keyPath
@@ -78,6 +93,20 @@ public class MapUtils {
     List<Object> holder = new ArrayList<>();
     iterateMapValue(value, keyPath, 0, true, true, holder);
     return holder;
+  }
+
+  /**
+   * extract and convert list value from map object and remove the entry, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   * @param expectedElementType
+   * @return extractMapKeyPathValues
+   */
+  public static <T> List<T> extractMapKeyPathValues(Object value, Object[] keyPath,
+      Class<T> expectedElementType) {
+    return toList(extractMapKeyPathValues(value, keyPath), t -> toObject(t, expectedElementType));
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
@@ -114,18 +143,6 @@ public class MapUtils {
     Map<String, String> stringMap = new HashMap<>(stringKeyMap.size());
     stringKeyMap.forEach((k, v) -> stringMap.put(k, asString(v, null)));
     return stringMap;
-  }
-
-  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath) {
-    List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, false, holder);
-    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
-  }
-
-  public static List<Object> getMapKeyPathValues(Object value, Object[] keyPath) {
-    List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, false, holder);
-    return holder;
   }
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
@@ -200,6 +217,56 @@ public class MapUtils {
   }
 
   /**
+   * Get value from map object, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   * @return
+   */
+  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath) {
+    List<Object> holder = new ArrayList<>();
+    iterateMapValue(value, keyPath, 0, true, false, holder);
+    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
+  }
+
+  /**
+   * Get and convert value from map object, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   * @param expectedType
+   */
+  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath, Class<T> expectedType) {
+    return toObject(getMapKeyPathValue(value, keyPath), expectedType);
+  }
+
+  /**
+   * Get list value from map object, use key path
+   *
+   * @param value
+   * @param keyPath
+   */
+  public static List<Object> getMapKeyPathValues(Object value, Object[] keyPath) {
+    List<Object> holder = new ArrayList<>();
+    iterateMapValue(value, keyPath, 0, true, false, holder);
+    return holder;
+  }
+
+  /**
+   * Get and convert list value from map object, use key path
+   *
+   * @param <T>
+   * @param value
+   * @param keyPath
+   */
+  public static <T> List<T> getMapKeyPathValues(Object value, Object[] keyPath,
+      Class<T> expectedElementType) {
+    return toList(getMapKeyPathValues(value, keyPath), t -> toObject(t, expectedElementType));
+  }
+
+  /**
    * Retrieve the list value with the key from a map, use force cast convert.
    *
    * @param <T>
@@ -208,7 +275,7 @@ public class MapUtils {
    * @return getMapList
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key) {
-    return getMapList(map, key, o -> forceCast(o));
+    return getMapList(map, key, ObjectUtils::forceCast);
   }
 
   /**
@@ -342,7 +409,7 @@ public class MapUtils {
   }
 
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
-    return new HashSet<>(getMapList(map, key, o -> forceCast(o)));
+    return new HashSet<>(getMapList(map, key, ObjectUtils::forceCast));
   }
 
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key, final Class<T> clazz) {
@@ -398,11 +465,6 @@ public class MapUtils {
       return Collections.emptyMap();
     }
     return Collections.unmodifiableMap(mapOf(objects));
-  }
-
-  @SuppressWarnings("rawtypes")
-  public static void putMapKeyPathValue(Map target, Object[] paths, Object value) {
-    implantMapValue(target, paths, 0, value);
   }
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
@@ -464,6 +526,11 @@ public class MapUtils {
     Properties result = new Properties();
     mapOf((Object[]) strings).forEach(result::put);
     return result;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static void putMapKeyPathValue(Map target, Object[] paths, Object value) {
+    implantMapValue(target, paths, 0, value);
   }
 
   public static Map<String, String> toMap(final Properties properties) {

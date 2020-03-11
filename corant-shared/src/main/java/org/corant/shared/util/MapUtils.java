@@ -577,12 +577,12 @@ public class MapUtils {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   static void implantMapValue(Map target, Object[] paths, int deep, Object value) {
-    Object key;
-    if (target != null && paths.length > deep && target.containsKey(key = paths[deep])) {
+    if (target != null && paths.length > deep) {
+      Object key = paths[deep];
       if (paths.length - deep == 1) {
         target.put(key, value);
       } else {
-        Object next = target.get(key);
+        Object next = target.computeIfAbsent(key, k -> new HashMap<>());
         int nextDeep = deep + 1;
         if (next instanceof Map) {
           implantMapValue((Map) next, paths, nextDeep, value);

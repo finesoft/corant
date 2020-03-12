@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.cassandra;
 
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.util.List;
@@ -51,13 +52,13 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         fetchedList = getExecutor().select(ks, cql, scriptParameter);
       }
-      if (result instanceof List) {
-        querier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        querier.resolveFetchedResult(result, fetchedList, fetchQuery);
-      }
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
+      if (result instanceof List) {
+        parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+      }
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());
@@ -77,7 +78,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       Forwarding<T> result = Forwarding.inst();
       List<Map<String, Object>> list =
           getExecutor().paging(ks, cql, offset, limit + 1, scriptParameter);
-      int size = list == null ? 0 : list.size();
+      int size = sizeOf(list);
       if (size > 0) {
         if (size > limit) {
           list.remove(size - 1);
@@ -122,7 +123,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       List<Map<String, Object>> list =
           getExecutor().paging(ks, cql, offset, limit, scriptParameter);
       Paging<T> result = Paging.of(offset, limit);
-      int size = list == null ? 0 : list.size();
+      int size = sizeOf(list);
       if (size > 0) {
         if (size < limit) {
           result.withTotal(offset + size);
@@ -149,7 +150,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       log(queryName, scriptParameter, cql);
       List<Map<String, Object>> results =
           getExecutor().paging(ks, cql, 0, maxSelectSize + 1, scriptParameter);
-      int size = results == null ? 0 : results.size();
+      int size = sizeOf(results);
       if (size > 0) {
         if (size > maxSelectSize) {
           throw new QueryRuntimeException(

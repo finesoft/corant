@@ -97,13 +97,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
     List<Map<String, Object>> fetchedList =
         streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+    fetch(fetchedList, querier);
+    querier.resolveResultHints(fetchedList);
     if (result instanceof List) {
       parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
     } else {
       parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
     }
-    fetch(fetchedList, querier);
-    querier.resolveResultHints(fetchedList);
   }
 
   @Override

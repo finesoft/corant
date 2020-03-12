@@ -15,7 +15,6 @@ package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
 import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.CollectionUtils.sublist;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -159,7 +158,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       Class<?> extTyp = argsLen > 1 ? toObject(extractParamValue(args.get(1)), Class.class) : null;
       Map<String, ?> extHints = null;
       if (extTyp != null && argsLen > 3) {
-        extHints = mapOf(sublist(args, 2).stream().map(a -> {
+        extHints = mapOf(args.subList(2, argsLen).stream().map(a -> {
           try {
             return extractParamValue(a);
           } catch (TemplateModelException e) {

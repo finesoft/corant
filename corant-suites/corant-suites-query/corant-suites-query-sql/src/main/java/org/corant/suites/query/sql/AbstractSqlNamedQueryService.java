@@ -47,13 +47,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     try {
       log("fetch-> " + refQueryName, scriptParameter, sql);
       List<Map<String, Object>> fetchedList = getExecutor().select(sql, scriptParameter);
-      if (result instanceof List) {
-        querier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        querier.resolveFetchedResult(result, fetchedList, fetchQuery);
-      }
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
+      if (result instanceof List) {
+        parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+      }
     } catch (SQLException e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

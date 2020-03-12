@@ -15,7 +15,6 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -295,60 +294,6 @@ public class CollectionUtils {
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
     return collectionOf(HashSet::new, objects);
-  }
-
-  /**
-   * Returns a list that is a sublist of passed in list. The sublist begins with the character at
-   * the specified index and extends to the end of passed in list.
-   *
-   * @param <T>
-   * @param list
-   * @param beginIndex the beginning index, inclusive.
-   * @return sublist the specified sublist
-   */
-  public static <T> List<T> sublist(final List<T> list, int beginIndex) {
-    return sublist(list, beginIndex, sizeOf(list));
-  }
-
-  /**
-   * Returns a list that is a sublist of passed in list. The sublist begins at the specified
-   * {@code beginIndex} and extends to the character at index {@code endIndex - 1}. Thus the size of
-   * the sublist is {@code endIndex-beginIndex}.
-   *
-   * <pre>
-   * Examples:
-   *
-   * [a,b,c,d].substring(1, 3) returns [b,c]
-   *
-   * </pre>
-   *
-   * @param <T>
-   * @param list
-   * @param beginIndex the beginning index, inclusive
-   * @param endIndex the ending index, exclusive
-   * @return sublist the specified sublist
-   */
-  public static <T> List<T> sublist(final List<T> list, int beginIndex, int endIndex) {
-    int size = sizeOf(list);
-    if (beginIndex < 0) {
-      throw new ArrayIndexOutOfBoundsException(beginIndex);
-    }
-    if (endIndex > size) {
-      throw new ArrayIndexOutOfBoundsException(endIndex);
-    }
-    int subLen = endIndex - beginIndex;
-    if (subLen < 0) {
-      throw new ArrayIndexOutOfBoundsException(subLen);
-    }
-    if (beginIndex == 0 && endIndex == size) {
-      return list;
-    } else {
-      List<T> sub = new ArrayList<>();
-      for (int i = 0; i < subLen; i++) {
-        sub.add(list.get(beginIndex + i));
-      }
-      return sub;
-    }
   }
 
   /**

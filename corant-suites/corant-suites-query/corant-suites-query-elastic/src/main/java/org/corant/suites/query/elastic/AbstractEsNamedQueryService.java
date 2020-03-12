@@ -68,13 +68,13 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList =
           getExecutor().searchHits(resolveIndexName(querier), script).getValue();
+      fetch(fetchedList, querier);
+      querier.resolveResultHints(fetchedList);
       if (result instanceof List) {
         parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
       } else {
         parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }
-      fetch(fetchedList, querier);
-      querier.resolveResultHints(fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
           fetchQuery.getReferenceQuery());

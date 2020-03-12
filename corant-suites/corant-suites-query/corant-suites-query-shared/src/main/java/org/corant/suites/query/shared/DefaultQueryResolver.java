@@ -45,6 +45,9 @@ public class DefaultQueryResolver implements QueryResolver {
   @Inject
   ConversionService conversionService;
 
+  /**
+   * TODO Don't now create new arraylist, just convert results
+   */
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> resolve(List<?> results, Class<T> resultClass, List<QueryHint> hints,
@@ -69,6 +72,7 @@ public class DefaultQueryResolver implements QueryResolver {
           }
         }
       }
+      results.clear();// FIXME
     }
     return list;
   }

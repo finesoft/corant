@@ -168,10 +168,6 @@ public class JsonUtils {
     return null;
   }
 
-  public static ObjectMapper referenceMapper() {
-    return objectMapper;
-  }
-
   /**
    * Convert object to bytes
    *

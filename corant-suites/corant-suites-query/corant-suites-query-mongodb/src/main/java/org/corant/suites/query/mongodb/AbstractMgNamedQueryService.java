@@ -85,7 +85,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_ALTERNATE = PRO_KEY_CO_COLA + ".alternate";
   public static final String PRO_KEY_CO_COLA_MAXVAR = PRO_KEY_CO_COLA + ".maxVariable";
   public static final String PRO_KEY_CO_COLA_NORMA = PRO_KEY_CO_COLA + ".normalization";
-  public static final String PRO_KEY_CO_COLA_BACKWORDS = PRO_KEY_CO_COLA + ".backwards";
+  public static final String PRO_KEY_CO_COLA_BACKWARDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
@@ -282,7 +282,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       Collation.Builder b = Collation.builder();
       getOptMapObject(pros, PRO_KEY_CO_COLA_ALTERNATE, t -> toEnum(t, CollationAlternate.class))
           .ifPresent(b::collationAlternate);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWORDS, t -> toBoolean(t)).ifPresent(b::backwards);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWARDS, t -> toBoolean(t)).ifPresent(b::backwards);
       getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_FIRST, t -> toEnum(t, CollationCaseFirst.class))
           .ifPresent(b::collationCaseFirst);
       getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, t -> toBoolean(t)).ifPresent(b::caseLevel);

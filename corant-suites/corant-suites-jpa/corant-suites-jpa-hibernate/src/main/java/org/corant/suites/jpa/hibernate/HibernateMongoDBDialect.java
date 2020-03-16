@@ -2,6 +2,8 @@ package org.corant.suites.jpa.hibernate;
 
 import org.corant.suites.jpa.hibernate.type.BigDecimalType;
 import org.corant.suites.jpa.hibernate.type.InstantType;
+import org.corant.suites.jpa.hibernate.type.LocalDateTimeType;
+import org.corant.suites.jpa.hibernate.type.LocalDateType;
 import org.hibernate.ogm.datastore.mongodb.MongoDBDialect;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 import org.hibernate.ogm.type.spi.GridType;
@@ -28,6 +30,10 @@ public class HibernateMongoDBDialect extends MongoDBDialect {
       return InstantType.INSTANCE;
     } else if (type == org.hibernate.type.BigDecimalType.INSTANCE) {
       return BigDecimalType.INSTANCE;
+    } else if (type == org.hibernate.type.LocalDateType.INSTANCE) {
+      return LocalDateType.INSTANCE;
+    } else if (type == org.hibernate.type.LocalDateTimeType.INSTANCE) {
+      return LocalDateTimeType.INSTANCE;
     }
     return null;
   }

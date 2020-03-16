@@ -260,17 +260,18 @@ public class Converters {
       return null;
     }
 
-    static Stack searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses,
+    static Stack<Class<?>> searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses,
         Class<?> classCanBeConvertedBySrcClass, Set<Class<?>> endClassesSetCanConvertTargetClass,
-        Stack stack) {
-      Stack classSurvival = new Stack();
+        Stack<Class<?>> stack) {
+      Stack<Class<?>> classSurvival = new Stack();
       classSurvival.addAll(stack);
       if (classSurvival.contains(classCanBeConvertedBySrcClass)) {
         // avoid closed-loop
         return classSurvival;
       }
       classSurvival.push(classCanBeConvertedBySrcClass);
-      if (endClassesSetCanConvertTargetClass.contains(classCanBeConvertedBySrcClass)) {
+      if (endClassesSetCanConvertTargetClass.stream()
+          .anyMatch(x -> match(x, classCanBeConvertedBySrcClass))) {
         return classSurvival;
       } else {
         Set<Class<?>> children = srcClassMappedTagClasses.get(classCanBeConvertedBySrcClass);

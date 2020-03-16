@@ -17,11 +17,15 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.MapUtils.getMapDuration;
+import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isBlank;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.kernel.util.Retries.SupplierRetrier;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
@@ -48,6 +53,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public static final int DEFAULT_LIMIT = 16;
   public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
   public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
+  public static final String STREAM_FORWARD_RETRY_TIMES = ".stream-forward-retry-times";
+  public static final String STREAM_FORWARD_RETRY_INTERVAL = ".stream-forward-retry-interval";
 
   static final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();
 
@@ -65,11 +72,14 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
     final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
     final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
+    final int retryTimes = getMapInteger(queryParam.getContext(), STREAM_FORWARD_RETRY_TIMES, 0);
+    final Duration retryInterval = getMapDuration(queryParam.getContext(),
+        STREAM_FORWARD_RETRY_INTERVAL, Duration.ofSeconds(1L));
     final Forwarding<T> empty = Forwarding.inst();
     final Iterator<T> iterator = new Iterator<T>() {
 
       final AtomicReference<Forwarding<T>> buffer =
-          new AtomicReference<>(defaultObject(forward(queryName, useParam), empty));
+          new AtomicReference<>(defaultObject(doForward(queryName, useParam), empty));
       int offset = useParam.getOffset();
 
       @Override
@@ -77,7 +87,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         Forwarding<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           if (fw.hasNext()) {
-            fw = defaultObject(forward(queryName, useParam.offset(offset += limit)), empty);
+            fw = defaultObject(doForward(queryName, useParam.offset(offset += limit)), empty);
             buffer.set(fw);
             return isNotEmpty(fw.getResults());
           }
@@ -94,6 +104,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
           throw new NoSuchElementException();
         }
         return fw.getResults().remove(0);
+      }
+
+      Forwarding<T> doForward(String queryName, QueryParameter parameter) {
+        if (retryTimes > 0) {
+          return forceCast(new SupplierRetrier<>(() -> forward(queryName, parameter))
+              .times(retryTimes).interval(retryInterval).execute());
+        } else {
+          return forward(queryName, parameter);
+        }
       }
     };
     return streamOf(iterator);

@@ -18,6 +18,7 @@ import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -129,6 +130,14 @@ public class ConversionUtils {
 
   public static List<Double> toDoubleList(Object obj) {
     return toList(obj, Double.class);
+  }
+
+  public static Duration toDuration(Object obj) {
+    return toDuration(obj, null);
+  }
+
+  public static Duration toDuration(Object obj, Duration altVal) {
+    return defaultObject(Conversions.convert(obj, Duration.class), altVal);
   }
 
   public static <T extends Enum<T>> T toEnum(Object obj, Class<T> enumClazz) {

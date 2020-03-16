@@ -35,7 +35,7 @@ public class Retries {
   protected static final Logger LOGGER = Logger.getLogger(Retries.class.toString());
 
   static final String RTY_LOG =
-      "An exception occurred during execution, enter the retry phase, the retry times is %s, interval is %s.";
+      "An exception occurred during execution, enter the retry phase, the retry times %s, interval %s.";
 
   static final String RTY_ERR_LOG = "An exception occurred during supplier.";
 
@@ -103,7 +103,7 @@ public class Retries {
           if (this.on.stream().noneMatch(ec -> ec.isAssignableFrom(e.getClass()))) {
             throw this.transfer.apply(e);
           }
-          final int logretryCounter = retryCounter;
+          final String logretryCounter = times + " - " + retryCounter;
           LOGGER.warning(() -> String.format(RTY_LOG, logretryCounter, this.interval));
           try {
             Thread.sleep(this.interval.toMillis());

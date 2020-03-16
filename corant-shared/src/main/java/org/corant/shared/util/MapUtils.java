@@ -24,6 +24,7 @@ import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -179,6 +180,14 @@ public class MapUtils {
 
   public static Double getMapDouble(final Map<?, ?> map, final Object key, Double nvt) {
     return getMapObject(map, key, ConversionUtils::toDouble, nvt);
+  }
+
+  public static Duration getMapDuration(final Map<?, ?> map, final Object key) {
+    return getMapObject(map, key, ConversionUtils::toDuration, null);
+  }
+
+  public static Duration getMapDuration(final Map<?, ?> map, final Object key, Duration nvt) {
+    return getMapObject(map, key, ConversionUtils::toDuration, nvt);
   }
 
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,

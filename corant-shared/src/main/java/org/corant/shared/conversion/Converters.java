@@ -227,25 +227,25 @@ public class Converters {
 
     public static Stack<Class<?>> getConvertibleClasses(Class<?> sourceClass,
         Class<?> targetClass) {
-      Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses = new HashMap<>();
-      Map<Class<?>, Set<Class<?>>> tagClassMappedSrcClasses = new HashMap<>();
+      Map<Class<?>, Set<Class<?>>> srcClassMappedItsTagClasses = new HashMap<>();
+      Map<Class<?>, Set<Class<?>>> tagClassMappedItsSrcClasses = new HashMap<>();
       ConverterRegistry.getNotSyntheticConverterTypes().forEach(ct -> {
-        srcClassMappedTagClasses.computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
+        srcClassMappedItsTagClasses.computeIfAbsent(ct.getSourceClass(), k -> new HashSet<>())
             .add(ct.getTargetClass());
-        tagClassMappedSrcClasses.computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())
+        tagClassMappedItsSrcClasses.computeIfAbsent(ct.getTargetClass(), k -> new HashSet<>())
             .add(ct.getSourceClass());
       });
 
-      List<Class<?>> srcMatchedList = srcClassMappedTagClasses.keySet().stream()
+      List<Class<?>> srcClsAndItsParentClasses = srcClassMappedItsTagClasses.keySet().stream()
           .filter(src -> match(src, sourceClass)).collect(Collectors.toList());
-      List<Class<?>> tagMatchedList = tagClassMappedSrcClasses.keySet().stream()
+      List<Class<?>> tagClsAndItsParentClasses = tagClassMappedItsSrcClasses.keySet().stream()
           .filter(tag -> match(targetClass, tag)).collect(Collectors.toList());
-      for (Class<?> tagCls : tagMatchedList) {
-        Set<Class<?>> endClassesCanConvertTargetClass = tagClassMappedSrcClasses.get(tagCls);
-        for (Class<?> srcCls : srcMatchedList) {
-          Set<Class<?>> classesCanBeConvertedBySrcClass = srcClassMappedTagClasses.get(srcCls);
+      for (Class<?> tagCls : tagClsAndItsParentClasses) {
+        Set<Class<?>> endClassesCanConvertTargetClass = tagClassMappedItsSrcClasses.get(tagCls);
+        for (Class<?> srcCls : srcClsAndItsParentClasses) {
+          Set<Class<?>> classesCanBeConvertedBySrcClass = srcClassMappedItsTagClasses.get(srcCls);
           for (Class<?> canBeConvertedBySrcClass : classesCanBeConvertedBySrcClass) {
-            Stack classesPipe = searchMatchedClass(srcClassMappedTagClasses,
+            Stack classesPipe = searchMatchedClass(srcClassMappedItsTagClasses,
                 canBeConvertedBySrcClass, endClassesCanConvertTargetClass, new Stack());
             if (isNotEmpty(classesPipe)) {
               Stack<Class<?>> stack = new Stack();
@@ -260,7 +260,7 @@ public class Converters {
       return null;
     }
 
-    static Stack<Class<?>> searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedTagClasses,
+    static Stack<Class<?>> searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedItsTagClasses,
         Class<?> classCanBeConvertedBySrcClass, Set<Class<?>> endClassesSetCanConvertTargetClass,
         Stack<Class<?>> stack) {
       Stack<Class<?>> classSurvival = new Stack();
@@ -274,14 +274,14 @@ public class Converters {
           .anyMatch(x -> match(x, classCanBeConvertedBySrcClass))) {
         return classSurvival;
       } else {
-        Set<Class<?>> children = srcClassMappedTagClasses.get(classCanBeConvertedBySrcClass);
+        Set<Class<?>> children = srcClassMappedItsTagClasses.get(classCanBeConvertedBySrcClass);
         if (isEmpty(children)) {
           classSurvival.pop();
         } else {
           Stack childSurvivalStack = new Stack<>();
           boolean childFound = false;
           for (Class<?> child : children) {
-            childSurvivalStack = searchMatchedClass(srcClassMappedTagClasses, child,
+            childSurvivalStack = searchMatchedClass(srcClassMappedItsTagClasses, child,
                 endClassesSetCanConvertTargetClass, classSurvival);
             if (childSurvivalStack.size() > classSurvival.size()) {
               childFound = true;

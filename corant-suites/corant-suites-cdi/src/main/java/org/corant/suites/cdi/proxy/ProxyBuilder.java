@@ -69,6 +69,19 @@ public class ProxyBuilder {
    * @param clazz
    * @param methodPredicate
    * @param appendQualifierss
+   * @return buildDeclaredMethods
+   */
+  public static Set<ContextualMethodHandler> buildDeclaredMethods(final Class<?> clazz,
+      Predicate<Method> methodPredicate, Annotation... appendQualifierss) {
+    return ContextualMethodHandler.fromDeclared(clazz, methodPredicate, appendQualifierss);
+  }
+
+  /**
+   * Build contextual bean method handler instance.
+   *
+   * @param clazz
+   * @param methodPredicate
+   * @param appendQualifierss
    * @return buildMethods
    */
   public static Set<ContextualMethodHandler> buildMethods(final Class<?> clazz,

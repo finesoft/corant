@@ -43,8 +43,8 @@ public class ContextualMethodHandler {
 
   protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
       Annotation... qualifiers) {
-    this.method = shouldNotNull(beanMethod);
-    this.clazz = defaultObject(beanClass, beanMethod.getDeclaringClass());
+    method = shouldNotNull(beanMethod);
+    clazz = defaultObject(beanClass, beanMethod.getDeclaringClass());
     this.qualifiers = qualifiers;
   }
 
@@ -58,6 +58,23 @@ public class ContextualMethodHandler {
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getMethods()) {
         if (methodPredicate.test(m)) {
+          annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
+        }
+      }
+    }
+    return annotatedMethods;
+  }
+
+  public static Set<ContextualMethodHandler> fromDeclared(Class<?> clazz,
+      Predicate<Method> methodPredicate, Annotation... qualifiers) {
+    Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
+    if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
+      for (Method m : clazz.getDeclaredMethods()) {
+        if (methodPredicate.test(m)) {
+          if (!Modifier.isPublic(m.getModifiers())
+              || !Modifier.isPublic(m.getDeclaringClass().getModifiers())) {
+            m.setAccessible(true);
+          }
           annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
         }
       }
@@ -141,8 +158,8 @@ public class ContextualMethodHandler {
           final Set<Bean<?>> beans = bm.getBeans(clazz, qualifiers);
           Bean<?> resolvedBean = null;
           if (sizeOf(beans) > 1) {
-            resolvedBean = beans.stream().filter(b -> b.getBeanClass().equals(clazz))
-                .findFirst().orElseThrow(
+            resolvedBean =
+                beans.stream().filter(b -> b.getBeanClass().equals(clazz)).findFirst().orElseThrow(
                     () -> new CorantRuntimeException("Can't resolve bean class %s", clazz));
           } else {
             resolvedBean = bm.resolve(bm.getBeans(clazz, qualifiers));

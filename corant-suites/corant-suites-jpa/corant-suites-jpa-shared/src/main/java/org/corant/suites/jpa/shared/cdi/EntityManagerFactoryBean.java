@@ -68,12 +68,12 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
 
   @Override
   public String getId() {
-    return EntityManagerFactoryBean.class.getName() + "." + pu.unitName();
+    return EntityManagerFactory.class.getName();
   }
 
   @Override
   public String getName() {
-    return "EntityManagerFactoryBean." + pu.unitName();
+    return EntityManagerFactory.class.getName();
   }
 
   @Override

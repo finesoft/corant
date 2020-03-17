@@ -305,14 +305,6 @@ public abstract class TransactionalAction<T> {
     }
   }
 
-  public interface UserTransactionActionHandler {
-
-    void afterExecute(boolean prestatus, Transaction tx, TransactionManager tm, TxType type);
-
-    boolean beforeExecute(Transaction tx, TransactionManager tm, TxType type, Class<?>[] rollbackOn,
-        Class<?>[] dontRollbackOn);
-  }
-
   /**
    * corant-suites-jta-shared
    *
@@ -339,6 +331,26 @@ public abstract class TransactionalAction<T> {
       }
     }
 
+    public TransactionalActuator<T> mandatory() {
+      return txType(TxType.MANDATORY);
+    }
+
+    public TransactionalActuator<T> never() {
+      return txType(TxType.NEVER);
+    }
+
+    public TransactionalActuator<T> notSupported() {
+      return txType(TxType.NOT_SUPPORTED);
+    }
+
+    public TransactionalActuator<T> required() {
+      return txType(TxType.REQUIRED);
+    }
+
+    public TransactionalActuator<T> requiresNew() {
+      return txType(TxType.REQUIRES_NEW);
+    }
+
     public TransactionalActuator<T> rollbackOn(final Class<?>... rollbackOn) {
       this.rollbackOn = rollbackOn;
       return this;
@@ -354,6 +366,10 @@ public abstract class TransactionalAction<T> {
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
+    }
+
+    public TransactionalActuator<T> supports() {
+      return txType(TxType.SUPPORTS);
     }
 
     public TransactionalActuator<T> synchronization(final Synchronization synchronization) {
@@ -394,5 +410,13 @@ public abstract class TransactionalAction<T> {
               dontRollbackOn);
       }
     }
+  }
+
+  public interface UserTransactionActionHandler {
+
+    void afterExecute(boolean prestatus, Transaction tx, TransactionManager tm, TxType type);
+
+    boolean beforeExecute(Transaction tx, TransactionManager tm, TxType type, Class<?>[] rollbackOn,
+        Class<?>[] dontRollbackOn);
   }
 }

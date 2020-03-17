@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +31,6 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.bson.Document;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.Decimal128Utils;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
@@ -39,6 +39,8 @@ import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -127,10 +129,8 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param manager
      */
     public DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
-      this.dataBase =
-          findNamed(MongoDatabase.class, dataBase).orElseThrow(() -> new CorantRuntimeException(
-              "Can't build default mongo named query, the data base named %s not found.",
-              dataBase));
+      this.dataBase = shouldNotNull(resolveDataBase(dataBase),
+          "Can't build default mongo named query, the data base named %s not found.", dataBase);
       resolver = manager.resolver;
       defaultMaxSelectSize = manager.maxSelectSize;
       defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
@@ -180,5 +180,15 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
       return resolver;
     }
 
+    @SuppressWarnings("resource")
+    protected MongoDatabase resolveDataBase(String dataBase) {
+      if (isNotBlank(dataBase)
+          && (dataBase.startsWith("mongodb+srv://") || dataBase.startsWith("mongodb://"))) {
+        String db = dataBase.substring(dataBase.lastIndexOf('/'));
+        return new MongoClient(new MongoClientURI(dataBase)).getDatabase(db);
+      } else {
+        return findNamed(MongoDatabase.class, dataBase).orElse(null);
+      }
+    }
   }
 }

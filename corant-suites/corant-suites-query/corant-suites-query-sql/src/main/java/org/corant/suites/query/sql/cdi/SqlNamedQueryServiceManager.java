@@ -18,6 +18,7 @@ import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.Map;
@@ -31,9 +32,12 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
@@ -108,9 +112,14 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     return services.computeIfAbsent(key, k -> {
       String dataSourceName = defaultQualifierValue.orElse(EMPTY);
       DBMS dialect = defaultQualifierDialect;
-      String[] qs = split(asDefaultString(k), Names.DOMAIN_SPACE_SEPARATORS, true, true);
+      String useKey = k;
+      boolean jndi = useKey.startsWith(JndiNames.JNDI_COMP_NME);
+      if (jndi) {
+        useKey = useKey.substring(JndiNames.JNDI_COMP_NME.length());
+      }
+      String[] qs = split(useKey, Names.DOMAIN_SPACE_SEPARATORS, true, true);
       if (qs.length > 0) {
-        dataSourceName = qs[0];
+        dataSourceName = jndi ? JndiNames.JNDI_COMP_NME.concat(qs[0]) : qs[0];
         if (qs.length > 1) {
           dialect = toObject(qs[1], DBMS.class);
         }
@@ -181,10 +190,9 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
         SqlNamedQueryServiceManager manager) {
       resolver = manager.resolver;
       Builder builder = SqlQueryConfiguration.defaultBuilder()
-          .dataSource(findNamed(DataSource.class, dataSourceName)
-              .orElseThrow(() -> new CorantRuntimeException(
-                  "Can't build default sql named query, the data source named %s not found.",
-                  dataSourceName)))
+          .dataSource(shouldNotNull(resolveDataSource(dataSourceName),
+              "Can't build default sql named query, the data source named %s not found.",
+              dataSourceName))
           .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize)
           .maxRows(manager.maxRows).queryTimeout(manager.timeout);
       manager.fetchDirection.ifPresent(builder::fetchDirection);
@@ -213,5 +221,16 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
       return resolver;
     }
 
+    protected DataSource resolveDataSource(String dataSourceName) {
+      if (isNotBlank(dataSourceName) && dataSourceName.startsWith(JndiNames.JNDI_COMP_NME)) {
+        try {
+          return forceCast(new InitialContext().lookup(dataSourceName));
+        } catch (NamingException e) {
+          throw new CorantRuntimeException(e);
+        }
+      } else {
+        return findNamed(DataSource.class, dataSourceName).orElse(null);
+      }
+    }
   }
 }

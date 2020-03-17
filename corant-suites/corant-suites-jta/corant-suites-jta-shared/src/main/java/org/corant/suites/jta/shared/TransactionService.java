@@ -50,6 +50,11 @@ public interface TransactionService {
    *       // the business operation that run in transaction;
    *       return operation result;
    *     });
+   * return TransactionService.actuator().required().rollbackOn(SomeException.class)
+   *     .get(() -> {
+   *       // the business operation that run in transaction;
+   *       return operation result;
+   *     });
    * </pre>
    *
    * @param <T>

@@ -33,6 +33,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
@@ -107,7 +108,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     return services.computeIfAbsent(key, k -> {
       String dataSourceName = defaultQualifierValue.orElse(EMPTY);
       DBMS dialect = defaultQualifierDialect;
-      String[] qs = split(asDefaultString(k), ":", true, true);
+      String[] qs = split(asDefaultString(k), Names.DOMAIN_SPACE_SEPARATORS, true, true);
       if (qs.length > 0) {
         dataSourceName = qs[0];
         if (qs.length > 1) {
@@ -137,7 +138,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   String resolveQualifer(Object qualifier) {
     if (qualifier instanceof SqlQuery) {
       SqlQuery q = forceCast(qualifier);
-      return q.value().concat(":").concat(q.dialect());
+      return q.value().concat(Names.DOMAIN_SPACE_SEPARATORS).concat(q.dialect());
     } else {
       return asDefaultString(qualifier);
     }

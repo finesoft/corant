@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultBlank;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import org.corant.shared.normal.Names;
 import org.corant.suites.cdi.AbstractBean;
 import org.corant.suites.jpa.shared.PersistenceService;
 
@@ -68,7 +70,9 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
 
   @Override
   public String getId() {
-    return EntityManagerFactory.class.getName();
+    return isBlank(pu.unitName()) ? EntityManagerFactory.class.getName()
+        : EntityManagerFactory.class.getName().concat(Names.DOMAIN_SPACE_SEPARATORS)
+            .concat(pu.unitName());
   }
 
   @Override

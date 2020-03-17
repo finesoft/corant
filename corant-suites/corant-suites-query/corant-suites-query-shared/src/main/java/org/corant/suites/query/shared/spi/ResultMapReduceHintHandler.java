@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -124,7 +125,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
     if (isNotEmpty(params)) {
       linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).forEach(fn -> {
-        String[] pathAndKey = split(fn, ":", true, true);
+        String[] pathAndKey = split(fn, Names.DOMAIN_SPACE_SEPARATORS, true, true);
         if (pathAndKey.length > 1) {
           fields.add(Pair.of(pathAndKey[1], split(pathAndKey[0], ".", true, true)));
         } else if (pathAndKey.length > 0) {

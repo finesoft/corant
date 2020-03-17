@@ -27,7 +27,11 @@ public interface Names {
 
   char NAME_SPACE_SEPARATOR = '.';
 
+  char DOMMAIN_SPACE_SEPARATOR = ':';
+
   String NAME_SPACE_SEPARATORS = ".";
+
+  String DOMAIN_SPACE_SEPARATORS = ":";
 
   String CORANT_APP_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "application-name";
 

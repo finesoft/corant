@@ -21,6 +21,7 @@ import org.bson.types.ObjectId;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.normal.Names;
 
 /**
  * corant-suites-query-mongodb
@@ -37,7 +38,8 @@ public class StringDBPointerConverter extends AbstractConverter<String, BsonDbPo
     if (isBlank(value)) {
       return null;
     }
-    String[] array = split(value, ConverterHints.getHint(hints, SEPARATOR_KEY, ":"), true, true);
+    String[] array = split(value,
+        ConverterHints.getHint(hints, SEPARATOR_KEY, Names.DOMAIN_SPACE_SEPARATORS), true, true);
     if (array.length != 2) {
       throw new ConversionException(
           "Can't convert string %s to BsonDbPointer, the source string must be represented like 'namespace:id'",

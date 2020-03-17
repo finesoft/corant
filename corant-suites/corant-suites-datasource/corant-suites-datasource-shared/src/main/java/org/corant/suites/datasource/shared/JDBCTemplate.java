@@ -95,47 +95,72 @@ public class JDBCTemplate {
   }
 
   public static void batch(Connection conn, String sql, int batchSubmitSize,
-      Stream<Iterable<?>> params, Consumer<int[]> consumer) throws SQLException {
-    SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, batchSubmitSize, params, consumer);
+      Stream<Iterable<?>> params, Consumer<int[]> consumer) {
+    try {
+      SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, batchSubmitSize, params, consumer);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  public static int[] batch(Connection conn, String sql, Object[][] params) throws SQLException {
-    return SIMPLE_RUNNER.batch(conn, sql, params);
+  public static int[] batch(Connection conn, String sql, Object[][] params) {
+    try {
+      return SIMPLE_RUNNER.batch(conn, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  public static int[] batch(Connection conn, String sql, Stream<Iterable<?>> params)
-      throws SQLException {
-    return SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, params);
+  public static int[] batch(Connection conn, String sql, Stream<Iterable<?>> params) {
+    try {
+      return SIMPLE_STREAM_RUNNER.streamBatch(conn, false, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static JDBCTemplate build(DataSource ds) {
     return new JDBCTemplate(ds);
   }
 
-  public static int execute(Connection conn, String sql, Object... params) throws SQLException {
+  public static int execute(Connection conn, String sql, Object... params) {
     Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
-    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), processeds.getValue());
+    try {
+      return SIMPLE_RUNNER.execute(conn, processeds.getKey(), processeds.getValue());
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh,
-      Object... params) throws SQLException {
+      Object... params) {
     Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
-    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), rsh, processeds.getValue());
+    try {
+      return SIMPLE_RUNNER.execute(conn, processeds.getKey(), rsh, processeds.getValue());
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
-      Object... params) throws SQLException {
+      Object... params) {
     return execute(conn, sql, MAP_LIST_HANDLER, params);
   }
 
-  public static Map<String, Object> get(Connection conn, String sql, Object... params)
-      throws SQLException {
-    return query(conn, sql, MAP_HANDLER, params);
+  public static Map<String, Object> get(Connection conn, String sql, Object... params) {
+    try {
+      return query(conn, sql, MAP_HANDLER, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  public static Map<String, Object> insert(Connection conn, String sql, Object... params)
-      throws SQLException {
-    return insert(conn, sql, MAP_HANDLER, params);
+  public static Map<String, Object> insert(Connection conn, String sql, Object... params) {
+    try {
+      return insert(conn, sql, MAP_HANDLER, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
@@ -232,45 +257,25 @@ public class JDBCTemplate {
   }
 
   public static int tryExecute(Connection conn, String sql, Object... params) {
-    try {
-      return execute(conn, sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return execute(conn, sql, params);
   }
 
   public static <T> List<T> tryExecute(Connection conn, String sql, ResultSetHandler<T> rsh,
       Object... params) {
-    try {
-      return execute(conn, sql, rsh, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return execute(conn, sql, rsh, params);
   }
 
   public static List<List<Map<String, Object>>> tryExecutes(Connection conn, String sql,
       Object... params) {
-    try {
-      return executes(conn, sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return executes(conn, sql, params);
   }
 
   public static Map<String, Object> tryGet(Connection conn, String sql, Object... params) {
-    try {
-      return get(conn, sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return get(conn, sql, params);
   }
 
   public static Map<String, Object> tryInsert(Connection conn, String sql, Object... params) {
-    try {
-      return insert(conn, sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return insert(conn, sql, params);
   }
 
   public static <T> T tryInsert(Connection conn, String sql, ResultSetHandler<T> rsh,
@@ -345,16 +350,16 @@ public class JDBCTemplate {
   }
 
   public static int tryUpdate(Connection conn, String sql, Object... params) {
+    return update(conn, sql, params);
+  }
+
+  public static int update(Connection conn, String sql, Object... params) {
+    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
     try {
-      return update(conn, sql, params);
+      return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
     } catch (SQLException e) {
       throw new CorantRuntimeException(e);
     }
-  }
-
-  public static int update(Connection conn, String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
-    return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -403,17 +408,29 @@ public class JDBCTemplate {
     return Pair.of(useSql.toString(), useParams.toArray());
   }
 
-  public int[] batch(String sql, Object[][] params) throws SQLException {
-    return runner.batch(sql, params);
+  public int[] batch(String sql, Object[][] params) {
+    try {
+      return runner.batch(sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  public int[] batch(String sql, Stream<Iterable<?>> params) throws SQLException {
-    return streamRunner.streamBatch(dataSource.getConnection(), true, sql, params);
+  public int[] batch(String sql, Stream<Iterable<?>> params) {
+    try {
+      return streamRunner.streamBatch(dataSource.getConnection(), true, sql, params);
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
-  public int execute(String sql, Object... params) throws SQLException {
+  public int execute(String sql, Object... params) {
     Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
-    return runner.execute(processeds.getKey(), processeds.getValue());
+    try {
+      return runner.execute(processeds.getKey(), processeds.getValue());
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params)
@@ -489,27 +506,15 @@ public class JDBCTemplate {
   }
 
   public int[] tryBatch(String sql, Object[][] params) {
-    try {
-      return batch(sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return batch(sql, params);
   }
 
   public int[] tryBatch(String sql, Stream<Iterable<?>> params) {
-    try {
-      return batch(sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return batch(sql, params);
   }
 
   public int tryExecute(String sql, Object... params) {
-    try {
-      return execute(sql, params);
-    } catch (SQLException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return execute(sql, params);
   }
 
   public <T> List<T> tryExecute(String sql, ResultSetHandler<T> rsh, Object... params) {
@@ -611,9 +616,13 @@ public class JDBCTemplate {
     }
   }
 
-  public int update(String sql, Object... params) throws SQLException {
+  public int update(String sql, Object... params) {
     Pair<String, Object[]> processed = processSqlAndParams(sql, params);
-    return runner.update(processed.getKey(), processed.getValue());
+    try {
+      return runner.update(processed.getKey(), processed.getValue());
+    } catch (SQLException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {

@@ -16,7 +16,6 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.Empties.isEmptyOrNull;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -36,7 +35,6 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -635,27 +633,28 @@ public class MapUtils {
           iterateMapValue(next, keyPath, deep + 1, flat, remove, holder);
         }
       } else if (value instanceof Iterable) {
-        final Iterator it = ((Iterable<?>) value).iterator();
-        while (it.hasNext()) {
-          Object next = it.next();
+        for (Object next : (Iterable<?>) value) {
           if (next != null) {
             iterateMapValue(next, keyPath, deep, flat, remove, holder);
           }
-          if (removed && isEmptyOrNull(next)) {
-            it.remove();
-          }
         }
+        /*
+         * final Iterator it = ((Iterable<?>) value).iterator(); while (it.hasNext()) { Object next
+         * = it.next(); if (next != null) { iterateMapValue(next, keyPath, deep, flat, remove,
+         * holder); } if (removed && isEmptyOrNull(next)) { it.remove(); } }
+         */
       } else if (value instanceof Object[]) {
-        final Object[] arrayValue = (Object[]) value;
-        final int arrayLength = arrayValue.length;
-        for (int i = 0; i < arrayLength; i++) {
-          if (arrayValue[i] != null) {
-            iterateMapValue(arrayValue[i], keyPath, deep, flat, remove, holder);
-          }
-          if (removed && isEmptyOrNull(arrayValue[i])) {
-            arrayValue[i] = null;
+        for (Object next : (Object[]) value) {
+          if (next != null) {
+            iterateMapValue(next, keyPath, deep, flat, remove, holder);
           }
         }
+        /*
+         * final Object[] arrayValue = (Object[]) value; final int arrayLength = arrayValue.length;
+         * for (int i = 0; i < arrayLength; i++) { if (arrayValue[i] != null) {
+         * iterateMapValue(arrayValue[i], keyPath, deep, flat, remove, holder); } if (removed &&
+         * isEmptyOrNull(arrayValue[i])) { arrayValue[i] = null; } }
+         */
       } else {
         throw new NotSupportedException("We only extract value from map/iterable/array object");
       }

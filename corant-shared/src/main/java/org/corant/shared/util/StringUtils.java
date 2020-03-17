@@ -18,20 +18,25 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
@@ -321,6 +326,66 @@ public class StringUtils {
       return str;
     }
     return str.substring(0, len);
+  }
+
+  /**
+   * String lines from file input stream, use for read txt file line by line.
+   *
+   * @param fis
+   * @param offset the offset start from 0
+   * @param limit the number of lines returned
+   */
+  public static Stream<String> lines(final FileInputStream fis, int offset, int limit) {
+    return lines(new InputStreamReader(fis, StandardCharsets.UTF_8), offset, limit);
+  }
+
+  /**
+   * String lines from input stream reader, use for read txt file line by line.
+   *
+   * @param isr the input stream reader
+   * @param offset the offset start from 0
+   * @param limit the number of lines returned
+   */
+  public static Stream<String> lines(final InputStreamReader isr, int offset, int limit) {
+
+    return streamOf(new Iterator<String>() {
+
+      BufferedReader reader = new BufferedReader(isr);
+      String nextLine = null;
+      int readLines = 0;
+
+      @Override
+      public boolean hasNext() {
+        if (nextLine != null) {
+          return true;
+        } else {
+          try {
+            if (readLines == 0 && offset > 0) {
+              for (int i = 0; i < offset; i++) {
+                if ((nextLine = reader.readLine()) == null) {
+                  return false;
+                }
+              }
+            }
+            nextLine = reader.readLine();
+            return nextLine != null && (limit <= 0 || readLines++ < limit);
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+        }
+      }
+
+      @Override
+      public String next() {
+        if (nextLine != null || hasNext()) {
+          String line = nextLine;
+          nextLine = null;
+          return line;
+        } else {
+          throw new NoSuchElementException();
+        }
+      }
+    });
   }
 
   /**

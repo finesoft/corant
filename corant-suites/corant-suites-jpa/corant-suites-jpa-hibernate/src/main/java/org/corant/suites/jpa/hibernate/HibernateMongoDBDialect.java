@@ -4,6 +4,7 @@ import org.corant.suites.jpa.hibernate.type.BigDecimalType;
 import org.corant.suites.jpa.hibernate.type.InstantType;
 import org.corant.suites.jpa.hibernate.type.LocalDateTimeType;
 import org.corant.suites.jpa.hibernate.type.LocalDateType;
+import org.corant.suites.jpa.hibernate.type.ZonedDateTimeType;
 import org.hibernate.ogm.datastore.mongodb.MongoDBDialect;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 import org.hibernate.ogm.type.spi.GridType;
@@ -34,6 +35,8 @@ public class HibernateMongoDBDialect extends MongoDBDialect {
       return LocalDateType.INSTANCE;
     } else if (type == org.hibernate.type.LocalDateTimeType.INSTANCE) {
       return LocalDateTimeType.INSTANCE;
+    } else if (type == org.hibernate.type.ZonedDateTimeType.INSTANCE) {
+      return ZonedDateTimeType.INSTANCE;
     }
     return null;
   }

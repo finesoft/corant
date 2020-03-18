@@ -1,11 +1,11 @@
 package org.corant.suites.jpa.hibernate.type;
 
-import java.time.ZonedDateTime;
-import org.corant.suites.jpa.hibernate.type.descriptor.ZonedDateTimeGridTypeDescriptor;
+import java.time.LocalDateTime;
+import org.corant.suites.jpa.hibernate.type.descriptor.LocalDateTimeGridTypeDescriptor;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.Mapping;
 import org.hibernate.ogm.type.impl.AbstractGenericBasicType;
-import org.hibernate.type.descriptor.java.ZonedDateTimeJavaDescriptor;
+import org.hibernate.type.descriptor.java.LocalDateTimeJavaDescriptor;
 
 /**
  * corant-suites-jpa-hibernate
@@ -13,14 +13,14 @@ import org.hibernate.type.descriptor.java.ZonedDateTimeJavaDescriptor;
  * @author bingo 下午12:52:35
  *
  */
-public class LocalDateTimeType extends AbstractGenericBasicType<ZonedDateTime> {
+public class LocalDateTimeType extends AbstractGenericBasicType<LocalDateTime> {
 
   private static final long serialVersionUID = -3820937201712074842L;
 
   public static final LocalDateTimeType INSTANCE = new LocalDateTimeType();
 
   public LocalDateTimeType() {
-    super(ZonedDateTimeGridTypeDescriptor.INSTANCE, ZonedDateTimeJavaDescriptor.INSTANCE);
+    super(LocalDateTimeGridTypeDescriptor.INSTANCE, LocalDateTimeJavaDescriptor.INSTANCE);
   }
 
   @Override

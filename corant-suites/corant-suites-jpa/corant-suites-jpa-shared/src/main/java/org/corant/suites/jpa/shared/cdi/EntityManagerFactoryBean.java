@@ -70,14 +70,14 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
 
   @Override
   public String getId() {
-    return isBlank(pu.unitName()) ? EntityManagerFactory.class.getName()
-        : EntityManagerFactory.class.getName().concat(Names.DOMAIN_SPACE_SEPARATORS)
-            .concat(pu.unitName());
+    return getName();
   }
 
   @Override
   public String getName() {
-    return EntityManagerFactory.class.getName();
+    return isBlank(pu.unitName()) ? EntityManagerFactory.class.getName()
+        : EntityManagerFactory.class.getName().concat(Names.DOMAIN_SPACE_SEPARATORS)
+            .concat(pu.unitName());
   }
 
   @Override

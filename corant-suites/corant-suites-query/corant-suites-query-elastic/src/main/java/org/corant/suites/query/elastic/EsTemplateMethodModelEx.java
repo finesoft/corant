@@ -46,7 +46,7 @@ public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
           Class<?> argCls = getUserClass(arg.getClass());
           if (isPrimitiveOrWrapper(argCls)) {
             return arg;
-          } else if (isSimpleType(getComponentClass(argCls))) {
+          } else if (isSimpleType(getComponentClass(arg))) {
             return OM.writeValueAsString(arg);
           } else {
             // FIXME throw exception or not ?

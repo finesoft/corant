@@ -13,7 +13,12 @@
  */
 package org.corant.suites.query.elastic;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
@@ -31,20 +36,33 @@ public class DefaultEsNamedQuerier extends
 
   protected final Map<Object, Object> script;
   protected final String name;
+  protected final String indexName;
 
   /**
    * @param query
    * @param queryParameter
    * @param queryResolver
    * @param fetchQueryResolver
-   * @param script
+   * @param scriptMap
    */
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
       QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
-      Map<Object, Object> script) {
+      Map<Object, Object> scriptMap) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
-    this.script = script;
+    if (isNotEmpty(scriptMap)) {
+      Entry<?, ?> entry = scriptMap.entrySet().iterator().next();
+      indexName = asDefaultString(entry.getKey());
+      script = forceCast(entry.getValue());
+    } else {
+      indexName = null;
+      script = new HashMap<>();
+    }
+  }
+
+  @Override
+  public String getIndexName() {
+    return indexName;
   }
 
   @Override

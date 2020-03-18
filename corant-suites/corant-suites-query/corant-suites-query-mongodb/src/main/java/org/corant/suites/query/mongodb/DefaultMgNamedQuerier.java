@@ -13,8 +13,12 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
@@ -39,6 +43,7 @@ public class DefaultMgNamedQuerier
 
   public static final ObjectMapper OM = new ObjectMapper();
 
+  protected String collectionName;
   protected final String name;
   protected final EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
   protected final String originalScript;
@@ -58,6 +63,16 @@ public class DefaultMgNamedQuerier
     name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);
+  }
+
+  public static void main(String... strings) {
+    EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
+    System.out.println(script.size());
+  }
+
+  @Override
+  public String getCollectionName() {
+    return collectionName;
   }
 
   @Override
@@ -80,18 +95,31 @@ public class DefaultMgNamedQuerier
     return null;
   }
 
+  /**
+   * Resolve the collection name and query script
+   *
+   *
+   * @param mgQuery init
+   */
+  @SuppressWarnings("rawtypes")
   protected void init(Map<?, ?> mgQuery) {
-    for (MgOperator mgo : MgOperator.values()) {
-      Object x = mgQuery.get(mgo.getOps());
-      if (x != null) {
-        try {
-          script.put(mgo, BasicDBObject
-              .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x)));
-        } catch (Exception e) {
-          throw new QueryRuntimeException(e);
+    // resolve collection name and query script
+    if (isNotEmpty(mgQuery)) {
+      Entry<?, ?> entry = mgQuery.entrySet().iterator().next();
+      collectionName = asDefaultString(entry.getKey());
+      Map queryScript = forceCast(entry.getValue());
+      if (isNotEmpty(queryScript)) {
+        for (MgOperator mgo : MgOperator.values()) {
+          Object x = queryScript.get(mgo.getOps());
+          if (x != null) {
+            try {
+              script.put(mgo, BasicDBObject
+                  .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x)));
+            } catch (Exception e) {
+              throw new QueryRuntimeException(e);
+            }
+          }
         }
-      } else {
-        script.put(mgo, null);
       }
     }
   }

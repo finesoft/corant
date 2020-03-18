@@ -147,6 +147,11 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   String resolveQualifer(Object qualifier) {
     if (qualifier instanceof SqlQuery) {
       SqlQuery q = forceCast(qualifier);
+      // try {
+      // return new URI(q.dialect(), q.value(), null, null).toString();
+      // } catch (URISyntaxException e) {
+      // throw new CorantRuntimeException(e);
+      // }
       return q.value().concat(Names.DOMAIN_SPACE_SEPARATORS).concat(q.dialect());
     } else {
       return asDefaultString(qualifier);

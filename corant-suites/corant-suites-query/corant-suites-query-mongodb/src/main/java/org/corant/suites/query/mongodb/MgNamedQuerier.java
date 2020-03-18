@@ -22,6 +22,9 @@ import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
 public interface MgNamedQuerier
     extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>, NamedQuerier {
+
+  String getCollectionName();// from 2020-03-18
+
   String getOriginalScript();
 
   public enum MgOperator {

@@ -21,7 +21,6 @@ import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -227,6 +226,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     Map<String, String> pros = querier.getQuery().getProperties();
     // handle properties
+    fi.batchSize(resolveDefaultLimit(querier));
     getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(fi::batchSize);
     getOptMapObject(pros, PRO_KEY_COMMENT, ConversionUtils::toString).ifPresent(fi::comment);
     CursorType ct = getMapEnum(pros, PRO_KEY_CURSOR_TYPE, CursorType.class);
@@ -269,7 +269,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected String resolveCollectionName(MgNamedQuerier querier) {
     String colName = resolveProperties(querier, PRO_KEY_COLLECTION_NAME, String.class, null);
-    return isNotBlank(colName) ? colName : split(querier.getQuery().getName(), ".")[0];
+    return isNotBlank(colName) ? colName : querier.getCollectionName(); // FIXME
   }
 
   protected int resolveCountOptionsLimit() {

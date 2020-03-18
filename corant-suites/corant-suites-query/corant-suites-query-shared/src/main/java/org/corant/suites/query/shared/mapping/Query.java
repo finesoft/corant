@@ -227,7 +227,7 @@ public class Query implements Serializable {
   }
 
   public List<String> getVersionedFetchQueryNames() {
-    return fetchQueries.stream().map(f -> f.getVersionedReferenceQueryName())
+    return fetchQueries.stream().map(f -> f.getReferenceQuery().getVersionedName())
         .collect(Collectors.toList());
   }
 

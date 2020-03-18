@@ -90,7 +90,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);

@@ -191,7 +191,7 @@ public class QueryParseHandler extends DefaultHandler {
       for (int i = 0; i < attributes.getLength(); i++) {
         String aqn = attributes.getQName(i), atv = attributes.getValue(i);
         if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQuery(atv);
+          fq.setReferenceQueryName(atv);
         } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryType(ConversionUtils.toEnum(atv, QueryType.class));
         } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {

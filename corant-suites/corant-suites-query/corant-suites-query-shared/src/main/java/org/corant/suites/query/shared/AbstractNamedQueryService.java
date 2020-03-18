@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import org.corant.kernel.util.Retries.SupplierRetrier;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
+import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.suites.query.shared.mapping.Query;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
@@ -130,9 +131,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
             }
           }
         } else {
-          fetchQueryService.fetch(
-              results.stream().filter(r -> querier.decideFetch(r, fq)).collect(Collectors.toList()),
-              fq, querier);
+          List<T> decideResults =
+              results.stream().filter(r -> querier.decideFetch(r, fq)).collect(Collectors.toList());
+          if (isEmpty(decideResults) && isNotEmpty(fq.getParameters())
+              && fq.getParameters().stream()
+                  .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
+                      || fp.getSource() == FetchQueryParameterSource.P)) {
+            continue;
+          }
+          fetchQueryService.fetch(decideResults, fq, querier);
         }
       }
     }
@@ -184,8 +191,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
-    final QueryType type = fq.getReferenceQueryType();
-    final String qualifier = fq.getReferenceQueryQualifier();
+    final QueryType type = fq.getReferenceQuery().getType();
+    final String qualifier = fq.getReferenceQuery().getQualifier();
     return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
       if (type == null && isBlank(qualifier)) {
         return this;

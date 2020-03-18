@@ -14,8 +14,6 @@
 package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,15 +33,12 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
 public class FetchQuery implements Serializable {
 
   private static final long serialVersionUID = 449192431797295206L;
-  private String referenceQuery;
-  private QueryType referenceQueryType;
-  private String referenceQueryQualifier;
+  private QueryReference referenceQuery = new QueryReference();
   private String injectPropertyName;
   private String[] injectPropertyNamePath = new String[0];
   private Class<?> resultClass = Map.class;
   private int maxSize = 1024;
   private List<FetchQueryParameter> parameters = new ArrayList<>();
-  private String referenceQueryversion = "";
   private boolean multiRecords = true;
   private Script predicateScript = new Script();
   private Script injectionScript = new Script();
@@ -55,24 +50,19 @@ public class FetchQuery implements Serializable {
   }
 
   /**
-   *
    * @param referenceQuery
    * @param injectPropertyName
    * @param resultClass
    * @param maxSize
    * @param parameters
-   * @param referenceQueryversion
    * @param multiRecords
    * @param predicate
    * @param injection
    * @param eagerInject
-   * @param referenceQueryType
-   * @param referenceQueryQualifier
    */
-  public FetchQuery(String referenceQuery, String injectPropertyName, Class<?> resultClass,
-      int maxSize, List<FetchQueryParameter> parameters, String referenceQueryversion,
-      boolean multiRecords, Script predicate, Script injection, boolean eagerInject,
-      QueryType referenceQueryType, String referenceQueryQualifier) {
+  public FetchQuery(QueryReference referenceQuery, String injectPropertyName, Class<?> resultClass,
+      int maxSize, List<FetchQueryParameter> parameters, boolean multiRecords, Script predicate,
+      Script injection, boolean eagerInject) {
     super();
     setReferenceQuery(referenceQuery);
     setInjectPropertyName(injectPropertyName);
@@ -81,7 +71,6 @@ public class FetchQuery implements Serializable {
     if (parameters != null) {
       this.parameters.addAll(parameters);
     }
-    setReferenceQueryversion(referenceQueryversion);
     setMultiRecords(multiRecords);
     if (predicate != null) {
       setPredicateScript(predicate);
@@ -90,8 +79,6 @@ public class FetchQuery implements Serializable {
       setInjectionScript(injection);
     }
     setEagerInject(eagerInject);
-    setReferenceQueryType(referenceQueryType);
-    setReferenceQueryQualifier(referenceQueryQualifier);
   }
 
   /**
@@ -146,31 +133,8 @@ public class FetchQuery implements Serializable {
   /**
    * @return the referenceQuery
    */
-  public String getReferenceQuery() {
+  public QueryReference getReferenceQuery() {
     return referenceQuery;
-  }
-
-  /**
-   *
-   * @return the referenceQueryQualifier
-   */
-  public String getReferenceQueryQualifier() {
-    return referenceQueryQualifier;
-  }
-
-  /**
-   *
-   * @return the referenceQueryType
-   */
-  public QueryType getReferenceQueryType() {
-    return referenceQueryType;
-  }
-
-  /**
-   * @return the referenceQueryversion
-   */
-  public String getReferenceQueryversion() {
-    return referenceQueryversion;
   }
 
   /**
@@ -178,11 +142,6 @@ public class FetchQuery implements Serializable {
    */
   public Class<?> getResultClass() {
     return resultClass;
-  }
-
-  public String getVersionedReferenceQueryName() {
-    return defaultString(getReferenceQuery())
-        + (isNotBlank(getReferenceQueryversion()) ? "_" + getReferenceQueryversion() : "");
   }
 
   /**
@@ -234,8 +193,16 @@ public class FetchQuery implements Serializable {
     predicateScript = defaultObject(predicate, new Script());
   }
 
-  protected void setReferenceQuery(String referenceQuery) {
+  /**
+   *
+   * @param referenceQuery the referenceQuery to set
+   */
+  protected void setReferenceQuery(QueryReference referenceQuery) {
     this.referenceQuery = referenceQuery;
+  }
+
+  protected void setReferenceQueryName(String referenceQueryName) {
+    referenceQuery.setName(referenceQueryName);
   }
 
   /**
@@ -243,7 +210,7 @@ public class FetchQuery implements Serializable {
    * @param referenceQueryQualifier the referenceQueryQualifier to set
    */
   protected void setReferenceQueryQualifier(String referenceQueryQualifier) {
-    this.referenceQueryQualifier = referenceQueryQualifier;
+    referenceQuery.setQualifier(referenceQueryQualifier);
   }
 
   /**
@@ -251,11 +218,11 @@ public class FetchQuery implements Serializable {
    * @param referenceQueryType the referenceQueryType to set
    */
   protected void setReferenceQueryType(QueryType referenceQueryType) {
-    this.referenceQueryType = referenceQueryType;
+    referenceQuery.setType(referenceQueryType);
   }
 
   protected void setReferenceQueryversion(String referenceQueryversion) {
-    this.referenceQueryversion = referenceQueryversion;
+    referenceQuery.setVersion(referenceQueryversion);
   }
 
   protected void setResultClass(Class<?> resultClass) {

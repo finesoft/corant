@@ -37,7 +37,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     String sql = querier.getScript(null);
     Object[] scriptParameter = querier.getScriptParameter();

@@ -39,7 +39,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getVersionedReferenceQueryName();
+    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     String cql = querier.getScript(null);
     String ks = resolveKeyspace(querier);

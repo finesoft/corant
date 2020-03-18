@@ -121,7 +121,7 @@ public class QueryMapping {
       // validate fetch queries elements
       q.getFetchQueries().forEach(fq -> {
         Set<String> injectProNames = new HashSet<>();
-        if (isBlank(fq.getReferenceQuery())) {
+        if (isBlank(fq.getReferenceQuery().getVersionedName())) {
           brokens.add(String.format(
               "The 'reference-query' attribute of 'fetch-query' in query element [%s] in query file [%s] can not null!",
               q.getName(), getUrl()));
@@ -154,7 +154,7 @@ public class QueryMapping {
         // injectProNames.add(fq.getInjectPropertyName());
         // }
 
-        if (isEquals(q.getVersionedName(), fq.getVersionedReferenceQueryName())) {
+        if (isEquals(q.getVersionedName(), fq.getReferenceQuery().getVersionedName())) {
           brokens.add(String.format(
               "The 'fetch-query' [%s] in query element [%s] in query file [%s] can not reference the parent query!",
               fq.getReferenceQuery(), q.getName(), getUrl()));

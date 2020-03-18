@@ -30,8 +30,9 @@ public interface FetchQueryResolver {
   String PARAMETER_FUNC_PARAMETER_NAME = "p";
 
   /**
-   * Decide whether to fetch, generally, the parameter 'result' is a single result record.
-   *
+   * Decide whether to fetch, generally, the parameter 'result' is a single result record. If the
+   * fetch query predicate script not set, this method must return true.
+   * 
    * @param result
    * @param queryParameter
    * @param fetchQuery

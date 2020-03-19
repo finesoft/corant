@@ -15,9 +15,11 @@ package org.corant.suites.jta.shared;
 
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.List;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-jta-shared
@@ -27,21 +29,65 @@ import javax.transaction.xa.Xid;
  * @author bingo 上午11:04:13
  *
  */
-public class ChaosXA {
+public class ChaosXATester {
+
+  final TransactionService transactionService;
+  final List<Runnable> runners;
+
+  /**
+   * @param transactionService
+   * @param runners
+   */
+  public ChaosXATester(TransactionService transactionService, List<Runnable> runners) {
+    super();
+    this.transactionService = transactionService;
+    this.runners = runners;
+  }
+
+  public void test(boolean halt) {
+    if (halt) {
+      failure();
+    } else {
+      normal();
+    }
+  }
+
+  protected void failure() {
+    try {
+      // transactionService.enlistXAResource(new ChaosXAResource(ChaosXAResource.faultType.NONE));
+      transactionService.enlistXAResource(new ChaosXAResource(ChaosXAResource.faultType.HALT));
+      runners.forEach(Runnable::run);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  protected void normal() {
+    runners.forEach(Runnable::run);
+  }
 
   public static class ChaosXAResource implements XAResource, Serializable {
 
     private static final long serialVersionUID = -115520889587270637L;
 
     private static int commitRequests = 0;
+
     private transient faultType fault = faultType.NONE;
+
     private Xid[] recoveryXids;
+
     public boolean startCalled;
+
     public boolean endCalled;
+
     public boolean prepareCalled;
+
     public boolean commitCalled;
+
     public boolean rollbackCalled;
+
     public boolean forgetCalled;
+
     public boolean recoverCalled;
 
     public ChaosXAResource() {
@@ -242,7 +288,7 @@ public class ChaosXA {
 
     @Override
     public String toString() {
-      return "XidImpl (" + System.identityHashCode(this) + " bq:" + stringRep(branchQualifier)
+      return "ChaosXid (" + System.identityHashCode(this) + " bq:" + stringRep(branchQualifier)
           + " formatID:" + formatId + " gtxid:" + stringRep(globalTransactionId);
     }
 

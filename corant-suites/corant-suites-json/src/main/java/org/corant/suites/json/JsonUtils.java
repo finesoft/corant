@@ -98,6 +98,28 @@ public class JsonUtils {
   }
 
   /**
+   * Convert input string to Map.
+   *
+   * @param <K>
+   * @param <V>
+   * @param keyCls
+   * @param valueCls
+   * @param cmd
+   * @return fromString
+   */
+  public static <K, V> Map<K, V> fromString(Class<K> keyCls, Class<V> valueCls, String cmd) {
+    if (!isNotBlank(cmd)) {
+      return null;
+    }
+    try {
+      return objectMapper.readValue(cmd,
+          objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
+    } catch (IOException e) {
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
+    }
+  }
+
+  /**
    * Convert input json string to Map
    *
    * @param cmd The json string
@@ -125,26 +147,6 @@ public class JsonUtils {
     try {
       return objectMapper.readValue(cmd,
           objectMapper.getTypeFactory().constructParametricType(parametrized, parameterClasses));
-    } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
-    }
-  }
-
-  /**
-   * Convert input string to Map.
-   *
-   * @param cmd
-   * @param keyCls
-   * @param valueCls
-   * @return Map
-   */
-  public static <K, V> Map<K, V> fromString(String cmd, Class<K> keyCls, Class<V> valueCls) {
-    if (!isNotBlank(cmd)) {
-      return null;
-    }
-    try {
-      return objectMapper.readValue(cmd,
-          objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
     } catch (IOException e) {
       throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
     }

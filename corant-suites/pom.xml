@@ -42,6 +42,7 @@
 		<module>corant-suites-mail</module>
 		<module>corant-suites-rpc</module>
 		<module>corant-suites-logging</module>
+		<module>corant-suites-arrow</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

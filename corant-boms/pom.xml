@@ -37,6 +37,7 @@
 		<version.commons-net>3.6</version.commons-net>
 		<version.apache-poi>4.1.1</version.apache-poi>
 		<version.apache.johnzon-core>1.1.13</version.apache.johnzon-core>
+		<version.apache.arrow>0.16.0</version.apache.arrow>
 		<version.log4j2>2.13.0</version.log4j2>
 		<version.calcite>1.17.0</version.calcite>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
@@ -245,7 +246,36 @@
 				<artifactId>geronimo-json_1.1_spec</artifactId>
 				<version>${version.apache.geronimo-json}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-algorithm</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-jdbc</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-vector</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-tools</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-memory</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.arrow</groupId>
+				<artifactId>arrow-format</artifactId>
+				<version>${version.apache.arrow}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.opentracing.contrib</groupId>

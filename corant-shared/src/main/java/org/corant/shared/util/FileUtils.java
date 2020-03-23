@@ -198,6 +198,10 @@ public class FileUtils {
     return null;
   }
 
+  public static String getFileBaseName(File file) {
+    return getFileBaseName(shouldNotNull(file.getPath()));
+  }
+
   public static String getFileBaseName(String path) {
     String fileName = getFileName(path);
     if (fileName != null) {

@@ -29,6 +29,7 @@ public interface QueryParameter extends Serializable {
 
   String OFFSET_PARAM_NME = "_offset";
   String LIMIT_PARAM_NME = "_limit";
+  String CONTEXT_NME = "_context";
 
   /**
    * Return the query context that may be contain current user context or security context.

@@ -15,6 +15,7 @@ package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.suites.query.shared.QueryParameter.CONTEXT_NME;
 import static org.corant.suites.query.shared.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.suites.query.shared.QueryParameter.OFFSET_PARAM_NME;
 import java.util.ArrayList;
@@ -90,6 +91,7 @@ public class DefaultQueryResolver implements QueryResolver {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveQueryParameter(Query query, Object param) {
     QueryParameter queryParameter = new DefaultQueryParameter();
@@ -100,6 +102,8 @@ public class DefaultQueryResolver implements QueryResolver {
       DefaultQueryParameter qp = new DefaultQueryParameter();
       Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, 1)));
       Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, 0)));
+      Optional.ofNullable(mp.remove(CONTEXT_NME))
+          .ifPresent(x -> qp.context((Map<String, Object>) x));
       Map<String, Class<?>> convertSchema = query == null ? null : query.getParamConvertSchema();
       queryParameter = qp.criteria(convertParameter(mp, convertSchema));
     } else if (param != null) {

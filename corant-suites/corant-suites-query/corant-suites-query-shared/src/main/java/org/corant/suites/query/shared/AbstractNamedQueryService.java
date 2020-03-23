@@ -19,6 +19,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.getMapDuration;
 import static org.corant.shared.util.MapUtils.getMapInteger;
+import static org.corant.shared.util.MapUtils.getMapObject;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,6 +58,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
   public static final String STREAM_FORWARD_RETRY_TIMES = ".stream-forward-retry-times";
   public static final String STREAM_FORWARD_RETRY_INTERVAL = ".stream-forward-retry-interval";
+  public static final String STREAM_TERMINATER = ".stream-terminater";
 
   static final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();
 
@@ -71,11 +74,13 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public <T> Stream<T> stream(String queryName, Object parameter) {
     QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
     final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
+    final Map<String, Object> context = queryParam.getContext();
     final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
     final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
-    final int retryTimes = getMapInteger(queryParam.getContext(), STREAM_FORWARD_RETRY_TIMES, 0);
-    final Duration retryInterval = getMapDuration(queryParam.getContext(),
-        STREAM_FORWARD_RETRY_INTERVAL, Duration.ofSeconds(1L));
+    final Predicate<Integer> terminater = forceCast(getMapObject(context, STREAM_TERMINATER));
+    final int retryTimes = getMapInteger(context, STREAM_FORWARD_RETRY_TIMES, 0);
+    final Duration retryInterval =
+        getMapDuration(context, STREAM_FORWARD_RETRY_INTERVAL, Duration.ofSeconds(1L));
     final Forwarding<T> empty = Forwarding.inst();
     final Iterator<T> iterator = new Iterator<T>() {
 
@@ -85,6 +90,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       @Override
       public boolean hasNext() {
+        if (terminate()) {
+          return false;
+        }
         Forwarding<T> fw = buffer.get();
         if (isEmpty(fw.getResults())) {
           if (fw.hasNext()) {
@@ -114,6 +122,10 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         } else {
           return forward(queryName, parameter);
         }
+      }
+
+      boolean terminate() {
+        return terminater != null && terminater.test(offset);
       }
     };
     return streamOf(iterator);

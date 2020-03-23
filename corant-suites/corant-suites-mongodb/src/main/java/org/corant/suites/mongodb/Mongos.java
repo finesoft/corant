@@ -15,6 +15,7 @@ package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.batchCollectStream;
+import static org.corant.shared.util.StreamUtils.batchStream;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.suites.cdi.Instances.resolve;
 import java.util.function.BiConsumer;
@@ -46,13 +47,12 @@ public class Mongos {
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     for (String c : s.listCollectionNames()) {
       MongoCollection<Document> dest = d.getCollection(c);
-      batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))
-          .forEach(b -> {
-            if (consumer != null) {
-              b.forEach(cs -> cs.append(c, d));
-            }
-            dest.insertMany(b);
-          });
+      batchStream(batchSize, s.getCollection(c).find().batchSize(batchSize)).forEach(b -> {
+        if (consumer != null) {
+          b.forEach(cs -> cs.append(c, d));
+        }
+        dest.insertMany(b);
+      });
     }
   }
 
@@ -61,21 +61,19 @@ public class Mongos {
       Consumer<Document> consumer) {
     Bson useFilter = filter == null ? null : filter.get();
     if (useFilter == null) {
-      batchCollectStream(batchSize, streamOf(srcCollection.find().batchSize(batchSize)))
-          .forEach(b -> {
-            if (consumer != null) {
-              b.forEach(consumer::accept);
-            }
-            destCollection.insertMany(b);
-          });
+      batchStream(batchSize, srcCollection.find().batchSize(batchSize)).forEach(b -> {
+        if (consumer != null) {
+          b.forEach(consumer::accept);
+        }
+        destCollection.insertMany(b);
+      });
     } else {
-      batchCollectStream(batchSize, streamOf(srcCollection.find(useFilter).batchSize(batchSize)))
-          .forEach(b -> {
-            if (consumer != null) {
-              b.forEach(consumer::accept);
-            }
-            destCollection.insertMany(b);
-          });
+      batchStream(batchSize, srcCollection.find(useFilter).batchSize(batchSize)).forEach(b -> {
+        if (consumer != null) {
+          b.forEach(consumer::accept);
+        }
+        destCollection.insertMany(b);
+      });
     }
   }
 

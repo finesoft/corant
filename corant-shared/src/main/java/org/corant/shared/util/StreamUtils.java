@@ -18,6 +18,7 @@ import static org.corant.shared.util.ObjectUtils.emptyConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -44,12 +45,74 @@ public class StreamUtils {
 
   private StreamUtils() {}
 
-  public static <T> Stream<List<T>> batchCollectStream(int forEachBatchSize, Stream<T> source) {
-    final int useBatchSize = forEachBatchSize < 0 ? DFLE_BATCH_SIZE : forEachBatchSize;
+  public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
+    final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
     final AtomicInteger counter = new AtomicInteger();
     return shouldNotNull(source)
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
         .stream();
+  }
+
+  /**
+   * NOTE : parallel not support
+   *
+   * @param <T>
+   * @param batchSize
+   * @param source
+   * @return batchStream
+   */
+  public static <T> Stream<List<T>> batchStream(int batchSize, Iterable<T> source) {
+    return batchStream(batchSize, shouldNotNull(source).iterator());
+  }
+
+  /**
+   * NOTE : parallel not support
+   *
+   * @param <T>
+   * @param batchSize
+   * @param it
+   * @return batchStream
+   */
+  public static <T> Stream<List<T>> batchStream(int batchSize, Iterator<T> it) {
+
+    return streamOf(new Iterator<List<T>>() {
+
+      final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
+      final Iterator<T> useIt = shouldNotNull(it);
+
+      @Override
+      public boolean hasNext() {
+        return useIt.hasNext();
+      }
+
+      @Override
+      public List<T> next() {
+        if (hasNext()) {
+          List<T> list = new ArrayList<>(useBatchSize);
+          int i = 0;
+          while (useIt.hasNext()) {
+            list.add(useIt.next());
+            if (++i == useBatchSize) {
+              break;
+            }
+          }
+          return list;
+        }
+        throw new NoSuchElementException();
+      }
+    });
+  }
+
+  /**
+   * NOTE : parallel not support
+   *
+   * @param <T>
+   * @param batchSize
+   * @param source
+   * @return batchStream
+   */
+  public static <T> Stream<List<T>> batchStream(int batchSize, Stream<T> source) {
+    return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
   public static long copy(InputStream input, OutputStream output) throws IOException {

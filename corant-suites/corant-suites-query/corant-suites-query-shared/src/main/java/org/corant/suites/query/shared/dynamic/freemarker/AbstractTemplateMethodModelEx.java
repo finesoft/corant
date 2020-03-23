@@ -19,6 +19,7 @@ import static org.corant.shared.util.ConversionUtils.toList;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.MapUtils.mapOf;
+import java.lang.reflect.Array;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -182,6 +183,44 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
         || Number.class.isAssignableFrom(cls) || Boolean.class.isAssignableFrom(cls)
         || Temporal.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls)
         || Enum.class.isAssignableFrom(cls);
+  }
+
+  /**
+   * Return pass in object is simple type or simple type collection or simple type array.
+   *
+   * Unfinish yet
+   *
+   * @param obj
+   * @return isSimpleTypeObject
+   */
+  protected byte isSimpleTypeObject(Object obj) {
+    byte simple = 0;
+    if (obj instanceof Iterable<?>) {
+      simple = 2;
+      for (Object o : (Iterable<?>) obj) {
+        if (o != null && !isSimpleType(o.getClass())) {
+          simple = -1;
+        }
+        if (simple < 0) {
+          break;
+        }
+      }
+    } else if (obj != null && obj.getClass().isArray()) {
+      simple = 2;
+      if (Array.getLength(obj) > 0) {
+        for (Object o : (Object[]) obj) {
+          if (o != null && !isSimpleType(o.getClass())) {
+            simple = -1;
+          }
+          if (simple < 0) {
+            break;
+          }
+        }
+      }
+    } else if (obj != null && isSimpleType(obj.getClass())) {
+      simple = 1;
+    }
+    return simple;
   }
 
   /**

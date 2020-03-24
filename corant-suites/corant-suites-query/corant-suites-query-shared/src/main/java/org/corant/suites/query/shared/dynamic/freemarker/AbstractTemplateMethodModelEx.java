@@ -186,7 +186,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   }
 
   /**
-   * Return pass in object is simple type or simple type collection or simple type array.
+   * Return whether the passed object is simple type or simple type collection or simple type array.
    *
    * Unfinish yet
    *

@@ -16,16 +16,21 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.MapUtils.getMapEnum;
+import static org.corant.shared.util.MapUtils.getMapObject;
 import static org.corant.shared.util.MapUtils.getOpt;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
+import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
@@ -36,6 +41,8 @@ import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
+import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
@@ -94,8 +101,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
-    List<Map<String, Object>> fetchedList =
-        streamOf(fi).map(r -> (Map<String, Object>) r).collect(Collectors.toList());
+    List<Map<String, Object>> fetchedList = streamOf(fi).collect(Collectors.toList());
     fetch(fetchedList, querier);
     querier.resolveResultHints(fetchedList);
     if (result instanceof List) {
@@ -151,7 +157,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       if (size < limit) {
         result.withTotal(offset + size);
       } else {
-        result.withTotal(Long.valueOf(queryCount(querier)).intValue());
+        result.withTotal((int) queryCount(querier));
       }
       this.fetch(list, querier);
     }
@@ -180,11 +186,44 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
+    final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
+    final Map<String, Object> context = queryParam.getContext();
+    final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
+    final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
+    final BiPredicate<Integer, Object> terminater =
+        forceCast(getMapObject(context, STREAM_TERMINATER));
+    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, useParam);
+    final int offset = resolveOffset(querier);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    return streamOf(query(querier)).map(result -> {
-      this.fetch(convertDocument(result), querier);
-      return querier.resolveResult(result);
+    final Iterator<Document> it =
+        offset > 0 ? query(querier).skip(offset).batchSize(limit).iterator()
+            : query(querier).batchSize(limit).iterator();
+
+    return streamOf(new Iterator<T>() {
+      int counter = 1;
+      Object next = null;
+
+      @Override
+      public boolean hasNext() {
+        if (terminate()) {
+          return false;
+        }
+        return it.hasNext();
+      }
+
+      @Override
+      public T next() {
+        counter++;
+        next = it.next();
+        AbstractMgNamedQueryService.this.fetch(next, querier);
+        next = querier.resolveResult(next);
+        return forceCast(next);
+      }
+
+      boolean terminate() {
+        return terminater != null && !terminater.test(counter, next);
+      }
     });
   }
 

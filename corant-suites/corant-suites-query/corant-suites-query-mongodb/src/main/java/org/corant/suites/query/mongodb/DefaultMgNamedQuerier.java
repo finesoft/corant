@@ -65,11 +65,6 @@ public class DefaultMgNamedQuerier
     init(mgQuery);
   }
 
-  public static void main(String... strings) {
-    EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
-    System.out.println(script.size());
-  }
-
   @Override
   public String getCollectionName() {
     return collectionName;

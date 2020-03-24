@@ -13,12 +13,15 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,6 +40,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
@@ -329,6 +333,28 @@ public class StringUtils {
   }
 
   /**
+   * String lines from file, use for read txt file line by line.
+   *
+   * @param file
+   * @return lines
+   */
+  public static Stream<String> lines(final File file) {
+    FileInputStream fis;
+    try {
+      fis = new FileInputStream(shouldNotNull(file));
+    } catch (FileNotFoundException e1) {
+      throw new CorantRuntimeException(e1);
+    }
+    return lines(fis, -1, -1).onClose(() -> {
+      try {
+        fis.close();
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+  }
+
+  /**
    * String lines from file input stream, use for read txt file line by line.
    *
    * @param fis
@@ -389,6 +415,7 @@ public class StringUtils {
   }
 
   /**
+   * Checks if the passed string matches all passed regular expressions.
    *
    * @param seq
    * @param flags
@@ -406,6 +433,7 @@ public class StringUtils {
   }
 
   /**
+   * Checks if the passed string matches any passed regular expressions.
    *
    * @param seq
    * @param flags
@@ -423,6 +451,8 @@ public class StringUtils {
   }
 
   /**
+   * Checks if the passed string matches Glob expressions.
+   *
    * @param str
    * @param ignoreCase
    * @param isDos
@@ -439,11 +469,13 @@ public class StringUtils {
   }
 
   /**
+   * Checks if the passed string matches Wildcard expressions.
    *
    * @param str
    * @param ignoreCase
    * @param globExpress
-   * @return matchWildcard
+   * @return
+   * @see WildcardMatcher
    */
   public static boolean matchWildcard(final String str, final boolean ignoreCase,
       final String globExpress) {

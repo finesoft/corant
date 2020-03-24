@@ -45,6 +45,14 @@ public class StreamUtils {
 
   private StreamUtils() {}
 
+  /**
+   * Receive stream object converts it to a list stream, use stream grouping.
+   *
+   * @param <T>
+   * @param batchSize
+   * @param source
+   * @return batchCollectStream
+   */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
     final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
     final AtomicInteger counter = new AtomicInteger();
@@ -54,6 +62,8 @@ public class StreamUtils {
   }
 
   /**
+   * Receive iterable object converts it to a list stream, use for batch processing.
+   *
    * NOTE : parallel not support
    *
    * @param <T>
@@ -66,6 +76,8 @@ public class StreamUtils {
   }
 
   /**
+   * Receive iterator object converts it to a list stream, use for batch processing.
+   *
    * NOTE : parallel not support
    *
    * @param <T>
@@ -104,6 +116,8 @@ public class StreamUtils {
   }
 
   /**
+   * Receive stream object converts it to a list stream, use for batch processing.
+   *
    * NOTE : parallel not support
    *
    * @param <T>
@@ -115,6 +129,14 @@ public class StreamUtils {
     return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
+  /**
+   * Copy the input stream to the output stream without closing the streams.
+   *
+   * @param input
+   * @param output
+   * @return
+   * @throws IOException copy
+   */
   public static long copy(InputStream input, OutputStream output) throws IOException {
     byte[] buffer = new byte[4096];
     long count;
@@ -125,6 +147,13 @@ public class StreamUtils {
     return count;
   }
 
+  /**
+   * Read the input stream to byte array.
+   *
+   * @param is
+   * @return
+   * @throws IOException readAllBytes
+   */
   public static byte[] readAllBytes(InputStream is) throws IOException {
     byte[] buf = new byte[4096];
     int maxBufferSize = Integer.MAX_VALUE - 8;
@@ -152,6 +181,13 @@ public class StreamUtils {
     return capacity == nread ? buf : Arrays.copyOf(buf, nread);
   }
 
+  /**
+   * Convert Enumeration object to Stream object
+   *
+   * @param <T>
+   * @param enumeration
+   * @return streamOf
+   */
   public static <T> Stream<T> streamOf(final Enumeration<T> enumeration) {
     if (enumeration != null) {
       return streamOf(new Iterator<T>() {
@@ -172,6 +208,13 @@ public class StreamUtils {
     return Stream.empty();
   }
 
+  /**
+   * Convert Iterable object to Stream object
+   *
+   * @param <T>
+   * @param iterable
+   * @return streamOf
+   */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> Stream<T> streamOf(final Iterable<T> iterable) {
     if (iterable instanceof Collection) {
@@ -182,6 +225,13 @@ public class StreamUtils {
     return Stream.empty();
   }
 
+  /**
+   * Convert Iterator object to Stream object
+   *
+   * @param <T>
+   * @param iterator
+   * @return streamOf
+   */
   public static <T> Stream<T> streamOf(final Iterator<T> iterator) {
     if (iterator != null) {
       return StreamSupport
@@ -190,6 +240,14 @@ public class StreamUtils {
     return Stream.empty();
   }
 
+  /**
+   * Convert the entries of Map to Stream
+   *
+   * @param <K>
+   * @param <V>
+   * @param map
+   * @return streamOf
+   */
   public static <K, V> Stream<Map.Entry<K, V>> streamOf(Map<K, V> map) {
     if (map != null) {
       return map.entrySet().stream();
@@ -197,11 +255,24 @@ public class StreamUtils {
     return Stream.empty();
   }
 
+  /**
+   * Convert object array to Stream
+   *
+   * @param <T>
+   * @param objects
+   * @return streamOf
+   */
   @SuppressWarnings("unchecked")
   public static <T> Stream<T> streamOf(T... objects) {
     return Arrays.stream(objects);
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:39:59
+   *
+   */
   public abstract static class AbstractBatchHandlerSpliterator<T> extends AbstractSpliterator<T> {
 
     private final int batchSize;

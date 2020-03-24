@@ -14,6 +14,7 @@
 package org.corant.kernel.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +36,10 @@ public class Retries {
   protected static final Logger LOGGER = Logger.getLogger(Retries.class.toString());
 
   static final String RTY_LOG =
-      "An exception occurred during execution, enter the retry phase, the retry times %s, interval %s, message : %s";
+      "An exception [%s] occurred during execution, enter the retry phase, the retry times [%s], interval [%s], message : [%s]";
+
+  static final String REC_LOG =
+      "The retry execution resume normal operation from [%s], message : [%s].";
 
   static final String RTY_ERR_LOG = "An exception occurred during supplier.";
 
@@ -95,17 +99,17 @@ public class Retries {
       }
       int retryCounter = 1;
       Exception executeException = null;
+      boolean occurredException = false;
       do {
         try {
+          occurredException = false;
           return this.doExecute();
         } catch (Exception e) {
           executeException = e;
+          occurredException = true;
           if (this.on.stream().noneMatch(ec -> ec.isAssignableFrom(e.getClass()))) {
             throw this.transfer.apply(e);
           }
-          final String logretryCounter = times + " - " + retryCounter;
-          LOGGER.warning(
-              () -> String.format(RTY_LOG, logretryCounter, this.interval, e.getMessage()));
           try {
             Thread.sleep(this.interval.toMillis());
           } catch (InterruptedException te) {
@@ -114,6 +118,17 @@ public class Retries {
             throw this.transfer.apply(te);
           }
         } finally {
+          final Exception lastException = executeException;
+          final String logretryCounter = times + " - " + retryCounter;
+          if (occurredException) {
+            LOGGER.warning(
+                () -> String.format(RTY_LOG, lastException.getClass().getName(), logretryCounter,
+                    this.interval, defaultString(lastException.getMessage(), "no message")));
+          } else if (retryCounter > 1) {
+            LOGGER.info(() -> String.format(REC_LOG, lastException.getClass().getName(),
+                defaultString(lastException.getMessage(), "no message")));
+
+          }
           retryCounter++;
         }
       } while (retryCounter <= this.times);

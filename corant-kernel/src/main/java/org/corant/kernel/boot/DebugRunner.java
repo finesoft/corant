@@ -21,9 +21,8 @@ import org.corant.shared.util.LaunchUtils;
  * @author bingo 下午3:33:04
  *
  */
-public class DebugRunner implements Runner {
+public class DebugRunner {
 
-  @Override
   public void run(String... args) throws Exception {
     LaunchUtils.debugAs();
   }

@@ -19,8 +19,7 @@ package org.corant.kernel.boot;
  * @author bingo 下午3:32:02
  *
  */
-public class DirectRunner implements Runner {
+public class DirectRunner {
 
-  @Override
   public void run(String... args) throws Exception {}
 }

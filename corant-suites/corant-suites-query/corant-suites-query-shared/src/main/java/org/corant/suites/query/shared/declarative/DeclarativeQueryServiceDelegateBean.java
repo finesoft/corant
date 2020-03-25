@@ -76,6 +76,11 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   }
 
   @Override
+  public void destroy(Object instance, CreationalContext<Object> creationalContext) {
+    methodInvokers.clear();
+  }
+
+  @Override
   public String getId() {
     return proxyType.getName();
   }

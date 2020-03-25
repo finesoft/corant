@@ -17,6 +17,8 @@ import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import java.lang.annotation.Annotation;
+import java.lang.management.ManagementFactory;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
@@ -31,12 +33,21 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import org.corant.kernel.boot.CorantRunner;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.StopWatch;
@@ -119,6 +130,7 @@ public class Corant implements AutoCloseable {
   public static final String DISABLE_BOOST_LINE_CMD = "-disable_boost-line";
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
+  public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
 
   private static volatile Corant me; // NOSONAR
 
@@ -126,6 +138,7 @@ public class Corant implements AutoCloseable {
   private final String[] arguments;
   private final ClassLoader classLoader;
   private WeldContainer container;
+  private volatile CorantRunner mbeanRunner;
 
   /**
    * Use the class loader of Corant.class as current thread context and the CDI container class
@@ -171,6 +184,7 @@ public class Corant implements AutoCloseable {
       this.classLoader = Corant.class.getClassLoader();
     }
     this.arguments = arguments;
+    setMe(this);
   }
 
   /**
@@ -194,6 +208,26 @@ public class Corant implements AutoCloseable {
    */
   public Corant(String... arguments) {
     this(null, null, arguments);
+  }
+
+  public static <T> T call(boolean synthetic, Class<T> beanClass, Annotation[] annotations,
+      String[] arguments) {
+    if (current() == null) {
+      if (synthetic) {
+        run(beanClass, arguments);
+      } else {
+        run(new Class[0], arguments);
+      }
+    }
+    return CDI.current().select(beanClass, annotations).get();
+  }
+
+  public static <T> T call(Class<T> beanClass, String... arguments) {
+    return call(false, beanClass, new Annotation[0], arguments);
+  }
+
+  public static <T> T callSynthetic(Class<T> beanClass, String... arguments) {
+    return call(true, beanClass, new Annotation[0], arguments);
   }
 
   public static Corant current() {
@@ -279,10 +313,8 @@ public class Corant implements AutoCloseable {
   }
 
   public synchronized void start(Consumer<Weld> preInitializer) {
-    if (me != null) {
+    if (isRuning()) {
       return;
-    } else {
-      setMe(this);
     }
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
@@ -342,7 +374,6 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    setMe(null);
   }
 
   void doAfterContainerInitialized() {
@@ -366,6 +397,7 @@ public class Corant implements AutoCloseable {
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    registerMBean();
   }
 
   void doOnReady() {
@@ -386,6 +418,31 @@ public class Corant implements AutoCloseable {
       logger.info(() -> String.format(msgOrFmt, arguments));
     } else {
       logger.info(() -> msgOrFmt);
+    }
+  }
+
+  private void registerMBean() {
+    if (!setOf(arguments).contains(REGISTER_TO_MBEAN_CMD)) {
+      return;
+    }
+    synchronized (this) {
+      if (mbeanRunner != null) {
+        return;
+      }
+      mbeanRunner = new CorantRunner(beanClasses, arguments);
+      ObjectName objectName = null;
+      try {
+        objectName = new ObjectName("corant:type=basic,name=CorantRunner");
+      } catch (MalformedObjectNameException ex) {
+        throw new CorantRuntimeException(ex);
+      }
+      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+      try {
+        server.registerMBean(mbeanRunner, objectName);
+      } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+          | NotCompliantMBeanException ex) {
+        throw new CorantRuntimeException(ex);
+      }
     }
   }
 

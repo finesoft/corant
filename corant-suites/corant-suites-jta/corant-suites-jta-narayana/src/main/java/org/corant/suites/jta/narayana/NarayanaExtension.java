@@ -45,6 +45,7 @@ import org.corant.Corant;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.config.spi.Sortable;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.suites.jta.shared.TransactionExtension;
@@ -213,6 +214,15 @@ public class NarayanaExtension implements TransactionExtension {
       streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
           .map(NarayanaXAResourceRecoveryHelper::new)
           .forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
+    }
+  }
+
+  void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
+    try {
+      resolve(RecoveryManagerService.class).stop();
+      logger.info(() -> "JTA automatic recovery processes has been stopped.");
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
     }
   }
 

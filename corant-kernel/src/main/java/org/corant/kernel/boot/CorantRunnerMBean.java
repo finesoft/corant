@@ -16,11 +16,15 @@ package org.corant.kernel.boot;
 /**
  * corant-kernel
  *
- * @author bingo 下午3:30:49
+ * @author bingo 下午4:53:58
  *
  */
-public interface Runner {
+public interface CorantRunnerMBean {
 
-  void run(String... args) throws Exception;
+  boolean isRunning();
+
+  void start();
+
+  void stop();
 
 }

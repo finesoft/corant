@@ -30,7 +30,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 public class MpIncomingHeadersProvider implements IncomingHeadersProvider {
 
   static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
-      new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());
+      new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());// static?
 
   transient Logger logger = Logger.getLogger(this.getClass().toString());
 

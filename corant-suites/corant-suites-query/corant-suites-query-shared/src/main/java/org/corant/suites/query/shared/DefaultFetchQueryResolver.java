@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
@@ -59,6 +61,9 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
   @Inject
   ConversionService conversionService;
+
+  @Inject
+  Logger logger;
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
@@ -255,6 +260,13 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     } else {
       return BeanUtils.getProperty(result, String.join(".", sourceNamePath));
     }
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    predicates.clear();
+    injections.clear();
+    logger.fine(() -> "Clear default fetch query resolver caches.");
   }
 
   @Deprecated

@@ -21,7 +21,9 @@ import static org.corant.suites.cdi.Instances.resolve;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
@@ -80,6 +82,7 @@ public class NarayanaExtension implements TransactionExtension {
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
+  protected final List<TransactionIntegration> integrations = new CopyOnWriteArrayList<>();
 
   @Override
   public NarayanaTransactionConfig getConfig() {
@@ -129,6 +132,10 @@ public class NarayanaExtension implements TransactionExtension {
           .disposeWith((t, inst) -> t.destroy());
 
     }
+
+    streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
+        .forEach(integrations::add);
+
   }
 
   void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event,
@@ -210,9 +217,8 @@ public class NarayanaExtension implements TransactionExtension {
       rms.create();
     }
     final XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
-    if (xaRecoveryModule != null) {
-      streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-          .map(NarayanaXAResourceRecoveryHelper::new)
+    if (xaRecoveryModule != null && !integrations.isEmpty()) {
+      integrations.stream().map(NarayanaXAResourceRecoveryHelper::new)
           .forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
     }
   }
@@ -220,6 +226,8 @@ public class NarayanaExtension implements TransactionExtension {
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
       resolve(RecoveryManagerService.class).stop();
+      integrations.stream().forEach(TransactionIntegration::destroy);
+      integrations.clear();
       logger.info(() -> "JTA automatic recovery processes has been stopped.");
     } catch (Exception e) {
       throw new CorantRuntimeException(e);

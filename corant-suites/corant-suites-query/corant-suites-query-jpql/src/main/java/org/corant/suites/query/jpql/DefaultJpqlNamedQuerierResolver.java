@@ -17,7 +17,10 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -37,6 +40,9 @@ public class DefaultJpqlNamedQuerierResolver
     extends AbstractNamedQuerierResolver<JpqlNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+
+  @Inject
+  Logger logger;
 
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {
@@ -66,6 +72,12 @@ public class DefaultJpqlNamedQuerierResolver
 
   protected JavascriptJpqlQuerierBuilder createJsProcessor(Query query) {
     return new JavascriptJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    builders.clear();
+    logger.fine(() -> "Clear default jpql named querier resolver builders");
   }
 
 }

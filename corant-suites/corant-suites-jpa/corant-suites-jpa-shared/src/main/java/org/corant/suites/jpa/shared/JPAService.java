@@ -52,8 +52,8 @@ import org.corant.suites.jta.shared.TransactionService;
 @ApplicationScoped
 public class JPAService implements PersistenceService {
 
-  static final Logger logger = Logger.getLogger(JPAService.class.getName());
-  static final Map<PersistenceUnit, EntityManagerFactory> emfs = new ConcurrentHashMap<>();
+  final Logger logger = Logger.getLogger(JPAService.class.getName());// static
+  final Map<PersistenceUnit, EntityManagerFactory> emfs = new ConcurrentHashMap<>(); // static
 
   @Inject
   @Any
@@ -73,7 +73,7 @@ public class JPAService implements PersistenceService {
                   p.synchronization(),
                   PersistenceContextLiteral.extractProperties(pc.properties())));
       logger.fine(() -> String.format(
-          "Get transactional scope entity maneger [%s] from persistence unit [%s].", em,
+          "Get transactional scope entity manager [%s] for persistence unit [%s].", em,
           pc.unitName()));
       return em;
     } else {
@@ -83,7 +83,7 @@ public class JPAService implements PersistenceService {
                   p.synchronization(),
                   PersistenceContextLiteral.extractProperties(pc.properties())));
       logger.fine(() -> String.format(
-          "Get request scope entity maneger [%s] from persistence unit [%s].", em, pc.unitName()));
+          "Get request scope entity manager [%s] for persistence unit [%s].", em, pc.unitName()));
       return em;
     }
   }
@@ -102,10 +102,11 @@ public class JPAService implements PersistenceService {
   }
 
   @PreDestroy
-  void onPreDestroy() {
-    emfs.values().forEach(emf -> {
-      if (emf.isOpen()) {
-        emf.close();
+  synchronized void onPreDestroy() {
+    emfs.forEach((k, v) -> {
+      if (v.isOpen()) {
+        v.close();
+        logger.fine(() -> String.format("Close entity manager factory [%s].", k));
       }
     });
   }
@@ -133,7 +134,7 @@ public class JPAService implements PersistenceService {
       Exception ex = null;
       for (final EntityManager c : components.values()) {
         try {
-          logger.fine(() -> String.format("Close entityManager %s", c));
+          logger.fine(() -> String.format("Close entity manager [%s].", c));
           if (c.isOpen()) {
             c.close();
           }

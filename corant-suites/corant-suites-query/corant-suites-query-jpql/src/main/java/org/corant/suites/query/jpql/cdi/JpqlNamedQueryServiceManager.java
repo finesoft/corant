@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -49,7 +50,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Alternative
 public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+  final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
 
   @Inject
   protected Logger logger;
@@ -91,6 +92,12 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected String resolveQualifier(Object qualifier) {
     return qualifier instanceof JpqlQuery ? ((JpqlQuery) qualifier).value()
         : asDefaultString(qualifier);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    services.clear();
+    logger.fine(() -> "Clear cached named query services.");
   }
 
   @Produces

@@ -155,6 +155,8 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
       v.enumLiterals.clear();
     });
     holder.clear();
+    initialized = false;
+    logger.fine(() -> "Clear property enumerations bundle holder.");
   }
 
   static class EnumLiteralsObject {

@@ -41,7 +41,7 @@ import org.corant.shared.util.TypeUtils;
  *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class ConverterRegistry {
+public class ConverterRegistry { // static?
 
   static final Map<ConverterType<?, ?>, Converter<?, ?>> SUPPORT_CONVERTERS =
       new ConcurrentHashMap<>();

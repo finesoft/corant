@@ -17,6 +17,8 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
@@ -37,6 +39,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver<SqlNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+
+  @Inject
+  Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.sql.mapping-file.paths")
@@ -67,6 +72,12 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {
     return new JavascriptSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    builders.clear();
+    logger.fine(() -> "Clear default sql named querier resolver builders.");
   }
 
 }

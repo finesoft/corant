@@ -30,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.normal.Names;
@@ -54,8 +55,8 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_MAP_FIELD_NME = "map-field-name";
   public static final String HINT_PARA_MAP_TYP_NME = "java.util.Map";
 
-  static final Map<String, Consumer<Map>> caches = new ConcurrentHashMap<>();
-  static final Set<String> brokens = new CopyOnWriteArraySet<>();
+  final Map<String, Consumer<Map>> caches = new ConcurrentHashMap<>();// static?
+  final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
 
   @Inject
   Logger logger;
@@ -113,6 +114,13 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    caches.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result map reduce hint handler caches.");
   }
 
   String resolveMapFieldname(QueryHint qh) {

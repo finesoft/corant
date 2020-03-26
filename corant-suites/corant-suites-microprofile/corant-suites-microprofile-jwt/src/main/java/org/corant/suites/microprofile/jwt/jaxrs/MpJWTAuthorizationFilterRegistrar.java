@@ -44,7 +44,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 
   private static final DenyAllFilter denyAllFilter = new DenyAllFilter();
   private static final Map<ResourceInfo, Consumer<FeatureContext>> handlers =
-      new ConcurrentHashMap<>();
+      new ConcurrentHashMap<>();// static?
   private static final Set<Class<? extends Annotation>> mpJwtAnnotations =
       setOf(DenyAll.class, PermitAll.class, RolesAllowed.class);
 

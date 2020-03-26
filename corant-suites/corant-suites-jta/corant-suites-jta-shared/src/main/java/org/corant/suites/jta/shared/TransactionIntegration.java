@@ -29,6 +29,8 @@ public interface TransactionIntegration {
 
   Logger LOGGER = Logger.getLogger(TransactionIntegration.class.getName());
 
+  default void destroy() {}
+
   default TransactionConfig getConfig() {
     if (CDIs.isEnabled()) {
       Instance<TransactionExtension> txExt = CDI.current().select(TransactionExtension.class);

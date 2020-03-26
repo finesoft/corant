@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -52,7 +53,7 @@ import com.datastax.driver.core.Cluster;
 @Alternative
 public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  static final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -91,6 +92,12 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   protected String resolveQualifier(Object qualifier) {
     return qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
         : asDefaultString(qualifier);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    services.clear();
+    logger.fine(() -> "Clear cached named query services.");
   }
 
   @Produces

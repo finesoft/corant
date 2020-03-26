@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -148,6 +149,13 @@ public class QueryMappingService {
       }
     }
     return paths.toArray(new String[paths.size()]);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    queries.clear();
+    initialized = false;
+    logger.fine(() -> "Clear all query mappings.");
   }
 
   public interface QueryMappingFilePathResolver {

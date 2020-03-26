@@ -50,7 +50,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static volatile int WORKER_ID;
   static volatile boolean usePersistenceTime =
       getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
-  static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();
+  static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();// static?
 
   static {
     DATA_CENTER_ID = getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);

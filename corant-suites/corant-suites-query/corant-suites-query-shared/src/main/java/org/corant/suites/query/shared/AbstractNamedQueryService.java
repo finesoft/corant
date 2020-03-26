@@ -37,6 +37,7 @@ import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.PreDestroy;
 import org.corant.kernel.util.Retries.SupplierRetrier;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
@@ -61,7 +62,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public static final String STREAM_RETRY_INTERVAL = ".stream-retry-interval";
   public static final String STREAM_TERMINATER = ".stream-terminater";
 
-  static final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();
+  final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();// static?
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 
@@ -289,5 +290,11 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       obj = querier.getQuery().getProperty(key, cls);
     }
     return defaultObject(obj, dflt);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    fetchQueryServices.clear();
+    logger.fine(() -> "Clear named query service cached fetch query services.");
   }
 }

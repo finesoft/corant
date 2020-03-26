@@ -141,6 +141,8 @@ public class PropertyMessageBundle implements MessageBundle {
   synchronized void onPreDestroy() {
     holder.forEach((k, v) -> v.clear());
     holder.clear();
+    initialized = false;
+    logger.fine(() -> "Clear property message bundle holder.");
   }
 
 }

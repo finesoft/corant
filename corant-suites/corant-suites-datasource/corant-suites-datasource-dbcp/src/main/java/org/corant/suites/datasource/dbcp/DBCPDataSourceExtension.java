@@ -65,7 +65,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
   private static final String DEFAULT_NODE_IDENTIFIER = "1";
 
   private static final List<String> DEFAULT_RECOVERY_MODULES =
-      Arrays.asList(AtomicActionRecoveryModule.class.getName(), XARecoveryModule.class.getName());
+      Arrays.asList(AtomicActionRecoveryModule.class.getName(), XARecoveryModule.class.getName()); // static?
 
   private static final List<String> DEFAULT_ORPHAN_FILTERS =
       Arrays.asList(JTATransactionLogXAResourceOrphanFilter.class.getName(),

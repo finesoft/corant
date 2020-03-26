@@ -49,27 +49,33 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String appBaseName = "application";
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
-  static String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-  static String sysLcEnv = ConfigUtils.extractSysEnv(
-      AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-      CFG_LOCATION_KEY);
-  static String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
-  static String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
 
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
-  static String[] locations = isBlank(locationDir) ? new String[0]
-      : Arrays.stream(appExtName)
-          .map(e -> locationDir + SourceType.decideSeparator(locationDir) + appBaseName + e)
-          .toArray(String[]::new);
+  static Predicate<URL> resolveExPattern() {
+    String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
+    return u -> isBlank(cfgUrlExPattern)
+        || !PathUtils.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
+  }
 
-  static Predicate<URL> filter = u -> isBlank(cfgUrlExPattern)
-      || !PathUtils.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
+  static String[] resolveLocations() {
+    String sysLcPro = System.getProperty(CFG_LOCATION_KEY); 
+    String sysLcEnv = ConfigUtils.extractSysEnv(
+        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+        CFG_LOCATION_KEY);
+    String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
+    return isBlank(locationDir) ? new String[0]
+        : Arrays.stream(appExtName)
+            .map(e -> locationDir + SourceType.decideSeparator(locationDir) + appBaseName + e)
+            .toArray(String[]::new);
+  }
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
+    String[] locations = resolveLocations();
+    Predicate<URL> filter = resolveExPattern();
     try {
       if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment

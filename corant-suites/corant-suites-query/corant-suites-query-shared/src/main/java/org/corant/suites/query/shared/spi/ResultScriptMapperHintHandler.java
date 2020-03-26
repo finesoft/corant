@@ -24,11 +24,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.script.ScriptEngineManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.QueryService.Forwarding;
@@ -92,9 +93,11 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static final String HINT_SCRIPT_PARA = "p";
   public static final String HINT_SCRIPT_RESU = "r";
 
-  static final ScriptEngineManager sm = new ScriptEngineManager();
-  static final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
-  static final Set<String> brokens = new CopyOnWriteArraySet<>();
+  final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
+  final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
+
+  @Inject
+  Logger logger;
 
   @Inject
   @Any
@@ -154,6 +157,13 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     });
   }
 
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    mappers.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result script mapper hint handler caches.");
+  }
+
   @ApplicationScoped
   public static class NashornResultMapperResolver implements ResultMapperResolver {
 
@@ -181,5 +191,4 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     Consumer<Object[]> resolve(QueryHint qh) throws Exception;
   }
-
 }

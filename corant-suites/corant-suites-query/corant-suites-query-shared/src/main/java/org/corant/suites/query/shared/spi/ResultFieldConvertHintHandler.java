@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.util.ObjectUtils.Pair;
@@ -85,9 +86,8 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
   public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
-  static final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches =
-      new ConcurrentHashMap<>();
-  static final Set<String> brokens = new CopyOnWriteArraySet<>();
+  final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches = new ConcurrentHashMap<>();// static?
+  final Set<String> brokens = new CopyOnWriteArraySet<>(); // static?
 
   @Inject
   Logger logger;
@@ -227,5 +227,12 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    caches.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result field converter hint handler caches.");
   }
 }

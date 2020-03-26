@@ -53,7 +53,7 @@ public class ArtemisConfig extends AbstractJMSConfig {
 
   public static final int DFLT_PORT = 61616;
 
-  private static final Map<String, Method> propertiesMaps = new HashMap<>();
+  private static final Map<String, Method> propertiesMaps = new HashMap<>(); // static?
   static {
     propertiesMaps.putAll(createSettingsMap());
   }

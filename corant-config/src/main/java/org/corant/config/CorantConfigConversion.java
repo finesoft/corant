@@ -61,7 +61,7 @@ public class CorantConfigConversion implements Serializable {
 
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
-  public static final List<OrdinalConverter> BUILT_IN_CONVERTERS;
+  public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
 
   private static final long serialVersionUID = -2708805756022227289L;
 

@@ -15,7 +15,10 @@ package org.corant.suites.query.mongodb;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
@@ -31,6 +34,9 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
 
   final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
 
+  @Inject
+  Logger logger;
+
   @Override
   public DefaultMgNamedQuerier resolve(String key, Object param) {
     FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
@@ -43,6 +49,12 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
     return new FreemarkerMgQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    builders.clear();
+    logger.fine(() -> "Clear default mongodb named querier resolver builders");
   }
 
 }

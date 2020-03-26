@@ -91,7 +91,7 @@ public class ClassPaths {
   protected static final Set<String> sysLibs =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");
-  protected static final Map<Path, URLClassLoader> cachedClassLoaders = new ConcurrentHashMap<>();
+  protected static final Map<Path, URLClassLoader> cachedClassLoaders = new ConcurrentHashMap<>();// static?
 
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 

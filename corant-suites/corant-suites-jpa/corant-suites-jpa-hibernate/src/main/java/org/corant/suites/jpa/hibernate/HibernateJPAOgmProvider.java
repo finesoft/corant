@@ -36,11 +36,11 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider implements JPAProvider {
 
-  static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
+  final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM, new JTAPlatform(),
+      AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
 
-  static Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
-  static {
+  Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
+  {
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.create_database", true);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",
         AssociationStorageStrategy.IN_ENTITY);

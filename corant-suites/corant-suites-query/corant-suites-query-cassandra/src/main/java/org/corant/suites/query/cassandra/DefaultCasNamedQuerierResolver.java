@@ -17,6 +17,8 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.util.ObjectUtils.Triple;
@@ -40,6 +42,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver<CasNamedQuerier> {
 
   final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+
+  @Inject
+  Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.cassandra.mapping-file.paths")
@@ -77,6 +82,12 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
       }
 
     };
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    builders.clear();
+    logger.fine(() -> "Clear default cassandra named querier resolver builders");
   }
 
 }

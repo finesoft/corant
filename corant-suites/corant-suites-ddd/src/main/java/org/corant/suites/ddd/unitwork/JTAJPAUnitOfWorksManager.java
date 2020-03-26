@@ -184,8 +184,9 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   @PreDestroy
-  void destroy() {
+  synchronized void destroy() {
     uows.clear();
+    logger.fine(() -> "Clear unit of works.");
   }
 
   abstract static class SynchronizationAdapter implements Synchronization {

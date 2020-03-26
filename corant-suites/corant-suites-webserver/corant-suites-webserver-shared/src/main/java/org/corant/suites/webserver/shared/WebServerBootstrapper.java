@@ -82,7 +82,7 @@ public class WebServerBootstrapper {
   }
 
   @PreDestroy
-  protected void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     if (server != null && running) {
       logger.info(() -> String.format("Stop web server %s ", getUserClass(server).getSimpleName()));
       server.stop();

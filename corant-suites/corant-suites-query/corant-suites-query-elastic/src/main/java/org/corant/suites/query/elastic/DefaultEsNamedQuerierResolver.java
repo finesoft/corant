@@ -15,7 +15,10 @@ package org.corant.suites.query.elastic;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.Query;
@@ -31,6 +34,9 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
 
   final Map<String, FreemarkerEsQuerierBuilder> builders = new ConcurrentHashMap<>();
 
+  @Inject
+  Logger logger;
+
   @Override
   public DefaultEsNamedQuerier resolve(String key, Object param) {
     FreemarkerEsQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
@@ -43,6 +49,12 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
     return new FreemarkerEsQuerierBuilder(query, queryResolver, fetchQueryResolver);
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    builders.clear();
+    logger.fine(() -> "Clear default elastic named querier resolver builders");
   }
 
 }

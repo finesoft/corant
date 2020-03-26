@@ -39,11 +39,11 @@ import org.hibernate.tool.schema.Action;
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJPAOrmProvider implements JPAProvider {
 
-  static final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
+  final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM, new JTAPlatform(),
+      AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
 
-  static Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
-  static {
+  Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
+  {
     DEFAULT_PROPERTIES.put("hibernate.show_sql", false);
     DEFAULT_PROPERTIES.put("hibernate.format_sql", false);
     DEFAULT_PROPERTIES.put("hibernate.use_sql_comments", false);

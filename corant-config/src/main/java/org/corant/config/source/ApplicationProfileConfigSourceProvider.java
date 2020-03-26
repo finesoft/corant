@@ -13,6 +13,7 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_PROFILE_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -21,12 +22,14 @@ import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.split;
 import java.io.IOException;
+import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.SourceType;
@@ -40,36 +43,51 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  */
 public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSourceProvider {
 
-  static String sysPfPro = System.getProperty(CFG_PROFILE_KEY);
-  static String sysPfEvn = ConfigUtils.extractSysEnv(
-      AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-      CFG_PROFILE_KEY);
-  static String[] profiles = split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
+  static String[] resolveProfileClassPaths(String[] profiles) {
+    return Arrays.stream(profiles)
+        .flatMap(p -> Arrays.stream(appExtName).map(e -> metaInf + appBaseName + "-" + p + e))
+        .toArray(String[]::new);
+  }
 
-  static String[] pfClassPaths = Arrays.stream(profiles)
-      .flatMap(p -> Arrays.stream(appExtName).map(e -> metaInf + appBaseName + "-" + p + e))
-      .toArray(String[]::new);
+  static String[] resolveProfileLocations(String[] profiles) {
+    String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
+    String sysLcEnv = ConfigUtils.extractSysEnv(
+        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+        CFG_LOCATION_KEY);
+    String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
+    return isBlank(locationDir) ? new String[0]
+        : Arrays.stream(profiles)
+            .flatMap(p -> Arrays.stream(appExtName).map(e -> locationDir
+                + SourceType.decideSeparator(locationDir) + appBaseName + "-" + p + e))
+            .toArray(String[]::new);
+  }
 
-  static String[] pfLocations = isBlank(locationDir) ? new String[0]
-      : Arrays.stream(profiles)
-          .flatMap(p -> Arrays.stream(appExtName).map(e -> locationDir
-              + SourceType.decideSeparator(locationDir) + appBaseName + "-" + p + e))
-          .toArray(String[]::new);
+  static String[] resolveProfiles() {
+    String sysPfPro = System.getProperty(CFG_PROFILE_KEY);
+    String sysPfEvn = ConfigUtils.extractSysEnv(
+        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+        CFG_PROFILE_KEY);
+    return split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
+  }
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
     List<ConfigSource> list = new ArrayList<>();
+    Predicate<URL> filter = resolveExPattern();
+    String[] profiles = resolveProfiles();
+    String[] locations = resolveProfileLocations(profiles);
+    String[] classPaths = resolveProfileClassPaths(profiles);
     try {
-      if (isNotEmpty(pfLocations)) {
+      if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment
         logger.fine(() -> String.format("Load profile config source from designated locations %s",
-            String.join(",", pfLocations)));
-        list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, pfLocations));
-      } else if (isNotEmpty(pfClassPaths)) {
+            String.join(",", locations)));
+        list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, locations));
+      } else if (isNotEmpty(classPaths)) {
         logger.fine(() -> String.format("Load profile config source from class paths %s",
-            String.join(",", pfClassPaths)));
-        list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_PROFILE_ORDINAL, filter,
-            pfClassPaths));
+            String.join(",", classPaths)));
+        list.addAll(
+            ConfigSourceLoader.load(classLoader, APPLICATION_PROFILE_ORDINAL, filter, classPaths));
       }
     } catch (IOException e) {
       throw new CorantRuntimeException(e);

@@ -47,7 +47,7 @@ import org.corant.suites.jta.shared.TransactionIntegration;
 public class JDBCTransactionIntegration implements TransactionIntegration {
 
   static Map<DataSourceConfig, JDBCRecoveryXAResource> recoveryXAResources =
-      new ConcurrentHashMap<>();
+      new ConcurrentHashMap<>();// static
 
   static XAConnection getXAConnection(XADataSource xads, DataSourceConfig cfg) throws SQLException {
     try {
@@ -58,6 +58,11 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
               cfg.getName()));
       return xads.getXAConnection(cfg.getUsername(), cfg.getPassword());
     }
+  }
+
+  @Override
+  public void destroy() {
+    recoveryXAResources.clear();
   }
 
   @Override
@@ -374,4 +379,5 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       return connection.get() != null && xaresource.get() != null;
     }
   }
+
 }

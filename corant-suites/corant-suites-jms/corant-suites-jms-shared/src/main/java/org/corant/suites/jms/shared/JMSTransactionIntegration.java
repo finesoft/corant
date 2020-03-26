@@ -46,10 +46,15 @@ import org.corant.suites.jta.shared.TransactionIntegration;
 public class JMSTransactionIntegration implements TransactionIntegration {
 
   static Map<AbstractJMSConfig, JMSRecoveryXAResource> recoveryXAResources =
-      new ConcurrentHashMap<>();
+      new ConcurrentHashMap<>();// static?
 
   @Override
-  public XAResource[] getRecoveryXAResources() {
+  public synchronized void destroy() {
+    recoveryXAResources.clear();
+  }
+
+  @Override
+  public synchronized XAResource[] getRecoveryXAResources() {
     LOGGER.fine(() -> "Searching JMS XAResources for JTA recovery processes.");
     if (!CDIs.isEnabled()) {
       LOGGER.warning(
@@ -70,6 +75,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     }
     return isNotEmpty(resources) ? resources.toArray(new XAResource[resources.size()])
         : new XAResource[0];
+
   }
 
   Optional<XAResource> resolveRecoveryXAResource(AbstractJMSConfig config) {
@@ -324,4 +330,5 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       return connection.get() != null && session.get() != null;
     }
   }
+
 }

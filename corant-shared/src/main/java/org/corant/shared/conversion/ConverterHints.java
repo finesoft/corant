@@ -54,7 +54,7 @@ public class ConverterHints {
 
   public static final String CVT_CLS_LOADER_KEY = "converter.class-loader";
 
-  private static final Map<String, ?> sys_hints = Collections.unmodifiableMap(resolveSysProHints());
+  private static final Map<String, ?> sys_hints = Collections.unmodifiableMap(resolveSysProHints());// static?
 
   public static boolean containsKey(Map<String, ?> hints, String key) {
     return hints != null && hints.containsKey(key);

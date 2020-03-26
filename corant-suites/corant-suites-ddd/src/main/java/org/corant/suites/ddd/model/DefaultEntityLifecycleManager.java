@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -52,7 +53,7 @@ import org.corant.suites.jpa.shared.PersistenceService;
 @InfrastructureServices
 public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
-  static final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
+  final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -116,5 +117,10 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
           .forEach(cls -> clsUns.put(cls, persistenceService.getPersistenceContext(puNme)));
     });
     logger.fine(() -> "Initialized JPAPersistenceService.");
+  }
+
+  @PreDestroy
+  synchronized void onPreDestroy() {
+    clsUns.clear();
   }
 }

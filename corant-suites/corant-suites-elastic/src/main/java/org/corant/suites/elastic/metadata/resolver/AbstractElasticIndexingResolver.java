@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
@@ -205,6 +206,14 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   @PostConstruct
   protected void onPostConstruct() {
     initialize();
+  }
+
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    classIndices.clear();
+    namedIndices.clear();
+    classMaps.clear();
+    logger.fine(() -> "Clear indices schema caches");
   }
 
   protected void resolveClassSchema(Class<?> docCls, Map<String, Object> map, List<String> path) {

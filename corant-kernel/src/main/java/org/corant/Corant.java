@@ -318,12 +318,12 @@ public class Corant implements AutoCloseable {
     }
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
-        "Starting ".concat(applicationName()).concat(", perform the spi prestart handlers."));
+        "Starting ".concat(applicationName()).concat(", completed the pre-start SPIs processing"));
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
-        .start("Initializes the CDI container");
+    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+        .start("Completed the CDI container initialization");
     if (registerMBean()) {
       log(logger,
           "Register %s to MBean server, one can use it for shutdown or restartup the application.",
@@ -331,23 +331,24 @@ public class Corant implements AutoCloseable {
     }
     initializeContainer(preInitializer);
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
-        .start("Initializes all suites");
+    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+        .start("Completed all of the SUITES initialization");
     doAfterContainerInitialized();
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getName(), tk.getTimeSeconds()))
-        .start("Perform the spi handlers after startup.");
+    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+        .start("Completed the post-started SPIs processing");
     doAfterStarted(classLoader);
 
-    stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
         .destroy(sw -> {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {
             log(logger,
-                "Finished all initialization at %s, take %s seconds. It's been a long way, but we're here.",
+                "Completed all of the startup process %s, consume %ss. It's been a long way, but we're here.",
                 Instant.now(), tt);
           } else {
-            log(logger, "Finished all initialization at %s, take %s seconds.", Instant.now(), tt);
+            log(logger, "Completed all of the startup process at %s, consume %ss.", Instant.now(),
+                tt);
           }
         });
 

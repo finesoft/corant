@@ -42,12 +42,12 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
    * @param script
    */
   protected DefaultSqlNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
-      Object[] scriptParameter, String script) {
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Object[] scriptParameter,
+      String script) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;
-    this.script = script.replaceAll("[\\t\\n\\r]", " ");
+    this.script = script;// .replaceAll("[\\t\\n\\r]", " ");
   }
 
   @Override

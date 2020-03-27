@@ -181,7 +181,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return injections.computeIfAbsent(fetchQuery.getId(), id -> {
       if (fetchQuery.getInjectionScript().isValid()) {
         if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
-          throw new NotSupportedException();// For now we only support js script
+          throw new NotSupportedException(
+              "Currently we only support using javascript as an fetch query injection script.");
         }
         return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
             RESULT_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
@@ -195,7 +196,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     return predicates.computeIfAbsent(fetchQuery.getId(), k -> {
       if (fetchQuery.getPredicateScript().isValid()) {
         if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
-          throw new NotSupportedException();// For now we only support js script
+          throw new NotSupportedException(
+              "Currently we only support using javascript as an fetch query predication script.");
         }
         return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(),
             PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);

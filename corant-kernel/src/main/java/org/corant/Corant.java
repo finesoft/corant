@@ -318,31 +318,25 @@ public class Corant implements AutoCloseable {
     }
     Thread.currentThread().setContextClassLoader(classLoader);
     StopWatch stopWatch = StopWatch.press(applicationName(),
-        "Perform the spi handlers before ".concat(applicationName()).concat(" starting"));
+        "Starting ".concat(applicationName()).concat(", perform the spi prestart handlers."));
     doBeforeStart(classLoader);
+
     final Logger logger = Logger.getLogger(Corant.class.getName());
     stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
         .start("Initializes the CDI container");
-    String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
-    Weld weld = new Weld(id);
-    weld.setClassLoader(classLoader);
-    weld.addExtensions(new CorantExtension());
-    if (beanClasses != null) {
-      weld.addBeanClasses(beanClasses);
+    if (registerMBean()) {
+      log(logger,
+          "Register %s to MBean server, one can use it for shutdown or restartup the application.",
+          applicationName(), Instant.now());
     }
-    if (preInitializer != null) {
-      preInitializer.accept(weld);
-    }
-    container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+    initializeContainer(preInitializer);
 
     stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
         .start("Initializes all suites");
-
     doAfterContainerInitialized();
 
     stopWatch.stop(tk -> log(logger, "%s in %s seconds ", tk.getName(), tk.getTimeSeconds()))
-        .start("Perform the spi handlers after corant startup");
-
+        .start("Perform the spi handlers after startup.");
     doAfterStarted(classLoader);
 
     stopWatch.stop(tk -> log(logger, "%s in %s seconds.", tk.getName(), tk.getTimeSeconds()))
@@ -374,6 +368,8 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
+    log(Logger.getLogger(Corant.class.getName()), "Stopped %s at %s", applicationName(),
+        Instant.now());
   }
 
   void doAfterContainerInitialized() {
@@ -397,12 +393,51 @@ public class Corant implements AutoCloseable {
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
-    registerMBean();
   }
 
   void doOnReady() {
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostCorantReadyEvent(arguments));
+  }
+
+  synchronized void initializeContainer(Consumer<Weld> preInitializer) {
+    String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    Weld weld = new Weld(id);
+    weld.setClassLoader(classLoader);
+    weld.addExtensions(new CorantExtension());
+    if (beanClasses != null) {
+      weld.addBeanClasses(beanClasses);
+    }
+    if (preInitializer != null) {
+      preInitializer.accept(weld);
+    }
+    container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+  }
+
+  boolean registerMBean() {
+    if (!setOf(arguments).contains(REGISTER_TO_MBEAN_CMD)) {
+      return false;
+    }
+    synchronized (this) {
+      if (mbeanRunner != null) {
+        return false;
+      }
+      mbeanRunner = new CorantRunner(beanClasses, arguments);
+      ObjectName objectName = null;
+      try {
+        objectName = new ObjectName(applicationName() + ":type=basic,name=CorantRunner");
+      } catch (MalformedObjectNameException ex) {
+        throw new CorantRuntimeException(ex);
+      }
+      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+      try {
+        server.registerMBean(mbeanRunner, objectName);
+      } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+          | NotCompliantMBeanException ex) {
+        throw new CorantRuntimeException(ex);
+      }
+      return true;
+    }
   }
 
   private String boostLine() {
@@ -418,31 +453,6 @@ public class Corant implements AutoCloseable {
       logger.info(() -> String.format(msgOrFmt, arguments));
     } else {
       logger.info(() -> msgOrFmt);
-    }
-  }
-
-  private void registerMBean() {
-    if (!setOf(arguments).contains(REGISTER_TO_MBEAN_CMD)) {
-      return;
-    }
-    synchronized (this) {
-      if (mbeanRunner != null) {
-        return;
-      }
-      mbeanRunner = new CorantRunner(beanClasses, arguments);
-      ObjectName objectName = null;
-      try {
-        objectName = new ObjectName("corant:type=basic,name=CorantRunner");
-      } catch (MalformedObjectNameException ex) {
-        throw new CorantRuntimeException(ex);
-      }
-      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-      try {
-        server.registerMBean(mbeanRunner, objectName);
-      } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-          | NotCompliantMBeanException ex) {
-        throw new CorantRuntimeException(ex);
-      }
     }
   }
 

@@ -51,10 +51,6 @@ public class QueryReference implements Serializable {
     return qualifier;
   }
 
-  public String getVersionedName() {
-    return defaultString(getName()) + (isNotBlank(getVersion()) ? "_" + getVersion() : "");
-  }
-
   /**
    *
    * @return the type
@@ -69,6 +65,16 @@ public class QueryReference implements Serializable {
    */
   public String getVersion() {
     return version;
+  }
+
+  public String getVersionedName() {
+    return defaultString(getName()) + (isNotBlank(getVersion()) ? "_" + getVersion() : "");
+  }
+
+  @Override
+  public String toString() {
+    return "{\"name\":\"" + name + "\", \"type\": \"" + type + "\", \"qualifier\": \"" + qualifier
+        + "\", \"version\": \"" + version + "\"}";
   }
 
   /**

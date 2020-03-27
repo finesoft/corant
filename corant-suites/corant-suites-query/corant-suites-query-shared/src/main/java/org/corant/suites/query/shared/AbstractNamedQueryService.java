@@ -84,58 +84,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     final int retryTimes = getMapInteger(context, STREAM_RETRY_TIMES, 0);
     final Duration retryInterval =
         getMapDuration(context, STREAM_RETRY_INTERVAL, Duration.ofSeconds(1L));
-    final Forwarding<T> empty = Forwarding.inst();
-
-    final Iterator<T> iterator = new Iterator<T>() {
-      final AtomicReference<Forwarding<T>> buffer =
-          new AtomicReference<>(defaultObject(doForward(queryName, useParam), empty));
-      int offset = useParam.getOffset();
-      int counter = 1;
-      T next = null;
-
-      @Override
-      public boolean hasNext() {
-        if (terminate()) {
-          return false;
-        }
-        Forwarding<T> fw = buffer.get();
-        if (isEmpty(fw.getResults())) {
-          if (fw.hasNext()) {
-            fw = defaultObject(doForward(queryName, useParam.offset(offset += limit)), empty);
-            buffer.set(fw);
-            return isNotEmpty(fw.getResults());
-          }
-        } else {
-          return true;
-        }
-        return false;
-      }
-
-      @Override
-      public T next() {
-        Forwarding<T> fw = buffer.get();
-        if (isEmpty(fw.getResults())) {
-          throw new NoSuchElementException();
-        }
-        counter++;
-        next = fw.getResults().remove(0);
-        return next;
-      }
-
-      Forwarding<T> doForward(String queryName, QueryParameter parameter) {
-        if (retryTimes > 0) {
-          return forceCast(new SupplierRetrier<>(() -> forward(queryName, parameter))
-              .times(retryTimes).interval(retryInterval).execute());
-        } else {
-          return forward(queryName, parameter);
-        }
-      }
-
-      boolean terminate() {
-        return terminater != null && !terminater.test(counter, next);
-      }
-    };
-    return streamOf(iterator);
+    return streamOf(streamIterator(queryName, useParam, terminater, retryTimes, retryInterval));
   }
 
   protected <T> void fetch(List<T> results, Querier querier) {
@@ -217,8 +166,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         return this;
       } else {
         return shouldNotNull(NamedQueryServiceManager.resolveQueryService(type, qualifier),
-            "Can't find any query service to execute fetch query %s %s %s", fq.getReferenceQuery(),
-            type, qualifier);
+            "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
       }
     });
   }
@@ -237,7 +185,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     int max = resolveMaxSelectSize(querier);
     if (limit > max) {
       throw new QueryRuntimeException(
-          "Exceeded the maximum number of query [%s] results, limit is [%S].",
+          "Exceeded the maximum number of query [%s] results, limit is [%s].",
           querier.getQuery().getName(), max);
     }
     return limit;
@@ -290,6 +238,61 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       obj = querier.getQuery().getProperty(key, cls);
     }
     return defaultObject(obj, dflt);
+  }
+
+  protected <T> Iterator<T> streamIterator(String queryName, DefaultQueryParameter useParam,
+      BiPredicate<Integer, Object> terminater, int retryTimes, Duration retryInterval) {
+    final Forwarding<T> empty = Forwarding.inst();
+    return new Iterator<T>() {
+      final AtomicReference<Forwarding<T>> buffer =
+          new AtomicReference<>(defaultObject(doForward(queryName, useParam), empty));
+      final int limit = useParam.getLimit();
+      int offset = useParam.getOffset();
+      int counter = 1;
+      T next = null;
+
+      @Override
+      public boolean hasNext() {
+        if (terminate()) {
+          return false;
+        }
+        Forwarding<T> fw = buffer.get();
+        if (isEmpty(fw.getResults())) {
+          if (fw.hasNext()) {
+            fw = defaultObject(doForward(queryName, useParam.offset(offset += limit)), empty);
+            buffer.set(fw);
+            return isNotEmpty(fw.getResults());
+          }
+        } else {
+          return true;
+        }
+        return false;
+      }
+
+      @Override
+      public T next() {
+        Forwarding<T> fw = buffer.get();
+        if (isEmpty(fw.getResults())) {
+          throw new NoSuchElementException();
+        }
+        counter++;
+        next = fw.getResults().remove(0);
+        return next;
+      }
+
+      Forwarding<T> doForward(String queryName, QueryParameter parameter) {
+        if (retryTimes > 0) {
+          return forceCast(new SupplierRetrier<>(() -> forward(queryName, parameter))
+              .times(retryTimes).interval(retryInterval).execute());
+        } else {
+          return forward(queryName, parameter);
+        }
+      }
+
+      boolean terminate() {
+        return terminater != null && !terminater.test(counter, next);
+      }
+    };
   }
 
   @PreDestroy

@@ -61,7 +61,7 @@ public class MessageReceiverManager {
   }
 
   void beforeShutdown(@Observes final PreContainerStopEvent event) {
-    logger.info(() -> "Shut down the message receiver executor services");
+    logger.fine(() -> "Shut down the message receiver executor services");
     executorServices.forEach((cfg, es) -> {
       try {
         es.awaitTermination(cfg.getReceiverExecutorAwaitTermination().toMillis(),

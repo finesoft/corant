@@ -419,22 +419,21 @@ public class Corant implements AutoCloseable {
       return false;
     }
     synchronized (this) {
-      if (mbeanRunner != null) {
-        return false;
-      }
-      mbeanRunner = new CorantRunner(beanClasses, arguments);
-      ObjectName objectName = null;
-      try {
-        objectName = new ObjectName(applicationName() + ":type=basic,name=CorantRunner");
-      } catch (MalformedObjectNameException ex) {
-        throw new CorantRuntimeException(ex);
-      }
-      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-      try {
-        server.registerMBean(mbeanRunner, objectName);
-      } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-          | NotCompliantMBeanException ex) {
-        throw new CorantRuntimeException(ex);
+      if (mbeanRunner == null) {
+        mbeanRunner = new CorantRunner(beanClasses, arguments);
+        ObjectName objectName = null;
+        try {
+          objectName = new ObjectName(applicationName() + ":type=basic,name=CorantRunner");
+        } catch (MalformedObjectNameException ex) {
+          throw new CorantRuntimeException(ex);
+        }
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        try {
+          server.registerMBean(mbeanRunner, objectName);
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+            | NotCompliantMBeanException ex) {
+          throw new CorantRuntimeException(ex);
+        }
       }
       return true;
     }

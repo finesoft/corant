@@ -15,8 +15,8 @@ package org.corant.suites.query.mongodb.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
-import org.bson.BsonRegularExpression;
-import org.corant.shared.conversion.ConverterHints;
+import org.bson.BsonObjectId;
+import org.bson.types.ObjectId;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
@@ -25,28 +25,26 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * @author bingo 上午10:04:31
  *
  */
-public class StringRegexConverter extends AbstractConverter<String, BsonRegularExpression> {
-
-  public static final String REGEX_KEY = "regex.option";
+public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonObjectId> {
 
   /**
    *
    */
-  public StringRegexConverter() {
+  public StringBsonObjectIdConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringRegexConverter(boolean throwException) {
+  public StringBsonObjectIdConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringRegexConverter(BsonRegularExpression defaultValue) {
+  public StringBsonObjectIdConverter(BsonObjectId defaultValue) {
     super(defaultValue);
   }
 
@@ -54,15 +52,16 @@ public class StringRegexConverter extends AbstractConverter<String, BsonRegularE
    * @param defaultValue
    * @param throwException
    */
-  public StringRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
+  public StringBsonObjectIdConverter(BsonObjectId defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected BsonRegularExpression convert(String value, Map<String, ?> hints) throws Exception {
+  protected BsonObjectId convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return new BsonRegularExpression(value, ConverterHints.getHint(hints, REGEX_KEY, "i"));
+    return new BsonObjectId(new ObjectId(value));
   }
+
 }

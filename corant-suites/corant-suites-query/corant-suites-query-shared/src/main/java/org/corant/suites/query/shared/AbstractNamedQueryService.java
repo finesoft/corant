@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -84,7 +83,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     final int retryTimes = getMapInteger(context, STREAM_RETRY_TIMES, 0);
     final Duration retryInterval =
         getMapDuration(context, STREAM_RETRY_INTERVAL, Duration.ofSeconds(1L));
-    return streamOf(streamIterator(queryName, useParam, terminater, retryTimes, retryInterval));
+    return stream(queryName, useParam, terminater, retryTimes, retryInterval);
   }
 
   protected <T> void fetch(List<T> results, Querier querier) {
@@ -240,12 +239,10 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     return defaultObject(obj, dflt);
   }
 
-  protected <T> Iterator<T> streamIterator(String queryName, DefaultQueryParameter useParam,
+  protected <T> Stream<T> stream(String queryName, DefaultQueryParameter useParam,
       BiPredicate<Integer, Object> terminater, int retryTimes, Duration retryInterval) {
-    final Forwarding<T> empty = Forwarding.inst();
-    return new Iterator<T>() {
-      final AtomicReference<Forwarding<T>> buffer =
-          new AtomicReference<>(defaultObject(doForward(queryName, useParam), empty));
+    return streamOf(new Iterator<T>() {
+      final Forwarding<T> buffer = doForward(queryName, useParam);
       final int limit = useParam.getLimit();
       int offset = useParam.getOffset();
       int counter = 1;
@@ -256,12 +253,10 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         if (terminate()) {
           return false;
         }
-        Forwarding<T> fw = buffer.get();
-        if (isEmpty(fw.getResults())) {
-          if (fw.hasNext()) {
-            fw = defaultObject(doForward(queryName, useParam.offset(offset += limit)), empty);
-            buffer.set(fw);
-            return isNotEmpty(fw.getResults());
+        if (!buffer.hasResults()) {
+          if (buffer.hasNext()) {
+            buffer.with(doForward(queryName, useParam.offset(offset += limit)));
+            return buffer.hasResults();
           }
         } else {
           return true;
@@ -271,12 +266,11 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       @Override
       public T next() {
-        Forwarding<T> fw = buffer.get();
-        if (isEmpty(fw.getResults())) {
+        if (!buffer.hasResults()) {
           throw new NoSuchElementException();
         }
         counter++;
-        next = fw.getResults().remove(0);
+        next = buffer.getResults().remove(0);
         return next;
       }
 
@@ -292,7 +286,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       boolean terminate() {
         return terminater != null && !terminater.test(counter, next);
       }
-    };
+    });
   }
 
   @PreDestroy

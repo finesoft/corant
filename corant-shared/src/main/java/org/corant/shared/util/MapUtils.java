@@ -663,6 +663,10 @@ public class MapUtils {
         for (Object next : (Iterable<?>) value) {
           holder.add(next);
         }
+      } else if (value.getClass().isArray() && flat) {
+        for (Object next : (Object[]) value) {
+          holder.add(next);
+        }
       } else {
         holder.add(value);
       }

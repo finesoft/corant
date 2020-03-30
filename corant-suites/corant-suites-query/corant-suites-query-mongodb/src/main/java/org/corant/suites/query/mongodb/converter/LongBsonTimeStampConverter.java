@@ -23,7 +23,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * @author bingo 上午10:43:57
  *
  */
-public class LongTimeStampConverter extends AbstractConverter<Long, BsonTimestamp> {
+public class LongBsonTimeStampConverter extends AbstractConverter<Long, BsonTimestamp> {
 
   @Override
   protected BsonTimestamp convert(Long value, Map<String, ?> hints) throws Exception {

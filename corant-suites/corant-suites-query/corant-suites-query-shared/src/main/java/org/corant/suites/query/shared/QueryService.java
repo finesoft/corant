@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -199,11 +200,26 @@ public interface QueryService<Q, P> {
       return hasNext;
     }
 
+    public boolean hasResults() {
+      return isNotEmpty(results);
+    }
+
     /**
      * @return the hasNext
      */
     public boolean isHasNext() {
       return hasNext;
+    }
+
+    public Forwarding<T> with(Forwarding<T> other) {
+      if (other != null) {
+        withHasNext(other.hasNext());
+        withResults(other.getResults());
+      } else {
+        withHasNext(false);
+        withResults(new ArrayList<>());
+      }
+      return this;
     }
 
     public Forwarding<T> withHasNext(boolean hasNext) {
@@ -286,6 +302,10 @@ public interface QueryService<Q, P> {
 
     public int getTotalPages() {
       return totalPages;
+    }
+
+    public boolean hasResults() {
+      return isNotEmpty(results);
     }
 
     public Paging<T> withOffset(int offset) {

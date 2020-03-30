@@ -14,11 +14,9 @@
 package org.corant.suites.query.mongodb.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
 import org.bson.BsonRegularExpression;
+import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
@@ -27,27 +25,28 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * @author bingo 上午10:04:31
  *
  */
-@SuppressWarnings("rawtypes")
-public class MapRegexConverter extends AbstractConverter<Map, BsonRegularExpression> {
+public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegularExpression> {
+
+  public static final String REGEX_KEY = "regex.option";
 
   /**
    *
    */
-  public MapRegexConverter() {
+  public StringBsonRegexConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public MapRegexConverter(boolean throwException) {
+  public StringBsonRegexConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public MapRegexConverter(BsonRegularExpression defaultValue) {
+  public StringBsonRegexConverter(BsonRegularExpression defaultValue) {
     super(defaultValue);
   }
 
@@ -55,23 +54,15 @@ public class MapRegexConverter extends AbstractConverter<Map, BsonRegularExpress
    * @param defaultValue
    * @param throwException
    */
-  public MapRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
+  public StringBsonRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected BsonRegularExpression convert(Map value, Map<String, ?> hints) throws Exception {
-    String pattern = null;
-    String option = null;
-    if (isEmpty(value) || isBlank(pattern = asDefaultString(value.get("pattern")))) {
+  protected BsonRegularExpression convert(String value, Map<String, ?> hints) throws Exception {
+    if (isEmpty(value)) {
       return getDefaultValue();
     }
-    option = asDefaultString(value.get("option"));
-    if (isNotBlank(option)) {
-      return new BsonRegularExpression(pattern);
-    } else {
-      return new BsonRegularExpression(pattern, option);
-    }
+    return new BsonRegularExpression(value, ConverterHints.getHint(hints, REGEX_KEY, "i"));
   }
-
 }

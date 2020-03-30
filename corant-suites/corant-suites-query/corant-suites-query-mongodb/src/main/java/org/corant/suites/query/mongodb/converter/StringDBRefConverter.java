@@ -37,7 +37,7 @@ public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
       return null;
     }
     String[] array = split(value, ConverterHints.getHint(hints,
-        StringDBPointerConverter.SEPARATOR_KEY, Names.DOMAIN_SPACE_SEPARATORS), true, true);
+        StringBsonDbPointerConverter.SEPARATOR_KEY, Names.DOMAIN_SPACE_SEPARATORS), true, true);
     if (array.length < 2) {
       throw new ConversionException(
           "Can't convert string %s to DBRef, the source string must be represented like 'database:collection:id'",

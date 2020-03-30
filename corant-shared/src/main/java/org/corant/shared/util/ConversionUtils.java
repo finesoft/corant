@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.ClassUtils.asClass;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -319,6 +320,10 @@ public class ConversionUtils {
 
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
     return Conversions.convert(obj, clazz, hints);
+  }
+
+  public static Object toObject(Object obj, String className) {
+    return toObject(obj, asClass(className));
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz) {

@@ -16,18 +16,18 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.MapUtils.getMapEnum;
-import static org.corant.shared.util.MapUtils.getMapObject;
 import static org.corant.shared.util.MapUtils.getOpt;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
@@ -42,12 +42,12 @@ import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationAlternate;
@@ -184,49 +184,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return querier.resolveResult(list);
   }
 
-  @Override
-  public <T> Stream<T> stream(String queryName, Object parameter) {
-    QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
-    final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
-    final Map<String, Object> context = queryParam.getContext();
-    final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
-    final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
-    final BiPredicate<Integer, Object> terminater =
-        forceCast(getMapObject(context, STREAM_TERMINATER));
-    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, useParam);
-    final int offset = resolveOffset(querier);
-    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    final Iterator<Document> it =
-        offset > 0 ? query(querier).skip(offset).batchSize(limit).iterator()
-            : query(querier).batchSize(limit).iterator();
-
-    return streamOf(new Iterator<T>() {
-      int counter = 1;
-      Object next = null;
-
-      @Override
-      public boolean hasNext() {
-        if (terminate()) {
-          return false;
-        }
-        return it.hasNext();
-      }
-
-      @Override
-      public T next() {
-        counter++;
-        next = it.next();
-        AbstractMgNamedQueryService.this.fetch(next, querier);
-        next = querier.resolveResult(next);
-        return forceCast(next);
-      }
-
-      boolean terminate() {
-        return terminater != null && !terminater.test(counter, next);
-      }
-    });
-  }
-
   protected Document convertDocument(Document doc) {
     return doc;
   }
@@ -266,6 +223,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Map<String, String> pros = querier.getQuery().getProperties();
     // handle properties
     fi.batchSize(resolveDefaultLimit(querier));
+    int offset = resolveOffset(querier);
+    if (offset > 0) {
+      fi.skip(offset);
+    }
     getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(fi::batchSize);
     getOptMapObject(pros, PRO_KEY_COMMENT, ConversionUtils::toString).ifPresent(fi::comment);
     CursorType ct = getMapEnum(pros, PRO_KEY_CURSOR_TYPE, CursorType.class);
@@ -338,5 +299,66 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
 
     return Optional.empty();
+  }
+
+  @SuppressWarnings("restriction")
+  @Override
+  protected <T> Stream<T> stream(String queryName, DefaultQueryParameter useParam,
+      BiPredicate<Integer, Object> terminater, int retryTimes, Duration retryInterval) {
+    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, useParam);
+    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    final MongoCursor<Document> cursor = query(querier).batchSize(useParam.getLimit()).iterator();
+    Stream<T> stream = streamOf(new Iterator<T>() {
+      final Forwarding<T> buffer = doForward(cursor);
+      int counter = 1;
+      T next = null;
+
+      @Override
+      public boolean hasNext() {
+        if (terminate()) {
+          return false;
+        }
+        if (!buffer.hasResults()) {
+          if (buffer.hasNext()) {
+            buffer.with(doForward(cursor));
+            return buffer.hasResults();
+          }
+        } else {
+          return true;
+        }
+        return false;
+      }
+
+      @Override
+      public T next() {
+        if (!buffer.hasResults()) {
+          throw new NoSuchElementException();
+        }
+        counter++;
+        next = buffer.getResults().remove(0);
+        return next;
+      }
+
+      Forwarding<T> doForward(MongoCursor<Document> it) {
+        int size = useParam.getLimit();
+        List<Object> list = new ArrayList<>(size);
+        while (it.hasNext() && --size >= 0) {
+          list.add(it.next());
+        }
+        fetch(list, querier);
+        return Forwarding.of(querier.resolveResult(list), it.hasNext());
+      }
+
+      boolean terminate() {
+        return terminater != null && !terminater.test(counter, next);
+      }
+
+    }).onClose(cursor::close);
+    sun.misc.Cleaner.create(stream, () -> {
+      if (cursor != null) {
+        cursor.close();
+      }
+    });
+    return stream;
   }
 }

@@ -322,32 +322,32 @@ public class Corant implements AutoCloseable {
     doBeforeStart(classLoader);
 
     final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
         .start("Completed the CDI container initialization");
     if (registerMBean()) {
       log(logger,
-          "Register %s to MBean server, one can use it for shutdown or restartup the application.",
+          "Registered %s to MBean server, one can use it for shutdown or restartup the application.",
           applicationName(), Instant.now());
     }
     initializeContainer(preInitializer);
 
-    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
-        .start("Completed all of the SUITES initialization");
+    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
+        .start("Completed all of the SUITE initialization");
     doAfterContainerInitialized();
 
-    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
         .start("Completed the post-started SPIs processing");
     doAfterStarted(classLoader);
 
-    stopWatch.stop(tk -> log(logger, "%s consume %ss.", tk.getName(), tk.getTimeSeconds()))
+    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
         .destroy(sw -> {
           double tt = sw.getTotalTimeSeconds();
           if (tt > 8) {
             log(logger,
-                "Completed all of the startup process %s, consume %ss. It's been a long way, but we're here.",
+                "Completed all of the startup process %s, takes %ss. It's been a long way, but we're here.",
                 Instant.now(), tt);
           } else {
-            log(logger, "Completed all of the startup process at %s, consume %ss.", Instant.now(),
+            log(logger, "Completed all of the startup process at %s, takes %ss.", Instant.now(),
                 tt);
           }
         });

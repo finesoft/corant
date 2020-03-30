@@ -230,7 +230,10 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
             for (Object resultItem : resultList) {
               Object itemParameterValue =
                   resolveFetchQueryCriteriaValue(resultItem, sourceNamePath);
-              if (itemParameterValue != null) {
+              if (itemParameterValue instanceof Collection) {
+                listParameterValue
+                    .addAll((Collection) convertIfNecessarily(itemParameterValue, type));
+              } else if (itemParameterValue != null) {
                 listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
               }
             }

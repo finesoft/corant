@@ -13,23 +13,25 @@
  */
 package org.corant.suites.query.mongodb.converter;
 
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Map;
-import org.bson.BsonDateTime;
+import org.bson.BsonSymbol;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
  * corant-suites-query-mongodb
  *
- * @author bingo 上午10:43:57
+ * @author bingo 下午4:02:44
  *
  */
-public class LongDateTimeConverter extends AbstractConverter<Long, BsonDateTime> {
+public class StringBsonSymbolConverter extends AbstractConverter<String, BsonSymbol> {
 
   @Override
-  protected BsonDateTime convert(Long value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
+  protected BsonSymbol convert(String value, Map<String, ?> hints) throws Exception {
+    if (isBlank(value)) {
+      return null;
     }
-    return new BsonDateTime(value);
+    return new BsonSymbol(value);
   }
+
 }

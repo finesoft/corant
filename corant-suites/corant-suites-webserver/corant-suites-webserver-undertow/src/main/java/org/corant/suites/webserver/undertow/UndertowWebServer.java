@@ -98,7 +98,7 @@ public class UndertowWebServer extends AbstractWebServer {
           .orElse(Boolean.TRUE)) {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
-        sw.destroy((t) -> logger.info(() -> String.format("%s [%s] was started, takes %s seconds.",
+        sw.destroy((t) -> logger.info(() -> String.format("%s [%s] was started, takes %ss.",
             t.getLastTaskInfo().getName(), config.getDescription(),
             t.getLastTaskInfo().getTimeSeconds())));
       } else {

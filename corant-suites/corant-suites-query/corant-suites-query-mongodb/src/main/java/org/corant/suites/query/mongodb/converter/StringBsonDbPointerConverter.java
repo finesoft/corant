@@ -29,7 +29,7 @@ import org.corant.shared.normal.Names;
  * @author bingo 下午3:47:12
  *
  */
-public class StringDBPointerConverter extends AbstractConverter<String, BsonDbPointer> {
+public class StringBsonDbPointerConverter extends AbstractConverter<String, BsonDbPointer> {
 
   public static final String SEPARATOR_KEY = "namespace.separator";
 

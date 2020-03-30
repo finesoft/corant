@@ -1,9 +1,9 @@
-org.corant.suites.query.mongodb.converter.LongDateTimeConverter
-org.corant.suites.query.mongodb.converter.LongTimeStampConverter
-org.corant.suites.query.mongodb.converter.MapRegexConverter
-org.corant.suites.query.mongodb.converter.StringObjectIdConverter
-org.corant.suites.query.mongodb.converter.StringRegexConverter
-org.corant.suites.query.mongodb.converter.TemporalDateTimeConverter
-org.corant.suites.query.mongodb.converter.StringDBPointerConverter
+org.corant.suites.query.mongodb.converter.LongBsonDateTimeConverter
+org.corant.suites.query.mongodb.converter.LongBsonTimeStampConverter
+org.corant.suites.query.mongodb.converter.MapBsonRegexConverter
+org.corant.suites.query.mongodb.converter.StringBsonObjectIdConverter
+org.corant.suites.query.mongodb.converter.StringBsonRegexConverter
+org.corant.suites.query.mongodb.converter.TemporalBsonDateTimeConverter
+org.corant.suites.query.mongodb.converter.StringBsonDbPointerConverter
 org.corant.suites.query.mongodb.converter.StringDBRefConverter
-org.corant.suites.query.mongodb.converter.StringSymbolConverter
+org.corant.suites.query.mongodb.converter.StringBsonSymbolConverter

@@ -14,9 +14,11 @@
 package org.corant.suites.query.mongodb.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Map;
-import org.bson.BsonObjectId;
-import org.bson.types.ObjectId;
+import org.bson.BsonRegularExpression;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
@@ -25,26 +27,27 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * @author bingo 上午10:04:31
  *
  */
-public class StringObjectIdConverter extends AbstractConverter<String, BsonObjectId> {
+@SuppressWarnings("rawtypes")
+public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExpression> {
 
   /**
    *
    */
-  public StringObjectIdConverter() {
+  public MapBsonRegexConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringObjectIdConverter(boolean throwException) {
+  public MapBsonRegexConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringObjectIdConverter(BsonObjectId defaultValue) {
+  public MapBsonRegexConverter(BsonRegularExpression defaultValue) {
     super(defaultValue);
   }
 
@@ -52,16 +55,23 @@ public class StringObjectIdConverter extends AbstractConverter<String, BsonObjec
    * @param defaultValue
    * @param throwException
    */
-  public StringObjectIdConverter(BsonObjectId defaultValue, boolean throwException) {
+  public MapBsonRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected BsonObjectId convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+  protected BsonRegularExpression convert(Map value, Map<String, ?> hints) throws Exception {
+    String pattern = null;
+    String option = null;
+    if (isEmpty(value) || isBlank(pattern = asDefaultString(value.get("pattern")))) {
       return getDefaultValue();
     }
-    return new BsonObjectId(new ObjectId(value));
+    option = asDefaultString(value.get("option"));
+    if (isNotBlank(option)) {
+      return new BsonRegularExpression(pattern);
+    } else {
+      return new BsonRegularExpression(pattern, option);
+    }
   }
 
 }

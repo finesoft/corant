@@ -31,23 +31,23 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * @author bingo 上午10:47:31
  *
  */
-public class TemporalDateTimeConverter extends AbstractConverter<Temporal, BsonDateTime> {
+public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, BsonDateTime> {
 
-  public TemporalDateTimeConverter() {
+  public TemporalBsonDateTimeConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public TemporalDateTimeConverter(boolean throwException) {
+  public TemporalBsonDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public TemporalDateTimeConverter(BsonDateTime defaultValue) {
+  public TemporalBsonDateTimeConverter(BsonDateTime defaultValue) {
     super(defaultValue);
   }
 
@@ -55,7 +55,7 @@ public class TemporalDateTimeConverter extends AbstractConverter<Temporal, BsonD
    * @param defaultValue
    * @param throwException
    */
-  public TemporalDateTimeConverter(BsonDateTime defaultValue, boolean throwException) {
+  public TemporalBsonDateTimeConverter(BsonDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 

@@ -21,8 +21,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
+import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 
 /**
  * corant-suites-query-sql
@@ -60,4 +62,41 @@ public @interface SqlQuery {
   @Nonbinding
   String value() default "";
 
+  /**
+   * corant-suites-query-sql
+   *
+   * @author bingo 上午11:42:04
+   *
+   */
+  public static final class SqlQueryLiteral extends AnnotationLiteral<SqlQuery>
+      implements SqlQuery {
+
+    public static final SqlQuery INSTANCE = of(DBMS.MYSQL, "");
+
+    private static final long serialVersionUID = 1L;
+
+    private final String value;
+
+    private final String dialect;
+
+    private SqlQueryLiteral(String value, String dialect) {
+      this.value = value;
+      this.dialect = dialect;
+    }
+
+    public static SqlQueryLiteral of(DBMS dialect, String ds) {
+      return new SqlQueryLiteral(ds, dialect.name());
+    }
+
+    @Override
+    public String dialect() {
+      return dialect;
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+
+  }
 }

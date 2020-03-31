@@ -39,6 +39,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversions;
 import org.corant.shared.conversion.ConverterHints;
+import org.corant.shared.conversion.converter.NumberBigDecimalConverter;
+import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
+import org.corant.shared.conversion.converter.StringBigDecimalConverter;
+import org.corant.shared.conversion.converter.StringBigIntegerConverter;
 
 /**
  * corant-shared
@@ -53,29 +57,91 @@ public class ConversionUtils {
     super();
   }
 
+  /**
+   * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal
+   *
+   * @param obj
+   * @return the converted object
+   *
+   * @see StringBigDecimalConverter
+   * @see NumberBigDecimalConverter
+   */
   public static BigDecimal toBigDecimal(Object obj) {
     return toBigDecimal(obj, null);
   }
 
+  /**
+   * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal,
+   * return the given alternative object if the converted object is null else return the converted
+   * obejct.
+   *
+   * @param obj
+   * @param altVal the alternative object if converted object is null
+   * @return the converted object
+   * @see StringBigDecimalConverter
+   * @see NumberBigDecimalConverter
+   */
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal) {
     return defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
   }
 
+  /**
+   * Convert an object to rounding BigDecimal object with scale, supports String to BigDecimal
+   * Number to BigDecimal, return the given alternative object if the converted object is null else
+   * return the converted obejct.
+   *
+   * @param obj
+   * @param altVal
+   * @param scale
+   * @param roundingMode
+   * @return the converted object
+   * @see StringBigDecimalConverter
+   * @see NumberBigDecimalConverter
+   */
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal, int scale,
       int roundingMode) {
     BigDecimal d = defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
     return d == null ? null : d.setScale(scale, roundingMode);
   }
 
+  /**
+   * Convert an object to rounding BigDecimal object with scale, use
+   * {@code BigDecimal#ROUND_HALF_UP}. supports String to BigDecimal Number to BigDecimal
+   *
+   * @param obj
+   * @param scale
+   * @return the converted object
+   */
   public static BigDecimal toBigDecimal(Object obj, int scale) {
     BigDecimal d = toBigDecimal(obj, null);
     return d == null ? null : d.setScale(scale, BigDecimal.ROUND_HALF_UP);
   }
 
+  /**
+   * Convert an object to BigDecimal list.
+   *
+   * Supports String[], Number[], Iterable&lt;String&gt;, Iterable&lt;? extends Number&gt;,
+   * Iterator&lt;String&gt;, Iterator&lt;? extends Number&gt;, Enumeration&lt;String&gt;,
+   * Enumeration&lt;? extends Number&gt;
+   *
+   * @param obj
+   * @return the converted object list
+   *
+   * @see Conversions#convert(Object, Class, Supplier, Map)
+   */
   public static List<BigDecimal> toBigDecimalList(Object obj) {
     return toList(obj, BigDecimal.class);
   }
 
+  /**
+   * Convert an object to BigInteger object, supports String to BigInteger Number to BigInteger
+   *
+   * @param obj
+   * @return the converted object
+   *
+   * @see StringBigIntegerConverter
+   * @see NumberBigIntegerConverter
+   */
   public static BigInteger toBigInteger(Object obj) {
     return toBigInteger(obj, null);
   }

@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -51,4 +52,33 @@ public @interface JpqlQuery {
   @Nonbinding
   String value() default "";
 
+  /**
+   * corant-suites-query-jpql
+   *
+   * @author bingo 上午11:41:54
+   *
+   */
+  public static final class JpqlQueryLiteral extends AnnotationLiteral<JpqlQuery>
+      implements JpqlQuery {
+
+    public static final JpqlQuery INSTANCE = of("");
+
+    private static final long serialVersionUID = 1L;
+
+    private final String value;
+
+    private JpqlQueryLiteral(String value) {
+      this.value = value;
+    }
+
+    public static JpqlQueryLiteral of(String value) {
+      return new JpqlQueryLiteral(value);
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+
+  }
 }

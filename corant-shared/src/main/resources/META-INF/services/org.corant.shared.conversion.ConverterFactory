@@ -1,1 +1,2 @@
 org.corant.shared.conversion.converter.factory.ObjectEnumConverterFactory
+org.corant.shared.conversion.converter.factory.StringObjectConverterFactory

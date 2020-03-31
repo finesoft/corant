@@ -21,6 +21,7 @@ import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.split;
 import static org.corant.suites.cdi.Instances.findNamed;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +31,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
@@ -146,9 +146,14 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   @Produces
   @SqlQuery
   NamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final SqlQuery sc = shouldNotNull(annotated.getAnnotation(SqlQuery.class));
-    return get(sc);
+    Annotation qualifier = null;
+    for (Annotation a : ip.getQualifiers()) {
+      if (a.annotationType().equals(SqlQuery.class)) {
+        qualifier = a;
+        break;
+      }
+    }
+    return get(qualifier);
   }
 
   String resolveQualifer(Object qualifier) {

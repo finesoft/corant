@@ -24,9 +24,12 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
+import org.corant.shared.util.ObjectUtils;
 
 /**
  * corant-shared
+ *
+ * Implicit String to Object converter factory
  *
  * <ul>
  * <li>the target type {@code T} has a {@code public static T of(String)} method, or</li>
@@ -35,7 +38,6 @@ import org.corant.shared.conversion.ConverterFactory;
  * <li>the target type {@code T} has a {@code public static T parse(CharSequence)} method</li>
  * </ul>
  *
- * Unfinish yet
  *
  * @author bingo 上午11:38:58
  *
@@ -49,11 +51,28 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
   }
 
   @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    return forType(targetClass).isPresent();
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return String.class.equals(sourceClass) || CharSequence.class.equals(sourceClass);
   }
 
-  <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    return forType(targetClass).isPresent() && !Enum.class.isAssignableFrom(targetClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> Optional<Converter<String, T>> forType(Type generalType) {
+    if (!(generalType instanceof Class)) {
+      return Optional.empty();
+    }
+    Class<T> type = (Class<T>) generalType;
+    return Stream.<Supplier<Converter<String, T>>>of(() -> forConstructor(type, String.class),
+        () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
+        () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
+        .filter(ObjectUtils::isNotNull).findFirst();
+  }
+
+  private <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
     try {
       Constructor<?> constructor = targetClass.getConstructor(argumentTypes);
       if (Modifier.isPublic(constructor.getModifiers())) {
@@ -74,10 +93,10 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     }
   }
 
-  <T> Converter<String, T> forMethod(Class<?> targetClass, String method,
+  private <T> Converter<String, T> forMethod(Class<?> targetClass, String method,
       Class<?>... argumentTypes) {
     try {
-      Method factoryMethod = targetClass.getMethod(method, String.class);
+      Method factoryMethod = targetClass.getMethod(method, argumentTypes);
       if (Modifier.isStatic(factoryMethod.getModifiers())
           && Modifier.isPublic(factoryMethod.getModifiers())) {
         return (s, m) -> {
@@ -95,18 +114,6 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     } catch (NoSuchMethodException | SecurityException e) {
       return null;
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  <T> Optional<Converter<String, T>> forType(Type generalType) {
-    if (!(generalType instanceof Class)) {
-      return Optional.empty();
-    }
-    Class<T> type = (Class<T>) generalType;
-    return Stream.<Supplier<Converter<String, T>>>of(() -> forConstructor(type, String.class),
-        () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
-        () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
-        .filter(converter -> converter != null).findFirst();
   }
 
 }

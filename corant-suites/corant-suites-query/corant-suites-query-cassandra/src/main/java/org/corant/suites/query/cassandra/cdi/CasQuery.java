@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -51,4 +52,32 @@ public @interface CasQuery {
   @Nonbinding
   String value() default "";
 
+  /**
+   * corant-suites-query-cassandra
+   *
+   * @author bingo 上午11:43:39
+   *
+   */
+  public static final class CasQueryLiteral extends AnnotationLiteral<CasQuery>
+      implements CasQuery {
+
+    public static final CasQuery INSTANCE = of("");
+
+    private static final long serialVersionUID = 1L;
+
+    private final String value;
+
+    private CasQueryLiteral(String value) {
+      this.value = value;
+    }
+
+    public static CasQueryLiteral of(String value) {
+      return new CasQueryLiteral(value);
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+  }
 }

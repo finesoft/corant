@@ -13,10 +13,10 @@
  */
 package org.corant.suites.query.jpql.cdi;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +26,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
@@ -103,9 +102,14 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   @Produces
   @JpqlQuery
   NamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final JpqlQuery sc = shouldNotNull(annotated.getAnnotation(JpqlQuery.class));
-    return get(sc);
+    Annotation qualifier = null;
+    for (Annotation a : ip.getQualifiers()) {
+      if (a.annotationType().equals(JpqlQuery.class)) {
+        qualifier = a;
+        break;
+      }
+    }
+    return get(qualifier);
   }
 
   /**

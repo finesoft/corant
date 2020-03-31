@@ -260,7 +260,8 @@ public class Converters {
       return null;
     }
 
-    static Stack<Class<?>> searchMatchedClass(Map<Class<?>, Set<Class<?>>> srcClassMappedItsTagClasses,
+    static Stack<Class<?>> searchMatchedClass(
+        Map<Class<?>, Set<Class<?>>> srcClassMappedItsTagClasses,
         Class<?> classCanBeConvertedBySrcClass, Set<Class<?>> endClassesSetCanConvertTargetClass,
         Stack<Class<?>> stack) {
       Stack<Class<?>> classSurvival = new Stack();

@@ -13,11 +13,11 @@
  */
 package org.corant.suites.query.cassandra.cdi;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +27,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -103,9 +102,14 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   @Produces
   @CasQuery
   NamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final CasQuery sc = shouldNotNull(annotated.getAnnotation(CasQuery.class));
-    return get(sc);
+    Annotation qualifier = null;
+    for (Annotation a : ip.getQualifiers()) {
+      if (a.annotationType().equals(CasQuery.class)) {
+        qualifier = a;
+        break;
+      }
+    }
+    return get(qualifier);
   }
 
   /**

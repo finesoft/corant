@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -50,5 +51,34 @@ public @interface MgQuery {
    */
   @Nonbinding
   String value() default "";
+
+  /**
+   * corant-suites-query-mongodb
+   *
+   * @author bingo 上午11:41:59
+   *
+   */
+  public static final class MgQueryLiteral extends AnnotationLiteral<MgQuery> implements MgQuery {
+
+    public static final MgQuery INSTANCE = of("");
+
+    private static final long serialVersionUID = 1L;
+
+    private final String value;
+
+    private MgQueryLiteral(String value) {
+      this.value = value;
+    }
+
+    public static MgQueryLiteral of(String value) {
+      return new MgQueryLiteral(value);
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+
+  }
 
 }

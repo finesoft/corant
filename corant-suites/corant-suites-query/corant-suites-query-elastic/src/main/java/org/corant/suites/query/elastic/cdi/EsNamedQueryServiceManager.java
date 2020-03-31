@@ -16,6 +16,7 @@ package org.corant.suites.query.elastic.cdi;
 import static org.corant.shared.util.StringUtils.EMPTY;
 import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isBlank;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
@@ -104,9 +104,14 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   @Produces
   @EsQuery
   EsNamedQueryService produce(InjectionPoint ip) {
-    final Annotated annotated = ip.getAnnotated();
-    final EsQuery sc = annotated.getAnnotation(EsQuery.class);
-    return get(sc);
+    Annotation qualifier = null;
+    for (Annotation a : ip.getQualifiers()) {
+      if (a.annotationType().equals(EsQuery.class)) {
+        qualifier = a;
+        break;
+      }
+    }
+    return get(qualifier);
   }
 
   /**

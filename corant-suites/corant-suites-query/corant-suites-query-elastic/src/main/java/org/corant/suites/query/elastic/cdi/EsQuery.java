@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -51,4 +52,31 @@ public @interface EsQuery {
   @Nonbinding
   String value() default "";
 
+  /**
+   * corant-suites-query-elastic
+   *
+   * @author bingo 上午11:42:58
+   *
+   */
+  public static final class EsQueryLiteral extends AnnotationLiteral<EsQuery> implements EsQuery {
+
+    public static final EsQuery INSTANCE = of("");
+
+    private static final long serialVersionUID = 1L;
+
+    private final String value;
+
+    private EsQueryLiteral(String value) {
+      this.value = value;
+    }
+
+    public static EsQueryLiteral of(String value) {
+      return new EsQueryLiteral(value);
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+  }
 }

@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
+import org.corant.shared.util.StringUtils;
 import org.corant.suites.query.sql.dialect.Dialect.DBMS;
 
 /**
@@ -85,7 +86,7 @@ public @interface SqlQuery {
     }
 
     public static SqlQueryLiteral of(DBMS dialect, String ds) {
-      return new SqlQueryLiteral(ds, dialect.name());
+      return new SqlQueryLiteral(ds, dialect == null ? StringUtils.EMPTY : dialect.name());
     }
 
     @Override

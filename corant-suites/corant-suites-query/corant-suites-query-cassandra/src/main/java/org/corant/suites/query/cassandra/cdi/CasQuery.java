@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -72,7 +73,7 @@ public @interface CasQuery {
     }
 
     public static CasQueryLiteral of(String value) {
-      return new CasQueryLiteral(value);
+      return new CasQueryLiteral(defaultString(value));
     }
 
     @Override

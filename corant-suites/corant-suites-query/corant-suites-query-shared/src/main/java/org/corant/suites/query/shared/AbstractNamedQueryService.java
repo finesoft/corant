@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public static final String STREAM_RETRY_TIMES = ".stream-retry-times";
   public static final String STREAM_RETRY_INTERVAL = ".stream-retry-interval";
   public static final String STREAM_TERMINATER = ".stream-terminater";
+  public static final String STREAM_ENHANCER = ".stream-enhancer";
 
   final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();// static?
 
@@ -68,22 +70,28 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   /**
    * {@inheritDoc}
    * <p>
-   * This method use {@link forward} to fetch next data records
+   * This method use {@link forward} to fetch next data records.
    * </p>
+   * TODO: Introduce a new QueryParameter class that include retry/terminate/enhance mechanisms as
+   * query parameter.
+   *
+   * @see #stream(String, DefaultQueryParameter, BiPredicate, BiConsumer, int, Duration)
    */
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
     QueryResolver queryResolver = getQuerierResolver().getQueryResolver();
-    final QueryParameter queryParam = queryResolver.resolveQueryParameter(null, parameter);
+    final QueryParameter queryParam = queryResolver.resolveParameter(null, parameter);
     final Map<String, Object> context = queryParam.getContext();
     final int limit = max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1);
     final DefaultQueryParameter useParam = new DefaultQueryParameter(queryParam).limit(limit);
     final BiPredicate<Integer, Object> terminater =
         forceCast(getMapObject(context, STREAM_TERMINATER));
+    final BiConsumer<Object, DefaultQueryParameter> enhancer =
+        forceCast(getMapObject(context, STREAM_ENHANCER));
     final int retryTimes = getMapInteger(context, STREAM_RETRY_TIMES, 0);
     final Duration retryInterval =
         getMapDuration(context, STREAM_RETRY_INTERVAL, Duration.ofSeconds(1L));
-    return stream(queryName, useParam, terminater, retryTimes, retryInterval);
+    return stream(queryName, useParam, terminater, enhancer, retryTimes, retryInterval);
   }
 
   protected <T> void fetch(List<T> results, Querier querier) {
@@ -239,8 +247,21 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     return defaultObject(obj, dflt);
   }
 
+  /**
+   * Actual execution method for {@link #stream(String, Object)}
+   *
+   * @param <T> the result type
+   * @param queryName the query name
+   * @param useParam the converted query parameter
+   * @param terminater the terminater use to terminate the stream
+   * @param enhancer the enhancer use to enhance query
+   * @param retryTimes the retry times use to retry when exeception errored
+   * @param retryInterval the retry interval
+   * @return stream the stream
+   */
   protected <T> Stream<T> stream(String queryName, DefaultQueryParameter useParam,
-      BiPredicate<Integer, Object> terminater, int retryTimes, Duration retryInterval) {
+      BiPredicate<Integer, Object> terminater, BiConsumer<Object, DefaultQueryParameter> enhancer,
+      int retryTimes, Duration retryInterval) {
     return streamOf(new Iterator<T>() {
       final Forwarding<T> buffer = doForward(queryName, useParam);
       final int limit = useParam.getLimit();
@@ -255,7 +276,12 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         }
         if (!buffer.hasResults()) {
           if (buffer.hasNext()) {
-            buffer.with(doForward(queryName, useParam.offset(offset += limit)));
+            if (enhancer == null) {
+              useParam.offset(offset += limit);
+            } else {
+              enhancer.accept(next, useParam);
+            }
+            buffer.with(doForward(queryName, useParam));
             return buffer.hasResults();
           }
         } else {

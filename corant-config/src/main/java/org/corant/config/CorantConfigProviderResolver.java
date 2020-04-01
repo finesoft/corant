@@ -21,9 +21,11 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
@@ -87,9 +89,20 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
       while (iterator.hasNext()) {
         Map.Entry<ClassLoader, Config> entry = iterator.next();
         if (entry.getValue() == config) {
+          // According to the specification close config sources or converters if necessary
+          for (ConfigSource cs : config.getConfigSources()) {
+            if (cs instanceof AutoCloseable) {
+              ((AutoCloseable) cs).close();
+            }
+          }
+          if (config instanceof CorantConfig) {
+            ((CorantConfig) config).getConversion().closeCloseableConverters();
+          }
           iterator.remove();
         }
       }
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
     } finally {
       lock.unlock();
     }

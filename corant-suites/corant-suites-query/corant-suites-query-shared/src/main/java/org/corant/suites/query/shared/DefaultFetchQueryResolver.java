@@ -78,7 +78,32 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   }
 
   @Override
-  public void resolveFetchedResult(List<?> results, List<?> fetchedResults, FetchQuery fetchQuery) {
+  public void resolveFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
+    if (result == null) {
+      return;
+    }
+    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
+    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
+    if (injection == null) {
+      // use inject pro name
+      shouldNotEmpty(injectProNamePath);
+      if (isEmpty(fetchedResults)) {
+        injectFetchedResult(result, null, injectProNamePath);
+      } else {
+        if (fetchQuery.isMultiRecords()) {
+          injectFetchedResult(result, fetchedResults, injectProNamePath);
+        } else {
+          injectFetchedResult(result, fetchedResults.iterator().next(), injectProNamePath);
+        }
+      }
+    } else {
+      injection.apply(new Object[] {result, defaultObject(fetchedResults, new ArrayList())});
+    }
+  }
+
+  @Override
+  public void resolveFetchedResults(List<?> results, List<?> fetchedResults,
+      FetchQuery fetchQuery) {
     if (isEmpty(results)) {
       return;
     }
@@ -110,37 +135,13 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   }
 
   @Override
-  public void resolveFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
-    if (result == null) {
-      return;
-    }
-    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
-    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
-    if (injection == null) {
-      // use inject pro name
-      shouldNotEmpty(injectProNamePath);
-      if (isEmpty(fetchedResults)) {
-        injectFetchedResult(result, null, injectProNamePath);
-      } else {
-        if (fetchQuery.isMultiRecords()) {
-          injectFetchedResult(result, fetchedResults, injectProNamePath);
-        } else {
-          injectFetchedResult(result, fetchedResults.iterator().next(), injectProNamePath);
-        }
-      }
-    } else {
-      injection.apply(new Object[] {result, defaultObject(fetchedResults, new ArrayList())});
-    }
-  }
-
-  @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparameter) {
     return new DefaultQueryParameter().context(parentQueryparameter.getContext())
         .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
   }
 
-  protected Object convertIfNecessarily(Object obj, Class<?> type) {
+  protected Object convertCriteriaValue(Object obj, Class<?> type) {
     if (type == null || obj == null) {
       return obj;
     } else {
@@ -155,9 +156,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       if (criteria instanceof Map) {
         ((Map) criteria).forEach((k, v) -> map.put(asDefaultString(k), v));
       } else if (criteria != null) {
-        QueryObjectMapper.OM.convertValue(criteria, Map.class).forEach((k, v) -> {
-          map.put(asDefaultString(k), v);
-        });
+        QueryObjectMapper.OM.convertValue(criteria, Map.class)
+            .forEach((k, v) -> map.put(asDefaultString(k), v));
       }
     }
     return map;
@@ -212,37 +212,33 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       Class<?> type = parameter.getType();
       boolean distinct = parameter.isDistinct();
+      String name = parameter.getName();
       if (parameter.getSource() == FetchQueryParameterSource.C) {
-        fetchCriteria.put(parameter.getName(), convertIfNecessarily(parameter.getValue(), type));
+        fetchCriteria.put(name, convertCriteriaValue(parameter.getValue(), type));
       } else if (parameter.getSource() == FetchQueryParameterSource.P) {
-        fetchCriteria.put(parameter.getName(),
-            convertIfNecessarily(criteria.get(parameter.getSourceName()), type));
+        String sourceName = parameter.getSourceName();
+        fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
       } else if (result != null) {
-        String parameterName = parameter.getName();
-        String[] sourceNamePath = parameter.getSourceNamePath();
+        String[] namePath = parameter.getSourceNamePath();
+        Object criteriaValue = null;
         try {
-          Object parameterValue = null;
           // handle multi results
           if (result instanceof List) {
-            Collection<Object> listParameterValue =
-                distinct ? new LinkedHashSet<>() : new ArrayList<>();
-            List<?> resultList = (List<?>) result;
-            for (Object resultItem : resultList) {
-              Object itemParameterValue =
-                  resolveFetchQueryCriteriaValue(resultItem, sourceNamePath);
-              if (itemParameterValue instanceof Collection) {
-                listParameterValue
-                    .addAll((Collection) convertIfNecessarily(itemParameterValue, type));
-              } else if (itemParameterValue != null) {
-                listParameterValue.add(convertIfNecessarily(itemParameterValue, type));
+            Collection<Object> values = distinct ? new LinkedHashSet<>() : new ArrayList<>();
+            for (Object resultItem : (List<?>) result) {
+              Object resultItemValue = resolveFetchQueryCriteriaValue(resultItem, namePath);
+              if (resultItemValue instanceof Collection) {
+                values.addAll((Collection) convertCriteriaValue(resultItemValue, type));
+              } else if (resultItemValue != null) {
+                values.add(convertCriteriaValue(resultItemValue, type));
               }
             }
-            parameterValue = listParameterValue;
+            criteriaValue = values;
           } else {
-            parameterValue =
-                convertIfNecessarily(resolveFetchQueryCriteriaValue(result, sourceNamePath), type);
+            Object resultValue = resolveFetchQueryCriteriaValue(result, namePath);
+            criteriaValue = convertCriteriaValue(resultValue, type);
           }
-          fetchCriteria.put(parameterName, parameterValue);
+          fetchCriteria.put(name, criteriaValue);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
           throw new QueryRuntimeException(e,
               "Can not extract value from query result for resolve fetch query [%s] parameter!",

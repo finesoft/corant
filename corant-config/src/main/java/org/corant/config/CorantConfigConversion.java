@@ -16,6 +16,9 @@ package org.corant.config;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.ObjectUtils.isEquals;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -47,6 +50,8 @@ import javax.annotation.Priority;
 import javax.inject.Provider;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
+import org.corant.shared.conversion.ConverterType;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.Converter;
@@ -69,7 +74,8 @@ public class CorantConfigConversion implements Serializable {
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
     ConverterRegistry.getSupportConverters().keySet().stream()
         .filter(ct -> ct.getSourceClass().isAssignableFrom(String.class))
-        .map(ct -> ct.getTargetClass()).map(OrdinalConverter::builtIn).forEach(builtInCvts::add);
+        .map(ConverterType::getTargetClass).map(OrdinalConverter::builtIn)
+        .forEach(builtInCvts::add);
     builtInCvts.add(OrdinalConverter.builtIn(String.class));
     BUILT_IN_CONVERTERS = Collections.unmodifiableList(builtInCvts);
   }
@@ -294,6 +300,22 @@ public class CorantConfigConversion implements Serializable {
     return converters.get().containsKey(cls);
   }
 
+  void closeCloseableConverters() {
+    Map<Type, Converter<?>> map = converters.get();
+    if (map != null) {
+      map.values().stream()
+          .filter(c -> BUILT_IN_CONVERTERS.stream().noneMatch(o -> isEquals(o.converter, c))
+              && c instanceof AutoCloseable)
+          .forEach(c -> {
+            try {
+              ((Closeable) c).close();
+            } catch (IOException e) {
+              throw new CorantRuntimeException(e);
+            }
+          });
+    }
+  }
+
   Class<?> resolveActualTypeArguments(ParameterizedType ptype, int idx) {
     Type argType = ptype.getActualTypeArguments()[idx];
     if (argType instanceof Class) {
@@ -322,8 +344,8 @@ public class CorantConfigConversion implements Serializable {
       }
       @SuppressWarnings("unchecked")
       Class<T> type = (Class<T>) generalType;
-      return Stream.<Supplier<Converter<T>>>of(() -> forConstructor(type, String.class),
-          () -> forMethod(type, "of", String.class), () -> forMethod(type, "valueOf", String.class),
+      return Stream.<Supplier<Converter<T>>>of(() -> forMethod(type, "of", String.class),
+          () -> forMethod(type, "valueOf", String.class), () -> forConstructor(type, String.class),
           () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
           .filter(ObjectUtils::isNotNull).findFirst();
     }

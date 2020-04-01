@@ -50,7 +50,7 @@ public class JavascriptJpqlQuerierBuilder
    */
   @Override
   public DefaultJpqlNamedQuerier build(Object param) {
-    QueryParameter queryParam = getQueryResolver().resolveQueryParameter(getQuery(), param);
+    QueryParameter queryParam = getQueryResolver().resolveParameter(getQuery(), param);
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {queryParam, useParam});
     return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getQueryResolver(),

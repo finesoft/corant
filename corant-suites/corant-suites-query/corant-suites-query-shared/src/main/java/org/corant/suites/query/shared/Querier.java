@@ -51,16 +51,6 @@ public interface Querier {
   QueryParameter getQueryParameter();
 
   /**
-   * Inject the fetched result to result list
-   *
-   * @param result
-   * @param fetchResult
-   * @param fetchQuery
-   * @see FetchQueryResolver#resolveFetchedResult(List, List, FetchQuery)
-   */
-  void resolveFetchedResult(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
-
-  /**
    * Inject the fetched result to single result
    *
    * @param result
@@ -69,6 +59,16 @@ public interface Querier {
    * @see FetchQueryResolver#resolveFetchedResult(Object, List, FetchQuery)
    */
   void resolveFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
+
+  /**
+   * Inject the fetched result to result list
+   *
+   * @param result
+   * @param fetchResult
+   * @param fetchQuery
+   * @see FetchQueryResolver#resolveFetchedResults(List, List, FetchQuery)
+   */
+  void resolveFetchedResults(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
 
   /**
    * Resolve fetch query parameter, merge parent querier criteria.
@@ -84,7 +84,7 @@ public interface Querier {
    *
    * @param <T>
    * @param results
-   * @see QueryResolver#resolve(List, Class, List, QueryParameter)
+   * @see QueryResolver#resolveResults(List, Class, List, QueryParameter)
    */
   <T> List<T> resolveResult(List<?> results);
 
@@ -93,7 +93,7 @@ public interface Querier {
    *
    * @param <T>
    * @param result
-   * @see QueryResolver#resolve(Object, Class, List, QueryParameter)
+   * @see QueryResolver#resolveResult(Object, Class, List, QueryParameter)
    */
   <T> T resolveResult(Object result);
 

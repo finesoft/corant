@@ -70,7 +70,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
       if (result instanceof List) {
-        parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+        parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
       } else {
         parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }

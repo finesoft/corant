@@ -27,6 +27,43 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
 public interface QueryResolver {
 
   /**
+   * Resolve query parameter.
+   *
+   * @param query
+   * @param parameter
+   * @return query parameter
+   */
+  QueryParameter resolveParameter(Query query, Object parameter);
+
+  /**
+   * Resolve single result {@link #resolveResult(List, Class, List, QueryParameter)}
+   *
+   * @param <T> the result class
+   * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>
+   * @param resultClass
+   * @param hints
+   * @param parameter
+   * @return resolve
+   * @see QueryHint
+   * @see Query
+   * @see ResultHintHandler
+   */
+  <T> T resolveResult(Object result, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter);
+
+  /**
+   * Resolve query hints, in this step the result set may be adjusted or inserted with certain
+   * values.
+   *
+   * @param result
+   * @param resultClass
+   * @param hints
+   * @param parameter resolveResultHints
+   */
+  void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+      QueryParameter parameter);
+
+  /**
    * Resolve result list, The steps are as follows:
    *
    * <pre>
@@ -46,43 +83,6 @@ public interface QueryResolver {
    * @see Query
    * @see ResultHintHandler
    */
-  <T> List<T> resolve(List<?> results, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter);
-
-  /**
-   * Resolve single result {@link #resolve(List, Class, List, QueryParameter)}
-   *
-   * @param <T> the result class
-   * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>
-   * @param resultClass
-   * @param hints
-   * @param parameter
-   * @return resolve
-   * @see QueryHint
-   * @see Query
-   * @see ResultHintHandler
-   */
-  <T> T resolve(Object result, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter);
-
-  /**
-   * Resolve query parameter.
-   *
-   * @param query
-   * @param parameter
-   * @return query parameter
-   */
-  QueryParameter resolveQueryParameter(Query query, Object parameter);
-
-  /**
-   * Resolve query hints, in this step the result set may be adjusted or inserted with certain
-   * values.
-   *
-   * @param result
-   * @param resultClass
-   * @param hints
-   * @param parameter resolveResultHints
-   */
-  void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+  <T> List<T> resolveResults(List<Object> results, Class<T> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
 }

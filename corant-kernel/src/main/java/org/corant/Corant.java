@@ -424,7 +424,7 @@ public class Corant implements AutoCloseable {
         mbeanRunner = new CorantRunner(beanClasses, arguments);
         ObjectName objectName = null;
         try {
-          objectName = new ObjectName(applicationName() + ":type=basic,name=CorantRunner");
+          objectName = new ObjectName(applicationName() + ":type=Clutch,name=CorantRunner");
         } catch (MalformedObjectNameException ex) {
           throw new CorantRuntimeException(ex);
         }

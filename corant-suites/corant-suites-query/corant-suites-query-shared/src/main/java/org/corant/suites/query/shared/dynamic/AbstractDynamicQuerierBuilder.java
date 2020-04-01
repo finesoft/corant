@@ -66,7 +66,7 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   }
 
   protected QueryParameter resolveParameter(Object param) {
-    return queryResolver.resolveQueryParameter(query, param);
+    return queryResolver.resolveParameter(query, param);
   }
 
 }

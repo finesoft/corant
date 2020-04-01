@@ -32,23 +32,13 @@ public interface FetchQueryResolver {
   /**
    * Decide whether to fetch, generally, the parameter 'result' is a single result record. If the
    * fetch query predicate script not set, this method must return true.
-   * 
+   *
    * @param result
    * @param queryParameter
    * @param fetchQuery
    * @return canFetch
    */
   boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery);
-
-  /**
-   * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
-   * modified.
-   *
-   * @param results
-   * @param fetchResults
-   * @param fetchQuery
-   */
-  void resolveFetchedResult(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
    * Inject fetch query result in to single parent query result, the parameter 'fetchResult' may be
@@ -59,6 +49,16 @@ public interface FetchQueryResolver {
    * @param fetchQuery
    */
   void resolveFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
+
+  /**
+   * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
+   * modified.
+   *
+   * @param results
+   * @param fetchResults
+   * @param fetchQuery
+   */
+  void resolveFetchedResults(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
    * Resolve fetch query parameter. Generally, the fetch query parameters are composed of parent

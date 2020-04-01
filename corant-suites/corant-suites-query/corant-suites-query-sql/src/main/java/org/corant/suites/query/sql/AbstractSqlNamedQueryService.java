@@ -50,7 +50,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
       if (result instanceof List) {
-        parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+        parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
       } else {
         parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }

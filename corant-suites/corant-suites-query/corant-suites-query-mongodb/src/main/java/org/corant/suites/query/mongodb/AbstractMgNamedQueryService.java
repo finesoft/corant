@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,7 +106,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     fetch(fetchedList, querier);
     querier.resolveResultHints(fetchedList);
     if (result instanceof List) {
-      parentQuerier.resolveFetchedResult((List<?>) result, fetchedList, fetchQuery);
+      parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
     } else {
       parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
     }
@@ -301,10 +302,14 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return Optional.empty();
   }
 
+  /**
+   * TODO: Implement the retry and enhancer mechanisms
+   */
   @SuppressWarnings("restriction")
   @Override
   protected <T> Stream<T> stream(String queryName, DefaultQueryParameter useParam,
-      BiPredicate<Integer, Object> terminater, int retryTimes, Duration retryInterval) {
+      BiPredicate<Integer, Object> terminater, BiConsumer<Object, DefaultQueryParameter> enhancer,
+      int retryTimes, Duration retryInterval) {
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, useParam);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(useParam.getLimit()).iterator();

@@ -15,10 +15,10 @@ package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.suites.query.shared.QueryParameter.CONTEXT_NME;
 import static org.corant.suites.query.shared.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.suites.query.shared.QueryParameter.OFFSET_PARAM_NME;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,54 +46,9 @@ public class DefaultQueryResolver implements QueryResolver {
   @Inject
   ConversionService conversionService;
 
-  /**
-   * TODO Don't now create new arraylist, just convert results
-   */
   @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> resolve(List<?> results, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter) {
-    List<T> list = new ArrayList<>();
-    if (!isEmpty(results)) {
-      resolveResultHints(results, resultClass, hints, parameter);
-      if (Map.class.isAssignableFrom(resultClass)) {
-        for (Object r : results) {
-          if (r != null) {
-            list.add((T) r);
-          } else {
-            list.add(null);
-          }
-        }
-      } else {
-        for (Object r : results) {
-          if (r != null) {
-            list.add(QueryObjectMapper.OM.convertValue(r, resultClass));
-          } else {
-            list.add(null);
-          }
-        }
-      }
-      results.clear();// FIXME
-    }
-    return list;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T resolve(Object result, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter) {
-    if (result == null) {
-      return null;
-    } else {
-      resolveResultHints(result, resultClass, hints, parameter);
-      return Map.class.isAssignableFrom(resultClass) ? (T) result
-          : QueryObjectMapper.OM.convertValue(result, resultClass);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public QueryParameter resolveQueryParameter(Query query, Object param) {
+  public QueryParameter resolveParameter(Query query, Object param) {
     QueryParameter queryParameter = new DefaultQueryParameter();
     if (param instanceof QueryParameter) {
       queryParameter = (QueryParameter) param;
@@ -110,6 +65,19 @@ public class DefaultQueryResolver implements QueryResolver {
       queryParameter = new DefaultQueryParameter().criteria(param);
     }
     return queryParameter;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T resolveResult(Object result, Class<T> resultClass, List<QueryHint> hints,
+      QueryParameter parameter) {
+    if (result == null) {
+      return null;
+    } else {
+      resolveResultHints(result, resultClass, hints, parameter);
+      return Map.class.isAssignableFrom(resultClass) ? (T) result
+          : convertRecord(result, resultClass);
+    }
   }
 
   @Override
@@ -133,6 +101,18 @@ public class DefaultQueryResolver implements QueryResolver {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> List<T> resolveResults(List<Object> results, Class<T> resultClass,
+      List<QueryHint> hints, QueryParameter parameter) {
+    if (!isEmpty(results)) {
+      resolveResultHints(results, resultClass, hints, parameter);
+      final boolean needConvert = !Map.class.isAssignableFrom(resultClass);
+      results.replaceAll(e -> needConvert ? convertRecord(e, resultClass) : (T) e);
+    }
+    return forceCast(results);
+  }
+
   protected Map<String, Object> convertParameter(Map<?, ?> param,
       Map<String, Class<?>> convertSchema) {
     Map<String, Object> convertedParam = new HashMap<>();
@@ -147,5 +127,17 @@ public class DefaultQueryResolver implements QueryResolver {
       });
     }
     return convertedParam;
+  }
+
+  /**
+   * Convert single record to expected class object.
+   *
+   * @param <T>
+   * @param result
+   * @param expectedClass
+   * @return the converted record
+   */
+  protected <T> T convertRecord(Object record, Class<T> expectedClass) {
+    return QueryObjectMapper.OM.convertValue(record, expectedClass);
   }
 }

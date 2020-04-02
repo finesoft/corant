@@ -14,10 +14,15 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.ObjectUtils.max;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 /**
  * corant-suites-query-shared
@@ -78,10 +83,10 @@ public interface QueryParameter extends Serializable {
 
     private static final long serialVersionUID = 6618232487063961660L;
 
-    private Object criteria;
-    private Integer limit;
-    private Integer offset = 0;
-    private Map<String, Object> context = new HashMap<>();
+    protected Object criteria;
+    protected Integer limit;
+    protected Integer offset = 0;
+    protected Map<String, Object> context = new HashMap<>();
 
     public DefaultQueryParameter() {}
 
@@ -173,10 +178,203 @@ public interface QueryParameter extends Serializable {
      * @param offset the offset to set
      */
     public DefaultQueryParameter offset(Integer offset) {
-      this.offset = offset;
+      this.offset = max(offset, 0);
       return this;
     }
 
+  }
+
+  /**
+   * corant-suites-query-shared
+   *
+   * @author bingo 下午3:14:48
+   *
+   */
+  public static class StreamQueryParameter extends DefaultQueryParameter {
+
+    private static final long serialVersionUID = -2111105679283097964L;
+
+    static final Duration defRtyItl = Duration.ofSeconds(1L);
+
+    protected int retryTimes = 0;
+
+    protected Duration retryInterval = defRtyItl;
+
+    protected Function<Exception, RuntimeException> errorTransfer;
+
+    protected BiPredicate<Integer, Object> terminater;
+
+    protected BiConsumer<Object, StreamQueryParameter> enhancer;
+
+    public StreamQueryParameter() {
+      super();
+    }
+
+    public StreamQueryParameter(QueryParameter other) {
+      super(other);
+    }
+
+    public StreamQueryParameter(StreamQueryParameter other) {
+      super(other);
+      enhancer(other.enhancer).retryInterval(other.retryInterval).retryTimes(other.retryTimes)
+          .errorTransfer(other.errorTransfer).terminater(other.terminater);
+    }
+
+    @Override
+    public StreamQueryParameter context(Map<String, Object> context) {
+      super.context(context);
+      return this;
+    }
+
+    @Override
+    public StreamQueryParameter context(Object... objects) {
+      super.context(objects);
+      return this;
+    }
+
+    @Override
+    public StreamQueryParameter criteria(Object criteria) {
+      super.criteria(criteria);
+      return this;
+    }
+
+    public StreamQueryParameter enhancer(BiConsumer<Object, StreamQueryParameter> enhancer) {
+      this.enhancer = enhancer;
+      return this;
+    }
+
+    public StreamQueryParameter errorTransfer(Function<Exception, RuntimeException> errorTransfer) {
+      this.errorTransfer = errorTransfer;
+      return this;
+    }
+
+    public StreamQueryParameter forward(Object current) {
+      if (enhancer != null) {
+        enhancer.accept(current, this);
+      } else {
+        offset(offset + super.getLimit());
+      }
+      return this;
+    }
+
+    public BiConsumer<Object, StreamQueryParameter> getEnhancer() {
+      return enhancer;
+    }
+
+    /**
+     *
+     * @return the errorTransfer
+     */
+    public Function<Exception, RuntimeException> getErrorTransfer() {
+      return errorTransfer;
+    }
+
+    /**
+     * @see #retryInterval(Duration)
+     *
+     * @return getRetryInterval
+     */
+    public Duration getRetryInterval() {
+      return retryInterval;
+    }
+
+    /**
+     * @see #retryTimes(int)
+     *
+     * @return getRetryTimes
+     */
+    public int getRetryTimes() {
+      return retryTimes;
+    }
+
+    /**
+     * The terminater use to terminate the stream, if not set the stream ends naturally.
+     *
+     * @see #terminater(BiPredicate)
+     * @return getTerminater
+     */
+    public BiPredicate<Integer, Object> getTerminater() {
+      return terminater;
+    }
+
+    @Override
+    public StreamQueryParameter limit(Integer limit) {
+      super.limit(limit);
+      return this;
+    }
+
+    /**
+     * Check whether to use retry mechanism, if the underly query service implemention supports
+     * retry then only {@link #getRetryTimes()} > 0 can use retry mechanism.
+     *
+     * @return needRetry
+     */
+    public boolean needRetry() {
+      return retryTimes > 0;
+    }
+
+    @Override
+    public StreamQueryParameter offset(Integer offset) {
+      super.offset(offset);
+      return this;
+    }
+
+    /**
+     * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
+     * batches, in this process the exception may be occurred, the query may retry after exception
+     * occurred, this method use to set the retry interval. The underly query service implemention
+     * may not support
+     *
+     * @param retryInterval
+     * @return retryInterval
+     */
+    public StreamQueryParameter retryInterval(Duration retryInterval) {
+      if (retryInterval != null) {
+        this.retryInterval = retryInterval;
+      }
+      return this;
+    }
+
+    /**
+     * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
+     * batches, in this process the exception may be occurred, the query may retry after exception
+     * occurred, this method use to set the retry times. The underly query service implemention may
+     * not support retry.
+     *
+     * @param retryTimes
+     * @return retryTimes
+     */
+    public StreamQueryParameter retryTimes(int retryTimes) {
+      this.retryTimes = max(retryTimes, 0);
+      return this;
+    }
+
+    /**
+     * Check whether to terminate the stream
+     *
+     * @param counter the number of objects that have flowed out
+     * @param current the last object that has flowed out
+     * @return terminateIf
+     */
+    public boolean terminateIf(Integer counter, Object current) {
+      return terminater != null && !terminater.test(counter, current);
+    }
+
+    /**
+     *
+     * The terminater is used to terminate the stream. If it is not set, the stream will terminate
+     * naturally. The terminater determines whether to terminate the stream by testing two
+     * parameters, The first parameter is an integer that represents the number of objects that have
+     * flowed out, The second parameter is an object that represents the last object that has flowed
+     * out.
+     *
+     * @param terminater
+     * @return terminater
+     */
+    public StreamQueryParameter terminater(BiPredicate<Integer, Object> terminater) {
+      this.terminater = terminater;
+      return this;
+    }
   }
 
 }

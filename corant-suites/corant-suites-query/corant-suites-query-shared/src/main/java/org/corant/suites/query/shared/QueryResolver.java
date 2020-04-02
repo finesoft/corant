@@ -27,8 +27,9 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
 public interface QueryResolver {
 
   /**
-   * Resolve query parameter.
-   *
+   * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
+   * return it.
+   * 
    * @param query
    * @param parameter
    * @return query parameter

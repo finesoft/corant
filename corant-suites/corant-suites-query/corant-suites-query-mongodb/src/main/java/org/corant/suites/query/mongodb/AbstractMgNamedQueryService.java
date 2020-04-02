@@ -21,7 +21,6 @@ import static org.corant.shared.util.MapUtils.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -30,8 +29,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
@@ -42,7 +39,7 @@ import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
+import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import com.mongodb.BasicDBObject;
@@ -302,17 +299,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return Optional.empty();
   }
 
-  /**
-   * TODO: Implement the retry and enhancer mechanisms
-   */
   @SuppressWarnings("restriction")
   @Override
-  protected <T> Stream<T> stream(String queryName, DefaultQueryParameter useParam,
-      BiPredicate<Integer, Object> terminater, BiConsumer<Object, DefaultQueryParameter> enhancer,
-      int retryTimes, Duration retryInterval) {
-    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, useParam);
+  protected <T> Stream<T> stream(String queryName, StreamQueryParameter parameter) {
+    if (parameter.getEnhancer() != null) {
+      return super.stream(queryName, parameter);
+    }
+    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    final MongoCursor<Document> cursor = query(querier).batchSize(useParam.getLimit()).iterator();
+    final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
     Stream<T> stream = streamOf(new Iterator<T>() {
       final Forwarding<T> buffer = doForward(cursor);
       int counter = 1;
@@ -320,16 +315,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
       @Override
       public boolean hasNext() {
-        if (terminate()) {
-          return false;
-        }
-        if (!buffer.hasResults()) {
-          if (buffer.hasNext()) {
-            buffer.with(doForward(cursor));
-            return buffer.hasResults();
+        if (!parameter.terminateIf(counter, next)) {
+          if (!buffer.hasResults()) {
+            if (buffer.hasNext()) {
+              buffer.with(doForward(cursor));
+              return buffer.hasResults();
+            }
+          } else {
+            return true;
           }
-        } else {
-          return true;
         }
         return false;
       }
@@ -345,17 +339,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
 
       Forwarding<T> doForward(MongoCursor<Document> it) {
-        int size = useParam.getLimit();
+        int size = parameter.getLimit();
         List<Object> list = new ArrayList<>(size);
         while (it.hasNext() && --size >= 0) {
           list.add(it.next());
         }
         fetch(list, querier);
         return Forwarding.of(querier.resolveResult(list), it.hasNext());
-      }
-
-      boolean terminate() {
-        return terminater != null && !terminater.test(counter, next);
       }
 
     }).onClose(cursor::close);

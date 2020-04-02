@@ -42,22 +42,18 @@ public class ObjectUtils {
   @SuppressWarnings("rawtypes")
   public static final Consumer EMPTY_CONSUMER = o -> {
   };
+
   @SuppressWarnings("rawtypes")
-  public static final Supplier EMPTY_SUPPLIER = () -> {
-    return null;
-  };
+  public static final Supplier EMPTY_SUPPLIER = () -> null;
+
   @SuppressWarnings("rawtypes")
-  public static final Function EMPTY_FUNCTION = p -> {
-    return null;
-  };
+  public static final Function EMPTY_FUNCTION = p -> null;
+
   @SuppressWarnings("rawtypes")
-  public static final Predicate EMPTY_PREDICATE_TRUE = p -> {
-    return true;
-  };
+  public static final Predicate EMPTY_PREDICATE_TRUE = p -> true;
+
   @SuppressWarnings("rawtypes")
-  public static final Predicate EMPTY_PREDICATE_FALSE = p -> {
-    return false;
-  };
+  public static final Predicate EMPTY_PREDICATE_FALSE = p -> false;
 
   protected ObjectUtils() {}
 
@@ -154,10 +150,26 @@ public class ObjectUtils {
     return Objects.isNull(obj);
   }
 
+  /**
+   * a>=b return a else return b
+   *
+   * @param <T>
+   * @param a
+   * @param b
+   * @return max
+   */
   public static <T extends Comparable<T>> T max(T a, T b) {
     return a.compareTo(b) >= 0 ? a : b;
   }
 
+  /**
+   * a<b return a else return b
+   *
+   * @param <T>
+   * @param a
+   * @param b
+   * @return min
+   */
   public static <T extends Comparable<T>> T min(T a, T b) {
     return a.compareTo(b) < 0 ? a : b;
   }

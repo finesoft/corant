@@ -24,7 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.Elastic6Constants;
@@ -35,11 +36,9 @@ import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -55,34 +54,43 @@ import org.elasticsearch.search.sort.SortBuilder;
 @SuppressWarnings("unchecked")
 public abstract class AbstractElasticDocumentService implements ElasticDocumentService {
 
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
+
   protected ElasticIndexingResolver indexingResolver;
 
   @Override
-  public int bulkIndex(List<? extends ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticIndexing> idxGetter,
-      Function<Class<? extends ElasticDocument>, ElasticMapping> mapGetter) {
+  public int bulkIndex(List<? extends ElasticDocument> docList, boolean flush) {
+    // grouping docs by doc class
     Map<Class<? extends ElasticDocument>, List<ElasticDocument>> docMap = new HashMap<>();
     for (ElasticDocument doc : shouldNotNull(docList)) {
       if (isNotNull(doc)) {
-        docMap.computeIfAbsent(doc.getClass(), (c) -> new ArrayList<>()).add(doc);
+        docMap.computeIfAbsent(doc.getClass(), c -> new ArrayList<>()).add(doc);
       }
     }
-    BulkRequestBuilder brb = getTransportClient().prepareBulk()
+    // create bulk request builder
+    final BulkRequestBuilder requestBuilder = getTransportClient().prepareBulk()
         .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE);
+
+    // build requests
     for (Entry<Class<? extends ElasticDocument>, List<ElasticDocument>> entry : docMap.entrySet()) {
       Class<? extends ElasticDocument> docCls = entry.getKey();
-      ElasticIndexing indexing = idxGetter.apply(docCls);
-      ElasticMapping mapping = mapGetter.apply(docCls);
+      ElasticIndexing indexing = resolveIndexing(docCls);
+      ElasticMapping mapping = resolveMapping(docCls);
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
-        IndexRequest rb = indexRequestBuilder(indexing.getName(), doc.getId(), doc.getRId(),
-            mapping.toMap(doc), false, 0l, null).request();
-        brb.add(rb);
+        requestBuilder.add(indexRequestBuilder(indexing.getName(), doc.getId(), doc.getRId(),
+            mapping.toMap(doc), false, 0l, null).request());
       }
     }
+    docMap.clear();
     try {
-      return Arrays.stream(brb.execute().actionGet().getItems()).map(x -> x.isFailed() ? 0 : 1)
-          .reduce(Integer.valueOf(0), Integer::sum);
+      return Arrays.stream(requestBuilder.execute().actionGet().getItems()).map(response -> {
+        if (response.isFailed()) {
+          logger.log(Level.WARNING, response.getFailure().getCause(), response::getFailureMessage);
+          return 0;
+        }
+        return 1;
+      }).reduce(Integer.valueOf(0), Integer::sum);
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
@@ -97,9 +105,6 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       throw new CorantRuntimeException(e);
     }
   }
-
-  @Override
-  public abstract TransportClient getTransportClient();
 
   @Override
   public boolean index(String indexName, String id, String routingId, Map<?, ?> obj, boolean flush,

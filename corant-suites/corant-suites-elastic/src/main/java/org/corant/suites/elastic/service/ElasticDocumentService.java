@@ -19,7 +19,6 @@ import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
@@ -41,13 +40,7 @@ import org.elasticsearch.search.sort.SortBuilder;
  */
 public interface ElasticDocumentService {
 
-  default int bulkIndex(List<? extends ElasticDocument> docList, boolean flush) {
-    return bulkIndex(docList, flush, this::resolveIndexing, this::resolveMapping);
-  }
-
-  int bulkIndex(List<? extends ElasticDocument> docList, boolean flush,
-      Function<Class<? extends ElasticDocument>, ElasticIndexing> indexFunction,
-      Function<Class<? extends ElasticDocument>, ElasticMapping> mappingFunction);
+  int bulkIndex(List<? extends ElasticDocument> docList, boolean flush);
 
   default boolean delete(String indexName, String id) {
     return delete(indexName, id, false);

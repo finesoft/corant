@@ -218,14 +218,16 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
 
   protected void resolveClassSchema(Class<?> docCls, Map<String, Object> map, List<String> path) {
     traverseFields(docCls, f -> {
+      List<String> currentPath = new LinkedList<>(path);
+      currentPath.add(f.getName());
       if (!Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
           && (f.getDeclaringClass().equals(docCls) || isSimpleType(f.getType())
               || f.getDeclaringClass().isAnnotationPresent(EsMappedSuperclass.class)
               || f.getDeclaringClass().isAnnotationPresent(EsEmbeddable.class)
               || f.getDeclaringClass().isAnnotationPresent(EsDocument.class))) {
-        resolveFieldSchema(docCls, f, map, new LinkedList<>(path));
+        resolveFieldSchema(docCls, f, map, currentPath);
       } else {
-        notSupportLog(docCls, path);
+        notSupportLog(docCls, currentPath);
       }
     });
   }
@@ -291,20 +293,18 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
   protected void resolveFieldSchema(Class<?> docCls, Field f, Map<String, Object> map,
       List<String> path) {
     Class<?> ft = shouldNotNull(f).getType();
-    List<String> curPath = new LinkedList<>(path);
-    curPath.add(f.getName());
     if (isSimpleType(ft)) {
-      resolveSimpleFieldSchema(docCls, f, map, new LinkedList<>(curPath));
+      resolveSimpleFieldSchema(docCls, f, map, new LinkedList<>(path));
     } else if (Collection.class.isAssignableFrom(ft)) {
-      resolveCollectionFieldSchema(docCls, f, map, new LinkedList<>(curPath));
+      resolveCollectionFieldSchema(docCls, f, map, new LinkedList<>(path));
     } else if (Map.class.isAssignableFrom(ft)) {
-      resolveMapFieldSchema(docCls, f, map, new LinkedList<>(curPath));
+      resolveMapFieldSchema(docCls, f, map, new LinkedList<>(path));
     } else {
-      resolveComponentFieldSchema(docCls, f, map, new LinkedList<>(curPath));
+      resolveComponentFieldSchema(docCls, f, map, new LinkedList<>(path));
     }
     if (f.isAnnotationPresent(EsAlias.class)) {
       EsAlias aliasAnn = f.getAnnotation(EsAlias.class);
-      map.put(aliasAnn.name(), genFieldMapping(aliasAnn, curPath));
+      map.put(aliasAnn.name(), genFieldMapping(aliasAnn, path));
     }
   }
 

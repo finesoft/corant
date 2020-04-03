@@ -28,7 +28,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class FreemarkerJpqlQuerierBuilder
-    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
+    extends FreemarkerDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   /**
    * @param query

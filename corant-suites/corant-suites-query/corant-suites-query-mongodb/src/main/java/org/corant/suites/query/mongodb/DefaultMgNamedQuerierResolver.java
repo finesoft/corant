@@ -38,7 +38,7 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   Logger logger;
 
   @Override
-  public DefaultMgNamedQuerier resolve(String key, Object param) {
+  public MgNamedQuerier resolve(String key, Object param) {
     FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);
   }

@@ -30,7 +30,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class JavascriptJpqlQuerierBuilder
-    extends AbstractDynamicQuerierBuilder<Object[], String, DefaultJpqlNamedQuerier> {
+    extends AbstractDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   final Function<Object[], Object> execution;
 

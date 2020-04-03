@@ -28,7 +28,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class FreemarkerSqlQuerierBuilder
-    extends FreemarkerDynamicQuerierBuilder<Object[], String, DefaultSqlNamedQuerier> {
+    extends FreemarkerDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
    * @param query

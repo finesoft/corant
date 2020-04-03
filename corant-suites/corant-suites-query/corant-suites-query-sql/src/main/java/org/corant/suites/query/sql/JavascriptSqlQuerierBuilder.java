@@ -28,7 +28,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class JavascriptSqlQuerierBuilder
-    extends JavascriptDynamicQuerierBuilder<Object[], String, DefaultSqlNamedQuerier> {
+    extends JavascriptDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
    * @param query

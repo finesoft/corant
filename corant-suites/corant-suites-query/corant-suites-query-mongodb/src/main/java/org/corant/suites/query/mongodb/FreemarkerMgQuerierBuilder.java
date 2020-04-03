@@ -34,7 +34,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class FreemarkerMgQuerierBuilder extends
-    FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Bson>, DefaultMgNamedQuerier> {
+    FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Bson>, MgNamedQuerier> {
 
   /**
    * @param query

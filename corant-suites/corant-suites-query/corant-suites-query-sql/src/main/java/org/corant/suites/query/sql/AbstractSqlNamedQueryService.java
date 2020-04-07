@@ -55,8 +55,9 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
         parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
       }
     } catch (SQLException e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the fetch query [%s].",
-          fetchQuery.getReferenceQuery());
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the fetch query [%s], exception [%s].",
+          fetchQuery.getReferenceQuery(), e.getMessage());
     }
   }
 

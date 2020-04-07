@@ -47,7 +47,7 @@ public interface EsQueryExecutor {
     try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
       return SearchSourceBuilder.fromXContent(parser);
     } catch (IOException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "Can't build SearchSourceBuilder from %s", script);
     }
   }
 

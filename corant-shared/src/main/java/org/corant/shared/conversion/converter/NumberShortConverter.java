@@ -59,10 +59,10 @@ public class NumberShortConverter extends AbstractConverter<Number, Short> {
     }
     final long longValue = value.longValue();
     if (longValue > Short.MAX_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to big for short!");
+      throw new ConversionException("Can not convert, the source value is too big for short!");
     }
     if (longValue < Short.MIN_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to small for short!");
+      throw new ConversionException("Can not convert, the source value is too small for short!");
     }
     return Short.valueOf(value.shortValue());
   }

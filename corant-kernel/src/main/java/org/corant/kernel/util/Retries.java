@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.interceptor.InvocationContext;
+import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -131,7 +132,7 @@ public class Retries {
           }
           retryCounter++;
         }
-      } while (retryCounter <= this.times);
+      } while (retryCounter <= this.times && Corant.current().isRuning());
       throw this.transfer.apply(executeException);
     }
 

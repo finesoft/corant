@@ -59,10 +59,10 @@ public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
     }
     final long longValue = value.longValue();
     if (longValue > Integer.MAX_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to big for integer!");
+      throw new ConversionException("Can not convert, the source value is too big for integer!");
     }
     if (longValue < Integer.MIN_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to small for integer!");
+      throw new ConversionException("Can not convert, the source value is too small for integer!");
     }
     return Integer.valueOf(value.intValue());
   }

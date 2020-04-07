@@ -58,10 +58,7 @@ public class NumberFloatConverter extends AbstractConverter<Number, Float> {
       return getDefaultValue();
     }
     if (value.doubleValue() > Float.MAX_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to big for float!");
-    }
-    if (value.doubleValue() < Float.MIN_VALUE) {
-      throw new ConversionException("Can not convert, the source value is to small for float!");
+      throw new ConversionException("Can not convert, the source value is too big for float!");
     }
     return Float.valueOf(value.floatValue());
   }

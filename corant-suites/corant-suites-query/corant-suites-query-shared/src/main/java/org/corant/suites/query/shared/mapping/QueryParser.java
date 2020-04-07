@@ -84,7 +84,8 @@ public class QueryParser {
         try {
           Resources.from(path).forEach(f -> map.put(f.getURL().getPath(), f));
         } catch (Exception e) {
-          throw new QueryRuntimeException(e);
+          throw new QueryRuntimeException(e, "Can't resolve query mapping files from path %s",
+              path);
         }
       });
     }
@@ -96,7 +97,8 @@ public class QueryParser {
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
           Resources.fromClassPath(SCHEMA_URL).map(ClassPathResource::getURL).findFirst().get());
     } catch (SAXException | IOException e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e, "Can't resolve query mapping XML schema from %s",
+          SCHEMA_URL);
     }
   }
 

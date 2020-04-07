@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import org.corant.shared.conversion.Conversions;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -164,6 +165,36 @@ public class MapUtils {
     return getMapObject(map, key, ConversionUtils::toBoolean, Boolean.FALSE);
   }
 
+  /**
+   * Convert mapped value to collection, use built-in converter
+   *
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
+   * @param map the source map to convert
+   * @param key the key corresponding to the value to be converted
+   * @param elementClazz the target class of item of the collection
+   * @param collectionFactory the constructor of collection
+   * @param hints the lastConverter hints use for intervening converters
+   * @return getMapCollection
+   *
+   * @see Conversions#convert(Object, Class, java.util.function.Supplier, Map)
+   * @see Conversions#convert(Collection, IntFunction, Class, Map)
+   * @see Conversions#convert(Object[], IntFunction, Class, Map)
+   */
+  public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
+      final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz,
+      final Map<String, ?> hints) {
+    Object obj = map == null ? null : map.get(key);
+    if (obj instanceof Collection) {
+      return Conversions.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
+    } else if (obj instanceof Object[]) {
+      return Conversions.convert((Object[]) obj, collectionFactory, elementClazz, hints);
+    } else if (obj != null) {
+      return Conversions.convert(obj, elementClazz, () -> collectionFactory.apply(10), hints);
+    }
+    return collectionFactory.apply(0);
+  }
+
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, ConversionUtils::toCurrency, null);
   }
@@ -274,7 +305,7 @@ public class MapUtils {
   }
 
   /**
-   * Retrieve the list value with the key from a map, use force cast convert.
+   * Retrieve and convert the list value with the key from a map, use force cast convert.
    *
    * @param <T>
    * @param map
@@ -286,7 +317,8 @@ public class MapUtils {
   }
 
   /**
-   * Retrieve the list value with the key and element class from a map, use converter.
+   * Retrieve and convert the list value with the key and element class from a map, use built-in
+   * converter.
    *
    * @param <T> the expected element type in list
    * @param map
@@ -296,11 +328,12 @@ public class MapUtils {
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Class<T> elementClazz) {
-    return getMapObjectList(map, key, o -> ConversionUtils.toList(o, elementClazz));
+    return getMapCollection(map, key, ArrayList::new, elementClazz, null);
   }
 
   /**
-   * Retrieve the list value with the key and convert function from a map.
+   * Retrieve and convert the list value with the key and convert function from a map, use specified
+   * element extractor.
    *
    * @param <T> the expected element type in list
    * @param map
@@ -402,7 +435,8 @@ public class MapUtils {
   }
 
   /**
-   * Retrieves the value of the specified type with key from map, use specified list extractor.
+   * Retrieve and convert the value of the specified type with key from map, use specified list
+   * extractor.
    *
    * @param <T> the expected value type
    * @param map
@@ -415,14 +449,40 @@ public class MapUtils {
     return map != null ? extractor.apply(map.get(key)) : null;
   }
 
+  /**
+   * Retrieve and convert the set value with the key from a map, use force cast convert.
+   *
+   * @param <T>
+   * @param map
+   * @param key
+   * @return getMapList
+   */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
     return new HashSet<>(getMapList(map, key, ObjectUtils::forceCast));
   }
 
+  /**
+   * Retrieve and convert the value of the specified type with key from map, use bulit-in converter.
+   *
+   * @param <T> the expected value type
+   * @param map
+   * @param key
+   * @param clazz the expected value class
+   */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key, final Class<T> clazz) {
-    return new HashSet<>(getMapObjectList(map, key, o -> ConversionUtils.toList(o, clazz)));
+    return getMapCollection(map, key, HashSet::new, clazz, null);
   }
 
+  /**
+   * Retrieve and convert the value of the specified type with key from map, use specified element
+   * extractor.
+   *
+   * @param <T>
+   * @param map
+   * @param key
+   * @param objFunc
+   * @return getMapSet
+   */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
       final Function<Object, T> objFunc) {
     return new HashSet<>(getMapObjectList(map, key, v -> ConversionUtils.toList(v, objFunc)));

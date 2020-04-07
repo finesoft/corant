@@ -50,7 +50,6 @@ import org.corant.shared.conversion.converter.StringBigIntegerConverter;
  * @author bingo 上午10:05:26
  *
  */
-@SuppressWarnings("unchecked")
 public class ConversionUtils {
 
   private ConversionUtils() {
@@ -268,6 +267,11 @@ public class ConversionUtils {
   }
 
   public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    if (obj instanceof Collection) {
+      return Conversions.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
+    } else if (obj instanceof Object[]) {
+      return Conversions.convert((Object[]) obj, ArrayList::new, clazz, hints);
+    }
     return Conversions.convert(obj, clazz, ArrayList::new, hints);
   }
 
@@ -393,7 +397,16 @@ public class ConversionUtils {
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz) {
-    return Conversions.convert(obj, clazz, HashSet::new, null);
+    return toSet(obj, clazz, null);
+  }
+
+  public static <T> Set<T> toSet(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    if (obj instanceof Collection) {
+      return Conversions.convert((Collection<?>) obj, HashSet::new, clazz, hints);
+    } else if (obj instanceof Object[]) {
+      return Conversions.convert((Object[]) obj, HashSet::new, clazz, hints);
+    }
+    return Conversions.convert(obj, clazz, HashSet::new, hints);
   }
 
   public static Short toShort(Object obj) {

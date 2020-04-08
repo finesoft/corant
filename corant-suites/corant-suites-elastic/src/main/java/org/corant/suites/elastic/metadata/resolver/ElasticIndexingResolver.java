@@ -20,16 +20,47 @@ import org.corant.suites.elastic.metadata.ElasticMapping;
 /**
  * corant-suites-elastic
  *
+ * <p>
+ * This interface is used to parse classes that have some annotations and generate various metadata
+ * objects related to the index, which will be used for subsequent data indexing.
+ * </p>
+ *
  * @author bingo 下午2:55:11
  *
  */
 public interface ElasticIndexingResolver {
 
+  /**
+   * Resolve document class elastic indexing metadata object. the document class must have some
+   * metadata annotations.
+   *
+   * @param documentClass
+   * @return the document elastic indexing metadata
+   */
   ElasticIndexing getIndexing(Class<?> documentClass);
 
+  /**
+   * Get the all resolved elastic indexing metadata map.
+   *
+   * @return all resolved elastic indexing metadata, the key is index name, the value is the
+   *         metadata object
+   */
   Map<String, ElasticIndexing> getIndexings();
 
+  /**
+   * Get the document class elastic mapping metadata object. the document class must have some
+   * metadata annotations.
+   *
+   * @param documentClass
+   * @return the document elastic mapping metadata
+   */
   ElasticMapping getMapping(Class<?> documentClass);
 
+  /**
+   * Get the all resolved elastic indexing metadata map.
+   *
+   * @return all resolved elastic indexing metadata, the key is document class, the value is the
+   *         metadata object
+   */
   Map<Class<?>, ElasticIndexing> getMappings();
 }

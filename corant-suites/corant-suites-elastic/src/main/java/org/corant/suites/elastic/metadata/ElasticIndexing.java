@@ -21,6 +21,10 @@ import java.util.Map;
 /**
  * corant-suites-elastic
  *
+ * <p>
+ * The elastic indexing metadata, include index name and index setting and mapping
+ * <p>
+ *
  * @author bingo 下午4:13:06
  *
  */
@@ -59,6 +63,7 @@ public class ElasticIndexing {
   }
 
   /**
+   * The index name
    *
    * @return the name
    */
@@ -67,6 +72,7 @@ public class ElasticIndexing {
   }
 
   /**
+   * The index mapping schema
    *
    * @return the schema
    */
@@ -75,6 +81,7 @@ public class ElasticIndexing {
   }
 
   /**
+   * The index setting
    *
    * @return the setting
    */

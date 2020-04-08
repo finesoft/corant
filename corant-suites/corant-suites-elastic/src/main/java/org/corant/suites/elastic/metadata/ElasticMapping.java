@@ -21,12 +21,17 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.corant.suites.elastic.metadata.resolver.ResolverUtils;
+import org.corant.suites.elastic.metadata.resolver.ElasticObjectMapper;
 import org.corant.suites.elastic.model.ElasticDocument;
 import org.elasticsearch.index.VersionType;
 
 /**
  * corant-suites-elastic
+ *
+ * <p>
+ * The document elastic mapping metadata, include document class and version control, children
+ * document metadata.
+ * </p>
  *
  * @author bingo 下午2:47:08
  *
@@ -61,10 +66,11 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
 
   @SuppressWarnings("unchecked")
   public <T> T fromMap(Map<String, Object> map) {
-    return (T) ResolverUtils.toObject(map, documentClass);
+    return (T) ElasticObjectMapper.toObject(map, documentClass);
   }
 
   /**
+   * Get the children document mappings
    *
    * @return the children
    */
@@ -73,6 +79,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * The document class
    *
    * @return the documentClass
    */
@@ -81,6 +88,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * The join field name use for parent-child relationship
    *
    * @return the joinFiledName
    */
@@ -89,6 +97,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * The document name
    *
    * @return the name
    */
@@ -97,6 +106,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * The version type use for version control
    *
    * @return the versionType
    */
@@ -105,6 +115,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * Whether this document is the root document, use for parent-child relationship
    *
    * @return the root
    */
@@ -113,6 +124,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
   }
 
   /**
+   * Whether this document has custom version control enabled
    *
    * @return the versioned
    */
@@ -120,13 +132,22 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
     return versioned;
   }
 
+  /**
+   * The children document mapping iterator
+   */
   @Override
   public Iterator<ElasticMapping> iterator() {
     return children.iterator();
   }
 
+  /**
+   * Convert elastic document to map object.
+   *
+   * @param doc
+   * @return toMap
+   */
   public Map<String, Object> toMap(ElasticDocument doc) {
-    Map<String, Object> convertedMap = ResolverUtils.toMap(doc);
+    Map<String, Object> convertedMap = ElasticObjectMapper.toMap(doc);
     if (!isEmpty(convertedMap) && getJoinFiledName() != null) {
       shouldBeFalse(convertedMap.containsKey(getJoinFiledName()),
           "Join field name and property name conflicts %s", getJoinFiledName());

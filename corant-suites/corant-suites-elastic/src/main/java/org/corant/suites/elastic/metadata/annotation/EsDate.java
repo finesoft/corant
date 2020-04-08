@@ -65,7 +65,7 @@ public @interface EsDate {
    *
    * @return
    */
-  String format() default "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz";
+  String format() default "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis||yyyy-MM-dd'T'HH:mm:ss.SSSz||yyyy-MM-dd'T'HH:mm:ss.SSS||yyyy-MM-dd'T'HH:mm:ss";
 
   /**
    * If true, malformed numbers are ignored. If false (default), malformed numbers throw an

@@ -23,10 +23,10 @@ import static org.corant.shared.util.FieldUtils.traverseFields;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.split;
+import static org.corant.suites.elastic.metadata.resolver.ElasticObjectMapper.isSimpleType;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genFieldMapping;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.genJoinMapping;
 import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.getCollectionFieldEleType;
-import static org.corant.suites.elastic.metadata.resolver.ResolverUtils.isSimpleType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -76,6 +76,13 @@ import org.elasticsearch.index.VersionType;
 /**
  * corant-suites-elastic
  *
+ * <p>
+ * This class is an abstract implementation of the ElasticIndexingResolver, managed by the CDI
+ * container, and its scope of application is ApplicationScoped. When the container initializes this
+ * class instance, it has completed the extraction of various metadatas
+ * {@code AbstractElasticIndexingResolver#initialize()}.
+ * </p>
+ *
  * @author bingo 下午2:58:30
  *
  */
@@ -120,7 +127,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     namedIndices.put(indexing.getName(), indexing);
   }
 
-  protected void buildIndex(Class<?> docCls) {
+  protected void buildMetadata(Class<?> docCls) {
     ElasticConfig config = getConfig();
     EsDocument doc = findAnnotation(shouldNotNull(docCls), EsDocument.class, false);
     VersionType versionType = doc.versionType();
@@ -135,7 +142,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       mapping =
           new ElasticMapping(docCls, true, joinFieldName, shouldNotNull(poc.name()), versionType);
       for (Class<?> childCls : childClses) {
-        buildIndex(childCls, mapping, propertiesSchema);
+        buildMetadata(childCls, mapping, propertiesSchema);
       }
       shouldBeNull(propertiesSchema.put(shouldNotNull(poc.fieldName()), genJoinMapping(mapping)));
     } else {
@@ -148,7 +155,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     logger.fine(() -> String.format("Build elastic index object for %s", docCls.getName()));
   }
 
-  protected void buildIndex(Class<?> childDocCls, ElasticMapping parentMapping,
+  protected void buildMetadata(Class<?> childDocCls, ElasticMapping parentMapping,
       Map<String, Object> propertiesSchema) {
     EsChildDocument coc = shouldNotNull(findAnnotation(childDocCls, EsChildDocument.class, false));
     VersionType versionType = coc.versionType();
@@ -166,15 +173,28 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     // next grand child
     if (!isEmpty(coc.children())) {
       for (Class<?> grandChild : coc.children()) {
-        buildIndex(grandChild, childMapping, propertiesSchema);
+        buildMetadata(grandChild, childMapping, propertiesSchema);
       }
     }
   }
 
+  /**
+   * Create elastic indexes with resolved metadatas
+   */
   protected abstract void createIndex();
 
+  /**
+   * Get the config
+   *
+   * @return the config
+   */
   protected abstract ElasticConfig getConfig();
 
+  /**
+   * Get all the document classes that need to be indexed through the configuration information
+   *
+   * @return the document classes
+   */
   protected Set<Class<?>> getDocumentClasses() {
     Set<String> docPaths = streamOf(split(getConfig().getDocumentPaths(), ",", true, true))
         .collect(Collectors.toSet());
@@ -187,10 +207,16 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     return docClses;
   }
 
+  /**
+   * Get all the document classes with related annotations, parse and create the index metadata
+   * object of the document, and create the index immediately if necessary
+   *
+   * initialize
+   */
   protected void initialize() {
     Set<Class<?>> docClses = getDocumentClasses();
     for (Class<?> docCls : docClses) {
-      buildIndex(docCls);
+      buildMetadata(docCls);
     }
     if (getConfig().isAutoUpdateSchema()) {
       createIndex();

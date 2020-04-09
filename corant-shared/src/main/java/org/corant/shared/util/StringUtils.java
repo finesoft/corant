@@ -379,6 +379,7 @@ public class StringUtils {
       BufferedReader reader = new BufferedReader(isr);
       String nextLine = null;
       int readLines = 0;
+      boolean skiped = offset <= 0;
 
       @Override
       public boolean hasNext() {
@@ -386,12 +387,13 @@ public class StringUtils {
           return true;
         } else {
           try {
-            if (readLines == 0 && offset > 0) {
+            if (!skiped) {
               for (int i = 0; i < offset; i++) {
-                if ((nextLine = reader.readLine()) == null) {
+                if (reader.readLine() == null) {
                   return false;
                 }
               }
+              skiped = true;
             }
             nextLine = reader.readLine();
             return nextLine != null && (limit <= 0 || readLines++ < limit);

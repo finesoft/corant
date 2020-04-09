@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.emptyConsumer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,26 +92,37 @@ public class StreamUtils {
 
       final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
       final Iterator<T> useIt = shouldNotNull(it);
+      final List<T> buffer = new ArrayList<>(useBatchSize);
+      boolean end = false;
 
       @Override
       public boolean hasNext() {
-        return useIt.hasNext();
+        if (end) {
+          return false;
+        }
+        if (isNotEmpty(buffer)) {
+          return true;
+        }
+        int i = 0;
+        while (useIt.hasNext()) {
+          buffer.add(useIt.next());
+          if (++i == useBatchSize) {
+            break;
+          }
+        }
+        end = i != useBatchSize;
+        return i > 0;
       }
 
       @Override
       public List<T> next() {
-        if (hasNext()) {
-          List<T> list = new ArrayList<>(useBatchSize);
-          int i = 0;
-          while (useIt.hasNext()) {
-            list.add(useIt.next());
-            if (++i == useBatchSize) {
-              break;
-            }
-          }
+        if (isNotEmpty(buffer) || hasNext()) {
+          List<T> list = new ArrayList<>(buffer);
+          buffer.clear();
           return list;
+        } else {
+          throw new NoSuchElementException();
         }
-        throw new NoSuchElementException();
       }
     });
   }

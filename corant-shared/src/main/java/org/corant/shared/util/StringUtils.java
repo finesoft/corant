@@ -379,22 +379,31 @@ public class StringUtils {
       BufferedReader reader = new BufferedReader(isr);
       String nextLine = null;
       int readLines = 0;
-      boolean skiped = offset <= 0;
+      boolean valid = true;
+      { // skip lines if necessary
+        try {
+          if (offset > 0) {
+            for (int i = 0; i < offset; i++) {
+              if (reader.readLine() == null) {
+                valid = false;
+                break;
+              }
+            }
+          }
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        }
+      }
 
       @Override
       public boolean hasNext() {
+        if (!valid) {
+          return false;
+        }
         if (nextLine != null) {
           return true;
         } else {
           try {
-            if (!skiped) {
-              for (int i = 0; i < offset; i++) {
-                if (reader.readLine() == null) {
-                  return false;
-                }
-              }
-              skiped = true;
-            }
             nextLine = reader.readLine();
             return nextLine != null && (limit <= 0 || readLines++ < limit);
           } catch (IOException e) {

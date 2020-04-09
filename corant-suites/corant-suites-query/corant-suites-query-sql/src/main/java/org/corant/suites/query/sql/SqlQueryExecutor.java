@@ -31,7 +31,11 @@ public interface SqlQueryExecutor {
 
   Dialect getDialect();
 
-  List<Map<String, Object>> select(String sql, Object... args) throws SQLException;
+  List<Map<String, Object>> select(String sql, int expectRows, Object... args) throws SQLException;
+
+  default List<Map<String, Object>> select(String sql, Object... args) throws SQLException {
+    return select(sql, 0, args);
+  }
 
   Stream<Map<String, Object>> stream(String sql, Object... args);
 

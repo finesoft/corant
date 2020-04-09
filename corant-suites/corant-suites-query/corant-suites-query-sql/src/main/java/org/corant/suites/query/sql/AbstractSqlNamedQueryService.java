@@ -41,12 +41,12 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     String sql = querier.getScript(null);
     Object[] scriptParameter = querier.getScriptParameter();
-    if (maxSize > 0) {
-      sql = getDialect().getLimitSql(sql, maxSize);
-    }
+    // if (maxSize > 0) {
+    // sql = getDialect().getLimitSql(sql, maxSize);
+    // }
     try {
       log("fetch-> " + refQueryName, scriptParameter, sql);
-      List<Map<String, Object>> fetchedList = getExecutor().select(sql, scriptParameter);
+      List<Map<String, Object>> fetchedList = getExecutor().select(sql, maxSize, scriptParameter);
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
       if (result instanceof List) {
@@ -76,7 +76,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       int size = list == null ? 0 : list.size();
       if (size > 0) {
         if (size > limit) {
-          list.remove(size - 1);
+          list.remove(limit);
           result.withHasNext(true);
         }
         this.fetch(list, querier);
@@ -142,9 +142,10 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript(null);
     int maxSelectSize = resolveMaxSelectSize(querier);
     try {
-      sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
+      // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
       log(queryName, scriptParameter, sql);
-      List<Map<String, Object>> results = getExecutor().select(sql, scriptParameter);
+      List<Map<String, Object>> results =
+          getExecutor().select(sql, maxSelectSize + 1, scriptParameter);
       int size = results == null ? 0 : results.size();
       if (size > 0) {
         if (size > maxSelectSize) {
@@ -181,4 +182,5 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   protected abstract AbstractNamedQuerierResolver<SqlNamedQuerier> getQuerierResolver();
+
 }

@@ -75,7 +75,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       int size = list.size();
       if (size > 0) {
         if (size > limit) {
-          list.remove(size - 1);
+          list.remove(limit);
           result.withHasNext(true);
         }
       }

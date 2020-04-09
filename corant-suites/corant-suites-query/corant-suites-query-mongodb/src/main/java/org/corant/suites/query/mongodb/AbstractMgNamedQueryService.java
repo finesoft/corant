@@ -122,7 +122,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int size = list.size();
     if (size > 0) {
       if (size > limit) {
-        list.remove(size - 1);
+        list.remove(limit);
         result.withHasNext(true);
       }
       this.fetch(list, querier);

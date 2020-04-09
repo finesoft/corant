@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
@@ -42,12 +41,12 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
 
   protected final SqlQueryConfiguration confiuration;
-  protected final QueryRunner runner;
+  protected final DefaultQueryRunner runner;
   protected final Dialect dialect;
 
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
     this.confiuration = confiuration;
-    runner = new QueryRunner(confiuration.getDataSource(),
+    runner = new DefaultQueryRunner(confiuration.getDataSource(),
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
             confiuration.getMaxFieldSize(), confiuration.getMaxRows(),
             confiuration.getQueryTimeout()));
@@ -77,9 +76,9 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   public Map<String, Object> get(String sql, Object... args) throws SQLException {
     Object result = null;
     if (args.length > 0) {
-      result = getRunner().query(sql, MAP_HANDLER, args);
+      result = getRunner().select(sql, MAP_HANDLER, 1, args);
     } else {
-      result = getRunner().query(sql, MAP_HANDLER);
+      result = getRunner().select(sql, MAP_HANDLER, 1);
     }
     return forceCast(result);
   }
@@ -90,12 +89,13 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public List<Map<String, Object>> select(String sql, Object... args) throws SQLException {
+  public List<Map<String, Object>> select(String sql, int expectRows, Object... args)
+      throws SQLException {
     Object result = null;
     if (args.length > 0) {
-      result = getRunner().query(sql, MAP_LIST_HANDLER, args);
+      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows, args);
     } else {
-      result = getRunner().query(sql, MAP_LIST_HANDLER);
+      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows);
     }
     return forceCast(result);
   }
@@ -110,7 +110,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
     }
   }
 
-  protected QueryRunner getRunner() {
+  protected DefaultQueryRunner getRunner() {
     return runner;
   }
 

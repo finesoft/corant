@@ -82,7 +82,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       int size = sizeOf(list);
       if (size > 0) {
         if (size > limit) {
-          list.remove(size - 1);
+          list.remove(limit);
           result.withHasNext(true);
         }
         this.fetch(list, querier);

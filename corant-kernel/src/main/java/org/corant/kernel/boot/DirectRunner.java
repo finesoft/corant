@@ -13,6 +13,8 @@
  */
 package org.corant.kernel.boot;
 
+import org.corant.Corant;
+
 /**
  * corant-kernel
  *
@@ -21,5 +23,22 @@ package org.corant.kernel.boot;
  */
 public class DirectRunner {
 
-  public void run(String... args) throws Exception {}
+  private DirectRunner() {}
+
+  public static void main(String... args) {
+    new DirectRunner().run(args);
+  }
+
+  public void run(String... args) {
+    Corant.run(new Class[0], args);
+    synchronized (this) {
+      while (true) {
+        try {
+          this.wait(2000L);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+  }
 }

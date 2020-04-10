@@ -19,7 +19,7 @@ package org.corant.kernel.boot;
  * @author bingo 下午4:53:58
  *
  */
-public interface CorantRunnerMBean {
+public interface PowerMBean {
 
   boolean isRunning();
 

@@ -41,7 +41,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.corant.kernel.boot.CorantRunner;
+import org.corant.kernel.boot.Power;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -138,7 +138,7 @@ public class Corant implements AutoCloseable {
   private final String[] arguments;
   private final ClassLoader classLoader;
   private WeldContainer container;
-  private volatile CorantRunner mbeanRunner;
+  private volatile Power power;
 
   /**
    * Use the class loader of Corant.class as current thread context and the CDI container class
@@ -329,7 +329,7 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    log("Stopped %s at %s", applicationName(), Instant.now());
+    log("Stopped %s at %s.", applicationName(), Instant.now());
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {
@@ -407,8 +407,8 @@ public class Corant implements AutoCloseable {
       return false;
     }
     synchronized (this) {
-      if (mbeanRunner == null) {
-        mbeanRunner = new CorantRunner(beanClasses, arguments);
+      if (power == null) {
+        power = new Power(beanClasses, arguments);
         ObjectName objectName = null;
         try {
           objectName = new ObjectName(applicationName() + ":type=Power");
@@ -417,7 +417,7 @@ public class Corant implements AutoCloseable {
         }
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         try {
-          server.registerMBean(mbeanRunner, objectName);
+          server.registerMBean(power, objectName);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException
             | NotCompliantMBeanException ex) {
           throw new CorantRuntimeException(ex);

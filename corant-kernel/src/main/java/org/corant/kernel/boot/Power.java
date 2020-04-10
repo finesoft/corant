@@ -23,12 +23,12 @@ import org.corant.shared.util.ObjectUtils;
  * @author bingo 下午3:30:49
  *
  */
-public class CorantRunner implements CorantRunnerMBean {
+public class Power implements PowerMBean {
 
   private Class<?>[] beanClasses = new Class[0];
   private String[] arguments = new String[0];
 
-  public CorantRunner(Class<?>[] beanClasses, String[] arguments) {
+  public Power(Class<?>[] beanClasses, String[] arguments) {
     if (beanClasses != null) {
       this.beanClasses = Arrays.copyOf(beanClasses, beanClasses.length);
     }

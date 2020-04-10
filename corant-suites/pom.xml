@@ -43,6 +43,7 @@
 		<module>corant-suites-rpc</module>
 		<module>corant-suites-logging</module>
 		<module>corant-suites-arrow</module>
+		<module>corant-suites-structure</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

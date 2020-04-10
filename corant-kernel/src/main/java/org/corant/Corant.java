@@ -296,10 +296,6 @@ public class Corant implements AutoCloseable {
     return (WeldManager) container.getBeanManager();
   }
 
-  /**
-   *
-   * @return the classLoader
-   */
   public ClassLoader getClassLoader() {
     return classLoader;
   }
@@ -316,49 +312,13 @@ public class Corant implements AutoCloseable {
     if (isRuning()) {
       return;
     }
+    final StopWatch stopWatch = new StopWatch(applicationName());
     Thread.currentThread().setContextClassLoader(classLoader);
-    StopWatch stopWatch = StopWatch.press(applicationName(),
-        "Starting ".concat(applicationName()).concat(", completed the pre-start SPIs processing"));
-    doBeforeStart(classLoader);
-
-    final Logger logger = Logger.getLogger(Corant.class.getName());
-    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-        .start("Completed the CDI container initialization");
-    if (registerMBean()) {
-      log(logger,
-          "Registered %s to MBean server, one can use it for shutdown or restartup the application.",
-          applicationName(), Instant.now());
-    }
-    initializeContainer(preInitializer);
-
-    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-        .start("Completed all of the SUITE initialization");
-    doAfterContainerInitialized();
-
-    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-        .start("Completed the post-started SPIs processing");
-    doAfterStarted(classLoader);
-
-    stopWatch.stop(tk -> log(logger, "%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-        .destroy(sw -> {
-          double tt = sw.getTotalTimeSeconds();
-          if (tt > 8) {
-            log(logger,
-                "Completed all of the startup process %s, takes %ss. It's been a long way, but we're here.",
-                Instant.now(), tt);
-          } else {
-            log(logger, "Completed all of the startup process at %s, takes %ss.", Instant.now(),
-                tt);
-          }
-        });
-
-    // log(logger, "Finished at: %s.", Instant.now());
-    log(logger,
-        "Final memory: %sM/%sM/%sM, process id: %s, java version: %s, default locale: %s, default timezone: %s.%s",
-        LaunchUtils.getUsedMemoryMb(), LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(),
-        LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
-        TimeZone.getDefault().getID(), boostLine());
-
+    doBeforeStart(classLoader, stopWatch);
+    registerMBean();
+    initializeContainer(preInitializer, stopWatch);
+    doAfterContainerInitialized(stopWatch);
+    doAfterStarted(classLoader, stopWatch);
     doOnReady();
   }
 
@@ -369,31 +329,56 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    log(Logger.getLogger(Corant.class.getName()), "Stopped %s at %s", applicationName(),
-        Instant.now());
+    log("Stopped %s at %s", applicationName(), Instant.now());
   }
 
-  void doAfterContainerInitialized() {
+  void doAfterContainerInitialized(StopWatch stopWatch) {
+    stopWatch.start("All SUITES are initialized");
+
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerStartedEvent(arguments));
+
+    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
-  void doAfterStarted(ClassLoader classLoader) {
+  void doAfterStarted(ClassLoader classLoader, StopWatch stopWatch) {
+    stopWatch.start("The post-started SPI processing is completed");
+
     if (setOf(arguments).contains(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
+
+    stopWatch.stop(tk -> log("%s, takes %ss.", tk.getName(), tk.getTimeSeconds())).destroy(sw -> {
+      double tt = sw.getTotalTimeSeconds();
+      if (tt > 8) {
+        log("All initialization work is completed, the %s has started, takes %ss. It's been a long way, but we're here.",
+            applicationName(), tt);
+      } else {
+        log("All initialization work is completed, the %s has started, takes %ss.",
+            applicationName(), tt);
+      }
+    });
+
+    log("Default setting: java version: %s, locale: %s, timezone: %s.",
+        LaunchUtils.getJavaVersion(), Locale.getDefault(), TimeZone.getDefault().getID());
+    log("Final memory: %sM/%sM/%sM, process id: %s.%s", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid(),
+        boostLine());
   }
 
-  void doBeforeStart(ClassLoader classLoader) {
+  void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
+    stopWatch
+        .start("Starting " + applicationName() + ", the pre-start SPI processing is completed");
     if (setOf(arguments).contains(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
         .sorted(CorantBootHandler::compare)
         .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   void doOnReady() {
@@ -401,7 +386,8 @@ public class Corant implements AutoCloseable {
     emitter.fire(new PostCorantReadyEvent(arguments));
   }
 
-  synchronized void initializeContainer(Consumer<Weld> preInitializer) {
+  synchronized void initializeContainer(Consumer<Weld> preInitializer, StopWatch stopWatch) {
+    stopWatch.start("Initialization of the CDI container is completed");
     String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
     Weld weld = new Weld(id);
     weld.setClassLoader(classLoader);
@@ -413,6 +399,7 @@ public class Corant implements AutoCloseable {
       preInitializer.accept(weld);
     }
     container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   boolean registerMBean() {
@@ -424,7 +411,7 @@ public class Corant implements AutoCloseable {
         mbeanRunner = new CorantRunner(beanClasses, arguments);
         ObjectName objectName = null;
         try {
-          objectName = new ObjectName(applicationName() + ":type=Clutch,name=CorantRunner");
+          objectName = new ObjectName(applicationName() + ":type=Power");
         } catch (MalformedObjectNameException ex) {
           throw new CorantRuntimeException(ex);
         }
@@ -436,6 +423,8 @@ public class Corant implements AutoCloseable {
           throw new CorantRuntimeException(ex);
         }
       }
+      log("Registered %s to MBean server, one can use it for shutdown or restartup the application.",
+          applicationName(), Instant.now());
       return true;
     }
   }
@@ -448,11 +437,11 @@ public class Corant implements AutoCloseable {
     return "";
   }
 
-  private void log(Logger logger, String msgOrFmt, Object... arguments) {
+  private void log(String msgOrFmt, Object... arguments) {
     if (arguments.length > 0) {
-      logger.info(() -> String.format(msgOrFmt, arguments));
+      Logger.getLogger(Corant.class.getName()).info(() -> String.format(msgOrFmt, arguments));
     } else {
-      logger.info(() -> msgOrFmt);
+      Logger.getLogger(Corant.class.getName()).info(() -> msgOrFmt);
     }
   }
 

@@ -204,14 +204,14 @@ public class NarayanaExtension implements TransactionExtension {
 
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
     if (getConfig().isAutoRecovery()) {
-      logger.info(() -> "Initializes automatic JTA recovery processes.");
+      logger.info(() -> "Initialize automatic JTA recovery processes.");
       RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
       RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();
       rms.start();
       logger.info(() -> "JTA automatic recovery processes has been started.");
     } else {
-      logger.info(() -> "Initializes manual JTA recovery processes.");
+      logger.info(() -> "Initialize manual JTA recovery processes.");
       RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
       RecoveryManagerService rms = resolve(RecoveryManagerService.class);
       rms.create();

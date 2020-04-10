@@ -124,6 +124,7 @@
 		<version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
 		<version.swagger>2.0.8</version.swagger>
 		<version.zxing>3.4.0</version.zxing>
+		<version.ansj_seg>5.1.6</version.ansj_seg>
 
 	</properties>
 
@@ -807,6 +808,13 @@
 				<groupId>ognl</groupId>
 				<artifactId>ognl</artifactId>
 				<version>${version.ognl}</version>
+			</dependency>
+
+			<!-- NLP -->
+			<dependency>
+				<groupId>org.ansj</groupId>
+				<artifactId>ansj_seg</artifactId>
+				<version>${version.ansj_seg}</version>
 			</dependency>
 
 			<!-- RPC -->

@@ -35,6 +35,12 @@ public class NarayanaXAResourceRecoveryHelper implements XAResourceRecoveryHelpe
     this.integration = integration;
   }
 
+  public void destory() {
+    if (integration != null) {
+      integration.destroy();
+    }
+  }
+
   @Override
   public XAResource[] getXAResources() throws Exception {
     return integration.getRecoveryXAResources();
@@ -42,7 +48,6 @@ public class NarayanaXAResourceRecoveryHelper implements XAResourceRecoveryHelpe
 
   @Override
   public boolean initialise(String p) throws Exception {
-    return false;
+    return true;
   }
-
 }

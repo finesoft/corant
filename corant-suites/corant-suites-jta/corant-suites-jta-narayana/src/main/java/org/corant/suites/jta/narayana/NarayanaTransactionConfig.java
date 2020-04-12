@@ -40,6 +40,9 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   @ConfigKeyItem
   Optional<Duration> autoRecoveryInitOffset;
 
+  @ConfigKeyItem(defaultValue = "false")
+  boolean enableMbean;
+
   /**
    *
    * @return the autoRecoveryBackoffPeriod
@@ -49,7 +52,7 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   }
 
   /**
-   * 
+   *
    * @return the autoRecoveryInitOffset
    */
   public Optional<Duration> getAutoRecoveryInitOffset() {
@@ -70,6 +73,14 @@ public class NarayanaTransactionConfig extends TransactionConfig {
    */
   public Optional<String> getObjectsStore() {
     return objectsStore;
+  }
+
+  /**
+   * 
+   * @return the enableMbean
+   */
+  public boolean isEnableMbean() {
+    return enableMbean;
   }
 
 }

@@ -13,17 +13,16 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.suites.cdi.Instances.resolve;
 import static org.corant.suites.cdi.Instances.select;
+import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
@@ -37,13 +36,18 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.inject.Singleton;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
-import org.corant.Corant;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.config.spi.Sortable;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -51,7 +55,6 @@ import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.suites.jta.shared.TransactionExtension;
-import org.corant.suites.jta.shared.TransactionIntegration;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
@@ -59,8 +62,6 @@ import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.coordinator.CheckedAction;
 import com.arjuna.ats.arjuna.logging.tsLogger;
-import com.arjuna.ats.arjuna.recovery.RecoveryManager;
-import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
@@ -79,10 +80,12 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  */
 public class NarayanaExtension implements TransactionExtension {
 
+  static volatile boolean registeredMbean = false;
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
-  protected final List<TransactionIntegration> integrations = new CopyOnWriteArrayList<>();
+  protected final NarayanaRecoveryManagerService recoveryManagerService =
+      new NarayanaRecoveryManagerService(config.isAutoRecovery());
 
   @Override
   public NarayanaTransactionConfig getConfig() {
@@ -128,18 +131,14 @@ public class NarayanaExtension implements TransactionExtension {
       event.<RecoveryManagerService>addBean().addTransitiveTypeClosure(RecoveryManagerService.class)
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
               NamedLiteral.of("narayana-jta"))
-          .scope(Singleton.class).createWith(cc -> new RecoveryManagerService())
+          .scope(Singleton.class).createWith(cc -> recoveryManagerService)
           .disposeWith((t, inst) -> t.destroy());
 
     }
 
-    streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-        .forEach(integrations::add);
-
   }
 
-  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event,
-      final BeanManager beanManager) {
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     String dfltObjStoreDir = getConfig().getObjectsStore()
         .orElse(Defaults.corantUserDir("-narayana-objects").toString());
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
@@ -203,34 +202,52 @@ public class NarayanaExtension implements TransactionExtension {
   }
 
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
-    if (getConfig().isAutoRecovery()) {
-      logger.info(() -> "Initialize automatic JTA recovery processes.");
-      RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
-      RecoveryManagerService rms = resolve(RecoveryManagerService.class);
-      rms.create();
-      rms.start();
-      logger.info(() -> "JTA automatic recovery processes has been started.");
-    } else {
-      logger.info(() -> "Initialize manual JTA recovery processes.");
-      RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
-      RecoveryManagerService rms = resolve(RecoveryManagerService.class);
-      rms.create();
-    }
-    final XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
-    if (xaRecoveryModule != null && !integrations.isEmpty()) {
-      integrations.stream().map(NarayanaXAResourceRecoveryHelper::new)
-          .forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
-    }
+    recoveryManagerService.initialize();
+    registerToMBean();
   }
 
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
-      resolve(RecoveryManagerService.class).stop();
-      integrations.stream().forEach(TransactionIntegration::destroy);
-      integrations.clear();
-      logger.info(() -> "JTA automatic recovery processes has been stopped.");
+      recoveryManagerService.unInitialize();
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    }
+  }
+
+  synchronized void registerToMBean() {
+    if (config.isEnableMbean() && !registeredMbean) {
+      registerToMBean("ObjectStoreEnvironmentBean-nullAction",
+          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null));
+      registerToMBean("ObjectStoreEnvironmentBean-default",
+          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default"));
+      registerToMBean("ObjectStoreEnvironmentBean-stateStore",
+          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore"));
+      registerToMBean("ObjectStoreEnvironmentBean-communicationStore",
+          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore"));
+      registerToMBean("CoordinatorEnvironmentBean",
+          BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class));
+      registerToMBean("JTAEnvironmentBean",
+          BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
+      registerToMBean("RecoveryEnvironmentBean",
+          BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class));
+      registeredMbean = true;
+      logger.info(() -> "Registered narayana environment beans to MBean server.");
+    }
+  }
+
+  void registerToMBean(String beanName, Object bean) {
+    ObjectName objectName = null;
+    try {
+      objectName = new ObjectName(applicationName() + ":type=narayana,name=" + beanName);
+    } catch (MalformedObjectNameException ex) {
+      throw new CorantRuntimeException(ex);
+    }
+    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+    try {
+      server.registerMBean(bean, objectName);
+    } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+        | NotCompliantMBeanException ex) {
+      throw new CorantRuntimeException(ex);
     }
   }
 

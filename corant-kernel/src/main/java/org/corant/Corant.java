@@ -411,7 +411,7 @@ public class Corant implements AutoCloseable {
         power = new Power(beanClasses, arguments);
         ObjectName objectName = null;
         try {
-          objectName = new ObjectName(applicationName() + ":type=Power");
+          objectName = new ObjectName(applicationName() + ":type=kernel,name=Power");
         } catch (MalformedObjectNameException ex) {
           throw new CorantRuntimeException(ex);
         }

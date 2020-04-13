@@ -38,6 +38,16 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
   private static final Map<ClassLoader, Config> configs = new HashMap<>();
   private static final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
+  public void clear() {
+    Lock lock = rwLock.writeLock();
+    try {
+      lock.lock();
+      configs.clear();
+    } finally {
+      lock.unlock();
+    }
+  }
+
   @Override
   public ConfigBuilder getBuilder() {
     return new CorantConfigBuilder();
@@ -77,7 +87,6 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
     } finally {
       lock.unlock();
     }
-
   }
 
   @Override

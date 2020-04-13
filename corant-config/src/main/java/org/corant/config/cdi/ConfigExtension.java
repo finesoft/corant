@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Priority;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
@@ -34,13 +35,16 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
+import org.corant.config.CorantConfigProviderResolver;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
 /**
  * corant-config
@@ -66,6 +70,13 @@ public class ConfigExtension implements Extension {
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd, BeanManager bm) {
     AnnotatedType<ConfigProducer> configBean = bm.createAnnotatedType(ConfigProducer.class);
     bbd.addAnnotatedType(configBean, ConfigProducer.class.getName());
+  }
+
+  synchronized void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    ConfigProviderResolver cfr = ConfigProviderResolver.instance();
+    if (cfr instanceof CorantConfigProviderResolver) {
+      ((CorantConfigProviderResolver) cfr).clear(); // FIXME Is it necessary?
+    }
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.datasource.agroal;
 
+import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -42,7 +43,6 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import io.agroal.api.AgroalDataSource;
@@ -164,8 +164,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
     ObjectName objectName = null;
     try {
-      objectName = new ObjectName(
-          Names.CORANT.concat(".agroal-datasource:type=metrices,name=").concat(useName));
+      objectName = new ObjectName(applicationName().concat(":type=agroal,name=").concat(useName));
     } catch (MalformedObjectNameException ex) {
       throw new CorantRuntimeException(ex);
     }

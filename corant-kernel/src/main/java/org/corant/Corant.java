@@ -329,7 +329,7 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    log("Stopped %s at %s.", applicationName(), Instant.now());
+    log("Stopped %s at %s.\n", applicationName(), Instant.now());
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {

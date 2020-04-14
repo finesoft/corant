@@ -357,19 +357,18 @@ public class Corant implements AutoCloseable {
     stopWatch.stop(tk -> log("%s, takes %ss.", tk.getName(), tk.getTimeSeconds())).destroy(sw -> {
       double tt = sw.getTotalTimeSeconds();
       if (tt > 8) {
-        log("All initialization work is completed, the %s has started, takes %ss. It's been a long way, but we're here.",
+        log("The %s has been started, takes %ss. It's been a long way, but we're here.",
             applicationName(), tt);
       } else {
-        log("All initialization work is completed, the %s has started, takes %ss.",
-            applicationName(), tt);
+        log("The %s has been started, takes %ss.", applicationName(), tt);
       }
     });
 
-    log("Default setting: java version: %s, locale: %s, timezone: %s.",
-        LaunchUtils.getJavaVersion(), Locale.getDefault(), TimeZone.getDefault().getID());
-    log("Final memory: %sM/%sM/%sM, process id: %s.%s", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), LaunchUtils.getPid(),
-        boostLine());
+    log("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
+        LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
+        TimeZone.getDefault().getID());
+    log("Final memory: %sM/%sM/%sM%s", LaunchUtils.getUsedMemoryMb(),
+        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), boostLine());
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {

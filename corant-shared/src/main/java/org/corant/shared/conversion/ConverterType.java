@@ -14,6 +14,7 @@
 package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.io.Serializable;
 
 /**
  * corant-shared
@@ -21,8 +22,9 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
  * @author bingo 下午3:25:39
  *
  */
-public class ConverterType<S, T> {
+public class ConverterType<S, T> implements Serializable {
 
+  private static final long serialVersionUID = 4569587948510207966L;
   private final Class<S> sourceClass;
   private final Class<T> targetClass;
   private final int hash;

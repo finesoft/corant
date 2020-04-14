@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class StringDurationConveter extends AbstractConverter<String, Duration> {
 
+  private static final long serialVersionUID = 8193049169682207818L;
+
   public StringDurationConveter() {
     super();
   }

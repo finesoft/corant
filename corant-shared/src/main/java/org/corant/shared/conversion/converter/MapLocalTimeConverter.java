@@ -27,6 +27,8 @@ import org.corant.shared.conversion.ConversionException;
 @SuppressWarnings("rawtypes")
 public class MapLocalTimeConverter extends AbstractTemporalConverter<Map, LocalTime> {
 
+  private static final long serialVersionUID = -8273312369472063383L;
+
   public MapLocalTimeConverter() {
     super();
   }

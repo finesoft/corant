@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
 
+  private static final long serialVersionUID = 3789303513885426920L;
+
   public StringByteConverter() {
     super();
   }

@@ -27,6 +27,8 @@ import java.util.Optional;
  */
 public class StringLocalTimeConverter extends AbstractTemporalConverter<String, LocalTime> {
 
+  private static final long serialVersionUID = -6226525275934417544L;
+
   public StringLocalTimeConverter() {
     super();
   }

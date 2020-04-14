@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class StringDoubleConveter extends AbstractNumberConverter<String, Double> {
 
+  private static final long serialVersionUID = -3511169540092047221L;
+
   public StringDoubleConveter() {
     super();
   }

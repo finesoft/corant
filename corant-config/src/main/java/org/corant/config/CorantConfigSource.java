@@ -137,7 +137,9 @@ public abstract class CorantConfigSource implements ConfigSource, Serializable {
    * @author bingo 下午5:18:52
    *
    */
-  static class AdjustedConfigSource implements ConfigSource {
+  static class AdjustedConfigSource implements ConfigSource, Serializable {
+
+    private static final long serialVersionUID = -1812318116122239210L;
 
     final ConfigSource orginal;
     final Map<String, String> properties;

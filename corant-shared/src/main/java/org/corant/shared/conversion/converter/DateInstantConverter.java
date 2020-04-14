@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class DateInstantConverter extends AbstractConverter<Date, Instant> {
 
+  private static final long serialVersionUID = 7454593855210302901L;
+
   public DateInstantConverter() {
     super();
   }

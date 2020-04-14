@@ -56,6 +56,8 @@ import org.corant.shared.util.StopWatch;
 public abstract class AbstractTemporalConverter<S, T extends Temporal>
     extends AbstractConverter<S, T> {
 
+  private static final long serialVersionUID = -8347017613116027454L;
+
   public static final Map<Long, String> DEFAULT_DAY_OF_WEEK_LP = // NOSONAR
       immutableMapOf(1L, "Mon", 2L, "Tue", 3L, "Wed", 4L, "Thu", 5L, "Fri", 6L, "Sat", 7L, "Sun");
 

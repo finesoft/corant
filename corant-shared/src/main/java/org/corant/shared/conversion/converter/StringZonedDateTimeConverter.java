@@ -35,6 +35,8 @@ import java.util.Optional;
  */
 public class StringZonedDateTimeConverter extends AbstractTemporalConverter<String, ZonedDateTime> {
 
+  private static final long serialVersionUID = 9120944253257690550L;
+
   public StringZonedDateTimeConverter() {
     super();
   }

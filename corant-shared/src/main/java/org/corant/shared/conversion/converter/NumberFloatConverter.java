@@ -24,6 +24,8 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberFloatConverter extends AbstractConverter<Number, Float> {
 
+  private static final long serialVersionUID = -3388447641785445918L;
+
   public NumberFloatConverter() {
     super();
   }

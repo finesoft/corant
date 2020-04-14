@@ -26,6 +26,8 @@ import org.corant.shared.conversion.ConversionException;
 @SuppressWarnings("rawtypes")
 public class MapInstantConverter extends AbstractTemporalConverter<Map, Instant> {
 
+  private static final long serialVersionUID = -5931968882747573116L;
+
   public MapInstantConverter() {
     super();
   }

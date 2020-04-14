@@ -24,6 +24,8 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public abstract class AbstractNumberConverter<S, T extends Number> extends AbstractConverter<S, T> {
 
+  private static final long serialVersionUID = 5110029130020305766L;
+
   static final String[] HEX_PREFIXES = {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#"};
 
   /**

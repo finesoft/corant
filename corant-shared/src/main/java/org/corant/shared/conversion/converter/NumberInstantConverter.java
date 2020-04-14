@@ -26,6 +26,8 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberInstantConverter extends AbstractTemporalConverter<Number, Instant> {
 
+  private static final long serialVersionUID = 4369026196393053980L;
+
   public NumberInstantConverter() {
     super();
   }

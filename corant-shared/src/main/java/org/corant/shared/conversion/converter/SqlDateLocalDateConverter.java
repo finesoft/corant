@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class SqlDateLocalDateConverter extends AbstractConverter<Date, LocalDate> {
 
+  private static final long serialVersionUID = -3159830275459854918L;
+
   public SqlDateLocalDateConverter() {
     super();
   }

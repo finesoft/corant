@@ -24,6 +24,8 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
 
+  private static final long serialVersionUID = 7896620625712851734L;
+
   public NumberIntegerConverter() {
     super();
   }

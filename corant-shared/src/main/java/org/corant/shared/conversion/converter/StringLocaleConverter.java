@@ -25,9 +25,10 @@ import java.util.Map;
  */
 public class StringLocaleConverter extends AbstractConverter<String, Locale> {
 
-  public final static char IETF_SEPARATOR = '-';
-  public final static String EMPTY_STRING = "";
-  public final static Locale DEFAULT_LOCALE = Locale.getDefault();
+  private static final long serialVersionUID = 3936089658605787L;
+  public static final char IETF_SEPARATOR = '-';
+  public static final String EMPTY_STRING = "";
+  public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
   public StringLocaleConverter() {
     super();

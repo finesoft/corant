@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class StringIntegerConverter extends AbstractNumberConverter<String, Integer> {
 
+  private static final long serialVersionUID = 3377012280500697376L;
+
   public StringIntegerConverter() {
     super();
   }

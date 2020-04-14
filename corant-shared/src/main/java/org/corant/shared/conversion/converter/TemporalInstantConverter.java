@@ -29,6 +29,8 @@ import java.util.Map;
  */
 public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal, Instant> {
 
+  private static final long serialVersionUID = -5769926778003040220L;
+
   public TemporalInstantConverter() {
     super();
   }

@@ -14,6 +14,7 @@
 package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ import java.util.Map;
  *
  */
 @FunctionalInterface
-public interface Converter<S, T> {
+public interface Converter<S, T> extends Serializable {
 
   default <V> Converter<S, V> andThen(Converter<? super T, ? extends V> after) {
     return (t, hints) -> shouldNotNull(after).apply(apply(t, hints), hints);

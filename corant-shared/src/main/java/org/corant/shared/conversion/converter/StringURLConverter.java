@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class StringURLConverter extends AbstractConverter<String, URL> {
 
+  private static final long serialVersionUID = -8965194718871098524L;
+
   public StringURLConverter() {
     super();
   }

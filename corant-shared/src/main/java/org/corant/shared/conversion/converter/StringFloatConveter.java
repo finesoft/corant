@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class StringFloatConveter extends AbstractNumberConverter<String, Float> {
 
+  private static final long serialVersionUID = 8690400531369950717L;
+
   public StringFloatConveter() {
     super();
   }

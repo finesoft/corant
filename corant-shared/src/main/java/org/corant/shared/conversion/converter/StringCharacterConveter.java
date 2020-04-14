@@ -25,6 +25,8 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class StringCharacterConveter extends AbstractConverter<String, Character> {
 
+  private static final long serialVersionUID = 3960608981229517111L;
+
   public StringCharacterConveter() {
     super();
   }

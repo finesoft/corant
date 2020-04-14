@@ -24,6 +24,8 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberByteConverter extends AbstractConverter<Number, Byte> {
 
+  private static final long serialVersionUID = -2907903153705190681L;
+
   public NumberByteConverter() {
     super();
   }

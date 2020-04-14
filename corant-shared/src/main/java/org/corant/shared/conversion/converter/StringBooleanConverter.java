@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
 
+  private static final long serialVersionUID = 1213151404362261968L;
   private String[] trues = {"true", "yes", "y", "on", "1", "是"};
   // private String[] falses = {"false", "no", "n", "off", "0", "否"};
 

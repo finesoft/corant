@@ -163,11 +163,11 @@
     </build>
     <distributionManagement>
         <repository>
-            <id>releases</id>
+            <id>maven-releases</id>
             <url>http://192.168.100.200:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>maven-snapshots</id>
             <url>http://192.168.100.200:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>

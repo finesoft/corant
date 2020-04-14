@@ -25,11 +25,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
 import org.corant.config.declarative.DeclarativeConfigResolver;
@@ -97,6 +99,11 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
       logger.fine(() -> String.format("Find %s elastic clusters named [%s]", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    configManager.destroy();
+    clients.clear();
   }
 
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent e) {

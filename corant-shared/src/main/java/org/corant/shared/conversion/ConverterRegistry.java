@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
@@ -61,9 +62,29 @@ public class ConverterRegistry { // static?
         .forEach(ConverterRegistry::register);
   }
 
+  public static synchronized <S, T> void deregister(Converter<S, T> converter) {
+    Type[] type = resolveTypes(converter);
+    deregister(new ConverterType((Class) type[0], (Class) type[1])); // FIXME consider other ways
+  }
+
+  public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory,
+      ConverterType<?, ?>... convertFactoryTypes) {
+    Iterator<Entry<Type, ConverterFactory<?, ?>>> it =
+        SUPPORT_CONVERTER_FACTORIES.entrySet().iterator(); // FIXME consider other ways
+    while (it.hasNext()) {
+      Entry<Type, ConverterFactory<?, ?>> next = it.next();
+      if (next.getValue().equals(converterFactory)) {
+        it.remove();
+      }
+    }
+    for (ConverterType<?, ?> converter : convertFactoryTypes) {
+      deregister(converter);
+    }
+  }
+
   public static synchronized void deregister(ConverterType<?, ?> converterType) {
     if (SUPPORT_CONVERTERS.remove(converterType) != null) {
-      removeConverterPipeTypes(converterType);
+      removeConverterPipeTypes(converterType); // FIXME consider other ways
     }
   }
 
@@ -85,19 +106,13 @@ public class ConverterRegistry { // static?
   }
 
   public static synchronized <S, T> void register(Converter<S, T> converter) {
-    Type[] types =
-        TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
-    shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
-        "The converter %s parametered type must be actual type!", converter.toString());
+    Type[] types = resolveTypes(converter);
     register((Class) types[0], (Class) types[1], converter);
   }
 
-  public static synchronized <S, T> void register(ConverterFactory<S, T> converter) {
-    Type[] types = TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)),
-        ConverterFactory.class);
-    shouldBeTrue(types.length == 2 && types[0] instanceof Class,
-        "The converter %s parametered type must be actual type!", converter.toString());
-    SUPPORT_CONVERTER_FACTORIES.put(types[1], converter);
+  public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
+    Type[] types = resolveTypes(converterFactory);
+    SUPPORT_CONVERTER_FACTORIES.put(types[1], converterFactory);
   }
 
   public static synchronized void registerNotSupportType(Class<?> sourceClass,
@@ -160,6 +175,22 @@ public class ConverterRegistry { // static?
     if (pipeTypes.length > 0) {
       SUPPORT_CONVERTER_PIPE_TYPES.put(ct, setOf(pipeTypes));
     }
+  }
+
+  static Type[] resolveTypes(Converter<?, ?> converter) {
+    Type[] types =
+        TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
+    shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
+        "The converter %s parametered type must be actual type!", converter.toString());
+    return types;
+  }
+
+  static Type[] resolveTypes(ConverterFactory<?, ?> converterFactory) {
+    Type[] types = TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converterFactory)),
+        ConverterFactory.class);
+    shouldBeTrue(types.length == 2 && types[0] instanceof Class,
+        "The converter %s parametered type must be actual type!", converterFactory.toString());
+    return types;
   }
 
   private static void removeConverterPipeTypes(ConverterType<?, ?> pipe) {

@@ -72,6 +72,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
       XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
       helper.destory();
     });
+    helpers.clear();
     if (autoRecovery) {
       logger.info(() -> "JTA automatic recovery processes has been stopped.");
     } else {

@@ -79,12 +79,22 @@ public class Qualifiers {
           }
         }
       }
-      this.objects = Collections.unmodifiableMap(tmpObjects);
-      this.nameAndQualifiers = Collections.unmodifiableMap(resolveNameds(tmpObjects.keySet()));
+      // this.objects = Collections.unmodifiableMap(tmpObjects);
+      this.objects = tmpObjects;
+      // this.nameAndQualifiers = Collections.unmodifiableMap(resolveNameds(tmpObjects.keySet()));
+      this.nameAndQualifiers = resolveNameds(tmpObjects.keySet());
       Map<T, Annotation[]> tmpObjectAndQualifiers = new HashMap<>();
       nameAndQualifiers.forEach((k, v) -> tmpObjectAndQualifiers.put(this.objects.get(k), v));
-      this.objectAndQualifiers = Collections.unmodifiableMap(tmpObjectAndQualifiers);
+      // this.objectAndQualifiers = Collections.unmodifiableMap(tmpObjectAndQualifiers);
+      this.objectAndQualifiers = tmpObjectAndQualifiers;
 
+    }
+
+    @Override
+    public void destroy() {
+      objects.clear();
+      nameAndQualifiers.clear();
+      objectAndQualifiers.clear();
     }
 
     @Override
@@ -100,17 +110,17 @@ public class Qualifiers {
 
     @Override
     public Set<String> getAllNames() {
-      return objects.keySet();
+      return Collections.unmodifiableSet(objects.keySet());
     }
 
     @Override
     public Map<String, T> getAllWithNames() {
-      return objects;
+      return Collections.unmodifiableMap(objects);
     }
 
     @Override
     public Map<T, Annotation[]> getAllWithQualifiers() {
-      return objectAndQualifiers;
+      return Collections.unmodifiableMap(objectAndQualifiers);
     }
 
     @Override
@@ -143,8 +153,10 @@ public class Qualifiers {
       return EMPTY;
     }
 
+    default void destroy() {}
+
     default T get(String name) {
-      return getAllWithNames().get(defaultTrim(name));
+      return null;
     }
 
     default Set<String> getAllDisplayNames() {
@@ -168,11 +180,11 @@ public class Qualifiers {
     }
 
     default boolean isEmpty() {
-      return getAllWithNames().isEmpty();
+      return true;
     }
 
     default int size() {
-      return getAllWithNames().size();
+      return 0;
     }
 
     public abstract static class AbstractNamedObject implements NamedObject {

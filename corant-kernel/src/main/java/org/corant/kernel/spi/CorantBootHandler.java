@@ -33,6 +33,8 @@ public interface CorantBootHandler {
 
   void handleAfterStarted(Corant corant, String... args);
 
+  default void handleAfterStopped(ClassLoader classLoader, String... args) {}
+
   void handleBeforeStart(ClassLoader classLoader, String... args);
 
 }

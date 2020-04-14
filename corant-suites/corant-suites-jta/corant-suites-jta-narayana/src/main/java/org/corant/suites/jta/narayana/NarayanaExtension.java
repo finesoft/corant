@@ -133,9 +133,7 @@ public class NarayanaExtension implements TransactionExtension {
               NamedLiteral.of("narayana-jta"))
           .scope(Singleton.class).createWith(cc -> recoveryManagerService)
           .disposeWith((t, inst) -> t.destroy());
-
     }
-
   }
 
   void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {

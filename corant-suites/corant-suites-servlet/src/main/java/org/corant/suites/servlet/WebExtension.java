@@ -16,8 +16,10 @@ package org.corant.suites.servlet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
@@ -62,6 +64,12 @@ public class WebExtension implements Extension, WebMetaDataProvider {
   @Override
   public Stream<WebServletMetaData> servletMetaDataStream() {
     return servletMetaDatas.stream();
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    listenerMetaDatas.clear();
+    servletMetaDatas.clear();
+    filterMetaDatas.clear();
   }
 
   void findFilterMetaDatas(

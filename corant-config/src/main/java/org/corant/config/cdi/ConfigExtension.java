@@ -77,6 +77,7 @@ public class ConfigExtension implements Extension {
     if (cfr instanceof CorantConfigProviderResolver) {
       ((CorantConfigProviderResolver) cfr).clear(); // FIXME Is it necessary?
     }
+    injectionPoints.clear();
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {

@@ -23,10 +23,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -66,6 +68,10 @@ public class JPAExtension implements Extension {
   public Map<PersistenceUnit, PersistenceUnitInfoMetaData> getPersistenceUnitInfoMetaDatas() {
     shouldBeTrue(finishedMetadatas, "Persistent unit metadata collection has not been completed!");
     return Collections.unmodifiableMap(persistenceUnitInfoMetaDatas);
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    persistenceUnitInfoMetaDatas.clear();
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {

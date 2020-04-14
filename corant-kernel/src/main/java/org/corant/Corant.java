@@ -329,6 +329,9 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compare).forEach(
+            h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
     log("Stopped %s at %s.\n", applicationName(), Instant.now());
   }
 

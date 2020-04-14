@@ -20,9 +20,11 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
@@ -72,6 +74,12 @@ public abstract class AbstractJMSExtension implements Extension {
 
   public Set<ContextualMethodHandler> getStreamMethods() {
     return Collections.unmodifiableSet(streamMethods);
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    configManager.destroy();
+    receiveMethods.clear();
+    streamMethods.clear();
   }
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,

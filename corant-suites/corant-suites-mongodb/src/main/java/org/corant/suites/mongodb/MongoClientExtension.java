@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
@@ -39,6 +40,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -192,6 +194,12 @@ public class MongoClientExtension implements Extension {
           () -> String.format("Find %s mongodb databases named [%s].", databaseConfigManager.size(),
               String.join(",", databaseConfigManager.getAllDisplayNames())));
     }
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    gridFSBucketNames.clear();
+    clientConfigManager.destroy();
+    databaseConfigManager.destroy();
   }
 
   protected MongoClient produceClient(Instance<Object> beans, MongoClientConfig cfg,

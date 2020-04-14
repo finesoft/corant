@@ -21,11 +21,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
@@ -51,6 +53,10 @@ public class JPARepositoryExtension implements Extension {
     return qualifiers.get(find(EntityLifecycleManager.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find entity lifecycle manager!"))
         .getPersistenceContext(cls).unitName());
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    qualifiers.clear();
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {

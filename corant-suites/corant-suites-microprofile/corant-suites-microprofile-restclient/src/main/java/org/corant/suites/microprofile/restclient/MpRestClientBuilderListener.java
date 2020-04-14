@@ -32,7 +32,7 @@ public class MpRestClientBuilderListener implements RestClientBuilderListener {
   public static final boolean enableDefaultContextResolver = ConfigProvider.getConfig()
       .getOptionalValue(DFLT_CTX_RESOLER_KEY, Boolean.class).orElse(Boolean.TRUE);
 
-  transient Logger logger = Logger.getLogger(this.getClass().toString());
+  Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public void onNewBuilder(RestClientBuilder builder) {

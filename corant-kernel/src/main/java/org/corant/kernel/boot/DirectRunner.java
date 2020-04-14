@@ -23,14 +23,20 @@ import org.corant.Corant;
  */
 public class DirectRunner {
 
-  private DirectRunner() {}
-
-  public static void main(String... args) {
-    new DirectRunner().run(args);
+  public static void run(Class<?>[] args) {
+    run(args, new String[0]);
   }
 
-  public void run(String... args) {
-    Corant.run(new Class[0], args);
+  public static void run(Class<?>[] classes, String... args) {
+    new DirectRunner().launch(classes, args);
+  }
+
+  public static void run(String... args) {
+    run(new Class[0], args);
+  }
+
+  public void launch(Class<?>[] classes, String... args) {
+    Corant.run(classes, args);
     synchronized (this) {
       while (true) {
         try {

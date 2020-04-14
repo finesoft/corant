@@ -32,6 +32,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
+import org.corant.shared.exception.CorantRuntimeException;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
 
 /**
@@ -108,7 +109,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       case 1:
         return annotations.iterator().next();
       default:
-        throw new RuntimeException(
+        throw new CorantRuntimeException(
             "Duplicate MicroProfile JWT annotations found on " + annotationPlacementDescriptor.get()
                 + ". Expected at most 1 annotation, found: " + annotations);
     }

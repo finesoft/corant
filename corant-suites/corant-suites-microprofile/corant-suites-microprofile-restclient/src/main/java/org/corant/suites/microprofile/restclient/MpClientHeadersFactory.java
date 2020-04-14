@@ -14,36 +14,37 @@
 package org.corant.suites.microprofile.restclient;
 
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import org.eclipse.microprofile.rest.client.ext.ClientHeadersFactory;
 import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
-import org.jboss.resteasy.spi.HttpRequest;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 /**
- * corant-suites-mp-restclient
+ * corant-suites-microprofile-restclient
  *
- * @deprecated from resteasy_4_5_3
- * @author bingo 下午1:26:52
+ * @author bingo 下午7:14:19
  *
  */
-@Deprecated
-public class MpIncomingHeadersProvider /* implements IncomingHeadersProvider */ {
+@ApplicationScoped
+public class MpClientHeadersFactory implements ClientHeadersFactory {
 
   static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
       new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());// static?
 
-  transient Logger logger = Logger.getLogger(this.getClass().toString());
+  Logger logger = Logger.getLogger(this.getClass().toString());
 
-  // @Override
-  public MultivaluedMap<String, String> getIncomingHeaders() {
-    MultivaluedMap<String, String> headers = null;
-    HttpRequest request = ResteasyProviderFactory.getInstance().getContextData(HttpRequest.class);
-    if (request != null) {
-      logger.fine(() -> "Propagates current header information to outgoing request.");
-      headers = request.getHttpHeaders().getRequestHeaders();
+  @Override
+  public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,
+      MultivaluedMap<String, String> clientOutgoingHeaders) {
+    MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+    if (incomingHeaders != null) {
+      headers.putAll(incomingHeaders);
     }
-    return headers == null ? EMPTY_MAP : headers;
+    if (clientOutgoingHeaders != null) {
+      headers.putAll(clientOutgoingHeaders);
+    }
+    return headers;
   }
 
 }

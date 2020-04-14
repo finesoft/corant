@@ -17,10 +17,12 @@ import static org.corant.shared.util.Empties.isEmpty;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
@@ -40,6 +42,10 @@ public class QueryExtension implements Extension {
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   Set<Class<?>> declarativeQueryServiceClasses = new LinkedHashSet<>();
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    declarativeQueryServiceClasses.clear();
+  }
 
   void findDeclarativeQueryServices(
       @Observes @WithAnnotations(DeclarativeQueryService.class) ProcessAnnotatedType<?> pat) {

@@ -28,6 +28,7 @@ import io.smallrye.jwt.auth.AbstractBearerTokenExtractor;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
+import io.smallrye.jwt.auth.principal.JWTParser;
 
 /**
  * corant-microprofile-jwt
@@ -42,6 +43,10 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   public static final String JTW_EXCEPTION_KEY = "___JWT-EX___";
 
   private static Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
+
+  @Inject
+  private JWTParser jwtParser;
+
   @Inject
   private JWTAuthContextInfo authContextInfo;
 
@@ -58,7 +63,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
       String bearerToken = extractor.getBearerToken();
       if (bearerToken != null) {
         try {
-          JsonWebToken jwtPrincipal = extractor.validate(bearerToken);
+          JsonWebToken jwtPrincipal = jwtParser.parse(bearerToken);
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));

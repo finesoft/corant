@@ -17,8 +17,10 @@ import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -68,6 +70,10 @@ public abstract class AbstractDataSourceExtension implements Extension {
       logger.fine(() -> String.format("Find %s data sources named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
+  }
+
+  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    configManager.destroy();
   }
 
   protected synchronized void registerJndi(String name, Annotation... qualifiers) {

@@ -29,17 +29,17 @@ import org.corant.shared.util.ObjectUtils;
 /**
  * corant-shared
  *
- * Implicit String to Object converter factory
+ * Implicit String to Object converter factory (in order)
  *
  * <ul>
  * <li>the target type {@code T} has a {@code public static T of(String)} method, or</li>
  * <li>the target type {@code T} has a {@code public static T of(CharSequence)} method, or</li>
  * <li>the target type {@code T} has a {@code public static T valueOf(String)} method, or</li>
  * <li>the target type {@code T} has a {@code public static T valueOf(CharSequence)} method, or</li>
- * <li>the target type {@code T} has a public Constructor with a String parameter, or</li>
- * <li>the target type {@code T} has a public Constructor with a CharSequence parameter, or</li>
  * <li>the target type {@code T} has a {@code public static T parse(String)} method, or</li>
  * <li>the target type {@code T} has a {@code public static T parse(CharSequence)} method</li>
+ * <li>the target type {@code T} has a public Constructor with a String parameter, or</li>
+ * <li>the target type {@code T} has a public Constructor with a CharSequence parameter, or</li>
  * </ul>
  *
  *
@@ -76,10 +76,11 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
         () -> forMethod(type, "of", CharSequence.class),
         () -> forMethod(type, "valueOf", String.class),
         () -> forMethod(type, "valueOf", CharSequence.class),
-        () -> forConstructor(type, String.class),
-        () -> forConstructor(type, CharSequence.class),
         () -> forMethod(type, "parse", String.class),
-        () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
+        () -> forMethod(type, "parse", CharSequence.class),
+        () -> forConstructor(type, String.class),
+        () -> forConstructor(type, CharSequence.class)
+        ).map(Supplier::get)
         .filter(ObjectUtils::isNotNull).findFirst();
     //@formatter:on
   }

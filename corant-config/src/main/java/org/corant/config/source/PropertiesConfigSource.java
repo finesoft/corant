@@ -15,10 +15,10 @@ package org.corant.config.source;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.toMap;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -64,10 +64,8 @@ public class PropertiesConfigSource extends CorantConfigSource {
   }
 
   public static Properties getProperties(URL url) {
-    try (Reader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
-      Properties props = new Properties();
-      props.load(in);
-      return props;
+    try (InputStream is = url.openStream()) {
+      return load(is);
     } catch (IOException e) {
       throw new CorantRuntimeException(e,
           "Load properties config source from '%s' occured an error!", url);
@@ -77,6 +75,7 @@ public class PropertiesConfigSource extends CorantConfigSource {
   static Properties load(InputStream is) throws IOException {
     Properties props = new Properties();
     props.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+    props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));// TCK 2020-04-14
     return props;
   }
 

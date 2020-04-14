@@ -344,10 +344,12 @@ public class CorantConfigConversion implements Serializable {
       }
       @SuppressWarnings("unchecked")
       Class<T> type = (Class<T>) generalType;
-      return Stream.<Supplier<Converter<T>>>of(() -> forMethod(type, "of", String.class),
-          () -> forMethod(type, "valueOf", String.class), () -> forConstructor(type, String.class),
-          () -> forMethod(type, "parse", CharSequence.class)).map(Supplier::get)
-          .filter(ObjectUtils::isNotNull).findFirst();
+      return Stream
+          .<Supplier<Converter<T>>>of(() -> forMethod(type, "of", String.class),
+              () -> forMethod(type, "valueOf", String.class),
+              () -> forMethod(type, "parse", CharSequence.class),
+              () -> forConstructor(type, String.class))
+          .map(Supplier::get).filter(ObjectUtils::isNotNull).findFirst();
     }
 
     static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {

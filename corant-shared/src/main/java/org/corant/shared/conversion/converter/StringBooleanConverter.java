@@ -27,20 +27,20 @@ import java.util.Map;
 public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
 
   private String[] trues = {"true", "yes", "y", "on", "1", "是"};
-  private String[] falses = {"false", "no", "n", "off", "0", "否"};
+  // private String[] falses = {"false", "no", "n", "off", "0", "否"};
 
   public StringBooleanConverter() {
     super();
   }
 
-  public StringBooleanConverter(Boolean defaultValue, String[] trues, String[] falses) {
+  public StringBooleanConverter(Boolean defaultValue, String[] trues/* , String[] falses */) {
     super(defaultValue);
     if (trues != null) {
       this.trues = Arrays.stream(trues).map(String::toLowerCase).toArray(String[]::new);
     }
-    if (falses != null) {
-      this.falses = Arrays.stream(falses).map(String::toLowerCase).toArray(String[]::new);
-    }
+    // if (falses != null) {
+    // this.falses = Arrays.stream(falses).map(String::toLowerCase).toArray(String[]::new);
+    // }
   }
 
   @Override

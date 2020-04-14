@@ -204,7 +204,7 @@ public class CorantConfigConversion implements Serializable {
    * @param propertyComponentType
    * @return convert
    */
-  public <T> T[] convertArray(String rawValue, Class<T> propertyComponentType) {
+  public <T> T convertArray(String rawValue, Class<T> propertyComponentType) {
     String[] values = ConfigUtils.splitValue(rawValue);
     Object array = Array.newInstance(propertyComponentType, values.length);
     for (int i = 0; i < values.length; i++) {

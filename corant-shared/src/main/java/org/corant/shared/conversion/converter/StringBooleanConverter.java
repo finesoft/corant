@@ -17,7 +17,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-import org.corant.shared.conversion.ConversionException;
 
 /**
  * corant-shared
@@ -55,11 +54,12 @@ public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
         return Boolean.TRUE;
       }
     }
-    for (String falseString : falses) {
-      if (falseString.equals(stringValue)) {
-        return Boolean.FALSE;
-      }
-    }
-    throw new ConversionException("Can not convert from '%s' to boolean", value);
+    return Boolean.FALSE;
+    // for (String falseString : falses) {
+    // if (falseString.equals(stringValue)) {
+    // return Boolean.FALSE;
+    // }
+    // }
+    // throw new ConversionException("Can not convert from '%s' to boolean", value);
   }
 }

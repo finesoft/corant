@@ -25,6 +25,8 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class LongBsonDateTimeConverter extends AbstractConverter<Long, BsonDateTime> {
 
+  private static final long serialVersionUID = -3078078908690262986L;
+
   @Override
   protected BsonDateTime convert(Long value, Map<String, ?> hints) throws Exception {
     if (value == null) {

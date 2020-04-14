@@ -30,6 +30,8 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 @SuppressWarnings("rawtypes")
 public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExpression> {
 
+  private static final long serialVersionUID = -324446604179431073L;
+
   /**
    *
    */

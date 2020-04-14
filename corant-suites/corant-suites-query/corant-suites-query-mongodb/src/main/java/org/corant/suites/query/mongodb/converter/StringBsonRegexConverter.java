@@ -27,6 +27,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegularExpression> {
 
+  private static final long serialVersionUID = 7854963879899587144L;
   public static final String REGEX_KEY = "regex.option";
 
   /**

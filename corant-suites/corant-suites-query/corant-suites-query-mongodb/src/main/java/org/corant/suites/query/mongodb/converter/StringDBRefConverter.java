@@ -31,6 +31,8 @@ import com.mongodb.DBRef;
  */
 public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
 
+  private static final long serialVersionUID = -2775898833507578989L;
+
   @Override
   protected DBRef convert(String value, Map<String, ?> hints) throws Exception {
     if (isBlank(value)) {

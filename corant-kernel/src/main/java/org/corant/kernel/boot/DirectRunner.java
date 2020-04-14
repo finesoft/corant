@@ -23,6 +23,10 @@ import org.corant.Corant;
  */
 public class DirectRunner {
 
+  public static void main(String... args) {
+    run(args);
+  }
+
   public static void run(Class<?>[] args) {
     run(args, new String[0]);
   }

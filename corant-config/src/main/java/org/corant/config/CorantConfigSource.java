@@ -14,6 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,7 +30,9 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 下午5:18:28
  *
  */
-public abstract class CorantConfigSource implements ConfigSource {
+public abstract class CorantConfigSource implements ConfigSource, Serializable {
+
+  private static final long serialVersionUID = 8513468393148039580L;
 
   static final Comparator<ConfigSource> CONFIG_SOURCE_COMPARATOR = (o1, o2) -> {
     int res = Long.signum((long) o2.getOrdinal() - (long) o1.getOrdinal());

@@ -25,6 +25,8 @@ import org.corant.config.CorantConfigSource;
  */
 public class XmlConfigSource extends CorantConfigSource {
 
+  private static final long serialVersionUID = -6510093356770922600L;
+
   XmlConfigSource(URL resourceUrl, int ordinal) {}
 
   @Override

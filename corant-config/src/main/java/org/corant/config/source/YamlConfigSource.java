@@ -35,6 +35,8 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class YamlConfigSource extends CorantConfigSource {
 
+  private static final long serialVersionUID = 8099900233760280030L;
+
   final Map<String, String> properties;
 
   YamlConfigSource(InputStream in, int ordinal) {

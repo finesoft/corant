@@ -117,19 +117,6 @@ public class ConfigUtils {
     return getGroupConfigKeys(configs, s -> defaultString(s).startsWith(prefix), keyIndex);
   }
 
-  // public static void main(String... regex) throws FileNotFoundException, IOException {
-  //
-  // Properties p = new Properties();
-  // p.load(new FileInputStream(new File("d:/aaa.property")));
-  //
-  // String s = p.getProperty("xxx");
-  //
-  // // s = StringUtils.fromInputStream(new FileInputStream(new File("d:/aaa.txt")));
-  // for (String ss : splitValue(s.replace("\\", "\\\\"))) {
-  // System.out.println(ss);
-  // }
-  // }
-
   public static String regulerKeyPrefix(String prefix) {
     String rs = defaultTrim(prefix);
     if (rs.length() == 0) {

@@ -35,6 +35,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class PropertiesConfigSource extends CorantConfigSource {
 
+  private static final long serialVersionUID = -9141492489031571885L;
+
   final Map<String, String> properties;
 
   /**
@@ -76,6 +78,7 @@ public class PropertiesConfigSource extends CorantConfigSource {
     Properties props = new Properties();
     props.load(new InputStreamReader(is, StandardCharsets.UTF_8));
     props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));// TCK 2020-04-14
+                                                                         // ArrayConverter
     return props;
   }
 

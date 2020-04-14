@@ -25,6 +25,8 @@ import org.corant.config.CorantConfigSource;
  */
 public class JsonConfigSource extends CorantConfigSource {
 
+  private static final long serialVersionUID = 4384365167157384602L;
+
   JsonConfigSource(URL resourceUrl, int ordinal) {
     // TODO
   }

@@ -15,6 +15,7 @@ package org.corant.config.source;
 
 import static org.corant.config.ConfigUtils.extractSysEnv;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
+import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
@@ -27,7 +28,9 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * @author bingo 上午11:04:36
  *
  */
-public class SystemEnvironmentConfigSource implements ConfigSource {
+public class SystemEnvironmentConfigSource implements ConfigSource, Serializable {
+
+  private static final long serialVersionUID = -2548484846997245188L;
 
   @Override
   public String getName() {

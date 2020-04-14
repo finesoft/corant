@@ -25,6 +25,8 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class JsonNumberNumberConverter extends AbstractConverter<JsonNumber, Number> {
 
+  private static final long serialVersionUID = 7201796053881772463L;
+
   public JsonNumberNumberConverter() {
     super();
   }

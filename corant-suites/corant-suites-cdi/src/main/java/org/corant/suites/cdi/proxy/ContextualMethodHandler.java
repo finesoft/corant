@@ -44,7 +44,7 @@ public class ContextualMethodHandler {
   protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
       Annotation... qualifiers) {
     method = shouldNotNull(beanMethod);
-    clazz = defaultObject(beanClass, beanMethod.getDeclaringClass());
+    clazz = defaultObject(beanClass, beanMethod::getDeclaringClass);
     this.qualifiers = qualifiers;
   }
 

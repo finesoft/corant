@@ -130,7 +130,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   public String getLocalizedMessage(Locale locale) {
     MessageResolver resolver = CDI.current().select(MessageResolver.class).get();
     if (resolver != null) {
-      return resolver.getMessage(defaultObject(locale, Locale.getDefault()), this);
+      return resolver.getMessage(defaultObject(locale, Locale::getDefault), this);
     } else {
       return defaultString(super.getMessage()) + " " + asDefaultString(getCode());
     }

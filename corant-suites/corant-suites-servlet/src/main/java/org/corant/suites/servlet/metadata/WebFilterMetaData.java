@@ -258,7 +258,7 @@ public class WebFilterMetaData {
    * @param servletNames the servletNames to set
    */
   protected void setServletNames(String[] servletNames) {
-    this.servletNames = defaultObject(servletNames, new String[0]);
+    this.servletNames = defaultObject(servletNames, () -> new String[0]);
   }
 
   /**
@@ -274,7 +274,7 @@ public class WebFilterMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, new String[0]);
+    this.urlPatterns = defaultObject(urlPatterns, () -> new String[0]);
   }
 
   /**
@@ -282,7 +282,7 @@ public class WebFilterMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, new String[0]);
+    this.value = defaultObject(value, () -> new String[0]);
   }
 
 }

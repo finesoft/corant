@@ -200,11 +200,11 @@ public interface QueryParameter extends Serializable {
 
     protected Duration retryInterval = defRtyItl;
 
-    protected Function<Exception, RuntimeException> errorTransfer;
+    protected transient Function<Exception, RuntimeException> errorTransfer;
 
-    protected BiPredicate<Integer, Object> terminater;
+    protected transient BiPredicate<Integer, Object> terminater;
 
-    protected BiConsumer<Object, StreamQueryParameter> enhancer;
+    protected transient BiConsumer<Object, StreamQueryParameter> enhancer;
 
     public StreamQueryParameter() {
       super();

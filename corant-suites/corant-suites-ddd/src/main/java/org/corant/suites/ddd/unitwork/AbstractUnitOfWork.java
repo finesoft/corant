@@ -39,7 +39,7 @@ public abstract class AbstractUnitOfWork implements UnitOfWork {
     messageDispatcher = manager.getMessageDispatcher();
     messageStorage = manager.getMessageStorage();
     persistenceService = manager.getPersistenceService();
-    sagaService = defaultObject(manager.getSagaService(), SagaService.empty());
+    sagaService = defaultObject(manager.getSagaService(), SagaService::empty);
     messageDispatcher.prepare();
     messageStorage.prepare();
     sagaService.prepare();

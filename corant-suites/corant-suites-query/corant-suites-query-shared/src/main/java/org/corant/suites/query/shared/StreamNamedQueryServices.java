@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
@@ -23,9 +24,11 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.shared.util.StreamUtils;
 import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
+import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
  * corant-suites-query-shared
@@ -35,22 +38,56 @@ import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
  */
 public class StreamNamedQueryServices {
 
-  private final String queryName;
-  private final Annotation qualifier;
+  private String queryName;
+  private Annotation qualifier;
+  private NamedQueryService namedQueryService;
   private StreamQueryParameter parameter = new StreamQueryParameter();
 
   /**
    * @param queryName
    * @param qualifier
    */
-  public StreamNamedQueryServices(String queryName, Annotation qualifier) {
+  protected StreamNamedQueryServices(String queryName, Annotation qualifier) {
     super();
     this.queryName = shouldNotBlank(queryName);
     this.qualifier = qualifier;
   }
 
+  /**
+   * @param queryName
+   * @param namedQueryService
+   */
+  protected StreamNamedQueryServices(String queryName, NamedQueryService namedQueryService) {
+    this.queryName = shouldNotBlank(queryName);
+    this.namedQueryService = shouldNotNull(namedQueryService);
+  }
+
+  public static StreamNamedQueryServices of(NamedQueryService namedQueryService, String queryName) {
+    return new StreamNamedQueryServices(queryName, namedQueryService);
+  }
+
   public static StreamNamedQueryServices of(String queryName, Annotation qualifier) {
     return new StreamNamedQueryServices(queryName, qualifier);
+  }
+
+  public static StreamNamedQueryServices ofCas(String clusterName, String queryName) {
+    return new StreamNamedQueryServices(queryName,
+        NamedQueryServiceManager.resolveQueryService(QueryType.CAS, clusterName));
+  }
+
+  public static StreamNamedQueryServices ofEs(String clusterName, String queryName) {
+    return new StreamNamedQueryServices(queryName,
+        NamedQueryServiceManager.resolveQueryService(QueryType.ES, clusterName));
+  }
+
+  public static StreamNamedQueryServices ofMg(String database, String queryName) {
+    return new StreamNamedQueryServices(queryName,
+        NamedQueryServiceManager.resolveQueryService(QueryType.MG, database));
+  }
+
+  public static StreamNamedQueryServices ofSql(String dataSourceWithDialect, String queryName) {
+    return new StreamNamedQueryServices(queryName,
+        NamedQueryServiceManager.resolveQueryService(QueryType.SQL, dataSourceWithDialect));
   }
 
   public <T> Stream<List<T>> batch() {
@@ -62,6 +99,11 @@ public class StreamNamedQueryServices {
     return this;
   }
 
+  /**
+   * Key and value pairs
+   *
+   * @param objects
+   */
   public StreamNamedQueryServices context(Object... objects) {
     parameter.context(objects);
     return this;
@@ -72,6 +114,11 @@ public class StreamNamedQueryServices {
     return this;
   }
 
+  /**
+   * Key and value pairs
+   *
+   * @param objects
+   */
   public StreamNamedQueryServices criteria(Object... objects) {
     parameter.criteria(mapOf(objects));
     return this;
@@ -110,13 +157,22 @@ public class StreamNamedQueryServices {
 
   public <T> Stream<T> stream() {
     if (qualifier == null) {
-      return resolve(NamedQueryService.class).stream(queryName, parameter);
+      return namedQueryService.stream(queryName, parameter);
     }
     return resolve(NamedQueryService.class, qualifier).stream(queryName, parameter);
+  }
+
+  public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminater) {
+    return terminater((c, o) -> terminater.test(c));
+  }
+
+  public StreamNamedQueryServices terminateByLastRecord(Predicate<Object> terminater) {
+    return terminater((c, o) -> terminater.test(o));
   }
 
   public StreamNamedQueryServices terminater(BiPredicate<Integer, Object> terminater) {
     parameter.terminater(terminater);
     return this;
   }
+
 }

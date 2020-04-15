@@ -74,7 +74,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     } else {
       useQueryParam = new StreamQueryParameter(queryParam);
     }
-    useQueryParam.limit(max(defaultObject(queryParam.getLimit(), getDefaultLimit()), 1));
+    useQueryParam.limit(max(defaultObject(queryParam.getLimit(), this::getDefaultLimit), 1));
     return stream(queryName, useQueryParam);
   }
 
@@ -172,7 +172,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    * @return resolveLimit
    */
   protected int resolveLimit(Querier querier) {
-    int limit = defaultObject(querier.getQueryParameter().getLimit(), resolveDefaultLimit(querier));
+    int limit =
+        defaultObject(querier.getQueryParameter().getLimit(), () -> resolveDefaultLimit(querier));
     int max = resolveMaxSelectSize(querier);
     if (limit > max) {
       throw new QueryRuntimeException(

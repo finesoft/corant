@@ -71,7 +71,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       Forwarding<T> result = Forwarding.inst();
       Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit + 1);
-      List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
+      List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       int size = list.size();
       if (size > 0) {
         if (size > limit) {
@@ -126,7 +126,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     try {
       Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit);
-      List<T> list = defaultObject(query.getResultList(), new ArrayList<>());
+      List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       Paging<T> result = Paging.of(offset, limit);
       int size = list.size();
       if (size > 0) {

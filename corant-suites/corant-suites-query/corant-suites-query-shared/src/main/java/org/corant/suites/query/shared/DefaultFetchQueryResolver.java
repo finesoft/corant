@@ -97,7 +97,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         }
       }
     } else {
-      injection.apply(new Object[] {result, defaultObject(fetchedResults, new ArrayList())});
+      injection.apply(new Object[] {result, defaultObject(fetchedResults, ArrayList::new)});
     }
   }
 
@@ -127,7 +127,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       }
     } else {
       // use inject script
-      List usedFetchedResults = defaultObject(fetchedResults, new ArrayList());
+      List usedFetchedResults = defaultObject(fetchedResults, ArrayList::new);
       for (Object result : results) {
         injection.apply(new Object[] {result, usedFetchedResults});
       }

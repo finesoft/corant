@@ -88,7 +88,7 @@ public class QueryHint implements Serializable {
   }
 
   protected void setScript(Script script) {
-    this.script = defaultObject(script, new Script());
+    this.script = defaultObject(script, Script.EMPTY);
   }
 
   /**

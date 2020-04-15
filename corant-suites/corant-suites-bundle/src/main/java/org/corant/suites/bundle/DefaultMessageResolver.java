@@ -18,7 +18,6 @@ import static org.corant.shared.util.StringUtils.asDefaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_ERR_CODE;
 import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_INF_CODE;
-
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -33,8 +32,10 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.shared.ubiquity.Readable;
+
 /**
  * corant-suites-bundle
+ *
  * @author bingo 下午8:01:13
  */
 @ApplicationScoped
@@ -64,24 +65,24 @@ public class DefaultMessageResolver implements MessageResolver {
       return null;
     }
     String codes = asDefaultString(messageSource.getCodes());
-    locale = defaultObject(locale, Locale.getDefault());
+    locale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(locale, messageSource.getParameters());
     return messageBundle.getMessage(locale, codes, parameters,
-                                    (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
+        (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
-    locale = defaultObject(locale, Locale.getDefault());
+    locale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(locale, params);
     return messageBundle.getMessage(locale, codes, parameters,
-                                    (l) -> String.format("Can't find any message for %s", codes));
+        (l) -> String.format("Can't find any message for %s", codes));
   }
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
-    String unknow = (ser == MessageSeverity.INF) ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
-    return messageBundle.getMessage(locale, unknow, new Object[]{code},
-                                    (l) -> String.format("Can't find any message for %s", code));
+    String unknow = ser == MessageSeverity.INF ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
+    return messageBundle.getMessage(locale, unknow, new Object[] {code},
+        (l) -> String.format("Can't find any message for %s", code));
   }
 
   @Produces

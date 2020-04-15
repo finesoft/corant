@@ -230,7 +230,7 @@ public class DeclarativeConfigResolver {
     ConfigField(ConfigClass<?> configClass, Field field) {
       this.configClass = configClass;
       ConfigKeyItem cki =
-          defaultObject(field.getAnnotation(ConfigKeyItem.class), ConfigKeyItem.EMPTY);
+          defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
       this.field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
         field.setAccessible(true);
         return field;

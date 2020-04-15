@@ -63,7 +63,7 @@ public abstract class AbstractGridFSBucketProvider {
       Map<String, Object> metadata) {
     getBucket().uploadFromStream(MongoClientExtension.bsonId(id), filename, shouldNotNull(is),
         new GridFSUploadOptions()
-            .metadata(new Document(defaultObject(metadata, Collections.emptyMap())))
+            .metadata(new Document(defaultObject(metadata, Collections::emptyMap)))
             .chunkSizeBytes(chunkSizeBytes));
   }
 

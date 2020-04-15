@@ -288,7 +288,7 @@ public class WebServletMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, new String[0]);
+    this.urlPatterns = defaultObject(urlPatterns, () -> new String[0]);
   }
 
   /**
@@ -296,7 +296,7 @@ public class WebServletMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, new String[0]);
+    this.value = defaultObject(value, () -> new String[0]);
   }
 
 }

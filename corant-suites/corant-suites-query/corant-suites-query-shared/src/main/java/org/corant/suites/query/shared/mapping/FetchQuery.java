@@ -173,7 +173,7 @@ public class FetchQuery implements Serializable {
   }
 
   protected void setInjectionScript(Script injection) {
-    injectionScript = defaultObject(injection, new Script());
+    injectionScript = defaultObject(injection, Script.EMPTY);
   }
 
   protected void setInjectPropertyName(String injectPropertyName) {
@@ -190,7 +190,7 @@ public class FetchQuery implements Serializable {
   }
 
   protected void setPredicateScript(Script predicate) {
-    predicateScript = defaultObject(predicate, new Script());
+    predicateScript = defaultObject(predicate, Script.EMPTY);
   }
 
   /**

@@ -22,6 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ClassUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -83,7 +84,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
     Lock lock = rwLock.writeLock();
     try {
       lock.lock();
-      cacheConfig(defaultObject(classLoader, defaultClassLoader()), config);
+      cacheConfig(defaultObject(classLoader, ClassUtils::defaultClassLoader), config);
     } finally {
       lock.unlock();
     }

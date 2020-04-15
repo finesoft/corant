@@ -26,6 +26,8 @@ public class Script implements Serializable {
 
   private static final long serialVersionUID = -8086650413401748374L;
 
+  public static final Script EMPTY = new Script();
+
   private String code;
 
   private String src;

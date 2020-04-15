@@ -77,7 +77,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
         logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(value)));
       }
     }
-    return defaultObject(result, getDefaultValue());
+    return defaultObject(result, this::getDefaultValue);
   }
 
   /**

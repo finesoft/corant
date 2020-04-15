@@ -29,6 +29,7 @@ import io.smallrye.jwt.auth.cdi.JsonValueProducer;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.cdi.RawClaimTypeProducer;
 import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
+import io.smallrye.jwt.auth.principal.DefaultJWTParser;
 import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
 
 /**
@@ -75,6 +76,7 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     addAnnotatedType(event, beanManager, PrincipalProducer.class);
     addAnnotatedType(event, beanManager, RawClaimTypeProducer.class);
     addAnnotatedType(event, beanManager, MpSmallRyeJWTAuthJaxRsFeature.class);
+    addAnnotatedType(event, beanManager, DefaultJWTParser.class);
 
     if (isEESecurityAvailable()) {
       addAnnotatedType(event, beanManager, JWTHttpAuthenticationMechanism.class);

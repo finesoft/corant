@@ -290,6 +290,8 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       resolveEmbeddedFieldSchema(docCls, f, map, new LinkedList<>(path));
     } else if (f.isAnnotationPresent(EsNested.class)) {
       resolveNestedFieldSchema(docCls, f, map, new LinkedList<>(path));
+    } else if (f.isAnnotationPresent(EsRange.class)) {
+      resolveRangeFieldSchema(docCls, f, map);
     } else {
       notSupportLog(docCls, path);
     }
@@ -358,6 +360,10 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
       map.put(fn, objMap);
       objMap.put("properties", objProMap);
     }
+  }
+
+  protected void resolveRangeFieldSchema(Class<?> docCls, Field f, Map<String, Object> map) {
+    map.put(f.getName(), genFieldMapping(f.getAnnotation(EsRange.class)));
   }
 
   protected Map<String, Object> resolveSchema(Class<?> docCls) {

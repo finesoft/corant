@@ -97,7 +97,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         }
       }
     } else {
-      injection.apply(new Object[] {result, defaultObject(fetchedResults, ArrayList::new)});
+      injection.apply(
+          new Object[] {new Object[] {result}, defaultObject(fetchedResults, ArrayList::new)});
     }
   }
 

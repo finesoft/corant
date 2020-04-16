@@ -18,7 +18,9 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -57,19 +59,23 @@ public class MessageReceiverManager {
   protected final Set<MessageReceiverMetaData> receiveMetaDatas =
       Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
 
-  protected void beforeShutdown(@Observes final PreContainerStopEvent event) {
+  protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.fine(() -> "Shut down the message receiver executor services");
-    executorServices.forEach((cfg, es) -> {
+    Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
+        executorServices.entrySet().iterator();
+    while (it.hasNext()) {
+      Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
       try {
-        es.awaitTermination(cfg.getReceiverExecutorAwaitTermination().toMillis(),
-            TimeUnit.MICROSECONDS);
+        entry.getValue().awaitTermination(
+            entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
       } catch (InterruptedException e) {
         logger.log(Level.WARNING, e, () -> String.format("Can not terminate [%s] executor service.",
-            cfg.getConnectionFactoryId()));
+            entry.getKey().getConnectionFactoryId()));
         Thread.currentThread().interrupt();
+      } finally {
+        it.remove();
       }
-    });
-    executorServices.clear();
+    }
   }
 
   protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {

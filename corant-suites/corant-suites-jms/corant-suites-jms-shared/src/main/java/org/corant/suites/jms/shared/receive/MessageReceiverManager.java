@@ -69,6 +69,7 @@ public class MessageReceiverManager {
         Thread.currentThread().interrupt();
       }
     });
+    executorServices.clear();
   }
 
   protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {

@@ -37,21 +37,21 @@ public class CharacterEncodingFilter implements Filter {
 
   @Inject
   @ConfigProperty(name = "servlet.request-charset-filter.enable", defaultValue = "true")
-  boolean enableReq;
+  protected boolean enableReq;
 
   @Inject
   @ConfigProperty(name = "servlet.response-charset-filter.enable", defaultValue = "true")
-  boolean enableRes;
+  protected boolean enableRes;
 
   @Inject
   @ConfigProperty(name = "servlet.request-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
-  String reqCharset;
+  protected String reqCharset;
 
   @Inject
   @ConfigProperty(name = "servlet.response-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
-  String resCharset;
+  protected String resCharset;
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -44,7 +44,7 @@ public class DefaultQueryResolver implements QueryResolver {
   protected Instance<ResultHintHandler> resultHintHandlers;
 
   @Inject
-  ConversionService conversionService;
+  protected ConversionService conversionService;
 
   @SuppressWarnings("unchecked")
   @Override

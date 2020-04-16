@@ -62,29 +62,29 @@ import org.flywaydb.core.api.resolver.MigrationResolver;
 public class FlywayMigrator {
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @Any
-  Instance<Callback> callbacks;
+  protected Instance<Callback> callbacks;
 
   @Inject
   @Any
-  Instance<JavaMigration> javaMigrations;
+  protected Instance<JavaMigration> javaMigrations;
 
   @Inject
   @Any
-  Instance<MigrationResolver> migrationResolvers;
+  protected Instance<MigrationResolver> migrationResolvers;
 
   @Inject
   @Any
-  Instance<DataSourceService> dataSourceService;
+  protected Instance<DataSourceService> dataSourceService;
 
   @Inject
   @Any
-  Instance<AbstractDataSourceExtension> dataSourceExtensions;
+  protected Instance<AbstractDataSourceExtension> dataSourceExtensions;
 
-  FlywayConfig globalFlywayConfig;
+  protected FlywayConfig globalFlywayConfig;
 
   public void migrate(@Observes PostCorantReadyEvent e) {
     if (globalFlywayConfig.isEnable()) {
@@ -169,6 +169,12 @@ public class FlywayMigrator {
         : globalFlywayConfig.getLocationPrefix() + "/";
   }
 
+  @PostConstruct
+  protected void onPostConstruct() {
+    globalFlywayConfig = defaultObject(DeclarativeConfigResolver.resolveSingle(FlywayConfig.class),
+        FlywayConfig.EMPTY);
+  }
+
   protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {
     if (defaultString(name).startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
       try {
@@ -182,11 +188,5 @@ public class FlywayMigrator {
       return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().get(name));
     }
     throw new CorantRuntimeException("Can not found any data source named %s", name);
-  }
-
-  @PostConstruct
-  void onPostConstruct() {
-    globalFlywayConfig = defaultObject(DeclarativeConfigResolver.resolveSingle(FlywayConfig.class),
-        FlywayConfig.EMPTY);
   }
 }

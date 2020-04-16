@@ -41,10 +41,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @SuppressWarnings({"rawtypes"})
 public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver<CasNamedQuerier> {
 
-  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+  protected final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.cassandra.mapping-file.paths")
@@ -85,7 +85,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     builders.clear();
     logger.fine(() -> "Clear default cassandra named querier resolver builders");
   }

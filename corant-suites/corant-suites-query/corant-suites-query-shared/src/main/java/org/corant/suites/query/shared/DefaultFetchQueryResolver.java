@@ -60,10 +60,10 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   protected final Map<String, Function<Object[], Object>> injections = new ConcurrentHashMap<>();
 
   @Inject
-  ConversionService conversionService;
+  protected ConversionService conversionService;
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
@@ -127,10 +127,9 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       }
     } else {
       // use inject script
-      List usedFetchedResults = defaultObject(fetchedResults, ArrayList::new);
-      for (Object result : results) {
-        injection.apply(new Object[] {result, usedFetchedResults});
-      }
+      // for (Object result : results) {
+      injection.apply(new Object[] {results, defaultObject(fetchedResults, ArrayList::new)});
+      // }
     }
   }
 
@@ -178,6 +177,13 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     }
   }
 
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    predicates.clear();
+    injections.clear();
+    logger.fine(() -> "Clear default fetch query resolver caches.");
+  }
+
   protected Function<Object[], Object> resolveFetchInjection(FetchQuery fetchQuery) {
     return injections.computeIfAbsent(fetchQuery.getId(), id -> {
       if (fetchQuery.getInjectionScript().isValid()) {
@@ -186,7 +192,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
               "Currently we only support using javascript as an fetch query injection script.");
         }
         return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
-            RESULT_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+            RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
       } else {
         return null;
       }
@@ -262,13 +268,6 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     } else {
       return BeanUtils.getProperty(result, String.join(".", sourceNamePath));
     }
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    predicates.clear();
-    injections.clear();
-    logger.fine(() -> "Clear default fetch query resolver caches.");
   }
 
   @Deprecated

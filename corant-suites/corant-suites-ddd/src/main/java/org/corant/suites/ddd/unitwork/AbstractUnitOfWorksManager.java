@@ -33,10 +33,10 @@ public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Inject
-  Instance<UnitOfWorksListener> listeners;
+  protected Instance<UnitOfWorksListener> listeners;
 
   @Inject
-  Instance<UnitOfWorksHandler> handlers;
+  protected Instance<UnitOfWorksHandler> handlers;
 
   @Override
   public Stream<UnitOfWorksHandler> getHandlers() {

@@ -46,21 +46,18 @@ import org.corant.suites.jms.shared.AbstractJMSExtension;
 public class MessageReceiverManager {
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  AbstractJMSExtension extesion;
+  protected AbstractJMSExtension extesion;
 
-  final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices = new HashMap<>();
+  protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
+      new HashMap<>();
 
-  final Set<MessageReceiverMetaData> receiveMetaDatas =
+  protected final Set<MessageReceiverMetaData> receiveMetaDatas =
       Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
 
-  protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {
-    return new MessageReceiverTask(metaData);
-  }
-
-  void beforeShutdown(@Observes final PreContainerStopEvent event) {
+  protected void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.fine(() -> "Shut down the message receiver executor services");
     executorServices.forEach((cfg, es) -> {
       try {
@@ -74,7 +71,11 @@ public class MessageReceiverManager {
     });
   }
 
-  void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
+  protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {
+    return new MessageReceiverTask(metaData);
+  }
+
+  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     Set<Pair<String, String>> anycasts = new HashSet<>();
     for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
       if (!metaData.isMulticast()
@@ -106,7 +107,7 @@ public class MessageReceiverManager {
   }
 
   @PostConstruct
-  void postConstruct() {
+  protected void postConstruct() {
     extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
         .forEach(receiveMetaDatas::addAll);
     if (!receiveMetaDatas.isEmpty()) {

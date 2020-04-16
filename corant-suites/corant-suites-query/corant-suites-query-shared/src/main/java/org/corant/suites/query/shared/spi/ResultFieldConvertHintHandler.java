@@ -86,14 +86,15 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
   public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
-  final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches = new ConcurrentHashMap<>();// static?
-  final Set<String> brokens = new CopyOnWriteArraySet<>(); // static?
+  protected final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches =
+      new ConcurrentHashMap<>();// static?
+  protected final Set<String> brokens = new CopyOnWriteArraySet<>(); // static?
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  ConversionService conversionService;
+  protected ConversionService conversionService;
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static void convertMapValue(Map<Object, Object> map, String[] keyPath,
@@ -196,6 +197,13 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     });
   }
 
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    caches.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result field converter hint handler caches.");
+  }
+
   protected Pair<String[], Pair<Class<?>, Object[]>> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
@@ -227,12 +235,5 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    caches.clear();
-    brokens.clear();
-    logger.fine(() -> "Clear result field converter hint handler caches.");
   }
 }

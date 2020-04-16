@@ -33,11 +33,11 @@ public class JMSContextProducer {
 
   @Inject
   @Any
-  RsJMSContextManager rsJMSContextManager;
+  protected RsJMSContextManager rsJMSContextManager;
 
   @Inject
   @Any
-  TsJMSContextManager tsJMSContextManager;
+  protected TsJMSContextManager tsJMSContextManager;
 
   public JMSContext create(final String connectionFactoryId, final int sessionMode) {
     return new ExtendedJMSContext(new JMSContextKey(connectionFactoryId, sessionMode),
@@ -61,7 +61,7 @@ public class JMSContextProducer {
   }
 
   @Produces
-  JMSContext produce(final InjectionPoint ip) {
+  protected JMSContext produce(final InjectionPoint ip) {
     return new ExtendedJMSContext(JMSContextKey.of(ip), getRsJMSContextManager(),
         getTsJMSContextManager());
   }

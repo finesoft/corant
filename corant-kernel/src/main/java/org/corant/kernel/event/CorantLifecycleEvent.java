@@ -28,7 +28,7 @@ public interface CorantLifecycleEvent {
   @ApplicationScoped
   public static class LifecycleEventEmitter {
     @Inject
-    Event<CorantLifecycleEvent> events;
+    protected Event<CorantLifecycleEvent> events;
 
     public void fire(CorantLifecycleEvent event) {
       events.fire(event);

@@ -23,9 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -47,12 +45,12 @@ import com.datastax.driver.core.Cluster;
  * @author bingo 下午6:04:28
  *
  */
-@Priority(1)
+// @Priority(1)
 @ApplicationScoped
-@Alternative
+// @Alternative
 public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -88,20 +86,15 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
     return QueryType.MG;
   }
 
-  protected String resolveQualifier(Object qualifier) {
-    return qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
-        : asDefaultString(qualifier);
-  }
-
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     services.clear();
     logger.fine(() -> "Clear cached named query services.");
   }
 
   @Produces
   @CasQuery
-  NamedQueryService produce(InjectionPoint ip) {
+  protected NamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(CasQuery.class)) {
@@ -110,6 +103,11 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
       }
     }
     return get(qualifier);
+  }
+
+  protected String resolveQualifier(Object qualifier) {
+    return qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
+        : asDefaultString(qualifier);
   }
 
   /**

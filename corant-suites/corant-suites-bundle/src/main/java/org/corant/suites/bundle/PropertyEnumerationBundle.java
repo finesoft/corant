@@ -43,15 +43,15 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class PropertyEnumerationBundle implements EnumerationBundle {
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
-  final Map<Locale, EnumLiteralsObject> holder = new ConcurrentHashMap<>();
+  protected final Map<Locale, EnumLiteralsObject> holder = new ConcurrentHashMap<>();
 
-  private volatile boolean initialized = false;
+  protected volatile boolean initialized = false;
 
   @Inject
   @ConfigProperty(name = "bundle.enum-file.paths", defaultValue = "META-INF/**Enums_*.properties")
-  String bundleFilePaths;
+  protected String bundleFilePaths;
 
   @SuppressWarnings("unchecked")
   @Override
@@ -144,12 +144,12 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
   }
 
   @PostConstruct
-  synchronized void onPostConstruct() {
+  protected synchronized void onPostConstruct() {
     load();
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     holder.forEach((k, v) -> {
       v.classLiteral.clear();
       v.enumLiterals.clear();
@@ -159,7 +159,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
     logger.fine(() -> "Clear property enumerations bundle holder.");
   }
 
-  static class EnumLiteralsObject {
+  public static class EnumLiteralsObject {
 
     Logger logger = Logger.getLogger(EnumLiteralsObject.class.getName());
     private final Map<Class<Enum>, String> classLiteral = new ConcurrentHashMap<>();

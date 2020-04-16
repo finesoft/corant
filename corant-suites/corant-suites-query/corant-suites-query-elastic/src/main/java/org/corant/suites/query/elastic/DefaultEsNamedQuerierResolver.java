@@ -32,10 +32,10 @@ import org.corant.suites.query.shared.mapping.Query;
 @ApplicationScoped
 public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<EsNamedQuerier> {
 
-  final Map<String, FreemarkerEsQuerierBuilder> builders = new ConcurrentHashMap<>();
+  protected final Map<String, FreemarkerEsQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public EsNamedQuerier resolve(String key, Object param) {
@@ -52,7 +52,7 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     builders.clear();
     logger.fine(() -> "Clear default elastic named querier resolver builders");
   }

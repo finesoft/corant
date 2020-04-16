@@ -23,9 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -46,12 +44,13 @@ import org.elasticsearch.client.transport.TransportClient;
  * @author bingo 下午6:04:28
  *
  */
-@Priority(1)
+// @Priority(1)
 @ApplicationScoped
-@Alternative
+// @Alternative
 public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+  protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME
+                                                                                        // scope
 
   @Inject
   protected Logger logger;
@@ -90,20 +89,15 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
     return QueryType.ES;
   }
 
-  protected String resolveQualifier(Object qualifier) {
-    return qualifier instanceof EsQuery ? ((EsQuery) qualifier).value()
-        : asDefaultString(qualifier);
-  }
-
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     services.clear();
     logger.fine(() -> "Clear cached named query services.");
   }
 
   @Produces
   @EsQuery
-  EsNamedQueryService produce(InjectionPoint ip) {
+  protected EsNamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(EsQuery.class)) {
@@ -112,6 +106,11 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
       }
     }
     return get(qualifier);
+  }
+
+  protected String resolveQualifier(Object qualifier) {
+    return qualifier instanceof EsQuery ? ((EsQuery) qualifier).value()
+        : asDefaultString(qualifier);
   }
 
   /**

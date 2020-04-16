@@ -38,17 +38,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class PropertyMessageBundle implements MessageBundle {
 
-  final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
+  protected final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
 
-  private volatile boolean initialized = false;
+  protected volatile boolean initialized = false;
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @ConfigProperty(name = "bundle.message-file.paths",
       defaultValue = "META-INF/**Messages_*.properties")
-  String bundleFilePaths;
+  protected String bundleFilePaths;
 
   @Override
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException {
@@ -133,12 +133,12 @@ public class PropertyMessageBundle implements MessageBundle {
   }
 
   @PostConstruct
-  synchronized void onPostConstruct() {
+  protected synchronized void onPostConstruct() {
     load();
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     holder.forEach((k, v) -> v.clear());
     holder.clear();
     initialized = false;

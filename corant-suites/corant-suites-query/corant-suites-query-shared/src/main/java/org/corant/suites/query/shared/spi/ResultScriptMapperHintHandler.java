@@ -93,15 +93,15 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   public static final String HINT_SCRIPT_PARA = "p";
   public static final String HINT_SCRIPT_RESU = "r";
 
-  final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
-  final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
+  protected final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
+  protected final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @Any
-  Instance<ResultMapperResolver> mapperResolvers;
+  protected Instance<ResultMapperResolver> mapperResolvers;
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
@@ -137,6 +137,13 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     }
   }
 
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    mappers.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result script mapper hint handler caches.");
+  }
+
   protected Consumer<Object[]> resolveMapper(QueryHint qh) {
     return mappers.computeIfAbsent(qh.getId(), k -> {
       if (!mapperResolvers.isUnsatisfied()) {
@@ -155,13 +162,6 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       return ps -> {
       };
     });
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    mappers.clear();
-    brokens.clear();
-    logger.fine(() -> "Clear result script mapper hint handler caches.");
   }
 
   @ApplicationScoped

@@ -39,8 +39,8 @@ import org.hibernate.tool.schema.Action;
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJPAOrmProvider implements JPAProvider {
 
-  final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM, new JTAPlatform(),
-      AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
+  protected final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
+      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
 
   Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
   {

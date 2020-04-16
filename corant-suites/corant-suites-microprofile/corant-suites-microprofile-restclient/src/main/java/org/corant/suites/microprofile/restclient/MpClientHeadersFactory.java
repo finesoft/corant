@@ -32,7 +32,7 @@ public class MpClientHeadersFactory implements ClientHeadersFactory {
   static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
       new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());// static?
 
-  Logger logger = Logger.getLogger(this.getClass().toString());
+  protected Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,

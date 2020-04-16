@@ -32,10 +32,10 @@ import org.corant.suites.query.shared.mapping.Query;
 @ApplicationScoped
 public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<MgNamedQuerier> {
 
-  final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
+  protected final Map<String, FreemarkerMgQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public MgNamedQuerier resolve(String key, Object param) {
@@ -52,7 +52,7 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     builders.clear();
     logger.fine(() -> "Clear default mongodb named querier resolver builders");
   }

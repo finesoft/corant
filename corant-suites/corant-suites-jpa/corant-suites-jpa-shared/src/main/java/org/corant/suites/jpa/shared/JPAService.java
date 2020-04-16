@@ -52,16 +52,16 @@ import org.corant.suites.jta.shared.TransactionService;
 @ApplicationScoped
 public class JPAService implements PersistenceService {
 
-  final Logger logger = Logger.getLogger(JPAService.class.getName());// static
-  final Map<PersistenceUnit, EntityManagerFactory> emfs = new ConcurrentHashMap<>(); // static
+  protected final Logger logger = Logger.getLogger(JPAService.class.getName());// static
+  protected final Map<PersistenceUnit, EntityManagerFactory> emfs = new ConcurrentHashMap<>(); // static
 
   @Inject
   @Any
-  RsEntityManagerManager rsEmManager;
+  protected RsEntityManagerManager rsEmManager;
 
   @Inject
   @Any
-  TsEntityManagerManager tsEmManager;
+  protected TsEntityManagerManager tsEmManager;
 
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {

@@ -55,11 +55,11 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_MAP_FIELD_NME = "map-field-name";
   public static final String HINT_PARA_MAP_TYP_NME = "java.util.Map";
 
-  final Map<String, Consumer<Map>> caches = new ConcurrentHashMap<>();// static?
-  final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
+  protected final Map<String, Consumer<Map>> caches = new ConcurrentHashMap<>();// static?
+  protected final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
@@ -92,6 +92,13 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     }
   }
 
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    caches.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result map reduce hint handler caches.");
+  }
+
   protected Consumer<Map> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
@@ -116,19 +123,12 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     return null;
   }
 
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    caches.clear();
-    brokens.clear();
-    logger.fine(() -> "Clear result map reduce hint handler caches.");
-  }
-
-  String resolveMapFieldname(QueryHint qh) {
+  protected String resolveMapFieldname(QueryHint qh) {
     List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
     return isNotEmpty(params) ? params.get(0).getValue() : null;
   }
 
-  List<Pair<String, String[]>> resolveReduceFields(QueryHint qh) {
+  protected List<Pair<String, String[]>> resolveReduceFields(QueryHint qh) {
     List<Pair<String, String[]>> fields = new ArrayList<>();
     List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
     if (isNotEmpty(params)) {

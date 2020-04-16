@@ -39,10 +39,10 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
 public class DefaultJpqlNamedQuerierResolver
     extends AbstractNamedQuerierResolver<JpqlNamedQuerier> {
 
-  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+  protected final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {
@@ -75,7 +75,7 @@ public class DefaultJpqlNamedQuerierResolver
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     builders.clear();
     logger.fine(() -> "Clear default jpql named querier resolver builders");
   }

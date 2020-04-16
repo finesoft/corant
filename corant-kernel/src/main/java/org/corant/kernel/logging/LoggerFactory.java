@@ -52,7 +52,7 @@ public class LoggerFactory {
   }
 
   @Produces
-  Logger createLogger(InjectionPoint injectionPoint) {
+  protected Logger createLogger(InjectionPoint injectionPoint) {
     return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
   }
 }

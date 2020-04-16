@@ -82,11 +82,11 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_AGGS_FIELD_NME = "aggs-field-names";
   public static final String HNIT_PARA_AGGS_NME = "aggs-name";
 
-  final Map<String, Consumer<List<Map<?, ?>>>> caches = new ConcurrentHashMap<>();// static?
-  final Set<String> brokens = new CopyOnWriteArraySet<>();
+  protected final Map<String, Consumer<List<Map<?, ?>>>> caches = new ConcurrentHashMap<>();// static?
+  protected final Set<String> brokens = new CopyOnWriteArraySet<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
@@ -112,6 +112,13 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     if (!isEmpty(list)) {
       handler.accept(list);
     }
+  }
+
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    caches.clear();
+    brokens.clear();
+    logger.fine(() -> "Clear result aggregation hint handler caches.");
   }
 
   protected Consumer<List<Map<?, ?>>> resolveHint(QueryHint qh) {
@@ -156,12 +163,5 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    caches.clear();
-    brokens.clear();
-    logger.fine(() -> "Clear result aggregation hint handler caches.");
   }
 }

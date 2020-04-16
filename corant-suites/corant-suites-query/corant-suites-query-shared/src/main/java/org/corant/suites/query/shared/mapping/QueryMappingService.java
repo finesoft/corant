@@ -45,23 +45,23 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class QueryMappingService {
 
-  private final Map<String, Query> queries = new HashMap<>();
-  private volatile boolean initialized = false;
+  protected final Map<String, Query> queries = new HashMap<>();
+  protected volatile boolean initialized = false;
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
-  String mappingFilePaths;
+  protected String mappingFilePaths;
 
   @Inject
   @Any
-  Instance<QueryProvider> queryProvider;
+  protected Instance<QueryProvider> queryProvider;
 
   @Inject
   @Any
-  Instance<QueryMappingFilePathResolver> mappingFilePathSupplier;
+  protected Instance<QueryMappingFilePathResolver> mappingFilePathSupplier;
 
   public String getMappingFilePaths() {
     return mappingFilePaths;
@@ -129,6 +129,13 @@ public class QueryMappingService {
     initialize();
   }
 
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    queries.clear();
+    initialized = false;
+    logger.fine(() -> "Clear all query mappings.");
+  }
+
   protected String[] resolveMappingFilePaths() {
     Set<String> paths = new LinkedHashSet<>();
     if (!mappingFilePathSupplier.isUnsatisfied()) {
@@ -149,13 +156,6 @@ public class QueryMappingService {
       }
     }
     return paths.toArray(new String[paths.size()]);
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    queries.clear();
-    initialized = false;
-    logger.fine(() -> "Clear all query mappings.");
   }
 
   public interface QueryMappingFilePathResolver {

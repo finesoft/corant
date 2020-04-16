@@ -50,22 +50,22 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   protected final Map<Object, JTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
-  TransactionManager transactionManager;
+  protected TransactionManager transactionManager;
 
   @Inject
-  PersistenceService persistenceService;
-
-  @Inject
-  @Any
-  Instance<MessageDispatcher> messageDispatch;
+  protected PersistenceService persistenceService;
 
   @Inject
   @Any
-  Instance<MessageStorage> messageStorage;
+  protected Instance<MessageDispatcher> messageDispatch;
 
   @Inject
   @Any
-  Instance<SagaService> sagaService;
+  protected Instance<MessageStorage> messageStorage;
+
+  @Inject
+  @Any
+  protected Instance<SagaService> sagaService;
 
   public static JTAJPAUnitOfWork curUow() {
     Optional<UnitOfWork> curuow = UnitOfWorksManager.currentUnitOfWork();
@@ -170,23 +170,23 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     return new JTAJPAUnitOfWork(this, transaction);
   }
 
+  protected void clearCurrentUnitOfWorks(Object key) {
+    logger.fine(() -> "Deregister the unit of work with the current transacion context.");
+    uows.remove(key);
+  }
+
+  @PreDestroy
+  protected synchronized void destroy() {
+    uows.clear();
+    logger.fine(() -> "Clear unit of works.");
+  }
+
   protected Transaction unwrapUnifOfWorksKey(Object object) {
     return object == null ? null : (Transaction) object;
   }
 
   protected Object wrapUintOfWorksKey(Transaction transaction) {
     return transaction;// JTA1.3 Spec-> 3.3.4 Transaction Equality and Hash Code
-  }
-
-  void clearCurrentUnitOfWorks(Object key) {
-    logger.fine(() -> "Deregister the unit of work with the current transacion context.");
-    uows.remove(key);
-  }
-
-  @PreDestroy
-  synchronized void destroy() {
-    uows.clear();
-    logger.fine(() -> "Clear unit of works.");
   }
 
   abstract static class SynchronizationAdapter implements Synchronization {

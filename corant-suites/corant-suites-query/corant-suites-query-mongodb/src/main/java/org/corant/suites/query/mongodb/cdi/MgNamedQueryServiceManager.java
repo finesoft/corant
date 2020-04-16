@@ -25,9 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -50,12 +48,13 @@ import com.mongodb.client.MongoDatabase;
  * @author bingo 下午6:04:28
  *
  */
-@Priority(1)
+// @Priority(1)
 @ApplicationScoped
-@Alternative
+// @Alternative
 public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME scope
+  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
+                                                                                       // scope
 
   @Inject
   protected Logger logger;
@@ -96,14 +95,14 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     services.clear();
     logger.fine(() -> "Clear cached named query services.");
   }
 
   @Produces
   @MgQuery
-  NamedQueryService produce(InjectionPoint ip) {
+  protected NamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(MgQuery.class)) {
@@ -114,7 +113,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     return get(qualifier);
   }
 
-  String resolveQualifier(Object qualifier) {
+  protected String resolveQualifier(Object qualifier) {
     if (qualifier instanceof MgQuery) {
       return ((MgQuery) qualifier).value();
     } else {

@@ -36,8 +36,8 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider implements JPAProvider {
 
-  final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM, new JTAPlatform(),
-      AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
+  protected final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
+      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
 
   Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
   {

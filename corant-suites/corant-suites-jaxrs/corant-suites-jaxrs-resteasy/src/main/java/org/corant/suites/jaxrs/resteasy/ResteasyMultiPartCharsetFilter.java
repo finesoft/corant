@@ -39,17 +39,17 @@ public class ResteasyMultiPartCharsetFilter implements ContainerRequestFilter {
 
   @Inject
   @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.enable", defaultValue = "true")
-  boolean enable;
+  protected boolean enable;
 
   @Inject
   @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
-  String charset;
+  protected String charset;
 
   @Inject
   @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.context-type",
       defaultValue = "text/plain; charset=" + Defaults.DFLT_CHARSET_STR)
-  String contextType;
+  protected String contextType;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {

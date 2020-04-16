@@ -53,12 +53,12 @@ import org.corant.suites.jpa.shared.PersistenceService;
 @InfrastructureServices
 public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
-  final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
+  protected final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 
-  final Logger logger = Logger.getLogger(this.getClass().getName());
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   @Inject
-  JTAJPAUnitOfWorksManager unitOfWorksManager;
+  protected JTAJPAUnitOfWorksManager unitOfWorksManager;
 
   @Override
   public EntityManager getEntityManager(Class<?> cls) {
@@ -107,7 +107,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   }
 
   @PostConstruct
-  void onPostConstruct() {
+  protected void onPostConstruct() {
     final PersistenceService persistenceService = find(PersistenceService.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find Persistence service!"));
     select(EntityManagerFactory.class).forEach(emf -> {
@@ -120,7 +120,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     clsUns.clear();
   }
 }

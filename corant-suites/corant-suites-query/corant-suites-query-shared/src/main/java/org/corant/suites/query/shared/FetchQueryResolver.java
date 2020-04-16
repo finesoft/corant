@@ -26,6 +26,7 @@ public interface FetchQueryResolver {
 
   String RESULT_FUNC_PARAMETER_NAME = "r";
   String FETCHED_RESULT_FUNC_PARAMETER_NAME = "fr";
+  String RESULTS_FUNC_PARAMETER_NAME = "rs";
   String FETCHED_RESULTS_FUNC_PARAMETER_NAME = "frs";
   String PARAMETER_FUNC_PARAMETER_NAME = "p";
 

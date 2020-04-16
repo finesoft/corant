@@ -38,10 +38,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @SuppressWarnings({"rawtypes"})
 public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver<SqlNamedQuerier> {
 
-  final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
+  protected final Map<String, DynamicQuerierBuilder> builders = new ConcurrentHashMap<>();
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
   @ConfigProperty(name = "query.sql.mapping-file.paths")
@@ -75,7 +75,7 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     builders.clear();
     logger.fine(() -> "Clear default sql named querier resolver builders.");
   }

@@ -48,7 +48,7 @@ public class FreemarkerServletProiver implements WebMetaDataProvider {
     return Stream.empty();
   }
 
-  WebServletMetaData resolveWebInitParamMetaDatas() {
+  protected WebServletMetaData resolveWebInitParamMetaDatas() {
     String name = FreemarkerServlet.class.getSimpleName();
     FreemarkerServletConfig config =
         DeclarativeConfigResolver.resolveSingle(FreemarkerServletConfig.class);

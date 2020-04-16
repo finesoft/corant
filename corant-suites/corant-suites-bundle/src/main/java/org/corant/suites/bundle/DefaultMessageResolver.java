@@ -47,10 +47,10 @@ public class DefaultMessageResolver implements MessageResolver {
       .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 
   @Inject
-  private PropertyMessageBundle messageBundle;
+  protected PropertyMessageBundle messageBundle;
 
   @Inject
-  private EnumerationBundle enumBundle;
+  protected EnumerationBundle enumBundle;
 
   public Object[] genParameters(Locale locale, Object[] parameters) {
     if (parameters.length > 0) {
@@ -85,10 +85,23 @@ public class DefaultMessageResolver implements MessageResolver {
         (l) -> String.format("Can't find any message for %s", code));
   }
 
+  @SuppressWarnings("rawtypes")
+  protected Object handleParameter(Locale locale, Object obj) {
+    if (obj instanceof Enum) {
+      String literal = enumBundle.getEnumItemLiteral((Enum) obj, locale);
+      return literal == null ? obj : literal;
+    } else if (obj instanceof Instant || obj instanceof ZonedDateTime) {
+      return DATE_TIME_FMT.format((TemporalAccessor) obj);
+    } else if (obj instanceof Readable) {
+      return ((Readable) obj).toHumanReader(locale);
+    }
+    return obj;
+  }
+
   @Produces
   @MessageCodes
   @Dependent
-  String produce(InjectionPoint ip) {
+  protected String produce(InjectionPoint ip) {
     String codes = null;
     Locale locale = Locale.getDefault();
     for (Annotation ann : ip.getQualifiers()) {
@@ -104,19 +117,6 @@ public class DefaultMessageResolver implements MessageResolver {
       return getMessage(locale, codes, MessageResolver.EMPTY_PARAM);
     }
     return null;
-  }
-
-  @SuppressWarnings("rawtypes")
-  private Object handleParameter(Locale locale, Object obj) {
-    if (obj instanceof Enum) {
-      String literal = enumBundle.getEnumItemLiteral((Enum) obj, locale);
-      return literal == null ? obj : literal;
-    } else if (obj instanceof Instant || obj instanceof ZonedDateTime) {
-      return DATE_TIME_FMT.format((TemporalAccessor) obj);
-    } else if (obj instanceof Readable) {
-      return ((Readable) obj).toHumanReader(locale);
-    }
-    return obj;
   }
 
 }

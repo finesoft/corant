@@ -180,7 +180,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
     @Override
     public Consumer<Object[]> resolve(QueryHint qh) throws Exception {
-      return NashornScriptEngines.compileConsumer(qh.getScript().getCode(), "p", "r");
+      return NashornScriptEngines.createConsumer(qh.getScript().getCode(), "p", "r");
     }
 
   }

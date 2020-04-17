@@ -17,8 +17,6 @@ import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
@@ -27,6 +25,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 /**
  * corant-suites-query
+ *
+ * NOTE: The nashorn script engine is not thread safe, so we use thread local to hold it.
  *
  * @author bingo 下午7:02:11
  *
@@ -39,52 +39,44 @@ public class NashornScriptEngines {
 
   // -doe Dump a stack trace on errors.
   // --global-per-engine Use single Global instance per script engine instance
-  public static final ScriptEngine ENGINE =
-      NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine");
+  public static final ThreadLocal<ScriptEngine> ENGINES = ThreadLocal
+      .withInitial(() -> NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine"));
 
-  public static Consumer<Object[]> compileConsumer(String funcScript, String... paraNames) {
+  public static Consumer<Object[]> createConsumer(String funcScript, String... paraNames) {
     if (isBlank(funcScript)) {
       return null;
     }
-    try {
-      final CompiledScript compiled = ((Compilable) ENGINE).compile(funcScript);
-      return pns -> {
-        Bindings bindings = new SimpleBindings();
+    return pns -> {
+      Bindings bindings = new SimpleBindings();
+      try {
         for (int i = 0; i < pns.length; i++) {
           bindings.put(paraNames[i], pns[i]);
         }
-        try {
-          compiled.eval(bindings);
-        } catch (ScriptException e) {
-          throw new CorantRuntimeException(e);
-        }
-      };
-    } catch (ScriptException e) {
-      throw new CorantRuntimeException(e);
-    }
-
+        ENGINES.get().eval(funcScript, bindings);
+      } catch (ScriptException e) {
+        throw new CorantRuntimeException(e);
+      } finally {
+        bindings.clear();
+      }
+    };
   }
 
-  public static Function<Object[], Object> compileFunction(String funcScript, String... paraNames) {
+  public static Function<Object[], Object> createFunction(String funcScript, String... paraNames) {
     if (isBlank(funcScript)) {
       return null;
     }
-    try {
-      final CompiledScript compiled = ((Compilable) ENGINE).compile(funcScript);
-      return pns -> {
-        Bindings bindings = new SimpleBindings();
+    return pns -> {
+      Bindings bindings = new SimpleBindings();
+      try {
         for (int i = 0; i < pns.length; i++) {
           bindings.put(paraNames[i], pns[i]);
         }
-        try {
-          return compiled.eval(bindings);
-        } catch (ScriptException e) {
-          throw new CorantRuntimeException(e);
-        }
-      };
-    } catch (ScriptException e) {
-      throw new CorantRuntimeException(e);
-    }
+        return ENGINES.get().eval(funcScript, bindings);
+      } catch (ScriptException e) {
+        throw new CorantRuntimeException(e);
+      } finally {
+        bindings.clear();
+      }
+    };
   }
-
 }

@@ -192,7 +192,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
           throw new NotSupportedException(
               "Currently we only support using javascript as an fetch query injection script.");
         }
-        return NashornScriptEngines.compileFunction(fetchQuery.getInjectionScript().getCode(),
+        return NashornScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
             RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
       } else {
         return null;
@@ -207,7 +207,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
           throw new NotSupportedException(
               "Currently we only support using javascript as an fetch query predication script.");
         }
-        return NashornScriptEngines.compileFunction(fetchQuery.getPredicateScript().getCode(),
+        return NashornScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
             PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
       }
       return null;

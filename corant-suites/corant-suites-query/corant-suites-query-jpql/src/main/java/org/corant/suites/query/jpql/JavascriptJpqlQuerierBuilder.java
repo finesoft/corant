@@ -42,7 +42,7 @@ public class JavascriptJpqlQuerierBuilder
   protected JavascriptJpqlQuerierBuilder(Query query, QueryResolver queryResolver,
       FetchQueryResolver fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
-    execution = NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
+    execution = NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
   }
 
   /**

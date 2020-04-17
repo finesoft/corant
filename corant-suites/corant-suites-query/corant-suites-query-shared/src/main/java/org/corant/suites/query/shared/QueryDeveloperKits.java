@@ -86,7 +86,7 @@ public class QueryDeveloperKits {
       List<Throwable> throwabls) {
     if (fq.getPredicateScript().isValid() && fq.getPredicateScript().getType() == ScriptType.JS) {
       try {
-        NashornScriptEngines.compileFunction(fq.getPredicateScript().getCode(), "p", "r");
+        NashornScriptEngines.createFunction(fq.getPredicateScript().getCode(), "p", "r");
       } catch (Exception e) {
         throwabls
             .add(new CorantRuntimeException(e, "FETCH-QUERY-PREDICATE-SCRIPT-ERROR : [%s -> %s]",
@@ -95,7 +95,7 @@ public class QueryDeveloperKits {
     }
     if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.JS) {
       try {
-        NashornScriptEngines.compileFunction(fq.getInjectionScript().getCode(), "r", "fr");
+        NashornScriptEngines.createFunction(fq.getInjectionScript().getCode(), "r", "fr");
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
             query.getName(), fq.getReferenceQuery()));
@@ -127,7 +127,7 @@ public class QueryDeveloperKits {
       }
     } else if (query.getScript().getType() == ScriptType.JS) {
       try {
-        NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
+        NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "QUERY-ERROR : [%s]", query.getName()));
       }

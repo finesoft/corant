@@ -40,6 +40,6 @@ public abstract class JavascriptDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected JavascriptDynamicQuerierBuilder(Query query, QueryResolver queryResolver,
       FetchQueryResolver fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
-    execution = NashornScriptEngines.compileFunction(query.getScript().getCode(), "p", "up");
+    execution = NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
   }
 }

@@ -11,5 +11,6 @@
   	<module>corant-suites-lang-kotlin</module>
   	<module>corant-suites-lang-javascript</module>
   	<module>corant-suites-lang-ognl</module>
+  	<module>corant-suites-lang-jsr223</module>
   </modules>
 </project>

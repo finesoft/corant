@@ -108,7 +108,7 @@
 		<version.grpc>1.25.0</version.grpc>
 		<version.rsocket>1.0.0-RC5</version.rsocket>
 
-		<version.kotlin>1.3.60</version.kotlin>
+		<version.kotlin>1.3.72</version.kotlin>
 		<version.groovy>2.5.6</version.groovy>
 		<version.ognl>3.2.13</version.ognl>
 		<version.lombok>1.18.8</version.lombok>
@@ -788,6 +788,7 @@
 				<artifactId>groovy</artifactId>
 				<version>${version.groovy}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-compiler-embeddable</artifactId>
@@ -798,6 +799,27 @@
 				<artifactId>kotlin-stdlib-jdk8</artifactId>
 				<version>${version.kotlin}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-script-runtime</artifactId>
+				<version>${version.kotlin}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-reflect</artifactId>
+				<version>${version.kotlin}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-scripting-compiler-embeddable</artifactId>
+				<version>${version.kotlin}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-script-util</artifactId>
+				<version>${version.kotlin}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>ognl</groupId>
 				<artifactId>ognl</artifactId>
@@ -1341,6 +1363,11 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-lang-javascript</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-lang-jsr223</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

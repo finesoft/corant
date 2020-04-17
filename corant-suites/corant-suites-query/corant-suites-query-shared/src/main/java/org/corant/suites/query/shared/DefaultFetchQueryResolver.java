@@ -40,6 +40,7 @@ import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.cdi.ConversionService;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
+import org.corant.suites.lang.kotlin.KotlinScriptEngines;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
@@ -188,12 +189,17 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   protected Function<Object[], Object> resolveFetchInjection(FetchQuery fetchQuery) {
     return injections.computeIfAbsent(fetchQuery.getId(), id -> {
       if (fetchQuery.getInjectionScript().isValid()) {
-        if (fetchQuery.getInjectionScript().getType() != ScriptType.JS) {
+        if (fetchQuery.getInjectionScript().getType() == ScriptType.JS) {
+          return NashornScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
+              RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+        } else if (fetchQuery.getInjectionScript().getType() == ScriptType.KT) {
+          return KotlinScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
+              RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+        } else {
           throw new NotSupportedException(
-              "Currently we only support using javascript as an fetch query injection script.");
+              "Currently we only support using javascript / kotlin as an fetch query injection script.");
         }
-        return NashornScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
-            RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+
       } else {
         return null;
       }
@@ -203,12 +209,17 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   protected Function<Object[], Object> resolveFetchPredicate(FetchQuery fetchQuery) {
     return predicates.computeIfAbsent(fetchQuery.getId(), k -> {
       if (fetchQuery.getPredicateScript().isValid()) {
-        if (fetchQuery.getPredicateScript().getType() != ScriptType.JS) {
+        if (fetchQuery.getPredicateScript().getType() == ScriptType.JS) {
+          return NashornScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
+              PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
+        } else if (fetchQuery.getPredicateScript().getType() == ScriptType.KT) {
+          return KotlinScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
+              PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
+        } else {
           throw new NotSupportedException(
-              "Currently we only support using javascript as an fetch query predication script.");
+              "Currently we only support using javascript / kotlin as an fetch query predication script.");
         }
-        return NashornScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
-            PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
+
       }
       return null;
     });

@@ -24,6 +24,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-lang-kotlin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-cdi</artifactId>
 		</dependency>
 		<dependency>

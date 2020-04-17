@@ -87,6 +87,6 @@ public class Script implements Serializable {
   }
 
   public enum ScriptType {
-    JS, FM
+    JS, FM, KT
   }
 }

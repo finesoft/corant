@@ -26,6 +26,7 @@ import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
+import org.corant.suites.lang.kotlin.KotlinScriptEngines;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerConfigurations;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
@@ -96,6 +97,14 @@ public class QueryDeveloperKits {
     if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.JS) {
       try {
         NashornScriptEngines.createFunction(fq.getInjectionScript().getCode(), "r", "fr");
+      } catch (Exception e) {
+        throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
+            query.getName(), fq.getReferenceQuery()));
+      }
+    }
+    if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.KT) {
+      try {
+        KotlinScriptEngines.createFunction(fq.getInjectionScript().getCode(), "r", "fr");
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
             query.getName(), fq.getReferenceQuery()));

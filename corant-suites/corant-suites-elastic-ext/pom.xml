@@ -8,9 +8,6 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>corant-suites-elastic-ext</artifactId>
-	<properties>
-		<version.elasticsearch>6.5.4</version.elasticsearch>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.elasticsearch</groupId>

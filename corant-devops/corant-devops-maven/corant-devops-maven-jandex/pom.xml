@@ -9,34 +9,25 @@
 	</parent>
 	<artifactId>corant-devops-maven-jandex</artifactId>
 	<packaging>maven-plugin</packaging>
-	<properties>
-		<version.maven-plugin-plugin>3.5.1</version.maven-plugin-plugin>
-		<version.maven-plugin-api>3.2.5</version.maven-plugin-api>
-		<version.jandex>2.0.5.Final</version.jandex>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
-			<version>${version.maven-plugin-api}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
-			<version>${version.maven-plugin-plugin}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-			<version>${version.maven-plugin-api}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss</groupId>
 			<artifactId>jandex</artifactId>
-			<version>${version.jandex}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -52,7 +43,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>${version.maven-plugin-plugin}</version>
 				<executions>
 					<execution>
 						<id>default-descriptor</id>

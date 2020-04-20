@@ -33,15 +33,4 @@
 		<module>corant-devops-test-unit</module>
 		<module>corant-devops-test-itgr</module>
 	</modules>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-boms</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

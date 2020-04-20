@@ -419,7 +419,9 @@ public class Corant implements AutoCloseable {
         }
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         try {
-          server.registerMBean(power, objectName);
+          if (!server.isRegistered(objectName)) {
+            server.registerMBean(power, objectName);
+          }
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException
             | NotCompliantMBeanException ex) {
           throw new CorantRuntimeException(ex);

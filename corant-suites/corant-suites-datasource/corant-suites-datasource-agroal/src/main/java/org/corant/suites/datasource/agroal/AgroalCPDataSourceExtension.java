@@ -32,7 +32,9 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -154,12 +156,12 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         .sorted(Sortable::compare).forEach(c -> c.config(cfg, cfgs));
     AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
     if (cfg.isEnableMetrics()) {
-      registerMetricsMBean(agroalDataSource, cfg.getName());
+      registerMetricsMBean(cfg.getName());
     }
     return agroalDataSource;
   }
 
-  void registerMetricsMBean(AgroalDataSource agroalDataSource, String name) {
+  void registerMetricsMBean(String name) {
     final String useName = defaultString(name, "unnamed");
     logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
     ObjectName objectName = null;
@@ -169,10 +171,13 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       throw new CorantRuntimeException(ex);
     }
     try {
-      ManagementFactory.getPlatformMBeanServer()
-          .registerMBean(new AgroalCPDataSourceMetrics(agroalDataSource), objectName);
+      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+      if (server.isRegistered(objectName)) {
+        server.unregisterMBean(objectName);
+      }
+      server.registerMBean(new AgroalCPDataSourceMetrics(name), objectName);
     } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-        | NotCompliantMBeanException ex) {
+        | NotCompliantMBeanException | InstanceNotFoundException ex) {
       throw new CorantRuntimeException(ex);
     }
   }
@@ -183,24 +188,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       TransactionSynchronizationRegistry tsr = tryResolve(TransactionSynchronizationRegistry.class);
       cfgs.connectionPoolConfiguration()
           .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
-
-      // XAResourceRecoveryRegistry xar = null;
-      // if (ConfigProvider.getConfig().getOptionalValue("jta.auto-start-recovery", Boolean.class)
-      // .orElse(false)) {
-      // if (tryAsClass("org.corant.suites.jta.narayana.NarayanaExtension") != null) {
-      // xar = resolve(XAResourceRecoveryRegistry.class, NamedLiteral.of("narayana-jta"))
-      // .orElse(null);
-      // } else {
-      // xar = resolve(XAResourceRecoveryRegistry.class).orElse(null);
-      // }
-      // }
-      // if (xar != null) {
-      // cfgs.connectionPoolConfiguration()
-      // .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, "", false, xar));
-      // } else {
-      // cfgs.connectionPoolConfiguration()
-      // .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
-      // }
     }
   }
 

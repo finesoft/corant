@@ -15,7 +15,10 @@ package org.corant.shared.conversion.converter;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
+import org.corant.shared.conversion.ConversionException;
 
 /**
  * corant-shared
@@ -23,7 +26,7 @@ import java.util.Map;
  * @author bingo 上午11:09:37
  *
  */
-public class SqlDateInstantConverter extends AbstractConverter<Date, Instant> {
+public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Instant> {
 
   private static final long serialVersionUID = 5714969977056601989L;
 
@@ -63,7 +66,15 @@ public class SqlDateInstantConverter extends AbstractConverter<Date, Instant> {
     if (value == null) {
       return getDefaultValue();
     }
-    return Instant.ofEpochMilli(((java.util.Date) value).getTime());
+    // return Instant.ofEpochMilli(((java.util.Date) value).getTime());
+    Optional<ZoneId> zoneId = resolveHintZoneId(hints);
+    if (zoneId.isPresent()) {
+      return value.toLocalDate().atStartOfDay(zoneId.get()).toInstant();
+    } else if (!isStrict(hints)) {
+      return value.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+    } else {
+      throw new ConversionException("Can't not convert java.sql.Date %s to Instant", value);
+    }
   }
 
 }

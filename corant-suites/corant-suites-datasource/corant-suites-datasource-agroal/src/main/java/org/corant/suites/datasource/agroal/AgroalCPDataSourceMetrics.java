@@ -13,8 +13,11 @@
  */
 package org.corant.suites.datasource.agroal;
 
+import static org.corant.suites.cdi.Instances.findNamed;
 import java.time.Duration;
+import java.util.Optional;
 import io.agroal.api.AgroalDataSource;
+import io.agroal.api.AgroalDataSourceMetrics;
 
 /**
  * corant-suites-datasource-agroal
@@ -24,110 +27,120 @@ import io.agroal.api.AgroalDataSource;
  */
 public class AgroalCPDataSourceMetrics implements AgroalCPDataSourceMetricsMBean {
 
-  final AgroalDataSource dataSource;
+  static final AgroalDataSourceMetrics EMPTY = new AgroalDataSourceMetrics() {};
+
+  final String dataSourceName;
 
   /**
-   * @param dataSource
+   * @param dataSourceName
    */
-  protected AgroalCPDataSourceMetrics(AgroalDataSource dataSource) {
+  protected AgroalCPDataSourceMetrics(String dataSourceName) {
     super();
-    this.dataSource = dataSource;
+    this.dataSourceName = dataSourceName;
   }
 
   @Override
   public long acquireCount() {
-    return dataSource.getMetrics().acquireCount();
+    return getMetrics().acquireCount();
   }
 
   @Override
   public long activeCount() {
-    return dataSource.getMetrics().activeCount();
+    return getMetrics().activeCount();
   }
 
   @Override
   public long availableCount() {
-    return dataSource.getMetrics().availableCount();
+    return getMetrics().availableCount();
   }
 
   @Override
   public long awaitingCount() {
-    return dataSource.getMetrics().awaitingCount();
+    return getMetrics().awaitingCount();
   }
 
   @Override
   public Duration blockingTimeAverage() {
-    return dataSource.getMetrics().blockingTimeAverage();
+    return getMetrics().blockingTimeAverage();
   }
 
   @Override
   public Duration blockingTimeMax() {
-    return dataSource.getMetrics().blockingTimeMax();
+    return getMetrics().blockingTimeMax();
   }
 
   @Override
   public Duration blockingTimeTotal() {
 
-    return dataSource.getMetrics().blockingTimeTotal();
+    return getMetrics().blockingTimeTotal();
   }
 
   @Override
   public long creationCount() {
-    return dataSource.getMetrics().creationCount();
+    return getMetrics().creationCount();
   }
 
   @Override
   public Duration creationTimeAverage() {
-    return dataSource.getMetrics().creationTimeAverage();
+    return getMetrics().creationTimeAverage();
   }
 
   @Override
   public Duration creationTimeMax() {
-    return dataSource.getMetrics().creationTimeMax();
+    return getMetrics().creationTimeMax();
   }
 
   @Override
   public Duration creationTimeTotal() {
-    return dataSource.getMetrics().creationTimeTotal();
+    return getMetrics().creationTimeTotal();
   }
 
   @Override
   public String description() {
-    return dataSource.getMetrics().toString();
+    return getMetrics().toString();
   }
 
   @Override
   public long destroyCount() {
-    return dataSource.getMetrics().destroyCount();
+    return getMetrics().destroyCount();
   }
 
   @Override
   public long flushCount() {
-    return dataSource.getMetrics().flushCount();
+    return getMetrics().flushCount();
+  }
+
+  public AgroalDataSourceMetrics getMetrics() {
+    Optional<AgroalDataSource> ds = findNamed(AgroalDataSource.class, dataSourceName);
+    if (ds.isPresent()) {
+      return ds.get().getMetrics();
+    } else {
+      return EMPTY;
+    }
   }
 
   @Override
   public long invalidCount() {
-    return dataSource.getMetrics().invalidCount();
+    return getMetrics().invalidCount();
   }
 
   @Override
   public long leakDetectionCount() {
-    return dataSource.getMetrics().leakDetectionCount();
+    return getMetrics().leakDetectionCount();
   }
 
   @Override
   public long maxUsedCount() {
-    return dataSource.getMetrics().maxUsedCount();
+    return getMetrics().maxUsedCount();
   }
 
   @Override
   public long reapCount() {
-    return dataSource.getMetrics().reapCount();
+    return getMetrics().reapCount();
   }
 
   @Override
   public void reset() {
-    dataSource.getMetrics().reset();
+    getMetrics().reset();
   }
-
 }

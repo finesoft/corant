@@ -37,6 +37,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.inject.Singleton;
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -80,7 +81,6 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  */
 public class NarayanaExtension implements TransactionExtension {
 
-  static volatile boolean registeredMbean = false;
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
@@ -213,7 +213,7 @@ public class NarayanaExtension implements TransactionExtension {
   }
 
   synchronized void registerToMBean() {
-    if (config.isEnableMbean() && !registeredMbean) {
+    if (config.isEnableMbean()) {
       registerToMBean("ObjectStoreEnvironmentBean-nullAction",
           BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null));
       registerToMBean("ObjectStoreEnvironmentBean-default",
@@ -228,7 +228,6 @@ public class NarayanaExtension implements TransactionExtension {
           BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
       registerToMBean("RecoveryEnvironmentBean",
           BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class));
-      registeredMbean = true;
       logger.info(() -> "Registered narayana environment beans to MBean server.");
     }
   }
@@ -240,11 +239,15 @@ public class NarayanaExtension implements TransactionExtension {
     } catch (MalformedObjectNameException ex) {
       throw new CorantRuntimeException(ex);
     }
+
     MBeanServer server = ManagementFactory.getPlatformMBeanServer();
     try {
+      if (server.isRegistered(objectName)) {
+        server.unregisterMBean(objectName);
+      }
       server.registerMBean(bean, objectName);
     } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-        | NotCompliantMBeanException ex) {
+        | NotCompliantMBeanException | InstanceNotFoundException ex) {
       throw new CorantRuntimeException(ex);
     }
   }

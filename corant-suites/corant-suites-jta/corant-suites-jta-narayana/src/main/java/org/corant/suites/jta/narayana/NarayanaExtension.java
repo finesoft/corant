@@ -208,7 +208,7 @@ public class NarayanaExtension implements TransactionExtension {
     try {
       recoveryManagerService.unInitialize();
     } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      logger.log(Level.WARNING, e, () -> "Uninitialize recovery manager service occurred error!");
     }
   }
 

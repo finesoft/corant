@@ -66,7 +66,7 @@ public class Power implements PowerMBean {
         Corant.current().stop();
       }
     } catch (Exception t) {
-      throw new RuntimeException("Can't Stop corant! please check logging.");
+      throw new RuntimeException("Can't stop corant! please check logging.");
     }
   }
 

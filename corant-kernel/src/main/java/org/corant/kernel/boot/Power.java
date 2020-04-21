@@ -39,7 +39,11 @@ public class Power implements PowerMBean {
 
   @Override
   public boolean isRunning() {
-    return Corant.current() != null && Corant.current().isRuning();
+    try {
+      return Corant.current() != null && Corant.current().isRuning();
+    } catch (Exception t) {
+      throw new RuntimeException("Can't check corant running! please check logging.");
+    }
   }
 
   @Override

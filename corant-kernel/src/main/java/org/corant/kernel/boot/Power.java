@@ -44,17 +44,25 @@ public class Power implements PowerMBean {
 
   @Override
   public void start() {
-    if (Corant.current() == null) {
-      Corant.run(beanClasses, arguments);
-    } else if (!Corant.current().isRuning()) {
-      Corant.current().start(ObjectUtils.emptyConsumer());
+    try {
+      if (Corant.current() == null) {
+        Corant.run(beanClasses, arguments);
+      } else if (!Corant.current().isRuning()) {
+        Corant.current().start(ObjectUtils.emptyConsumer());
+      }
+    } catch (Exception t) {
+      throw new RuntimeException("Can't start corant! please check logging.");
     }
   }
 
   @Override
   public void stop() {
-    if (Corant.current() != null && Corant.current().isRuning()) {
-      Corant.current().stop();
+    try {
+      if (Corant.current() != null && Corant.current().isRuning()) {
+        Corant.current().stop();
+      }
+    } catch (Exception t) {
+      throw new RuntimeException("Can't Stop corant! please check logging.");
     }
   }
 

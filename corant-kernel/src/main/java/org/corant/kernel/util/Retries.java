@@ -122,7 +122,7 @@ public class Retries {
           final Exception lastException = executeException;
           final String logretryCounter = times + " - " + retryCounter;
           if (occurredException) {
-            LOGGER.warning(
+            LOGGER.log(Level.WARNING, executeException,
                 () -> String.format(RTY_LOG, lastException.getClass().getName(), logretryCounter,
                     this.interval, defaultString(lastException.getMessage(), "no message")));
           } else if (retryCounter > 1) {

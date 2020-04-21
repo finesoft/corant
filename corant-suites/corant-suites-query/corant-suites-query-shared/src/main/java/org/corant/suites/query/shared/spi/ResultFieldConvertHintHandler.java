@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared.spi;
 
 import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
@@ -86,7 +87,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
   public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
-  protected final Map<String, Pair<String[], Pair<Class<?>, Object[]>>> caches =
+  protected final Map<String, List<Pair<String[], Pair<Class<?>, Object[]>>>> caches =
       new ConcurrentHashMap<>();// static?
   protected final Set<String> brokens = new CopyOnWriteArraySet<>(); // static?
 
@@ -145,12 +146,14 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    Pair<String[], Pair<Class<?>, Object[]>> hint = null;
-    if (brokens.contains(qh.getId()) || (hint = resolveHint(qh)) == null) {
+    List<Pair<String[], Pair<Class<?>, Object[]>>> hints = null;
+    if (brokens.contains(qh.getId()) || (hints = resolveHint(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
-      handle((Map) result, hint.getLeft(), hint.getRight().getKey(), hint.getRight().getRight());
+      for (Pair<String[], Pair<Class<?>, Object[]>> hint : hints) {
+        handle((Map) result, hint.getLeft(), hint.getRight().getKey(), hint.getRight().getRight());
+      }
     } else {
       List<?> list = null;
       if (result instanceof Forwarding) {
@@ -163,15 +166,16 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            handle((Map) item, hint.getLeft(), hint.getRight().getKey(),
-                hint.getRight().getRight());
+            for (Pair<String[], Pair<Class<?>, Object[]>> hint : hints) {
+              handle((Map) item, hint.getLeft(), hint.getRight().getKey(),
+                  hint.getRight().getRight());
+            }
           }
         }
       }
     }
   }
 
-  @SuppressWarnings("unchecked")
   protected void handle(Map<Object, Object> map, String[] keyPath, Class<?> targetClass,
       Object[] convertHits) {
     convertMapValue(map, keyPath, (orginalVal) -> {
@@ -204,7 +208,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     logger.fine(() -> "Clear result field converter hint handler caches.");
   }
 
-  protected Pair<String[], Pair<Class<?>, Object[]>> resolveHint(QueryHint qh) {
+  protected List<Pair<String[], Pair<Class<?>, Object[]>>> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
     } else {
@@ -219,13 +223,8 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
           if (isNoneBlank(propertyName, propertyType)) {
             Class<?> targetClass = tryAsClass(propertyType);
             if (targetClass != null) {
-              Pair<Class<?>, Object[]> converterParam = Pair.of(targetClass, new Object[0]);
               return caches.computeIfAbsent(qh.getId(),
-                  (k) -> Pair.of(split(propertyName, ".", true, true),
-                      isNotEmpty(pthk) && isNotEmpty(pthv)
-                          ? converterParam.withRight(
-                              new Object[] {pthk.get(0).getValue(), pthv.get(0).getValue()})
-                          : converterParam));
+                  k -> resolveHint(propertyName, targetClass, pthk, pthv));
             }
           }
         }
@@ -235,5 +234,16 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
+  }
+
+  protected List<Pair<String[], Pair<Class<?>, Object[]>>> resolveHint(String propertyName,
+      Class<?> targetClass, List<QueryHintParameter> pthk, List<QueryHintParameter> pthv) {
+    final Object[] convertHints = isNotEmpty(pthk) && isNotEmpty(pthv)
+        ? new Object[] {pthk.get(0).getValue(), pthv.get(0).getValue()}
+        : new Object[0];
+    List<Pair<String[], Pair<Class<?>, Object[]>>> list = new ArrayList<>();
+    linkedHashSetOf(split(propertyName, ",", true, true)).forEach(
+        p -> list.add(Pair.of(split(p, ".", true, true), Pair.of(targetClass, convertHints))));
+    return list;
   }
 }

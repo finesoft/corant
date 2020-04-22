@@ -14,9 +14,12 @@
 package org.corant.suites.jpa.hibernate;
 
 import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.ConversionUtils.toInteger;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.MapUtils.getMapInstant;
 import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.StringUtils.split;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -41,6 +44,7 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
+  static final String SYS_IP_KEY = "corant.system.ip";
   static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
   static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
   static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
@@ -51,10 +55,19 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static volatile boolean usePersistenceTime =
       getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
   static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();// static?
+  static String ipAddress = getConfig().getOptionalValue(SYS_IP_KEY, String.class).orElse(null);
 
   static {
     DATA_CENTER_ID = getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
-    WORKER_ID = getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElse(0);
+    WORKER_ID = getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class).orElseGet(() -> {
+      if (isNotBlank(ipAddress)) {
+        String[] segs = split(ipAddress, ".", true, true);
+        if (segs.length > 0) {
+          return toInteger(segs[segs.length - 1]);
+        }
+      }
+      return 0;
+    });
     logger.info(() -> String.format(
         "Use Snowflake id generator for hibernate data center id is %s, worker id is %s.",
         DATA_CENTER_ID, WORKER_ID));

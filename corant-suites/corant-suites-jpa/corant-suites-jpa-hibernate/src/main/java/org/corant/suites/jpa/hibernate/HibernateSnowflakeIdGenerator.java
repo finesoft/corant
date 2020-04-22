@@ -64,7 +64,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
             ? toInteger(right(IP, IP.length() - IP.lastIndexOf('.') - 1))
             : 0);
     logger.info(() -> String.format(
-        "Use Snowflake id generator for hibernate data center id is %s, worker id is %s.",
+        "Use snowflake id generator for hibernate data center id is %s, worker id is %s.",
         DATA_CENTER_ID, WORKER_ID));
     if (DATA_CENTER_ID >= 0) {
       GENERATOR = Identifiers.snowflakeUUIDGenerator(DATA_CENTER_ID, WORKER_ID);

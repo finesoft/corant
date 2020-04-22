@@ -90,7 +90,7 @@
 		<version.atomikos>5.0.3</version.atomikos>
 		<version.xadisk>1.2.2</version.xadisk>
 
-		<version.mssql-jdbc>8.2.0.jre8</version.mssql-jdbc>
+		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>

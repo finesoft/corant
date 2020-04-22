@@ -35,6 +35,8 @@ public interface Names {
 
   String CORANT_APP_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "application-name";
 
+  String CORANT_SYS_IP = CORANT + NAME_SPACE_SEPARATORS + "system.ip";
+
   String CORANT_PREFIX = CORANT + NAME_SPACE_SEPARATORS;
 
   static String applicationName() {

@@ -54,7 +54,7 @@ import com.mongodb.client.MongoDatabase;
 public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, MgNamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
-                                                                                       // scope
+  // scope
 
   @Inject
   protected Logger logger;

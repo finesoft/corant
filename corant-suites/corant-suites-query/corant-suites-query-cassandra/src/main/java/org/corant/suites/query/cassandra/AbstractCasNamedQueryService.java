@@ -41,7 +41,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String cql = querier.getScript(null);
+    String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     Object[] scriptParameter = querier.getScriptParameter();
     try {
@@ -70,7 +70,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public <T> Forwarding<T> forward(String queryName, Object parameter) {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String cql = querier.getScript(null);
+    String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
@@ -98,7 +98,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public <T> T get(String queryName, Object parameter) {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String cql = querier.getScript(null);
+    String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     try {
       log(queryName, scriptParameter, cql);
@@ -115,7 +115,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public <T> Paging<T> page(String queryName, Object parameter) {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String cql = querier.getScript(null);
+    String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
@@ -144,7 +144,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public <T> List<T> select(String queryName, Object parameter) {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String cql = querier.getScript(null);
+    String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int maxSelectSize = resolveMaxSelectSize(querier);
     try {

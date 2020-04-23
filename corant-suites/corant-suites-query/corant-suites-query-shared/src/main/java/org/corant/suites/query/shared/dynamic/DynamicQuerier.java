@@ -24,6 +24,17 @@ import org.corant.suites.query.shared.Querier;
  */
 public interface DynamicQuerier<P, S> extends Querier {
 
+  default S getScript() {
+    return getScript(null);
+  }
+
+  /**
+   * Return query script, implemention can use the pass in additionals parameter to compute the
+   * script.
+   *
+   * @param additionals
+   * @return getScript
+   */
   S getScript(Map<?, ?> additionals);
 
   P getScriptParameter();

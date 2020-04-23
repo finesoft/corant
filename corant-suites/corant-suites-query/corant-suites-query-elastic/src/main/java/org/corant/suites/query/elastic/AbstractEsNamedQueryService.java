@@ -44,7 +44,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public Map<String, Object> aggregate(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    String script = resolveScript(querier.getScript(null), null, null);
+    String script = resolveScript(querier.getScript(), null, null);
     try {
       Map<String, Object> result =
           getExecutor().searchAggregation(resolveIndexName(querier), script);
@@ -62,7 +62,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     EsNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String script = resolveScript(querier.getScript(null), null, maxSize > 0 ? maxSize : null);
+    String script = resolveScript(querier.getScript(), null, maxSize > 0 ? maxSize : null);
     try {
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList =
@@ -115,7 +115,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public Map<String, Object> search(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    String script = resolveScript(querier.getScript(null), null, null);
+    String script = resolveScript(querier.getScript(), null, null);
     try {
       Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script);
       querier.resolveResultHints(result);
@@ -136,7 +136,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Stream<T> stream(String q, Object param) {
     EsNamedQuerier querier = getQuerierResolver().resolve(q, param);
-    String script = resolveScript(querier.getScript(null), null, null);
+    String script = resolveScript(querier.getScript(), null, null);
     log("stream-> " + q, querier.getQueryParameter(), script);
     try {
       return getExecutor().stream(resolveIndexName(querier), script).map(result -> {
@@ -174,7 +174,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,
       Integer limit) {
-    String script = resolveScript(querier.getScript(null), offset, limit);
+    String script = resolveScript(querier.getScript(), offset, limit);
     try {
       log(q, querier.getQueryParameter(), script);
       Pair<Long, List<Map<String, Object>>> hits =

@@ -39,7 +39,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
     String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
     SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String sql = querier.getScript(null);
+    String sql = querier.getScript();
     Object[] scriptParameter = querier.getScriptParameter();
     // if (maxSize > 0) {
     // sql = getDialect().getLimitSql(sql, maxSize);
@@ -65,7 +65,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> Forwarding<T> forward(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript(null);
+    String sql = querier.getScript();
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
@@ -92,7 +92,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> T get(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript(null);
+    String sql = querier.getScript();
     try {
       log(queryName, scriptParameter, sql);
       Map<String, Object> result = getExecutor().get(sql, scriptParameter);
@@ -108,7 +108,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> Paging<T> page(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript(null);
+    String sql = querier.getScript();
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
@@ -139,7 +139,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> List<T> select(String queryName, Object parameter) {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
-    String sql = querier.getScript(null);
+    String sql = querier.getScript();
     int maxSelectSize = resolveMaxSelectSize(querier);
     try {
       // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);

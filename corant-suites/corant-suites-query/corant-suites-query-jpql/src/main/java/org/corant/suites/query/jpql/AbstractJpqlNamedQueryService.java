@@ -62,7 +62,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    String ql = querier.getScript(null);
+    String ql = querier.getScript();
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     log(queryName, scriptParameter, ql);
@@ -94,7 +94,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    String ql = querier.getScript(null);
+    String ql = querier.getScript();
     log(queryName, scriptParameter, ql);
     T result = null;
     EntityManager em = getEntityManager();
@@ -118,7 +118,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    String ql = querier.getScript(null);
+    String ql = querier.getScript();
     int offset = resolveOffset(querier);
     int limit = resolveLimit(querier);
     log(queryName, scriptParameter, ql);
@@ -156,7 +156,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] queryParam = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     int maxSelectSize = resolveMaxSelectSize(querier);
-    String ql = querier.getScript(null);
+    String ql = querier.getScript();
     log(queryName, queryParam, ql);
     EntityManager em = getEntityManager();
     try {
@@ -184,7 +184,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    String ql = querier.getScript(null);
+    String ql = querier.getScript();
     log("stream-> " + queryName, scriptParameter, ql);
     final EntityManager em = getEntityManager(); // FIXME close
     Stream<T> stream =

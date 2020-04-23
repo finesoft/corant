@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.logging.Level;
-import org.bson.conversions.Bson;
 import org.corant.shared.util.ObjectUtils.Triple;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
@@ -34,7 +33,7 @@ import org.corant.suites.query.shared.mapping.Query;
  *
  */
 public class FreemarkerMgQuerierBuilder extends
-    FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Bson>, MgNamedQuerier> {
+    FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Object>, MgNamedQuerier> {
 
   /**
    * @param query

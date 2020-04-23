@@ -68,6 +68,27 @@ public class DefaultMgNamedQuerier
     init(mgQuery);
   }
 
+  @SuppressWarnings("rawtypes")
+  static Object resolve(Object x) throws JsonProcessingException {
+    if (x instanceof Iterable) {
+      List<Bson> list = new ArrayList<>();
+      for (Object item : (Iterable) x) {
+        list.add(BasicDBObject
+            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
+      }
+      return list;
+    } else if (x instanceof Object[]) {
+      List<Bson> list = new ArrayList<>();
+      for (Object item : (Object[]) x) {
+        list.add(BasicDBObject
+            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
+      }
+      return list;
+    } else {
+      return BasicDBObject.parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x));
+    }
+  }
+
   @Override
   public String getCollectionName() {
     return collectionName;
@@ -118,27 +139,6 @@ public class DefaultMgNamedQuerier
           }
         }
       }
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  protected Object resolve(Object x) throws JsonProcessingException {
-    if (x instanceof Iterable) {
-      List<Bson> list = new ArrayList<>();
-      for (Object item : (Iterable) x) {
-        list.add(BasicDBObject
-            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
-      }
-      return list;
-    } else if (x instanceof Object[]) {
-      List<Bson> list = new ArrayList<>();
-      for (Object item : (Object[]) x) {
-        list.add(BasicDBObject
-            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
-      }
-      return list;
-    } else {
-      return BasicDBObject.parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x));
     }
   }
 }

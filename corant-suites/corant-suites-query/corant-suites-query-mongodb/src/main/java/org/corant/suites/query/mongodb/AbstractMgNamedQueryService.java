@@ -98,6 +98,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
     AggregateIterable<Document> ai =
         getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
+    Map<String, String> pros = querier.getQuery().getProperties();
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(ai::batchSize);
+    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, ConversionUtils::toLong)
+            .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
+    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, ConversionUtils::toLong)
+            .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
+    Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
+    bson.ifPresent(ai::hint);
+    resovleCollation(querier).ifPresent(ai::collation);
     List<Map<String, Object>> list =
         streamOf(ai).map(this::convertDocument).collect(Collectors.toList());
     return querier.resolveResult(list);

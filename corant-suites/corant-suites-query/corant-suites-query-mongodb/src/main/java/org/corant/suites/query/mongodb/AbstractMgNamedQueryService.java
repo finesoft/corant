@@ -13,54 +13,40 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import static org.corant.shared.util.ConversionUtils.toBoolean;
-import static org.corant.shared.util.ConversionUtils.toEnum;
-import static org.corant.shared.util.MapUtils.getMapEnum;
-import static org.corant.shared.util.MapUtils.getOpt;
-import static org.corant.shared.util.MapUtils.getOptMapObject;
-import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonpCharacterEscapes;
+import com.mongodb.BasicDBObject;
+import com.mongodb.CursorType;
+import com.mongodb.client.*;
+import com.mongodb.client.model.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
-import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
-import org.corant.suites.query.shared.AbstractNamedQueryService;
-import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryParameter;
+import org.corant.suites.query.shared.*;
 import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
-import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
-import com.mongodb.BasicDBObject;
-import com.mongodb.CursorType;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Collation;
-import com.mongodb.client.model.CollationAlternate;
-import com.mongodb.client.model.CollationCaseFirst;
-import com.mongodb.client.model.CollationMaxVariable;
-import com.mongodb.client.model.CollationStrength;
-import com.mongodb.client.model.CountOptions;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.ConversionUtils.toEnum;
+import static org.corant.shared.util.MapUtils.*;
+import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.suites.query.mongodb.DefaultMgNamedQuerier.OM;
 
 /**
  * corant-suites-query
  *
  * @author bingo 下午8:20:43
- *
  */
-public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService {
+public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryService
+    implements MgNamedQueryService {
 
   public static final String PRO_KEY_COLLECTION_NAME = ".collection-name";
 
@@ -90,6 +76,32 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_MAXVAR = PRO_KEY_CO_COLA + ".maxVariable";
   public static final String PRO_KEY_CO_COLA_NORMA = PRO_KEY_CO_COLA + ".normalization";
   public static final String PRO_KEY_CO_COLA_BACKWARDS = PRO_KEY_CO_COLA + ".backwards";
+
+  public <T> List<T> aggregate(String queryName, Object parameter) {
+    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    MongoCollection<Document> collection =
+        getDataBase().getCollection(resolveCollectionName(querier));
+    DefaultMgNamedQuerier defaultMgNamedQuerier = (DefaultMgNamedQuerier) querier;
+    EnumMap<MgOperator, List<?>> operatorScript =
+        defaultMgNamedQuerier.getAggregateOperatorScript();
+    List<BasicDBObject> basicDBObjectList = new ArrayList<>();
+    operatorScript
+        .get(MgOperator.AGGREGATE)
+        .forEach(
+            script -> {
+              try {
+                basicDBObjectList.add(
+                    BasicDBObject.parse(
+                        OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(script)));
+              } catch (JsonProcessingException e) {
+                e.printStackTrace();
+              }
+            });
+    AggregateIterable<Document> aggregateIterable = collection.aggregate(basicDBObjectList);
+    List<Map<String, Object>> list =
+        streamOf(aggregateIterable).map(this::convertDocument).collect(Collectors.toList());
+    return querier.resolveResult(list);
+  }
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
@@ -174,8 +186,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (size > 0) {
       if (size > maxSelectSize) {
         throw new QueryRuntimeException(
-            "[%s] Result record number overflow, the allowable range is %s.", queryName,
-            maxSelectSize);
+            "[%s] Result record number overflow, the allowable range is %s.",
+            queryName, maxSelectSize);
       }
       this.fetch(list, querier);
     }
@@ -308,52 +320,56 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
-    Stream<T> stream = streamOf(new Iterator<T>() {
-      final Forwarding<T> buffer = doForward(cursor);
-      int counter = 1;
-      T next = null;
+    Stream<T> stream =
+        streamOf(
+                new Iterator<T>() {
+                  final Forwarding<T> buffer = doForward(cursor);
+                  int counter = 1;
+                  T next = null;
 
-      @Override
-      public boolean hasNext() {
-        if (!parameter.terminateIf(counter, next)) {
-          if (!buffer.hasResults()) {
-            if (buffer.hasNext()) {
-              buffer.with(doForward(cursor));
-              return buffer.hasResults();
-            }
-          } else {
-            return true;
+                  @Override
+                  public boolean hasNext() {
+                    if (!parameter.terminateIf(counter, next)) {
+                      if (!buffer.hasResults()) {
+                        if (buffer.hasNext()) {
+                          buffer.with(doForward(cursor));
+                          return buffer.hasResults();
+                        }
+                      } else {
+                        return true;
+                      }
+                    }
+                    return false;
+                  }
+
+                  @Override
+                  public T next() {
+                    if (!buffer.hasResults()) {
+                      throw new NoSuchElementException();
+                    }
+                    counter++;
+                    next = buffer.getResults().remove(0);
+                    return next;
+                  }
+
+                  Forwarding<T> doForward(MongoCursor<Document> it) {
+                    int size = parameter.getLimit();
+                    List<Object> list = new ArrayList<>(size);
+                    while (it.hasNext() && --size >= 0) {
+                      list.add(it.next());
+                    }
+                    fetch(list, querier);
+                    return Forwarding.of(querier.resolveResult(list), it.hasNext());
+                  }
+                })
+            .onClose(cursor::close);
+    sun.misc.Cleaner.create(
+        stream,
+        () -> {
+          if (cursor != null) {
+            cursor.close();
           }
-        }
-        return false;
-      }
-
-      @Override
-      public T next() {
-        if (!buffer.hasResults()) {
-          throw new NoSuchElementException();
-        }
-        counter++;
-        next = buffer.getResults().remove(0);
-        return next;
-      }
-
-      Forwarding<T> doForward(MongoCursor<Document> it) {
-        int size = parameter.getLimit();
-        List<Object> list = new ArrayList<>(size);
-        while (it.hasNext() && --size >= 0) {
-          list.add(it.next());
-        }
-        fetch(list, querier);
-        return Forwarding.of(querier.resolveResult(list), it.hasNext());
-      }
-
-    }).onClose(cursor::close);
-    sun.misc.Cleaner.create(stream, () -> {
-      if (cursor != null) {
-        cursor.close();
-      }
-    });
+        });
     return stream;
   }
 }

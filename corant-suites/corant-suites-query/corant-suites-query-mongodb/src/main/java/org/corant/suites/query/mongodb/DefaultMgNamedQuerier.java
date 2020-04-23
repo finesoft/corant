@@ -13,12 +13,9 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.fasterxml.jackson.core.JsonpCharacterEscapes;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
@@ -27,26 +24,32 @@ import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
-import com.fasterxml.jackson.core.JsonpCharacterEscapes;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.BasicDBObject;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.StringUtils.asDefaultString;
 
 /**
  * corant-suites-query
  *
  * @author bingo 下午4:35:55
- *
  */
 public class DefaultMgNamedQuerier
     extends AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>
     implements MgNamedQuerier {
 
   public static final ObjectMapper OM = new ObjectMapper();
-
-  protected String collectionName;
   protected final String name;
   protected final EnumMap<MgOperator, Bson> script = new EnumMap<>(MgOperator.class);
+  protected final EnumMap<MgOperator, List<?>> aggregateOperatorScript =
+      new EnumMap<>(MgOperator.class);
   protected final String originalScript;
+  protected String collectionName;
 
   /**
    * @param query
@@ -56,13 +59,21 @@ public class DefaultMgNamedQuerier
    * @param mgQuery
    * @param originalScript
    */
-  protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
+  protected DefaultMgNamedQuerier(
+      Query query,
+      QueryParameter queryParameter,
+      QueryResolver resultResolver,
+      FetchQueryResolver fetchQueryResolver,
+      Map<?, ?> mgQuery,
       String originalScript) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);
+  }
+
+  public EnumMap<MgOperator, List<?>> getAggregateOperatorScript() {
+    return aggregateOperatorScript;
   }
 
   @Override
@@ -93,7 +104,6 @@ public class DefaultMgNamedQuerier
   /**
    * Resolve the collection name and query script
    *
-   *
    * @param mgQuery init
    */
   @SuppressWarnings("rawtypes")
@@ -108,8 +118,17 @@ public class DefaultMgNamedQuerier
           Object x = queryScript.get(mgo.getOps());
           if (x != null) {
             try {
-              script.put(mgo, BasicDBObject
-                  .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x)));
+              switch (mgo) {
+                case AGGREGATE:
+                  aggregateOperatorScript.put(mgo, (List) x);
+                  break;
+                default:
+                  script.put(
+                      mgo,
+                      BasicDBObject.parse(
+                          OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x)));
+                  break;
+              }
             } catch (Exception e) {
               throw new QueryRuntimeException(e);
             }

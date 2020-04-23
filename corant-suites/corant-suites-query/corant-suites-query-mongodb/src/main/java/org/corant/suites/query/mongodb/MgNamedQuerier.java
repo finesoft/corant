@@ -13,23 +13,29 @@
  */
 package org.corant.suites.query.mongodb;
 
-import java.util.EnumMap;
-import java.util.Map;
 import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.NamedQuerier;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public interface MgNamedQuerier
     extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Bson>>, NamedQuerier {
 
-  String getCollectionName();// from 2020-03-18
+  String getCollectionName(); // from 2020-03-18
 
   String getOriginalScript();
 
   public enum MgOperator {
-
-    FILTER("filter"), PROJECTION("projection"), MIN("min"), MAX("max"), HINT("hint"), SORT("sort");
+    AGGREGATE("aggregate"),
+    FILTER("filter"),
+    PROJECTION("projection"),
+    MIN("min"),
+    MAX("max"),
+    HINT("hint"),
+    SORT("sort");
 
     private String ops;
 

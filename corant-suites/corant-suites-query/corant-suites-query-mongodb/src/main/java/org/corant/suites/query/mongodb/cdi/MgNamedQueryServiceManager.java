@@ -33,8 +33,8 @@ import org.bson.Document;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.Decimal128Utils;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
+import org.corant.suites.query.mongodb.MgNamedQueryService;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
-import org.corant.suites.query.shared.NamedQueryService;
 import org.corant.suites.query.shared.NamedQueryServiceManager;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -53,7 +53,7 @@ import com.mongodb.client.MongoDatabase;
 // @Alternative
 public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
+  protected final Map<String, MgNamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
                                                                                        // scope
 
   @Inject
@@ -79,7 +79,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected boolean convertDecimal;
 
   @Override
-  public NamedQueryService get(Object qualifier) {
+  public MgNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String databaseName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
@@ -102,7 +102,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Produces
   @MgQuery
-  protected NamedQueryService produce(InjectionPoint ip) {
+  protected MgNamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(MgQuery.class)) {

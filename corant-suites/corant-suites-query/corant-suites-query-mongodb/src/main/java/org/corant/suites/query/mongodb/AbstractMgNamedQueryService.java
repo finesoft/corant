@@ -228,7 +228,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           bson.ifPresent(fi::sort);
           break;
         default:
-          break;
+          throw new QueryRuntimeException("invoke aggregate func plz");
       }
     }
     Map<String, String> pros = querier.getQuery().getProperties();

@@ -15,11 +15,11 @@ package org.corant.suites.query.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.suites.cdi.Instances.findNamed;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -47,17 +47,17 @@ import com.mongodb.client.MongoDatabase;
  */
 public class MgQueryTemplate {
 
-  private final MongoDatabase database;
-  private String collection;
-  private BasicDBObject filter;
-  private BasicDBObject sort;
-  private BasicDBObject projection;
-  private BasicDBObject max;
-  private BasicDBObject min;
-  private BasicDBObject hint;
-  private List<BasicDBObject> aggregate;
-  private int limit = -1;
-  private int offset = 0;
+  protected final MongoDatabase database;
+  protected String collection;
+  protected Bson filter;
+  protected Bson sort;
+  protected Bson projection;
+  protected Bson max;
+  protected Bson min;
+  protected Bson hint;
+  protected List<Bson> aggregate;
+  protected int limit = -1;
+  protected int offset = 0;
 
   private MgQueryTemplate(String database) {
     this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
@@ -73,11 +73,15 @@ public class MgQueryTemplate {
     return streamOf(ai).collect(Collectors.toList());
   }
 
+  public MgQueryTemplate aggregate(Bson... pipeline) {
+    aggregate = shouldNotEmpty(listOf(pipeline));
+    return this;
+  }
+
   @SuppressWarnings("unchecked")
   public MgQueryTemplate aggregate(List<Map<?, ?>> aggregate) {
     try {
-      this.aggregate = (List<BasicDBObject>) DefaultMgNamedQuerier
-          .resolve(defaultObject(shouldNotEmpty(aggregate), ArrayList::new));
+      this.aggregate = (List<Bson>) DefaultMgNamedQuerier.resolve(shouldNotEmpty(aggregate));
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
@@ -97,9 +101,13 @@ public class MgQueryTemplate {
     return mc.countDocuments();
   }
 
-  public MgQueryTemplate filter(Map<?, ?> filter) {
-    this.filter = (BasicDBObject) parse(defaultObject(filter, HashMap::new));
+  public MgQueryTemplate filter(Bson filter) {
+    this.filter = shouldNotNull(filter);
     return this;
+  }
+
+  public MgQueryTemplate filter(Map<?, ?> filter) {
+    return filter((Bson) parse(defaultObject(filter, HashMap::new)));
   }
 
   public Forwarding<Map<?, ?>> forward() {
@@ -132,9 +140,13 @@ public class MgQueryTemplate {
     return it.hasNext() ? it.next() : null;
   }
 
-  public MgQueryTemplate hint(Map<?, ?> hint) {
-    this.hint = (BasicDBObject) parse(defaultObject(hint, HashMap::new));
+  public MgQueryTemplate hint(Bson hint) {
+    this.hint = shouldNotNull(hint);
     return this;
+  }
+
+  public MgQueryTemplate hint(Map<?, ?> hint) {
+    return hint((Bson) parse(defaultObject(hint, HashMap::new)));
   }
 
   public MgQueryTemplate limit(int limit) {
@@ -142,14 +154,22 @@ public class MgQueryTemplate {
     return this;
   }
 
+  public MgQueryTemplate max(Bson max) {
+    this.max = shouldNotNull(max);
+    return this;
+  }
+
   public MgQueryTemplate max(Map<?, ?> max) {
-    this.max = (BasicDBObject) parse(defaultObject(max, HashMap::new));
+    return max((Bson) parse(defaultObject(max, HashMap::new)));
+  }
+
+  public MgQueryTemplate min(Bson min) {
+    this.min = shouldNotNull(min);
     return this;
   }
 
   public MgQueryTemplate min(Map<?, ?> min) {
-    this.min = (BasicDBObject) parse(defaultObject(min, HashMap::new));
-    return this;
+    return min((Bson) parse(defaultObject(min, HashMap::new)));
   }
 
   public MgQueryTemplate offset(int offset) {
@@ -188,9 +208,13 @@ public class MgQueryTemplate {
         .collect(Collectors.toList()));
   }
 
-  public MgQueryTemplate projection(Map<?, ?> projection) {
-    this.projection = (BasicDBObject) parse(defaultObject(projection, HashMap::new));
+  public MgQueryTemplate projection(Bson projection) {
+    this.projection = shouldNotNull(projection);
     return this;
+  }
+
+  public MgQueryTemplate projection(Map<?, ?> projection) {
+    return projection((Bson) parse(defaultObject(projection, HashMap::new)));
   }
 
   public List<Map<?, ?>> select() {
@@ -202,9 +226,13 @@ public class MgQueryTemplate {
         .collect(Collectors.toList());
   }
 
-  public MgQueryTemplate sort(Map<?, ?> sort) {
-    this.sort = (BasicDBObject) parse(defaultObject(sort, HashMap::new));
+  public MgQueryTemplate sort(Bson sort) {
+    this.sort = shouldNotNull(sort);
     return this;
+  }
+
+  public MgQueryTemplate sort(Map<?, ?> sort) {
+    return sort((Bson) parse(defaultObject(sort, HashMap::new)));
   }
 
   @SuppressWarnings("rawtypes")
@@ -218,7 +246,7 @@ public class MgQueryTemplate {
     return streamOf(query()).map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
   }
 
-  Object parse(Object object) {
+  protected Object parse(Object object) {
     try {
       return DefaultMgNamedQuerier.resolve(object);
     } catch (JsonProcessingException e) {
@@ -226,7 +254,7 @@ public class MgQueryTemplate {
     }
   }
 
-  FindIterable<Document> query() {
+  protected FindIterable<Document> query() {
     MongoCollection<Document> mc = database.getCollection(collection);
     FindIterable<Document> fi = mc.find();
     if (isNotEmpty(filter)) {

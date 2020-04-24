@@ -109,6 +109,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     resovleCollation(querier).ifPresent(ai::collation);
     List<Map<String, Object>> list =
         streamOf(ai).map(this::convertDocument).collect(Collectors.toList());
+    this.fetch(list, querier);
     return querier.resolveResult(list);
   }
 
@@ -237,7 +238,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           bson.ifPresent(fi::sort);
           break;
         default:
-          throw new QueryRuntimeException("invoke aggregate func plz");
+          break;
       }
     }
     Map<String, String> pros = querier.getQuery().getProperties();

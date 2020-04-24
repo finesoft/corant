@@ -356,6 +356,11 @@
                     <xsd:documentation>Specify that the script language is Freemarker.</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+            <xsd:enumeration value="KT">
+                <xsd:annotation>
+                    <xsd:documentation>Specify that the script language is Kotlin.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
         </xsd:restriction>
     </xsd:simpleType>    
         

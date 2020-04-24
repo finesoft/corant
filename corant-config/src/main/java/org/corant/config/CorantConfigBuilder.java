@@ -128,7 +128,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   void debugOutputSource(List<ConfigSource> resolvedSources, CorantConfig config) {
     logger.fine(() -> String.format("Resolved %s config sources.", resolvedSources.size()));
     logger.fine(() -> {
-      SortedMap<String, String> sortMap = new TreeMap<>();
+      SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);
       for (String name : config.getPropertyNames()) {
         sortMap.put(name, defaultString(config.getRawValue(name)));
       }

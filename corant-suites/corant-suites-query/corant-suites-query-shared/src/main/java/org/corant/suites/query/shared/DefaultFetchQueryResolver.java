@@ -197,7 +197,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
               RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
         } else {
           throw new NotSupportedException(
-              "Currently we only support using javascript / kotlin as an fetch query injection script.");
+              "Currently we only support using javascript / kotlin as fetch query injection script.");
         }
 
       } else {
@@ -217,7 +217,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
               PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
         } else {
           throw new NotSupportedException(
-              "Currently we only support using javascript / kotlin as an fetch query predication script.");
+              "Currently we only support using javascript / kotlin as fetch query predication script.");
         }
 
       }

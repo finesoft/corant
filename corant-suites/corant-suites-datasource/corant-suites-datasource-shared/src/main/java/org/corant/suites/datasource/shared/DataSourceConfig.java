@@ -36,6 +36,7 @@ import org.eclipse.microprofile.config.Config;
 @ConfigKeyRoot("datasource")
 public class DataSourceConfig extends AbstractNamedObject implements DeclarativeConfig {
 
+  private static final long serialVersionUID = -7623266774880311110L;
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/Datasources";
   public static final String EMPTY_NAME = StringUtils.EMPTY;
 

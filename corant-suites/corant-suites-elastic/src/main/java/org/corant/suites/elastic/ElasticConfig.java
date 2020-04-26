@@ -30,8 +30,8 @@ import org.corant.config.declarative.DeclarativePattern;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.suites.cdi.Qualifiers.NamedObject;
 import org.corant.shared.util.StreamUtils;
+import org.corant.suites.cdi.Qualifiers.NamedObject;
 import org.eclipse.microprofile.config.Config;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -45,6 +45,8 @@ import org.elasticsearch.common.xcontent.XContentType;
  */
 @ConfigKeyRoot("elastic")
 public class ElasticConfig implements NamedObject, DeclarativeConfig {
+
+  private static final long serialVersionUID = 6721730236951712908L;
 
   @ConfigKeyItem
   protected String clusterName;

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -143,6 +144,11 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
   /**
    * corant-suites-datasource-shared
+   *
+   * FIXME: Make XAResource {@link Serializable}, may use data source config ({@link #config}) to
+   * rebuild the {@link #dataSource}, and the {@link #connection} and the {@link #xaresource}}.
+   *
+   * @see ARJUNA016037
    *
    * @author bingo 下午3:17:50
    *

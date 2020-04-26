@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.asStrings;
 import static org.corant.suites.cdi.Instances.findNamed;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,17 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     return Optional.ofNullable(res);
   }
 
+  /**
+   * corant-suites-jms-shared
+   *
+   * FIXME: Make XAResource {@link Serializable}, may use jms config ({@link #config}) to rebuild
+   * the {@link #factory}, and the {@link #connection} and the {@link #session}}.
+   *
+   * @see ARJUNA016037
+   *
+   * @author bingo 下午5:09:39
+   *
+   */
   public static class JMSRecoveryXAResource implements XAResource {
     final AbstractJMSConfig config;
     final XAConnectionFactory factory;

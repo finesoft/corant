@@ -30,7 +30,12 @@ import org.corant.suites.cdi.Qualifiers.NamedObject;
 @ConfigKeyRoot("jms")
 public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfig {
 
-  public final static AbstractJMSConfig DFLT_INSTANCE = new AbstractJMSConfig() {};
+  private static final long serialVersionUID = 2263743463205278263L;
+
+  public static final AbstractJMSConfig DFLT_INSTANCE = new AbstractJMSConfig() {
+
+    private static final long serialVersionUID = 5340760550873711017L;
+  };
 
   // the connection factory id means a artemis server or cluster
   @ConfigKeyItem

@@ -28,6 +28,8 @@ import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager.AbstractName
 @ConfigKeyRoot(value = "rpc.grpc", keyIndex = 2, ignoreNoAnnotatedItem = false)
 public class ClientConfig extends AbstractNamedObject implements DeclarativeConfig {
 
+  private static final long serialVersionUID = 6342527084682440153L;
+
   private String name;
   private String host;
   @ConfigKeyItem(defaultValue = "9000")

@@ -27,6 +27,8 @@ import org.flywaydb.core.api.configuration.ClassicConfiguration;
 @ConfigKeyRoot(value = "flyway.migrate", keyIndex = 2, ignoreNoAnnotatedItem = false)
 public class FlywayConfig extends ClassicConfiguration implements DeclarativeConfig {
 
+  private static final long serialVersionUID = 3571486311594362397L;
+
   public static final FlywayConfig EMPTY = new FlywayConfig(false, "META-INF/dbmigration");
 
   @ConfigKeyItem(defaultValue = "false")

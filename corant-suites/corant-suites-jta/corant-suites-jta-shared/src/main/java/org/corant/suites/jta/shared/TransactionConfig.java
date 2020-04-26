@@ -28,6 +28,8 @@ import org.corant.config.declarative.DeclarativeConfig;
 @ConfigKeyRoot(value = "jta.transaction", keyIndex = 2, ignoreNoAnnotatedItem = false)
 public class TransactionConfig implements DeclarativeConfig {
 
+  private static final long serialVersionUID = -6080028917760002437L;
+
   static final TransactionConfig EMPTY = new TransactionConfig();
 
   @ConfigKeyItem

@@ -30,6 +30,8 @@ import org.corant.config.declarative.DeclarativePattern;
 @ConfigKeyRoot(value = "mvc", keyIndex = 0)
 public class FreemarkerServletConfig implements DeclarativeConfig {
 
+  private static final long serialVersionUID = 1447267350656863451L;
+
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> initParams = new HashMap<>();
 

@@ -13,6 +13,7 @@
  */
 package org.corant.config.declarative;
 
+import java.io.Serializable;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -21,7 +22,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午7:43:15
  *
  */
-public interface DeclarativeConfig {
+public interface DeclarativeConfig extends Serializable {
 
   default boolean isValid() {
     return true;

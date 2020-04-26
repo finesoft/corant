@@ -25,6 +25,8 @@ import org.corant.config.declarative.DeclarativeConfig;
 @ConfigKeyRoot("mp.lra")
 public class LRAConfig implements DeclarativeConfig {
 
+  private static final long serialVersionUID = -3095817375062098398L;
+
   public static final LRAConfig EMPTY = new LRAConfig("localhost", 8089);
 
   @ConfigKeyItem(defaultValue = "localhost")

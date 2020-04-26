@@ -28,6 +28,8 @@ import org.corant.suites.jta.shared.TransactionConfig;
 @ConfigKeyRoot(value = "jta.transaction", keyIndex = 2, ignoreNoAnnotatedItem = false)
 public class NarayanaTransactionConfig extends TransactionConfig {
 
+  private static final long serialVersionUID = -1353597648110310051L;
+
   @ConfigKeyItem
   Optional<String> objectsStore;
 
@@ -76,7 +78,7 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   }
 
   /**
-   * 
+   *
    * @return the enableMbean
    */
   public boolean isEnableMbean() {

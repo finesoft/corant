@@ -51,6 +51,8 @@ import org.eclipse.microprofile.config.Config;
 @ConfigKeyRoot(value = "jms.artemis", keyIndex = 2)
 public class ArtemisConfig extends AbstractJMSConfig {
 
+  private static final long serialVersionUID = 7757438714150588283L;
+
   public static final int DFLT_PORT = 61616;
 
   private static final Map<String, Method> propertiesMaps = new HashMap<>(); // static?

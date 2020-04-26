@@ -84,8 +84,7 @@ public class NarayanaExtension implements TransactionExtension {
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
-  protected final NarayanaRecoveryManagerService recoveryManagerService =
-      new NarayanaRecoveryManagerService(config.isAutoRecovery());
+  protected volatile NarayanaRecoveryManagerService recoveryManagerService;
 
   @Override
   public NarayanaTransactionConfig getConfig() {
@@ -136,7 +135,7 @@ public class NarayanaExtension implements TransactionExtension {
     }
   }
 
-  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
+  synchronized void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     String dfltObjStoreDir = getConfig().getObjectsStore()
         .orElse(Defaults.corantUserDir("-narayana-objects").toString());
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
@@ -197,6 +196,10 @@ public class NarayanaExtension implements TransactionExtension {
               "communicationStore");
           cfgr.configJTAEnvironmentBean(jtaEnvironmentBean);
         });
+
+    if (recoveryManagerService == null) {
+      recoveryManagerService = new NarayanaRecoveryManagerService(config.isAutoRecovery());
+    }
   }
 
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
@@ -207,6 +210,7 @@ public class NarayanaExtension implements TransactionExtension {
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
       recoveryManagerService.unInitialize();
+      recoveryManagerService = null;
     } catch (Exception e) {
       logger.log(Level.WARNING, e, () -> "Uninitialize recovery manager service occurred error!");
     }

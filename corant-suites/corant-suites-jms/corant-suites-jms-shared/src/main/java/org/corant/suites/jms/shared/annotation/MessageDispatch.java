@@ -31,8 +31,18 @@ import javax.jms.JMSContext;
 @Target(FIELD)
 public @interface MessageDispatch {
 
+  /**
+   * The connection factory id, used to represent a JMS service or cluster, usually set up through a
+   * configuration file.
+   */
   String connectionFactoryId() default "";
 
+  /**
+   * The destination name, can use '${config property name}' to retrieve the destination name
+   * frommicroprofile config source.
+   *
+   * @return destination
+   */
   String destination();
 
   String durableSubscription() default "";

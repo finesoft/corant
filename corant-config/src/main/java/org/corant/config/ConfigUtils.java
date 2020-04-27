@@ -16,17 +16,21 @@ package org.corant.config;
 import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.MapUtils.mapOf;
 import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.group;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-config
@@ -44,6 +48,42 @@ public class ConfigUtils {
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
     map.forEach((k, v) -> System.setProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
+  }
+
+  public static Set<String> assemblyStringConfigProperties(String key) {
+    if (isNotBlank(key)) {
+      int s;
+      int e;
+      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1) {
+        String proKey = key.substring(s + 2, e);
+        if (proKey.length() > 0) {
+          Set<String> set = new LinkedHashSet<>();
+          for (String proVal : ConfigUtils
+              .splitValue(ConfigProvider.getConfig().getValue(proKey, String.class))) {
+            set.add(new StringBuilder(key.substring(0, s)).append(proVal)
+                .append(key.substring(e + 1)).toString());
+          }
+          return set;
+        }
+      }
+    }
+    return linkedHashSetOf(key);
+  }
+
+  public static String assemblyStringConfigProperty(String key) {
+    if (isNotBlank(key)) {
+      int s;
+      int e;
+      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1) {
+        String proKey = key.substring(s + 2, e);
+        if (proKey.length() > 0) {
+          return new StringBuilder(key.substring(0, s))
+              .append(ConfigProvider.getConfig().getValue(proKey, String.class))
+              .append(key.substring(e + 1)).toString();
+        }
+      }
+    }
+    return key;
   }
 
   public static String concatKey(String... keys) {

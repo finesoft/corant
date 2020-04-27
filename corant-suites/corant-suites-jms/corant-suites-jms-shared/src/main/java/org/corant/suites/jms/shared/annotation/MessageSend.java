@@ -32,8 +32,18 @@ import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSeria
 @Target(TYPE)
 public @interface MessageSend {
 
+  /**
+   * The connection factory id, used to represent a JMS service or cluster, usually set up through a
+   * configuration file.
+   */
   String connectionFactoryId() default "";
 
+  /**
+   * The destination name, can use '${config property name}' to retrieve the destination name
+   * frommicroprofile config source.
+   *
+   * @return destination
+   */
   String destination();
 
   boolean multicast() default false;

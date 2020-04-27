@@ -81,7 +81,8 @@ public @interface MessageReceive {
   String connectionFactoryId() default "";
 
   /**
-   * The destination name
+   * The destination names, can use '${config property name}' to retrieve the destination names from
+   * microprofile config source.
    *
    * @see javax.jms.Destination
    * @return destinations

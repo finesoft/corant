@@ -31,6 +31,7 @@ import javax.jms.JMSSessionMode;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
+import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
@@ -138,7 +139,7 @@ public interface MessageDispatcher {
 
     public MessageDispatcherImpl(MessageDispatch mpl) {
       multicast = mpl.multicast();
-      destination = shouldNotNull(mpl.destination());
+      destination = shouldNotNull(ConfigUtils.assemblyStringConfigProperty(mpl.destination()));
       connectionFactoryId = mpl.connectionFactoryId();
       sessionMode = mpl.sessionMode();
     }

@@ -15,7 +15,6 @@ package org.corant.suites.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StringUtils.defaultTrim;
@@ -27,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.jms.ConnectionFactory;
+import org.corant.config.ConfigUtils;
 import org.corant.config.spi.Sortable;
 import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
@@ -85,11 +85,13 @@ public class MessageReceiverMetaData {
     final MessageReceive ann =
         shouldNotNull(shouldNotNull(method).getMethod().getAnnotation(MessageReceive.class));
     shouldBeTrue(isNoneBlank(ann.destinations()));
-    Set<MessageReceiverMetaData> beans = new LinkedHashSet<>();
-    linkedHashSetOf(ann.destinations()).forEach(d -> {
-      shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),
-          "The message receive method %s dup!", method.toString());
-    });
+    Set<String> dests = new LinkedHashSet<>();
+    for (String dest : ann.destinations()) {
+      dests.addAll(ConfigUtils.assemblyStringConfigProperties(dest));
+    }
+    Set<MessageReceiverMetaData> beans = new LinkedHashSet<>(dests.size());
+    dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),
+        "The message receive method %s dup!", method.toString()));
     return beans;
   }
 

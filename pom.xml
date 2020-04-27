@@ -16,7 +16,6 @@
     <module>corant-config</module>
     <module>corant-devops</module>
     <module>corant-kernel</module>
-    <module>corant-parent</module>
     <module>corant-shared</module>
     <module>corant-suites</module>
   </modules>

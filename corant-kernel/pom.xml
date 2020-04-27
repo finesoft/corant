@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>corant-parent</artifactId>
+    <artifactId>corant-boms</artifactId>
     <groupId>org.corant</groupId>
     <version>${revision}</version>
-    <relativePath>../corant-parent</relativePath>
+    <relativePath>../corant-boms</relativePath>
   </parent>
   <artifactId>corant-kernel</artifactId>
   <dependencies>
@@ -30,6 +30,10 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.corant</groupId>
         <artifactId>corant-devops-maven-jandex</artifactId>

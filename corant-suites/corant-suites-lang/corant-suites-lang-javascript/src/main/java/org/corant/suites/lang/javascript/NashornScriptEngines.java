@@ -60,6 +60,16 @@ public class NashornScriptEngines {
    * consumer in multi threads. the script was complied only once in every thread. we don't use
    * script as id, because the script may have very large size.
    *
+   * <pre>
+   * NOTE: Usually, the passed in script should be a IIFE (Immediately Invoked Function Expression).
+   * Example:
+   *    (function(p){
+   *         //do somthing;
+   *     })(p);
+   * </pre>
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression">IIFE</a>
+   *
    * @param id the specified id, client use this id to retrive the appropriate consumer
    * @param scriptAndParamNames the script and parameter names use for compling.
    * @return the complied consumer
@@ -96,6 +106,16 @@ public class NashornScriptEngines {
    * function in multi threads. the script was complied only once in every thread. we don't use
    * script as id, because the script may have very large size
    *
+   * <pre>
+   * NOTE: Usually, the passed in script should be a IIFE (Immediately Invoked Function Expression).
+   * Example:
+   *    (function(p){
+   *         //do somthing;
+   *         return true;
+   *     })(p);
+   * </pre>
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression">IIFE</a>
    * @param id the specified id, client use this id to retrive the appropriate function
    * @param scriptAndParamNames the script and parameter names use for compling.
    * @return the complied function

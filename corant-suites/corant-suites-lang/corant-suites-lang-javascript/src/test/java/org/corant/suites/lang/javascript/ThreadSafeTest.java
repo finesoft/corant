@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.shared.util.StopWatch;
 
 /**
@@ -48,10 +49,9 @@ public class ThreadSafeTest {
     long i = 1000000000000L;
     StopWatch sw = StopWatch.press();
     while (--i > 0) {
-      exe.accept(new Object[] {list11, list1});
-      // NashornScriptEngines.complieConsumer("1", () -> Pair.of(script1, new String[] {"l1",
-      // "l2"}))
-      // .accept(new Object[] {list11, list1});
+      // exe.accept(new Object[] {list11, list1});
+      NashornScriptEngines.complieConsumer("1", () -> Pair.of(script1, new String[] {"l1", "l2"}))
+          .accept(new Object[] {list11, list1});
       int s = list11.stream().reduce(Integer::sum).get();
       int a = list1.stream().reduce(Integer::sum).get();
       if (s != 6) {
@@ -69,10 +69,9 @@ public class ThreadSafeTest {
     long i = 1000000000000L;
     StopWatch sw = StopWatch.press();
     while (--i > 0) {
-      exe.accept(new Object[] {list22, list2});
-      // NashornScriptEngines.complieConsumer("2", () -> Pair.of(script1, new String[] {"l1",
-      // "l2"}))
-      // .accept(new Object[] {list22, list2});
+      // exe.accept(new Object[] {list22, list2});
+      NashornScriptEngines.complieConsumer("2", () -> Pair.of(script1, new String[] {"l1", "l2"}))
+          .accept(new Object[] {list22, list2});
       int s = list22.stream().reduce(Integer::sum).get();
       int a = list2.stream().reduce(Integer::sum).get();
       if (s != 12) {

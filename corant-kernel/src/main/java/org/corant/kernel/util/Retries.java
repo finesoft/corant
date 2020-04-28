@@ -57,11 +57,30 @@ public class Retries {
     return new SupplierRetrier<>(execution);
   }
 
+  @SafeVarargs
   public static Object retry(InvocationContext ctx, int times, Duration interval,
       Function<Exception, RuntimeException> transfer,
-      @SuppressWarnings("unchecked") Class<? extends Exception>... ignoreExceptions) {
+      Class<? extends Exception>... ignoreExceptions) {
     return new InvocationRetrier(ctx).transfer(transfer).on(ignoreExceptions).times(times)
         .interval(interval).execute();
+  }
+
+  public static void retry(Runnable execution, int times, Duration interval) {
+    retry(execution, times, interval, null);
+  }
+
+  @SafeVarargs
+  public static void retry(Runnable execution, int times, Duration interval,
+      Function<Exception, RuntimeException> transfer,
+      Class<? extends Exception>... ignoreExceptions) {
+    retry(() -> {
+      execution.run();
+      return null;
+    }, times, interval, transfer, ignoreExceptions);
+  }
+
+  public static <T> T retry(Supplier<T> execution, int times, Duration interval) {
+    return retry(execution, times, interval, null);
   }
 
   @SafeVarargs

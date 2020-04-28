@@ -1,69 +1,63 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.corant</groupId>
-		<artifactId>corant-root</artifactId>
-		<version>${revision}</version>
-	</parent>
-	<artifactId>corant-config</artifactId>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-boms</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.corant</groupId>
-			<artifactId>corant-shared</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.microprofile.config</groupId>
-			<artifactId>microprofile-config-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.yaml</groupId>
-			<artifactId>snakeyaml</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- TCK <dependency> <groupId>javax.enterprise</groupId> <artifactId>cdi-api</artifactId> 
-			<version>1.2</version> <scope>provided</scope> </dependency> <dependency> 
-			<groupId>javax.transaction</groupId> <artifactId>jta</artifactId> <version>1.1</version> 
-			</dependency> <dependency> <groupId>org.eclipse.microprofile.config</groupId> 
-			<artifactId>microprofile-config-tck</artifactId> <version>1.3</version> </dependency> 
-			<dependency> <groupId>org.jboss.weld.se</groupId> <artifactId>weld-se-core</artifactId> 
-			<version>2.3.2.Final</version> </dependency> <dependency> <groupId>org.jboss.weld</groupId> 
-			<artifactId>weld-spi</artifactId> <version>2.3.SP2</version> </dependency> 
-			<dependency> <groupId>org.jboss.weld</groupId> <artifactId>weld-api</artifactId> 
-			<version>2.3.SP2</version> </dependency> <dependency> <groupId>org.jboss.weld.servlet</groupId> 
-			<artifactId>weld-servlet-core</artifactId> <version>2.3.2.Final</version> 
-			</dependency> <dependency> <groupId>org.jboss.arquillian.testng</groupId> 
-			<artifactId>arquillian-testng-container</artifactId> </dependency> <dependency> 
-			<groupId>org.jboss.arquillian.container</groupId> <artifactId>arquillian-weld-ee-embedded-1.1</artifactId> 
-			<version>1.0.0.Final</version> </dependency> -->
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-devops-maven-jandex</artifactId>
-			</plugin>
-			<!-- TCK <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 
-				<configuration> <dependenciesToScan> <dependency>org.eclipse.microprofile.config:microprofile-config-tck</dependency> 
-				</dependenciesToScan> </configuration> </plugin> -->
-		</plugins>
-	</build>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>corant-boms</artifactId>
+    <groupId>org.corant</groupId>
+    <version>${revision}</version>
+    <relativePath>../corant-boms</relativePath>
+  </parent>
+  <artifactId>corant-config</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-shared</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- TCK <dependency> <groupId>javax.enterprise</groupId> <artifactId>cdi-api</artifactId>
+      <version>1.2</version> <scope>provided</scope> </dependency> <dependency>
+      <groupId>javax.transaction</groupId> <artifactId>jta</artifactId> <version>1.1</version>
+      </dependency> <dependency> <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-tck</artifactId> <version>1.3</version> </dependency>
+      <dependency> <groupId>org.jboss.weld.se</groupId> <artifactId>weld-se-core</artifactId>
+      <version>2.3.2.Final</version> </dependency> <dependency> <groupId>org.jboss.weld</groupId>
+      <artifactId>weld-spi</artifactId> <version>2.3.SP2</version> </dependency>
+      <dependency> <groupId>org.jboss.weld</groupId> <artifactId>weld-api</artifactId>
+      <version>2.3.SP2</version> </dependency> <dependency> <groupId>org.jboss.weld.servlet</groupId>
+      <artifactId>weld-servlet-core</artifactId> <version>2.3.2.Final</version>
+      </dependency> <dependency> <groupId>org.jboss.arquillian.testng</groupId>
+      <artifactId>arquillian-testng-container</artifactId> </dependency> <dependency>
+      <groupId>org.jboss.arquillian.container</groupId> <artifactId>arquillian-weld-ee-embedded-1.1</artifactId>
+      <version>1.0.0.Final</version> </dependency> -->
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-devops-maven-jandex</artifactId>
+      </plugin>
+      <!-- TCK <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId>
+        <configuration> <dependenciesToScan> <dependency>org.eclipse.microprofile.config:microprofile-config-tck</dependency>
+        </dependenciesToScan> </configuration> </plugin> -->
+    </plugins>
+  </build>
 </project>

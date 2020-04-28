@@ -24,7 +24,7 @@ LCF_URL=$CFG_DIR/log4j2.xml
 
 CLASSPATH=$(join ':' $LIB_DIR/*.jar $APP_DIR/*.jar $CFG_DIR/*.*)
 
-# Setup the JVM
+# Setup the JVM 
 if [ "x$JAVA" = "x" ]; then
     if [ "x$JAVA_HOME" != "x" ]; then
         JAVA="$JAVA_HOME/bin/java"

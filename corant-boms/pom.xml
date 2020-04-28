@@ -23,7 +23,6 @@
     <version.asciidoctor-pdf>1.5.0-alpha.16</version.asciidoctor-pdf>
     <version.assertj>3.10.0</version.assertj>
     <version.atomikos>5.0.3</version.atomikos>
-    <version.build-helper-maven-plugin>3.0.0</version.build-helper-maven-plugin>
     <version.calcite>1.17.0</version.calcite>
     <version.commons-beanutils>1.9.4</version.commons-beanutils>
     <version.commons-cli>1.4</version.commons-cli>
@@ -328,11 +327,6 @@
         <groupId>org.eclipse.microprofile.rest.client</groupId>
         <artifactId>microprofile-rest-client-api</artifactId>
         <version>${version.microprofile-rest-client-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.microprofile.concurrency</groupId>
-        <artifactId>microprofile-concurrency-api</artifactId>
-        <version>${version.microprofile-concurrency-api}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.microprofile.lra</groupId>

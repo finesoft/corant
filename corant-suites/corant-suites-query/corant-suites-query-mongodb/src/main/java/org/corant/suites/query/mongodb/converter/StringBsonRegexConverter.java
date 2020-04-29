@@ -70,12 +70,13 @@ public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegu
     if (pattern != null) {
       if (RegexMatcher.hasRegexChar(useValue)) {
         int len = useValue.length();
-        StringBuilder sb = new StringBuilder(useValue.length() << 2);
+        StringBuilder sb = new StringBuilder(len << 1);
         for (int i = 0; i < len; i++) {
-          if (RegexMatcher.isRegexChar(useValue.charAt(i))) {
-            sb.append("\\").append(useValue.charAt(i));
+          char c = useValue.charAt(i);
+          if (RegexMatcher.isRegexChar(c)) {
+            sb.append("\\").append(c);
           } else {
-            sb.append(useValue.charAt(i));
+            sb.append(c);
           }
         }
         useValue = sb.toString();

@@ -224,6 +224,13 @@ public class SqlQueryTemplate {
     }
   }
 
+  /**
+   * FIXME: Need another implementation
+   *
+   * @param sql
+   * @param params
+   * @return processSqlAndParams
+   */
   @SuppressWarnings({"rawtypes", "unchecked"})
   protected Pair<String, Object[]> processSqlAndParams(String sql, Object... params) {
     if (isEmpty(params) || isBlank(sql)

@@ -25,6 +25,7 @@
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-lang-kotlin</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>

@@ -18,6 +18,7 @@ import java.util.Map;
 import org.bson.BsonRegularExpression;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.util.PathUtils.RegexMatcher;
 
 /**
  * corant-suites-query-mongodb
@@ -64,6 +65,31 @@ public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegu
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return new BsonRegularExpression(value, ConverterHints.getHint(hints, REGEX_KEY, "i"));
+    String useValue = value;
+    Object pattern = hints.get("like");
+    if (pattern != null) {
+      if (RegexMatcher.hasRegexChar(useValue)) {
+        int len = useValue.length();
+        StringBuilder sb = new StringBuilder(useValue.length() << 2);
+        for (int i = 0; i < len; i++) {
+          if (RegexMatcher.isRegexChar(useValue.charAt(i))) {
+            sb.append("\\").append(useValue.charAt(i));
+          } else {
+            sb.append(useValue.charAt(i));
+          }
+        }
+        useValue = sb.toString();
+      }
+      if ("%*%".equals(pattern)) {
+        useValue = ".*" + useValue + ".*";// include
+      } else if ("*%".equals(pattern)) {
+        useValue = "^" + useValue + ".*"; // start with
+      } else if ("%*".equals(pattern)) {
+        useValue = ".*" + useValue + "$"; // end with
+      } else if ("~%*%".equals(pattern)) {
+        useValue = "^((?!" + value + ").)*$"; // exclude
+      }
+    }
+    return new BsonRegularExpression(useValue, ConverterHints.getHint(hints, REGEX_KEY, "i"));
   }
 }

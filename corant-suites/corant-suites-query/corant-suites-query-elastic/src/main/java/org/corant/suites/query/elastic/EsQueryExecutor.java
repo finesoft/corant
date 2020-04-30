@@ -38,8 +38,9 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  */
 public interface EsQueryExecutor {
 
-  String HIT_RS_ETR_PATH = "hits.hits._source";
-  String[] HIT_RS_ETR_PATHS = split(HIT_RS_ETR_PATH, ".");
+  String HIT_HL_KEY = "hits.hits.highlight";
+  String HIT_RS_KEY = "hits.hits._source";
+  String[] HIT_KEYS = new String[] {"hits", "hits"};
   String AGG_RS_ETR_PATH = "aggregations";
   String SUG_RS_ERT_PATH = "suggest";
 
@@ -83,18 +84,22 @@ public interface EsQueryExecutor {
     return new HashMap<>();
   }
 
-  default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script)
-      throws Exception {
+  default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script,
+      String... hintKeys) throws Exception {
     List<Map<String, Object>> list = new ArrayList<>();
     SearchResponse searchResponse = execute(indexName, script);
     long total = 0;
     if (searchResponse != null) {
       total = searchResponse.getHits() != null ? searchResponse.getHits().getTotalHits() : 0;
       if (total > 0) {
-        Map<String, Object> result =
-            XContentUtils.searchResponseToMap(searchResponse, HIT_RS_ETR_PATH);
-        List<Object> extracted = getMapKeyPathValues(result, HIT_RS_ETR_PATHS);
-        extracted.forEach(obj -> list.add(forceCast(obj)));
+        Map<String, Object> result = XContentUtils.searchResponseToMap(searchResponse, hintKeys);
+        if (hintKeys.length == 1) {
+          List<Object> extracted = getMapKeyPathValues(result, split(hintKeys[0], ".", true, true));
+          extracted.forEach(obj -> list.add(forceCast(obj)));
+        } else {
+          List<Object> extracted = getMapKeyPathValues(result, HIT_KEYS);
+          extracted.forEach(obj -> list.add(forceCast(obj)));
+        }
       }
     }
     return Pair.of(total, list);

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
+import static org.corant.shared.util.CollectionUtils.append;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.asDefaultString;
@@ -37,6 +38,7 @@ public class DefaultEsNamedQuerier extends
   protected final Map<Object, Object> script;
   protected final String name;
   protected final String indexName;
+  protected final String[] hintKeys;
 
   /**
    * @param query
@@ -45,19 +47,30 @@ public class DefaultEsNamedQuerier extends
    * @param fetchQueryResolver
    * @param scriptMap
    */
+  @SuppressWarnings("rawtypes")
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
       QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
       Map<Object, Object> scriptMap) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
+    String[] useHintKeys = new String[] {EsQueryExecutor.HIT_RS_KEY};
     if (isNotEmpty(scriptMap)) {
       Entry<?, ?> entry = scriptMap.entrySet().iterator().next();
       indexName = asDefaultString(entry.getKey());
       script = forceCast(entry.getValue());
+      if (entry.getValue() instanceof Map && ((Map) entry.getValue()).containsKey("highlight")) {
+        useHintKeys = append(useHintKeys, EsQueryExecutor.HIT_HL_KEY);
+      }
     } else {
       indexName = null;
       script = new HashMap<>();
     }
+    hintKeys = useHintKeys;
+  }
+
+  @Override
+  public String[] getHintKeys() {
+    return hintKeys;
   }
 
   @Override

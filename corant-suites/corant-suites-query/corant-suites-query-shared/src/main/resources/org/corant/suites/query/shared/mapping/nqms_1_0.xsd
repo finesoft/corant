@@ -311,7 +311,7 @@
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="parameter" type="nqms:hint-parameter" minOccurs="0" maxOccurs="unbounded"></xsd:element>
-            <xsd:element name="script" type="xsd:string" maxOccurs="1" minOccurs="0">
+            <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>The script for hint</xsd:documentation>
                 </xsd:annotation>

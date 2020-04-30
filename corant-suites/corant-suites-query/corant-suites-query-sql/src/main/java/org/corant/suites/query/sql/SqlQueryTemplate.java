@@ -13,10 +13,10 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.CollectionUtils.linkedListOf;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -231,51 +232,52 @@ public class SqlQueryTemplate {
    * @param params
    * @return processSqlAndParams
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   protected Pair<String, Object[]> processSqlAndParams(String sql, Object... params) {
     if (isEmpty(params) || isBlank(sql)
         || streamOf(params).noneMatch(p -> p instanceof Collection || p.getClass().isArray())) {
       return Pair.of(sql, params);
     }
-    int sqlLen = sql.length();
-    int escs = 0;
-    List<Integer> poses = new ArrayList<>(params.length);
-    for (int i = 0; i < sqlLen; i++) {
+    LinkedList<Object> orginalParams = linkedListOf(params);
+    List<Object> fixedParams = new ArrayList<>();
+    StringBuilder fixedSql = new StringBuilder();
+    int escapes = 0;
+    for (int i = 0; i < sql.length(); i++) {
       char c = sql.charAt(i);
       if (c == SQL_PARAM_ESC_C) {
-        escs++;
-      } else if (c == SQL_PARAM_PH_C && escs % 2 == 0) {
-        poses.add(i);
-      }
-    }
-    shouldBeTrue(poses.size() == params.length, "Parameters and sql statements not match.", sql);
-    StringBuilder useSql = new StringBuilder();
-    List<Object> useParams = new ArrayList<>();
-    int paramPos = 0;
-    int paramIdx = 0;
-    for (Integer pos : poses) {
-      useSql.append(sql.substring(paramPos, pos));
-      paramPos = pos + 1;
-      Object param = params[paramIdx++];
-      List<Object> collectionParams = new ArrayList<>();
-      List<String> placeHolders = new ArrayList<>();
-      if (param instanceof Collection) {
-        collectionParams.addAll((Collection) param);
-      } else if (param != null && param.getClass().isArray()) {
-        collectionParams.addAll(listOf((Object[]) param));
+        fixedSql.append(c);
+        escapes++;
+      } else if (c == SQL_PARAM_PH_C && escapes % 2 == 0) {
+        Object param = orginalParams.remove();
+        if (param instanceof Collection) {
+          Collection<?> collectionParam = (Collection<?>) param;
+          if (isNotEmpty(collectionParam)) {
+            for (Object p : collectionParam) {
+              fixedParams.add(p);
+              fixedSql.append(SQL_PARAM_PH).append(SQL_PARAM_SP);
+            }
+            fixedSql.deleteCharAt(fixedSql.length() - 1);
+          }
+        } else if (param != null && param.getClass().isArray()) {
+          Object[] arrayParam = (Object[]) param;
+          if (isNotEmpty(arrayParam)) {
+            for (Object p : arrayParam) {
+              fixedParams.add(p);
+              fixedSql.append(SQL_PARAM_PH).append(SQL_PARAM_SP);
+            }
+            fixedSql.deleteCharAt(fixedSql.length() - 1);
+          }
+        } else {
+          fixedParams.add(param);
+          fixedSql.append(c);
+        }
       } else {
-        collectionParams.add(param);
+        fixedSql.append(c);
       }
-      for (Object cp : collectionParams) {
-        useParams.add(cp);
-        placeHolders.add(SQL_PARAM_PH);
-      }
-      useSql.append(String.join(SQL_PARAM_SP, placeHolders));
     }
-    if (paramPos < sqlLen) {
-      useSql.append(sql.substring(paramPos));
+    if (escapes % 2 != 0 || !orginalParams.isEmpty()) {
+      throw new QueryRuntimeException("Parameters and sql statements not match!");
     }
-    return Pair.of(useSql.toString(), useParams.toArray());
+    return Pair.of(fixedSql.toString(), fixedParams.toArray());
   }
 
   protected List<Map<String, Object>> query(String sql, Object... parameter) {

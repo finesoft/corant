@@ -20,6 +20,8 @@ import org.corant.suites.query.shared.dynamic.DynamicQuerier;
 public interface EsNamedQuerier
     extends DynamicQuerier<Map<String, Object>, Map<Object, Object>>, NamedQuerier {
 
+  String[] getHintKeys();
+
   String getIndexName();
 
   @Override

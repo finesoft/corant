@@ -101,14 +101,14 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Map<String, String> pros = querier.getQuery().getProperties();
     getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(ai::batchSize);
     getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, ConversionUtils::toLong)
-            .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
+        .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
     getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, ConversionUtils::toLong)
-            .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
+        .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
     Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
     bson.ifPresent(ai::hint);
     resovleCollation(querier).ifPresent(ai::collation);
     List<Map<String, Object>> list =
-        streamOf(ai).map(this::convertDocument).collect(Collectors.toList());
+        streamOf(ai).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
     this.fetch(list, querier);
     return querier.resolveResult(list);
   }
@@ -140,7 +140,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > limit) {
@@ -157,7 +157,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result = convertDocument(fi.iterator().tryNext());
+    Map<String, Object> result = convertDocument(fi.iterator().tryNext(), querier);
     this.fetch(result, querier);
     return querier.resolveResult(result);
   }
@@ -171,7 +171,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
-        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size < limit) {
@@ -191,7 +191,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(this::convertDocument).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > maxSelectSize) {
@@ -204,7 +204,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return querier.resolveResult(list);
   }
 
-  protected Document convertDocument(Document doc) {
+  protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier) {
     return doc;
   }
 

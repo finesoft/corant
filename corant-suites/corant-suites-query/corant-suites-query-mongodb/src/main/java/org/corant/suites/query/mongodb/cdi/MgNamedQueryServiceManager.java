@@ -167,7 +167,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected Document convertDocument(Document doc) {
+    protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier) {
       return convertDecimal ? Decimal128Utils.convert(doc) : doc;
     }
 

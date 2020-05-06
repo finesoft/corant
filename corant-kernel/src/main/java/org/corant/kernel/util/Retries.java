@@ -151,7 +151,8 @@ public class Retries {
           }
           retryCounter++;
         }
-      } while (retryCounter <= this.times && Corant.current().isRuning());
+      } while (retryCounter <= this.times
+          && (Corant.current() == null || Corant.current().isRuning()));
       throw this.transfer.apply(executeException);
     }
 

@@ -168,6 +168,11 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
     @Override
     protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier) {
+      boolean autoSetIdField =
+          resolveProperties(querier, PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+      if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
+        doc.put("id", doc.get("_id"));
+      }
       return convertDecimal ? Decimal128Utils.convert(doc) : doc;
     }
 

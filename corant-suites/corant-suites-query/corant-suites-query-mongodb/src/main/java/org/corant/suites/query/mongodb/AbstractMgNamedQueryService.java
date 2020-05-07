@@ -65,6 +65,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   public static final String PRO_KEY_COLLECTION_NAME = ".collection-name";
 
+  public static final String PRO_KEY_AUTO_SET_ID_FIELD = ".mg.auto-set-id-field";
+
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
   public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeout";

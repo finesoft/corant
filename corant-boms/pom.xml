@@ -12,6 +12,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.agroal>1.7</version.agroal>
+    <version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
     <version.ansj_seg>5.1.6</version.ansj_seg>
     <version.apache-poi>4.1.1</version.apache-poi>
     <version.apache.arrow>0.16.0</version.apache.arrow>
@@ -116,12 +117,12 @@
     <version.snakeyaml>1.26</version.snakeyaml>
     <version.swagger>2.0.8</version.swagger>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.1.0.Final</version.undertow>
+    <version.undertow>2.0.30.Final</version.undertow>
     <version.vertx>3.8.5</version.vertx>
     <version.weld-junit4>2.0.1.Final</version.weld-junit4>
     <version.weld>3.1.4.Final</version.weld>
     <version.xadisk>1.2.2</version.xadisk>
-    <version.xnio>3.8.0.Final</version.xnio>
+    <version.xnio>3.3.8.Final</version.xnio>
     <version.zxing>3.4.0</version.zxing>
   </properties>
 
@@ -1125,6 +1126,11 @@
         <version>${version.zxing}</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.aliyun</groupId>
+        <artifactId>aliyun-java-sdk-core</artifactId>
+        <version>${version.aliyun-java-sdk-core}</version>
+      </dependency>
       <!-- Corant -->
       <dependency>
         <groupId>org.corant</groupId>
@@ -1391,6 +1397,7 @@
         <artifactId>corant-suites-mvc</artifactId>
         <version>${project.version}</version>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
   <build>

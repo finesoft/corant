@@ -16,6 +16,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import org.xml.sax.SAXParseException;
  */
 public class ValidateUtils {
 
+  public static final Pattern MOB_NUM_PTN = Pattern.compile("^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$");
+
   private ValidateUtils() {
     super();
   }
@@ -59,7 +62,6 @@ public class ValidateUtils {
   /**
    * Check if input stream is image format, the process prereads the input stream.
    * If input stream not support mark, then return false.
-   *
    * @param is
    * @return
    */
@@ -101,9 +103,9 @@ public class ValidateUtils {
   public static boolean isIp4Address(String ipAddress) {
     return isNotBlank(ipAddress)
         && Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b").matcher(ipAddress).matches();
+                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b").matcher(ipAddress).matches();
   }
 
   /**
@@ -113,7 +115,7 @@ public class ValidateUtils {
   public static boolean isMailAddress(String mailAddress) {
     return isNotBlank(mailAddress)
         && Pattern.compile("^(\\w+)([\\-+.\\'][\\w]+)*@(\\w[\\-\\w]*\\.){1,5}([A-Za-z]){2,6}$")
-            .matcher(mailAddress).matches();
+        .matcher(mailAddress).matches();
   }
 
   /**
@@ -130,8 +132,7 @@ public class ValidateUtils {
    */
   public static boolean isZhMobileNumber(String mobileNumber) {
     if (isNotBlank(mobileNumber)) {
-      return Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$").matcher(mobileNumber)
-          .matches();
+      return MOB_NUM_PTN.matcher(mobileNumber).matches();
     }
     return false;
   }
@@ -192,7 +193,6 @@ public class ValidateUtils {
 
   /**
    * Validate Xml document with schema
-   *
    * @param doc
    * @param schema
    * @return validateXmlDocument

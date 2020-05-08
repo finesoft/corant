@@ -13,7 +13,10 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -29,6 +32,64 @@ public class PathUtils {
 
   private PathUtils() {
     super();
+  }
+
+  /**
+   * Decide {@code PathMatcher} from path expressions. Returns a {@code PathMatcher} that performs
+   * match operations on the {@code String} representation of path by interpreting a given pattern.
+   *
+   * The pathExp parameter identifies the syntax and the pattern and takes the form: <blockquote>
+   *
+   * <pre>
+   * <i>syntax</i><b>:</b><i>pattern</i>
+   * </pre>
+   *
+   * </blockquote> where {@code ':'} stands for itself.
+   *
+   * <p>
+   * Supports the "{@code glob}" and "{@code regex}" syntaxes.
+   *
+   * <p>
+   * NOTE: If syntax is not found, use the following processes
+   * <ul>
+   * <li>1. If the path expression is empty, it is regarded as {@code GlobMatcher}, and the pattern
+   * is {@code **}</li>
+   * <li>2. If the path expression ends with the path separator, it is also regarded as
+   * {@code GlobMatcher}, and the pattern is {@code xxxx/**}</li>
+   * <li>3. If {@code *} or {@code ?} appears in the path expression, it is also regarded as
+   * {@code GlobMatcher}</li>
+   * <li>4. In addition to the above description, it is regarded as {@code CaseMatcher}</li>
+   * </ul>
+   *
+   * @param pathExp
+   * @param dos
+   * @param ignoreCase
+   * @return decidePathMatcher
+   */
+  public static PathMatcher decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+    String path = defaultTrim(pathExp);
+    if (path.startsWith("regex:")) {
+      path = shouldNotBlank(path.substring("regex:".length()));
+      return new RegexMatcher(ignoreCase, path);
+    } else {
+      boolean glob = false;
+      String pathSpr = dos ? "\\" : "/";
+      if (isBlank(path) || path.endsWith(pathSpr)) {
+        path += "**";
+        glob = true;
+      }
+      if (path.startsWith("glob:")) {
+        path = shouldNotBlank(path.substring("glob:".length()));
+        glob = true;
+      } else {
+        glob = path.chars().anyMatch(c -> c == '?' || c == '*');
+      }
+      if (glob) {
+        return new GlobMatcher(dos, ignoreCase, path);
+      } else {
+        return new CaseMatcher(path, ignoreCase);
+      }
+    }
   }
 
   public static boolean matchClassPath(String path, String globExpress) {
@@ -49,13 +110,40 @@ public class PathUtils {
     return GlobPatterns.build(globExpress, true, true).matcher(path).matches();
   }
 
+  private static String resolvePlainParent(String patternChars, String pathSeparator,
+      String express) {
+    if (isBlank(patternChars)) {
+      return express;
+    }
+    int idx = -1;
+    for (int i = 0; i < express.length(); i++) {
+      char c = express.charAt(i);
+      if (patternChars.indexOf(c) != -1) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx == -1) {
+      return express;
+    } else if (idx == 0) {
+      return StringUtils.EMPTY;
+    } else {
+      String path = express.substring(0, idx);
+      if (path.indexOf(pathSeparator) != -1) {
+        return path.substring(0, path.lastIndexOf(pathSeparator));
+      } else {
+        return path;
+      }
+    }
+  }
+
   /**
    * corant-shared
    *
    * @author bingo 下午3:48:58
    *
    */
-  public static class CaseMatcher implements Predicate<String> {
+  public static class CaseMatcher implements PathMatcher {
 
     private final String express;
     private final boolean ignoreCase;
@@ -71,10 +159,19 @@ public class PathUtils {
     }
 
     @Override
+    public String getExpress() {
+      return express;
+    }
+
+    @Override
+    public String getPlainParent(String pathSeparator) {
+      return PathUtils.resolvePlainParent(null, pathSeparator, express);
+    }
+
+    @Override
     public boolean test(String t) {
       return ignoreCase ? express.equalsIgnoreCase(t) : express.equals(t);
     }
-
   }
 
   /**
@@ -85,7 +182,7 @@ public class PathUtils {
    * @author bingo 下午8:32:50
    *
    */
-  public static class GlobMatcher implements Predicate<String> {
+  public static class GlobMatcher implements PathMatcher {
 
     private final boolean isDos;
     private final boolean ignoreCase;
@@ -148,12 +245,18 @@ public class PathUtils {
       return isDos == other.isDos && ignoreCase == other.ignoreCase;
     }
 
-    public String getGlobExpress() {
+    @Override
+    public String getExpress() {
       return globExpress;
     }
 
     public Pattern getPattern() {
       return pattern;
+    }
+
+    @Override
+    public String getPlainParent(String pathSeparator) {
+      return PathUtils.resolvePlainParent(GlobPatterns.DIST_GLO_CHARS, pathSeparator, globExpress);
     }
 
     @Override
@@ -184,8 +287,115 @@ public class PathUtils {
   /**
    * corant-shared
    *
-   * @author bingo 下午4:30:24
+   * <p>
+   * NOTE: code base from sun.nio.fs
    *
+   * <p>
+   * The glob patterns:
+   *
+   * <ul>
+   * <li>
+   * <p>
+   * The {@code *} character matches zero or more {@link Character characters} of a name component
+   * without crossing directory boundaries.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * The {@code **} characters matches zero or more {@link Character characters} crossing directory
+   * boundaries.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * The {@code ?} character matches exactly one character of a name component.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * The backslash character ({@code \}) is used to escape characters that would otherwise be
+   * interpreted as special characters. The expression {@code \\} matches a single backslash and
+   * "\{" matches a left brace for example.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * The {@code [ ]} characters are a <i>bracket expression</i> that match a single character of a
+   * name component out of a set of characters. For example, {@code [abc]} matches {@code "a"},
+   * {@code "b"}, or {@code "c"}. The hyphen ({@code -}) may be used to specify a range so
+   * {@code [a-z]} specifies a range that matches from {@code "a"} to {@code "z"} (inclusive). These
+   * forms can be mixed so [abce-g] matches {@code "a"}, {@code "b"}, {@code "c"}, {@code "e"},
+   * {@code "f"} or {@code "g"}. If the character after the {@code [} is a {@code !} then it is used
+   * for negation so {@code
+   *   [!a-c]} matches any character except {@code "a"}, {@code "b"}, or {@code
+   *   "c"}.
+   * <p>
+   * Within a bracket expression the {@code *}, {@code ?} and {@code \} characters match themselves.
+   * The ({@code -}) character matches itself if it is the first character within the brackets, or
+   * the first character after the {@code !} if negating.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * The {@code { }} characters are a group of subpatterns, where the group matches if any
+   * subpattern in the group matches. The {@code ","} character is used to separate the subpatterns.
+   * Groups cannot be nested.
+   * </p>
+   * </li>
+   *
+   * <li>
+   * <p>
+   * Leading period<tt>&#47;</tt>dot characters in file name are treated as regular characters in
+   * match operations. For example, the {@code "*"} glob pattern matches file name {@code ".login"}.
+   * </p>
+   * </li>
+   * </ul>
+   * <p>
+   * For example:
+   *
+   * <blockquote>
+   * <table border="0" summary="Pattern Language">
+   * <tr>
+   * <td>{@code *.java}</td>
+   * <td>Matches a path that represents a file name ending in {@code .java}</td>
+   * </tr>
+   * <tr>
+   * <td>{@code *.*}</td>
+   * <td>Matches file names containing a dot</td>
+   * </tr>
+   * <tr>
+   * <td>{@code *.{java,class}}</td>
+   * <td>Matches file names ending with {@code .java} or {@code .class}</td>
+   * </tr>
+   * <tr>
+   * <td>{@code foo.?}</td>
+   * <td>Matches file names starting with {@code foo.} and a single character extension</td>
+   * </tr>
+   * <tr>
+   * <td><tt>&#47;home&#47;*&#47;*</tt>
+   * <td>Matches <tt>&#47;home&#47;gus&#47;data</tt> on UNIX platforms</td>
+   * </tr>
+   * <tr>
+   * <td><tt>&#47;home&#47;**</tt>
+   * <td>Matches <tt>&#47;home&#47;gus</tt> and <tt>&#47;home&#47;gus&#47;data</tt> on UNIX
+   * platforms</td>
+   * </tr>
+   * <tr>
+   * <td><tt>C:&#92;&#92;*</tt>
+   * <td>Matches <tt>C:&#92;foo</tt> and <tt>C:&#92;bar</tt> on the Windows platform (note that the
+   * backslash is escaped; as a string literal in the Java Language the pattern would be
+   * <tt>"C:&#92;&#92;&#92;&#92;*"</tt>)</td>
+   * </tr>
+   *
+   * </table>
+   * </blockquote>
+   *
+   * @author bingo 下午4:30:24
    */
   public static class GlobPatterns {
 
@@ -227,11 +437,11 @@ public class PathUtils {
       return DIST_REG_CHARS.indexOf(c) != -1;
     }
 
-    public static String toUnixRegexPattern(String globExpress) {
+    static String toUnixRegexPattern(String globExpress) {
       return toRegexPattern(globExpress, false);
     }
 
-    public static String toWindowsRegexPattern(String globExpress) {
+    static String toWindowsRegexPattern(String globExpress) {
       return toRegexPattern(globExpress, true);
     }
 
@@ -394,6 +604,21 @@ public class PathUtils {
 
       return regex.append('$').toString();
     }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午11:18:13
+   *
+   */
+  public interface PathMatcher extends Predicate<String> {
+
+    String getExpress();
+
+    String getPlainParent(String pathSeparator);
+
   }
 
   /**
@@ -402,7 +627,7 @@ public class PathUtils {
    * @author bingo 下午2:28:39
    *
    */
-  public static class RegexMatcher implements Predicate<String> {
+  public static class RegexMatcher implements PathMatcher {
 
     public static final String REG_CHARS = ".+*?^$()[]{}|";
 
@@ -433,12 +658,18 @@ public class PathUtils {
       return REG_CHARS.indexOf(c) != -1;
     }
 
+    @Override
     public String getExpress() {
       return express;
     }
 
     public Pattern getPattern() {
       return pattern;
+    }
+
+    @Override
+    public String getPlainParent(String pathSeparator) {
+      return PathUtils.resolvePlainParent(REG_CHARS, pathSeparator, express);
     }
 
     public boolean isIgnoreCase() {

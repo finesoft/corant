@@ -45,7 +45,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -58,8 +57,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.PathUtils.GlobMatcher;
-import org.corant.shared.util.PathUtils.RegexMatcher;
+import org.corant.shared.util.PathUtils.CaseMatcher;
+import org.corant.shared.util.PathUtils.PathMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
 
 /**
@@ -71,9 +70,6 @@ import org.corant.shared.util.Resources.ClassPathResource;
  *
  */
 public class ClassPaths {
-
-  public static final String REGE_CHARS = "+*?^([{|";
-  public static final String GLOB_CHARS = "*?[{";
 
   public static final char PATH_SEPARATOR = '/';
   public static final String JAR_URL_SEPARATOR = "!/";
@@ -191,15 +187,8 @@ public class ClassPaths {
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
       boolean ignoreCase) throws IOException {
     final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
-    final Optional<ClassPathMatcher> pathFilter = decideClassPathMatcher(path, ignoreCase);
-    if (pathFilter.isPresent()) {
-      Scanner scanner = new Scanner(pathFilter.get());
-      for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,
-          scanner.getRoot()).entrySet()) {
-        scanner.scan(entry.getKey(), entry.getValue());
-      }
-      return scanner.getResources();
-    } else {
+    final PathMatcher pathMatcher = PathUtils.decidePathMatcher(path, false, ignoreCase);
+    if (pathMatcher instanceof CaseMatcher && !ignoreCase) {
       return getClassPathResourceUrls(useClassLoader, path).stream().map(u -> {
         try {
           return ClassPathResource.of(u.toURI().getRawSchemeSpecificPart(), classLoader, u);
@@ -207,6 +196,14 @@ public class ClassPaths {
           throw new CorantRuntimeException(e);
         }
       }).collect(Collectors.toSet());
+    } else {
+      final ClassPathMatcher pathFilter = new ClassPathMatcher(pathMatcher);
+      Scanner scanner = new Scanner(pathFilter);
+      for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,
+          scanner.getRoot()).entrySet()) {
+        scanner.scan(entry.getKey(), entry.getValue());
+      }
+      return scanner.getResources();
     }
   }
 
@@ -220,41 +217,6 @@ public class ClassPaths {
   public static Set<ClassPathResource> fromRelative(Class<?> relative, String path,
       boolean ignoreCase) {
     throw new NotSupportedException();// TODO
-  }
-
-  static Optional<ClassPathMatcher> decideClassPathMatcher(String express, boolean ignoreCase) {
-    String path = express;
-    if (isBlank(path)) {
-      path = "**";
-      return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
-    } else if (path.startsWith("regex:")) {
-      path = path.substring("regex:".length());
-      return Optional.of(new ClassPathMatcher(new RegexMatcher(ignoreCase, path), path));
-    } else if (path.startsWith("glob:")) {
-      path = path.substring("glob:".length());
-      path = path.endsWith(PATH_SEPARATOR_STRING) ? path.concat("**") : path;
-      return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
-    } else {
-      int len = path.length();
-      Set<Character> chars = new HashSet<>();
-      for (int i = 0; i < len; i++) {
-        if (REGE_CHARS.indexOf(path.charAt(i)) != -1) {
-          chars.add(path.charAt(i));
-        }
-      }
-      if (!chars.isEmpty()) {
-        if (chars.stream().map(String::valueOf).allMatch(p -> GLOB_CHARS.indexOf(p) != -1)) {
-          path = path.endsWith(PATH_SEPARATOR_STRING) ? path.concat("**") : path;
-          return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
-        } else {
-          return Optional.of(new ClassPathMatcher(new RegexMatcher(ignoreCase, path), path));
-        }
-      } else if (path.endsWith(PATH_SEPARATOR_STRING)) {
-        path = path.concat("**");
-        return Optional.of(new ClassPathMatcher(new GlobMatcher(false, ignoreCase, path), path));
-      }
-    }
-    return Optional.empty();
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {
@@ -326,48 +288,16 @@ public class ClassPaths {
    */
   public static final class ClassPathMatcher implements Predicate<String> {
 
-    final Predicate<String> matcher;
-    final String pathExpress;
-    final boolean glob;
+    final PathMatcher matcher;
+    final String root;
 
-    protected ClassPathMatcher(Predicate<String> matcher, String pathExpress) {
+    protected ClassPathMatcher(PathMatcher matcher) {
       this.matcher = matcher;
-      this.pathExpress = pathExpress;
-      glob = matcher instanceof GlobMatcher;
+      root = matcher.getPlainParent(PATH_SEPARATOR_STRING);
     }
 
     public String getRoot() {
-      if (pathExpress == null) {
-        return null;
-      }
-      int len = pathExpress.length();
-      int idx = -1;
-      for (int i = 0; i < len; i++) {
-        if (isSpecChar(pathExpress.charAt(i))) {
-          idx = i;
-          break;
-        }
-      }
-      if (idx == -1) {
-        return pathExpress;
-      } else if (idx == 0) {
-        return StringUtils.EMPTY;
-      } else {
-        String path = pathExpress.substring(0, idx);
-        if (path.indexOf(PATH_SEPARATOR_STRING) != -1) {
-          return path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
-        } else {
-          return path;
-        }
-      }
-    }
-
-    public boolean isSpecChar(char c) {
-      if (glob) {
-        return GLOB_CHARS.indexOf(c) != -1;
-      } else {
-        return REGE_CHARS.indexOf(c) != -1;
-      }
+      return root;
     }
 
     @Override

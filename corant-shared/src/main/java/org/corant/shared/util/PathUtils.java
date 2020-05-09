@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.StringUtils.defaultTrim;
 import static org.corant.shared.util.StringUtils.isBlank;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -29,6 +30,11 @@ import java.util.regex.PatternSyntaxException;
  *
  */
 public class PathUtils {
+
+  public static final String SYNTAX_GLOB = "glob:";
+  public static final int SYNTAX_GLOB_LEN = SYNTAX_GLOB.length();
+  public static final String SYNTAX_REGEX = "regex:";
+  public static final int SYNTAX_REGEX_LEN = SYNTAX_REGEX.length();
 
   private PathUtils() {
     super();
@@ -58,7 +64,8 @@ public class PathUtils {
    * {@code GlobMatcher}, and the pattern is {@code xxxx/**}</li>
    * <li>3. If {@code *} or {@code ?} appears in the path expression, it is also regarded as
    * {@code GlobMatcher}</li>
-   * <li>4. In addition to the above description, it is regarded as {@code CaseMatcher}</li>
+   * <li>4. In addition to the above description and ignore case, it is regarded as
+   * {@code CaseInsensitiveMatcher}</li>
    * </ul>
    *
    * @param pathExp
@@ -66,30 +73,31 @@ public class PathUtils {
    * @param ignoreCase
    * @return decidePathMatcher
    */
-  public static PathMatcher decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+  public static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos,
+      boolean ignoreCase) {
+    PathMatcher matcher = null;
     String path = defaultTrim(pathExp);
-    if (path.startsWith("regex:")) {
-      path = shouldNotBlank(path.substring("regex:".length()));
-      return new RegexMatcher(ignoreCase, path);
+    if (path.startsWith(SYNTAX_REGEX)) {
+      matcher = new RegexMatcher(ignoreCase, shouldNotBlank(path.substring(SYNTAX_REGEX_LEN)));
     } else {
       boolean glob = false;
-      String pathSpr = dos ? "\\" : "/";
-      if (isBlank(path) || path.endsWith(pathSpr)) {
+      if (isBlank(path) || path.endsWith(dos ? "\\" : "/")) {
         path += "**";
         glob = true;
       }
-      if (path.startsWith("glob:")) {
-        path = shouldNotBlank(path.substring("glob:".length()));
+      if (path.startsWith(SYNTAX_GLOB)) {
+        path = shouldNotBlank(path.substring(SYNTAX_GLOB_LEN));
         glob = true;
       } else {
-        glob = path.chars().anyMatch(c -> c == '?' || c == '*');
+        glob = path.chars().anyMatch(c -> c == '?' || c == '*');// auto discovery
       }
       if (glob) {
-        return new GlobMatcher(dos, ignoreCase, path);
-      } else {
-        return new CaseMatcher(path, ignoreCase);
+        matcher = new GlobMatcher(dos, ignoreCase, path);
+      } else if (ignoreCase) {
+        matcher = new CaseInsensitiveMatcher(path);
       }
     }
+    return Optional.ofNullable(matcher);
   }
 
   public static boolean matchClassPath(String path, String globExpress) {
@@ -143,19 +151,16 @@ public class PathUtils {
    * @author bingo 下午3:48:58
    *
    */
-  public static class CaseMatcher implements PathMatcher {
+  public static class CaseInsensitiveMatcher implements PathMatcher {
 
     private final String express;
-    private final boolean ignoreCase;
 
     /**
      * @param express
-     * @param ignoreCase
      */
-    protected CaseMatcher(String express, boolean ignoreCase) {
+    protected CaseInsensitiveMatcher(String express) {
       super();
       this.express = express;
-      this.ignoreCase = ignoreCase;
     }
 
     @Override
@@ -170,7 +175,7 @@ public class PathUtils {
 
     @Override
     public boolean test(String t) {
-      return ignoreCase ? express.equalsIgnoreCase(t) : express.equals(t);
+      return express.equalsIgnoreCase(t);
     }
   }
 

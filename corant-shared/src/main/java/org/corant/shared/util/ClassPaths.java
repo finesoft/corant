@@ -45,6 +45,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -57,7 +58,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.PathUtils.CaseMatcher;
 import org.corant.shared.util.PathUtils.PathMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
 
@@ -187,8 +187,15 @@ public class ClassPaths {
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
       boolean ignoreCase) throws IOException {
     final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
-    final PathMatcher pathMatcher = PathUtils.decidePathMatcher(path, false, ignoreCase);
-    if (pathMatcher instanceof CaseMatcher && !ignoreCase) {
+    final Optional<PathMatcher> pathMatcher = PathUtils.decidePathMatcher(path, false, ignoreCase);
+    if (pathMatcher.isPresent()) {
+      Scanner scanner = new Scanner(new ClassPathMatcher(pathMatcher.get()));
+      for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,
+          scanner.getRoot()).entrySet()) {
+        scanner.scan(entry.getKey(), entry.getValue());
+      }
+      return scanner.getResources();
+    } else {
       return getClassPathResourceUrls(useClassLoader, path).stream().map(u -> {
         try {
           return ClassPathResource.of(u.toURI().getRawSchemeSpecificPart(), classLoader, u);
@@ -196,14 +203,6 @@ public class ClassPaths {
           throw new CorantRuntimeException(e);
         }
       }).collect(Collectors.toSet());
-    } else {
-      final ClassPathMatcher pathFilter = new ClassPathMatcher(pathMatcher);
-      Scanner scanner = new Scanner(pathFilter);
-      for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,
-          scanner.getRoot()).entrySet()) {
-        scanner.scan(entry.getKey(), entry.getValue());
-      }
-      return scanner.getResources();
     }
   }
 

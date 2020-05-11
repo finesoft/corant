@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils.GlobMatcher;
 
 /**
  * corant-shared
@@ -51,7 +50,7 @@ public class Resources {
   public static final Logger logger = Logger.getLogger(Resources.class.getName());
 
   /**
-   * Get URL resources from specified url path, support Glob Pattern.
+   * Get URL resources from specified url path, support Glob / Regex Pattern.
    * <p>
    * <li>The incoming path start with 'filesystem:'({@link SourceType#FILE_SYSTEM}) means that get
    * resouces from file system.</li>
@@ -65,6 +64,7 @@ public class Resources {
    * Note: If the incoming path non start with {@link SourceType} that means not specified schema
    * then use class path.
    *
+   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
    * @param <T>
    * @param path
    * @return
@@ -156,28 +156,16 @@ public class Resources {
   }
 
   /**
-   * Use path string to find file system resource.
+   * Use path string to find file system resource. Support glob/regex expression
    *
+   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
    * @param path
    * @return
    * @throws IOException fromFileSystem
    */
   public static Stream<FileSystemResource> fromFileSystem(String path) throws IOException {
-    String usePath = SourceType.FILE_SYSTEM.resolve(path);
-    if (GlobMatcher.hasGlobChar(usePath)) {
-      String resolvedPath = FileUtils.resolveGlobPathPrefix(usePath);
-      final GlobMatcher m = new GlobMatcher(false, true, usePath.replace('\\', '/'));
-      return FileUtils.selectFiles(resolvedPath, f -> {
-        try {
-          return m.test(f.getCanonicalPath().replace('\\', '/'));
-        } catch (IOException e) {
-          throw new CorantRuntimeException(e);
-        }
-      }).stream().map(FileSystemResource::new);
-    } else {
-      return FileUtils.selectFiles(usePath, null).stream().map(FileSystemResource::new);
-    }
-
+    String pathExp = SourceType.FILE_SYSTEM.resolve(path);
+    return FileUtils.selectFiles(pathExp).stream().map(FileSystemResource::new);
   }
 
   /**

@@ -38,7 +38,7 @@ public class Power implements PowerMBean {
   }
 
   @Override
-  public boolean isRunning() {
+  public synchronized boolean isRunning() {
     try {
       return Corant.current() != null && Corant.current().isRuning();
     } catch (Exception t) {
@@ -47,7 +47,7 @@ public class Power implements PowerMBean {
   }
 
   @Override
-  public void start() {
+  public synchronized void start() {
     try {
       if (Corant.current() == null) {
         Corant.run(beanClasses, arguments);
@@ -60,7 +60,7 @@ public class Power implements PowerMBean {
   }
 
   @Override
-  public void stop() {
+  public synchronized void stop() {
     try {
       if (Corant.current() != null && Corant.current().isRuning()) {
         Corant.current().stop();

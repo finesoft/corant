@@ -100,6 +100,10 @@ public class PathUtils {
     return Optional.ofNullable(matcher);
   }
 
+  public static boolean isDos() {
+    return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window");
+  }
+
   public static boolean matchClassPath(String path, String globExpress) {
     return matchUnixPath(path, globExpress);
   }
@@ -207,10 +211,6 @@ public class PathUtils {
       pattern = GlobPatterns.build(globExpress, isDos, ignoreCase);
     }
 
-    public static boolean hasGlobChar(String str) {
-      return str != null && str.chars().anyMatch(GlobPatterns::isGlobChar);
-    }
-
     public static GlobMatcher of(boolean isDos, String globExpress, boolean ignoreCase) {
       return new GlobMatcher(isDos, ignoreCase, globExpress);
     }
@@ -220,8 +220,7 @@ public class PathUtils {
     }
 
     public static GlobMatcher of(String globExpress, boolean ignoreCase) {
-      return of(System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window"),
-          globExpress, ignoreCase);
+      return of(PathUtils.isDos(), globExpress, ignoreCase);
     }
 
     public static GlobMatcher ofDos(String globExpress) {
@@ -261,7 +260,7 @@ public class PathUtils {
 
     @Override
     public String getPlainParent(String pathSeparator) {
-      return PathUtils.resolvePlainParent(GlobPatterns.DIST_GLO_CHARS, pathSeparator, globExpress);
+      return PathUtils.resolvePlainParent(GlobPatterns.GLO_META_CHARS, pathSeparator, globExpress);
     }
 
     @Override
@@ -404,8 +403,9 @@ public class PathUtils {
    */
   public static class GlobPatterns {
 
-    public static final String DIST_REG_CHARS = ".^$+{[]|()";
-    public static final String DIST_GLO_CHARS = "\\*?[{";
+    public static final String REG_META_CHARS = ".^$+{[]|()";
+    public static final String GLO_META_CHARS = "\\*?[{";
+
     private static final char EOL = 0;
 
     public static Pattern build(String globExpress, boolean isDos, boolean ignoreCase) {
@@ -426,20 +426,20 @@ public class PathUtils {
       }
     }
 
-    public static boolean isGlobChar(char c) {
-      return DIST_GLO_CHARS.indexOf(c) != -1;
+    static boolean isGlobMeta(char c) {
+      return GLO_META_CHARS.indexOf(c) != -1;
     }
 
-    public static boolean isGlobChar(int c) {
-      return DIST_GLO_CHARS.indexOf(c) != -1;
+    static boolean isGlobMeta(int c) {
+      return GLO_META_CHARS.indexOf(c) != -1;
     }
 
-    public static boolean isRegexChar(char c) {
-      return DIST_REG_CHARS.indexOf(c) != -1;
+    static boolean isRegexMeta(char c) {
+      return REG_META_CHARS.indexOf(c) != -1;
     }
 
-    public static boolean isRegexChar(int c) {
-      return DIST_REG_CHARS.indexOf(c) != -1;
+    static boolean isRegexMeta(int c) {
+      return REG_META_CHARS.indexOf(c) != -1;
     }
 
     static String toUnixRegexPattern(String globExpress) {
@@ -476,7 +476,7 @@ public class PathUtils {
               throw new PatternSyntaxException("No character to escape", globPattern, i - 1);
             }
             char next = globPattern.charAt(i++);
-            if (isGlobChar(next) || isRegexChar(next)) {
+            if (isGlobMeta(next) || isRegexMeta(next)) {
               regex.append('\\');
             }
             regex.append(next);
@@ -596,7 +596,7 @@ public class PathUtils {
             break;
 
           default:
-            if (isRegexChar(c)) {
+            if (isRegexMeta(c)) {
               regex.append('\\');
             }
             regex.append(c);

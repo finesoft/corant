@@ -178,6 +178,8 @@ public class ClassPaths {
    * end with Driver.class.
    * </pre>
    *
+   * @see PathUtils#decidePathMatcher(String, false, boolean)
+   *
    * @param classLoader
    * @param path
    * @param ignoreCase only use in pattern matcher

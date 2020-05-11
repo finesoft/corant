@@ -15,13 +15,13 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,13 +38,15 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils.GlobPatterns;
+import org.corant.shared.util.PathUtils.PathMatcher;
+import org.corant.shared.util.Resources.SourceType;
 
 /**
  * Origin of code: org.apache.commons.io.FileUtils
@@ -239,12 +241,21 @@ public class FileUtils {
     }
   }
 
-  public static String resolveGlobPathPrefix(String globExpress) {
-    String path = parseGlobPathPrefix(globExpress);
-    try {
-      return new File(path).getCanonicalPath();
-    } catch (IOException e) {
-      throw new CorantRuntimeException(e);
+  public static List<File> selectFiles(String path) {
+    String pathExp = SourceType.FILE_SYSTEM.resolve(path);
+    pathExp = isNotBlank(pathExp) ? pathExp.replace('\\', '/') : pathExp;
+    Optional<PathMatcher> matcher = PathUtils.decidePathMatcher(pathExp, false, true);
+    if (matcher.isPresent()) {
+      final PathMatcher useMatcher = matcher.get();
+      return selectFiles(useMatcher.getPlainParent("/"), f -> {
+        try {
+          return useMatcher.test(f.getCanonicalPath().replace('\\', '/'));
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+      });
+    } else {
+      return selectFiles(pathExp, null);
     }
   }
 
@@ -270,33 +281,6 @@ public class FileUtils {
       }
     }
     return files;
-  }
-
-  static String parseGlobPathPrefix(String globExpress) {
-    String usePath = shouldNotBlank(globExpress).replaceAll("\\\\", "/");
-    int gidx = -1;
-    int fidx = -1;
-    int len = usePath.length();
-    for (int i = 0; i < len; i++) {
-      if (GlobPatterns.isGlobChar(usePath.charAt(i))) {
-        gidx = i;
-        break;
-      }
-    }
-    shouldBeFalse(gidx == 0);
-    if (gidx == -1) {
-      return usePath;
-    } else {
-      usePath = usePath.substring(0, gidx);
-      fidx = usePath.lastIndexOf('/');
-      shouldBeFalse(fidx == 0);
-      if (fidx == -1) {
-        return usePath;
-      } else {
-        usePath = usePath.substring(0, fidx);
-        return usePath + "/";
-      }
-    }
   }
 
 }

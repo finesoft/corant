@@ -59,6 +59,7 @@ public class FileUtils {
   public static final char EXTENSION_SEPARATOR = '.';
   public static final String EXTENSION_SEPARATOR_STR = Character.toString(EXTENSION_SEPARATOR);
   public static final char UNIX_SEPARATOR = '/';
+  public static final String UNIX_SEPARATOR_STR = Character.toString(UNIX_SEPARATOR);
   public static final char WINDOWS_SEPARATOR = '\\';
   public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16L;
   public static final String JAR_URL_SEPARATOR = "!/";
@@ -243,13 +244,13 @@ public class FileUtils {
 
   public static List<File> selectFiles(String path) {
     String pathExp = SourceType.FILE_SYSTEM.resolve(path);
-    pathExp = isNotBlank(pathExp) ? pathExp.replace('\\', '/') : pathExp;
+    pathExp = isNotBlank(pathExp) ? pathExp.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR) : pathExp;
     Optional<PathMatcher> matcher = PathUtils.decidePathMatcher(pathExp, false, true);
     if (matcher.isPresent()) {
       final PathMatcher useMatcher = matcher.get();
-      return selectFiles(useMatcher.getPlainParent("/"), f -> {
+      return selectFiles(useMatcher.getPlainParent(UNIX_SEPARATOR_STR), f -> {
         try {
-          return useMatcher.test(f.getCanonicalPath().replace('\\', '/'));
+          return useMatcher.test(f.getCanonicalPath().replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR));
         } catch (IOException e) {
           throw new CorantRuntimeException(e);
         }

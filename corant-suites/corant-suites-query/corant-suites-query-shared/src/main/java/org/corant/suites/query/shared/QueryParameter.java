@@ -47,7 +47,7 @@ public interface QueryParameter extends Serializable {
 
   /**
    * Return query criteria. The criteria can be Map or POJO that used to construct query conditions
-   * or specificationsused to construct query conditions or specifications.
+   * or specifications for construct query conditions or specifications.
    *
    * @return getCriteria
    */
@@ -182,6 +182,66 @@ public interface QueryParameter extends Serializable {
       return this;
     }
 
+  }
+
+  /**
+   *
+   * corant-suites-query-shared
+   *
+   * @author bingo 下午6:56:58
+   *
+   */
+  public static class GenericQueryParameter<T> implements QueryParameter {
+    private static final long serialVersionUID = 7809436027996029494L;
+    protected T criteria;
+    protected Integer limit;
+    protected Integer offset = 0;
+    protected Map<String, Object> context = new HashMap<>();
+
+    public GenericQueryParameter() {}
+
+    @Override
+    public Map<String, Object> getContext() {
+      return this.context;
+    }
+
+    @Override
+    public T getCriteria() {
+      return this.criteria;
+    }
+
+    @Override
+    public Integer getLimit() {
+      return this.limit;
+    }
+
+    @Override
+    public Integer getOffset() {
+      return this.offset;
+    }
+
+    public GenericQueryParameter<T> setContext(Map<String, Object> context) {
+      this.context.clear();
+      if (context != null) {
+        this.context.putAll(context);
+      }
+      return this;
+    }
+
+    public GenericQueryParameter<T> setCriteria(T criteria) {
+      this.criteria = criteria;
+      return this;
+    }
+
+    public GenericQueryParameter<T> setLimit(Integer limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public GenericQueryParameter<T> setOffset(Integer offset) {
+      this.offset = offset;
+      return this;
+    }
   }
 
   /**

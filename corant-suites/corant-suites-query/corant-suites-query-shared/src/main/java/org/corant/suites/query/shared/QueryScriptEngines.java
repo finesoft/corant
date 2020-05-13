@@ -62,8 +62,9 @@ public class QueryScriptEngines {
    */
   public static Function<Object[], Object> resolveFetchInjections(FetchQuery fetchQuery) {
     if (fetchQuery.getInjectionScript().isValid()) {
-      return complieFunction(fetchQuery.getId(), () -> Pair.of(fetchQuery.getInjectionScript(),
-          new String[] {RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME}));
+      return complieFunction(fetchQuery.getInjectionScript().getId(),
+          () -> Pair.of(fetchQuery.getInjectionScript(),
+              new String[] {RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME}));
     } else {
       return null;
     }
@@ -77,8 +78,9 @@ public class QueryScriptEngines {
    */
   public static Function<Object[], Object> resolveFetchPredicates(FetchQuery fetchQuery) {
     if (fetchQuery.getPredicateScript().isValid()) {
-      return complieFunction(fetchQuery.getId(), () -> Pair.of(fetchQuery.getPredicateScript(),
-          new String[] {PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME}));
+      return complieFunction(fetchQuery.getPredicateScript().getId(),
+          () -> Pair.of(fetchQuery.getPredicateScript(),
+              new String[] {PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME}));
     } else {
       return null;
     }
@@ -92,7 +94,7 @@ public class QueryScriptEngines {
    */
   public static Consumer<Object[]> resolveQueryHintResultScriptMappers(QueryHint queryHint) {
     if (queryHint != null && queryHint.getScript().isValid()) {
-      return complieConsumer(queryHint.getId(), () -> Pair.of(queryHint.getScript(),
+      return complieConsumer(queryHint.getScript().getId(), () -> Pair.of(queryHint.getScript(),
           new String[] {PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME}));
     } else {
       return null;

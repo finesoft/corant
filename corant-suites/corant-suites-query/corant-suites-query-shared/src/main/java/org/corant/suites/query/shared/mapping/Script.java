@@ -15,6 +15,7 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * corant-suites-query-shared
@@ -28,6 +29,8 @@ public class Script implements Serializable {
 
   public static final Script EMPTY = new Script();
 
+  private final String id = UUID.randomUUID().toString();
+
   private String code;
 
   private String src;
@@ -40,6 +43,14 @@ public class Script implements Serializable {
    */
   public String getCode() {
     return code;
+  }
+
+  /**
+   * 
+   * @return the id
+   */
+  public String getId() {
+    return id;
   }
 
   /**

@@ -14,7 +14,6 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
@@ -212,13 +211,21 @@ public class ClassPaths {
 
   /**
    * Get the resources of a relative path through a class and path
-   * 
+   *
    * @param relative
    * @param path
    * @return fromRelative
    */
   public static Resource fromRelative(Class<?> relative, String path) {
-    return new URLResource(shouldNotNull(relative).getResource(shouldNotBlank(path)));
+    URL url = null;
+    if (path != null) {
+      if (relative != null) {
+        url = relative.getResource(path);
+      } else {
+        url = defaultClassLoader().getResource(path);
+      }
+    }
+    return url != null ? new URLResource(url) : null;
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {

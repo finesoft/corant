@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ClassUtils.defaultClassLoader;
 import static org.corant.shared.util.CollectionUtils.immutableSetOf;
@@ -57,9 +58,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.PathUtils.PathMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
+import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Resources.URLResource;
 
 /**
  * corant-shared
@@ -209,15 +211,14 @@ public class ClassPaths {
   }
 
   /**
-   *
+   * Get the resources of a relative path through a class and path
+   * 
    * @param relative
    * @param path
-   * @param ignoreCase
    * @return fromRelative
    */
-  public static Set<ClassPathResource> fromRelative(Class<?> relative, String path,
-      boolean ignoreCase) {
-    throw new NotSupportedException();// TODO
+  public static Resource fromRelative(Class<?> relative, String path) {
+    return new URLResource(shouldNotNull(relative).getResource(shouldNotBlank(path)));
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {

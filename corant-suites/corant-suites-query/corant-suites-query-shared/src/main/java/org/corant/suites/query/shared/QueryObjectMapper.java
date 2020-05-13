@@ -20,21 +20,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-suites-query-shared
+ * 
  * @author bingo 下午6:48:41
  */
 public class QueryObjectMapper {
 
-    public static final ObjectMapper OM;
+  public static final ObjectMapper OM;
 
-    static {
-        OM = JsonUtils.copyMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+  static {
+    OM = JsonUtils.copyMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
 
-    public static String toString(Object obj) {
-        try {
-            return OM.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+  public static String toString(Object obj) {
+    try {
+      return OM.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      return null;
     }
+  }
 }

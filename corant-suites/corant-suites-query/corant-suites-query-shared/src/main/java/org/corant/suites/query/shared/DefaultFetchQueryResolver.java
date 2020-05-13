@@ -29,23 +29,18 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names;
 import org.corant.suites.cdi.ConversionService;
-import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.kotlin.KotlinScriptEngines;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
-import org.corant.suites.query.shared.mapping.Script.ScriptType;
 
 /**
  * corant-suites-query-shared
@@ -57,9 +52,6 @@ import org.corant.suites.query.shared.mapping.Script.ScriptType;
 @ApplicationScoped
 public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
-  protected final Map<String, Function<Object[], Object>> predicates = new ConcurrentHashMap<>();
-  protected final Map<String, Function<Object[], Object>> injections = new ConcurrentHashMap<>();
-
   @Inject
   protected ConversionService conversionService;
 
@@ -68,7 +60,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
-    Function<Object[], Object> sf = resolveFetchPredicate(fetchQuery);
+    Function<Object[], Object> sf = QueryScriptEngines.resolveFetchPredicates(fetchQuery);
     if (sf != null) {
       Boolean b = toBoolean(sf.apply(new Object[] {queryParameter, result}));
       if (b == null || !b.booleanValue()) {
@@ -83,7 +75,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (result == null) {
       return;
     }
-    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
     if (injection == null) {
       // use inject pro name
@@ -109,7 +102,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (isEmpty(results)) {
       return;
     }
-    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
     if (injection == null) {
       // use inject pro name
@@ -181,48 +175,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
-    predicates.clear();
-    injections.clear();
     logger.fine(() -> "Clear default fetch query resolver caches.");
-  }
-
-  protected Function<Object[], Object> resolveFetchInjection(FetchQuery fetchQuery) {
-    return injections.computeIfAbsent(fetchQuery.getId(), id -> {
-      if (fetchQuery.getInjectionScript().isValid()) {
-        if (fetchQuery.getInjectionScript().getType() == ScriptType.JS) {
-          return NashornScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
-              RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
-        } else if (fetchQuery.getInjectionScript().getType() == ScriptType.KT) {
-          return KotlinScriptEngines.createFunction(fetchQuery.getInjectionScript().getCode(),
-              RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
-        } else {
-          throw new NotSupportedException(
-              "Currently we only support using javascript / kotlin as fetch query injection script.");
-        }
-
-      } else {
-        return null;
-      }
-    });
-  }
-
-  protected Function<Object[], Object> resolveFetchPredicate(FetchQuery fetchQuery) {
-    return predicates.computeIfAbsent(fetchQuery.getId(), k -> {
-      if (fetchQuery.getPredicateScript().isValid()) {
-        if (fetchQuery.getPredicateScript().getType() == ScriptType.JS) {
-          return NashornScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
-              PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
-        } else if (fetchQuery.getPredicateScript().getType() == ScriptType.KT) {
-          return KotlinScriptEngines.createFunction(fetchQuery.getPredicateScript().getCode(),
-              PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
-        } else {
-          throw new NotSupportedException(
-              "Currently we only support using javascript / kotlin as fetch query predication script.");
-        }
-
-      }
-      return null;
-    });
   }
 
   protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
@@ -295,7 +248,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       }
       return;
     }
-    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     if (injection != null) {
       List<Object> useFetchedResultList = new ArrayList<>();
       for (Object result : results) {
@@ -352,7 +306,8 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       injectFetchedResult(result, null, injectProName);
       return;
     }
-    final Function<Object[], Object> injection = resolveFetchInjection(fetchQuery);
+    final Function<Object[], Object> injection =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     if (injection != null) {
       fetchedResults.removeIf(fri -> {
         Boolean fit = toBoolean(injection.apply(new Object[] {result, fri}));

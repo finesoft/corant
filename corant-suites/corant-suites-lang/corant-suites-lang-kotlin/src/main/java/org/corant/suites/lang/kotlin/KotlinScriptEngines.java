@@ -39,11 +39,6 @@ public class KotlinScriptEngines {
   public static final ScriptEngineManager ENGINE_MANAGER =
       new ScriptEngineManager(defaultClassLoader());
 
-  static {
-    System.out
-        .println(ENGINE_MANAGER.getEngineByExtension("kts").getFactory().getParameter("THREAD"));
-  }
-
   public static final ThreadLocal<ScriptEngine> ENGINES =
       ThreadLocal.withInitial(() -> ENGINE_MANAGER.getEngineByExtension("kts"));
 
@@ -64,6 +59,10 @@ public class KotlinScriptEngines {
         bindings.clear();
       }
     };
+  }
+
+  public static ScriptEngine createEngine() {
+    return new ScriptEngineManager(defaultClassLoader()).getEngineByExtension("kts");
   }
 
   public static Function<Object[], Object> createFunction(String funcScript, String... paraNames) {

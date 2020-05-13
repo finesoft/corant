@@ -15,25 +15,19 @@ package org.corant.suites.query.shared.spi;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultString;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.lang.javascript.NashornScriptEngines;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
+import org.corant.suites.query.shared.QueryScriptEngines;
 import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**
@@ -89,19 +83,11 @@ import org.corant.suites.query.shared.mapping.QueryHint;
 public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-script-mapper";
-  public static final String HNIT_SCRIPT_ENGINE = "script-engine";
-  public static final String HINT_SCRIPT_PARA = "p";
-  public static final String HINT_SCRIPT_RESU = "r";
 
-  protected final Map<String, Consumer<Object[]>> mappers = new ConcurrentHashMap<>();
   protected final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
 
   @Inject
   protected Logger logger;
-
-  @Inject
-  @Any
-  protected Instance<ResultMapperResolver> mapperResolvers;
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
@@ -113,7 +99,9 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Consumer<Object[]> func = null;
-    if (brokens.contains(qh.getId()) || (func = resolveMapper(qh)) == null) {
+    if (brokens.contains(qh.getId())
+        || (func = QueryScriptEngines.resolveQueryHintResultScriptMappers(qh)) == null) {
+      brokens.add(qh.getId());
       return;
     }
     if (result instanceof Map) {
@@ -139,56 +127,8 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
-    mappers.clear();
     brokens.clear();
     logger.fine(() -> "Clear result script mapper hint handler caches.");
   }
 
-  protected Consumer<Object[]> resolveMapper(QueryHint qh) {
-    return mappers.computeIfAbsent(qh.getId(), k -> {
-      if (!mapperResolvers.isUnsatisfied()) {
-        Optional<ResultMapperResolver> op =
-            mapperResolvers.stream().filter(rmr -> rmr.accept(qh)).findFirst();
-        if (op.isPresent()) {
-          try {
-            return op.get().resolve(qh);
-          } catch (Exception e) {
-            brokens.add(qh.getId());
-            throw new CorantRuntimeException(e);
-          }
-        }
-      }
-      brokens.add(qh.getId());
-      return ps -> {
-      };
-    });
-  }
-
-  @ApplicationScoped
-  public static class NashornResultMapperResolver implements ResultMapperResolver {
-
-    public static final String DFLT_SCRIPT_ENGINE = "Oracle Nashorn";
-
-    @Override
-    public boolean accept(QueryHint qh) {
-      return qh != null && isNotBlank(qh.getScript().getCode()) && (isEmpty(qh.getParameters())
-          || isEmpty(qh.getParameters(ResultScriptMapperHintHandler.HNIT_SCRIPT_ENGINE))
-          || defaultString(
-              qh.getParameters(ResultScriptMapperHintHandler.HNIT_SCRIPT_ENGINE).get(0).getValue(),
-              DFLT_SCRIPT_ENGINE).equals(DFLT_SCRIPT_ENGINE));
-    }
-
-    @Override
-    public Consumer<Object[]> resolve(QueryHint qh) throws Exception {
-      return NashornScriptEngines.createConsumer(qh.getScript().getCode(), "p", "r");
-    }
-
-  }
-
-  public interface ResultMapperResolver {
-
-    boolean accept(QueryHint qh);
-
-    Consumer<Object[]> resolve(QueryHint qh) throws Exception;
-  }
 }

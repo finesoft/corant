@@ -5,5 +5,5 @@
     <artifactId>corant-suites</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-suites-structure</artifactId>
+  <artifactId>corant-suites-dsa</artifactId>
 </project>

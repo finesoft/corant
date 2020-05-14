@@ -56,7 +56,7 @@
     <module>corant-suites-rpc</module>
     <module>corant-suites-logging</module>
     <module>corant-suites-arrow</module>
-    <module>corant-suites-structure</module>
+    <module>corant-suites-dsa</module>
   </modules>
   <description>The Corant integration suite, which contains various components involved in enterprise development.</description>
 </project>

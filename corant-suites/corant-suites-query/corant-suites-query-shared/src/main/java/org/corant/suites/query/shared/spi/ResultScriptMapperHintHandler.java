@@ -25,9 +25,9 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.suites.query.shared.QueryScriptEngines;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
-import org.corant.suites.query.shared.QueryScriptEngines;
 import org.corant.suites.query.shared.mapping.QueryHint;
 
 /**
@@ -36,8 +36,6 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  * <p>
  * The result script mapper hints, use script to intervene the result.
  * <li>The key is 'result-script-mapper'</li>
- * <li>The value of the parameter that named 'script-engine' is the script engine name that will be
- * use for execute the script.</li>
  * <li>In the current implementation, we recommend the use of stateless functions, which take two
  * arguments. The first argument 'p' is used to accept the query parameter, usually a Map structure,
  * and the second argument 'r' is the row data of the result set, usually a Map structure.</li>
@@ -45,9 +43,6 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  * language. We use CompiledScript to improve performance, which means you have to pay attention to
  * writing scripts, preferably stateless functions, that can be problematic in multi-threaded
  * conditions if global variables are involved.</li>
- * <li>If need another script engine, then implement the ResultMapperResolver interface, and assign
- * an engine name, use this name as the value of the parameter that named 'script-engine' of the
- * hint .</li>
  * </p>
  *
  * <p>
@@ -99,9 +94,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
     Consumer<Object[]> func = null;
-    if (brokens.contains(qh.getId())
-        || (func = QueryScriptEngines.resolveQueryHintResultScriptMappers(qh)) == null) {
-      brokens.add(qh.getId());
+    if (brokens.contains(qh.getId()) || (func = resolve(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
@@ -129,6 +122,14 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   protected synchronized void onPreDestroy() {
     brokens.clear();
     logger.fine(() -> "Clear result script mapper hint handler caches.");
+  }
+
+  protected Consumer<Object[]> resolve(QueryHint qh) {
+    Consumer<Object[]> func = QueryScriptEngines.resolveQueryHintResultScriptMappers(qh);
+    if (func == null) {
+      brokens.add(qh.getId());
+    }
+    return func;
   }
 
 }

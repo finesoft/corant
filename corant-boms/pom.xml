@@ -1402,7 +1402,11 @@
         <artifactId>corant-suites-mvc</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-suites-dsa</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>

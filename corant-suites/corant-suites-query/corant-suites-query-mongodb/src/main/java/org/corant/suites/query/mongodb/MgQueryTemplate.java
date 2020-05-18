@@ -58,6 +58,7 @@ public class MgQueryTemplate {
   protected List<Bson> aggregate;
   protected int limit = -1;
   protected int offset = 0;
+  protected boolean autoSetIdField = true;
 
   private MgQueryTemplate(String database) {
     this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
@@ -70,7 +71,7 @@ public class MgQueryTemplate {
 
   public List<Map<?, ?>> aggregate() {
     AggregateIterable<Document> ai = database.getCollection(collection).aggregate(aggregate);
-    return streamOf(ai).collect(Collectors.toList());
+    return streamOf(ai).map(this::convert).collect(Collectors.toList());
   }
 
   public MgQueryTemplate aggregate(Bson... pipeline) {
@@ -85,6 +86,11 @@ public class MgQueryTemplate {
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
+    return this;
+  }
+
+  public MgQueryTemplate autoSetIdField(boolean autoSetIdField) {
+    this.autoSetIdField = autoSetIdField;
     return this;
   }
 
@@ -113,7 +119,7 @@ public class MgQueryTemplate {
   public Forwarding<Map<?, ?>> forward() {
     Forwarding<Map<?, ?>> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
-    List<Map<?, ?>> list = streamOf(fi).collect(Collectors.toList());
+    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
     int size = list.size();
     if (size > 0 && size > limit) {
       list.remove(limit);
@@ -125,7 +131,7 @@ public class MgQueryTemplate {
   public <T> Forwarding<T> forward(Class<T> clazz) {
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
-    List<Map<String, Object>> list = streamOf(fi).collect(Collectors.toList());
+    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
     int size = list.size();
     if (size > 0 && size > limit) {
       list.remove(limit);
@@ -137,7 +143,7 @@ public class MgQueryTemplate {
 
   public Map<?, ?> get() {
     Iterator<Document> it = query().limit(1).iterator();
-    return it.hasNext() ? it.next() : null;
+    return it.hasNext() ? convert(it.next()) : null;
   }
 
   public MgQueryTemplate hint(Bson hint) {
@@ -180,7 +186,7 @@ public class MgQueryTemplate {
   public Paging<Map<?, ?>> page() {
     Paging<Map<?, ?>> result = Paging.of(offset, limit);
     FindIterable<Document> fi = query();
-    List<Map<?, ?>> list = streamOf(fi).collect(Collectors.toList());
+    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size < limit) {
@@ -195,7 +201,7 @@ public class MgQueryTemplate {
   public <T> Paging<T> page(Class<T> clazz) {
     Paging<T> result = Paging.of(offset, limit);
     FindIterable<Document> fi = query();
-    List<Map<?, ?>> list = streamOf(fi).collect(Collectors.toList());
+    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size < limit) {
@@ -218,12 +224,12 @@ public class MgQueryTemplate {
   }
 
   public List<Map<?, ?>> select() {
-    return streamOf(query()).collect(Collectors.toList());
+    return streamOf(query()).map(this::convert).collect(Collectors.toList());
   }
 
   public <T> List<T> select(Class<T> clazz) {
-    return streamOf(query()).map(r -> QueryObjectMapper.OM.convertValue(r, clazz))
-        .collect(Collectors.toList());
+    return streamOf(query()).map(this::convert)
+        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz)).collect(Collectors.toList());
   }
 
   public MgQueryTemplate sort(Bson sort) {
@@ -238,12 +244,20 @@ public class MgQueryTemplate {
   @SuppressWarnings("rawtypes")
   public Stream<Map<?, ?>> stream() {
     limit = -1;// NO LIMIT
-    return streamOf(query()).map(r -> (Map) r);
+    return streamOf(query()).map(this::convert).map(r -> (Map) r);
   }
 
   public <T> Stream<T> stream(Class<T> clazz) {
     limit = -1;// NO LIMIT
-    return streamOf(query()).map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return streamOf(query()).map(this::convert)
+        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  protected Map<?, ?> convert(Document doc) {
+    if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
+      doc.put("id", doc.get("_id"));
+    }
+    return doc;
   }
 
   protected Object parse(Object object) {

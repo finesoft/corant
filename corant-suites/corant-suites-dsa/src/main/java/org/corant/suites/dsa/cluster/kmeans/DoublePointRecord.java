@@ -14,8 +14,10 @@
 package org.corant.suites.dsa.cluster.kmeans;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.MapUtils.linkedHashMapOf;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -35,6 +37,8 @@ public class DoublePointRecord implements Clusterable {
   private final double[] point;
 
   private final TreeMap<Object, Double> features = new TreeMap<>();
+
+  private Map<Object, Object> descriptions = new HashMap<>();
 
   /**
    * @param id
@@ -79,6 +83,14 @@ public class DoublePointRecord implements Clusterable {
   }
 
   /**
+   * 
+   * @return the descriptions
+   */
+  public Map<Object, Object> getDescriptions() {
+    return descriptions;
+  }
+
+  /**
    *
    * @return the features
    */
@@ -93,5 +105,18 @@ public class DoublePointRecord implements Clusterable {
   @Override
   public double[] getPoint() {
     return Arrays.copyOf(point, point.length);
+  }
+
+  /**
+   *
+   * @param descriptions the descriptions to set
+   */
+  public void setDescriptions(Map<Object, Object> descriptions) {
+    this.descriptions = descriptions;
+  }
+
+  public DoublePointRecord withDescriptions(Object... objects) {
+    descriptions = linkedHashMapOf(objects);
+    return this;
   }
 }

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import static org.corant.shared.util.StringUtils.isBlank;
+import java.util.function.Supplier;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -58,6 +59,19 @@ public class Assertions {
   }
 
   /**
+   * Throw a certain runtime exception if given two arguments are not equals
+   *
+   * @param a
+   * @param b
+   * @param ex shouldBeEquals
+   */
+  public static void shouldBeEquals(Object a, Object b, Supplier<? extends RuntimeException> ex) {
+    if (!isEquals(a, b)) {
+      throw ex.get();
+    }
+  }
+
+  /**
    * Throw CorantRuntimeException if argument or expression is true
    *
    * @param condition shouldBeFalse
@@ -77,6 +91,18 @@ public class Assertions {
   public static void shouldBeFalse(boolean condition, String messageOrFormat, Object... args) {
     if (condition) {
       throw new CorantRuntimeException(messageOrFormat, args);
+    }
+  }
+
+  /**
+   * Throw a certain runtime exception if argument or expression is true
+   *
+   * @param condition
+   * @param ex shouldBeFalse
+   */
+  public static void shouldBeFalse(boolean condition, Supplier<? extends RuntimeException> ex) {
+    if (condition) {
+      throw ex.get();
     }
   }
 
@@ -106,6 +132,21 @@ public class Assertions {
   }
 
   /**
+   * Throw a certain runtime exception if argument is not null
+   *
+   * @param <T>
+   * @param obj
+   * @param ex
+   * @return shouldBeNull
+   */
+  public static <T> T shouldBeNull(T obj, Supplier<? extends RuntimeException> ex) {
+    if (obj != null) {
+      throw ex.get();
+    }
+    return null;
+  }
+
+  /**
    * Throw CorantRuntimeException if argument is not null
    *
    * @param condition shouldBeTrue
@@ -125,6 +166,18 @@ public class Assertions {
   public static void shouldBeTrue(boolean condition, String messageOrFormat, Object... args) {
     if (!condition) {
       throw new CorantRuntimeException(messageOrFormat, args);
+    }
+  }
+
+  /**
+   * Throw a certain runtime exception if argument or expression is false
+   *
+   * @param condition
+   * @param ex shouldBeTrue
+   */
+  public static void shouldBeTrue(boolean condition, Supplier<? extends RuntimeException> ex) {
+    if (!condition) {
+      throw ex.get();
     }
   }
 
@@ -151,6 +204,22 @@ public class Assertions {
       Object... args) {
     if (isBlank(obj)) {
       throw new CorantRuntimeException(messageOrFormat, args);
+    }
+    return obj;
+  }
+
+  /**
+   * Throw a certain runtime exception if argument is blank.
+   *
+   * @param <T>
+   * @param obj
+   * @param ex
+   * @return shouldNotBlank
+   */
+  public static <T extends CharSequence> T shouldNotBlank(T obj,
+      Supplier<? extends RuntimeException> ex) {
+    if (isBlank(obj)) {
+      throw ex.get();
     }
     return obj;
   }
@@ -183,6 +252,22 @@ public class Assertions {
   }
 
   /**
+   * Throw a certain runtime exception if argument is empty, usually the argument type is
+   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   *
+   * @param <T>
+   * @param obj
+   * @param ex
+   * @return shouldNotEmpty
+   */
+  public static <T> T shouldNotEmpty(T obj, Supplier<? extends RuntimeException> ex) {
+    if (isEmpty(obj)) {
+      throw ex.get();
+    }
+    return obj;
+  }
+
+  /**
    * Throw CorantRuntimeException if argument is null
    *
    * @param obj the argument
@@ -203,6 +288,21 @@ public class Assertions {
   public static <T> T shouldNotNull(T obj, String messageOrFormat, Object... args) {
     if (obj == null) {
       throw new CorantRuntimeException(messageOrFormat, args);
+    }
+    return obj;
+  }
+
+  /**
+   * Throw a certain runtime exception if argument is null
+   *
+   * @param <T>
+   * @param obj
+   * @param ex
+   * @return shouldNotNull
+   */
+  public static <T> T shouldNotNull(T obj, Supplier<? extends RuntimeException> ex) {
+    if (obj == null) {
+      throw ex.get();
     }
     return obj;
   }

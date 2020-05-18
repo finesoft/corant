@@ -232,6 +232,36 @@ public class Empties {
   }
 
   /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final boolean[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final byte[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final char[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
    * If object is null return 0 else return object.length();
    *
    * @param object
@@ -252,6 +282,16 @@ public class Empties {
   }
 
   /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final double[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
    * Returns the number of enumeration elements passed in
    *
    * @param enums
@@ -264,6 +304,26 @@ public class Empties {
       enums.nextElement();
     }
     return size;
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final float[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final int[] object) {
+    return object == null ? 0 : object.length;
   }
 
   /**
@@ -299,6 +359,16 @@ public class Empties {
   }
 
   /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final long[] object) {
+    return object == null ? 0 : object.length;
+  }
+
+  /**
    * If object is null return 0 else return object.size();
    *
    * @param object
@@ -316,5 +386,15 @@ public class Empties {
    */
   public static int sizeOf(final Object[] object) {
     return isEmpty(object) ? 0 : object.length;
+  }
+
+  /**
+   * If object is null return 0 else return object.length;
+   *
+   * @param object
+   * @return sizeOf
+   */
+  public static int sizeOf(final short[] object) {
+    return object == null ? 0 : object.length;
   }
 }

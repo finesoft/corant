@@ -14,6 +14,7 @@
 package org.corant.suites.dsa.cluster.distance;
 
 import java.util.Map;
+import org.apache.commons.math3.exception.DimensionMismatchException;
 
 /**
  * corant-suites-dsa
@@ -23,9 +24,17 @@ import java.util.Map;
  */
 public class EuclideanDistance extends SquaredEuclideanDistance {
 
+  private static final long serialVersionUID = 6581941216598243825L;
+
   @Override
   public double calculate(Map<Object, Double> f1, Map<Object, Double> f2) {
     double sum = super.calculate(f1, f2);
+    return Math.sqrt(sum);
+  }
+
+  @Override
+  public double compute(double[] a, double[] b) throws DimensionMismatchException {
+    double sum = super.compute(a, b);
     return Math.sqrt(sum);
   }
 

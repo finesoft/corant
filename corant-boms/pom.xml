@@ -34,6 +34,7 @@
     <version.commons-dbutils>1.7</version.commons-dbutils>
     <version.commons-io>2.6</version.commons-io>
     <version.commons-lang3>3.10</version.commons-lang3>
+    <version.commons-math3>3.6.1</version.commons-math3>
     <version.commons-net>3.6</version.commons-net>
     <version.commons-pool2>2.7.0</version.commons-pool2>
     <version.commons-vfs2>2.6.0</version.commons-vfs2>
@@ -211,6 +212,12 @@
         <artifactId>commons-net</artifactId>
         <version>${version.commons-net}</version>
       </dependency>
+	  <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-math3</artifactId>
+        <version>${version.commons-math3}</version>
+      </dependency>
+      
       <dependency>
         <groupId>org.apache.calcite</groupId>
         <artifactId>calcite-core</artifactId>

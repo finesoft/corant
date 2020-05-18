@@ -30,7 +30,7 @@ import org.corant.suites.dsa.cluster.distance.Distance;
  * @author bingo 下午2:14:34
  *
  */
-public class KMeans {
+public class DefaultKMeanClusterer {
   /**
    * Will be used to generate random numbers.
    */
@@ -39,28 +39,28 @@ public class KMeans {
   /**
    * Performs the K-Means clustering algorithm on the given dataset.
    *
-   * @param records The dataset.
+   * @param mapRecords The dataset.
    * @param k Number of Clusters.
    * @param distance To calculate the distance between two items.
    * @param maxIterations Upper bound for the number of iterations.
    * @return K clusters along with their features.
    */
-  public static Map<Centroid, List<Record>> fit(List<Record> records, int k, Distance distance,
+  public static Map<Centroid, List<MapRecord>> fit(List<MapRecord> mapRecords, int k, Distance distance,
       int maxIterations) {
-    applyPreconditions(records, k, distance, maxIterations);
+    applyPreconditions(mapRecords, k, distance, maxIterations);
 
-    List<Centroid> centroids = randomCentroids(records, k);
-    Map<Centroid, List<Record>> clusters = new HashMap<>();
-    Map<Centroid, List<Record>> lastState = new HashMap<>();
+    List<Centroid> centroids = randomCentroids(mapRecords, k);
+    Map<Centroid, List<MapRecord>> clusters = new HashMap<>();
+    Map<Centroid, List<MapRecord>> lastState = new HashMap<>();
 
     // iterate for a pre-defined number of times
     for (int i = 0; i < maxIterations; i++) {
       boolean isLastIteration = i == maxIterations - 1;
 
       // in each iteration we should find the nearest centroid for each record
-      for (Record record : records) {
-        Centroid centroid = nearestCentroid(record, centroids, distance);
-        assignToCluster(clusters, record, centroid);
+      for (MapRecord mapRecord : mapRecords) {
+        Centroid centroid = nearestCentroid(mapRecord, centroids, distance);
+        assignToCluster(clusters, mapRecord, centroid);
       }
 
       // if the assignment does not change, then the algorithm terminates
@@ -78,9 +78,9 @@ public class KMeans {
     return lastState;
   }
 
-  private static void applyPreconditions(List<Record> records, int k, Distance distance,
+  private static void applyPreconditions(List<MapRecord> mapRecords, int k, Distance distance,
       int maxIterations) {
-    if (records == null || records.isEmpty()) {
+    if (mapRecords == null || mapRecords.isEmpty()) {
       throw new IllegalArgumentException("The dataset can't be empty");
     }
 
@@ -103,17 +103,17 @@ public class KMeans {
    * centroid, first we should create the list.
    *
    * @param clusters The current cluster configuration.
-   * @param record The feature vector.
+   * @param mapRecord The feature vector.
    * @param centroid The centroid.
    */
-  private static void assignToCluster(Map<Centroid, List<Record>> clusters, Record record,
+  private static void assignToCluster(Map<Centroid, List<MapRecord>> clusters, MapRecord mapRecord,
       Centroid centroid) {
     clusters.compute(centroid, (key, list) -> {
       if (list == null) {
         list = new ArrayList<>();
       }
 
-      list.add(record);
+      list.add(mapRecord);
       return list;
     });
   }
@@ -125,12 +125,12 @@ public class KMeans {
    * dividing the final summation value by the number of records.
    *
    * @param centroid The centroid to move.
-   * @param records The assigned features.
+   * @param mapRecords The assigned features.
    * @return The moved centroid.
    */
-  private static Centroid average(Centroid centroid, List<Record> records) {
+  private static Centroid average(Centroid centroid, List<MapRecord> mapRecords) {
     // if this cluster is empty, then we shouldn't move the centroid
-    if (records == null || records.isEmpty()) {
+    if (mapRecords == null || mapRecords.isEmpty()) {
       return centroid;
     }
 
@@ -140,15 +140,15 @@ public class KMeans {
 
     // The average function works correctly if we clear all coordinates corresponding
     // to present record attributes
-    records.stream().flatMap(e -> e.getFeatures().keySet().stream())
+    mapRecords.stream().flatMap(e -> e.getFeatures().keySet().stream())
         .forEach(k -> average.put(k, 0.0));
 
-    for (Record record : records) {
-      record.getFeatures()
+    for (MapRecord mapRecord : mapRecords) {
+      mapRecord.getFeatures()
           .forEach((k, v) -> average.compute(k, (k1, currentValue) -> v + currentValue));
     }
 
-    average.forEach((k, v) -> average.put(k, v / records.size()));
+    average.forEach((k, v) -> average.put(k, v / mapRecords.size()));
 
     return new Centroid(average);
   }
@@ -157,18 +157,18 @@ public class KMeans {
    * With the help of the given distance calculator, iterates through centroids and finds the
    * nearest one to the given record.
    *
-   * @param record The feature vector to find a centroid for.
+   * @param mapRecord The feature vector to find a centroid for.
    * @param centroids Collection of all centroids.
    * @param distance To calculate the distance between two items.
    * @return The nearest centroid to the given feature vector.
    */
-  private static Centroid nearestCentroid(Record record, List<Centroid> centroids,
+  private static Centroid nearestCentroid(MapRecord mapRecord, List<Centroid> centroids,
       Distance distance) {
     double minimumDistance = Double.MAX_VALUE;
     Centroid nearest = null;
 
     for (Centroid centroid : centroids) {
-      double currentDistance = distance.calculate(record.getFeatures(), centroid.getCoordinates());
+      double currentDistance = distance.calculate(mapRecord.getFeatures(), centroid.getCoordinates());
       if (currentDistance < minimumDistance) {
         minimumDistance = currentDistance;
         nearest = centroid;
@@ -183,17 +183,17 @@ public class KMeans {
    * calculate the possible value range for each attribute. Then when we're going to generate the
    * centroids, we generate random coordinates in the [min, max] range for each attribute.
    *
-   * @param records The dataset which helps to calculate the [min, max] range for each attribute.
+   * @param mapRecords The dataset which helps to calculate the [min, max] range for each attribute.
    * @param k Number of clusters.
    * @return Collections of randomly generated centroids.
    */
-  private static List<Centroid> randomCentroids(List<Record> records, int k) {
+  private static List<Centroid> randomCentroids(List<MapRecord> mapRecords, int k) {
     List<Centroid> centroids = new ArrayList<>();
     Map<Object, Double> maxs = new HashMap<>();
     Map<Object, Double> mins = new HashMap<>();
 
-    for (Record record : records) {
-      record.getFeatures().forEach((key, value) -> {
+    for (MapRecord mapRecord : mapRecords) {
+      mapRecord.getFeatures().forEach((key, value) -> {
         // compares the value with the current max and choose the bigger value between them
         maxs.compute(key, (k1, max) -> max == null || value > max ? value : max);
 
@@ -202,7 +202,7 @@ public class KMeans {
       });
     }
 
-    Set<Object> attributes = records.stream().flatMap(e -> e.getFeatures().keySet().stream())
+    Set<Object> attributes = mapRecords.stream().flatMap(e -> e.getFeatures().keySet().stream())
         .collect(Collectors.toSet());
     for (int i = 0; i < k; i++) {
       Map<Object, Double> coordinates = new HashMap<>();
@@ -223,7 +223,7 @@ public class KMeans {
    * @param clusters The current cluster configuration.
    * @return Collection of new and relocated centroids.
    */
-  private static List<Centroid> relocateCentroids(Map<Centroid, List<Record>> clusters) {
+  private static List<Centroid> relocateCentroids(Map<Centroid, List<MapRecord>> clusters) {
     return clusters.entrySet().stream().map(e -> average(e.getKey(), e.getValue()))
         .collect(Collectors.toList());
   }

@@ -15,6 +15,7 @@ package org.corant.suites.dsa.cluster.distance;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.Map;
+import java.util.Set;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -25,14 +26,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class CustomizedDistance implements Distance {
 
-  public static void main(String... f2) {
-    double d = 4;
-    double p = 1 / 2;
-    double x = 0.5;
-    System.out.println(Double.compare(x, p));
-    System.out.println(Math.pow(d, 1.0 / 2));
-  }
-
   @Override
   public double calculate(Map<Object, Double> f1, Map<Object, Double> f2,
       Map<String, Double> hints) {
@@ -42,9 +35,10 @@ public class CustomizedDistance implements Distance {
       throw new CorantRuntimeException("Feature vectors can't be null");
     }
     double sum = 0;
-    for (Object key : f1.keySet()) {
-      Double v1 = f1.get(key);
-      Double v2 = f2.get(key);
+    Set<Map.Entry<Object, Double>> entries = f1.entrySet();
+    for (Map.Entry<Object, Double> entry : entries) {
+      Double v1 = entry.getValue();
+      Double v2 = f2.get(entry.getKey());
       if (v1 != null && v2 != null) {
         sum += Math.pow(Math.abs(v1 - v2), p);
       }

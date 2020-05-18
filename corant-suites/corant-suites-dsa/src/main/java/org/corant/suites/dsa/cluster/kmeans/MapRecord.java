@@ -22,17 +22,17 @@ import java.util.Map;
  * @author bingo 下午2:12:15
  *
  */
-public class Record {
+public class MapRecord {
 
   private final Object id;
 
   private final Map<Object, Double> features;
 
-  public Record(Map<Object, Double> features) {
+  public MapRecord(Map<Object, Double> features) {
     this("", features);
   }
 
-  public Record(Object id, Map<Object, Double> features) {
+  public MapRecord(Object id, Map<Object, Double> features) {
     this.id = id;
     this.features = features;
   }
@@ -48,7 +48,7 @@ public class Record {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    Record other = (Record) obj;
+    MapRecord other = (MapRecord) obj;
     if (id == null) {
       if (other.id != null) {
         return false;
@@ -91,7 +91,7 @@ public class Record {
 
   @Override
   public String toString() {
-    String prefix = id == null ? "Record" : asString(id);
+    String prefix = id == null ? "MapRecord" : asString(id);
     return prefix + ": " + features;
   }
 }

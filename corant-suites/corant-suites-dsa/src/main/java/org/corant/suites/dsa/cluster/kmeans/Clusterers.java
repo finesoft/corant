@@ -105,6 +105,44 @@ public class Clusterers {
   }
 
   public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
+      final Collection<DoublePointRecord> records, final int k, final int numTrials) {
+    return new MultiKMeansPlusPlusClusterer<DoublePointRecord>(new KMeansPlusPlusClusterer<>(k),
+        numTrials).cluster(records);
+  }
+
+  public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
+      final Collection<DoublePointRecord> records, final int k, final int maxIterations,
+      final DistanceMeasure measure, final int numTrials) {
+    return new MultiKMeansPlusPlusClusterer<>(
+        new KMeansPlusPlusClusterer<DoublePointRecord>(k, maxIterations, measure), numTrials)
+            .cluster(records);
+  }
+
+  public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
+      final Collection<DoublePointRecord> records, final int k, final int maxIterations,
+      final DistanceMeasure measure, final RandomGenerator random,
+      final EmptyClusterStrategy emptyStrategy, final int numTrials) {
+    return new MultiKMeansPlusPlusClusterer<>(new KMeansPlusPlusClusterer<DoublePointRecord>(k,
+        maxIterations, measure, random, emptyStrategy), numTrials).cluster(records);
+  }
+
+  public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
+      final Collection<DoublePointRecord> records, final int k, final int maxIterations,
+      final DistanceMeasure measure, final RandomGenerator random, final int numTrials) {
+    return new MultiKMeansPlusPlusClusterer<>(
+        new KMeansPlusPlusClusterer<DoublePointRecord>(k, maxIterations, measure, random),
+        numTrials).cluster(records);
+  }
+
+  public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
+      final Collection<DoublePointRecord> records, final int k, final int maxIterations,
+      final int numTrials) {
+    return new MultiKMeansPlusPlusClusterer<>(
+        new KMeansPlusPlusClusterer<DoublePointRecord>(k, maxIterations), numTrials)
+            .cluster(records);
+  }
+
+  public static List<CentroidCluster<DoublePointRecord>> multiKMeansPlusPlusCluster(
       final Collection<DoublePointRecord> records,
       final KMeansPlusPlusClusterer<DoublePointRecord> clusterer, final int numTrials) {
     return new MultiKMeansPlusPlusClusterer<>(clusterer, numTrials).cluster(records);

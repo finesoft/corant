@@ -26,8 +26,8 @@ public class LocaleUtils {
   /**
    * IETF RFC 1766 tag separator
    */
-  public final static char IETF_SEPARATOR = '-';
-  public final static String EMPTY_STRING = "";
+  public static final char IETF_SEPARATOR = '-';
+  public static final String EMPTY_STRING = "";
 
   public static Locale langToLocale(String lang) {
     return langToLocale(lang, IETF_SEPARATOR);

@@ -51,7 +51,6 @@ import javax.inject.Provider;
 import org.corant.config.spi.Sortable;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.Converter;
@@ -67,9 +66,7 @@ public class CorantConfigConversion implements Serializable {
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
-
   private static final long serialVersionUID = -2708805756022227289L;
-
   static {
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
     ConverterRegistry.getSupportConverters().keySet().stream()
@@ -310,7 +307,7 @@ public class CorantConfigConversion implements Serializable {
             try {
               ((Closeable) c).close();
             } catch (IOException e) {
-              throw new CorantRuntimeException(e);
+              // Noop!
             }
           });
     }

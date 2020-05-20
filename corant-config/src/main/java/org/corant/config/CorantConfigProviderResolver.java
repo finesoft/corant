@@ -100,14 +100,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
         Map.Entry<ClassLoader, Config> entry = iterator.next();
         if (entry.getValue() == config) {
           // According to the specification close config sources or converters if necessary
-          for (ConfigSource cs : config.getConfigSources()) {
-            if (cs instanceof AutoCloseable) {
-              ((AutoCloseable) cs).close();
-            }
-          }
-          if (config instanceof CorantConfig) {
-            ((CorantConfig) config).getConversion().closeCloseableConverters();
-          }
+          closeCloseable(config);
           iterator.remove();
         }
       }
@@ -115,6 +108,21 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
       throw new CorantRuntimeException(e);
     } finally {
       lock.unlock();
+    }
+  }
+
+  protected void closeCloseable(Config config) {
+    for (ConfigSource cs : config.getConfigSources()) {
+      if (cs instanceof AutoCloseable) {
+        try {
+          ((AutoCloseable) cs).close();
+        } catch (Exception e) {
+          // Noop!
+        }
+      }
+    }
+    if (config instanceof CorantConfig) {
+      ((CorantConfig) config).getConversion().closeCloseableConverters();
     }
   }
 

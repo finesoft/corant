@@ -218,6 +218,79 @@ public class ObjectUtils {
   /**
    * corant-shared
    *
+   * @author bingo 上午11:06:08
+   *
+   */
+  public static class MutableReference<T> {
+
+    private final Object[] reference = new Object[] {null};
+
+    public MutableReference(T reference) {
+      this.reference[0] = reference;
+    }
+
+    public static <X> MutableReference<X> of(X reference) {
+      return new MutableReference<>(reference);
+    }
+
+    public void accept(Consumer<T> func) {
+      T obj = forceCast(reference[0]);
+      func.accept(obj);
+    }
+
+    public void apply(UnaryOperator<T> func) {
+      T obj = forceCast(reference[0]);
+      reference[0] = func.apply(obj);
+    }
+
+    public T applyAndGet(UnaryOperator<T> func) {
+      T obj = forceCast(reference[0]);
+      reference[0] = func.apply(obj);
+      return forceCast(reference[0]);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      MutableReference other = (MutableReference) obj;
+      if (!Arrays.deepEquals(reference, other.reference)) {
+        return false;
+      }
+      return true;
+    }
+
+    public T get() {
+      return forceCast(reference[0]);
+    }
+
+    public T getAndApply(UnaryOperator<T> func) {
+      final T obj = forceCast(reference[0]);
+      reference[0] = func.apply(obj);
+      return obj;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + Arrays.deepHashCode(reference);
+      return result;
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
    * @author bingo 下午11:26:10
    *
    */

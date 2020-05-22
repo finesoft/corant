@@ -827,7 +827,7 @@ public class StringUtils {
       int tokenIdx = 0;
       final Stack<int[]> backtrack = new Stack<>();
       do {
-        if (backtrack.size() > 0) {
+        if (!backtrack.isEmpty()) {
           final int[] array = backtrack.pop();
           tokenIdx = array[0];
           textIdx = array[1];
@@ -868,7 +868,7 @@ public class StringUtils {
         if (tokenIdx == tokens.length && textIdx == text.length()) {
           return true;
         }
-      } while (backtrack.size() > 0);
+      } while (!backtrack.isEmpty());
 
       return false;
     }

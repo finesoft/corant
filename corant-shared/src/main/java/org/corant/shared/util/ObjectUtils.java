@@ -151,7 +151,7 @@ public class ObjectUtils {
   }
 
   /**
-   * a>=b return a else return b
+   * Return the max one, if the two parameters are the same, then return the first.
    *
    * @param <T>
    * @param a
@@ -163,7 +163,7 @@ public class ObjectUtils {
   }
 
   /**
-   * a<b return a else return b
+   * Return the min one, if the two parameters are the same, then return the first.
    *
    * @param <T>
    * @param a
@@ -171,7 +171,7 @@ public class ObjectUtils {
    * @return min
    */
   public static <T extends Comparable<T>> T min(T a, T b) {
-    return a.compareTo(b) < 0 ? a : b;
+    return a.compareTo(b) <= 0 ? a : b;
   }
 
   public static <T> T newInstance(Class<T> cls) {
@@ -262,10 +262,7 @@ public class ObjectUtils {
         return false;
       }
       MutableReference other = (MutableReference) obj;
-      if (!Arrays.deepEquals(reference, other.reference)) {
-        return false;
-      }
-      return true;
+      return Arrays.deepEquals(reference, other.reference);
     }
 
     public T get() {
@@ -284,6 +281,10 @@ public class ObjectUtils {
       int result = 1;
       result = prime * result + Arrays.deepHashCode(reference);
       return result;
+    }
+
+    public void set(T reference) {
+      this.reference[0] = reference;
     }
 
   }

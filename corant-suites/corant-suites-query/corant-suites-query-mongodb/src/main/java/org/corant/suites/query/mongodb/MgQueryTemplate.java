@@ -17,8 +17,10 @@ import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,7 +58,7 @@ public class MgQueryTemplate {
   protected Bson min;
   protected Bson hint;
   protected List<Bson> aggregate;
-  protected int limit = -1;
+  protected int limit = 1;
   protected int offset = 0;
   protected boolean autoSetIdField = true;
 
@@ -146,6 +148,11 @@ public class MgQueryTemplate {
     return it.hasNext() ? convert(it.next()) : null;
   }
 
+  public <T> T get(Class<T> clazz) {
+    Map<?, ?> document = get();
+    return document != null ? QueryObjectMapper.OM.convertValue(document, clazz) : null;
+  }
+
   public MgQueryTemplate hint(Bson hint) {
     this.hint = shouldNotNull(hint);
     return this;
@@ -214,6 +221,14 @@ public class MgQueryTemplate {
         .collect(Collectors.toList()));
   }
 
+  public MgQueryTemplate projection(boolean include, String... propertyNames) {
+    if (include) {
+      return projection(propertyNames, new String[0]);
+    } else {
+      return projection(new String[0], propertyNames);
+    }
+  }
+
   public MgQueryTemplate projection(Bson projection) {
     this.projection = shouldNotNull(projection);
     return this;
@@ -221,6 +236,30 @@ public class MgQueryTemplate {
 
   public MgQueryTemplate projection(Map<?, ?> projection) {
     return projection((Bson) parse(defaultObject(projection, HashMap::new)));
+  }
+
+  public MgQueryTemplate projection(String[] includePropertyNames, String[] excludePropertyNames) {
+    Map<String, Boolean> projections = new HashMap<>();
+    if (sizeOf(includePropertyNames) > 0 || sizeOf(excludePropertyNames) > 0) {
+      if (includePropertyNames != null) {
+        for (String proNme : includePropertyNames) {
+          if (isNotBlank(proNme)) {
+            projections.put(proNme, true);
+          }
+        }
+      }
+      if (excludePropertyNames != null) {
+        for (String proNme : excludePropertyNames) {
+          if (isNotBlank(proNme)) {
+            projections.put(proNme, false);
+          }
+        }
+      }
+    }
+    if (!projections.isEmpty()) {
+      return projection((Bson) parse(defaultObject(projection, projections)));
+    }
+    return this;
   }
 
   public List<Map<?, ?>> select() {
@@ -243,12 +282,12 @@ public class MgQueryTemplate {
 
   @SuppressWarnings("rawtypes")
   public Stream<Map<?, ?>> stream() {
-    limit = -1;// NO LIMIT
+    limit = 0;// NO LIMIT
     return streamOf(query()).map(this::convert).map(r -> (Map) r);
   }
 
   public <T> Stream<T> stream(Class<T> clazz) {
-    limit = -1;// NO LIMIT
+    limit = 0;// NO LIMIT
     return streamOf(query()).map(this::convert)
         .map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
   }
@@ -287,7 +326,7 @@ public class MgQueryTemplate {
       fi.sort(sort);
     }
     if (isNotEmpty(projection)) {
-      fi.min(projection);
+      fi.projection(projection);
     }
     if (limit > 0) {
       fi.limit(limit);

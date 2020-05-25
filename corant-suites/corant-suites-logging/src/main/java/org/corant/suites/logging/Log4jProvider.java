@@ -29,7 +29,7 @@ public class Log4jProvider implements CorantBootHandler {
 
   @Override
   public void handleBeforeStart(ClassLoader classLoader, String... args) {
-    // System.clearProperty("java.util.logging.manager");
+    System.clearProperty("java.util.logging.manager");
     System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
   }
 

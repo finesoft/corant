@@ -18,7 +18,6 @@ import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.fromInputStream;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.shared.util.StringUtils.trim;
@@ -34,6 +33,7 @@ import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Resources.URLResource;
+import org.corant.shared.util.Texts;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
@@ -498,7 +498,7 @@ public class QueryParseHandler extends DefaultHandler {
         Optional<URLResource> or = Resources.from(trim(src)).findFirst();
         if (or.isPresent()) {
           try (InputStream is = or.get().openStream()) {
-            return fromInputStream(is);
+            return Texts.fromInputStream(is);
           }
         }
       } catch (IOException e) {

@@ -13,34 +13,19 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathUtils.GlobPatterns;
 
 /**
@@ -141,24 +126,6 @@ public class StringUtils {
    */
   public static String defaultTrim(String str) {
     return str == null ? EMPTY : str.trim();
-  }
-
-  /**
-   * Convert input stream to string
-   *
-   * @param is
-   * @return
-   * @throws IOException fromInputStream
-   */
-  public static String fromInputStream(InputStream is) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    try (Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-      int c = 0;
-      while ((c = reader.read()) != -1) {
-        sb.append((char) c);
-      }
-    }
-    return sb.toString();
   }
 
   /**
@@ -330,99 +297,6 @@ public class StringUtils {
       return str;
     }
     return str.substring(0, len);
-  }
-
-  /**
-   * String lines from file, use for read txt file line by line.
-   *
-   * @param file
-   * @return lines
-   */
-  public static Stream<String> lines(final File file) {
-    FileInputStream fis;
-    try {
-      fis = new FileInputStream(shouldNotNull(file));
-    } catch (FileNotFoundException e1) {
-      throw new CorantRuntimeException(e1);
-    }
-    return lines(fis, -1, -1).onClose(() -> {
-      try {
-        fis.close();
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
-  }
-
-  /**
-   * String lines from file input stream, use for read txt file line by line.
-   *
-   * @param fis
-   * @param offset the offset start from 0
-   * @param limit the number of lines returned
-   */
-  public static Stream<String> lines(final FileInputStream fis, int offset, int limit) {
-    return lines(new InputStreamReader(fis, StandardCharsets.UTF_8), offset, limit);
-  }
-
-  /**
-   * String lines from input stream reader, use for read txt file line by line.
-   *
-   * @param isr the input stream reader
-   * @param offset the offset start from 0
-   * @param limit the number of lines returned
-   */
-  public static Stream<String> lines(final InputStreamReader isr, int offset, int limit) {
-
-    return streamOf(new Iterator<String>() {
-
-      BufferedReader reader = new BufferedReader(isr);
-      String nextLine = null;
-      int readLines = 0;
-      boolean valid = true;
-      { // skip lines if necessary
-        try {
-          if (offset > 0) {
-            for (int i = 0; i < offset; i++) {
-              if (reader.readLine() == null) {
-                valid = false;
-                break;
-              }
-            }
-          }
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
-        }
-      }
-
-      @Override
-      public boolean hasNext() {
-        if (!valid) {
-          return false;
-        }
-        if (nextLine != null) {
-          return true;
-        } else {
-          try {
-            nextLine = reader.readLine();
-            return nextLine != null && (limit <= 0 || readLines++ < limit);
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
-        }
-      }
-
-      @Override
-      public String next() {
-        if (nextLine != null || hasNext()) {
-          String line = nextLine;
-          nextLine = null;
-          return line;
-        } else {
-          throw new NoSuchElementException();
-        }
-      }
-    });
   }
 
   /**
@@ -725,20 +599,6 @@ public class StringUtils {
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();
-  }
-
-  /**
-   * Convert input stream to String
-   *
-   * @param is
-   * @return tryFromInputStream
-   */
-  public static String tryFromInputStream(InputStream is) {
-    try {
-      return fromInputStream(is);
-    } catch (IOException e) {
-      return null;
-    }
   }
 
   /**

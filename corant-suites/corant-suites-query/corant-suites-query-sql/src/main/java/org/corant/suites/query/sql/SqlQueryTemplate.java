@@ -68,7 +68,7 @@ public class SqlQueryTemplate {
   protected final QueryRunner runner;
   protected String sql;
   protected Object[] parameters = new Object[0];
-  protected int limit = -1;
+  protected int limit = 1;
   protected int offset = 0;
   protected final Dialect dialect;
   protected final DataSource datasource;
@@ -115,6 +115,11 @@ public class SqlQueryTemplate {
   public Map<?, ?> get() {
     Pair<String, Object[]> ps = processSqlAndParams(sql, parameters);
     return get(ps.getLeft(), ps.getRight());
+  }
+
+  public <T> T get(Class<T> clazz) {
+    Map<?, ?> r = get();
+    return r == null ? null : QueryObjectMapper.OM.convertValue(r, clazz);
   }
 
   public SqlQueryTemplate limit(int limit) {

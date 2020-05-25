@@ -254,7 +254,7 @@ public class MgQueryTemplate {
       }
     }
     if (!projections.isEmpty()) {
-      return projection((Bson) parse(defaultObject(projection, projections)));
+      return projection(projections);
     }
     return this;
   }

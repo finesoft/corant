@@ -17,7 +17,6 @@ import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isNotBlank;
@@ -240,19 +239,17 @@ public class MgQueryTemplate {
 
   public MgQueryTemplate projection(String[] includePropertyNames, String[] excludePropertyNames) {
     Map<String, Boolean> projections = new HashMap<>();
-    if (sizeOf(includePropertyNames) > 0 || sizeOf(excludePropertyNames) > 0) {
-      if (includePropertyNames != null) {
-        for (String proNme : includePropertyNames) {
-          if (isNotBlank(proNme)) {
-            projections.put(proNme, true);
-          }
+    if (includePropertyNames != null) {
+      for (String proNme : includePropertyNames) {
+        if (isNotBlank(proNme)) {
+          projections.put(proNme, true);
         }
       }
-      if (excludePropertyNames != null) {
-        for (String proNme : excludePropertyNames) {
-          if (isNotBlank(proNme)) {
-            projections.put(proNme, false);
-          }
+    }
+    if (excludePropertyNames != null) {
+      for (String proNme : excludePropertyNames) {
+        if (isNotBlank(proNme)) {
+          projections.put(proNme, false);
         }
       }
     }

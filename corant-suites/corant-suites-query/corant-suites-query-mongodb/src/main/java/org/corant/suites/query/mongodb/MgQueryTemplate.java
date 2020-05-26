@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.mongodb;
 
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.CollectionUtils.listOf;
@@ -35,6 +36,8 @@ import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -61,9 +64,16 @@ public class MgQueryTemplate {
   protected int offset = 0;
   protected boolean autoSetIdField = true;
 
+  @SuppressWarnings("resource")
   private MgQueryTemplate(String database) {
-    this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
-        .orElseThrow(QueryRuntimeException::new);
+    shouldNotBlank(database, () -> new QueryRuntimeException("Data base can't not empty"));
+    if (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://")) {
+      String db = database.substring(database.lastIndexOf('/'));
+      this.database = new MongoClient(new MongoClientURI(database)).getDatabase(db);
+    } else {
+      this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
+          .orElseThrow(QueryRuntimeException::new);
+    }
   }
 
   public static MgQueryTemplate database(String database) {

@@ -19,8 +19,10 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MapUtils.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,10 +35,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.ObjectUtils.Pair;
 import org.corant.suites.query.shared.QueryObjectMapper;
@@ -74,7 +79,15 @@ public class SqlQueryTemplate {
   protected final DataSource datasource;
 
   private SqlQueryTemplate(String database, DBMS dbms) {
-    datasource = findNamed(DataSource.class, database).orElseThrow(QueryRuntimeException::new);
+    if (isNotBlank(database) && database.startsWith(JndiNames.JNDI_COMP_NME)) {
+      try {
+        datasource = forceCast(new InitialContext().lookup(database));
+      } catch (NamingException e) {
+        throw new QueryRuntimeException(e);
+      }
+    } else {
+      datasource = findNamed(DataSource.class, database).orElseThrow(QueryRuntimeException::new);
+    }
     dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
     runner = new QueryRunner(datasource);
   }

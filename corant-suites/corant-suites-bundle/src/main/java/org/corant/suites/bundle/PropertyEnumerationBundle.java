@@ -104,11 +104,11 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
             onPreDestroy();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
-              PropertyResourceBundle.getBundles(path, (r) -> true).forEach((s, res) -> {
+              PropertyResourceBundle.getBundles(path, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Find enumeration resource from %s", s));
                 Locale locale = res.getLocale();
                 EnumLiteralsObject obj =
-                    holder.computeIfAbsent(locale, (k) -> new EnumLiteralsObject());
+                    holder.computeIfAbsent(locale, k -> new EnumLiteralsObject());
                 res.dump().forEach((k, v) -> {
                   int i = k.lastIndexOf('.');
                   String enumClsName = k.substring(0, i);

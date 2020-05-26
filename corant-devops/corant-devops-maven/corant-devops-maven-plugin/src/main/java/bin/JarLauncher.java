@@ -91,7 +91,7 @@ public class JarLauncher {
   }
 
   void cleanWorkDir() {
-    if (Arrays.stream(args).anyMatch(arg -> "-cwd".equalsIgnoreCase(arg))) {
+    if (Arrays.stream(args).anyMatch("-cwd"::equalsIgnoreCase)) {
       log(true, "Clearing archives from workspace %s ...", workPath);
       File file = workPath.toFile();
       if (file != null && file.exists()) {

@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-keycloak-eventspi
- * 
+ *
  * @author bingo 上午10:12:41
  *
  */

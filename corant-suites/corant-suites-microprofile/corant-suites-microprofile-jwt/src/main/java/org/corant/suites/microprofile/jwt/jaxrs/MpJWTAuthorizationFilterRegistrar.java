@@ -51,7 +51,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 
   @Override
   public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), (ri) -> {
+    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), ri -> {
       return new Consumer<FeatureContext>() {
         private final Object registration = resolveRegistration(ri);
 

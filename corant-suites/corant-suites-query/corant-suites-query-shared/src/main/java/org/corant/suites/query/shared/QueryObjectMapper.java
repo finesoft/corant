@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-suites-query-shared
- * 
+ *
  * @author bingo 下午6:48:41
  */
 public class QueryObjectMapper {

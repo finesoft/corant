@@ -80,7 +80,7 @@ public class QueryHint implements Serializable {
   }
 
   protected void addParameter(QueryHintParameter parameter) {
-    parameters.computeIfAbsent(parameter.getName(), (n) -> new ArrayList<>()).add(parameter);
+    parameters.computeIfAbsent(parameter.getName(), n -> new ArrayList<>()).add(parameter);
   }
 
   protected void setKey(String key) {

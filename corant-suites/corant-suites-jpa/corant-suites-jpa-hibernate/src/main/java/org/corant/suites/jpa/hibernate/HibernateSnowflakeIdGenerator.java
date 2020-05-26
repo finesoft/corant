@@ -88,7 +88,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   }
 
   long resolveTime(final SharedSessionContractImplementor session, final Object object) {
-    return timeResolvers.computeIfAbsent(getUserClass(object.getClass()), (cls) -> {
+    return timeResolvers.computeIfAbsent(getUserClass(object.getClass()), cls -> {
       return (s, o) -> {
         MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(s);
         if (mp != null) {

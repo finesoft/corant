@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-query-cassandra
- * 
+ *
  * @author bingo 下午1:57:50
  *
  */

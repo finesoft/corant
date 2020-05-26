@@ -178,7 +178,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   protected void handle(Map<Object, Object> map, String[] keyPath, Class<?> targetClass,
       Object[] convertHits) {
-    convertMapValue(map, keyPath, (orginalVal) -> {
+    convertMapValue(map, keyPath, orginalVal -> {
       if (orginalVal != null) {
         try {
           if (orginalVal instanceof List) {

@@ -116,26 +116,25 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
         event.<PreBuiltTransportClient>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(TransportClient.class)
             .beanClass(PreBuiltTransportClient.class).scope(ApplicationScoped.class)
-            .produceWith(beans -> {
-              return getTransportClient(c.getClusterName());
-            }).disposeWith((tc, beans) -> tc.close());// FIXME proxy error on TransportClient
+            .produceWith(beans -> getTransportClient(c.getClusterName()))
+            .disposeWith((tc, beans) -> tc.close());// FIXME proxy error on TransportClient
         event.<ElasticDocumentService>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(ElasticDocumentService.class)
-            .beanClass(ElasticDocumentService.class).scope(Singleton.class).produceWith(beans -> {
-              return new DefaultElasticDocumentService(beans, c);
-            }).disposeWith((tc, beans) -> {
+            .beanClass(ElasticDocumentService.class).scope(Singleton.class)
+            .produceWith(beans -> new DefaultElasticDocumentService(beans, c))
+            .disposeWith((tc, beans) -> {
             });
         event.<ElasticIndicesService>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(ElasticIndicesService.class)
-            .beanClass(ElasticIndicesService.class).scope(Singleton.class).produceWith(beans -> {
-              return new DefaultElasticIndicesService(beans, c);
-            }).disposeWith((tc, beans) -> {
+            .beanClass(ElasticIndicesService.class).scope(Singleton.class)
+            .produceWith(beans -> new DefaultElasticIndicesService(beans, c))
+            .disposeWith((tc, beans) -> {
             });
         event.<ElasticIndexingResolver>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(ElasticIndexingResolver.class)
-            .beanClass(ElasticIndexingResolver.class).scope(Singleton.class).produceWith(beans -> {
-              return new DefaultElasticIndexingResolver(c);
-            }).disposeWith((tc, beans) -> {
+            .beanClass(ElasticIndexingResolver.class).scope(Singleton.class)
+            .produceWith(beans -> new DefaultElasticIndexingResolver(c))
+            .disposeWith((tc, beans) -> {
             });
       });
     }

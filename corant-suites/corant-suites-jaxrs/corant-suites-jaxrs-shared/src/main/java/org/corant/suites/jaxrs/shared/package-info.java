@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-jaxrs-shared
- * 
+ *
  * @author bingo 下午2:16:22
  *
  */

@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 
 /**
  * corant-suites-elastic
- * 
+ *
  * @author bingo 2017年3月3日
  * @since
  */

@@ -30,8 +30,7 @@ public class InterceptorInvocation {
 
   private final Object interceptorInstance;
 
-  public InterceptorInvocation(final Interceptor<?> interceptor,
-      final Object interceptorInstance) {
+  public InterceptorInvocation(final Interceptor<?> interceptor, final Object interceptorInstance) {
     this.interceptor = interceptor;
     this.interceptorInstance = interceptorInstance;
   }

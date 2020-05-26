@@ -338,7 +338,7 @@ public class ResolverUtils {
       Map<String, Set<String>> relation) {
     if (!isEmpty(mapping.getChildren())) {
       shouldBeTrue(relation.put(mapping.getName(), mapping.getChildren().stream()
-          .map(c -> c.getName()).collect(Collectors.toSet())) == null);
+          .map(ElasticMapping::getName).collect(Collectors.toSet())) == null);
       for (ElasticMapping childMapping : mapping) {
         if (!isEmpty(childMapping.getChildren())) {
           resolveJoinMapping(childMapping, relation);

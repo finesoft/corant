@@ -32,7 +32,7 @@ public class KeycloakEventTypeSelector implements KeycloakEventSelector<Event> {
   private final Predicate<Event> predicate;
 
   public KeycloakEventTypeSelector(String eventTypes) {
-    Predicate<Event> p = (e) -> false;
+    Predicate<Event> p = e -> false;
     if (eventTypes != null) {
       for (String fs : KeycloakEventSelector.split(eventTypes, FIRST_SP)) {
         EventTypePredicate etp = EventTypePredicate.of(fs);

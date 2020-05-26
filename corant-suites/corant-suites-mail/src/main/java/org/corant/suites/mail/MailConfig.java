@@ -80,7 +80,7 @@ public class MailConfig {
   }
 
   /**
-   * 
+   *
    * @return the properties
    */
   public Map<String, String> getProperties() {

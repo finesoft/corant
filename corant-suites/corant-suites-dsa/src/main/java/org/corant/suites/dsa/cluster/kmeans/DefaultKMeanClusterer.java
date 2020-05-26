@@ -45,8 +45,8 @@ public class DefaultKMeanClusterer {
    * @param maxIterations Upper bound for the number of iterations.
    * @return K clusters along with their features.
    */
-  public static Map<Centroid, List<MapRecord>> fit(List<MapRecord> mapRecords, int k, Distance distance,
-      int maxIterations) {
+  public static Map<Centroid, List<MapRecord>> fit(List<MapRecord> mapRecords, int k,
+      Distance distance, int maxIterations) {
     applyPreconditions(mapRecords, k, distance, maxIterations);
 
     List<Centroid> centroids = randomCentroids(mapRecords, k);
@@ -168,7 +168,8 @@ public class DefaultKMeanClusterer {
     Centroid nearest = null;
 
     for (Centroid centroid : centroids) {
-      double currentDistance = distance.calculate(mapRecord.getFeatures(), centroid.getCoordinates());
+      double currentDistance =
+          distance.calculate(mapRecord.getFeatures(), centroid.getCoordinates());
       if (currentDistance < minimumDistance) {
         minimumDistance = currentDistance;
         nearest = centroid;

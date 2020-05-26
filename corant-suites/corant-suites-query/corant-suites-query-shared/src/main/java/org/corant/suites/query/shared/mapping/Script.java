@@ -46,7 +46,7 @@ public class Script implements Serializable {
   }
 
   /**
-   * 
+   *
    * @return the id
    */
   public String getId() {

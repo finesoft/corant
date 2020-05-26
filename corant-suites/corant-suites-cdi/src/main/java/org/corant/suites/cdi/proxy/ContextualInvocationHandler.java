@@ -37,8 +37,8 @@ public class ContextualInvocationHandler extends ProxyInvocationHandler {
     super(clazz, invokerHandler);
     if (beanManager != null) {
       creationalContext = beanManager.createCreationalContext(null);
-      interceptorChains = Collections.unmodifiableMap(
-          ProxyUtils.getInterceptorChains(beanManager, creationalContext, clazz));
+      interceptorChains = Collections
+          .unmodifiableMap(ProxyUtils.getInterceptorChains(beanManager, creationalContext, clazz));
     } else {
       creationalContext = null;
       interceptorChains = Collections.emptyMap();

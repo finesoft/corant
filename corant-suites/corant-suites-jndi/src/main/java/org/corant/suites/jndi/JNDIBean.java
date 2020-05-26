@@ -107,8 +107,8 @@ public class JNDIBean<T> implements Bean<T>, PassivationCapable {
             getQualifiers().stream().map(q -> q.annotationType().getSimpleName())
                 .toArray(String[]::new)),
         String.join(",",
-            getStereotypes().stream().map(q -> q.getSimpleName()).toArray(String[]::new)),
-        String.join(",", getTypes().stream().map(q -> q.getTypeName()).toArray(String[]::new)));
+            getStereotypes().stream().map(Class::getSimpleName).toArray(String[]::new)),
+        String.join(",", getTypes().stream().map(Type::getTypeName).toArray(String[]::new)));
   }
 
   @Override

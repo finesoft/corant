@@ -149,7 +149,7 @@ public class MESConfig {
   }
 
   /**
-   * 
+   *
    * @return the fair
    */
   public boolean isFair() {

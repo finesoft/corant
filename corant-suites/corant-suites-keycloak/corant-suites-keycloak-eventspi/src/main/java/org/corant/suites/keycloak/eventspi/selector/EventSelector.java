@@ -88,7 +88,7 @@ public class EventSelector implements Predicate<Event> {
   @Override
   public String toString() {
     return "KeycloakEventSelector [types=["
-        + String.join(",", types.stream().map(t -> t.name()).collect(Collectors.toList()))
+        + String.join(",", types.stream().map(EventType::name).collect(Collectors.toList()))
         + "], realmId=" + realmId + ", clientId=" + clientId + ", userId=" + userId + ", sessionId="
         + sessionId + ", ipAddress=" + ipAddress + "]";
   }

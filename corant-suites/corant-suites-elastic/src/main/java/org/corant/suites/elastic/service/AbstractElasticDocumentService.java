@@ -43,6 +43,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortBuilder;
 
 /**
@@ -139,7 +140,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       if (pops.length > 0) {
         srb.setFetchSource(pops, new String[0]);
       }
-      return Arrays.stream(srb.get().getHits().getHits()).map(x -> x.getSourceAsMap())
+      return Arrays.stream(srb.get().getHits().getHits()).map(SearchHit::getSourceAsMap)
           .collect(Collectors.toList());
     }
     return new ArrayList<>();

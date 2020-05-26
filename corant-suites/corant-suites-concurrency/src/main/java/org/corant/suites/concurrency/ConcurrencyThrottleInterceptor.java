@@ -45,7 +45,7 @@ public class ConcurrencyThrottleInterceptor {
     final int max = Integer.max(ann.max(), ConcurrencyThrottle.DFLT_THRON);
     final boolean fair = ann.fair();
     Semaphore counting = ConcurrencyThrottleInterceptor.THROTTLES
-        .computeIfAbsent(new MethodSignature(ctx.getMethod()), (k) -> new Semaphore(max, fair));
+        .computeIfAbsent(new MethodSignature(ctx.getMethod()), k -> new Semaphore(max, fair));
     try {
       counting.acquire();
       return ctx.proceed();

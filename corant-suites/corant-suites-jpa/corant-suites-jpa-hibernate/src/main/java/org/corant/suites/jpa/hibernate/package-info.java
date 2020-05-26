@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-jpa-hibernate
- * 
+ *
  * @author bingo 下午7:24:21
  *
  */

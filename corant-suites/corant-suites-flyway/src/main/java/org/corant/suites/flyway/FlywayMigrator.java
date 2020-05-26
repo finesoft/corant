@@ -156,9 +156,8 @@ public class FlywayMigrator {
 
   protected Stream<FlywayConfigProvider> getConfigProviders() {
     if (!dataSourceExtensions.isUnsatisfied()) {
-      return dataSourceExtensions.stream().flatMap(dse -> {
-        return streamOf(dse.getConfigManager().getAllNames()).map(this::resolveConfigProvider);
-      });
+      return dataSourceExtensions.stream().flatMap(
+          dse -> streamOf(dse.getConfigManager().getAllNames()).map(this::resolveConfigProvider));
     } else {
       return Stream.empty();
     }

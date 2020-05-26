@@ -60,7 +60,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   }
 
   static String[] resolveLocations() {
-    String sysLcPro = System.getProperty(CFG_LOCATION_KEY); 
+    String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
     String sysLcEnv = ConfigUtils.extractSysEnv(
         AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
         CFG_LOCATION_KEY);

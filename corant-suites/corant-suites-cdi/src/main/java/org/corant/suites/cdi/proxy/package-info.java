@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-cdi
- * 
+ *
  * @author bingo 下午3:19:55
  *
  */

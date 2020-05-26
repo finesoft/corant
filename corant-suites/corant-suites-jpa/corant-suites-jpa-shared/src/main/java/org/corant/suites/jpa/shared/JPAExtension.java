@@ -77,7 +77,7 @@ public class JPAExtension implements Extension {
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
     // create entity manager factory bean from persistence units
     Map<String, Annotation[]> qualifiers = resolveNameds(persistenceUnitInfoMetaDatas.keySet()
-        .stream().map(p -> p.unitName()).collect(Collectors.toSet()));
+        .stream().map(PersistenceUnit::unitName).collect(Collectors.toSet()));
     persistenceUnitInfoMetaDatas.forEach((pu, puim) -> {
       abd.addBean(new EntityManagerFactoryBean(beanManager, pu, qualifiers.get(pu.unitName())));
       if (puim.isBindToJndi()) {
@@ -87,7 +87,7 @@ public class JPAExtension implements Extension {
   }
 
   void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
-    JPAConfig.from(ConfigProvider.getConfig()).forEach((pu) -> persistenceUnitInfoMetaDatas
+    JPAConfig.from(ConfigProvider.getConfig()).forEach(pu -> persistenceUnitInfoMetaDatas
         .put(PersistenceUnitLiteral.of(pu.getPersistenceUnitName()), pu));
     finishedMetadatas = true;
   }

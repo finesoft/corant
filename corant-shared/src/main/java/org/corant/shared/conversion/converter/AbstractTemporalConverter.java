@@ -354,7 +354,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
         System.out.println(String.format("Formatter [%s] not found!", v));
       }
     });
-    sw.stop((t) -> System.out.println(t.getName() + " : " + t.getTimeMillis() + " ms!"));
+    sw.stop(t -> System.out.println(t.getName() + " : " + t.getTimeMillis() + " ms!"));
   }
 
   protected Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {

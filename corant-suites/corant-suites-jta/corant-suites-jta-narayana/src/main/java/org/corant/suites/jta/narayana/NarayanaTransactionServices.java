@@ -44,12 +44,14 @@ public class NarayanaTransactionServices implements TransactionServices {
   }
 
   public TransactionManager getTransactionManager() {
-    return resolveApply(NarayanaTransactionService.class, ts -> ts.getTransactionManager());
+    return resolveApply(NarayanaTransactionService.class,
+        NarayanaTransactionService::getTransactionManager);
   }
 
   @Override
   public UserTransaction getUserTransaction() {
-    return resolveApply(NarayanaTransactionService.class, ts -> ts.getUserTransaction());
+    return resolveApply(NarayanaTransactionService.class,
+        NarayanaTransactionService::getUserTransaction);
   }
 
   @Override

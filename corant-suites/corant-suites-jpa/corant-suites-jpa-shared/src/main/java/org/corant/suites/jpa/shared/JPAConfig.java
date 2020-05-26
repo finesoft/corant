@@ -26,6 +26,7 @@ import javax.persistence.spi.PersistenceProviderResolverHolder;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.StringUtils;
 import org.corant.suites.jpa.shared.metadata.PersistencePropertiesParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -129,8 +130,8 @@ public class JPAConfig {
   private static Set<PersistenceUnitInfoMetaData> generateFromXml() {
     Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     try {
-      Resources.fromClassPath(DFLT_PU_XML_LOCATION).map(r -> r.getURL())
-          .map(PersistenceXmlParser::parse).flatMap(m -> m.stream()).forEach(m -> {
+      Resources.fromClassPath(DFLT_PU_XML_LOCATION).map(ClassPathResource::getURL)
+          .map(PersistenceXmlParser::parse).flatMap(Set::stream).forEach(m -> {
             shouldBeTrue(cfgs.add(m), "The persistence unit name %s is dup!",
                 m.getPersistenceUnitName());
           });

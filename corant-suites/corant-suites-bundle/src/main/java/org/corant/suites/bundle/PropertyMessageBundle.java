@@ -18,6 +18,7 @@ import static org.corant.shared.util.StringUtils.split;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -110,11 +111,11 @@ public class PropertyMessageBundle implements MessageBundle {
             onPreDestroy();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
-              PropertyResourceBundle.getBundles(pkg, (r) -> true).forEach((s, res) -> {
+              PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Find message resource from %s", s));
-                Map<String, MessageFormat> localeMap = res.dump().entrySet().stream().collect(
-                    Collectors.toMap(k -> k.getKey(), v -> new MessageFormat(v.getValue())));
-                holder.computeIfAbsent(res.getLocale(), (k) -> new ConcurrentHashMap<>())
+                Map<String, MessageFormat> localeMap = res.dump().entrySet().stream()
+                    .collect(Collectors.toMap(Entry::getKey, v -> new MessageFormat(v.getValue())));
+                holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())
                     .putAll(localeMap);
                 logger.fine(() -> String.format("Find %s %s message keys from %s.",
                     localeMap.size(), res.getLocale(), s));

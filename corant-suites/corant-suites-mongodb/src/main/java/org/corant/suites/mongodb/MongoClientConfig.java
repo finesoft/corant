@@ -99,7 +99,7 @@ public class MongoClientConfig implements NamedObject {
     Set<String> dfltCfgKeys = defaultPropertyNames(config);
     // handle named client
     Map<String, List<String>> clientCfgs = getGroupConfigKeys(config,
-        (s) -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+        s -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig cfg = of(config, k, v);
       shouldBeTrue(cfgs.add(cfg), "Mongo client databaseName %s dup!", k);
@@ -303,7 +303,7 @@ public class MongoClientConfig implements NamedObject {
       try {
         entry.getValue().invoke(optionsBuilder, value);
       } catch (InvocationTargetException | IllegalAccessException e) {
-        throw new CorantRuntimeException(e,"Unable to build mongo client options [%s]",
+        throw new CorantRuntimeException(e, "Unable to build mongo client options [%s]",
             entry.getKey());
       }
     }

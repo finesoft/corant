@@ -13,7 +13,6 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import static org.corant.shared.util.ConversionUtils.toBoolean;
 import static org.corant.shared.util.ConversionUtils.toEnum;
 import static org.corant.shared.util.MapUtils.getMapEnum;
 import static org.corant.shared.util.MapUtils.getOptMapObject;
@@ -306,16 +305,18 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       Collation.Builder b = Collation.builder();
       getOptMapObject(pros, PRO_KEY_CO_COLA_ALTERNATE, t -> toEnum(t, CollationAlternate.class))
           .ifPresent(b::collationAlternate);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWARDS, t -> toBoolean(t)).ifPresent(b::backwards);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWARDS, ConversionUtils::toBoolean)
+          .ifPresent(b::backwards);
       getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_FIRST, t -> toEnum(t, CollationCaseFirst.class))
           .ifPresent(b::collationCaseFirst);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, t -> toBoolean(t)).ifPresent(b::caseLevel);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_LOCALE, t -> ConversionUtils.toString(t))
-          .ifPresent(b::locale);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, ConversionUtils::toBoolean)
+          .ifPresent(b::caseLevel);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_LOCALE, ConversionUtils::toString).ifPresent(b::locale);
       getOptMapObject(pros, PRO_KEY_CO_COLA_MAXVAR, t -> toEnum(t, CollationMaxVariable.class))
           .ifPresent(b::collationMaxVariable);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_NORMA, t -> toBoolean(t)).ifPresent(b::normalization);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_NUMORD, t -> toBoolean(t))
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NORMA, ConversionUtils::toBoolean)
+          .ifPresent(b::normalization);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NUMORD, ConversionUtils::toBoolean)
           .ifPresent(b::numericOrdering);
       getOptMapObject(pros, PRO_KEY_CO_COLA_STRENGTH, t -> toEnum(t, CollationStrength.class))
           .ifPresent(b::collationStrength);

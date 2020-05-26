@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
@@ -152,7 +153,7 @@ public class Query implements Serializable {
 
   public Map<String, Class<?>> getParamConvertSchema() {
     return Collections.unmodifiableMap(getParamMappings().entrySet().stream()
-        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getType())));
+        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getType())));
   }
 
   /**
@@ -318,13 +319,13 @@ public class Query implements Serializable {
    */
   void immunize() {
     if (fetchQueries != null) {
-      fetchQueries.forEach(fq -> fq.immunize());
+      fetchQueries.forEach(FetchQuery::immunize);
       fetchQueries = Collections.unmodifiableList(fetchQueries);
     } else {
       fetchQueries = Collections.emptyList();
     }
     if (hints != null) {
-      hints.forEach(h -> h.immunize());
+      hints.forEach(QueryHint::immunize);
       hints = Collections.unmodifiableList(hints);
     } else {
       hints = Collections.emptyList();

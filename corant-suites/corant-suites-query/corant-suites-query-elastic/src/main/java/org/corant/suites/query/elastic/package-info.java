@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-query-elastic
- * 
+ *
  * @author bingo 下午8:42:32
  *
  */

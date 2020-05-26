@@ -42,8 +42,8 @@ public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], St
    * @param script
    */
   protected DefaultJpqlNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
-      Object[] scriptParameter, String script) {
+      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Object[] scriptParameter,
+      String script) {
     super(query, queryParameter, resultResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;

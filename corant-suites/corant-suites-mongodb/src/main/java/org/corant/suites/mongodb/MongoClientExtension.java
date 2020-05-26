@@ -153,9 +153,9 @@ public class MongoClientExtension implements Extension {
     if (event != null) {
       clientConfigManager.getAllWithQualifiers().forEach((c, n) -> {
         event.<MongoClient>addBean().addQualifiers(n).addTransitiveTypeClosure(MongoClient.class)
-            .beanClass(MongoClient.class).scope(ApplicationScoped.class).produceWith(beans -> {
-              return produceClient(beans, c, n);
-            }).disposeWith((mc, beans) -> mc.close());
+            .beanClass(MongoClient.class).scope(ApplicationScoped.class)
+            .produceWith(beans -> produceClient(beans, c, n))
+            .disposeWith((mc, beans) -> mc.close());
         if (c.isBindToJndi()) {
           resolveJndi(c.getName(), n);
         }
@@ -164,17 +164,13 @@ public class MongoClientExtension implements Extension {
       databaseConfigManager.getAllWithQualifiers().forEach((c, n) -> {
         event.<MongoDatabase>addBean().addQualifiers(n)
             .addTransitiveTypeClosure(MongoDatabase.class).beanClass(MongoDatabase.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              return produceDatabase(beans, c);
-            });
+            .scope(ApplicationScoped.class).produceWith(beans -> produceDatabase(beans, c));
       });
 
       for (final String gfn : gridFSBucketNames) {
         event.<GridFSBucket>addBean().addQualifier(NamedLiteral.of(gfn))
             .addTransitiveTypeClosure(GridFSBucket.class).beanClass(GridFSBucket.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              return produceGridFSBucket(gfn);
-            });
+            .scope(ApplicationScoped.class).produceWith(beans -> produceGridFSBucket(gfn));
       }
     }
   }

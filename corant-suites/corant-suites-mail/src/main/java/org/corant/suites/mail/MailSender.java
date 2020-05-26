@@ -15,7 +15,7 @@ package org.corant.suites.mail;
 
 /**
  * corant-suites-mail
- * 
+ *
  * @author bingo 下午12:09:38
  *
  */

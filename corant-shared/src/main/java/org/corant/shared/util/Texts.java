@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UncheckedIOException;
@@ -239,8 +240,8 @@ public class Texts {
     if (!file.exists()) {
       shouldBeTrue(file.createNewFile());
     }
-    try (BufferedWriter fileWritter =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append)))) {
+    try (OutputStream os = new FileOutputStream(file, append);
+        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os))) {
       lines.forEach(line -> {
         try {
           fileWritter.append(line);

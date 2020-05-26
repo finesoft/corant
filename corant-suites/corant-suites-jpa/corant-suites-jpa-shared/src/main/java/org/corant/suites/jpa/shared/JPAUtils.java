@@ -34,6 +34,7 @@ import javax.persistence.PersistenceUnit;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.ClassResource;
 
 /**
@@ -58,8 +59,8 @@ public class JPAUtils {
     Set<Class<?>> clses = new LinkedHashSet<>();
     try {
       Resources.fromClassPath(replace(packages, ".", "/")).filter(c -> c instanceof ClassResource)
-          .map((c) -> (ClassResource) c).map(ClassResource::load)
-          .filter(JPAUtils::isPersistenceClass).forEach(clses::add);
+          .map(c -> (ClassResource) c).map(ClassResource::load).filter(JPAUtils::isPersistenceClass)
+          .forEach(clses::add);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
@@ -71,7 +72,7 @@ public class JPAUtils {
     try {
       for (String pathExpression : pathExpressions) {
         Resources.fromClassPath(pathExpression).filter(r -> !ClassResource.class.isInstance(r))
-            .map(r -> r.getClassPath()).forEach(paths::add);
+            .map(ClassPathResource::getClassPath).forEach(paths::add);
       }
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
@@ -119,7 +120,7 @@ public class JPAUtils {
   public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replaceAll("\\.", "/");
     Resources.fromClassPath(path).filter(r -> r.getClassPath().endsWith("JpaOrm.xml"))
-        .map(r -> r.getClassPath()).map(s -> new StringBuilder().append("<mapping-file>")
+        .map(ClassPathResource::getClassPath).map(s -> new StringBuilder().append("<mapping-file>")
             .append(s.substring(s.indexOf(path))).append("</mapping-file>"))
         .forEach(ps::println);
   }

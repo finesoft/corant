@@ -269,7 +269,7 @@ public class UndertowWebServerConfig {
   }
 
   /**
-   * 
+   *
    * @return the escapeErrorMessage
    */
   public boolean isEscapeErrorMessage() {

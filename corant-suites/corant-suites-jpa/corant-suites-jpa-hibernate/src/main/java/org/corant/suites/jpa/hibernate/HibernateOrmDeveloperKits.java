@@ -27,6 +27,7 @@ import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.suites.datasource.shared.DataSourceService;
 import org.corant.suites.jpa.shared.JPAExtension;
 import org.corant.suites.jpa.shared.JPAUtils;
@@ -94,7 +95,7 @@ public class HibernateOrmDeveloperKits {
     try (Corant corant = prepare()) {
       String usePkg = replace(pkg, ".", "/");
       Resources.fromClassPath(usePkg).filter(f -> f.getLocation().endsWith(endWith))
-          .map(f -> f.getClassPath()).sorted(String::compareTo).forEach(s -> {
+          .map(ClassPathResource::getClassPath).sorted(String::compareTo).forEach(s -> {
             if (s.contains(usePkg) && s.endsWith(endWith)) {
               out.accept(s.substring(s.indexOf(usePkg)));
             }
@@ -164,7 +165,7 @@ public class HibernateOrmDeveloperKits {
         shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource((dsn) -> dataSourceService.get(dsn));
+    usePum.configDataSource(dsn -> dataSourceService.get(dsn));
     props.putAll(usePum.getProperties());
     EntityManagerFactoryBuilderImpl emfb = EntityManagerFactoryBuilderImpl.class
         .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));

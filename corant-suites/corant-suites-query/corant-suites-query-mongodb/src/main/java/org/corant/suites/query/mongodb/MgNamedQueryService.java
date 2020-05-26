@@ -1,8 +1,7 @@
 package org.corant.suites.query.mongodb;
 
-import org.corant.suites.query.shared.NamedQueryService;
-
 import java.util.List;
+import org.corant.suites.query.shared.NamedQueryService;
 
 /**
  * @auther sushuaihao 2020/4/22

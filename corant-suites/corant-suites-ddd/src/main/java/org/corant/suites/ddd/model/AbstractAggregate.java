@@ -133,24 +133,6 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Set the aggregate lifecycle stage and raise lifecycle event.
-   *
-   * Do not raise Lifecycle.LOAD event by default.
-   *
-   * @param lifecycle
-   * @return lifecycle
-   */
-  protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
-    if (this.lifecycle != lifecycle) {
-      this.lifecycle = lifecycle;
-      if (lifecycle != Lifecycle.LOADED) {
-        this.raise(new AggregateLifecycleEvent(this), AggregateTypeLiteral.of(getClass()));
-      }
-    }
-    return this;
-  }
-
-  /**
    * Destroy preconditions, in general use to validate the aggregate internal consistency, in JPA
    * environment this method is the EntityListener callback.
    * <p>
@@ -208,6 +190,24 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected synchronized AbstractAggregate recover() {
     requireFalse(lifecycle == null || !lifecycle.signRefreshable(), PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
+    return this;
+  }
+
+  /**
+   * Set the aggregate lifecycle stage and raise lifecycle event.
+   *
+   * Do not raise Lifecycle.LOAD event by default.
+   *
+   * @param lifecycle
+   * @return lifecycle
+   */
+  protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
+    if (this.lifecycle != lifecycle) {
+      this.lifecycle = lifecycle;
+      if (lifecycle != Lifecycle.LOADED) {
+        this.raise(new AggregateLifecycleEvent(this), AggregateTypeLiteral.of(getClass()));
+      }
+    }
     return this;
   }
 

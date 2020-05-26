@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-keycloak-authzclient
- * 
+ *
  * @author bingo 下午2:12:40
  *
  */

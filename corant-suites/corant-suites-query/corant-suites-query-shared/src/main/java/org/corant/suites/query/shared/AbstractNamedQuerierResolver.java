@@ -37,7 +37,7 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
   protected FetchQueryResolver fetchQueryResolver;
 
   /**
-   * 
+   *
    * @return the fetchQueryResolver
    */
   public FetchQueryResolver getFetchQueryResolver() {
@@ -45,7 +45,7 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
   }
 
   /**
-   * 
+   *
    * @return the mappingService
    */
   public QueryMappingService getMappingService() {
@@ -53,7 +53,7 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
   }
 
   /**
-   * 
+   *
    * @return the queryResolver
    */
   public QueryResolver getQueryResolver() {

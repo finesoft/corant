@@ -18,4 +18,3 @@
  *
  */
 package org.corant.suites.jndi;
-

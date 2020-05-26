@@ -118,7 +118,7 @@ public class JarPackager implements Packager {
     DefaultArchive.of(APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
     DefaultArchive.of(BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
-    DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of((attr) -> {
+    DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of(attr -> {
       // The application main class and runner class
       attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());
       attr.put(JarLauncher.RUNNER_CLS_ATTR_NME, getMojo().getMainClass());

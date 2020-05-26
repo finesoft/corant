@@ -74,7 +74,7 @@ public class PropertyResourceBundle extends ResourceBundle {
       Predicate<Resource> fs) {
     Map<String, PropertyResourceBundle> map = new HashMap<>();
     try {
-      Resources.from(path).filter(fs).forEach((fo) -> {
+      Resources.from(path).filter(fs).forEach(fo -> {
         try {
           map.putIfAbsent(fo.getURL().getPath(), new PropertyResourceBundle(fo));
         } catch (IOException e) {

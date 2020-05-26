@@ -29,7 +29,7 @@ public interface QueryResolver {
   /**
    * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
    * return it.
-   * 
+   *
    * @param query
    * @param parameter
    * @return query parameter

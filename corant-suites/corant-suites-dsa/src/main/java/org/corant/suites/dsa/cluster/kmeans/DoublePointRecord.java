@@ -83,7 +83,7 @@ public class DoublePointRecord implements Clusterable {
   }
 
   /**
-   * 
+   *
    * @return the descriptions
    */
   public Map<Object, Object> getDescriptions() {

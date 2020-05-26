@@ -33,6 +33,7 @@ import org.corant.shared.util.ObjectUtils;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.StopWatch;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
+import org.corant.suites.servlet.metadata.HttpMethodConstraintMetaData;
 import org.corant.suites.servlet.metadata.ServletSecurityMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
 import org.corant.suites.webserver.shared.AbstractWebServer;
@@ -98,9 +99,9 @@ public class UndertowWebServer extends AbstractWebServer {
           .orElse(Boolean.TRUE)) {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
-        sw.destroy((t) -> logger.info(() -> String.format("%s [%s] was started, takes %ss.",
-            t.getLastTaskInfo().getName(), config.getDescription(),
-            t.getLastTaskInfo().getTimeSeconds())));
+        sw.destroy(t -> logger.info(
+            () -> String.format("%s [%s] was started, takes %ss.", t.getLastTaskInfo().getName(),
+                config.getDescription(), t.getLastTaskInfo().getTimeSeconds())));
       } else {
         logger.info(() -> "Undertow can not start, due to some PreStartHandler interruption!");
       }
@@ -272,7 +273,7 @@ public class UndertowWebServer extends AbstractWebServer {
             ssi.addRolesAllowed(ssm.getHttpConstraint().getRolesAllowed());
             resolveTransportGuaranteeType(ssi, ssm.getHttpConstraint().getTransportGuarantee());
             ssi.setEmptyRoleSemantic(resolveEmptyRoleSemantic(ssm.getHttpConstraint()));
-            streamOf(ssm.getHttpMethodConstraints()).map(m -> m.getValue())
+            streamOf(ssm.getHttpMethodConstraints()).map(HttpMethodConstraintMetaData::getValue)
                 .map(m -> new HttpMethodSecurityInfo().setMethod(m))
                 .forEach(ssi::addHttpMethodSecurityInfo);
           }

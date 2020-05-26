@@ -50,7 +50,7 @@ public @interface RunConfig {
 
   /**
    * The append bean classes
-   * 
+   *
    * @return beanClasses
    */
   Class<?>[] beanClasses() default {};

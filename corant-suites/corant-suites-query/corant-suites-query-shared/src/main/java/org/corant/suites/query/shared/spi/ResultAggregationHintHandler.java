@@ -134,7 +134,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
             && isNotBlank(aggName = aggNames.get(0).getValue()) && isNotEmpty(fieldNames =
                 linkedHashSetOf(split(aggFieldNames.get(0).getValue(), ",", true, true)))) {
           final String useAggName = aggName;
-          return caches.computeIfAbsent(qh.getId(), (k) -> (list) -> {
+          return caches.computeIfAbsent(qh.getId(), k -> (list) -> {
             Map<Map<Object, Object>, List<Map<Object, Object>>> temp =
                 new LinkedHashMap<>(list.size());
             for (Map<?, ?> src : list) {

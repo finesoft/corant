@@ -20,5 +20,5 @@
 package org.corant.shared.conversion;
 
 interface MsgCodes {
-  static final String CONVERTER_NOT_FOUND = "";
+  String CONVERTER_NOT_FOUND = "";
 }

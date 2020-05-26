@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * cps-m2b <br>
- * 
+ *
  * @auther sushuaihao 2019/8/30
  * @since
  */

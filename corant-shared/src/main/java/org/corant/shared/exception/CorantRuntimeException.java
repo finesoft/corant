@@ -67,5 +67,4 @@ public class CorantRuntimeException extends RuntimeException {
     super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args), cause);
   }
 
-
 }

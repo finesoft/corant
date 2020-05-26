@@ -83,7 +83,7 @@ public class QueryParseHandler extends DefaultHandler {
   public void endDocument() throws SAXException {
     mapping.setCommonSegment(commonSegment);
     mapping.paraMapping
-        .putAll(paraMappings.stream().collect(Collectors.toMap(p -> p.getName(), p -> p)));
+        .putAll(paraMappings.stream().collect(Collectors.toMap(ParameterMapping::getName, p -> p)));
     mapping.queries.addAll(queries);
     mapping.assembly();// FIXME
     valueStack.clear();

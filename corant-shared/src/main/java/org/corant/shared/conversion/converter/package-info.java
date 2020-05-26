@@ -20,8 +20,8 @@
 package org.corant.shared.conversion.converter;
 
 interface MsgCodes {
-  static final String CONVERT_ERROR = "";
-  static final String CONVERT_ERROR_NUM_2BIG = "";
-  static final String CONVERT_ERROR_NUM_2SML = "";
-  static final String CONVERTER_NOT_FOUNG = "";
+  String CONVERT_ERROR = "";
+  String CONVERT_ERROR_NUM_2BIG = "";
+  String CONVERT_ERROR_NUM_2SML = "";
+  String CONVERTER_NOT_FOUNG = "";
 }

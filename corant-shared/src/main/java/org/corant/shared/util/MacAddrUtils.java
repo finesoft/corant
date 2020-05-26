@@ -59,7 +59,6 @@ public class MacAddrUtils {
     return new byte[0];
   }
 
-
   public static byte[] getSecureMungedAddress(Random rd) {
     byte[] address = null;
     try {

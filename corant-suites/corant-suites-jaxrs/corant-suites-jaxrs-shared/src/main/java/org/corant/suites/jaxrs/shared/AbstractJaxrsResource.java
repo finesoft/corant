@@ -100,7 +100,7 @@ public abstract class AbstractJaxrsResource {
   }
 
   protected String resolvePath() {
-    return cachedPaths.computeIfAbsent(getClass(), (cls) -> {
+    return cachedPaths.computeIfAbsent(getClass(), cls -> {
       Annotation[] annotations = cls.getAnnotations();
       for (Annotation annotation : annotations) {
         if (annotation instanceof Path) {

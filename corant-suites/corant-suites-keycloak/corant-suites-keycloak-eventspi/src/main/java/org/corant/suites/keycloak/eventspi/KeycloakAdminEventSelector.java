@@ -33,7 +33,7 @@ public class KeycloakAdminEventSelector implements KeycloakEventSelector<AdminEv
   private final Predicate<AdminEvent> predicate;
 
   public KeycloakAdminEventSelector(String predicates) {
-    Predicate<AdminEvent> p = (e) -> false;
+    Predicate<AdminEvent> p = e -> false;
     if (predicates != null) {
       String[] events = KeycloakEventSelector.split(predicates, FIRST_SP);
       for (String event : events) {

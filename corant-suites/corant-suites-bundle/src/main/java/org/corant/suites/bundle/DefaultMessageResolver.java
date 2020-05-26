@@ -68,7 +68,7 @@ public class DefaultMessageResolver implements MessageResolver {
     locale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(locale, messageSource.getParameters());
     return messageBundle.getMessage(locale, codes, parameters,
-        (l) -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
+        l -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
@@ -76,13 +76,13 @@ public class DefaultMessageResolver implements MessageResolver {
     locale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(locale, params);
     return messageBundle.getMessage(locale, codes, parameters,
-        (l) -> String.format("Can't find any message for %s", codes));
+        l -> String.format("Can't find any message for %s", codes));
   }
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
     String unknow = ser == MessageSeverity.INF ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
     return messageBundle.getMessage(locale, unknow, new Object[] {code},
-        (l) -> String.format("Can't find any message for %s", code));
+        l -> String.format("Can't find any message for %s", code));
   }
 
   @SuppressWarnings("rawtypes")

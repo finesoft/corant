@@ -13,7 +13,7 @@
  */
 /**
  * corant-suites-microprofile-restclient
- * 
+ *
  * @author bingo 下午2:16:08
  *
  */

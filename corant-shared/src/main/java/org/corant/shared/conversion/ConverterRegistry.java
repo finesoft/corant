@@ -150,7 +150,7 @@ public class ConverterRegistry { // static?
 
   static Set<ConverterType<?, ?>> getNotSyntheticConverterTypes() {
     Set<ConverterType<?, ?>> types = SUPPORT_CONVERTERS.entrySet().stream()
-        .filter(e -> e.getValue().isComposable()).map(e -> e.getKey()).collect(Collectors.toSet());
+        .filter(e -> e.getValue().isComposable()).map(Entry::getKey).collect(Collectors.toSet());
     types.removeAll(SUPPORT_CONVERTER_PIPE_TYPES.keySet());
     return types;
   }

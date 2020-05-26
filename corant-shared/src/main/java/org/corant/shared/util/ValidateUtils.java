@@ -1,22 +1,19 @@
 /*
  * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package org.corant.shared.util;
 
 import static org.corant.shared.util.StringUtils.isNotBlank;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -41,7 +38,8 @@ import org.xml.sax.SAXParseException;
  */
 public class ValidateUtils {
 
-  public static final Pattern MOB_NUM_PTN = Pattern.compile("^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$");
+  public static final Pattern MOB_NUM_PTN = Pattern.compile(
+      "^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$");
 
   private ValidateUtils() {
     super();
@@ -60,8 +58,9 @@ public class ValidateUtils {
   }
 
   /**
-   * Check if input stream is image format, the process prereads the input stream.
-   * If input stream not support mark, then return false.
+   * Check if input stream is image format, the process prereads the input stream. If input stream
+   * not support mark, then return false.
+   * 
    * @param is
    * @return
    */
@@ -103,9 +102,9 @@ public class ValidateUtils {
   public static boolean isIp4Address(String ipAddress) {
     return isNotBlank(ipAddress)
         && Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-                               + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b").matcher(ipAddress).matches();
+            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b").matcher(ipAddress).matches();
   }
 
   /**
@@ -115,7 +114,7 @@ public class ValidateUtils {
   public static boolean isMailAddress(String mailAddress) {
     return isNotBlank(mailAddress)
         && Pattern.compile("^(\\w+)([\\-+.\\'][\\w]+)*@(\\w[\\-\\w]*\\.){1,5}([A-Za-z]){2,6}$")
-        .matcher(mailAddress).matches();
+            .matcher(mailAddress).matches();
   }
 
   /**
@@ -193,6 +192,7 @@ public class ValidateUtils {
 
   /**
    * Validate Xml document with schema
+   * 
    * @param doc
    * @param schema
    * @return validateXmlDocument

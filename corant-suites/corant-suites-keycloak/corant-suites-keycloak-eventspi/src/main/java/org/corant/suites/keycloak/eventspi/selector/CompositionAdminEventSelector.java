@@ -25,7 +25,8 @@ import org.keycloak.events.admin.AdminEvent;
  * @author bingo 下午8:12:00
  *
  */
-public class CompositionAdminEventSelector extends AbstactSelector implements Predicate<AdminEvent> {
+public class CompositionAdminEventSelector extends AbstactSelector
+    implements Predicate<AdminEvent> {
 
   static final Logger logger = Logger.getLogger(CompositionAdminEventSelector.class);
 

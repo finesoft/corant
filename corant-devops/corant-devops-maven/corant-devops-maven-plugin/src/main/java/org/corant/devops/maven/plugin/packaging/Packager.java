@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.jar.Attributes;
+import org.apache.maven.artifact.Artifact;
 import bin.JarLauncher;
 
 /**
@@ -61,6 +62,6 @@ public interface Packager {
 
   default Optional<String> resolveFrameworkVersion() {
     return getMojo().getProject().getArtifacts().stream()
-        .filter(a -> FW_NME.equals(a.getArtifactId())).map(a -> a.getVersion()).findFirst();
+        .filter(a -> FW_NME.equals(a.getArtifactId())).map(Artifact::getVersion).findFirst();
   }
 }

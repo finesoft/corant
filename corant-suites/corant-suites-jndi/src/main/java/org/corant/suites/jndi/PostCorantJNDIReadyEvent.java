@@ -38,7 +38,7 @@ public class PostCorantJNDIReadyEvent implements CorantLifecycleEvent {
   }
 
   /**
-   * 
+   *
    * @return the context
    */
   public InitialContext getContext() {

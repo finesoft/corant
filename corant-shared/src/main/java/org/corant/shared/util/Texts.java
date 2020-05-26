@@ -235,13 +235,13 @@ public class Texts {
     }
   }
 
-  public static void writeToFile(File file, boolean append, Stream<String> lines)
+  public static void writeToFile(File file, boolean append, Charset charset, Stream<String> lines)
       throws IOException {
     if (!file.exists()) {
       shouldBeTrue(file.createNewFile());
     }
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os))) {
+        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
       lines.forEach(line -> {
         try {
           fileWritter.append(line);
@@ -252,6 +252,11 @@ public class Texts {
         }
       });
     }
+  }
+
+  public static void writeToFile(File file, boolean append, Stream<String> lines)
+      throws IOException {
+    writeToFile(file, append, StandardCharsets.UTF_8, lines);
   }
 
   public static void writeToFile(File file, List<String> data) throws IOException {

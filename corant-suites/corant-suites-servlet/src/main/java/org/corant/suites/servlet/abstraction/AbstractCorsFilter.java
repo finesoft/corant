@@ -60,7 +60,7 @@ public abstract class AbstractCorsFilter implements Filter {
 
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-      FilterChain filterChain) throws IOException, ServletException {
+                       FilterChain filterChain) throws IOException, ServletException {
     HttpServletResponse response = (HttpServletResponse) servletResponse;
     if (isEnabled()) {
       response.addHeader("Access-Control-Allow-Origin", getOrigin());
@@ -69,7 +69,6 @@ public abstract class AbstractCorsFilter implements Filter {
       response.addHeader("Access-Control-Allow-Methods", getMethods());
       response.addHeader("Access-Control-Max-Age", getMaxAge());
     }
-    filterChain.doFilter(servletRequest,servletResponse);
   }
 
   /**

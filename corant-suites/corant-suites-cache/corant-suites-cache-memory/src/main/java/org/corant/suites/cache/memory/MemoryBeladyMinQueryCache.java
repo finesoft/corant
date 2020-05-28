@@ -11,27 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared.cache;
-
-import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryCache;
+package org.corant.suites.cache.memory;
 
 /**
  * corant-suites-query-shared
  *
+ * Unfinish yet!
+ *
  * @author bingo 下午2:04:12
  *
  */
-public class MemoryBeladyMinQueryCache implements QueryCache<Querier> {
+public class MemoryBeladyMinQueryCache<K, V> implements MemoryCache<K, V> {
 
   @Override
-  public Object get(Querier key) {
+  public V get(K key) {
     return null;
   }
 
   @Override
-  public Object put(Querier key, Object value) {
-    return null;
-  }
+  public void put(K key, V value) {}
 
 }

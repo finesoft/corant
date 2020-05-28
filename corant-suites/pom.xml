@@ -57,6 +57,7 @@
     <module>corant-suites-logging</module>
     <module>corant-suites-arrow</module>
     <module>corant-suites-dsa</module>
+    <module>corant-suites-cache</module>
   </modules>
   <description>The Corant integration suite, which contains various components involved in enterprise development.</description>
 </project>

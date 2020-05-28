@@ -11,44 +11,43 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared.cache;
+package org.corant.suites.cache.memory;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryCache;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * corant-suites-query-shared
  *
+ * Unfinish yet!
+ *
  * @author bingo 下午12:54:42
  *
  */
-@ApplicationScoped
-public class MemoryLRUQueryCache implements QueryCache<Querier> {
+public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
-  final Map<Object, Future<Object>> cache = new ConcurrentHashMap<>();
+  final ConcurrentHashMap<K, V> map;
+  final ConcurrentLinkedDeque<K> queue;
+  final int capacity;
+  final ReadWriteLock rwl;
 
-  @Override
-  public void clear() {
-    cache.clear();
+  public MemoryLRUCache(int capacity) {
+    this.capacity = capacity;
+    map = new ConcurrentHashMap<>(capacity);
+    queue = new ConcurrentLinkedDeque<>();
+    rwl = new ReentrantReadWriteLock();
   }
 
   @Override
-  public Object get(Querier key) {
-    return null;
+  public V get(K key) {
+    return null;// TODO
   }
 
   @Override
-  public Object put(Querier key, Object value) {
-    return null;
+  public void put(K key, V value) {
+    // TODO
   }
 
-  @PreDestroy
-  void onPreDestroy() {
-    clear();
-  }
 }

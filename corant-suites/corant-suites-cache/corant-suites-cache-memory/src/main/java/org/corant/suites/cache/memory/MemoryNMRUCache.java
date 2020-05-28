@@ -11,22 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.query.shared;
+package org.corant.suites.cache.memory;
 
 /**
  * corant-suites-query-shared
  *
- * @author bingo 下午12:42:16
+ * Unfinish yet!
+ *
+ * @author bingo 下午2:03:02
  *
  */
-public interface QueryCache<K> {
+public class MemoryNMRUCache<K, V> implements MemoryCache<K, V> {
 
-  default void clear() {}
+  @Override
+  public V get(K key) {
+    return null;
+  }
 
-  Object get(K key);
-
-  Object put(K key, Object value);
-
-  default void remove(K key) {}
+  @Override
+  public void put(K key, V value) {}
 
 }

@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-suites-query-shared
- *
- * @author bingo 下午1:54:18
+ * corant-suites-cache-memory
+ * 
+ * @author bingo 下午3:16:00
  *
  */
-package org.corant.suites.query.shared.cache;
+package org.corant.suites.cache.memory;

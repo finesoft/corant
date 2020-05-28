@@ -234,6 +234,12 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
+  public static synchronized Corant run() {
+    Corant corant = new Corant();
+    corant.start(null);
+    return corant;
+  }
+
   public static synchronized Corant run(Class<?> configClass, String... arguments) {
     Corant corant = new Corant(configClass, arguments);
     corant.start(null);

@@ -69,6 +69,7 @@ public abstract class AbstractCorsFilter implements Filter {
       response.addHeader("Access-Control-Allow-Methods", getMethods());
       response.addHeader("Access-Control-Max-Age", getMaxAge());
     }
+    filterChain.doFilter(servletRequest,servletResponse);
   }
 
   /**

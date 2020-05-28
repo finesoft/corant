@@ -5,12 +5,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.ext.Provider;
-import org.corant.suites.servlet.abstraction.AbstractCorsFilter;
+import org.corant.suites.jaxrs.shared.AbstractJaxrsCorsFilter;
 
 @Provider
 @PreMatching
 @Priority(Priorities.AUTHORIZATION)
 @ApplicationScoped
-public class ResteasyCorsFilter extends AbstractCorsFilter {
+public class ResteasyCorsFilter extends AbstractJaxrsCorsFilter {
 
 }

@@ -38,16 +38,16 @@ public abstract class AbstractCorsFilter implements Filter {
   @ConfigProperty(name = "servlet.cors.enabled", defaultValue = "false")
   protected boolean enabled;
   @Inject
-  @ConfigProperty(name = "servlet.cors.origin", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.origin", defaultValue = "*")
   protected String origin;
   @Inject
   @ConfigProperty(name = "servlet.cors.headers", defaultValue = "")
   protected String headers;
   @Inject
-  @ConfigProperty(name = "servlet.cors.credentials", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.credentials", defaultValue = "false")
   protected String credentials;
   @Inject
-  @ConfigProperty(name = "servlet.cors.methods", defaultValue = "")
+  @ConfigProperty(name = "servlet.cors.methods", defaultValue = "GET, POST, OPTIONS")
   protected String methods;
   @Inject
   @ConfigProperty(name = "servlet.cors.maxAge", defaultValue = "")

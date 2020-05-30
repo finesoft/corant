@@ -13,9 +13,6 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Empties.sizeOf;
-import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +47,7 @@ public class StringUtils {
    * </pre>
    */
   public static String asDefaultString(final Object obj) {
-    return asString(obj, EMPTY);
+    return obj != null ? obj.toString() : EMPTY;
   }
 
   /**
@@ -201,7 +198,7 @@ public class StringUtils {
    */
   public static boolean isDecimalNumber(final String obj) {
     int len;
-    if ((len = sizeOf(obj)) == 0) {
+    if (obj == null || (len = obj.length()) == 0) {
       return false;
     }
     if (obj.charAt(len - 1) == '.') {
@@ -346,7 +343,7 @@ public class StringUtils {
    */
   public static boolean matchGlob(final CharSequence str, final boolean ignoreCase,
       final boolean isDos, final String globExpress) {
-    if (str == null || isEmpty(globExpress)) {
+    if (str == null || globExpress == null || globExpress.length() == 0) {
       return false;
     } else {
       return GlobPatterns.build(globExpress, isDos, ignoreCase).matcher(str).matches();
@@ -358,16 +355,16 @@ public class StringUtils {
    *
    * @param str
    * @param ignoreCase
-   * @param globExpress
+   * @param wildcardExpress
    * @return
    * @see WildcardMatcher
    */
   public static boolean matchWildcard(final String str, final boolean ignoreCase,
-      final String globExpress) {
-    if (str == null || isEmpty(globExpress)) {
+      final String wildcardExpress) {
+    if (str == null || wildcardExpress == null || wildcardExpress.length() == 0) {
       return false;
     } else {
-      return WildcardMatcher.of(ignoreCase, globExpress).test(str);
+      return WildcardMatcher.of(ignoreCase, wildcardExpress).test(str);
     }
   }
 
@@ -407,6 +404,65 @@ public class StringUtils {
   }
 
   /**
+   * Remove all the given substring in the given string, any one of the parameters is null or the
+   * length is 0 then return the given string.
+   *
+   * <pre>
+   * StringUtils.remove("123", null)                         = 123
+   * StringUtils.remove("123abc123abc", "abc")               = "123123"
+   * StringUtils.remove(null, null)                          = null
+   * StringUtils.remove("", "123")                           = ""
+   * StringUtils.remove("123", "")                           = "123"
+   * StringUtils.remove("123", null)                         = "123"
+   * </pre>
+   *
+   * @param str
+   * @param remove
+   * @return remove
+   */
+  public static String remove(final String str, final String remove) {
+    int rlen;
+    if (str == null || remove == null || (rlen = remove.length()) == 0) {
+      return str;
+    }
+    int s = 0;
+    int i = str.indexOf(remove, s);
+    if (i == -1) {
+      return str;
+    }
+    StringBuilder buf = new StringBuilder(str.length());
+    do {
+      buf.append(str, s, i);
+      s = i + rlen;
+    } while ((i = str.indexOf(remove, s)) != -1);
+    if (s < str.length()) {
+      buf.append(str, s, str.length());
+    }
+    return buf.toString();
+  }
+
+  /**
+   * Use the given character filter to remove characters that meet the filter criteria.
+   *
+   * @param str
+   * @param filter
+   * @return removeCharIf
+   */
+  public static String removeCharIf(final String str, final Predicate<Character> filter) {
+    int len;
+    if (str == null || (len = str.length()) == 0 || filter == null) {
+      return str;
+    }
+    StringBuilder buf = new StringBuilder(len);
+    for (int i = 0; i < len; i++) {
+      if (!filter.test(str.charAt(i))) {
+        buf.append(str.charAt(i));
+      }
+    }
+    return buf.toString();
+  }
+
+  /**
    * Replace string use for short string not regex.
    *
    * @param source
@@ -415,7 +471,7 @@ public class StringUtils {
    * @return replaced
    */
   public static String replace(String source, String orginal, String replace) {
-    if (source == null || isEmpty(orginal)) {
+    if (source == null || orginal == null || orginal.length() == 0) {
       return source;
     }
     String replaced = source;

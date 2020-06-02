@@ -28,7 +28,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.shared.ubiquity.Pair;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 /**

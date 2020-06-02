@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.shared.ubiquity.Pair;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 import org.corant.suites.jms.shared.annotation.MessageSends;

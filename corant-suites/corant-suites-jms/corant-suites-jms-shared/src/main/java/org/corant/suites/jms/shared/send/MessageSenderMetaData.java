@@ -15,7 +15,7 @@ package org.corant.suites.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import org.corant.config.ConfigUtils;
-import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.shared.ubiquity.Pair;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 

@@ -27,7 +27,7 @@ import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.ObjectUtils.Pair;
+import org.corant.shared.ubiquity.Pair;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
 import org.corant.suites.lang.kotlin.KotlinScriptEngines;
 import org.corant.suites.query.shared.mapping.FetchQuery;

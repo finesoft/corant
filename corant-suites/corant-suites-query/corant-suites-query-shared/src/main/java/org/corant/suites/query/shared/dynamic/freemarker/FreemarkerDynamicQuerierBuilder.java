@@ -21,7 +21,7 @@ import java.io.StringWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-import org.corant.shared.util.ObjectUtils.Triple;
+import org.corant.shared.ubiquity.Triple;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;

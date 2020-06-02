@@ -360,7 +360,6 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   static Pair<String, Object[]> processSqlAndParams(String sql, Object... params) {
     if (isEmpty(params) || isBlank(sql)
         || streamOf(params).noneMatch(p -> p instanceof Collection || p.getClass().isArray())) {

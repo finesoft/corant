@@ -16,7 +16,7 @@ package org.corant.suites.jms.shared.receive;
 import javax.jms.Connection;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-suites-jms-shared

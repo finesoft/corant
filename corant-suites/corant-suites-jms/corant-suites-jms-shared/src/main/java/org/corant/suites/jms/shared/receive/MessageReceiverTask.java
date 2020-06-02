@@ -43,8 +43,8 @@ import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
-import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
@@ -101,7 +101,7 @@ public class MessageReceiverTask implements Runnable {
   protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
-  protected volatile boolean lastExecutionSuccessfully = true;
+  protected volatile boolean lastExecutionSuccessfully = false;// 20200602 change to false
   protected volatile long breakedTimePoint;
 
   protected final AtomicInteger failureCounter = new AtomicInteger(0);

@@ -14,7 +14,7 @@
 package org.corant.suites.webserver.undertow;
 
 import java.util.function.BiConsumer;
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import org.xnio.Option;
 import io.undertow.servlet.api.DeploymentInfo;
 

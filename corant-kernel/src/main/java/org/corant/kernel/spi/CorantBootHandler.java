@@ -21,10 +21,15 @@ import org.corant.Corant;
  * @author bingo 下午2:30:23
  *
  */
-public interface CorantBootHandler {
+public interface CorantBootHandler extends AutoCloseable {
 
   static int compare(CorantBootHandler h1, CorantBootHandler h2) {
     return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
+  }
+
+  @Override
+  default void close() throws Exception {
+    return;
   }
 
   default int getOrdinal() {

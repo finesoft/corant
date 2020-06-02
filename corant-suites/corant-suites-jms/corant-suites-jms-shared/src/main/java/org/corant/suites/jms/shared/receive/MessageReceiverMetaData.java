@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.jms.ConnectionFactory;
 import org.corant.config.ConfigUtils;
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;

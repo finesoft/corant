@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jta.narayana;
 
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;

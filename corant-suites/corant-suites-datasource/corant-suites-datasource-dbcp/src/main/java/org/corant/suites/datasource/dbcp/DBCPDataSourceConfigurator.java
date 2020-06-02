@@ -14,7 +14,7 @@
 package org.corant.suites.datasource.dbcp;
 
 import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 
 /**

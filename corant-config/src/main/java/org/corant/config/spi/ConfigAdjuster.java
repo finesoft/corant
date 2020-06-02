@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**

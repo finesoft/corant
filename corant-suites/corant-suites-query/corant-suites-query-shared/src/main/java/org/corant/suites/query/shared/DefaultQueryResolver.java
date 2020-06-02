@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -38,6 +41,9 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
 @ApplicationScoped
 // @Alternative
 public class DefaultQueryResolver implements QueryResolver {
+
+  @Inject
+  protected Logger logger;
 
   @Inject
   @Any
@@ -139,5 +145,20 @@ public class DefaultQueryResolver implements QueryResolver {
    */
   protected <T> T convertRecord(Object record, Class<T> expectedClass) {
     return QueryObjectMapper.OM.convertValue(record, expectedClass);
+  }
+
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    if (!resultHintHandlers.isUnsatisfied()) {
+      resultHintHandlers.stream().forEach(handler -> {
+        try {
+          handler.close();
+        } catch (Exception e) {
+          logger.log(Level.WARNING, e,
+              () -> String.format("Close result hint handler %s occurred error!",
+                  handler.getClass().getName()));
+        }
+      });
+    }
   }
 }

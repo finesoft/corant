@@ -13,7 +13,7 @@
  */
 package org.corant.suites.microprofile.restclient;
 
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 /**

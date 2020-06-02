@@ -22,7 +22,7 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  *
  */
 @FunctionalInterface
-public interface ResultHintHandler {
+public interface ResultHintHandler extends AutoCloseable {
 
   static int compare(ResultHintHandler h1, ResultHintHandler h2) {
     return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
@@ -30,6 +30,11 @@ public interface ResultHintHandler {
 
   default boolean canHandle(Class<?> resultClass, QueryHint qh) {
     return false;
+  }
+
+  @Override
+  default void close() throws Exception {
+    return;
   }
 
   default boolean exclusive() {

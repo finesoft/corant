@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.agroal;
 
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
 

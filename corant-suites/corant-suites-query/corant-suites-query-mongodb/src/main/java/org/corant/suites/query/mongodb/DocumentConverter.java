@@ -15,7 +15,7 @@ package org.corant.suites.query.mongodb;
 
 import java.util.Map;
 import org.bson.Document;
-import org.corant.config.spi.Sortable;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-suites-query-mongodb

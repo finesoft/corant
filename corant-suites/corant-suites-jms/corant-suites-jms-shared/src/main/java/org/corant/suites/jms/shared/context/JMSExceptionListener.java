@@ -15,8 +15,8 @@ package org.corant.suites.jms.shared.context;
 
 import javax.jms.Connection;
 import javax.jms.ExceptionListener;
-import org.corant.config.spi.Sortable;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-suites-jms-shared

@@ -266,10 +266,10 @@ public class SqlQueryTemplate {
         escapes++;
       } else if (c == SQL_PARAM_PH_C && escapes % 2 == 0) {
         Object param = orginalParams.remove();
-        if (param instanceof Collection) {
-          Collection<?> collectionParam = (Collection<?>) param;
-          if (isNotEmpty(collectionParam)) {
-            for (Object p : collectionParam) {
+        if (param instanceof Iterable) {
+          Iterable<?> iterableParam = (Iterable<?>) param;
+          if (isNotEmpty(iterableParam)) {
+            for (Object p : iterableParam) {
               fixedParams.add(p);
               fixedSql.append(SQL_PARAM_PH).append(SQL_PARAM_SP);
             }

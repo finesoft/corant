@@ -86,22 +86,6 @@ public class EncryptUtils {
   }
 
   /**
-   * 把char转为byte数组
-   *
-   * @param c
-   * @return
-   */
-  public static byte[] charToBytes(Character c) {
-    if (c == null) {
-      throw new CorantRuntimeException("Expecting not null char to construct a byte[]");
-    }
-    byte[] b = new byte[2];
-    b[0] = (byte) ((c & 0xFF00) >> 8);
-    b[1] = (byte) (c & 0xFF);
-    return b;
-  }
-
-  /**
    * AES解密，使用默认字符集对key进行字节获取，返回默认字符集的原文字符串
    *
    * @param aesB64Str b64密文字符串
@@ -241,25 +225,6 @@ public class EncryptUtils {
    */
   public static String decodeB64StringToString(String b64Str, Charset toCharset) {
     return new String(decodeB64StringToBytes(b64Str), toCharset);
-  }
-
-  /**
-   * 双精度浮点到byte数组
-   *
-   * @param d
-   * @return
-   */
-  public static byte[] doubleToBytes(Double d) {
-    if (d == null) {
-      throw new CorantRuntimeException("Expecting not null double to construct a byte[]");
-    }
-    byte[] b = new byte[8];
-    Long l = Double.doubleToLongBits(d);
-    for (int i = 0; i < 8; i++) {
-      b[i] = l.byteValue();
-      l = l >> 8;
-    }
-    return b;
   }
 
   /**
@@ -404,25 +369,6 @@ public class EncryptUtils {
   }
 
   /**
-   * 将浮点数转为数组
-   *
-   * @param f
-   * @return
-   */
-  public static byte[] floatToBytes(Float f) {
-    if (f == null) {
-      throw new CorantRuntimeException("Expecting not null float to construct a byte[]");
-    }
-    byte[] b = new byte[4];
-    Integer l = Float.floatToIntBits(f);
-    for (int i = 0; i < 4; i++) {
-      b[i] = l.byteValue();
-      l = l >> 8;
-    }
-    return b;
-  }
-
-  /**
    * 将十六进制字符串转换成byte数组
    *
    * @param hs
@@ -462,46 +408,6 @@ public class EncryptUtils {
       num = (num - r) / 26;
     }
     return sb.reverse().toString();
-  }
-
-  /**
-   * 把int转为byte数组
-   *
-   * @param i
-   * @return
-   */
-  public static byte[] intToBytes(Integer i) {
-    if (i == null) {
-      throw new CorantRuntimeException("Expecting not null int to construct a byte[]");
-    }
-    byte[] bt = new byte[4];
-    bt[0] = (byte) (0xff & i);
-    bt[1] = (byte) ((0xff00 & i) >> 8);
-    bt[2] = (byte) ((0xff0000 & i) >> 16);
-    bt[3] = (byte) ((0xff000000 & i) >> 24);
-    return bt;
-  }
-
-  /**
-   * 把long转为byte数组
-   *
-   * @param l
-   * @return
-   */
-  public static byte[] longToBytes(Long l) {
-    if (l == null) {
-      throw new CorantRuntimeException("Expecting not null long to construct a byte[]");
-    }
-    byte[] bt = new byte[8];
-    bt[0] = (byte) (0xffL & l);
-    bt[1] = (byte) ((0xff00L & l) >> 8);
-    bt[2] = (byte) ((0xff0000L & l) >> 16);
-    bt[3] = (byte) ((0xff000000L & l) >> 24);
-    bt[4] = (byte) ((0xff00000000L & l) >> 32);
-    bt[5] = (byte) ((0xff0000000000L & l) >> 40);
-    bt[6] = (byte) ((0xff000000000000L & l) >> 48);
-    bt[7] = (byte) ((0xff00000000000000L & l) >> 56);
-    return bt;
   }
 
   /**
@@ -548,22 +454,6 @@ public class EncryptUtils {
     char[] buffer = new char[times];
     Arrays.fill(buffer, character);
     return new String(buffer);
-  }
-
-  /**
-   * 把Short转为byte数组
-   *
-   * @param s
-   * @return
-   */
-  public static byte[] shortToBytes(Short s) {
-    if (s == null) {
-      throw new CorantRuntimeException("Expecting not null short to construct a byte[]");
-    }
-    byte[] bt = new byte[2];
-    bt[0] = (byte) (0xff & s);
-    bt[1] = (byte) ((0xff00 & s) >> 8);
-    return bt;
   }
 
   /**
@@ -635,49 +525,6 @@ public class EncryptUtils {
   }
 
   /**
-   * 将字节数组转为char
-   *
-   * @param b
-   * @return
-   */
-  public static Character toChar(byte[] b) {
-    if (b.length != 2) {
-      throw new CorantRuntimeException("Expecting 2 byte values to construct a char");
-    }
-    return (char) ((b[0] & 0xFF) << 8 | b[1] & 0xFF);
-  }
-
-  /**
-   * 把字节转为双精度浮点
-   *
-   * @param b
-   * @return
-   */
-  public static Double toDouble(byte[] b) {
-    if (b.length != 8) {
-      throw new CorantRuntimeException("Expecting 8 byte values to construct a double");
-    }
-    return Double.longBitsToDouble(0xffL & b[0] | 0xffffL & (long) b[1] << 8
-        | 0xffffffL & (long) b[2] << 16 | 0xffffffffL & (long) b[3] << 24
-        | 0xffffffffffL & (long) b[4] << 32 | 0xffffffffffffL & (long) b[5] << 40
-        | 0xffffffffffffffL & (long) b[6] << 48 | 0xffffffffffffffffL & (long) b[7] << 56);
-  }
-
-  /**
-   * 将字节数组转为浮点数
-   *
-   * @param b
-   * @return
-   */
-  public static Float toFloat(byte[] b) {
-    if (b.length != 4) {
-      throw new CorantRuntimeException("Expecting 4 byte values to construct a float");
-    }
-    return Float.intBitsToFloat(
-        b[0] & 0xFF | (b[1] & 0xFF) << 8 | (b[2] & 0xFF) << 16 | (b[3] & 0xFF) << 24);
-  }
-
-  /**
    * 将byte数组转换成十六进制字符串
    *
    * @param b 待转换的字节数组
@@ -709,38 +556,6 @@ public class EncryptUtils {
     }
     return charset == null ? toHexString(s.getBytes(DFLT_CHARSET))
         : toHexString(s.getBytes(charset));
-  }
-
-  /**
-   * 把byte数组转成int
-   *
-   * @param b
-   * @return
-   */
-  public static Integer toInt(byte[] b) {
-    if (b.length != 4) {
-      throw new CorantRuntimeException("Expecting 4 byte values to construct a int");
-    }
-    return b[0] & 0xFF | (b[1] & 0xFF) << 8 | (b[2] & 0xFF) << 16 | (b[3] & 0xFF) << 24;
-  }
-
-  /**
-   * 把byte数组转为long
-   *
-   * @param b
-   * @return
-   */
-  public static Long toLong(byte[] b) {
-    if (b == null) {
-      return 0L;
-    }
-    if (b.length != 8) {
-      throw new CorantRuntimeException("Expecting 8 byte values to construct a long");
-    }
-    return 0xffL & b[0] | 0xff00L & (long) b[1] << 8 | 0xff0000L & (long) b[2] << 16
-        | 0xff000000L & (long) b[3] << 24 | 0xff00000000L & (long) b[4] << 32
-        | 0xff0000000000L & (long) b[5] << 40 | 0xff000000000000L & (long) b[6] << 48
-        | 0xff00000000000000L & (long) b[7] << 56;
   }
 
   /**
@@ -862,16 +677,4 @@ public class EncryptUtils {
     return BigInteger.valueOf(n).toString(radix);
   }
 
-  /**
-   * 把字节转为short
-   *
-   * @param b
-   * @return
-   */
-  public static Short toShort(byte[] b) {
-    if (b.length != 2) {
-      throw new CorantRuntimeException("Expecting 2 byte values to construct a short");
-    }
-    return Integer.valueOf(b[0] & 0xFF | (b[1] & 0xFF) << 8).shortValue();
-  }
 }

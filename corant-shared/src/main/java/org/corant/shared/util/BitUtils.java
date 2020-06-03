@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.util.Arrays;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -46,6 +47,152 @@ public class BitUtils {
    */
   public static BitArray asBitArray(int size, boolean in) {
     return new BitArray(size, in);
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 2-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(char value) {
+    return new byte[] {(byte) (value >> 8), (byte) value};
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 8-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(double value) {
+    long data = Double.doubleToRawLongBits(value);
+    return new byte[] {(byte) (data >> 56 & 0xFF), (byte) (data >> 48 & 0xFF),
+        (byte) (data >> 40 & 0xFF), (byte) (data >> 32 & 0xFF), (byte) (data >> 24 & 0xFF),
+        (byte) (data >> 16 & 0xFF), (byte) (data >> 8 & 0xFF), (byte) (data >> 0 & 0xFF)};
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 4-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(float value) {
+    int data = Float.floatToIntBits(value);
+    return new byte[] {(byte) (data >> 24 & 0xFF), (byte) (data >> 16 & 0xFF),
+        (byte) (data >> 8 & 0xFF), (byte) (data >> 0 & 0xFF)};
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 4-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(int value) {
+    return new byte[] {(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8),
+        (byte) value};
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 8-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(long value) {
+    byte[] result = new byte[8];
+    for (int i = 7; i >= 0; i--) {
+      result[i] = (byte) (value & 0xFFL);
+      value >>= 8;
+    }
+    return result;
+  }
+
+  /**
+   * Returns a big-endian representation of {@code value} in a 2-element byte array.
+   *
+   * @param value
+   * @return toBytes
+   */
+  public static byte[] toBytes(short value) {
+    return new byte[] {(byte) (value >> 8), (byte) value};
+  }
+
+  /**
+   * Returns the char value whose big-endian representation is stored in the first 2 bytesof bytes
+   *
+   * @param bytes
+   * @return toChar
+   */
+  public static Character toChar(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Character.BYTES, "The bytes array too small: %s < %s for Char.",
+        bytes.length, Character.BYTES);
+    return (char) (bytes[0] << 8 | bytes[1] & 0xFF);
+  }
+
+  /**
+   * Returns the double value whose big-endian representation is stored in the first 8 bytesof bytes
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static double toDouble(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Double.BYTES, "The bytes array too small: %s < %s for Double.",
+        bytes.length, Double.BYTES);
+    return Double.longBitsToDouble(toLong(bytes));
+  }
+
+  /**
+   * Returns the float value whose big-endian representation is stored in the first 4 bytesof bytes
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static float toFloat(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Float.BYTES, "The bytes array too small: %s < %s for Float.",
+        bytes.length, Float.BYTES);
+    return Float.intBitsToFloat(
+        bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF);
+  }
+
+  /**
+   * Returns the int value whose big-endian representation is stored in the first 4 bytesof bytes
+   *
+   * @param bytes
+   * @return toInt
+   */
+  public static int toInt(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Integer.BYTES, "The bytes array too small: %s < %s for Int.",
+        bytes.length, Integer.BYTES);
+    return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF;
+  }
+
+  /**
+   * Returns the long value whose big-endian representation is stored in the first 8 bytesof bytes
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static long toLong(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Long.BYTES, "The bytes array too small: %s < %s for Long.",
+        bytes.length, Long.BYTES);
+    return (bytes[0] & 0xFFL) << 56 | (bytes[1] & 0xFFL) << 48 | (bytes[2] & 0xFFL) << 40
+        | (bytes[3] & 0xFFL) << 32 | (bytes[4] & 0xFFL) << 24 | (bytes[5] & 0xFFL) << 16
+        | (bytes[6] & 0xFFL) << 8 | bytes[7] & 0xFFL;
+  }
+
+  /**
+   * Returns the short value whose big-endian representation is stored in the first 2 bytesof bytes
+   *
+   * @param bytes
+   * @return toShort
+   */
+  public static short toShort(byte[] bytes) {
+    shouldBeTrue(bytes.length >= Short.BYTES, "The bytes array too small: %s < %s for Short.",
+        bytes.length, Short.BYTES);
+    return (short) (bytes[0] << 8 | bytes[1] & 0xFF);
   }
 
   public static class BitArray {

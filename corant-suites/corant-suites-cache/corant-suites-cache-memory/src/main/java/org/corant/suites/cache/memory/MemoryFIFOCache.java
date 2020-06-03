@@ -29,6 +29,8 @@ public class MemoryFIFOCache<K, V> implements MemoryCache<K, V> {
   }
 
   @Override
-  public void put(K key, V value) {}
+  public V put(K key, V value) {
+    return null;
+  }
 
 }

@@ -13,8 +13,9 @@
  */
 package org.corant.suites.cache.memory;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -28,26 +29,112 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
-  final ConcurrentHashMap<K, V> map;
-  final ConcurrentLinkedDeque<K> queue;
-  final int capacity;
-  final ReadWriteLock rwl;
+  protected final LRUMap<K, V> map;
+  protected final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-  public MemoryLRUCache(int capacity) {
-    this.capacity = capacity;
-    map = new ConcurrentHashMap<>(capacity);
-    queue = new ConcurrentLinkedDeque<>();
-    rwl = new ReentrantReadWriteLock();
+  public MemoryLRUCache(int maxSize) {
+    this.map = new LRUMap<>(maxSize);
+  }
+
+  public MemoryLRUCache(int initialCapacity, float loadFactor, boolean accessOrder, int maxSize) {
+    this.map = new LRUMap<>(initialCapacity, loadFactor, accessOrder, maxSize);
+  }
+
+  public MemoryLRUCache(int initialCapacity, float loadFactor, int maxSize) {
+    this.map = new LRUMap<>(initialCapacity, loadFactor, maxSize);
+  }
+
+  public MemoryLRUCache(int initialCapacity, int maxSize) {
+    this.map = new LRUMap<>(initialCapacity);
+  }
+
+  public MemoryLRUCache(Map<? extends K, ? extends V> m, int maxSize) {
+    this.map = new LRUMap<>(m, maxSize);
+  }
+
+  @Override
+  public void clear() {
+    Lock rl = lock.writeLock();
+    try {
+      map.clear();
+    } finally {
+      rl.unlock();
+    }
   }
 
   @Override
   public V get(K key) {
-    return null;// TODO
+    Lock rl = lock.readLock();
+    try {
+      return map.get(key);
+    } finally {
+      rl.unlock();
+    }
   }
 
   @Override
-  public void put(K key, V value) {
-    // TODO
+  public V put(K key, V value) {
+    Lock rl = lock.writeLock();
+    try {
+      return map.put(key, value);
+    } finally {
+      rl.unlock();
+    }
   }
 
+  @Override
+  public V remove(K key) {
+    Lock rl = lock.writeLock();
+    try {
+      return map.remove(key);
+    } finally {
+      rl.unlock();
+    }
+  }
+
+  static class LRUMap<K, V> extends LinkedHashMap<K, V> {
+
+    private static final long serialVersionUID = 7293780572467721980L;
+    private final int maxSize;
+
+    public LRUMap(int maxSize) {
+      this.maxSize = maxSize;
+      checkSize();
+    }
+
+    public LRUMap(int initialCapacity, float loadFactor, boolean accessOrder, int maxSize) {
+      super(initialCapacity, loadFactor, accessOrder);
+      this.maxSize = maxSize;
+      checkSize();
+    }
+
+    public LRUMap(int initialCapacity, float loadFactor, int maxSize) {
+      super(initialCapacity, loadFactor);
+      this.maxSize = maxSize;
+      checkSize();
+    }
+
+    public LRUMap(int initialCapacity, int maxSize) {
+      super(initialCapacity);
+      this.maxSize = maxSize;
+      checkSize();
+    }
+
+    public LRUMap(Map<? extends K, ? extends V> m, int maxSize) {
+      super(m);
+      this.maxSize = maxSize;
+      checkSize();
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+      return size() > maxSize;
+    }
+
+    private void checkSize() {
+      if (maxSize < 1) {
+        throw new IllegalArgumentException("maxSize must be >= 1");
+      }
+    }
+  }
 }

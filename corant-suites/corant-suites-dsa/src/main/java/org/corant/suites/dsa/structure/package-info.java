@@ -14,7 +14,7 @@
 /**
  * corant-suites-dsa
  * 
- * @author bingo 上午11:34:19
+ * @author bingo 下午5:43:48
  *
  */
-package org.corant.suites.dsa.cluster.structure;
+package org.corant.suites.dsa.structure;

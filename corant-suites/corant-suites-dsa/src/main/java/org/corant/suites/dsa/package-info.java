@@ -11,21 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.dsa.cluster.structure;
-
 /**
  * corant-suites-dsa
- *
- * Unfinish yet
- *
- * @author bingo 上午11:34:26
+ * 
+ * @author bingo 下午1:28:56
  *
  */
-public class Trie {
-
-  public class TrieNode {
-    char[] childrenIndex;
-    TrieNode[] childrenNode;
-    boolean terminal;
-  }
-}
+package org.corant.suites.dsa;

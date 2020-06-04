@@ -22,8 +22,10 @@ import static org.corant.shared.util.ObjectUtils.max;
 import static org.corant.shared.util.StreamUtils.streamOf;
 import static org.corant.shared.util.StringUtils.isBlank;
 import static org.corant.shared.util.StringUtils.isNotBlank;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -240,6 +242,30 @@ public class FileUtils {
         return path.substring(ep + 1);
       }
     }
+  }
+
+  public static boolean isSameContent(final File file1, final File file2)
+      throws FileNotFoundException, IOException {
+    if (file1 == null || file2 == null || !file1.isFile() || !file2.isFile() || !file1.canRead()
+        || !file2.canRead()) {
+      return false;
+    }
+    try (BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream(file1));
+        BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(file2))) {
+      int b1 = 0;
+      int b2 = 0;
+      while (b1 != -1 && b2 != -1) {
+        if (b1 != b2) {
+          return false;
+        }
+        b1 = bis1.read();
+        b2 = bis2.read();
+      }
+      if (b1 != b2) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static List<File> selectFiles(String path) {

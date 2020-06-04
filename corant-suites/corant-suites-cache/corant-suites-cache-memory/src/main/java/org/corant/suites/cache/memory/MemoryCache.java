@@ -13,6 +13,9 @@
  */
 package org.corant.suites.cache.memory;
 
+import java.util.Objects;
+import java.util.function.Function;
+
 /**
  * corant-suites-cache-memory
  *
@@ -22,6 +25,19 @@ package org.corant.suites.cache.memory;
 public interface MemoryCache<K, V> {
 
   default void clear() {}
+
+  default V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    Objects.requireNonNull(mappingFunction);
+    V v;
+    if ((v = get(key)) == null) {
+      V newValue;
+      if ((newValue = mappingFunction.apply(key)) != null) {
+        put(key, newValue);
+        return newValue;
+      }
+    }
+    return v;
+  }
 
   V get(K key);
 

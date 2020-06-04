@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 
 /**
  * corant-suites-query-shared
@@ -57,6 +58,16 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
     Lock rl = lock.writeLock();
     try {
       map.clear();
+    } finally {
+      rl.unlock();
+    }
+  }
+
+  @Override
+  public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    Lock rl = lock.writeLock();
+    try {
+      return MemoryCache.super.computeIfAbsent(key, mappingFunction);
     } finally {
       rl.unlock();
     }

@@ -62,23 +62,22 @@ public class DirectRunner {
       for (;;) {
         if (mem.hasRemaining()) {
           byte state = mem.get();
-          mem.position(0);
-          if (lastState == state) {
-            continue;
-          } else {
+          if (lastState != state) {
             lastState = state;
+            if (state == SIGNAL_STOP) {
+              stop();
+            } else if (state == SIGNAL_START) {
+              start(false);
+            } else if (state == SIGNAL_RESTART) {
+              stop();
+              start(false);
+            } else if (state == SIGNAL_QUIT) {
+              stop();
+              break;
+            }
           }
-          if (state == SIGNAL_STOP) {
-            stop();
-          } else if (state == SIGNAL_START) {
-            start(false);
-          } else if (state == SIGNAL_RESTART) {
-            stop();
-            start(false);
-          } else if (state == SIGNAL_QUIT) {
-            stop();
-            break;
-          }
+          tryThreadSleep(1000L);
+          mem.position(0);
         }
         tryThreadSleep(1000L);
       }

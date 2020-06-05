@@ -34,7 +34,6 @@ import org.corant.shared.util.ObjectUtils;
  */
 public class DirectRunner {
   static final String MMF_IPC = Defaults.corantUserDir("-mmf").resolve(".ipc").toString();
-  static final byte SIGNAL_LAUNCH = -1;
   static final byte SIGNAL_START = 0;
   static final byte SIGNAL_STOP = 1;
   static final byte SIGNAL_QUIT = 2;
@@ -59,7 +58,7 @@ public class DirectRunner {
     try (RandomAccessFile raf = new RandomAccessFile(new File(MMF_IPC), "rw");
         FileChannel fc = raf.getChannel();) {
       final MappedByteBuffer mem = fc.map(FileChannel.MapMode.READ_ONLY, 0, 8);
-      byte lastState = 0;
+      byte lastState = SIGNAL_START;
       for (;;) {
         if (mem.hasRemaining()) {
           byte state = mem.get();

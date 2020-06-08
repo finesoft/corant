@@ -235,40 +235,35 @@ public class Corant implements AutoCloseable {
   }
 
   public static synchronized Corant run() {
-    Corant corant = new Corant();
-    corant.start(null);
-    return corant;
+    return run(new Class[0], null, null);
   }
 
   public static synchronized Corant run(Class<?>... beanClasses) {
-    Corant corant = new Corant(beanClasses, null);
-    corant.start(null);
-    return corant;
+    return run(beanClasses, null, null);
   }
 
-  public static synchronized Corant run(Class<?> configClass, String... arguments) {
-    Corant corant = new Corant(configClass, arguments);
-    corant.start(null);
-    return corant;
+  public static synchronized Corant run(Class<?> configClass, String[] arguments) {
+    return run(new Class[] {configClass}, null, null, arguments);
   }
 
-  public static synchronized Corant run(Class<?>[] beanClasses, String... arguments) {
-    Corant corant = new Corant(beanClasses, null, arguments);
-    corant.start(null);
-    return corant;
-  }
-
-  public static synchronized Corant run(ClassLoader classLoader, Consumer<Weld> preInitializer,
-      String... arguments) {
-    Corant corant = new Corant(classLoader, arguments);
+  public static synchronized Corant run(Class<?>[] beanClasses, ClassLoader classLoader,
+      Consumer<Weld> preInitializer, String... arguments) {
+    Corant corant = new Corant(beanClasses, classLoader, arguments);
     corant.start(preInitializer);
     return corant;
   }
 
+  public static synchronized Corant run(Class<?>[] beanClasses, String[] arguments) {
+    return run(beanClasses, null, null, arguments);
+  }
+
+  public static synchronized Corant run(ClassLoader classLoader, Consumer<Weld> preInitializer,
+      String... arguments) {
+    return run(null, classLoader, preInitializer, arguments);
+  }
+
   public static synchronized Corant run(String... arguments) {
-    Corant corant = new Corant(arguments);
-    corant.start(null);
-    return corant;
+    return run(new Class[0], null, null, arguments);
   }
 
   private static synchronized void setMe(Corant me) {

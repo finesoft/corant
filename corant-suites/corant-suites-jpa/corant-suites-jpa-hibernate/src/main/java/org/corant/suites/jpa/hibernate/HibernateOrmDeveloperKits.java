@@ -185,7 +185,8 @@ public class HibernateOrmDeveloperKits {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(HibernateOrmDeveloperKits.class, Corant.DISABLE_BOOST_LINE_CMD);
+    return Corant.run(HibernateOrmDeveloperKits.class,
+        new String[] {Corant.DISABLE_BOOST_LINE_CMD});
   }
 
 }

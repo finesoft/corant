@@ -15,6 +15,7 @@ package org.corant.kernel.boot;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.tryThreadSleep;
+import static org.corant.shared.util.StringUtils.defaultString;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -29,6 +30,32 @@ import org.corant.shared.util.ObjectUtils;
  *
  * Simple use of shared memory(MMF IPC) to handle application boot, start, stop, restart and exit.
  *
+ * <p>
+ * <ul>
+ * <b>Argument command description:</b>
+ * <li>All arguments related to startup or shutdown are the last in the arguments list and start
+ * with '-', if no argument list is provided, it is regarded as executing the startup command</li>
+ * <li>Argument '-startup' use to create new process and launch the application.</li>
+ * <li>Argument '-start' use to startup the application(startup the application CDI container,
+ * reload configurations etc), it don't create new process, it was ignored if the current
+ * application was started or the application process wasn't created.</li>
+ * <li>Argument '-stop' use to stop the application(stop the application CDI container, release
+ * configurations etc), it don't create new process, it was ignored if the current application was
+ * stopped or the application process wasn't created.</li>
+ * <li>Argument '-restart' use to restart the application(stop and start the application CDI
+ * container, release and reload configurations etc), it don't create new process, it was ignored if
+ * the application process wasn't created.</li>
+ * <li>Argument '-shutdown' use to shutdown the application(stop the application DI container,
+ * release configurations etc), it will quit the application process, it was ignored if the
+ * application process wasn't created.</li>
+ * <ul>
+ * </p>
+ *
+ * <p>
+ * NOTE: When starting multiple application instances in the same system, the execution of related
+ * commands may cause the reaction of multiple instances, because we use MMF. This may be changed in
+ * the future.
+ *
  * @author bingo 下午3:32:02
  *
  */
@@ -36,13 +63,13 @@ public class DirectRunner {
   static final String MMF_IPC = Defaults.corantUserDir("-mmf").resolve(".ipc").toString();
   static final byte SIGNAL_START = 0;
   static final byte SIGNAL_STOP = 1;
-  static final byte SIGNAL_QUIT = 2;
-  static final byte SIGNAL_RESTART = 3;
-  static final String COMMAND_LAUNCH = "launch";
+  static final byte SIGNAL_RESTART = 2;
+  static final byte SIGNAL_SHUTDOWN = 3;
+  static final String COMMAND_STARTUP = "startup";
   static final String COMMAND_START = "start";
   static final String COMMAND_STOP = "stop";
-  static final String COMMAND_QUIT = "quit";
   static final String COMMAND_RESTART = "restart";
+  static final String COMMAND_SHUTDOWN = "shutdown";
 
   private String[] arguments = new String[0];
 
@@ -50,7 +77,10 @@ public class DirectRunner {
     if (isEmpty(args)) {
       new DirectRunner().launch(null);
     } else {
-      new DirectRunner().launch(args[args.length - 1]);
+      String cmd = defaultString(args[args.length - 1]);
+      if (cmd.startsWith("-")) {
+        new DirectRunner().launch(cmd.substring(1));
+      }
     }
   }
 
@@ -71,7 +101,7 @@ public class DirectRunner {
             } else if (state == SIGNAL_RESTART) {
               stop();
               start(false);
-            } else if (state == SIGNAL_QUIT) {
+            } else if (state == SIGNAL_SHUTDOWN) {
               stop();
               break;
             }
@@ -103,8 +133,8 @@ public class DirectRunner {
         mem.put(SIGNAL_RESTART);
       } else if (COMMAND_STOP.equalsIgnoreCase(cmd)) {
         mem.put(SIGNAL_STOP);
-      } else if (COMMAND_QUIT.equalsIgnoreCase(cmd)) {
-        mem.put(SIGNAL_QUIT);
+      } else if (COMMAND_SHUTDOWN.equalsIgnoreCase(cmd)) {
+        mem.put(SIGNAL_SHUTDOWN);
       } else if (COMMAND_START.equalsIgnoreCase(cmd)) {
         mem.put(SIGNAL_START);
       } else {

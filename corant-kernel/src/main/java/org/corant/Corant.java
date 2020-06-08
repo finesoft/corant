@@ -183,7 +183,7 @@ public class Corant implements AutoCloseable {
     } else {
       this.classLoader = Corant.class.getClassLoader();
     }
-    this.arguments = arguments;
+    this.arguments = arguments == null ? new String[0] : Arrays.copyOf(arguments, arguments.length);
     setMe(this);
   }
 
@@ -240,14 +240,14 @@ public class Corant implements AutoCloseable {
     return corant;
   }
 
-  public static synchronized Corant run(Class<?> configClass, String... arguments) {
-    Corant corant = new Corant(configClass, arguments);
+  public static synchronized Corant run(Class<?>... beanClasses) {
+    Corant corant = new Corant(beanClasses, null);
     corant.start(null);
     return corant;
   }
 
-  public static synchronized Corant run(Class<?>[] beanClasses) {
-    Corant corant = new Corant(beanClasses, null);
+  public static synchronized Corant run(Class<?> configClass, String... arguments) {
+    Corant corant = new Corant(configClass, arguments);
     corant.start(null);
     return corant;
   }
@@ -262,6 +262,12 @@ public class Corant implements AutoCloseable {
       String... arguments) {
     Corant corant = new Corant(classLoader, arguments);
     corant.start(preInitializer);
+    return corant;
+  }
+
+  public static synchronized Corant run(String... arguments) {
+    Corant corant = new Corant(arguments);
+    corant.start(null);
     return corant;
   }
 

@@ -48,6 +48,9 @@ public class ConverterHints {
 
   public static final String CVT_TEMPORAL_STRICTLY_KEY = "converter.temporal.strictly";
 
+  public static final String CVT_BYTES_PRIMITIVE_STRICTLY_KEY =
+      "converter.bytes-primitive.strictly";
+
   public static final String CVT_ZONE_ID_KEY = "converter.zone-id";
 
   public static final String CVT_LOCAL_KEY = "converter.local";
@@ -91,7 +94,7 @@ public class ConverterHints {
             : DateTimeFormatter.ofPattern(s));
     resolveSysProHints(map, CVT_TEMPORAL_EPOCH_KEY, ChronoUnit::valueOf);
     resolveSysProHints(map, CVT_TEMPORAL_STRICTLY_KEY, Boolean::valueOf);
-
+    resolveSysProHints(map, CVT_BYTES_PRIMITIVE_STRICTLY_KEY, Boolean::valueOf);
     return map;
   }
 

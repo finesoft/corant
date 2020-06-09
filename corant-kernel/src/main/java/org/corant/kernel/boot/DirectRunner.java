@@ -28,7 +28,8 @@ import org.corant.shared.util.ObjectUtils;
 /**
  * corant-kernel
  *
- * Simple use of shared memory(MMF IPC) to handle application boot, start, stop, restart and exit.
+ * Simple use of shared memory(MMF IPC) to handle application startup, start, stop, restart and
+ * shutdown.
  *
  * <p>
  * <ul>

@@ -121,77 +121,173 @@ public class BitUtils {
   }
 
   /**
-   * Returns the char value whose big-endian representation is stored in the first 2 bytesof bytes
+   * Returns the char value whose big-endian representation is stored in the first 2 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toChar
    */
   public static Character toChar(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Character.BYTES, "The bytes array too small: %s < %s for Char.",
-        bytes.length, Character.BYTES);
+    return toChar(bytes, false);
+  }
+
+  /**
+   * Returns the char value whose big-endian representation is stored in 2 bytes of byte array.
+   *
+   * @param bytes
+   * @return toChar
+   */
+  public static Character toChar(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Character.BYTES,
+          "The bytes array length illegality: %s != %s for Char.", bytes.length, Character.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Character.BYTES, "The bytes array too small: %s < %s for Char.",
+          bytes.length, Character.BYTES);
+    }
     return (char) (bytes[0] << 8 | bytes[1] & 0xFF);
   }
 
   /**
-   * Returns the double value whose big-endian representation is stored in the first 8 bytesof bytes
+   * Returns the double value whose big-endian representation is stored in the first 8 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toLong
    */
   public static double toDouble(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Double.BYTES, "The bytes array too small: %s < %s for Double.",
-        bytes.length, Double.BYTES);
+    return toDouble(bytes, false);
+  }
+
+  /**
+   * Returns the double value whose big-endian representation is stored in 8 bytes of byte array.
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static double toDouble(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Double.BYTES,
+          "The bytes array length illegality: %s != %s for Double.", bytes.length, Double.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Double.BYTES, "The bytes array too small: %s < %s for Double.",
+          bytes.length, Double.BYTES);
+    }
     return Double.longBitsToDouble(toLong(bytes));
   }
 
   /**
-   * Returns the float value whose big-endian representation is stored in the first 4 bytesof bytes
+   * Returns the float value whose big-endian representation is stored in the first 4 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toLong
    */
   public static float toFloat(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Float.BYTES, "The bytes array too small: %s < %s for Float.",
-        bytes.length, Float.BYTES);
+    return toFloat(bytes, false);
+  }
+
+  /**
+   * Returns the float value whose big-endian representation is stored in 4 bytes of byte array.
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static float toFloat(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Float.BYTES,
+          "The bytes array length illegality: %s != %s for Float.", bytes.length, Float.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Float.BYTES, "The bytes array too small: %s < %s for Float.",
+          bytes.length, Float.BYTES);
+    }
     return Float.intBitsToFloat(
         bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF);
   }
 
   /**
-   * Returns the int value whose big-endian representation is stored in the first 4 bytesof bytes
+   * Returns the int value whose big-endian representation is stored in the first 4 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toInt
    */
   public static int toInt(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Integer.BYTES, "The bytes array too small: %s < %s for Int.",
-        bytes.length, Integer.BYTES);
+    return toInt(bytes, false);
+  }
+
+  /**
+   * Returns the int value whose big-endian representation is stored in 4 bytes of byte array.
+   *
+   * @param bytes
+   * @return toInt
+   */
+  public static int toInt(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Integer.BYTES,
+          "The bytes array length illegality: %s != %s for Int.", bytes.length, Integer.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Integer.BYTES, "The bytes array too small: %s < %s for Int.",
+          bytes.length, Integer.BYTES);
+    }
     return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF;
   }
 
   /**
-   * Returns the long value whose big-endian representation is stored in the first 8 bytesof bytes
+   * Returns the long value whose big-endian representation is stored in the first 8 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toLong
    */
   public static long toLong(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Long.BYTES, "The bytes array too small: %s < %s for Long.",
-        bytes.length, Long.BYTES);
+    return toLong(bytes, false);
+  }
+
+  /**
+   * Returns the long value whose big-endian representation is stored in 8 bytes of byte array.
+   *
+   * @param bytes
+   * @return toLong
+   */
+  public static long toLong(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Long.BYTES,
+          "The bytes array length illegality: %s != %s for Long.", bytes.length, Long.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Long.BYTES, "The bytes array too small: %s < %s for Long.",
+          bytes.length, Long.BYTES);
+    }
     return (bytes[0] & 0xFFL) << 56 | (bytes[1] & 0xFFL) << 48 | (bytes[2] & 0xFFL) << 40
         | (bytes[3] & 0xFFL) << 32 | (bytes[4] & 0xFFL) << 24 | (bytes[5] & 0xFFL) << 16
         | (bytes[6] & 0xFFL) << 8 | bytes[7] & 0xFFL;
   }
 
   /**
-   * Returns the short value whose big-endian representation is stored in the first 2 bytesof bytes
+   * Returns the short value whose big-endian representation is stored in the first 2 bytes of byte
+   * array.
    *
    * @param bytes
    * @return toShort
    */
   public static short toShort(byte[] bytes) {
-    shouldBeTrue(bytes.length >= Short.BYTES, "The bytes array too small: %s < %s for Short.",
-        bytes.length, Short.BYTES);
+    return toShort(bytes, false);
+  }
+
+  /**
+   * Returns the short value whose big-endian representation is stored in 2 bytes of byte array.
+   *
+   * @param bytes
+   * @return toShort
+   */
+  public static short toShort(byte[] bytes, boolean strict) {
+    if (strict) {
+      shouldBeTrue(bytes.length == Short.BYTES,
+          "The bytes array length illegality: %s != %s for Short.", bytes.length, Short.BYTES);
+    } else {
+      shouldBeTrue(bytes.length >= Short.BYTES, "The bytes array too small: %s < %s for Short.",
+          bytes.length, Short.BYTES);
+    }
     return (short) (bytes[0] << 8 | bytes[1] & 0xFF);
   }
 

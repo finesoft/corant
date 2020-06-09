@@ -128,9 +128,7 @@ public class Converters {
 
   static Converter getMatchedConverterFromFactory(Class<?> sourceClass, Class<?> targetClass) {
     ConverterFactory factory = ConverterRegistry.getConverterFactories().values().stream()
-        .filter(f -> f.isSupportSourceClass(sourceClass) && f.isSupportTargetClass(targetClass))
-        .findFirst().orElse(null);
-
+        .filter(f -> f.isSupports(sourceClass, targetClass)).findFirst().orElse(null);
     if (factory != null) {
       // FIXME initialize parameter
       return factory.create(targetClass, null, true);

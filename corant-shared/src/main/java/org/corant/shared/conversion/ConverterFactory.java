@@ -27,6 +27,10 @@ public interface ConverterFactory<S, T> {
     return 0;
   }
 
+  default boolean isSupports(Class<?> sourceClass, Class<?> targetClass) {
+    return isSupportSourceClass(sourceClass) && isSupportTargetClass(targetClass);
+  }
+
   default boolean isSupportSourceClass(Class<?> sourceClass) {
     return true;
   }

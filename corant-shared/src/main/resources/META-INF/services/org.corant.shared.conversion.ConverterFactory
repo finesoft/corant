@@ -1,2 +1,4 @@
 org.corant.shared.conversion.converter.factory.ObjectEnumConverterFactory
 org.corant.shared.conversion.converter.factory.StringObjectConverterFactory
+org.corant.shared.conversion.converter.factory.PrimitiveByteArrayConverterFactory
+org.corant.shared.conversion.converter.factory.ByteArrayPrimitiveConverterFactory

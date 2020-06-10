@@ -13,55 +13,94 @@
  */
 package org.corant.kernel.boot;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.tryThreadSleep;
 import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.StringUtils.split;
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.util.LaunchUtils;
 import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.UnsafeAccessors;
 
 /**
  * corant-kernel
  *
+ * <p>
  * Simple use of shared memory(MMF IPC) to handle application startup, start, stop, restart and
  * shutdown.
- *
- * <p>
- * <ul>
- * <b>Argument command description:</b>
- * <li>All arguments related to startup or shutdown are the last in the arguments list and start
- * with '-', if no argument list is provided, it is regarded as executing the startup command</li>
- * <li>Argument '-startup' use to create new process and launch the application.</li>
- * <li>Argument '-start' use to startup the application(startup the application CDI container,
- * reload configurations etc), it don't create new process, it was ignored if the current
- * application was started or the application process wasn't created.</li>
- * <li>Argument '-stop' use to stop the application(stop the application CDI container, release
- * configurations etc), it don't create new process, it was ignored if the current application was
- * stopped or the application process wasn't created.</li>
- * <li>Argument '-restart' use to restart the application(stop and start the application CDI
- * container, release and reload configurations etc), it don't create new process, it was ignored if
- * the application process wasn't created.</li>
- * <li>Argument '-shutdown' use to shutdown the application(stop the application DI container,
- * release configurations etc), it will quit the application process, it was ignored if the
- * application process wasn't created.</li>
- * <ul>
  * </p>
  *
  * <p>
- * NOTE: When starting multiple application instances in the same system, the execution of related
- * commands may cause the reaction of multiple instances, because we use MMF. This may be changed in
- * the future.
+ * <b>Argument command description:</b>
+ * </p>
+ * <ul>
+ * <li>
+ * <p>
+ * All arguments related to startup or shutdown are the last in the arguments list and start with
+ * '-', if no argument list is provided, it is regarded as executing the startup command
+ * </p>
+ * </li>
+ * <li>
+ * <p>
+ * Argument '-startup' use to create new process and launch the application.
+ * </p>
+ * </li>
+ * <li>
+ * <p>
+ * Argument '-start' use to startup the application(startup the application CDI container, reload
+ * configurations etc), it don't create new process, it was ignored if the current application was
+ * started or the application process wasn't created.
+ * </p>
+ * </li>
+ * <li>
+ * <p>
+ * Argument '-stop' use to stop the application(stop the application CDI container, release
+ * configurations etc), it don't create new process, it was ignored if the current application was
+ * stopped or the application process wasn't created.
+ * </p>
+ * </li>
+ * <li>
+ * <p>
+ * Argument '-restart' use to restart the application(stop and start the application CDI container,
+ * release and reload configurations etc), it don't create new process, it was ignored if the
+ * application process wasn't created.
+ * </p>
+ * </li>
+ * <li>
+ * <p>
+ * Argument '-shutdown' use to shutdown the application(stop the application DI container, release
+ * configurations etc), it will quit the application process, it was ignored if the application
+ * process wasn't created.
+ * </p>
+ * </li>
+ * </ul>
+ *
+ * <p>
+ * <b>NOTE:</b><br/>
+ * When starting multiple application instances in the same system, the execution of related
+ * commands may cause the reaction of multiple instances, because we use MMF. In addition to the
+ * startup command, if other commands are followed by '-pid', where the 'pid' is the process id, it
+ * means that the command is only propagated to the specified process, if there is no '-pid' behind
+ * it, it means that the command will be propagated to all involved to the processes.
+ * </p>
  *
  * @author bingo 下午3:32:02
  *
  */
 public class DirectRunner {
-  static final String MMF_IPC = Defaults.corantUserDir("-mmf").resolve(".ipc").toString();
+  static final Path MMF_DIR = Defaults.corantUserDir("-launch");
+  static final String MMF_IPCF_PREFIX = ".ipc";
   static final byte SIGNAL_START = 0;
   static final byte SIGNAL_STOP = 1;
   static final byte SIGNAL_RESTART = 2;
@@ -71,28 +110,38 @@ public class DirectRunner {
   static final String COMMAND_STOP = "stop";
   static final String COMMAND_RESTART = "restart";
   static final String COMMAND_SHUTDOWN = "shutdown";
+  static final String COMMAND_SPLITOR = "-";
 
-  private String[] arguments = new String[0];
+  static {
+    File dir = MMF_DIR.toFile();
+    if (!dir.exists()) {
+      shouldBeTrue(dir.mkdirs(), "Can't make dir for %s.", MMF_DIR.toString());
+    }
+  }
+
+  protected String[] arguments = new String[0];
+
+  protected DirectRunner() {}
 
   public static void main(String... args) {
     if (isEmpty(args)) {
-      new DirectRunner().launch(null);
+      new DirectRunner().performe(null);
     } else {
       String cmd = defaultString(args[args.length - 1]);
-      if (cmd.startsWith("-")) {
-        new DirectRunner().launch(cmd.substring(1));
+      if (cmd.startsWith(COMMAND_SPLITOR)) {
+        new DirectRunner().performe(cmd.substring(1));
       }
     }
   }
 
-  synchronized void await() {
-    try (RandomAccessFile raf = new RandomAccessFile(new File(MMF_IPC), "rw");
+  protected synchronized void await() throws IOException {
+    try (RandomAccessFile raf = new RandomAccessFile(currentCtrlPath().toFile(), "rw");
         FileChannel fc = raf.getChannel();) {
-      final MappedByteBuffer mem = fc.map(FileChannel.MapMode.READ_ONLY, 0, 8);
+      final MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, 8);
       byte lastState = SIGNAL_START;
       for (;;) {
-        if (mem.hasRemaining()) {
-          byte state = mem.get();
+        if (mbb.hasRemaining()) {
+          byte state = mbb.get();
           if (lastState != state) {
             lastState = state;
             if (state == SIGNAL_STOP) {
@@ -108,16 +157,18 @@ public class DirectRunner {
             }
           }
           tryThreadSleep(1000L);
-          mem.position(0);
+          mbb.position(0);
         }
         tryThreadSleep(1000L);
       }
-    } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      UnsafeAccessors.free(mbb);
+    } finally {
+      System.gc();
+      currentCtrlPath().toFile().deleteOnExit();
     }
   }
 
-  synchronized boolean isRunning() {
+  protected synchronized boolean isRunning() {
     try {
       return Corant.current() != null && Corant.current().isRuning();
     } catch (Exception t) {
@@ -125,31 +176,55 @@ public class DirectRunner {
     }
   }
 
-  synchronized void launch(String cmd) {
-    try (RandomAccessFile raf = new RandomAccessFile(resolveMmfIpc(), "rw");
-        FileChannel fc = raf.getChannel();) {
-      MappedByteBuffer mem = fc.map(FileChannel.MapMode.READ_WRITE, 0, 8);
-      mem.clear();
-      if (COMMAND_RESTART.equalsIgnoreCase(cmd)) {
-        mem.put(SIGNAL_RESTART);
-      } else if (COMMAND_STOP.equalsIgnoreCase(cmd)) {
-        mem.put(SIGNAL_STOP);
-      } else if (COMMAND_SHUTDOWN.equalsIgnoreCase(cmd)) {
-        mem.put(SIGNAL_SHUTDOWN);
-      } else if (COMMAND_START.equalsIgnoreCase(cmd)) {
-        mem.put(SIGNAL_START);
+  protected synchronized void performe(String cmd) {
+    if (isBlank(cmd) || cmd.startsWith(COMMAND_STARTUP)) {
+      startup();
+    } else {
+      String[] cmds = split(cmd, COMMAND_SPLITOR, true, true);
+      if (cmds.length == 1) {
+        File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
+        for (File file : files) {
+          performe(cmds[0], file);
+        }
       } else {
-        start(true);
+        File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
+        String suffix = COMMAND_SPLITOR.concat(cmds[1]);
+        for (File file : files) {
+          if (file.getName().endsWith(suffix)) {
+            performe(cmds[0], file);
+          }
+        }
       }
+    }
+  }
+
+  protected synchronized void performe(String cmd, File file) {
+    try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        FileChannel fc = raf.getChannel();) {
+      MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 8);
+      mbb.clear();
+      if (COMMAND_RESTART.equalsIgnoreCase(cmd)) {
+        mbb.put(SIGNAL_RESTART);
+      } else if (COMMAND_STOP.equalsIgnoreCase(cmd)) {
+        mbb.put(SIGNAL_STOP);
+      } else if (COMMAND_SHUTDOWN.equalsIgnoreCase(cmd)) {
+        mbb.put(SIGNAL_SHUTDOWN);
+      } else if (COMMAND_START.equalsIgnoreCase(cmd)) {
+        mbb.put(SIGNAL_START);
+      } else {
+        System.err.println(String.format("Command [%s] illegality!", cmd));
+      }
+      UnsafeAccessors.free(mbb);
     } catch (Exception e) {
+      e.printStackTrace();
       throw new CorantRuntimeException(e);
     }
   }
 
-  synchronized void start(boolean await) {
+  protected synchronized void start(boolean await) {
     try {
       if (Corant.current() == null) {
-        Corant.run(new Class[0], arguments);
+        Corant.run(arguments);
         if (await) {
           await();
         }
@@ -157,26 +232,34 @@ public class DirectRunner {
         Corant.current().start(ObjectUtils.emptyConsumer());
       }
     } catch (Exception t) {
+      t.printStackTrace();
       throw new RuntimeException("Can't start corant! please check logging.");
     }
   }
 
-  synchronized void stop() {
+  protected synchronized void startup() {
+    try {
+      Files.deleteIfExists(currentCtrlPath());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new CorantRuntimeException(e);
+    }
+    start(true);
+  }
+
+  protected synchronized void stop() {
     try {
       if (isRunning()) {
         Corant.current().stop();
       }
     } catch (Exception t) {
+      t.printStackTrace();
       throw new RuntimeException("Can't stop corant! please check logging.");
     }
   }
 
-  private File resolveMmfIpc() {
-    File f = new File(MMF_IPC);
-    f.delete();
-    if (!f.getParentFile().exists()) {
-      f.getParentFile().mkdirs();
-    }
-    return f;
+  Path currentCtrlPath() {
+    return MMF_DIR.resolve(MMF_IPCF_PREFIX.concat(COMMAND_SPLITOR).concat(LaunchUtils.getPid()));
   }
+
 }

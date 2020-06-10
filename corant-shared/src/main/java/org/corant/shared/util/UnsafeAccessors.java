@@ -13,7 +13,11 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.invoke.MethodType.methodType;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import sun.misc.Unsafe;
@@ -27,6 +31,9 @@ import sun.misc.Unsafe;
 public class UnsafeAccessors {
 
   private static Unsafe UNSAFE = null;
+  private static final MethodHandle INVOKE_CLEANER;
+  private static final MethodHandle GET_CLEANER;
+  private static final MethodHandle CLEAN;
 
   static {
     UNSAFE = AccessController.doPrivileged((PrivilegedAction<Unsafe>) () -> {
@@ -38,6 +45,46 @@ public class UnsafeAccessors {
         throw new AssertionError(e);
       }
     });
+    try {
+      MethodHandle invokeCleaner = null;
+      MethodHandle getCleaner = null;
+      MethodHandle clean = null;
+      final MethodHandles.Lookup lookup = MethodHandles.lookup();
+      try {
+        invokeCleaner = lookup.findVirtual(UNSAFE.getClass(), "invokeCleaner",
+            methodType(void.class, ByteBuffer.class));
+      } catch (NoSuchMethodException ex) {
+        // for JDK 8
+        final Class<?> directBuffer = Class.forName("sun.nio.ch.DirectBuffer");
+        final Class<?> cleaner = Class.forName("sun.misc.Cleaner");
+        getCleaner = lookup.findVirtual(directBuffer, "cleaner", methodType(cleaner));
+        clean = lookup.findVirtual(cleaner, "clean", methodType(void.class));
+      }
+      INVOKE_CLEANER = invokeCleaner;
+      GET_CLEANER = getCleaner;
+      CLEAN = clean;
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public static void free(final ByteBuffer buffer) {
+    if (null != buffer && buffer.isDirect()) {
+      try {
+        if (null != INVOKE_CLEANER) {
+          // for JDK 9+
+          INVOKE_CLEANER.invokeExact(UNSAFE, buffer);
+        } else {
+          // for JDK 8
+          final Object cleaner = GET_CLEANER.invoke(buffer);
+          if (null != cleaner) {
+            CLEAN.invoke(cleaner);
+          }
+        }
+      } catch (Throwable throwable) {
+        throw new RuntimeException(throwable);
+      }
+    }
   }
 
   public static Unsafe get() {

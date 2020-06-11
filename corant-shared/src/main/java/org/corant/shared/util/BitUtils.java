@@ -14,13 +14,19 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
- * Convert byte array to bit array.
+ * corant-shared
+ * <p>
+ * Bit byte processing tool class, used for conversion between several primitive types and byte
+ * arrays, some method equivalent to {@link ByteBuffer}.
+ * </p>
  *
  * @author bingo 2015年3月23日
+ *
  */
 public class BitUtils {
 

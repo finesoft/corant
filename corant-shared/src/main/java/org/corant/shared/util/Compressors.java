@@ -28,6 +28,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
+ * <p>
+ * Simple compress tool class, use to compress / decompress bytes.
+ * </p>
  *
  * @author bingo 下午12:59:23
  *

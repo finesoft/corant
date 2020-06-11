@@ -23,7 +23,10 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-shared
  *
- * Contract assertions
+ * <p>
+ * Contract assertions tool class, used for validity judgment, if the assertion fails, only throw a
+ * runtime exception.
+ * </p>
  *
  * @author bingo 下午11:26:29
  *

@@ -65,7 +65,8 @@ import org.corant.shared.util.Resources.URLResource;
 /**
  * corant-shared
  *
- * Utility class for scanning/extracting resources from the classpath.
+ * Utility class for scanning/extracting resources from the classpath.Support Glob or regular
+ * expression path fuzzy matching.
  *
  * @author bingo 上午11:21:01
  *
@@ -179,7 +180,7 @@ public class ClassPaths {
    * end with Driver.class.
    * </pre>
    *
-   * @see PathUtils#decidePathMatcher(String, false, boolean)
+   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
    *
    * @param classLoader
    * @param path

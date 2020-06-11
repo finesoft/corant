@@ -79,9 +79,9 @@ import org.corant.shared.util.UnsafeAccessors;
  * </li>
  * <li>
  * <p>
- * Argument '-shutdown' use to shutdown the application(stop the application DI container, release
- * configurations etc), it will quit the application process, it was ignored if the application
- * process wasn't created.
+ * Argument '-shutdown' use to shutdown the application(stop the application CDI container, release
+ * configurations etc), it will exit and end the application process, it was ignored if the
+ * application process wasn't created.
  * </p>
  * </li>
  * </ul>

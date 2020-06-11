@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import org.corant.shared.exception.CorantRuntimeException;
 import sun.misc.Unsafe;
 
 /**
@@ -30,10 +31,10 @@ import sun.misc.Unsafe;
 @SuppressWarnings("restriction")
 public class UnsafeAccessors {
 
-  private static Unsafe UNSAFE = null;
-  private static final MethodHandle INVOKE_CLEANER;
-  private static final MethodHandle GET_CLEANER;
-  private static final MethodHandle CLEAN;
+  private static final Unsafe UNSAFE;
+  private static final MethodHandle UNSAFE_INVOKE_CLEANER;
+  private static final MethodHandle DIRECT_BUFFER_CLEANER;
+  private static final MethodHandle CLEANER_CLEAN;
 
   static {
     UNSAFE = AccessController.doPrivileged((PrivilegedAction<Unsafe>) () -> {
@@ -46,43 +47,44 @@ public class UnsafeAccessors {
       }
     });
     try {
-      MethodHandle invokeCleaner = null;
-      MethodHandle getCleaner = null;
-      MethodHandle clean = null;
+      MethodHandle unsafeInvokeCleaner = null;
+      MethodHandle directBufferCleaner = null;
+      MethodHandle cleanerClean = null;
       final MethodHandles.Lookup lookup = MethodHandles.lookup();
       try {
-        invokeCleaner = lookup.findVirtual(UNSAFE.getClass(), "invokeCleaner",
+        // for JDK 9+
+        unsafeInvokeCleaner = lookup.findVirtual(UNSAFE.getClass(), "invokeCleaner",
             methodType(void.class, ByteBuffer.class));
       } catch (NoSuchMethodException ex) {
         // for JDK 8
         final Class<?> directBuffer = Class.forName("sun.nio.ch.DirectBuffer");
         final Class<?> cleaner = Class.forName("sun.misc.Cleaner");
-        getCleaner = lookup.findVirtual(directBuffer, "cleaner", methodType(cleaner));
-        clean = lookup.findVirtual(cleaner, "clean", methodType(void.class));
+        directBufferCleaner = lookup.findVirtual(directBuffer, "cleaner", methodType(cleaner));
+        cleanerClean = lookup.findVirtual(cleaner, "clean", methodType(void.class));
       }
-      INVOKE_CLEANER = invokeCleaner;
-      GET_CLEANER = getCleaner;
-      CLEAN = clean;
+      UNSAFE_INVOKE_CLEANER = unsafeInvokeCleaner;
+      DIRECT_BUFFER_CLEANER = directBufferCleaner;
+      CLEANER_CLEAN = cleanerClean;
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new AssertionError(ex);
     }
   }
 
   public static void free(final ByteBuffer buffer) {
     if (null != buffer && buffer.isDirect()) {
       try {
-        if (null != INVOKE_CLEANER) {
+        if (null != UNSAFE_INVOKE_CLEANER) {
           // for JDK 9+
-          INVOKE_CLEANER.invokeExact(UNSAFE, buffer);
+          UNSAFE_INVOKE_CLEANER.invokeExact(UNSAFE, buffer);
         } else {
           // for JDK 8
-          final Object cleaner = GET_CLEANER.invoke(buffer);
+          final Object cleaner = DIRECT_BUFFER_CLEANER.invoke(buffer);
           if (null != cleaner) {
-            CLEAN.invoke(cleaner);
+            CLEANER_CLEAN.invoke(cleaner);
           }
         }
       } catch (Throwable throwable) {
-        throw new RuntimeException(throwable);
+        throw new CorantRuntimeException(throwable);
       }
     }
   }

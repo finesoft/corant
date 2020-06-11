@@ -125,11 +125,11 @@ public class DirectRunner {
 
   public static void main(String... args) {
     if (isEmpty(args)) {
-      new DirectRunner().performe(null);
+      new DirectRunner().perform(null);
     } else {
       String cmd = defaultString(args[args.length - 1]);
       if (cmd.startsWith(COMMAND_SPLITOR)) {
-        new DirectRunner().performe(cmd.substring(1));
+        new DirectRunner().perform(cmd.substring(1));
       }
     }
   }
@@ -176,7 +176,7 @@ public class DirectRunner {
     }
   }
 
-  protected synchronized void performe(String cmd) {
+  protected synchronized void perform(String cmd) {
     if (isBlank(cmd) || cmd.startsWith(COMMAND_STARTUP)) {
       startup();
     } else {

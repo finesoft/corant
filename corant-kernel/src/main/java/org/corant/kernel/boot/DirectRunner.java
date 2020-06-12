@@ -184,21 +184,21 @@ public class DirectRunner {
       if (cmds.length == 1) {
         File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
         for (File file : files) {
-          performe(cmds[0], file);
+          perform(cmds[0], file);
         }
       } else {
         File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
         String suffix = COMMAND_SPLITOR.concat(cmds[1]);
         for (File file : files) {
           if (file.getName().endsWith(suffix)) {
-            performe(cmds[0], file);
+            perform(cmds[0], file);
           }
         }
       }
     }
   }
 
-  protected synchronized void performe(String cmd, File file) {
+  protected synchronized void perform(String cmd, File file) {
     try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
         FileChannel fc = raf.getChannel();) {
       MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 8);

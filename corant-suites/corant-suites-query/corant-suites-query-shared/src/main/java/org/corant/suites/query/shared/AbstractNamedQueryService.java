@@ -196,7 +196,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   protected int resolveMaxSelectSize(Querier querier) {
     int mss = resolveProperties(querier, PRO_KEY_MAX_SELECT_SIZE, Integer.class,
         getDefaultMaxSelectSize());
-    return mss <= 0 ? Integer.MAX_VALUE : mss;
+    return mss <= 0 ? Integer.MAX_VALUE - 1 : mss;
   }
 
   /**

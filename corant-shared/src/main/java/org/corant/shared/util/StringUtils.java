@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import org.corant.shared.util.PathUtils.GlobPatterns;
 
@@ -64,6 +65,23 @@ public class StringUtils {
    */
   public static boolean contains(String str, String searchStr) {
     return str == null || searchStr == null ? false : str.contains(searchStr);
+  }
+
+  /**
+   * <pre>
+   * StringUtils.ifBlank(null, ()->"DFLT")  = "DFLT"
+   * StringUtils.ifBlank("", ()->"DFLT")    = "DFLT"
+   * StringUtils.ifBlank(" ", ()->"DFLT")   = "DFLT"
+   * StringUtils.ifBlank("abc", ()->"DFLT") = "abc"
+   * StringUtils.ifBlank("", null)      = null
+   * </pre>
+   *
+   * @param str
+   * @param supplier
+   * @return ifBlank
+   */
+  public static <T extends CharSequence> T defaultBlank(final T str, final Supplier<T> supplier) {
+    return isBlank(str) ? supplier == null ? null : supplier.get() : str;
   }
 
   /**

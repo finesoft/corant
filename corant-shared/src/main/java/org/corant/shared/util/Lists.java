@@ -29,6 +29,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.util.Lists.ListJoins.JoinType;
 
@@ -100,6 +101,27 @@ public class Lists {
   }
 
   /**
+   * Convert an iterator to a collection
+   *
+   * @param <T>
+   * @param <C>
+   * @param supplier the collection instance builder
+   * @param objects the iterator
+   * @return an collection that combined by the passed in iterator
+   */
+  public static <T, C extends Collection<T>> C collectionOf(Supplier<C> supplier, Iterator<T> it) {
+    if (it == null) {
+      return supplier.get();
+    } else {
+      final C collection = supplier.get();
+      while (it.hasNext()) {
+        collection.add(it.next());
+      }
+      return collection;
+    }
+  }
+
+  /**
    * Convert an array to immutable list
    *
    * @param <T>
@@ -159,12 +181,10 @@ public class Lists {
   public static <T> List<T> listOf(final Iterable<T> iterable) {
     if (iterable instanceof List) {
       return forceCast(iterable);
+    } else if (iterable != null) {
+      return collectionOf(ArrayList::new, iterable.iterator());
     } else {
-      List<T> list = new ArrayList<>();
-      if (iterable != null) {
-        iterable.forEach(list::add);
-      }
-      return list;
+      return new ArrayList<>();
     }
   }
 

@@ -99,7 +99,7 @@ import org.corant.shared.util.UnsafeAccessors;
  *
  */
 public class DirectRunner {
-  static final Path MMF_DIR = Defaults.corantUserDir("-launch");
+  static final Path MMF_DIR = Defaults.corantUserDir("-runner");
   static final String MMF_IPCF_PREFIX = ".ipc";
   static final byte SIGNAL_START = 0;
   static final byte SIGNAL_STOP = 1;

@@ -14,8 +14,10 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.collectionOf;
+import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -52,6 +54,34 @@ public class Sets {
   @SafeVarargs
   public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
     return collectionOf(LinkedHashSet::new, objects);
+  }
+
+  /**
+   * Convert an iterable to linked hash set
+   *
+   * @param <T>
+   * @param iterable
+   * @return setOf
+   */
+  public static <T> Set<T> setOf(final Iterable<T> iterable) {
+    if (iterable instanceof Set) {
+      return forceCast(iterable);
+    } else if (iterable != null) {
+      return collectionOf(HashSet::new, iterable.iterator());
+    } else {
+      return new HashSet<>();
+    }
+  }
+
+  /**
+   * Convert an iterator to linked hash set
+   *
+   * @param <T>
+   * @param iterator
+   * @return setOf
+   */
+  public static <T> Set<T> setOf(Iterator<T> iterator) {
+    return collectionOf(HashSet::new, iterator);
   }
 
   /**

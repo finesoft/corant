@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic.service;
 
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Strings.defaultTrim;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;

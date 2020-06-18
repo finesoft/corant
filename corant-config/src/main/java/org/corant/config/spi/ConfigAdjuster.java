@@ -13,7 +13,7 @@
  */
 package org.corant.config.spi;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Lists.listOf;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

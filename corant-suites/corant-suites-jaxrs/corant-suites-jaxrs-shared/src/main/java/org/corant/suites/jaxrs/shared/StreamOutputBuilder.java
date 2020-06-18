@@ -17,7 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -34,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources.FileSystemResource;
 import org.corant.shared.util.Resources.Resource;
-import org.corant.shared.util.StreamUtils;
+import org.corant.shared.util.Streams;
 import org.corant.suites.servlet.abstraction.ContentDispositions;
 
 /**
@@ -89,7 +89,7 @@ public class StreamOutputBuilder {
 
   public Response build() {
     ResponseBuilder rb =
-        Response.ok((StreamingOutput) output -> StreamUtils.copy(is, output), contentType);
+        Response.ok((StreamingOutput) output -> Streams.copy(is, output), contentType);
     if (inline) {
       rb.header(HttpHeaders.CONTENT_TYPE, contentType);
     } else {

@@ -13,13 +13,13 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ConversionUtils.toInteger;
-import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.MapUtils.getMapInstant;
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.right;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Conversions.toInteger;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.getMapInstant;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.right;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.Timestamp;

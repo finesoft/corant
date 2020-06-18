@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.ClassUtils.getComponentClass;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Classes.getComponentClass;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Classes.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Collections;
 import java.util.List;

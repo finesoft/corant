@@ -13,7 +13,7 @@
  */
 package org.corant.suites.keycloak.authzclient;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;

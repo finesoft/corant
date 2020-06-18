@@ -16,7 +16,7 @@ package org.corant.config.declarative;
 import static org.corant.config.ConfigUtils.removeSplitor;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;

@@ -14,14 +14,14 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
-import static org.corant.shared.util.ConversionUtils.toBoolean;
-import static org.corant.shared.util.ConversionUtils.toList;
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toList;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapKeyPathValues;
-import static org.corant.shared.util.MapUtils.putMapKeyPathValue;
+import static org.corant.shared.util.Maps.getMapKeyPathValues;
+import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;

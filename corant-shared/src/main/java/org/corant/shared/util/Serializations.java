@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.ClassUtils.checkPackageAccess;
+import static org.corant.shared.util.Classes.checkPackageAccess;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,9 +29,9 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午4:26:15
  *
  */
-public class SerializationUtils {
+public class Serializations {
 
-  private SerializationUtils() {
+  private Serializations() {
     super();
   }
 

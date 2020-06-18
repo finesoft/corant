@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

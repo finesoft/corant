@@ -15,10 +15,10 @@ package org.corant.kernel.boot;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.tryThreadSleep;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.split;
+import static org.corant.shared.util.Threads.tryThreadSleep;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -29,8 +29,8 @@ import java.nio.file.Path;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
-import org.corant.shared.util.LaunchUtils;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Functions;
+import org.corant.shared.util.Launchs;
 import org.corant.shared.util.UnsafeAccessors;
 
 /**
@@ -163,7 +163,6 @@ public class DirectRunner {
       }
       UnsafeAccessors.free(mbb);
     } finally {
-      System.gc();
       currentCtrlPath().toFile().deleteOnExit();
     }
   }
@@ -183,11 +182,17 @@ public class DirectRunner {
       String[] cmds = split(cmd, COMMAND_SPLITOR, true, true);
       if (cmds.length == 1) {
         File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
+        if (files == null) {
+          return;
+        }
         for (File file : files) {
           perform(cmds[0], file);
         }
       } else {
         File[] files = MMF_DIR.toFile().listFiles(f -> f.getName().startsWith(MMF_IPCF_PREFIX));
+        if (files == null) {
+          return;
+        }
         String suffix = COMMAND_SPLITOR.concat(cmds[1]);
         for (File file : files) {
           if (file.getName().endsWith(suffix)) {
@@ -229,7 +234,7 @@ public class DirectRunner {
           await();
         }
       } else if (!isRunning()) {
-        Corant.current().start(ObjectUtils.emptyConsumer());
+        Corant.current().start(Functions.emptyConsumer());
       }
     } catch (Exception t) {
       t.printStackTrace();
@@ -259,7 +264,7 @@ public class DirectRunner {
   }
 
   Path currentCtrlPath() {
-    return MMF_DIR.resolve(MMF_IPCF_PREFIX.concat(COMMAND_SPLITOR).concat(LaunchUtils.getPid()));
+    return MMF_DIR.resolve(MMF_IPCF_PREFIX.concat(COMMAND_SPLITOR).concat(Launchs.getPid()));
   }
 
 }

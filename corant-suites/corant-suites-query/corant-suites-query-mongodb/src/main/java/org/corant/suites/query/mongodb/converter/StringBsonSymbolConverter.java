@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.mongodb.converter;
 
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.Map;
 import org.bson.BsonSymbol;
 import org.corant.shared.conversion.converter.AbstractConverter;

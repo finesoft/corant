@@ -15,7 +15,7 @@ package org.corant.suites.lang.javascript;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;

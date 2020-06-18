@@ -14,12 +14,12 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.getAllSuperclassesAndInterfaces;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Classes.getAllSuperclassesAndInterfaces;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.replace;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.replace;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;

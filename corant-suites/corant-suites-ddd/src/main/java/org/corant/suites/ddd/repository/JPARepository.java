@@ -13,9 +13,9 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -14,7 +14,7 @@
 package org.corant.suites.jms.shared.context;
 
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

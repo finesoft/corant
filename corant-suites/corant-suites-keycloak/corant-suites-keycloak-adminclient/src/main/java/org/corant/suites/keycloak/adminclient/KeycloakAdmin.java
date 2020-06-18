@@ -14,8 +14,8 @@
 package org.corant.suites.keycloak.adminclient;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.MapUtils.getMapString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;

@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.cassandra.cdi;
 
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.lang.annotation.Annotation;
 import java.util.Map;

@@ -13,9 +13,9 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Classes.primitiveToWrapper;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;

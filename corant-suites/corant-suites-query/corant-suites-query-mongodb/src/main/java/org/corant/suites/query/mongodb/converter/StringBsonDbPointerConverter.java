@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.mongodb.converter;
 
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.Map;
 import org.bson.BsonDbPointer;
 import org.bson.types.ObjectId;

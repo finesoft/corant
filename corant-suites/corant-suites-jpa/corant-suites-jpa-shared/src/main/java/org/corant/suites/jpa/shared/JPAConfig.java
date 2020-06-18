@@ -27,7 +27,7 @@ import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 import org.corant.suites.jpa.shared.metadata.PersistencePropertiesParser;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jpa.shared.metadata.PersistenceXmlParser;
@@ -44,7 +44,7 @@ public class JPAConfig {
   public static final String DFLT_PU_XML_LOCATION = "META-INF/persistence.xml";
   public static final String DFLT_ORM_XML_LOCATION = "META-INF/*JpaOrm.xml";
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/EntityManagerFactories";
-  public static final String EMPTY_PU_NAME = StringUtils.EMPTY;
+  public static final String EMPTY_PU_NAME = Strings.EMPTY;
 
   public static final String BIND_JNDI = "bind-to-jndi";
 

@@ -34,7 +34,7 @@ import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.util.Conversions;
 import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 
@@ -153,15 +153,15 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         try {
           Class<?> parameterType = m.getParameterTypes()[0];
           if (String.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toString(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toString(v.get()));
           } else if (int.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toInteger(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toInteger(v.get()));
           } else if (long.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toLong(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toLong(v.get()));
           } else if (boolean.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toBoolean(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toBoolean(v.get()));
           } else if (double.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toDouble(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toDouble(v.get()));
           }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
           throw new CorantRuntimeException(e);

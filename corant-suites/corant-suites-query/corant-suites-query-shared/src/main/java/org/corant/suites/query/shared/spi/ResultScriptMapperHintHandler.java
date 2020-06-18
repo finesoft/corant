@@ -15,7 +15,7 @@ package org.corant.suites.query.shared.spi;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

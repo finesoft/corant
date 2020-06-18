@@ -14,12 +14,12 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ConversionUtils.toList;
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Conversions.toList;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -46,13 +46,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import org.corant.shared.conversion.Conversions;
+import org.corant.shared.conversion.Conversion;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
-public class MapUtils {
+public class Maps {
 
-  private MapUtils() {
+  private Maps() {
     super();
   }
 
@@ -145,23 +145,23 @@ public class MapUtils {
   }
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toBigDecimal, null);
+    return getMapObject(map, key, Conversions::toBigDecimal, null);
   }
 
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key, BigDecimal nvt) {
-    return getMapObject(map, key, ConversionUtils::toBigDecimal, nvt);
+    return getMapObject(map, key, Conversions::toBigDecimal, nvt);
   }
 
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toBigInteger, null);
+    return getMapObject(map, key, Conversions::toBigInteger, null);
   }
 
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key, BigInteger nvt) {
-    return getMapObject(map, key, ConversionUtils::toBigInteger, nvt);
+    return getMapObject(map, key, Conversions::toBigInteger, nvt);
   }
 
   public static Boolean getMapBoolean(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toBoolean, Boolean.FALSE);
+    return getMapObject(map, key, Conversions::toBoolean, Boolean.FALSE);
   }
 
   /**
@@ -176,51 +176,51 @@ public class MapUtils {
    * @param hints the lastConverter hints use for intervening converters
    * @return getMapCollection
    *
-   * @see Conversions#convert(Object, Class, java.util.function.Supplier, Map)
-   * @see Conversions#convert(Collection, IntFunction, Class, Map)
-   * @see Conversions#convert(Object[], IntFunction, Class, Map)
+   * @see Conversion#convert(Object, Class, java.util.function.Supplier, Map)
+   * @see Conversion#convert(Collection, IntFunction, Class, Map)
+   * @see Conversion#convert(Object[], IntFunction, Class, Map)
    */
   public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
       final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz,
       final Map<String, ?> hints) {
     Object obj = map == null ? null : map.get(key);
     if (obj instanceof Collection) {
-      return Conversions.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
+      return Conversion.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
     } else if (obj instanceof Object[]) {
-      return Conversions.convert((Object[]) obj, collectionFactory, elementClazz, hints);
+      return Conversion.convert((Object[]) obj, collectionFactory, elementClazz, hints);
     } else if (obj != null) {
-      return Conversions.convert(obj, elementClazz, () -> collectionFactory.apply(10), hints);
+      return Conversion.convert(obj, elementClazz, () -> collectionFactory.apply(10), hints);
     }
     return collectionFactory.apply(0);
   }
 
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toCurrency, null);
+    return getMapObject(map, key, Conversions::toCurrency, null);
   }
 
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key, Currency nvt) {
-    return getMapObject(map, key, ConversionUtils::toCurrency, nvt);
+    return getMapObject(map, key, Conversions::toCurrency, nvt);
   }
 
   public static Double getMapDouble(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toDouble, null);
+    return getMapObject(map, key, Conversions::toDouble, null);
   }
 
   public static Double getMapDouble(final Map<?, ?> map, final Object key, Double nvt) {
-    return getMapObject(map, key, ConversionUtils::toDouble, nvt);
+    return getMapObject(map, key, Conversions::toDouble, nvt);
   }
 
   public static Duration getMapDuration(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toDuration, null);
+    return getMapObject(map, key, Conversions::toDuration, null);
   }
 
   public static Duration getMapDuration(final Map<?, ?> map, final Object key, Duration nvt) {
-    return getMapObject(map, key, ConversionUtils::toDuration, nvt);
+    return getMapObject(map, key, Conversions::toDuration, nvt);
   }
 
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
       final Class<T> enumClazz) {
-    return getMapObject(map, key, o -> ConversionUtils.toEnum(o, enumClazz), null);
+    return getMapObject(map, key, o -> Conversions.toEnum(o, enumClazz), null);
   }
 
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
@@ -230,27 +230,27 @@ public class MapUtils {
   }
 
   public static Float getMapFloat(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toFloat, null);
+    return getMapObject(map, key, Conversions::toFloat, null);
   }
 
   public static Float getMapFloat(final Map<?, ?> map, final Object key, Float nvt) {
-    return getMapObject(map, key, ConversionUtils::toFloat, nvt);
+    return getMapObject(map, key, Conversions::toFloat, nvt);
   }
 
   public static Instant getMapInstant(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toInstant, null);
+    return getMapObject(map, key, Conversions::toInstant, null);
   }
 
   public static Instant getMapInstant(final Map<?, ?> map, final Object key, Instant nvt) {
-    return getMapObject(map, key, ConversionUtils::toInstant, nvt);
+    return getMapObject(map, key, Conversions::toInstant, nvt);
   }
 
   public static Integer getMapInteger(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toInteger, null);
+    return getMapObject(map, key, Conversions::toInteger, null);
   }
 
   public static Integer getMapInteger(final Map<?, ?> map, final Object key, Integer nvt) {
-    return getMapObject(map, key, ConversionUtils::toInteger, nvt);
+    return getMapObject(map, key, Conversions::toInteger, nvt);
   }
 
   /**
@@ -343,49 +343,49 @@ public class MapUtils {
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Function<Object, T> singleElementExtractor) {
-    return getMapObjectList(map, key, v -> ConversionUtils.toList(v, singleElementExtractor));
+    return getMapObjectList(map, key, v -> Conversions.toList(v, singleElementExtractor));
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toLocalDate, null);
+    return getMapObject(map, key, Conversions::toLocalDate, null);
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, LocalDate nvt) {
-    return getMapObject(map, key, ConversionUtils::toLocalDate, nvt);
+    return getMapObject(map, key, Conversions::toLocalDate, nvt);
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, ZoneId zoneId) {
-    return getMapObject(map, key, v -> ConversionUtils.toLocalDate(v, zoneId), null);
+    return getMapObject(map, key, v -> Conversions.toLocalDate(v, zoneId), null);
   }
 
   public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toLocalDateTime, null);
+    return getMapObject(map, key, Conversions::toLocalDateTime, null);
   }
 
   public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key,
       LocalDateTime nvt) {
-    return getMapObject(map, key, ConversionUtils::toLocalDateTime, nvt);
+    return getMapObject(map, key, Conversions::toLocalDateTime, nvt);
   }
 
   public static LocalDateTime getMapLocalDateTime(final Map<?, ?> map, final Object key,
       ZoneId zoneId) {
-    return getMapObject(map, key, v -> ConversionUtils.toLocalDateTime(v, zoneId), null);
+    return getMapObject(map, key, v -> Conversions.toLocalDateTime(v, zoneId), null);
   }
 
   public static Locale getMapLocale(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toLocale, null);
+    return getMapObject(map, key, Conversions::toLocale, null);
   }
 
   public static Locale getMapLocale(final Map<?, ?> map, final Object key, Locale nvt) {
-    return getMapObject(map, key, ConversionUtils::toLocale, nvt);
+    return getMapObject(map, key, Conversions::toLocale, nvt);
   }
 
   public static Long getMapLong(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toLong, null);
+    return getMapObject(map, key, Conversions::toLong, null);
   }
 
   public static Long getMapLong(final Map<?, ?> map, final Object key, Long nvt) {
-    return getMapObject(map, key, ConversionUtils::toLong, nvt);
+    return getMapObject(map, key, Conversions::toLong, nvt);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -411,7 +411,7 @@ public class MapUtils {
    * @return getMapObject
    */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
-    return ConversionUtils.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
+    return Conversions.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }
 
   /**
@@ -484,37 +484,37 @@ public class MapUtils {
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
       final Function<Object, T> objFunc) {
-    return new HashSet<>(getMapObjectList(map, key, v -> ConversionUtils.toList(v, objFunc)));
+    return new HashSet<>(getMapObjectList(map, key, v -> Conversions.toList(v, objFunc)));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toShort, null);
+    return getMapObject(map, key, Conversions::toShort, null);
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key, Short nvt) {
-    return getMapObject(map, key, ConversionUtils::toShort, nvt);
+    return getMapObject(map, key, Conversions::toShort, nvt);
   }
 
   public static String getMapString(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toString, null);
+    return getMapObject(map, key, Conversions::toString, null);
   }
 
   public static String getMapString(final Map<?, ?> map, final Object key, String nvt) {
-    return getMapObject(map, key, ConversionUtils::toString, nvt);
+    return getMapObject(map, key, Conversions::toString, nvt);
   }
 
   public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, ConversionUtils::toZonedDateTime, null);
+    return getMapObject(map, key, Conversions::toZonedDateTime, null);
   }
 
   public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key,
       ZonedDateTime nvt) {
-    return getMapObject(map, key, ConversionUtils::toZonedDateTime, nvt);
+    return getMapObject(map, key, Conversions::toZonedDateTime, nvt);
   }
 
   public static ZonedDateTime getMapZonedDateTime(final Map<?, ?> map, final Object key,
       ZoneId zoneId) {
-    return getMapObject(map, key, v -> ConversionUtils.toZonedDateTime(v, zoneId), null);
+    return getMapObject(map, key, v -> Conversions.toZonedDateTime(v, zoneId), null);
   }
 
   public static <K, V> Optional<V> getOpt(Map<K, V> map, K key) {

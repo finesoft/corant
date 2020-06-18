@@ -27,12 +27,12 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.BitUtils.BitArray;
+import org.corant.shared.util.Bytes.BitArray;
 
 /**
  * @author bingo 上午12:29:41
  */
-public class EncryptUtils {
+public class Encrypts {
 
   public static final String DFLT_CHARSET_NAME = "utf-8";
   public static final Charset DFLT_CHARSET = Charset.forName(DFLT_CHARSET_NAME);
@@ -44,7 +44,7 @@ public class EncryptUtils {
 
   private static final int R62_MAX_LEN = R62_DIGITS.length;
 
-  private EncryptUtils() {}
+  private Encrypts() {}
 
   /**
    * 从字母组合转为正整数，A->1，B->2...Z-26，AA-27，AB-28....
@@ -78,7 +78,7 @@ public class EncryptUtils {
     if ((length & 7) != 0) {
       throw new CorantRuntimeException("Expecting 8 bit values to construct a byte[]");
     }
-    BitArray ba = BitUtils.asBitArray(length, false);
+    BitArray ba = Bytes.asBitArray(length, false);
     for (int i = 0; i < length; i++) {
       ba.setBit(i, s.charAt(i) == '1');
     }

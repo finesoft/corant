@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -30,9 +30,9 @@ import java.util.function.Function;
  * @author bingo 下午10:08:22
  *
  */
-public class MethodUtils {
+public class Methods {
 
-  private MethodUtils() {
+  private Methods() {
     super();
   }
 
@@ -41,8 +41,8 @@ public class MethodUtils {
     shouldNotNull(cls, "Null class not allowed.");
     shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
     List<Method> methods = listOf(cls.getDeclaredMethods());
-    ClassUtils.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
-        .map(CollectionUtils::listOf).forEach(methods::addAll);
+    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
+        .map(Lists::listOf).forEach(methods::addAll);
     Method inexactMatch = null;
     for (final Method method : methods) {
       if (methodName.equals(method.getName())
@@ -81,7 +81,7 @@ public class MethodUtils {
       return false;
     }
     for (int i = 0; i < useClsArr.length; i++) {
-      if (!ClassUtils.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+      if (!Classes.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
         return false;
       }
     }
@@ -131,8 +131,8 @@ public class MethodUtils {
       // Note InheritanceUtils.distance() uses different scoring system.
       if (classArray[offset].equals(toClassArray[offset])) {
         continue;
-      } else if (ClassUtils.isAssignable(classArray[offset], toClassArray[offset], true)
-          && !ClassUtils.isAssignable(classArray[offset], toClassArray[offset], false)) {
+      } else if (Classes.isAssignable(classArray[offset], toClassArray[offset], true)
+          && !Classes.isAssignable(classArray[offset], toClassArray[offset], false)) {
         answer++;
       } else {
         answer = answer + 2;

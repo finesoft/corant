@@ -13,13 +13,13 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.extractMapKeyPathValue;
+import static org.corant.shared.util.Maps.extractMapKeyPathValue;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

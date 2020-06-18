@@ -16,10 +16,10 @@ package org.corant.suites.elastic.metadata.resolver;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.shared.util.TypeUtils;
+import org.corant.shared.util.Types;
 import org.corant.suites.elastic.metadata.ElasticMapping;
 import org.corant.suites.elastic.metadata.annotation.EsAlias;
 import org.corant.suites.elastic.metadata.annotation.EsArray;
@@ -319,16 +319,16 @@ public class ResolverUtils {
   }
 
   public static Type getCollectionFieldEleType(Field f, Class<?> contextRawType) {
-    return TypeUtils
-        .canonicalize(TypeUtils.getCollectionElementType(f.getGenericType(), contextRawType));
+    return Types
+        .canonicalize(Types.getCollectionElementType(f.getGenericType(), contextRawType));
   }
 
   public static Type[] getMapFieldKeyValTypes(Field f, Class<?> contextRawType) {
-    Type[] types = TypeUtils.getMapKeyAndValueTypes(f.getGenericType(), contextRawType);
+    Type[] types = Types.getMapKeyAndValueTypes(f.getGenericType(), contextRawType);
     if (!isEmpty(types)) {
       Type[] result = new Type[types.length];
-      result[0] = TypeUtils.canonicalize(types[0]);
-      result[1] = TypeUtils.canonicalize(types[1]);
+      result[0] = Types.canonicalize(types[0]);
+      result[1] = Types.canonicalize(types[1]);
       return result;
     }
     return new Type[0];

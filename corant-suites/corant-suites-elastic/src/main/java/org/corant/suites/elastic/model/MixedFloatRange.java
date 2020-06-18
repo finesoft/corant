@@ -13,7 +13,7 @@
  */
 package org.corant.suites.elastic.model;
 
-import static org.corant.shared.util.ConversionUtils.toBigDecimal;
+import static org.corant.shared.util.Conversions.toBigDecimal;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.corant.suites.elastic.metadata.annotation.EsEmbeddable;

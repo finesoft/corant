@@ -14,7 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;

@@ -16,7 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.function.Supplier;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -188,7 +188,7 @@ public class Assertions {
    * Throw CorantRuntimeException if argument is blank.
    *
    * @param obj
-   * @see StringUtils#isNotBlank(CharSequence)
+   * @see Strings#isNotBlank(CharSequence)
    * @return shouldNotBlank
    */
   public static <T extends CharSequence> T shouldNotBlank(T obj) {

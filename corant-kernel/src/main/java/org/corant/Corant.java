@@ -15,8 +15,8 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
@@ -49,7 +49,7 @@ import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.shared.util.LaunchUtils;
+import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
@@ -379,10 +379,10 @@ public class Corant implements AutoCloseable {
     });
 
     log("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
-        LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
+        Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
         TimeZone.getDefault().getID());
-    log("Final memory: %sM/%sM/%sM%s", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), boostLine());
+    log("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(),
+        Launchs.getTotalMemoryMb(), Launchs.getMaxMemoryMb(), boostLine());
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {

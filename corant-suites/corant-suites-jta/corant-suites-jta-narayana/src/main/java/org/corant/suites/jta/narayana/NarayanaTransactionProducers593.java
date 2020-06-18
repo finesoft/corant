@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jta.narayana;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Strings.split;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Any;

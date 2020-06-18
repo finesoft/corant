@@ -14,7 +14,7 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;

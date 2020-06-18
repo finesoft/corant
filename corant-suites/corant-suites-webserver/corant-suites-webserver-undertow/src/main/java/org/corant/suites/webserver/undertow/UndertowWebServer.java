@@ -14,9 +14,9 @@
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.logging.Logger;

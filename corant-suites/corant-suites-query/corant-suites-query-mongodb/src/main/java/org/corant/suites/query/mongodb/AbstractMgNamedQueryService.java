@@ -13,13 +13,13 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import static org.corant.shared.util.ConversionUtils.toEnum;
-import static org.corant.shared.util.MapUtils.getMapEnum;
-import static org.corant.shared.util.MapUtils.getOptMapObject;
+import static org.corant.shared.util.Conversions.toEnum;
+import static org.corant.shared.util.Maps.getMapEnum;
+import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.util.Conversions;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
@@ -100,10 +100,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     AggregateIterable<Document> ai =
         getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
     Map<String, String> pros = querier.getQuery().getProperties();
-    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(ai::batchSize);
-    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, ConversionUtils::toLong)
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
+    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
         .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, ConversionUtils::toLong)
+    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
         .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
     Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
     bson.ifPresent(ai::hint);
@@ -249,23 +249,23 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (offset > 0) {
       fi.skip(offset);
     }
-    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, ConversionUtils::toInteger).ifPresent(fi::batchSize);
-    getOptMapObject(pros, PRO_KEY_COMMENT, ConversionUtils::toString).ifPresent(fi::comment);
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(fi::batchSize);
+    getOptMapObject(pros, PRO_KEY_COMMENT, Conversions::toString).ifPresent(fi::comment);
     CursorType ct = getMapEnum(pros, PRO_KEY_CURSOR_TYPE, CursorType.class);
     if (ct != null) {
       fi.cursorType(ct);
     }
-    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, ConversionUtils::toLong)
+    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
         .ifPresent(t -> fi.maxAwaitTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, ConversionUtils::toLong)
+    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
         .ifPresent(t -> fi.maxTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, ConversionUtils::toBoolean)
+    getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, Conversions::toBoolean)
         .ifPresent(fi::noCursorTimeout);
-    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, ConversionUtils::toBoolean)
+    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, Conversions::toBoolean)
         .ifPresent(fi::oplogReplay);
-    getOptMapObject(pros, PRO_KEY_PARTIAL, ConversionUtils::toBoolean).ifPresent(fi::partial);
-    getOptMapObject(pros, PRO_KEY_RETURN_KEY, ConversionUtils::toBoolean).ifPresent(fi::returnKey);
-    getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, ConversionUtils::toBoolean)
+    getOptMapObject(pros, PRO_KEY_PARTIAL, Conversions::toBoolean).ifPresent(fi::partial);
+    getOptMapObject(pros, PRO_KEY_RETURN_KEY, Conversions::toBoolean).ifPresent(fi::returnKey);
+    getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, Conversions::toBoolean)
         .ifPresent(fi::showRecordId);
     resovleCollation(querier).ifPresent(fi::collation);
     return fi;
@@ -277,10 +277,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       co.hint((Bson) querier.getScript(null).get(MgOperator.HINT));
     }
     Map<String, String> pros = querier.getQuery().getProperties();
-    getOptMapObject(pros, PRO_KEY_CO_LIMIT, ConversionUtils::toInteger).ifPresent(co::limit);
-    getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, ConversionUtils::toLong)
+    getOptMapObject(pros, PRO_KEY_CO_LIMIT, Conversions::toInteger).ifPresent(co::limit);
+    getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, Conversions::toLong)
         .ifPresent(t -> co.maxTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_CO_SKIP, ConversionUtils::toInteger).ifPresent(co::skip);
+    getOptMapObject(pros, PRO_KEY_CO_SKIP, Conversions::toInteger).ifPresent(co::skip);
     resovleCollation(querier).ifPresent(co::collation);
     if (co.getLimit() <= 0) {
       co.limit(max(resolveCountOptionsLimit(), 1));
@@ -305,18 +305,18 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       Collation.Builder b = Collation.builder();
       getOptMapObject(pros, PRO_KEY_CO_COLA_ALTERNATE, t -> toEnum(t, CollationAlternate.class))
           .ifPresent(b::collationAlternate);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWARDS, ConversionUtils::toBoolean)
+      getOptMapObject(pros, PRO_KEY_CO_COLA_BACKWARDS, Conversions::toBoolean)
           .ifPresent(b::backwards);
       getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_FIRST, t -> toEnum(t, CollationCaseFirst.class))
           .ifPresent(b::collationCaseFirst);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, ConversionUtils::toBoolean)
+      getOptMapObject(pros, PRO_KEY_CO_COLA_CASE_LEVEL, Conversions::toBoolean)
           .ifPresent(b::caseLevel);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_LOCALE, ConversionUtils::toString).ifPresent(b::locale);
+      getOptMapObject(pros, PRO_KEY_CO_COLA_LOCALE, Conversions::toString).ifPresent(b::locale);
       getOptMapObject(pros, PRO_KEY_CO_COLA_MAXVAR, t -> toEnum(t, CollationMaxVariable.class))
           .ifPresent(b::collationMaxVariable);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_NORMA, ConversionUtils::toBoolean)
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NORMA, Conversions::toBoolean)
           .ifPresent(b::normalization);
-      getOptMapObject(pros, PRO_KEY_CO_COLA_NUMORD, ConversionUtils::toBoolean)
+      getOptMapObject(pros, PRO_KEY_CO_COLA_NUMORD, Conversions::toBoolean)
           .ifPresent(b::numericOrdering);
       getOptMapObject(pros, PRO_KEY_CO_COLA_STRENGTH, t -> toEnum(t, CollationStrength.class))
           .ifPresent(b::collationStrength);

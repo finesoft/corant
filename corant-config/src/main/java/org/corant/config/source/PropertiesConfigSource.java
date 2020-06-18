@@ -14,8 +14,8 @@
 package org.corant.config.source;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.toMap;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Maps.toMap;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

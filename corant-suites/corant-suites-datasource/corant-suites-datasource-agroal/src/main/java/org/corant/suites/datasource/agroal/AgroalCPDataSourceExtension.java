@@ -14,13 +14,13 @@
 package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.normal.Names.applicationName;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.tryResolve;
 import java.lang.management.ManagementFactory;
 import java.sql.SQLException;

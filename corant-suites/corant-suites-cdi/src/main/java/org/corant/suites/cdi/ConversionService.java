@@ -13,11 +13,11 @@
  */
 package org.corant.suites.cdi;
 
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import java.util.Collection;
 import java.util.function.Supplier;
 import javax.enterprise.context.ApplicationScoped;
-import org.corant.shared.conversion.Conversions;
+import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
@@ -58,18 +58,18 @@ public interface ConversionService {
     @Override
     public <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClazz,
         Class<T> clazz, Object... hints) {
-      return Conversions.convert(value, collectionClazz, clazz, mapOf(hints));
+      return Conversion.convert(value, collectionClazz, clazz, mapOf(hints));
     }
 
     @Override
     public <T> T convert(Object value, Class<T> clazz, Object... hints) {
-      return Conversions.convert(value, clazz, mapOf(hints));
+      return Conversion.convert(value, clazz, mapOf(hints));
     }
 
     @Override
     public <C extends Collection<T>, T> C convert(Object value, Class<T> clazz,
         Supplier<C> collectionFactory, Object... hints) {
-      return Conversions.convert(value, clazz, collectionFactory, mapOf(hints));
+      return Conversion.convert(value, clazz, collectionFactory, mapOf(hints));
     }
 
     @Override

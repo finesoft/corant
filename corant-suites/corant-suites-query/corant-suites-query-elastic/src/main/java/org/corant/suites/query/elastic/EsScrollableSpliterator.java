@@ -19,8 +19,8 @@ import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.ObjectUtils;
-import org.corant.shared.util.StreamUtils.AbstractBatchHandlerSpliterator;
+import org.corant.shared.util.Functions;
+import org.corant.shared.util.Streams.AbstractBatchHandlerSpliterator;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -65,7 +65,7 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
   }
 
   public EsScrollableSpliterator(TransportClient client, String indexName, String script) {
-    this(client, indexName, script, null, DFLT_BATCH_SIZE, ObjectUtils.emptyConsumer());
+    this(client, indexName, script, null, DFLT_BATCH_SIZE, Functions.emptyConsumer());
   }
 
   public EsScrollableSpliterator(TransportClient client, String indexName, String script,

@@ -14,8 +14,8 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.isDecimalNumber;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.isDecimalNumber;
+import static org.corant.shared.util.Strings.split;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

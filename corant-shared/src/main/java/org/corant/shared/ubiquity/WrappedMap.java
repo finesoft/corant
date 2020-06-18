@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ConversionUtils;
-import org.corant.shared.util.MapUtils;
+import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Maps;
 
 public interface WrappedMap<K, V> extends Map<K, V> {
 
@@ -58,103 +58,103 @@ public interface WrappedMap<K, V> extends Map<K, V> {
   }
 
   default BigDecimal getBigDecimal(K key) {
-    return MapUtils.getMapBigDecimal(unwrap(), key);
+    return Maps.getMapBigDecimal(unwrap(), key);
   }
 
   default BigDecimal getBigDecimal(K key, BigDecimal nvt) {
-    return MapUtils.getMapBigDecimal(unwrap(), key, nvt);
+    return Maps.getMapBigDecimal(unwrap(), key, nvt);
   }
 
   default BigInteger getBigInteger(K key) {
-    return MapUtils.getMapBigInteger(unwrap(), key);
+    return Maps.getMapBigInteger(unwrap(), key);
   }
 
   default BigInteger getBigInteger(K key, BigInteger nvt) {
-    return MapUtils.getMapBigInteger(unwrap(), key, nvt);
+    return Maps.getMapBigInteger(unwrap(), key, nvt);
   }
 
   default Boolean getBoolean(K key) {
-    return MapUtils.getMapBoolean(unwrap(), key);
+    return Maps.getMapBoolean(unwrap(), key);
   }
 
   default Currency getCurrency(K key) {
-    return MapUtils.getMapCurrency(unwrap(), key);
+    return Maps.getMapCurrency(unwrap(), key);
   }
 
   default Currency getCurrency(K key, Currency nvt) {
-    return MapUtils.getMapCurrency(unwrap(), key, nvt);
+    return Maps.getMapCurrency(unwrap(), key, nvt);
   }
 
   default Double getDouble(K key) {
-    return MapUtils.getMapDouble(unwrap(), key);
+    return Maps.getMapDouble(unwrap(), key);
   }
 
   default Double getDouble(K key, Double nvt) {
-    return MapUtils.getMapDouble(unwrap(), key, nvt);
+    return Maps.getMapDouble(unwrap(), key, nvt);
   }
 
   default <T extends Enum<T>> T getEnum(K key, final Class<T> enumClazz) {
-    return MapUtils.getMapEnum(unwrap(), key, enumClazz);
+    return Maps.getMapEnum(unwrap(), key, enumClazz);
   }
 
   default <T extends Enum<T>> T getEnum(K key, final Class<T> enumClazz, T nvt) {
-    return MapUtils.getMapEnum(unwrap(), key, enumClazz, nvt);
+    return Maps.getMapEnum(unwrap(), key, enumClazz, nvt);
   }
 
   default Float getFloat(K key) {
-    return MapUtils.getMapFloat(unwrap(), key);
+    return Maps.getMapFloat(unwrap(), key);
   }
 
   default Float getFloat(K key, Float nvt) {
-    return MapUtils.getMapFloat(unwrap(), key, nvt);
+    return Maps.getMapFloat(unwrap(), key, nvt);
   }
 
   default Instant getInstant(K key) {
-    return MapUtils.getMapInstant(unwrap(), key);
+    return Maps.getMapInstant(unwrap(), key);
   }
 
   default Instant getInstant(K key, Instant nvt) {
-    return MapUtils.getMapInstant(unwrap(), key, nvt);
+    return Maps.getMapInstant(unwrap(), key, nvt);
   }
 
   default Integer getInteger(K key) {
-    return MapUtils.getMapInteger(unwrap(), key);
+    return Maps.getMapInteger(unwrap(), key);
   }
 
   default Integer getInteger(K key, Integer nvt) {
-    return MapUtils.getMapInteger(unwrap(), key, nvt);
+    return Maps.getMapInteger(unwrap(), key, nvt);
   }
 
   default <T> List<T> getList(K key) {
-    return MapUtils.getMapList(unwrap(), key);
+    return Maps.getMapList(unwrap(), key);
   }
 
   default <T> List<T> getList(K key, final Function<Object, T> objFunc) {
-    return MapUtils.getMapList(unwrap(), key, objFunc);
+    return Maps.getMapList(unwrap(), key, objFunc);
   }
 
   default LocalDate getLocalDate(K key) {
-    return MapUtils.getMapLocalDate(unwrap(), key);
+    return Maps.getMapLocalDate(unwrap(), key);
   }
 
   default LocalDate getLocalDate(K key, LocalDate nvt) {
-    return MapUtils.getMapLocalDate(unwrap(), key, nvt);
+    return Maps.getMapLocalDate(unwrap(), key, nvt);
   }
 
   default Locale getLocale(K key) {
-    return MapUtils.getMapLocale(unwrap(), key);
+    return Maps.getMapLocale(unwrap(), key);
   }
 
   default Locale getLocale(K key, Locale nvt) {
-    return MapUtils.getMapLocale(unwrap(), key, nvt);
+    return Maps.getMapLocale(unwrap(), key, nvt);
   }
 
   default Long getLong(K key) {
-    return MapUtils.getMapLong(unwrap(), key);
+    return Maps.getMapLong(unwrap(), key);
   }
 
   default Long getLong(K key, Long nvt) {
-    return MapUtils.getMapLong(unwrap(), key, nvt);
+    return Maps.getMapLong(unwrap(), key, nvt);
   }
 
   @SuppressWarnings("rawtypes")
@@ -170,19 +170,19 @@ public interface WrappedMap<K, V> extends Map<K, V> {
   }
 
   default Short getShort(K key) {
-    return MapUtils.getMapObject(unwrap(), key, ConversionUtils::toShort, null);
+    return Maps.getMapObject(unwrap(), key, Conversions::toShort, null);
   }
 
   default Short getShort(K key, Short nvt) {
-    return MapUtils.getMapObject(unwrap(), key, ConversionUtils::toShort, nvt);
+    return Maps.getMapObject(unwrap(), key, Conversions::toShort, nvt);
   }
 
   default String getString(K key) {
-    return MapUtils.getMapObject(unwrap(), key, ConversionUtils::toString, null);
+    return Maps.getMapObject(unwrap(), key, Conversions::toString, null);
   }
 
   default String getString(K key, String nvt) {
-    String att = MapUtils.getMapObject(unwrap(), key, ConversionUtils::toString, null);
+    String att = Maps.getMapObject(unwrap(), key, Conversions::toString, null);
     return att == null ? nvt : att;
   }
 

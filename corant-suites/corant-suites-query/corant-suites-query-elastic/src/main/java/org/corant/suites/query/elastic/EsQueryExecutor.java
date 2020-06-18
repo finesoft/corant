@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.MapUtils.getMapKeyPathValues;
+import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

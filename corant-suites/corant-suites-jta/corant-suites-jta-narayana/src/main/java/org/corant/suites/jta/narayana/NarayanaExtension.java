@@ -14,10 +14,10 @@
 package org.corant.suites.jta.narayana;
 
 import static org.corant.shared.normal.Names.applicationName;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.ConversionUtils.toInteger;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.suites.cdi.Instances.select;
 import java.lang.management.ManagementFactory;
 import java.util.Collection;

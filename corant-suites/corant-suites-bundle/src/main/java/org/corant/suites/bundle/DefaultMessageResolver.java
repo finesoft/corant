@@ -14,8 +14,8 @@
 package org.corant.suites.bundle;
 
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_ERR_CODE;
 import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_INF_CODE;
 import java.lang.annotation.Annotation;

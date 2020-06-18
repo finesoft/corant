@@ -13,7 +13,7 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Locale;
 import org.corant.shared.normal.Names;
 

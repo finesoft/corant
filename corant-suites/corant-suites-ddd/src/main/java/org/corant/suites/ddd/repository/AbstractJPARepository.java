@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Annotations.findAnnotation;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.literal.NamedLiteral;

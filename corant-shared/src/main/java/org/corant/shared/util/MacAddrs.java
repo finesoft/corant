@@ -24,9 +24,9 @@ import java.util.Random;
  * @author bingo 上午12:30:55
  *
  */
-public class MacAddrUtils {
+public class MacAddrs {
 
-  private MacAddrUtils() {
+  private MacAddrs() {
     super();
   }
 

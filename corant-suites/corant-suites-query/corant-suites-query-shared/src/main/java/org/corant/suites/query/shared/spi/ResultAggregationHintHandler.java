@@ -13,12 +13,12 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -71,7 +71,7 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  * </p>
  *
  * @see ConversionService
- * @see org.corant.shared.conversion.Conversions
+ * @see org.corant.shared.conversion.Conversion
  * @author bingo 下午12:02:08
  *
  */
@@ -134,7 +134,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
             && isNotBlank(aggName = aggNames.get(0).getValue()) && isNotEmpty(fieldNames =
                 linkedHashSetOf(split(aggFieldNames.get(0).getValue(), ",", true, true)))) {
           final String useAggName = aggName;
-          return caches.computeIfAbsent(qh.getId(), k -> (list) -> {
+          return caches.computeIfAbsent(qh.getId(), k -> list -> {
             Map<Map<Object, Object>, List<Map<Object, Object>>> temp =
                 new LinkedHashMap<>(list.size());
             for (Map<?, ?> src : list) {

@@ -15,8 +15,8 @@ package org.corant.config.source;
 
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
-import static org.corant.shared.util.MapUtils.toMap;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Maps.toMap;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

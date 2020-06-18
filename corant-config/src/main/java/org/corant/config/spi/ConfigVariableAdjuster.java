@@ -14,7 +14,7 @@
 package org.corant.config.spi;
 
 import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;

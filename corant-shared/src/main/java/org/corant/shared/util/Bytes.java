@@ -28,9 +28,9 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 2015年3月23日
  *
  */
-public class BitUtils {
+public class Bytes {
 
-  private BitUtils() {
+  private Bytes() {
     super();
   }
 

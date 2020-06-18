@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.StreamUtils.copy;
+import static org.corant.shared.util.Streams.copy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

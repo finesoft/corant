@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.cassandra;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
+import static org.corant.shared.util.Maps.getMapInteger;
 import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.dynamic.SqlHelper;

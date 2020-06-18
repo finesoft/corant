@@ -13,9 +13,9 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -103,7 +103,7 @@ public class PropertyEnumerationBundle implements EnumerationBundle {
           try {
             onPreDestroy();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(StringUtils::isNotBlank).forEach(path -> {
+            paths.stream().filter(Strings::isNotBlank).forEach(path -> {
               PropertyResourceBundle.getBundles(path, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Find enumeration resource from %s", s));
                 Locale locale = res.getLocale();

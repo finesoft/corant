@@ -16,7 +16,7 @@ package org.corant.suites.elastic.metadata;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import java.beans.Transient;
 import java.io.Serializable;

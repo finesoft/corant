@@ -13,7 +13,7 @@
  */
 package org.corant.suites.microprofile.jwt.cdi;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.Classes.tryAsClass;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;

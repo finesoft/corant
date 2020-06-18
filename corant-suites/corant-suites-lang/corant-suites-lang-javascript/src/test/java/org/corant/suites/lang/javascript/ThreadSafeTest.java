@@ -13,7 +13,7 @@
  */
 package org.corant.suites.lang.javascript;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Lists.listOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

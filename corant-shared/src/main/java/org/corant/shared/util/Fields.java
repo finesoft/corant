@@ -24,7 +24,7 @@ import java.util.function.Function;
  * @author bingo 下午8:10:18
  *
  */
-public class FieldUtils {
+public class Fields {
 
   public static List<Field> getAllFields(final Class<?> cls) {
     final List<Field> allFields = new ArrayList<>();

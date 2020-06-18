@@ -13,13 +13,13 @@
  */
 package org.corant.suites.query.mongodb;
 
-import static org.corant.shared.util.ClassUtils.getComponentClass;
-import static org.corant.shared.util.ClassUtils.isPrimitiveOrWrapper;
-import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
-import static org.corant.shared.util.ConversionUtils.toList;
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Classes.getComponentClass;
+import static org.corant.shared.util.Classes.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Classes.primitiveToWrapper;
+import static org.corant.shared.util.Conversions.toList;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.ObjectUtils.asString;
 import java.math.BigDecimal;
 import java.math.BigInteger;

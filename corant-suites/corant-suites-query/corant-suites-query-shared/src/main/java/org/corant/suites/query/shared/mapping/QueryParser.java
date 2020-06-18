@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

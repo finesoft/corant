@@ -13,12 +13,12 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
-import static org.corant.shared.util.CollectionUtils.immutableSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapString;
+import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.ObjectUtils.asString;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Sets.immutableSetOf;
+import static org.corant.shared.util.Strings.split;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;

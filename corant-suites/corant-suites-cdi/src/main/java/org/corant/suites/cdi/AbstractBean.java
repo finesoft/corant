@@ -13,7 +13,7 @@
  */
 package org.corant.suites.cdi;
 
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Classes.getUserClass;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;

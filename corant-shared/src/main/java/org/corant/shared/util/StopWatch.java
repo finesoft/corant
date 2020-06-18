@@ -13,8 +13,8 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import java.io.PrintStream;
 import java.time.Duration;
 import java.util.Collections;

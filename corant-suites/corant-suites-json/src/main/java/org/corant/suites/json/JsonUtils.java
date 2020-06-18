@@ -14,7 +14,7 @@
 package org.corant.suites.json;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;

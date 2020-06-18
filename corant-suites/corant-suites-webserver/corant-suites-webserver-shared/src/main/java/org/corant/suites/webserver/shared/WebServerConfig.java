@@ -14,8 +14,8 @@
 package org.corant.suites.webserver.shared;
 
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.split;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;

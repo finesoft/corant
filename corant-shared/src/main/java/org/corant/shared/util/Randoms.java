@@ -23,7 +23,7 @@ import java.util.Random;
  * @author bingo 下午8:39:13
  *
  */
-public class RandomUtils {
+public class Randoms {
   private static final Random RANDOM = new Random();
   public static final String NUMBERS = "0123456789";
   public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

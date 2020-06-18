@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.shared;
 
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Set;
 import java.util.logging.Logger;

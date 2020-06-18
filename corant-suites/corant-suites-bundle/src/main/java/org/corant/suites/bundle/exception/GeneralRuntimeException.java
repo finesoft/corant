@@ -13,10 +13,10 @@
  */
 package org.corant.suites.bundle.exception;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;

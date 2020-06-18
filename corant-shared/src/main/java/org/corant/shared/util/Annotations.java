@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.CollectionUtils.linkedListOf;
+import static org.corant.shared.util.Lists.linkedListOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author bingo 下午10:06:13
  *
  */
-public class AnnotationUtils {
+public class Annotations {
 
   /**
    * Find the annotation object from given annotated element with given annotation type class, this
@@ -111,13 +111,13 @@ public class AnnotationUtils {
     if (method == null || annotationType == null) {
       return null;
     }
-    if (!ignoreAccess && !(Modifier.isPublic(method.getModifiers()) && !method.isSynthetic())) {
+    if (!ignoreAccess && (!Modifier.isPublic(method.getModifiers()) || method.isSynthetic())) {
       return null;
     }
     A annotation = method.getAnnotation(annotationType);
     if (annotation == null && searchSupers) {
       final Class<?> declaringClazz = method.getDeclaringClass();
-      final List<Class<?>> classes = ClassUtils.getAllSuperclassesAndInterfaces(declaringClazz);
+      final List<Class<?>> classes = Classes.getAllSuperclassesAndInterfaces(declaringClazz);
       for (final Class<?> cls : classes) {
         Method equivalentMethod;
         try {

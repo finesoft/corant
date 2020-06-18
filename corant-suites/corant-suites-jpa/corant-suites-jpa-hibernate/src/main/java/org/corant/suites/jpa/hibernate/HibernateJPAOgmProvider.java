@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;

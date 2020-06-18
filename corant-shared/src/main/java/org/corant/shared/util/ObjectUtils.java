@@ -13,14 +13,11 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -32,22 +29,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 public class ObjectUtils {
-
-  @SuppressWarnings("rawtypes")
-  public static final Consumer EMPTY_CONSUMER = o -> {
-  };
-
-  @SuppressWarnings("rawtypes")
-  public static final Supplier EMPTY_SUPPLIER = () -> null;
-
-  @SuppressWarnings("rawtypes")
-  public static final Function EMPTY_FUNCTION = p -> null;
-
-  @SuppressWarnings("rawtypes")
-  public static final Predicate EMPTY_PREDICATE_TRUE = p -> true;
-
-  @SuppressWarnings("rawtypes")
-  public static final Predicate EMPTY_PREDICATE_FALSE = p -> false;
 
   protected ObjectUtils() {}
 
@@ -85,21 +66,6 @@ public class ObjectUtils {
 
   public static <T> T defaultObject(T obj, T altObj) {
     return obj != null ? obj : altObj;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Consumer<T> emptyConsumer() {
-    return EMPTY_CONSUMER;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Predicate<T> emptyPredicate(boolean bool) {
-    return bool ? EMPTY_PREDICATE_TRUE : EMPTY_PREDICATE_FALSE;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Supplier<T> emptySupplier() {
-    return EMPTY_SUPPLIER;
   }
 
   @SuppressWarnings("unchecked")
@@ -176,10 +142,6 @@ public class ObjectUtils {
     }
   }
 
-  public static <T> Optional<T> optional(T obj) {
-    return Optional.ofNullable(obj);
-  }
-
   public static <T> Optional<T> optionalCast(Object o, Class<T> cls) {
     return Optional.ofNullable(tryCast(o, cls));
   }
@@ -188,24 +150,4 @@ public class ObjectUtils {
     return o != null && cls.isInstance(o) ? cls.cast(o) : null;
   }
 
-  public static <T> T trySupplied(Supplier<T> supplier) {
-    T supplied = null;
-    if (supplier != null) {
-      try {
-        supplied = supplier.get();
-      } catch (Exception e) {
-        // Noop! just try...
-      }
-    }
-    return supplied;
-  }
-
-  public static void tryThreadSleep(Long ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      // Noop! just try...
-    }
-  }
 }

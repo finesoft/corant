@@ -22,7 +22,7 @@ import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterHints;
-import org.corant.shared.util.BitUtils;
+import org.corant.shared.util.Bytes;
 
 /**
  * corant-shared
@@ -44,17 +44,17 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
       final boolean strict = isStrict(h);
       try {
         if (targetClass.equals(Long.class) || targetClass.equals(Long.TYPE)) {
-          result = BitUtils.toLong(bytes, strict);
+          result = Bytes.toLong(bytes, strict);
         } else if (targetClass.equals(Integer.class) || targetClass.equals(Integer.TYPE)) {
-          result = BitUtils.toInt(bytes, strict);
+          result = Bytes.toInt(bytes, strict);
         } else if (targetClass.equals(Short.class) || targetClass.equals(Short.TYPE)) {
-          result = BitUtils.toShort(bytes, strict);
+          result = Bytes.toShort(bytes, strict);
         } else if (targetClass.equals(Character.class) || targetClass.equals(Character.TYPE)) {
-          result = BitUtils.toChar(bytes, strict);
+          result = Bytes.toChar(bytes, strict);
         } else if (targetClass.equals(Float.class) || targetClass.equals(Float.TYPE)) {
-          result = BitUtils.toFloat(bytes, strict);
+          result = Bytes.toFloat(bytes, strict);
         } else {
-          result = BitUtils.toDouble(bytes, strict);
+          result = Bytes.toDouble(bytes, strict);
         }
       } catch (Exception e) {
         if (throwException) {

@@ -13,8 +13,8 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.split;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -28,7 +28,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -110,7 +110,7 @@ public class PropertyMessageBundle implements MessageBundle {
           try {
             onPreDestroy();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
+            paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Find message resource from %s", s));
                 Map<String, MessageFormat> localeMap = res.dump().entrySet().stream()

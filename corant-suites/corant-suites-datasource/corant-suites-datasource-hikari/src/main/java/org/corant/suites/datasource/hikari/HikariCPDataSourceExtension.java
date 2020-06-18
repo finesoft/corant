@@ -14,7 +14,7 @@
 package org.corant.suites.datasource.hikari;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;

@@ -15,12 +15,12 @@ package org.corant.devops.test.unit;
 
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.corant.Corant;
-import org.corant.shared.util.CollectionUtils;
+import org.corant.shared.util.Lists;
 import org.corant.suites.cdi.UnmanageableInstance;
 import org.junit.runners.model.Statement;
 
@@ -49,7 +49,7 @@ public interface CorantJunit4Runner {
         try {
           if (CORANTS.get() == null) {
             Class<?>[] beanClasses = new Class<?>[] {configTestClass(testClass)};
-            beanClasses = CollectionUtils.append(beanClasses, BEAN_CLASSES.get());
+            beanClasses = Lists.append(beanClasses, BEAN_CLASSES.get());
             CORANTS.set(new Corant(beanClasses, testClass.getClassLoader()));
             CORANTS.get().start(null);
           }

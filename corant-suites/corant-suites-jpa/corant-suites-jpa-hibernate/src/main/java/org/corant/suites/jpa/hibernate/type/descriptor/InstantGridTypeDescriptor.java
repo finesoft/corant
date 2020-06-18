@@ -1,6 +1,6 @@
 package org.corant.suites.jpa.hibernate.type.descriptor;
 
-import static org.corant.shared.util.ConversionUtils.toInstant;
+import static org.corant.shared.util.Conversions.toInstant;
 import java.time.Instant;
 import java.util.Date;
 import org.hibernate.ogm.model.spi.Tuple;

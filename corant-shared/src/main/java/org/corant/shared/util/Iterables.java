@@ -30,9 +30,9 @@ import java.util.function.Function;
  * @author bingo 上午12:19:13
  *
  */
-public class IterableUtils {
+public class Iterables {
 
-  private IterableUtils() {
+  private Iterables() {
     super();
   }
 
@@ -60,7 +60,7 @@ public class IterableUtils {
   }
 
   public static <T> Iterable<T> emptyIterable() {
-    return IterableUtils::emptyIterator;
+    return Iterables::emptyIterator;
   }
 
   public static <T> Iterator<T> emptyIterator() {

@@ -13,12 +13,12 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;

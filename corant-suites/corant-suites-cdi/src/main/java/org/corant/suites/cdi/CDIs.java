@@ -19,8 +19,8 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.shared.util.MethodUtils.MethodSignature;
-import org.corant.shared.util.TypeUtils;
+import org.corant.shared.util.Methods.MethodSignature;
+import org.corant.shared.util.Types;
 import org.jboss.weld.injection.ParameterInjectionPoint;
 
 /**
@@ -82,7 +82,7 @@ public abstract class CDIs {
     String[] parameterTypes = new String[method.getParameters().size()];
     for (int i = 0; i < method.getParameters().size(); i++) {
       parameterTypes[i] =
-          TypeUtils.getRawType(method.getParameters().get(i).getBaseType()).getName();
+          Types.getRawType(method.getParameters().get(i).getBaseType()).getName();
     }
     return MethodSignature.of(methodName, parameterTypes);
   }

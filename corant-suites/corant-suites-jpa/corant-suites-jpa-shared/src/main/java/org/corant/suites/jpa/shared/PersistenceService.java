@@ -15,9 +15,9 @@ package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.SynchronizationType;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-kernel
@@ -39,7 +39,7 @@ import org.corant.shared.util.StringUtils;
  */
 public interface PersistenceService {
 
-  String EMPTY_PERSISTENCE_UNIT_NAME = StringUtils.EMPTY;
+  String EMPTY_PERSISTENCE_UNIT_NAME = Strings.EMPTY;
 
   EntityManager getEntityManager(PersistenceContext pc);
 

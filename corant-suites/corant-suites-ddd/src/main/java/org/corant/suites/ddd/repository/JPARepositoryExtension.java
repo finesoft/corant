@@ -14,7 +14,7 @@
 package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Sets.setOf;
 import static org.corant.suites.cdi.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;

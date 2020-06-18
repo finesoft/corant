@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.split;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -31,11 +31,11 @@ import java.util.stream.Collectors;
  * @author bingo 上午10:37:10
  *
  */
-public class LaunchUtils {
+public class Launchs {
 
   private final static Pattern debugPattern = Pattern.compile("-Xdebug|jdwp");
 
-  private LaunchUtils() {
+  private Launchs() {
     super();
   }
 
@@ -63,7 +63,7 @@ public class LaunchUtils {
 
   public static List<String> getClassPaths() {
     return Arrays.stream(split(System.getProperty("java.class.path"), File.pathSeparator))
-        .filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        .filter(Strings::isNotBlank).collect(Collectors.toList());
   }
 
   public static String getDebugArgs() {
@@ -88,7 +88,7 @@ public class LaunchUtils {
 
   public static List<String> getMainCommands() {
     return Arrays.stream(split(System.getProperty("sun.java.command"), " "))
-        .filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        .filter(Strings::isNotBlank).collect(Collectors.toList());
   }
 
   public static Long getMaxMemoryMb() {

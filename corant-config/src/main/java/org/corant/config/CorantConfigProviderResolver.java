@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassUtils;
+import org.corant.shared.util.Classes;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -84,7 +84,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
     Lock lock = rwLock.writeLock();
     try {
       lock.lock();
-      cacheConfig(defaultObject(classLoader, ClassUtils::defaultClassLoader), config);
+      cacheConfig(defaultObject(classLoader, Classes::defaultClassLoader), config);
     } finally {
       lock.unlock();
     }

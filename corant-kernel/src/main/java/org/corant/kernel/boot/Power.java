@@ -15,7 +15,7 @@ package org.corant.kernel.boot;
 
 import java.util.Arrays;
 import org.corant.Corant;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Functions;
 
 /**
  * corant-kernel
@@ -52,7 +52,7 @@ public class Power implements PowerMBean {
       if (Corant.current() == null) {
         Corant.run(beanClasses, arguments);
       } else if (!Corant.current().isRuning()) {
-        Corant.current().start(ObjectUtils.emptyConsumer());
+        Corant.current().start(Functions.emptyConsumer());
       }
     } catch (Exception t) {
       throw new RuntimeException("Can't start corant! please check logging.");

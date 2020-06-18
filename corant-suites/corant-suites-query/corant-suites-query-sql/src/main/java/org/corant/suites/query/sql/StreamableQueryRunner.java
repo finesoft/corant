@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.ObjectUtils.emptyConsumer;
+import static org.corant.shared.util.Functions.emptyConsumer;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.ObjectUtils.max;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

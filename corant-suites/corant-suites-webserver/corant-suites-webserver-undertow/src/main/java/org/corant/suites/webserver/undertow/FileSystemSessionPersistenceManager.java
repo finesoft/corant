@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.util.SerializationUtils.ObjectInputStreamWithLoader;
+import org.corant.shared.util.Serializations.ObjectInputStreamWithLoader;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.undertow.servlet.UndertowServletLogger;
 import io.undertow.servlet.api.SessionPersistenceManager;

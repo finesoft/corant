@@ -14,15 +14,15 @@
 package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.CollectionUtils.linkedListOf;
+import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.getMapInteger;
+import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.sql.SQLException;
 import java.util.ArrayList;

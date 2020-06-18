@@ -14,7 +14,7 @@
 package org.corant.suites.microprofile.jwt.jaxrs;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Priority;
@@ -24,7 +24,7 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.SecurityContext;
-import org.corant.shared.util.StringUtils.WildcardMatcher;
+import org.corant.shared.util.Strings.WildcardMatcher;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**

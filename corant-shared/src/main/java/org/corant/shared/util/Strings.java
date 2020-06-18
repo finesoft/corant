@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -24,27 +24,27 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import org.corant.shared.util.PathUtils.GlobPatterns;
+import org.corant.shared.util.PathMatcher.GlobPatterns;
 
 /**
  *
  * @author bingo 上午12:31:35
  *
  */
-public class StringUtils {
+public class Strings {
 
   public static final String EMPTY = "";
 
-  private StringUtils() {
+  private Strings() {
     super();
   }
 
   /**
    * <pre>
-   * StringUtils.defaultString(null)  = ""
-   * StringUtils.defaultString("")    = ""
-   * StringUtils.defaultString("abc") = "abc"
-   * StringUtils.defaultString(NonNull) = NonNull.toString()
+   * Strings.defaultString(null)  = ""
+   * Strings.defaultString("")    = ""
+   * Strings.defaultString("abc") = "abc"
+   * Strings.defaultString(NonNull) = NonNull.toString()
    * </pre>
    */
   public static String asDefaultString(final Object obj) {
@@ -53,10 +53,10 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.contains(null, *)    = false
-   * StringUtils.contains("", *)      = false
-   * StringUtils.contains("abc", 'a') = true
-   * StringUtils.contains("abc", 'z') = false
+   * Strings.contains(null, *)    = false
+   * Strings.contains("", *)      = false
+   * Strings.contains("abc", 'a') = true
+   * Strings.contains("abc", 'z') = false
    * </pre>
    *
    * @param str
@@ -69,11 +69,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.ifBlank(null, ()->"DFLT")  = "DFLT"
-   * StringUtils.ifBlank("", ()->"DFLT")    = "DFLT"
-   * StringUtils.ifBlank(" ", ()->"DFLT")   = "DFLT"
-   * StringUtils.ifBlank("abc", ()->"DFLT") = "abc"
-   * StringUtils.ifBlank("", null)      = null
+   * Strings.ifBlank(null, ()->"DFLT")  = "DFLT"
+   * Strings.ifBlank("", ()->"DFLT")    = "DFLT"
+   * Strings.ifBlank(" ", ()->"DFLT")   = "DFLT"
+   * Strings.ifBlank("abc", ()->"DFLT") = "abc"
+   * Strings.ifBlank("", null)      = null
    * </pre>
    *
    * @param str
@@ -86,11 +86,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.ifBlank(null, "DFLT")  = "DFLT"
-   * StringUtils.ifBlank("", "DFLT")    = "DFLT"
-   * StringUtils.ifBlank(" ", "DFLT")   = "DFLT"
-   * StringUtils.ifBlank("abc", "DFLT") = "abc"
-   * StringUtils.ifBlank("", null)      = null
+   * Strings.ifBlank(null, "DFLT")  = "DFLT"
+   * Strings.ifBlank("", "DFLT")    = "DFLT"
+   * Strings.ifBlank(" ", "DFLT")   = "DFLT"
+   * Strings.ifBlank("abc", "DFLT") = "abc"
+   * Strings.ifBlank("", null)      = null
    * </pre>
    *
    * @param str
@@ -103,9 +103,9 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.defaultString(null)  = ""
-   * StringUtils.defaultString("")    = ""
-   * StringUtils.defaultString("abc") = "abc"
+   * Strings.defaultString(null)  = ""
+   * Strings.defaultString("")    = ""
+   * Strings.defaultString("abc") = "abc"
    * </pre>
    */
   public static String defaultString(final String str) {
@@ -114,9 +114,9 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.defaultString(null, "DFLT")  = "DFLT"
-   * StringUtils.defaultString("", "DFLT")    = ""
-   * StringUtils.defaultString("abc", "DFLT") = "abc"
+   * Strings.defaultString(null, "DFLT")  = "DFLT"
+   * Strings.defaultString("", "DFLT")    = ""
+   * Strings.defaultString("abc", "DFLT") = "abc"
    * </pre>
    *
    * @param str
@@ -129,11 +129,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.trimToEmpty(null)          = ""
-   * StringUtils.trimToEmpty("")            = ""
-   * StringUtils.trimToEmpty("     ")       = ""
-   * StringUtils.trimToEmpty("abc")         = "abc"
-   * StringUtils.trimToEmpty("    abc    ") = "abc"
+   * Strings.trimToEmpty(null)          = ""
+   * Strings.trimToEmpty("")            = ""
+   * Strings.trimToEmpty("     ")       = ""
+   * Strings.trimToEmpty("abc")         = "abc"
+   * Strings.trimToEmpty("    abc    ") = "abc"
    * </pre>
    *
    * @param str
@@ -165,11 +165,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.isBlank(null)      = true
-   * StringUtils.isBlank("")        = true
-   * StringUtils.isBlank(" ")       = true
-   * StringUtils.isBlank("abc")     = false
-   * StringUtils.isBlank("  abc  ") = false
+   * Strings.isBlank(null)      = true
+   * Strings.isBlank("")        = true
+   * Strings.isBlank(" ")       = true
+   * Strings.isBlank("abc")     = false
+   * Strings.isBlank("  abc  ") = false
    * </pre>
    *
    * @param cs
@@ -193,22 +193,22 @@ public class StringUtils {
    * are not considered
    *
    * <pre>
-   * StringUtils.isDecimalNumber(null)      =false
-   * StringUtils.isDecimalNumber("")        =false
-   * StringUtils.isDecimalNumber(" ")       =false
-   * StringUtils.isDecimalNumber("123")     =true
-   * StringUtils.isDecimalNumber("0123")    =true
-   * StringUtils.isDecimalNumber("1.23")    =true
-   * StringUtils.isDecimalNumber(".123")    =true
-   * StringUtils.isDecimalNumber("-123")    =true
-   * StringUtils.isDecimalNumber("-.123")   =true
-   * StringUtils.isDecimalNumber("+123")    =true
-   * StringUtils.isDecimalNumber("+.123")   =true
-   * StringUtils.isDecimalNumber("-.")      =false
-   * StringUtils.isDecimalNumber(".0")      =true
-   * StringUtils.isDecimalNumber("12 3")    =false
-   * StringUtils.isDecimalNumber(" 123")    =false
-   * StringUtils.isDecimalNumber("a123")    =false
+   * Strings.isDecimalNumber(null)      =false
+   * Strings.isDecimalNumber("")        =false
+   * Strings.isDecimalNumber(" ")       =false
+   * Strings.isDecimalNumber("123")     =true
+   * Strings.isDecimalNumber("0123")    =true
+   * Strings.isDecimalNumber("1.23")    =true
+   * Strings.isDecimalNumber(".123")    =true
+   * Strings.isDecimalNumber("-123")    =true
+   * Strings.isDecimalNumber("-.123")   =true
+   * Strings.isDecimalNumber("+123")    =true
+   * Strings.isDecimalNumber("+.123")   =true
+   * Strings.isDecimalNumber("-.")      =false
+   * Strings.isDecimalNumber(".0")      =true
+   * Strings.isDecimalNumber("12 3")    =false
+   * Strings.isDecimalNumber(" 123")    =false
+   * Strings.isDecimalNumber("a123")    =false
    * </pre>
    *
    * @param obj
@@ -246,17 +246,17 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.isNoneBlank((String) null)    = false
-   * StringUtils.isNoneBlank((String[]) null)  = true
-   * StringUtils.isNoneBlank(null, "abc")      = false
-   * StringUtils.isNoneBlank(null, null)       = false
-   * StringUtils.isNoneBlank("", "123")        = false
-   * StringUtils.isNoneBlank("xyz", "")        = false
-   * StringUtils.isNoneBlank("  xyz  ", null)  = false
-   * StringUtils.isNoneBlank(" ", "123")       = false
-   * StringUtils.isNoneBlank(new String[] {})  = true
-   * StringUtils.isNoneBlank(new String[]{""}) = false
-   * StringUtils.isNoneBlank("abc", "123")     = true
+   * Strings.isNoneBlank((String) null)    = false
+   * Strings.isNoneBlank((String[]) null)  = true
+   * Strings.isNoneBlank(null, "abc")      = false
+   * Strings.isNoneBlank(null, null)       = false
+   * Strings.isNoneBlank("", "123")        = false
+   * Strings.isNoneBlank("xyz", "")        = false
+   * Strings.isNoneBlank("  xyz  ", null)  = false
+   * Strings.isNoneBlank(" ", "123")       = false
+   * Strings.isNoneBlank(new String[] {})  = true
+   * Strings.isNoneBlank(new String[]{""}) = false
+   * Strings.isNoneBlank("abc", "123")     = true
    * </pre>
    *
    * @param css
@@ -276,11 +276,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.isNotBlank(null)      = false
-   * StringUtils.isNotBlank("")        = false
-   * StringUtils.isNotBlank(" ")       = false
-   * StringUtils.isNotBlank("abc")     = true
-   * StringUtils.isNotBlank("  abc  ") = true
+   * Strings.isNotBlank(null)      = false
+   * Strings.isNotBlank("")        = false
+   * Strings.isNotBlank(" ")       = false
+   * Strings.isNotBlank("abc")     = true
+   * Strings.isNotBlank("  abc  ") = true
    * </pre>
    */
   public static boolean isNotBlank(final CharSequence cs) {
@@ -289,12 +289,12 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.left(null, *)    = null
-   * StringUtils.left(*, -ve)     = ""
-   * StringUtils.left("", *)      = ""
-   * StringUtils.left("abc", 0)   = ""
-   * StringUtils.left("abc", 2)   = "ab"
-   * StringUtils.left("abc", 4)   = "abc"
+   * Strings.left(null, *)    = null
+   * Strings.left(*, -ve)     = ""
+   * Strings.left("", *)      = ""
+   * Strings.left("abc", 0)   = ""
+   * Strings.left("abc", 2)   = "ab"
+   * Strings.left("abc", 4)   = "abc"
    * </pre>
    *
    * @param str
@@ -388,14 +388,14 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.mid(null, *, *)    = null
-   * StringUtils.mid(*, *, -ve)     = ""
-   * StringUtils.mid("", 0, *)      = ""
-   * StringUtils.mid("abc", 0, 2)   = "ab"
-   * StringUtils.mid("abc", 0, 4)   = "abc"
-   * StringUtils.mid("abc", 2, 4)   = "c"
-   * StringUtils.mid("abc", 4, 2)   = ""
-   * StringUtils.mid("abc", -2, 2)  = "ab"
+   * Strings.mid(null, *, *)    = null
+   * Strings.mid(*, *, -ve)     = ""
+   * Strings.mid("", 0, *)      = ""
+   * Strings.mid("abc", 0, 2)   = "ab"
+   * Strings.mid("abc", 0, 4)   = "abc"
+   * Strings.mid("abc", 2, 4)   = "c"
+   * Strings.mid("abc", 4, 2)   = ""
+   * Strings.mid("abc", -2, 2)  = "ab"
    * </pre>
    *
    * @param str
@@ -426,12 +426,12 @@ public class StringUtils {
    * length is 0 then return the given string.
    *
    * <pre>
-   * StringUtils.remove("123", null)                         = 123
-   * StringUtils.remove("123abc123abc", "abc")               = "123123"
-   * StringUtils.remove(null, null)                          = null
-   * StringUtils.remove("", "123")                           = ""
-   * StringUtils.remove("123", "")                           = "123"
-   * StringUtils.remove("123", null)                         = "123"
+   * Strings.remove("123", null)                         = 123
+   * Strings.remove("123abc123abc", "abc")               = "123123"
+   * Strings.remove(null, null)                          = null
+   * Strings.remove("", "123")                           = ""
+   * Strings.remove("123", "")                           = "123"
+   * Strings.remove("123", null)                         = "123"
    * </pre>
    *
    * @param str
@@ -517,12 +517,12 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.right(null, *)    = null
-   * StringUtils.right(*, -ve)     = ""
-   * StringUtils.right("", *)      = ""
-   * StringUtils.right("abc", 0)   = ""
-   * StringUtils.right("abc", 2)   = "bc"
-   * StringUtils.right("abc", 4)   = "abc"
+   * Strings.right(null, *)    = null
+   * Strings.right(*, -ve)     = ""
+   * Strings.right("", *)      = ""
+   * Strings.right("abc", 0)   = ""
+   * Strings.right("abc", 2)   = "bc"
+   * Strings.right("abc", 4)   = "abc"
    * </pre>
    *
    * @param str
@@ -661,11 +661,11 @@ public class StringUtils {
 
   /**
    * <pre>
-   * StringUtils.trim(null)          = null
-   * StringUtils.trim("")            = ""
-   * StringUtils.trim("     ")       = ""
-   * StringUtils.trim("abc")         = "abc"
-   * StringUtils.trim("    abc    ") = "abc"
+   * Strings.trim(null)          = null
+   * Strings.trim("")            = ""
+   * Strings.trim("     ")       = ""
+   * Strings.trim("abc")         = "abc"
+   * Strings.trim("    abc    ") = "abc"
    * </pre>
    *
    * @param str

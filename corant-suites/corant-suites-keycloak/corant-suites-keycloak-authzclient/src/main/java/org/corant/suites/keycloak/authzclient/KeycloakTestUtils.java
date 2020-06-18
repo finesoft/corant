@@ -13,8 +13,8 @@
  */
 package org.corant.suites.keycloak.authzclient;
 
-import static org.corant.shared.util.MapUtils.getMapString;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.mapOf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;

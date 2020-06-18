@@ -1,6 +1,6 @@
 package org.corant.suites.jpa.hibernate.type.descriptor;
 
-import static org.corant.shared.util.ConversionUtils.toBigDecimal;
+import static org.corant.shared.util.Conversions.toBigDecimal;
 import java.math.BigDecimal;
 import org.bson.types.Decimal128;
 import org.hibernate.ogm.model.spi.Tuple;

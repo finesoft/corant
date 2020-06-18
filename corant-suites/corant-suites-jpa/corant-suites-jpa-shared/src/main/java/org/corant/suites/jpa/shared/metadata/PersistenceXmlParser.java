@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.ConversionUtils.toBoolean;
+import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;

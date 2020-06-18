@@ -13,8 +13,8 @@
  */
 package org.corant.suites.elastic;
 
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNoneBlank;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,7 @@ import org.corant.config.declarative.DeclarativePattern;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.StreamUtils;
+import org.corant.shared.util.Streams;
 import org.corant.suites.cdi.Qualifiers.NamedObject;
 import org.eclipse.microprofile.config.Config;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -185,7 +185,7 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
       if (setting != null) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream();
             InputStream is = setting.openStream();) {
-          StreamUtils.copy(is, os);
+          Streams.copy(is, os);
           this.setting.putAll(XContentHelper
               .convertToMap(new BytesArray(os.toByteArray()), true, XContentType.JSON).v2());
         } catch (IOException e) {

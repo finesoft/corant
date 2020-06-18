@@ -14,8 +14,8 @@
 package org.corant.suites.query.jpql;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapBoolean;
-import static org.corant.shared.util.MapUtils.getMapEnum;
+import static org.corant.shared.util.Maps.getMapBoolean;
+import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
 import java.util.ArrayList;

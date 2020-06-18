@@ -14,7 +14,7 @@
 package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.suites.cdi.Instances.select;
 import java.io.IOException;
 import java.io.StringWriter;

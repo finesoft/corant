@@ -13,7 +13,7 @@
  */
 package org.corant.suites.bundle.exception;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.util.HashMap;
 import java.util.LinkedList;

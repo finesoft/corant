@@ -13,10 +13,10 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.ClassUtils.asClass;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Classes.asClass;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -37,7 +37,7 @@ import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.corant.shared.conversion.Conversions;
+import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.NumberBigDecimalConverter;
 import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
@@ -50,9 +50,9 @@ import org.corant.shared.conversion.converter.StringBigIntegerConverter;
  * @author bingo 上午10:05:26
  *
  */
-public class ConversionUtils {
+public class Conversions {
 
-  private ConversionUtils() {
+  private Conversions() {
     super();
   }
 
@@ -81,7 +81,7 @@ public class ConversionUtils {
    * @see NumberBigDecimalConverter
    */
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal) {
-    return defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
+    return defaultObject(Conversion.convert(obj, BigDecimal.class), altVal);
   }
 
   /**
@@ -99,7 +99,7 @@ public class ConversionUtils {
    */
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal, int scale,
       int roundingMode) {
-    BigDecimal d = defaultObject(Conversions.convert(obj, BigDecimal.class), altVal);
+    BigDecimal d = defaultObject(Conversion.convert(obj, BigDecimal.class), altVal);
     return d == null ? null : d.setScale(scale, roundingMode);
   }
 
@@ -126,7 +126,7 @@ public class ConversionUtils {
    * @param obj
    * @return the converted object list
    *
-   * @see Conversions#convert(Object, Class, Supplier, Map)
+   * @see Conversion#convert(Object, Class, Supplier, Map)
    */
   public static List<BigDecimal> toBigDecimalList(Object obj) {
     return toList(obj, BigDecimal.class);
@@ -146,7 +146,7 @@ public class ConversionUtils {
   }
 
   public static BigInteger toBigInteger(Object obj, BigInteger altVal) {
-    return defaultObject(Conversions.convert(obj, BigInteger.class), altVal);
+    return defaultObject(Conversion.convert(obj, BigInteger.class), altVal);
   }
 
   public static List<BigInteger> toBigIntegerList(Object obj) {
@@ -154,7 +154,7 @@ public class ConversionUtils {
   }
 
   public static Boolean toBoolean(Object obj) {
-    return defaultObject(Conversions.convert(obj, Boolean.class), Boolean.FALSE);
+    return defaultObject(Conversion.convert(obj, Boolean.class), Boolean.FALSE);
   }
 
   public static Byte toByte(Object obj) {
@@ -162,20 +162,20 @@ public class ConversionUtils {
   }
 
   public static Byte toByte(Object obj, Byte altVal) {
-    return defaultObject(Conversions.convert(obj, Byte.class), altVal);
+    return defaultObject(Conversion.convert(obj, Byte.class), altVal);
   }
 
   public static Character toCharacter(Object obj) {
-    return Conversions.convert(obj, Character.class, null);
+    return Conversion.convert(obj, Character.class, null);
   }
 
   public static Class<?> toClass(Object obj) {
-    return Conversions.convert(obj, Class.class);
+    return Conversion.convert(obj, Class.class);
   }
 
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
       Supplier<C> collectionFactory) {
-    return Conversions.convert(obj, itemClass, collectionFactory, null);
+    return Conversion.convert(obj, itemClass, collectionFactory, null);
   }
 
   public static Currency toCurrency(Object obj) {
@@ -183,7 +183,7 @@ public class ConversionUtils {
   }
 
   public static Currency toCurrency(Object obj, Currency altVal) {
-    return defaultObject(Conversions.convert(obj, Currency.class), altVal);
+    return defaultObject(Conversion.convert(obj, Currency.class), altVal);
   }
 
   public static Double toDouble(Object obj) {
@@ -191,7 +191,7 @@ public class ConversionUtils {
   }
 
   public static Double toDouble(Object obj, Double altVal) {
-    return defaultObject(Conversions.convert(obj, Double.class), altVal);
+    return defaultObject(Conversion.convert(obj, Double.class), altVal);
   }
 
   public static List<Double> toDoubleList(Object obj) {
@@ -203,11 +203,11 @@ public class ConversionUtils {
   }
 
   public static Duration toDuration(Object obj, Duration altVal) {
-    return defaultObject(Conversions.convert(obj, Duration.class), altVal);
+    return defaultObject(Conversion.convert(obj, Duration.class), altVal);
   }
 
   public static <T extends Enum<T>> T toEnum(Object obj, Class<T> enumClazz) {
-    return Conversions.convert(obj, enumClazz);
+    return Conversion.convert(obj, enumClazz);
   }
 
   public static <T extends Enum<T>> List<T> toEnumList(Object obj, Class<T> enumClazz) {
@@ -219,7 +219,7 @@ public class ConversionUtils {
   }
 
   public static Float toFloat(Object obj, Float altVal) {
-    return defaultObject(Conversions.convert(obj, Float.class), altVal);
+    return defaultObject(Conversion.convert(obj, Float.class), altVal);
   }
 
   public static List<Float> toFloatList(Object obj) {
@@ -239,7 +239,7 @@ public class ConversionUtils {
   }
 
   public static Instant toInstant(Object obj, Map<String, ?> hints, Instant altVal) {
-    return defaultObject(Conversions.convert(obj, Instant.class, hints), altVal);
+    return defaultObject(Conversion.convert(obj, Instant.class, hints), altVal);
   }
 
   public static List<Instant> toInstantList(Object obj) {
@@ -255,7 +255,7 @@ public class ConversionUtils {
   }
 
   public static Integer toInteger(Object obj, Integer altVal) {
-    return defaultObject(Conversions.convert(obj, Integer.class), altVal);
+    return defaultObject(Conversion.convert(obj, Integer.class), altVal);
   }
 
   public static List<Integer> toIntegerList(Object obj) {
@@ -268,11 +268,11 @@ public class ConversionUtils {
 
   public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
     if (obj instanceof Collection) {
-      return Conversions.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
+      return Conversion.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
     } else if (obj instanceof Object[]) {
-      return Conversions.convert((Object[]) obj, ArrayList::new, clazz, hints);
+      return Conversion.convert((Object[]) obj, ArrayList::new, clazz, hints);
     }
-    return Conversions.convert(obj, clazz, ArrayList::new, hints);
+    return Conversion.convert(obj, clazz, ArrayList::new, hints);
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -294,7 +294,7 @@ public class ConversionUtils {
   }
 
   public static LocalDate toLocalDate(Object obj, Map<String, ?> hints, LocalDate altVal) {
-    return defaultObject(Conversions.convert(obj, LocalDate.class, hints), altVal);
+    return defaultObject(Conversion.convert(obj, LocalDate.class, hints), altVal);
   }
 
   public static LocalDate toLocalDate(Object obj, String pattern) {
@@ -331,7 +331,7 @@ public class ConversionUtils {
 
   public static LocalDateTime toLocalDateTime(Object obj, Map<String, ?> hints,
       LocalDateTime altVal) {
-    return defaultObject(Conversions.convert(obj, LocalDateTime.class, hints), altVal);
+    return defaultObject(Conversion.convert(obj, LocalDateTime.class, hints), altVal);
   }
 
   public static LocalDateTime toLocalDateTime(Object obj, String pattern) {
@@ -369,7 +369,7 @@ public class ConversionUtils {
   }
 
   public static Locale toLocale(Object obj, Locale altVal) {
-    return defaultObject(Conversions.convert(obj, Locale.class), altVal);
+    return defaultObject(Conversion.convert(obj, Locale.class), altVal);
   }
 
   public static Long toLong(Object obj) {
@@ -377,7 +377,7 @@ public class ConversionUtils {
   }
 
   public static Long toLong(Object obj, Long altVal) {
-    return defaultObject(Conversions.convert(obj, Long.class), altVal);
+    return defaultObject(Conversion.convert(obj, Long.class), altVal);
   }
 
   public static List<Long> toLongList(Object obj) {
@@ -385,11 +385,11 @@ public class ConversionUtils {
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz) {
-    return Conversions.convert(obj, clazz);
+    return Conversion.convert(obj, clazz);
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    return Conversions.convert(obj, clazz, hints);
+    return Conversion.convert(obj, clazz, hints);
   }
 
   public static Object toObject(Object obj, String className) {
@@ -402,11 +402,11 @@ public class ConversionUtils {
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz, Map<String, ?> hints) {
     if (obj instanceof Collection) {
-      return Conversions.convert((Collection<?>) obj, HashSet::new, clazz, hints);
+      return Conversion.convert((Collection<?>) obj, HashSet::new, clazz, hints);
     } else if (obj instanceof Object[]) {
-      return Conversions.convert((Object[]) obj, HashSet::new, clazz, hints);
+      return Conversion.convert((Object[]) obj, HashSet::new, clazz, hints);
     }
-    return Conversions.convert(obj, clazz, HashSet::new, hints);
+    return Conversion.convert(obj, clazz, HashSet::new, hints);
   }
 
   public static Short toShort(Object obj) {
@@ -414,7 +414,7 @@ public class ConversionUtils {
   }
 
   public static Short toShort(Object obj, Short altVal) {
-    return defaultObject(Conversions.convert(obj, Short.class), altVal);
+    return defaultObject(Conversion.convert(obj, Short.class), altVal);
   }
 
   public static List<Short> toShortList(Object obj) {
@@ -426,7 +426,7 @@ public class ConversionUtils {
   }
 
   public static TimeZone toTimeZone(Object obj) {
-    return Conversions.convert(obj, TimeZone.class);
+    return Conversion.convert(obj, TimeZone.class);
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj) {
@@ -435,7 +435,7 @@ public class ConversionUtils {
 
   public static ZonedDateTime toZonedDateTime(Object obj, Map<String, ?> hints,
       ZonedDateTime altVal) {
-    return defaultObject(Conversions.convert(obj, ZonedDateTime.class, hints), altVal);
+    return defaultObject(Conversion.convert(obj, ZonedDateTime.class, hints), altVal);
   }
 
   public static ZonedDateTime toZonedDateTime(Object obj, String pattern) {

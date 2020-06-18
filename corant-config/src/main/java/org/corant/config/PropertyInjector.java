@@ -14,8 +14,8 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Conversions.toObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;

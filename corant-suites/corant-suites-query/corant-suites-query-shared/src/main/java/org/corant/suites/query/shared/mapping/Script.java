@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.UUID;
 

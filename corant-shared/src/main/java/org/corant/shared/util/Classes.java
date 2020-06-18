@@ -14,9 +14,9 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.immutableMapOf;
-import static org.corant.shared.util.ObjectUtils.trySupplied;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Functions.trySupplied;
+import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -41,7 +41,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午10:31:37
  *
  */
-public class ClassUtils {
+public class Classes {
 
   public static final String CGLIB_CLASS_SEPARATOR = "$$";
   public static final char PACKAGE_SEPARATOR_CHAR = '.';
@@ -64,7 +64,7 @@ public class ClassUtils {
       Collections.unmodifiableMap(PRIMITIVE_WRAPPER_MAP.entrySet().stream()
           .collect(Collectors.toMap(Entry::getValue, Entry::getKey)));
 
-  private ClassUtils() {
+  private Classes() {
     super();
   }
 
@@ -147,7 +147,7 @@ public class ClassUtils {
 
   /**
    * Return the appropriate class loader. if the current thread has context class loader then return
-   * it else return the ClassUtils class loader, finally if class loader not found then return the
+   * it else return the Classes class loader, finally if class loader not found then return the
    * system class loader.
    *
    * @return defaultClassLoader
@@ -155,7 +155,7 @@ public class ClassUtils {
   public static ClassLoader defaultClassLoader() {
     ClassLoader classLoader = trySupplied(Thread.currentThread()::getContextClassLoader);
     if (classLoader == null) {
-      classLoader = ClassUtils.class.getClassLoader();
+      classLoader = Classes.class.getClassLoader();
       if (classLoader == null) {
         classLoader = trySupplied(ClassLoader::getSystemClassLoader);
       }
@@ -293,7 +293,7 @@ public class ClassUtils {
 
   public static String getPackageName(String fullClassName) {
     if (isEmpty(fullClassName)) {
-      return StringUtils.EMPTY;
+      return Strings.EMPTY;
     }
     int lastDot = fullClassName.lastIndexOf('.');
     return lastDot < 0 ? "" : fullClassName.substring(0, lastDot);
@@ -302,7 +302,7 @@ public class ClassUtils {
   public static String getShortClassName(String className) {
     String shortClassName = className;
     if (isEmpty(shortClassName)) {
-      return StringUtils.EMPTY;
+      return Strings.EMPTY;
     }
     final StringBuilder arrayPrefix = new StringBuilder();
     if (shortClassName.startsWith("[")) {

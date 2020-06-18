@@ -22,7 +22,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.MethodUtils.MethodSignature;
+import org.corant.shared.util.Methods.MethodSignature;
 import org.corant.suites.concurrency.annotation.ConcurrencyThrottle;
 
 /**

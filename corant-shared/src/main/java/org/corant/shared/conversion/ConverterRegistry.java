@@ -15,10 +15,10 @@ package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
-import org.corant.shared.util.TypeUtils;
+import org.corant.shared.util.Types;
 
 /**
  * corant-shared
@@ -179,14 +179,14 @@ public class ConverterRegistry { // static?
 
   static Type[] resolveTypes(Converter<?, ?> converter) {
     Type[] types =
-        TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
+        Types.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
         "The converter %s parametered type must be actual type!", converter.toString());
     return types;
   }
 
   static Type[] resolveTypes(ConverterFactory<?, ?> converterFactory) {
-    Type[] types = TypeUtils.getParameterizedTypes(getUserClass(shouldNotNull(converterFactory)),
+    Type[] types = Types.getParameterizedTypes(getUserClass(shouldNotNull(converterFactory)),
         ConverterFactory.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class,
         "The converter %s parametered type must be actual type!", converterFactory.toString());

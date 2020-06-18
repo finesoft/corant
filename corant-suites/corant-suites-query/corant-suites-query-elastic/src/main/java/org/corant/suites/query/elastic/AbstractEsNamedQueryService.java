@@ -14,7 +14,7 @@
 package org.corant.suites.query.elastic;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

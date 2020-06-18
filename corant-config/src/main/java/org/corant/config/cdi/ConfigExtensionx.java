@@ -13,10 +13,10 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.ClassUtils.isPrimitiveWrapper;
-import static org.corant.shared.util.ClassUtils.wrapperToPrimitive;
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Classes.isPrimitiveWrapper;
+import static org.corant.shared.util.Classes.wrapperToPrimitive;
 import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;

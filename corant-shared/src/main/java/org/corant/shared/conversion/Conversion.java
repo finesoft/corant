@@ -16,7 +16,7 @@ package org.corant.shared.conversion;
 import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
 import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.IterableUtils.iterableOf;
+import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.ObjectUtils.tryCast;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -26,7 +26,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.ClassUtils;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.ObjectUtils;
 
 /**
@@ -36,9 +36,9 @@ import org.corant.shared.util.ObjectUtils;
  *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class Conversions {
+public class Conversion {
 
-  private static final Logger LOGGER = Logger.getLogger(Conversions.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(Conversion.class.getName());
 
   /**
    * Convert collection value to target collection value
@@ -310,8 +310,8 @@ public class Conversions {
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,
       Map<String, ?> hints) {
-    return Converters.lookup(ClassUtils.primitiveToWrapper(sourceClass),
-        ClassUtils.primitiveToWrapper(targetClass),
+    return Converters.lookup(Classes.primitiveToWrapper(sourceClass),
+        Classes.primitiveToWrapper(targetClass),
         ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT)).orElse(null);
   }
 

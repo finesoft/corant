@@ -13,9 +13,9 @@
  */
 package org.corant.suites.query.jpql.cdi;
 
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;

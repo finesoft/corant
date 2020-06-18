@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.MapUtils.getMapInteger;
+import static org.corant.shared.util.Maps.getMapInteger;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
-import static org.corant.shared.util.ConversionUtils.toInteger;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.suites.query.shared.QueryParameter.CONTEXT_NME;

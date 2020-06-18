@@ -13,9 +13,9 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.right;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.right;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Instant;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
-import static org.corant.shared.util.StringUtils.replace;
+import static org.corant.shared.util.Strings.replace;
 import java.io.IOException;
 import java.util.List;
 import javax.xml.XMLConstants;
@@ -22,7 +22,7 @@ import javax.xml.validation.SchemaFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.ValidateUtils;
+import org.corant.shared.util.Validates;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -48,7 +48,7 @@ public enum PersistenceSchema {
   public static List<Exception> validate(Document document, String version) {
     for (PersistenceSchema ps : PersistenceSchema.values()) {
       if (ps.getVersion().equalsIgnoreCase(version)) {
-        return ValidateUtils.validateXmlDocument(document, ps.getSchema());
+        return Validates.validateXmlDocument(document, ps.getSchema());
       }
     }
     return null;

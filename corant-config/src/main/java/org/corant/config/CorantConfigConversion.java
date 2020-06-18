@@ -13,8 +13,8 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.ObjectUtils.forceCast;
 import static org.corant.shared.util.ObjectUtils.isEquals;
 import java.io.Closeable;
@@ -51,7 +51,7 @@ import javax.inject.Provider;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.util.Conversions;
 import org.corant.shared.util.ObjectUtils;
 import org.eclipse.microprofile.config.spi.Converter;
 
@@ -411,7 +411,7 @@ public class CorantConfigConversion implements Serializable {
     }
 
     static OrdinalConverter builtIn(Class<?> type) {
-      return new OrdinalConverter(type, s -> ConversionUtils.toObject(s, type),
+      return new OrdinalConverter(type, s -> Conversions.toObject(s, type),
           BUILT_IN_CONVERTER_ORDINAL);
     }
 

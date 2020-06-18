@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.ClassUtils.getComponentClass;
-import static org.corant.shared.util.ConversionUtils.toList;
+import static org.corant.shared.util.Classes.getComponentClass;
+import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.sql.Date;
 import java.sql.Timestamp;

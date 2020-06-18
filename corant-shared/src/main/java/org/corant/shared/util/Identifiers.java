@@ -506,7 +506,7 @@ public class Identifiers {
     static final SecureRandom SEC_RDM_INST = new SecureRandom();
 
     private static final byte[] SECURE_MUNGED_ADDRESS =
-        MacAddrUtils.getSecureMungedAddress(SEC_RDM_INST);
+        MacAddrs.getSecureMungedAddress(SEC_RDM_INST);
 
     static {
       assert SECURE_MUNGED_ADDRESS.length == 6;

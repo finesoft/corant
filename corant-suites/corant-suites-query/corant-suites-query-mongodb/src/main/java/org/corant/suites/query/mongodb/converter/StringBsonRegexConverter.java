@@ -18,7 +18,7 @@ import java.util.Map;
 import org.bson.BsonRegularExpression;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
-import org.corant.shared.util.PathUtils.RegexMatcher;
+import org.corant.shared.util.PathMatcher.RegexMatcher;
 
 /**
  * corant-suites-query-mongodb

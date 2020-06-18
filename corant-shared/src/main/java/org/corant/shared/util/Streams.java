@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.emptyConsumer;
+import static org.corant.shared.util.Functions.emptyConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,11 +40,11 @@ import java.util.stream.StreamSupport;
 /**
  * @author bingo 2017年4月7日
  */
-public class StreamUtils {
+public class Streams {
 
   public static final int DFLE_BATCH_SIZE = 64;
 
-  private StreamUtils() {}
+  private Streams() {}
 
   /**
    * Receive stream object converts it to a list stream, use stream grouping.

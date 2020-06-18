@@ -15,8 +15,8 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -29,16 +29,12 @@ import java.util.regex.PatternSyntaxException;
  * @author bingo 下午8:25:03
  *
  */
-public class PathUtils {
+public interface PathMatcher extends Predicate<String> {
 
-  public static final String SYNTAX_GLOB = "glob:";
-  public static final int SYNTAX_GLOB_LEN = SYNTAX_GLOB.length();
-  public static final String SYNTAX_REGEX = "regex:";
-  public static final int SYNTAX_REGEX_LEN = SYNTAX_REGEX.length();
-
-  private PathUtils() {
-    super();
-  }
+  String SYNTAX_GLOB = "glob:";
+  int SYNTAX_GLOB_LEN = SYNTAX_GLOB.length();
+  String SYNTAX_REGEX = "regex:";
+  int SYNTAX_REGEX_LEN = SYNTAX_REGEX.length();
 
   /**
    * Decide {@code PathMatcher} from path expressions. Returns a {@code PathMatcher} that performs
@@ -73,8 +69,7 @@ public class PathUtils {
    * @param ignoreCase
    * @return decidePathMatcher
    */
-  public static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos,
-      boolean ignoreCase) {
+  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
     PathMatcher matcher = null;
     String path = defaultTrim(pathExp);
     if (path.startsWith(SYNTAX_REGEX)) {
@@ -100,30 +95,29 @@ public class PathUtils {
     return Optional.ofNullable(matcher);
   }
 
-  public static boolean isDos() {
+  static boolean isDos() {
     return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window");
   }
 
-  public static boolean matchClassPath(String path, String globExpress) {
+  static boolean matchClassPath(String path, String globExpress) {
     return matchUnixPath(path, globExpress);
   }
 
-  public static boolean matchPath(String path, String globExpress) {
+  static boolean matchPath(String path, String globExpress) {
     return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")
         ? matchWinPath(path, globExpress)
         : matchUnixPath(path, globExpress);
   }
 
-  public static boolean matchUnixPath(String path, String globExpress) {
+  static boolean matchUnixPath(String path, String globExpress) {
     return GlobPatterns.build(globExpress, false, false).matcher(path).matches();
   }
 
-  public static boolean matchWinPath(String path, String globExpress) {
+  static boolean matchWinPath(String path, String globExpress) {
     return GlobPatterns.build(globExpress, true, true).matcher(path).matches();
   }
 
-  private static String resolvePlainParent(String patternChars, String pathSeparator,
-      String express) {
+  static String resolvePlainParent(String patternChars, String pathSeparator, String express) {
     if (isBlank(patternChars)) {
       return express;
     }
@@ -138,7 +132,7 @@ public class PathUtils {
     if (idx == -1) {
       return express;
     } else if (idx == 0) {
-      return StringUtils.EMPTY;
+      return Strings.EMPTY;
     } else {
       String path = express.substring(0, idx);
       if (path.indexOf(pathSeparator) != -1) {
@@ -148,6 +142,10 @@ public class PathUtils {
       }
     }
   }
+
+  String getExpress();
+
+  String getPlainParent(String pathSeparator);
 
   /**
    * corant-shared
@@ -174,7 +172,7 @@ public class PathUtils {
 
     @Override
     public String getPlainParent(String pathSeparator) {
-      return PathUtils.resolvePlainParent(null, pathSeparator, express);
+      return PathMatcher.resolvePlainParent(null, pathSeparator, express);
     }
 
     @Override
@@ -220,7 +218,7 @@ public class PathUtils {
     }
 
     public static GlobMatcher of(String globExpress, boolean ignoreCase) {
-      return of(PathUtils.isDos(), globExpress, ignoreCase);
+      return of(PathMatcher.isDos(), globExpress, ignoreCase);
     }
 
     public static GlobMatcher ofDos(String globExpress) {
@@ -260,7 +258,8 @@ public class PathUtils {
 
     @Override
     public String getPlainParent(String pathSeparator) {
-      return PathUtils.resolvePlainParent(GlobPatterns.GLO_META_CHARS, pathSeparator, globExpress);
+      return PathMatcher.resolvePlainParent(GlobPatterns.GLO_META_CHARS, pathSeparator,
+          globExpress);
     }
 
     @Override
@@ -615,20 +614,6 @@ public class PathUtils {
   /**
    * corant-shared
    *
-   * @author bingo 上午11:18:13
-   *
-   */
-  public interface PathMatcher extends Predicate<String> {
-
-    String getExpress();
-
-    String getPlainParent(String pathSeparator);
-
-  }
-
-  /**
-   * corant-shared
-   *
    * @author bingo 下午2:28:39
    *
    */
@@ -674,7 +659,7 @@ public class PathUtils {
 
     @Override
     public String getPlainParent(String pathSeparator) {
-      return PathUtils.resolvePlainParent(REG_CHARS, pathSeparator, express);
+      return PathMatcher.resolvePlainParent(REG_CHARS, pathSeparator, express);
     }
 
     public boolean isIgnoreCase() {

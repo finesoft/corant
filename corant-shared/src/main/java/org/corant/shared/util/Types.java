@@ -43,11 +43,11 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author Bob Lee
  * @author Jesse Wilson
  */
-public class TypeUtils {
+public class Types {
 
   static final Type[] EMPTY_TYPE_ARRAY = new Type[] {};
 
-  private TypeUtils() {
+  private Types() {
     throw new UnsupportedOperationException();
   }
 
@@ -348,7 +348,7 @@ public class TypeUtils {
     }
     shouldBeTrue(supertype.isAssignableFrom(contextRawType));
     return resolve(usedContext, contextRawType,
-        TypeUtils.getGenericSupertype(usedContext, contextRawType, supertype));
+        Types.getGenericSupertype(usedContext, contextRawType, supertype));
   }
 
   static int hashCodeOrZero(Object o) {
@@ -512,7 +512,7 @@ public class TypeUtils {
     @SuppressWarnings("unchecked")
     public TypeToken() {
       this.type = getSuperclassTypeParameter(getClass());
-      this.rawType = (Class<? super T>) TypeUtils.getRawType(type);
+      this.rawType = (Class<? super T>) Types.getRawType(type);
       this.hashCode = type.hashCode();
     }
 
@@ -521,8 +521,8 @@ public class TypeUtils {
      */
     @SuppressWarnings("unchecked")
     protected TypeToken(Type type) {
-      this.type = TypeUtils.canonicalize(shouldNotNull(type));
-      this.rawType = (Class<? super T>) TypeUtils.getRawType(this.type);
+      this.type = Types.canonicalize(shouldNotNull(type));
+      this.rawType = (Class<? super T>) Types.getRawType(this.type);
       this.hashCode = this.type.hashCode();
     }
 
@@ -545,7 +545,7 @@ public class TypeUtils {
      * {@code componentType}.
      */
     public static TypeToken<?> getArray(Type componentType) {
-      return new TypeToken<>(TypeUtils.arrayOf(componentType));
+      return new TypeToken<>(Types.arrayOf(componentType));
     }
 
     /**
@@ -553,11 +553,11 @@ public class TypeUtils {
      * {@code rawType}.
      */
     public static TypeToken<?> getParameterized(Type rawType, Type... typeArguments) {
-      return new TypeToken<>(TypeUtils.newParameterizedTypeWithOwner(null, rawType, typeArguments));
+      return new TypeToken<>(Types.newParameterizedTypeWithOwner(null, rawType, typeArguments));
     }
 
     /**
-     * Returns the type from super class's type parameter in {@link TypeUtils#canonicalize canonical
+     * Returns the type from super class's type parameter in {@link Types#canonicalize canonical
      * form}.
      */
     static Type getSuperclassTypeParameter(Class<?> subclass) {
@@ -566,12 +566,12 @@ public class TypeUtils {
         throw new CorantRuntimeException("Missing type parameter.");
       }
       ParameterizedType parameterized = (ParameterizedType) superclass;
-      return TypeUtils.canonicalize(parameterized.getActualTypeArguments()[0]);
+      return Types.canonicalize(parameterized.getActualTypeArguments()[0]);
     }
 
     @Override
     public final boolean equals(Object o) {
-      return o instanceof TypeToken<?> && TypeUtils.equals(type, ((TypeToken<?>) o).type);
+      return o instanceof TypeToken<?> && Types.equals(type, ((TypeToken<?>) o).type);
     }
 
     /**
@@ -605,7 +605,7 @@ public class TypeUtils {
 
     @Override
     public boolean equals(Object o) {
-      return o instanceof GenericArrayType && TypeUtils.equals(this, (GenericArrayType) o);
+      return o instanceof GenericArrayType && Types.equals(this, (GenericArrayType) o);
     }
 
     @Override
@@ -652,7 +652,7 @@ public class TypeUtils {
     @Override
     public boolean equals(Object other) {
       return other instanceof ParameterizedType
-          && TypeUtils.equals(this, (ParameterizedType) other);
+          && Types.equals(this, (ParameterizedType) other);
     }
 
     @Override
@@ -723,7 +723,7 @@ public class TypeUtils {
 
     @Override
     public boolean equals(Object other) {
-      return other instanceof WildcardType && TypeUtils.equals(this, (WildcardType) other);
+      return other instanceof WildcardType && Types.equals(this, (WildcardType) other);
     }
 
     @Override

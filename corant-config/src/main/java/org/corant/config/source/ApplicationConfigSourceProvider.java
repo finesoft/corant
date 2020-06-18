@@ -17,9 +17,9 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.defaultBlank;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.defaultBlank;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils;
+import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
@@ -56,7 +56,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static Predicate<URL> resolveExPattern() {
     String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
     return u -> isBlank(cfgUrlExPattern)
-        || !PathUtils.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
+        || !PathMatcher.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
   }
 
   static String[] resolveLocations() {

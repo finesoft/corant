@@ -21,28 +21,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.corant.shared.util.CollectionUtils.ListJoins.JoinType;
+import org.corant.shared.util.Lists.ListJoins.JoinType;
 
 /**
  *
  * @author bingo 上午12:31:10
  *
  */
-public class CollectionUtils {
+public class Lists {
 
-  private CollectionUtils() {
+  private Lists() {
     super();
   }
 
@@ -115,33 +112,6 @@ public class CollectionUtils {
       return Collections.emptyList();
     }
     return Collections.unmodifiableList(listOf(objects));
-  }
-
-  /**
-   * Convert an array to immutable set
-   *
-   * @param <T>
-   * @param objects the array
-   * @return an immutable set that combined by the passed in array
-   */
-  @SafeVarargs
-  public static <T> Set<T> immutableSetOf(final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return Collections.emptySet();
-    }
-    return Collections.unmodifiableSet(setOf(objects));
-  }
-
-  /**
-   * Convert an array to linked hash set
-   *
-   * @param <T>
-   * @param objects
-   * @return a linked hash set that combined by the passed in array
-   */
-  @SafeVarargs
-  public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
-    return collectionOf(LinkedHashSet::new, objects);
   }
 
   /**
@@ -282,18 +252,6 @@ public class CollectionUtils {
       collection.removeIf(p);
       return collection;
     }
-  }
-
-  /**
-   * Convert an array to set
-   *
-   * @param <T>
-   * @param objects
-   * @return a set that combined by the passed in array
-   */
-  @SafeVarargs
-  public static <T> Set<T> setOf(final T... objects) {
-    return collectionOf(HashSet::new, objects);
   }
 
   /**

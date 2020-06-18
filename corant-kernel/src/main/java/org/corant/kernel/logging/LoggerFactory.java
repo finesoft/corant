@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.logging;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
+import static org.corant.shared.util.Classes.tryAsClass;
 import java.lang.reflect.Method;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.shared.util.MethodUtils;
+import org.corant.shared.util.Methods;
 
 /**
  * @author bingo 下午7:37:00
@@ -41,7 +41,7 @@ public class LoggerFactory {
     try {
       Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
       if (loggerCfgCls != null) {
-        Method method = MethodUtils.getMatchingMethod(loggerCfgCls, "initialize",
+        Method method = Methods.getMatchingMethod(loggerCfgCls, "initialize",
             tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
         method.invoke(null,
             tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());

@@ -13,8 +13,6 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -25,13 +23,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.corant.shared.util.Lists.ListJoins.JoinType;
 
 /**
  *
@@ -230,11 +225,11 @@ public class Lists {
    * @param type the join type INNER LEFT CARTESIAN(CROSS-JOIN)
    * @return the merged new list
    */
-  public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
-      final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
-    return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
-        .execute();
-  }
+  // public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
+  // final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
+  // return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
+  // .execute();
+  // }
 
   /**
    * Break a collection into smaller pieces
@@ -307,64 +302,64 @@ public class Lists {
    * @author bingo 下午2:36:15
    *
    */
-  public static class ListJoins<F, J, T> {
-
-    private List<F> from;
-    private List<J> join;
-    private BiPredicate<F, J> on;
-    private BiFunction<F, J, T> select;
-    private JoinType type = JoinType.LEFT;
-
-    public static <F, J, T> ListJoins<F, J, T> start() {
-      return new ListJoins<>();
-    }
-
-    public List<T> execute() {
-      List<T> result = new ArrayList<>();
-      if (type == JoinType.LEFT && isEmpty(join)) {
-        from.stream().map(x -> select.apply(x, null)).forEachOrdered(result::add);
-      } else if (type == JoinType.LEFT && !isEmpty(join)) {
-        from.stream().forEachOrdered(f -> {
-          List<J> ms = join.stream().filter(j -> on.test(f, j)).collect(Collectors.toList());
-          if (isEmpty(ms)) {
-            result.add(select.apply(f, null));
-          } else {
-            ms.stream().map(m -> select.apply(f, m)).forEach(result::add);
-          }
-        });
-      } else if (type == JoinType.INNER && !isEmpty(join)) {
-        from.stream().forEachOrdered(f -> this.join.stream().filter(j -> on.test(f, j))
-            .forEachOrdered(j -> result.add(select.apply(f, j))));
-      } else if (type == JoinType.CARTESIAN && !isEmpty(join)) {
-        from.stream()
-            .forEachOrdered(f -> join.stream().forEachOrdered(j -> result.add(select.apply(f, j))));
-      }
-      return result;
-    }
-
-    public ListJoins<F, J, T> from(List<F> from) {
-      this.from = shouldNotNull(from);
-      return this;
-    }
-
-    public ListJoins<F, J, T> on(BiPredicate<F, J> on) {
-      this.on = on == null ? (f, j) -> false : on;
-      return this;
-    }
-
-    public ListJoins<F, J, T> select(BiFunction<F, J, T> select) {
-      this.select = select;
-      return this;
-    }
-
-    ListJoins<F, J, T> join(JoinType joinType, List<J> joined) {
-      this.type = joinType == null ? JoinType.LEFT : joinType;
-      this.join = joined;
-      return this;
-    }
-
-    enum JoinType {
-      LEFT, INNER, CARTESIAN;
-    }
-  }
+  // public static class ListJoins<F, J, T> {
+  //
+  // private List<F> from;
+  // private List<J> join;
+  // private BiPredicate<F, J> on;
+  // private BiFunction<F, J, T> select;
+  // private JoinType type = JoinType.LEFT;
+  //
+  // public static <F, J, T> ListJoins<F, J, T> start() {
+  // return new ListJoins<>();
+  // }
+  //
+  // public List<T> execute() {
+  // List<T> result = new ArrayList<>();
+  // if (type == JoinType.LEFT && isEmpty(join)) {
+  // from.stream().map(x -> select.apply(x, null)).forEachOrdered(result::add);
+  // } else if (type == JoinType.LEFT && !isEmpty(join)) {
+  // from.stream().forEachOrdered(f -> {
+  // List<J> ms = join.stream().filter(j -> on.test(f, j)).collect(Collectors.toList());
+  // if (isEmpty(ms)) {
+  // result.add(select.apply(f, null));
+  // } else {
+  // ms.stream().map(m -> select.apply(f, m)).forEach(result::add);
+  // }
+  // });
+  // } else if (type == JoinType.INNER && !isEmpty(join)) {
+  // from.stream().forEachOrdered(f -> this.join.stream().filter(j -> on.test(f, j))
+  // .forEachOrdered(j -> result.add(select.apply(f, j))));
+  // } else if (type == JoinType.CARTESIAN && !isEmpty(join)) {
+  // from.stream()
+  // .forEachOrdered(f -> join.stream().forEachOrdered(j -> result.add(select.apply(f, j))));
+  // }
+  // return result;
+  // }
+  //
+  // public ListJoins<F, J, T> from(List<F> from) {
+  // this.from = shouldNotNull(from);
+  // return this;
+  // }
+  //
+  // public ListJoins<F, J, T> on(BiPredicate<F, J> on) {
+  // this.on = on == null ? (f, j) -> false : on;
+  // return this;
+  // }
+  //
+  // public ListJoins<F, J, T> select(BiFunction<F, J, T> select) {
+  // this.select = select;
+  // return this;
+  // }
+  //
+  // ListJoins<F, J, T> join(JoinType joinType, List<J> joined) {
+  // this.type = joinType == null ? JoinType.LEFT : joinType;
+  // this.join = joined;
+  // return this;
+  // }
+  //
+  // enum JoinType {
+  // LEFT, INNER, CARTESIAN;
+  // }
+  // }
 }

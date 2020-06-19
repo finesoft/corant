@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -47,13 +48,39 @@ public class Iterables {
   public static <T> Iterable<T> concat(@SuppressWarnings("unchecked") final Iterable<T>... inputs) {
     shouldNotNull(inputs);
     return new Iterable<T>() {
-
-      final Iterable<T>[] all = Arrays.copyOf(inputs, inputs.length);
+      final Iterable<T>[] iterables = Arrays.copyOf(inputs, inputs.length);
 
       @Override
       public Iterator<T> iterator() {
-        return Stream.of(all).map(it -> StreamSupport.stream(it.spliterator(), false))
+        return Stream.of(iterables).map(it -> StreamSupport.stream(it.spliterator(), false))
             .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
+      }
+    };
+  }
+
+  public static <T> Iterator<T> concat(@SuppressWarnings("unchecked") final Iterator<T>... inputs) {
+    shouldNotNull(inputs);
+    return new Iterator<T>() {
+      @SuppressWarnings("unchecked")
+      final Iterator<T>[] iterators =
+          streamOf(inputs).filter(Objects::isNotNull).toArray(Iterator[]::new);
+      int index = 0;
+
+      @Override
+      public boolean hasNext() {
+        boolean hasNext = false;
+        while (index < iterators.length && !(hasNext = iterators[index].hasNext())) {
+          index++;
+        }
+        return hasNext;
+      }
+
+      @Override
+      public T next() {
+        if (!hasNext()) {
+          throw new NoSuchElementException();
+        }
+        return iterators[index].next();
       }
     };
   }
@@ -169,29 +196,6 @@ public class Iterables {
     };
   }
 
-  public static <T> Iterable<T> iterableOf(final Iterable<?> it,
-      final Function<Object, T> convert) {
-    return it == null ? emptyIterable() : () -> new Iterator<T>() {
-      private final Iterator<?> fromIterator = it.iterator();
-      private final Function<Object, T> useConvert = defaultObject(convert, Objects::forceCast);
-
-      @Override
-      public boolean hasNext() {
-        return fromIterator.hasNext();
-      }
-
-      @Override
-      public T next() {
-        return useConvert.apply(fromIterator.next());
-      }
-
-      @Override
-      public void remove() {
-        fromIterator.remove();
-      }
-    };
-  }
-
   @SafeVarargs
   public static <T> Iterable<T> iterableOf(final T... objects) {
     return new Iterable<T>() {
@@ -216,6 +220,32 @@ public class Iterables {
             return array[i++];
           }
         };
+      }
+    };
+  }
+
+  public static <T> Iterable<T> transform(final Iterable<?> it, final Function<Object, T> convert) {
+    return () -> transform(it == null ? (Iterator<?>) null : it.iterator(), convert);
+  }
+
+  public static <T> Iterator<T> transform(final Iterator<?> it, final Function<Object, T> convert) {
+    return it == null ? emptyIterator() : new Iterator<T>() {
+      final Iterator<?> fromIterator = it;
+      final Function<Object, T> useConvert = defaultObject(convert, Objects::forceCast);
+
+      @Override
+      public boolean hasNext() {
+        return fromIterator.hasNext();
+      }
+
+      @Override
+      public T next() {
+        return useConvert.apply(fromIterator.next());
+      }
+
+      @Override
+      public void remove() {
+        fromIterator.remove();
       }
     };
   }

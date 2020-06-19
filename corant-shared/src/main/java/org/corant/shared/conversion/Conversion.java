@@ -17,6 +17,7 @@ import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
 import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
+import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.tryCast;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -85,7 +86,7 @@ public class Conversion {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
             targetClass, targetClass));
-        return stringConverter.iterable(iterableOf(value, Objects::asString), hints);
+        return stringConverter.iterable(transform(value, Objects::asString), hints);
       }
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,
@@ -310,9 +311,10 @@ public class Conversion {
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,
       Map<String, ?> hints) {
-    return Converters.lookup(Classes.primitiveToWrapper(sourceClass),
-        Classes.primitiveToWrapper(targetClass),
-        ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT)).orElse(null);
+    return Converters
+        .lookup(Classes.primitiveToWrapper(sourceClass), Classes.primitiveToWrapper(targetClass),
+            ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT))
+        .orElse(null);
   }
 
 }

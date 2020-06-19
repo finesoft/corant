@@ -88,7 +88,7 @@ public class Objects {
     return java.util.Objects.hashCode(o);
   }
 
-  public static boolean areDeepEquals(Object a, Object b) {
+  public static boolean areDeepEqual(Object a, Object b) {
     return java.util.Objects.deepEquals(a, b);
   }
 

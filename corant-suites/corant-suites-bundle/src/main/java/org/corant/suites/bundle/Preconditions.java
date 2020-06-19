@@ -15,7 +15,7 @@ package org.corant.suites.bundle;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Objects.areDeepEquals;
+import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Strings.contains;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -90,7 +90,7 @@ public class Preconditions {
   }
 
   public static <T> T requireDeepEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (areDeepEquals(obj1, obj2)) {
+    if (areDeepEqual(obj1, obj2)) {
       return obj1;
     } else {
       throw new GeneralRuntimeException(code, parameters);

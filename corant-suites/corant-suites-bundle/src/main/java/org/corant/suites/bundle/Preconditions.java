@@ -14,8 +14,8 @@
 package org.corant.suites.bundle;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.isDeepEquals;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.areDeepEquals;
 import static org.corant.shared.util.Strings.contains;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -90,7 +90,7 @@ public class Preconditions {
   }
 
   public static <T> T requireDeepEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (isDeepEquals(obj1, obj2)) {
+    if (areDeepEquals(obj1, obj2)) {
       return obj1;
     } else {
       throw new GeneralRuntimeException(code, parameters);
@@ -142,7 +142,7 @@ public class Preconditions {
    * @param parameters
    */
   public static <T> T requireEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (isEquals(obj1, obj2)) {
+    if (areEqual(obj1, obj2)) {
       return obj1;
     } else {
       throw new GeneralRuntimeException(code, parameters);
@@ -188,7 +188,7 @@ public class Preconditions {
    */
   public static <T extends Comparable<T>> T requireGaet(T obj, T compareObj, Object code,
       Object... parameters) {
-    if (isEquals(obj, compareObj)) {
+    if (areEqual(obj, compareObj)) {
       return obj;
     }
     if (obj == null || compareObj == null) {
@@ -271,7 +271,7 @@ public class Preconditions {
    */
   public static <T extends Comparable<T>> T requireLaet(T obj, T compareObj, Object code,
       Object... parameters) {
-    if (isEquals(obj, compareObj)) {
+    if (areEqual(obj, compareObj)) {
       return obj;
     }
     if (obj == null || compareObj == null) {

@@ -15,7 +15,7 @@ package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

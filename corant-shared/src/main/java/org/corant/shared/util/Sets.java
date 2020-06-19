@@ -14,7 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.collectionOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;

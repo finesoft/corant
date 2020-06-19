@@ -13,7 +13,7 @@
  */
 package org.corant.suites.dsa.cluster.kmeans;
 
-import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.Objects.asString;
 import java.util.Map;
 
 /**

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.cassandra;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

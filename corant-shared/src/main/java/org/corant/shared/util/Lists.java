@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -182,7 +182,7 @@ public class Lists {
     if (iterable instanceof List) {
       return forceCast(iterable);
     } else if (iterable != null) {
-      return collectionOf(ArrayList::new, iterable.iterator());
+      return listOf(iterable.iterator());
     } else {
       return new ArrayList<>();
     }

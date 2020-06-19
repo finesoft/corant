@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -81,7 +81,7 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
         () -> forConstructor(type, String.class),
         () -> forConstructor(type, CharSequence.class)
         ).map(Supplier::get)
-        .filter(ObjectUtils::isNotNull).findFirst();
+        .filter(Objects::isNotNull).findFirst();
     //@formatter:on
   }
 

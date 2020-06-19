@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.undertow;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

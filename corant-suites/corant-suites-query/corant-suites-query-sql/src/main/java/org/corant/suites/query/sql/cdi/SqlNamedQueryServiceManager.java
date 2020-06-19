@@ -15,7 +15,7 @@ package org.corant.suites.query.sql.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;

@@ -15,7 +15,7 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class QueryMappingService {
       while (!tmp.isEmpty()) {
         String tq = tmp.remove(0);
         refs.add(tq);
-        if (isEquals(tq, q)) {
+        if (areEqual(tq, q)) {
           throw new QueryRuntimeException(
               "The queries in system circular reference occurred on [%s -> %s]", q,
               String.join(" -> ", refs));

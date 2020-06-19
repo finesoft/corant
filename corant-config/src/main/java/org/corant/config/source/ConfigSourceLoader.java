@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.URLResource;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -58,7 +58,7 @@ public class ConfigSourceLoader {
             .map(ConfigSourceLoader::toURI).forEach(loadedUrls::add);
       }
     }
-    return loadedUrls.stream().map(uri -> load(toURL(uri), ordinal)).filter(ObjectUtils::isNotNull)
+    return loadedUrls.stream().map(uri -> load(toURL(uri), ordinal)).filter(Objects::isNotNull)
         .collect(Collectors.toList());
   }
 

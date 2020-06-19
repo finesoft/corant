@@ -13,8 +13,8 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;

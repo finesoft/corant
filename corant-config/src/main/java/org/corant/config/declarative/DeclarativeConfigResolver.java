@@ -21,7 +21,7 @@ import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Fields.traverseFields;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;

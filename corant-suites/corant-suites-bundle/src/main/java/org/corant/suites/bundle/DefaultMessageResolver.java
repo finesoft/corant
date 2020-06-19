@@ -13,7 +13,7 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_ERR_CODE;

@@ -14,7 +14,7 @@
 package org.corant.config.cdi;
 
 import static org.corant.shared.util.Classes.primitiveToWrapper;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
@@ -42,7 +42,7 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
 import org.corant.config.CorantConfigProviderResolver;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
@@ -121,7 +121,7 @@ public class ConfigExtension implements Extension {
 
     @Override
     public String getId() {
-      return "ConfigInjectionBean_" + String.join("_", ObjectUtils.asStrings(types));
+      return "ConfigInjectionBean_" + String.join("_", Objects.asStrings(types));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ConfigExtension implements Extension {
 
     @Override
     public String getName() {
-      return "ConfigInjectionBean_" + String.join("_", ObjectUtils.asStrings(types));
+      return "ConfigInjectionBean_" + String.join("_", Objects.asStrings(types));
     }
 
     @Override

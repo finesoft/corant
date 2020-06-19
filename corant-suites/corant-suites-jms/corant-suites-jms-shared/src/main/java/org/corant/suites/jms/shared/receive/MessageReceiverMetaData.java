@@ -15,8 +15,8 @@ package org.corant.suites.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;

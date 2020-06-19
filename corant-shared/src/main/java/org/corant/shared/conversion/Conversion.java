@@ -17,7 +17,7 @@ import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
 import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
-import static org.corant.shared.util.ObjectUtils.tryCast;
+import static org.corant.shared.util.Objects.tryCast;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Classes;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -85,7 +85,7 @@ public class Conversion {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
             targetClass, targetClass));
-        return stringConverter.iterable(iterableOf(value, ObjectUtils::asString), hints);
+        return stringConverter.iterable(iterableOf(value, Objects::asString), hints);
       }
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,

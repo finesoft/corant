@@ -18,7 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
@@ -172,7 +172,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate limit(int limit) {
-    this.limit = ObjectUtils.max(limit, 1);
+    this.limit = Objects.max(limit, 1);
     return this;
   }
 
@@ -195,7 +195,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate offset(int offset) {
-    this.offset = ObjectUtils.max(offset, 0);
+    this.offset = Objects.max(offset, 0);
     return this;
   }
 

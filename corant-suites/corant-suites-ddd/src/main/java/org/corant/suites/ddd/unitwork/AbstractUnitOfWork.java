@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.suites.ddd.message.MessageDispatcher;

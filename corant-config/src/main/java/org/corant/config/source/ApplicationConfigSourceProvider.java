@@ -17,8 +17,6 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.defaultBlank;
-import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import java.net.URL;
@@ -53,6 +51,16 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
+  static String getLocation() {
+    String location = System.getProperty(CFG_LOCATION_KEY);
+    if (isBlank(location)) {
+      location = ConfigUtils.extractSysEnv(
+          AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+          CFG_LOCATION_KEY);
+    }
+    return location;
+  }
+
   static Predicate<URL> resolveExPattern() {
     String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
     return u -> isBlank(cfgUrlExPattern)
@@ -60,14 +68,10 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   }
 
   static String[] resolveLocations() {
-    String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-    String sysLcEnv = ConfigUtils.extractSysEnv(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-        CFG_LOCATION_KEY);
-    String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
-    return isBlank(locationDir) ? new String[0]
+    final String locDir = getLocation();
+    return isBlank(locDir) ? new String[0]
         : Arrays.stream(appExtName)
-            .map(e -> locationDir + SourceType.decideSeparator(locationDir) + appBaseName + e)
+            .map(e -> locDir + SourceType.decideSeparator(locDir) + appBaseName + e)
             .toArray(String[]::new);
   }
 

@@ -20,7 +20,7 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.event;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import javax.persistence.EntityManager;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;

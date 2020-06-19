@@ -16,7 +16,7 @@ package org.corant.suites.query.shared.spi;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNoneBlank;
@@ -140,7 +140,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
-    return conversionService != null && hint != null && isEquals(hint.getKey(), HINT_NAME);
+    return conversionService != null && hint != null && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

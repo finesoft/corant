@@ -13,12 +13,20 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.util.Maps.toMap;
+import static org.corant.shared.util.Strings.asDefaultString;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Properties;
 import org.corant.config.CorantConfigSource;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-config
+ *
+ * Use http://java.sun.com/dtd/properties.dtd
  *
  * @author bingo 上午10:11:23
  *
@@ -27,11 +35,22 @@ public class XmlConfigSource extends CorantConfigSource {
 
   private static final long serialVersionUID = -6510093356770922600L;
 
-  XmlConfigSource(URL resourceUrl, int ordinal) {}
+  final Map<String, String> properties;
+
+  XmlConfigSource(URL resourceUrl, int ordinal) {
+    Properties props = new Properties();
+    try (InputStream is = resourceUrl.openStream()) {
+      props.loadFromXML(is);
+      props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));
+      properties = Collections.unmodifiableMap(toMap(props));
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
 
   @Override
   public Map<String, String> getProperties() {
-    return null;
+    return properties;
   }
 
 }

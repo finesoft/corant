@@ -16,8 +16,8 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.tryCast;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Objects.tryCast;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;

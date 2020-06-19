@@ -14,7 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Map;
 import org.corant.shared.conversion.ConverterHints;
 

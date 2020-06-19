@@ -15,8 +15,8 @@ package org.corant.config;
 
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,7 +52,7 @@ import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Conversions;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.eclipse.microprofile.config.spi.Converter;
 
 /**
@@ -301,7 +301,7 @@ public class CorantConfigConversion implements Serializable {
     Map<Type, Converter<?>> map = converters.get();
     if (map != null) {
       map.values().stream()
-          .filter(c -> BUILT_IN_CONVERTERS.stream().noneMatch(o -> isEquals(o.converter, c))
+          .filter(c -> BUILT_IN_CONVERTERS.stream().noneMatch(o -> areEqual(o.converter, c))
               && c instanceof AutoCloseable)
           .forEach(c -> {
             try {
@@ -346,7 +346,7 @@ public class CorantConfigConversion implements Serializable {
               () -> forMethod(type, "valueOf", String.class),
               () -> forMethod(type, "parse", CharSequence.class),
               () -> forConstructor(type, String.class))
-          .map(Supplier::get).filter(ObjectUtils::isNotNull).findFirst();
+          .map(Supplier::get).filter(Objects::isNotNull).findFirst();
     }
 
     static <T> Converter<T> forConstructor(Class<T> type, Class<?>... argumentTypes) {

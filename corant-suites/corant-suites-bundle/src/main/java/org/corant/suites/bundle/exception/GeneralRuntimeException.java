@@ -14,7 +14,7 @@
 package org.corant.suites.bundle.exception;
 
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.Arrays;

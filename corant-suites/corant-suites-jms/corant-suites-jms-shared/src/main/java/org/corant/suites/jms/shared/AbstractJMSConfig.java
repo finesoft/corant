@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.shared;
 
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import java.time.Duration;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;

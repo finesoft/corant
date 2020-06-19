@@ -15,8 +15,8 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.ObjectUtils.isNull;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.isNull;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
@@ -154,7 +154,7 @@ public class QueryMapping {
         // injectProNames.add(fq.getInjectPropertyName());
         // }
 
-        if (isEquals(q.getVersionedName(), fq.getReferenceQuery().getVersionedName())) {
+        if (areEqual(q.getVersionedName(), fq.getReferenceQuery().getVersionedName())) {
           brokens.add(String.format(
               "The 'fetch-query' [%s] in query element [%s] in query file [%s] can not reference the parent query!",
               fq.getReferenceQuery(), q.getName(), getUrl()));

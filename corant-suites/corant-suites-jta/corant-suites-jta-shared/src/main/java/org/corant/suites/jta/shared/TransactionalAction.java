@@ -14,7 +14,7 @@
 package org.corant.suites.jta.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;

@@ -16,7 +16,7 @@ package org.corant.suites.jaxrs.shared;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;

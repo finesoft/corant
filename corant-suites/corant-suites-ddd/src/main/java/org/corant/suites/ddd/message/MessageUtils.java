@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.message;
 
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import java.util.Queue;
 import java.util.logging.Logger;
 
@@ -29,8 +29,8 @@ public class MessageUtils {
 
   public static boolean isCorrelated(Message m, Message o) {
     return m instanceof MergableMessage && o instanceof MergableMessage
-        && isEquals(m.getClass(), o.getClass())
-        && isEquals(m.getMetadata().getSource(), o.getMetadata().getSource());
+        && areEqual(m.getClass(), o.getClass())
+        && areEqual(m.getMetadata().getSource(), o.getMetadata().getSource());
   }
 
   public static void mergeToQueue(Queue<Message> queue, Message newMsg) {

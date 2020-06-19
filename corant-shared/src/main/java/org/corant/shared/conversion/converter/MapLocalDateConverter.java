@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.time.LocalDate;
 import java.util.Map;
 import org.corant.shared.conversion.ConversionException;

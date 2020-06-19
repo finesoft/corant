@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;

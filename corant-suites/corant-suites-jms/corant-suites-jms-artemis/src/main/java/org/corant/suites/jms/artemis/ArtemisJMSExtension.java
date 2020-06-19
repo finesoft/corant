@@ -14,7 +14,7 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;

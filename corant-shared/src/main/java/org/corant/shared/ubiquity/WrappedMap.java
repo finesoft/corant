@@ -13,7 +13,7 @@
  */
 package org.corant.shared.ubiquity;
 
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -222,7 +222,7 @@ public interface WrappedMap<K, V> extends Map<K, V> {
   }
 
   default boolean same(K key, WrappedMap<K, V> other, K keyInOther) {
-    return other != null && isEquals(unwrap().get(key), other.unwrap().get(keyInOther));
+    return other != null && areEqual(unwrap().get(key), other.unwrap().get(keyInOther));
   }
 
   @Override

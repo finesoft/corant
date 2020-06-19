@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashSet;

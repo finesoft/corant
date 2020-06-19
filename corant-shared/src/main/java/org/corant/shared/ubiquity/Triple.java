@@ -14,7 +14,7 @@
 package org.corant.shared.ubiquity;
 
 import java.io.Serializable;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -63,9 +63,9 @@ public class Triple<L, M, R> implements Serializable {
     }
     if (obj instanceof Triple<?, ?, ?>) {
       final Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
-      return ObjectUtils.isEquals(getLeft(), other.getLeft())
-          && ObjectUtils.isEquals(getMiddle(), other.getMiddle())
-          && ObjectUtils.isEquals(getRight(), other.getRight());
+      return Objects.areEqual(getLeft(), other.getLeft())
+          && Objects.areEqual(getMiddle(), other.getMiddle())
+          && Objects.areEqual(getRight(), other.getRight());
     }
     return false;
   }

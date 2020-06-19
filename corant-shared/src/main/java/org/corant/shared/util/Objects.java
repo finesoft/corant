@@ -16,7 +16,6 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -28,20 +27,28 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午11:26:00
  *
  */
-public class ObjectUtils {
+public class Objects {
 
-  protected ObjectUtils() {}
+  protected Objects() {}
+
+  public static boolean areEqual(Object a, Object b) {
+    return java.util.Objects.equals(a, b);
+  }
+
+  public static <T extends Number & Comparable<T>> boolean areEqual(T a, T b) {
+    return java.util.Objects.equals(a, b) || a != null && b != null && a.compareTo(b) == 0;
+  }
 
   public static String asString(Object o) {
-    return Objects.toString(o);
+    return java.util.Objects.toString(o);
   }
 
   public static String asString(Object o, String nullDefault) {
-    return Objects.toString(o, nullDefault);
+    return java.util.Objects.toString(o, nullDefault);
   }
 
   public static String[] asStrings(Iterable<?> it) {
-    return asStrings(null, streamOf(it).map(Objects::toString).toArray(Object[]::new));
+    return asStrings(null, streamOf(it).map(java.util.Objects::toString).toArray(Object[]::new));
   }
 
   public static String[] asStrings(Object... objs) {
@@ -57,7 +64,7 @@ public class ObjectUtils {
   }
 
   public static <T> int compare(T a, T b, Comparator<? super T> c) {
-    return Objects.compare(a, b, c);
+    return java.util.Objects.compare(a, b, c);
   }
 
   public static <T> T defaultObject(T obj, Supplier<T> supplier) {
@@ -74,23 +81,15 @@ public class ObjectUtils {
   }
 
   public static int hash(Object... values) {
-    return Objects.hash(values);
+    return java.util.Objects.hash(values);
   }
 
   public static int hashCode(Object o) {
-    return Objects.hashCode(o);
+    return java.util.Objects.hashCode(o);
   }
 
-  public static boolean isDeepEquals(Object a, Object b) {
-    return Objects.deepEquals(a, b);
-  }
-
-  public static boolean isEquals(Object a, Object b) {
-    return Objects.equals(a, b);
-  }
-
-  public static <T extends Number & Comparable<T>> boolean isEquals(T a, T b) {
-    return Objects.equals(a, b) || a != null && b != null && a.compareTo(b) == 0;
+  public static boolean areDeepEquals(Object a, Object b) {
+    return java.util.Objects.deepEquals(a, b);
   }
 
   public static boolean isNoneNull(Object... objs) {
@@ -103,35 +102,73 @@ public class ObjectUtils {
   }
 
   public static boolean isNotNull(Object obj) {
-    return Objects.nonNull(obj);
+    return java.util.Objects.nonNull(obj);
   }
 
   public static boolean isNull(Object obj) {
-    return Objects.isNull(obj);
+    return java.util.Objects.isNull(obj);
   }
 
   /**
-   * Return the max one, if the two parameters are the same, then return the first.
+   * Return the max one, if the two parameters are the same, then return the first. If any of the
+   * comparables are null, return the greater of the non-null objects.
    *
    * @param <T>
-   * @param a
-   * @param b
+   * @param comparables
    * @return max
    */
-  public static <T extends Comparable<T>> T max(T a, T b) {
-    return a.compareTo(b) >= 0 ? a : b;
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> T max(final T... comparables) {
+    T result = null;
+    if (comparables != null) {
+      for (final T value : comparables) {
+        int c;
+        if (value == result) {
+          c = 0;
+        } else if (value == null) {
+          c = -1;
+        } else if (result == null) {
+          c = 1;
+        } else {
+          c = value.compareTo(result);
+        }
+        if (c > 0) {
+          result = value;
+        }
+      }
+    }
+    return result;
   }
 
   /**
-   * Return the min one, if the two parameters are the same, then return the first.
+   * Return the min one, if the two parameters are the same, then return the first. If any of the
+   * comparables are null, return the lesser of the non-null objects.
    *
    * @param <T>
-   * @param a
-   * @param b
+   * @param comparables
    * @return min
    */
-  public static <T extends Comparable<T>> T min(T a, T b) {
-    return a.compareTo(b) <= 0 ? a : b;
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> T min(final T... comparables) {
+    T result = null;
+    if (comparables != null) {
+      for (final T value : comparables) {
+        int c;
+        if (value == result) {
+          c = 0;
+        } else if (value == null) {
+          c = 1;
+        } else if (result == null) {
+          c = -1;
+        } else {
+          c = value.compareTo(result);
+        }
+        if (c < 0) {
+          result = value;
+        }
+      }
+    }
+    return result;
   }
 
   public static <T> T newInstance(Class<T> cls) {

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.shared.util.Objects.areEqual;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,7 +30,6 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.ObjectUtils;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
@@ -135,7 +135,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.remove(ai);
           evolutiveAggregates.remove(ai);
-          registeredMessages.removeIf(e -> ObjectUtils.isEquals(e.getMetadata().getSource(), ai));
+          registeredMessages.removeIf(e -> areEqual(e.getMetadata().getSource(), ai));
         }
       } else if (obj instanceof Message) {
         registeredMessages.remove(obj);

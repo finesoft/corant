@@ -17,7 +17,7 @@ import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Map;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -68,8 +68,8 @@ public class Pair<L, R> implements Map.Entry<L, R>, Serializable {
     }
     if (obj instanceof Map.Entry<?, ?>) {
       final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
-      return ObjectUtils.isEquals(getKey(), other.getKey())
-          && ObjectUtils.isEquals(getValue(), other.getValue());
+      return Objects.areEqual(getKey(), other.getKey())
+          && Objects.areEqual(getValue(), other.getValue());
     }
     return false;
   }

@@ -15,7 +15,7 @@ package org.corant.suites.query.shared.spi;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
@@ -91,7 +91,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
     return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
-        && isEquals(hint.getKey(), HINT_NAME);
+        && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;

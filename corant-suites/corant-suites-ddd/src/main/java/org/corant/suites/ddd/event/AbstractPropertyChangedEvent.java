@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.event;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
 

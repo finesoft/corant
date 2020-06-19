@@ -15,8 +15,8 @@ package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.isNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.isNotNull;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -19,7 +19,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.emptyConsumer;
 import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import java.sql.Connection;

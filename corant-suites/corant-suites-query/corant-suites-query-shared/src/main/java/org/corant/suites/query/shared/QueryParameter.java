@@ -14,7 +14,7 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Collections;

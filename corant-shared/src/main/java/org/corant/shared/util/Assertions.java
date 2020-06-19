@@ -14,8 +14,8 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.function.Supplier;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -38,7 +38,7 @@ public class Assertions {
   /**
    * Throw CorantRuntimeException if given two arguments are not equals.
    *
-   * @see ObjectUtils#isEquals(Object, Object)
+   * @see Objects#isEquals(Object, Object)
    * @param a
    * @param b shouldBeEquals
    */
@@ -56,7 +56,7 @@ public class Assertions {
    * @param args
    */
   public static void shouldBeEquals(Object a, Object b, String messageOrFormat, Object... args) {
-    if (!isEquals(a, b)) {
+    if (!areEqual(a, b)) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
   }
@@ -69,7 +69,7 @@ public class Assertions {
    * @param ex shouldBeEquals
    */
   public static void shouldBeEquals(Object a, Object b, Supplier<? extends RuntimeException> ex) {
-    if (!isEquals(a, b)) {
+    if (!areEqual(a, b)) {
       throw ex.get();
     }
   }

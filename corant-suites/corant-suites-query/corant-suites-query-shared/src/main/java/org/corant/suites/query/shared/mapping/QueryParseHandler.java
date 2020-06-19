@@ -16,7 +16,7 @@ package org.corant.suites.query.shared.mapping;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;

@@ -16,9 +16,9 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -312,7 +312,7 @@ public class Maps {
    * @return getMapList
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key) {
-    return getMapList(map, key, ObjectUtils::forceCast);
+    return getMapList(map, key, Objects::forceCast);
   }
 
   /**
@@ -394,7 +394,7 @@ public class Maps {
   }
 
   public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
-    return getMapList(map, key, ObjectUtils::forceCast);
+    return getMapList(map, key, Objects::forceCast);
   }
 
   public static Object getMapObject(final Map<?, ?> map, final Object key) {
@@ -457,7 +457,7 @@ public class Maps {
    * @return getMapList
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
-    return new HashSet<>(getMapList(map, key, ObjectUtils::forceCast));
+    return new HashSet<>(getMapList(map, key, Objects::forceCast));
   }
 
   /**
@@ -753,7 +753,7 @@ public class Maps {
     }
 
     public String asStringKeys(String splitor) {
-      String[] stringKeys = keys.stream().map(ObjectUtils::asString).toArray(String[]::new);
+      String[] stringKeys = keys.stream().map(Objects::asString).toArray(String[]::new);
       return String.join(splitor, stringKeys);
     }
 

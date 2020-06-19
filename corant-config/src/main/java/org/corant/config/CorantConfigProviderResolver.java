@@ -14,7 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -117,7 +117,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
         try {
           ((AutoCloseable) cs).close();
         } catch (Exception e) {
-          // Noop!
+          e.printStackTrace();
         }
       }
     }

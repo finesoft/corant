@@ -15,7 +15,7 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;

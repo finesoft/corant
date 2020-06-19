@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Threads.tryThreadSleep;
 import static org.corant.suites.cdi.Instances.resolve;

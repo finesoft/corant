@@ -18,8 +18,8 @@ import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapInteger;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -43,7 +43,7 @@ import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
@@ -136,12 +136,12 @@ public class SqlQueryTemplate {
   }
 
   public SqlQueryTemplate limit(int limit) {
-    this.limit = ObjectUtils.max(limit, 1);
+    this.limit = Objects.max(limit, 1);
     return this;
   }
 
   public SqlQueryTemplate offset(int offset) {
-    this.offset = ObjectUtils.max(offset, 0);
+    this.offset = Objects.max(offset, 0);
     return this;
   }
 

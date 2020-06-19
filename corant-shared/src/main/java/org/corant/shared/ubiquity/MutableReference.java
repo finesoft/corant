@@ -16,7 +16,7 @@ package org.corant.shared.ubiquity;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -37,19 +37,19 @@ public class MutableReference<T> {
   }
 
   public void accept(Consumer<T> func) {
-    T obj = ObjectUtils.forceCast(reference[0]);
+    T obj = Objects.forceCast(reference[0]);
     func.accept(obj);
   }
 
   public void apply(UnaryOperator<T> func) {
-    T obj = ObjectUtils.forceCast(reference[0]);
+    T obj = Objects.forceCast(reference[0]);
     reference[0] = func.apply(obj);
   }
 
   public T applyAndGet(UnaryOperator<T> func) {
-    T obj = ObjectUtils.forceCast(reference[0]);
+    T obj = Objects.forceCast(reference[0]);
     reference[0] = func.apply(obj);
-    return ObjectUtils.forceCast(reference[0]);
+    return Objects.forceCast(reference[0]);
   }
 
   @SuppressWarnings("rawtypes")
@@ -69,11 +69,11 @@ public class MutableReference<T> {
   }
 
   public T get() {
-    return ObjectUtils.forceCast(reference[0]);
+    return Objects.forceCast(reference[0]);
   }
 
   public T getAndApply(UnaryOperator<T> func) {
-    final T obj = ObjectUtils.forceCast(reference[0]);
+    final T obj = Objects.forceCast(reference[0]);
     reference[0] = func.apply(obj);
     return obj;
   }

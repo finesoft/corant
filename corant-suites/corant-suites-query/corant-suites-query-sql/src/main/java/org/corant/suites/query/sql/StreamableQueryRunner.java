@@ -15,7 +15,7 @@ package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.Functions.emptyConsumer;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

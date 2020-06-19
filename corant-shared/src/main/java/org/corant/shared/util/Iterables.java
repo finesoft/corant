@@ -13,8 +13,8 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -155,7 +155,7 @@ public class Iterables {
       final Function<Object, T> convert) {
     return it == null ? emptyIterable() : () -> new Iterator<T>() {
       private final Iterator<?> fromIterator = it.iterator();
-      private final Function<Object, T> useConvert = defaultObject(convert, ObjectUtils::forceCast);
+      private final Function<Object, T> useConvert = defaultObject(convert, Objects::forceCast);
 
       @Override
       public boolean hasNext() {

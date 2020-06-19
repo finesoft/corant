@@ -14,7 +14,7 @@
 package org.corant.suites.bundle.exception;
 
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -133,7 +133,7 @@ public class GeneralRuntimeExceptionWrapper {
   public static class ConjoinedBuilder extends Builder {
     ConjoinedBuilder(GeneralRuntimeExceptionWrapper wrapper, Object code) {
       super(wrapper, code);
-      wrapper.builders.removeIf(p -> isEquals(p.getCode(), code));
+      wrapper.builders.removeIf(p -> areEqual(p.getCode(), code));
       wrapper.builders.add(this);
     }
 
@@ -174,7 +174,7 @@ public class GeneralRuntimeExceptionWrapper {
     @Override
     public GeneralRuntimeException wrap() {
       for (Builder builder : getWrapper().builders) {
-        if (isEquals(builder.code, getWrapper().exception.getCode())) {
+        if (areEqual(builder.code, getWrapper().exception.getCode())) {
           getWrapper().exception.attributes(t -> builder.attributes)
               .parameters(t -> listOf(builder.parameters)).subCode(builder.subCode);
           break;

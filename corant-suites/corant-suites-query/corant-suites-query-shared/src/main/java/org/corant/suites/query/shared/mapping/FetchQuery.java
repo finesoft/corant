@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.split;
 import java.io.Serializable;
 import java.util.ArrayList;

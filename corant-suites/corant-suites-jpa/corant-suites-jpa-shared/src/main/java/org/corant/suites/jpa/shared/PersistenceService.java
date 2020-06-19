@@ -16,7 +16,7 @@ package org.corant.suites.jpa.shared;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultTrim;
 import java.util.Collections;
 import java.util.LinkedHashMap;

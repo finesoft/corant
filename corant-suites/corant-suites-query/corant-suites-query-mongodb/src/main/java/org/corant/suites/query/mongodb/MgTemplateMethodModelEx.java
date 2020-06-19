@@ -20,7 +20,7 @@ import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.Objects.asString;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;

@@ -28,7 +28,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
@@ -179,7 +179,7 @@ public interface JPARepository extends Repository<Query> {
       return new ArrayList<>();
     } else {
       return linkedHashSetOf(ids).stream().map(i -> get(entityClass, i))
-          .filter(ObjectUtils::isNotNull).collect(Collectors.toList());
+          .filter(Objects::isNotNull).collect(Collectors.toList());
     }
   }
 

@@ -13,12 +13,9 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_PROFILE_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.defaultBlank;
-import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
@@ -50,11 +47,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   }
 
   static String[] resolveProfileLocations(String[] profiles) {
-    String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-    String sysLcEnv = ConfigUtils.extractSysEnv(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-        CFG_LOCATION_KEY);
-    String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
+    String locationDir = getLocation();
     return isBlank(locationDir) ? new String[0]
         : Arrays.stream(profiles)
             .flatMap(p -> Arrays.stream(appExtName).map(e -> locationDir
@@ -63,11 +56,13 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   }
 
   static String[] resolveProfiles() {
-    String sysPfPro = System.getProperty(CFG_PROFILE_KEY);
-    String sysPfEvn = ConfigUtils.extractSysEnv(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-        CFG_PROFILE_KEY);
-    return split(defaultString(defaultBlank(sysPfPro, sysPfEvn)), ",");
+    String pfs = System.getProperty(CFG_PROFILE_KEY);
+    if (isBlank(pfs)) {
+      pfs = ConfigUtils.extractSysEnv(
+          AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+          CFG_PROFILE_KEY);
+    }
+    return split(pfs, ",");
   }
 
   @Override
@@ -75,19 +70,23 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
     List<ConfigSource> list = new ArrayList<>();
     Predicate<URL> filter = resolveExPattern();
     String[] profiles = resolveProfiles();
-    String[] locations = resolveProfileLocations(profiles);
-    String[] classPaths = resolveProfileClassPaths(profiles);
     try {
-      if (isNotEmpty(locations)) {
-        // first find locations that designated in system properties or system environment
-        logger.fine(() -> String.format("Load profile config source from designated locations %s",
-            String.join(",", locations)));
-        list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, locations));
-      } else if (isNotEmpty(classPaths)) {
-        logger.fine(() -> String.format("Load profile config source from class paths %s",
-            String.join(",", classPaths)));
-        list.addAll(
-            ConfigSourceLoader.load(classLoader, APPLICATION_PROFILE_ORDINAL, filter, classPaths));
+      if (isNotEmpty(profiles)) {
+        String[] locations = resolveProfileLocations(profiles);
+        if (isNotEmpty(locations)) {
+          // first find locations that designated in system properties or system environment
+          logger.fine(() -> String.format("Load profile config source from designated locations %s",
+              String.join(",", locations)));
+          list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, locations));
+        } else {
+          String[] classPaths = resolveProfileClassPaths(profiles);
+          if (isNotEmpty(classPaths)) {
+            logger.fine(() -> String.format("Load profile config source from class paths %s",
+                String.join(",", classPaths)));
+            list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_PROFILE_ORDINAL, filter,
+                classPaths));
+          }
+        }
       }
     } catch (IOException e) {
       throw new CorantRuntimeException(e);

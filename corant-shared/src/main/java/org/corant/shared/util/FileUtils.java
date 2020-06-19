@@ -17,8 +17,8 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -171,7 +171,7 @@ public class FileUtils {
   }
 
   public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
-    if (streamOf(JARS).anyMatch(p -> ObjectUtils.isEquals(p, jarUrl.getProtocol()))) {
+    if (streamOf(JARS).anyMatch(p -> Objects.areEqual(p, jarUrl.getProtocol()))) {
       String urlFile = jarUrl.getFile();
       int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
       if (separatorIndex != -1) {

@@ -31,18 +31,47 @@ public class Objects {
 
   protected Objects() {}
 
+  public static boolean areDeepEqual(Object a, Object b) {
+    return java.util.Objects.deepEquals(a, b);
+  }
+
+  /**
+   * @see java.util.Objects#hash(Object...)
+   * @param a
+   * @param b
+   * @return areEqual
+   */
   public static boolean areEqual(Object a, Object b) {
     return java.util.Objects.equals(a, b);
   }
 
+  /**
+   * Use to compare Number
+   *
+   * @param <T>
+   * @param a
+   * @param b
+   * @return areEqual
+   */
   public static <T extends Number & Comparable<T>> boolean areEqual(T a, T b) {
     return java.util.Objects.equals(a, b) || a != null && b != null && a.compareTo(b) == 0;
   }
 
+  /**
+   * @see java.util.Objects#toString(Object)
+   * @param o
+   * @return asString
+   */
   public static String asString(Object o) {
     return java.util.Objects.toString(o);
   }
 
+  /**
+   * @see java.util.Objects#toString(Object, String)
+   * @param o
+   * @param nullDefault
+   * @return asString
+   */
   public static String asString(Object o, String nullDefault) {
     return java.util.Objects.toString(o, nullDefault);
   }
@@ -86,10 +115,6 @@ public class Objects {
 
   public static int hashCode(Object o) {
     return java.util.Objects.hashCode(o);
-  }
-
-  public static boolean areDeepEqual(Object a, Object b) {
-    return java.util.Objects.deepEquals(a, b);
   }
 
   public static boolean isNoneNull(Object... objs) {

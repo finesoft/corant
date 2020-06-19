@@ -57,7 +57,8 @@ public class Conversions {
   }
 
   /**
-   * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal
+   * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal.
+   * Support converting String or Numeric type to BigDecimal type.
    *
    * @param obj
    * @return the converted object
@@ -72,11 +73,12 @@ public class Conversions {
   /**
    * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal,
    * return the given alternative object if the converted object is null else return the converted
-   * obejct.
+   * obejct. Support converting String or Numeric type to BigDecimal type.
    *
-   * @param obj
+   * @param obj the object that to be converted
    * @param altVal the alternative object if converted object is null
    * @return the converted object
+   *
    * @see StringBigDecimalConverter
    * @see NumberBigDecimalConverter
    */
@@ -85,15 +87,16 @@ public class Conversions {
   }
 
   /**
-   * Convert an object to rounding BigDecimal object with scale, supports String to BigDecimal
-   * Number to BigDecimal, return the given alternative object if the converted object is null else
-   * return the converted obejct.
+   * Convert an object to rounding BigDecimal object with scale, support converting String or
+   * Numeric type to BigDecimal type. Return the given alternative object if the converted object is
+   * null else return the converted obejct.
    *
-   * @param obj
-   * @param altVal
-   * @param scale
-   * @param roundingMode
+   * @param obj the object that to be converted
+   * @param altVal the alternative object if converted object is null
+   * @param scale the scale of the value to be returned.
+   * @param roundingMode the rounding mode to apply.
    * @return the converted object
+   *
    * @see StringBigDecimalConverter
    * @see NumberBigDecimalConverter
    */
@@ -105,10 +108,10 @@ public class Conversions {
 
   /**
    * Convert an object to rounding BigDecimal object with scale, use
-   * {@code BigDecimal#ROUND_HALF_UP}. supports String to BigDecimal Number to BigDecimal
+   * {@code BigDecimal#ROUND_HALF_UP}. Support converting String or Numeric type to BigDecimal type.
    *
-   * @param obj
-   * @param scale
+   * @param obj the object that to be converted
+   * @param scale the scale of the value to be returned.
    * @return the converted object
    */
   public static BigDecimal toBigDecimal(Object obj, int scale) {
@@ -123,7 +126,7 @@ public class Conversions {
    * Iterator&lt;String&gt;, Iterator&lt;? extends Number&gt;, Enumeration&lt;String&gt;,
    * Enumeration&lt;? extends Number&gt;
    *
-   * @param obj
+   * @param obj the object that to be converted
    * @return the converted object list
    *
    * @see Conversion#convert(Object, Class, Supplier, Map)
@@ -133,9 +136,10 @@ public class Conversions {
   }
 
   /**
-   * Convert an object to BigInteger object, supports String to BigInteger Number to BigInteger
+   * Convert an object to BigInteger object, support converting String or Numeric type to BigInteger
+   * type, Float or Double type object may involve rounding or truncation.
    *
-   * @param obj
+   * @param obj the object that to be converted
    * @return the converted object
    *
    * @see StringBigIntegerConverter
@@ -145,43 +149,123 @@ public class Conversions {
     return toBigInteger(obj, null);
   }
 
+  /**
+   * Convert an object to BigInteger object, return second parameter if obj is null. Support
+   * converting String or Numeric type to BigInteger type, Float or Double type object may involve
+   * rounding or truncation.
+   *
+   * @param obj the object that to be converted
+   * @param altVal the alternative object if converted object is null
+   * @return toBigInteger
+   */
   public static BigInteger toBigInteger(Object obj, BigInteger altVal) {
     return defaultObject(Conversion.convert(obj, BigInteger.class), altVal);
   }
 
+  /**
+   * Convert an object to BigInteger list. Supports String[], Number[], Iterable&lt;String&gt;,
+   * Iterable&lt;? extends Number&gt;, Iterator&lt;String&gt;, Iterator&lt;? extends Number&gt;,
+   * Enumeration&lt;String&gt;, Enumeration&lt;? extends Number&gt;, Float or Double type element
+   * may involve rounding or truncation.
+   *
+   * @param obj the object that to be converted
+   * @return toBigInteger
+   */
   public static List<BigInteger> toBigIntegerList(Object obj) {
     return toList(obj, BigInteger.class);
   }
 
+  /**
+   * Convert an object to Boolean object. If object is string then only {"true", "yes", "y", "on",
+   * "1", "是"} return Boolean.TRUE.
+   *
+   * @param obj the object that to be converted
+   * @return toBoolean
+   */
   public static Boolean toBoolean(Object obj) {
     return defaultObject(Conversion.convert(obj, Boolean.class), Boolean.FALSE);
   }
 
+  /**
+   * Convert an object to Byte object, support converting String (normal or Hex) or Numeric type to
+   * Byte type, Float or Double type object may involve rounding or truncation.
+   *
+   * @param obj the object that to be converted
+   * @return toByte
+   */
   public static Byte toByte(Object obj) {
     return toByte(obj, null);
   }
 
+  /**
+   * Convert an object to Byte object, support converting String (normal or Hex) or Numeric type to
+   * Byte type, Float or Double type object may involve rounding or truncation. Return the given
+   * alternative object if the converted object is null else return the converted obejct.
+   *
+   * @param obj the object that to be converted
+   * @param altVal the alternative object if converted object is null
+   * @return toByte
+   */
   public static Byte toByte(Object obj, Byte altVal) {
     return defaultObject(Conversion.convert(obj, Byte.class), altVal);
   }
 
+  /**
+   * Convert an object to Character, support String or byte[]
+   *
+   * @param obj the object that to be converted
+   * @return toCharacter
+   */
   public static Character toCharacter(Object obj) {
     return Conversion.convert(obj, Character.class, null);
   }
 
+  /**
+   * Convert an object to Class, support class name string.
+   *
+   * @param obj
+   * @return toClass
+   */
   public static Class<?> toClass(Object obj) {
     return Conversion.convert(obj, Class.class);
   }
 
+  /**
+   * Convert an object to a collection of the specified element type. Support Object[]
+   * Iterable&lt;?&gt; Iterator&lt;?&gt; Enumeration&lt;?&gt; or single Object.
+   *
+   * @param <T> the converted collection item type
+   * @param <C> the converted collection type
+   * @param obj the object that to be converted
+   * @param itemClass the converted collection item class
+   * @param collectionFactory the collection factory use to create Collection
+   * @return toCollection
+   *
+   * @see Conversion#convert(Object, Class, Supplier, Map)
+   */
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
       Supplier<C> collectionFactory) {
     return Conversion.convert(obj, itemClass, collectionFactory, null);
   }
 
+  /**
+   * Convert an object to Currency object
+   *
+   * @param obj the object that to be converted
+   * @return toCurrency
+   */
   public static Currency toCurrency(Object obj) {
     return toCurrency(obj, null);
   }
 
+  /**
+   * Convert an object to Currency object. Return the given alternative object if the converted
+   * object is null
+   *
+   * @param obj the object that to be converted
+   * @param altVal the alternative object if converted object is null
+   * @return toCurrency
+   */
   public static Currency toCurrency(Object obj, Currency altVal) {
     return defaultObject(Conversion.convert(obj, Currency.class), altVal);
   }

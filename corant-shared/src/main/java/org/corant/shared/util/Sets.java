@@ -13,6 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.collectionOf;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.Collections;
@@ -28,6 +30,28 @@ import java.util.Set;
  *
  */
 public class Sets {
+
+  /**
+   * The relative complement, or difference, of the specified left and right set. Namely, the
+   * resulting set contains all the elements that are in the left set but not in the right set.
+   * Neither input is mutated by this operation, an entirely new set is returned.
+   *
+   * @param <T>
+   * @param left
+   * @param right
+   * @return difference
+   */
+  public static <T> Set<T> difference(Set<T> left, Set<T> right) {
+    Set<T> diffs = new HashSet<>();
+    if (isNotEmpty(left)) {
+      if (isEmpty(right)) {
+        diffs.addAll(left);
+      } else {
+        left.stream().filter(k -> !right.contains(k)).forEach(diffs::add);
+      }
+    }
+    return diffs;
+  }
 
   /**
    * Convert an array to immutable set

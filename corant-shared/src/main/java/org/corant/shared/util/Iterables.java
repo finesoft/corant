@@ -13,8 +13,10 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,6 +25,8 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * corant-shared
@@ -38,6 +42,20 @@ public class Iterables {
 
   public static <T extends Iterable<T>> Iterator<T> breadthIterator(T obj) {
     return new BreadthIterable<>(obj).iterator();
+  }
+
+  public static <T> Iterable<T> concat(@SuppressWarnings("unchecked") final Iterable<T>... inputs) {
+    shouldNotNull(inputs);
+    return new Iterable<T>() {
+
+      final Iterable<T>[] all = Arrays.copyOf(inputs, inputs.length);
+
+      @Override
+      public Iterator<T> iterator() {
+        return Stream.of(all).map(it -> StreamSupport.stream(it.spliterator(), false))
+            .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
+      }
+    };
   }
 
   public static <T extends Iterable<T>> Iterator<T> depthIterator(T obj) {

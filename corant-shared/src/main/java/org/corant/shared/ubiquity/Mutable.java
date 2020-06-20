@@ -13,15 +13,16 @@
  */
 package org.corant.shared.ubiquity;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -48,10 +49,10 @@ public interface Mutable<T> extends Serializable {
 
     private static final long serialVersionUID = -6244772495084570391L;
 
-    private final Object[] value = new Object[] {null};
+    private T value = null;
 
     protected MutableNumber(final T object) {
-      this.value[0] = validate(object);
+      this.value = validate(object);
     }
 
     public static <X extends Number> MutableNumber<X> of(X object) {
@@ -114,15 +115,19 @@ public interface Mutable<T> extends Serializable {
       }
     }
 
-    protected static Object validate(final Object object) {
-      shouldBeTrue(object != null && (object instanceof Long || object.getClass().equals(Long.TYPE)
+    protected static <T> T validate(final T object) {
+      if (object != null && (object instanceof Long || object.getClass().equals(Long.TYPE)
           || object instanceof Integer || object.getClass().equals(Integer.TYPE)
           || object instanceof Short || object.getClass().equals(Short.TYPE)
           || object instanceof Byte || object.getClass().equals(Byte.TYPE)
           || object instanceof Double || object.getClass().equals(Double.TYPE)
           || object instanceof Float || object.getClass().equals(Float.TYPE)
-          || object instanceof BigDecimal || object instanceof BigInteger));
-      return object;
+          || object instanceof BigDecimal || object instanceof BigInteger)) {
+        return object;
+      } else {
+        throw new NotSupportedException(
+            "MutableNumber only support Integer/Long/Byte/Short/Double/Float/BigInteger/BigDecimal.");
+      }
     }
 
     public void add(final T operand) {
@@ -130,7 +135,7 @@ public interface Mutable<T> extends Serializable {
     }
 
     public T addAndGet(final Number operand) {
-      this.value[0] = doAdd(get(), operand);
+      this.value = (T) doAdd(get(), operand);
       return get();
     }
 
@@ -171,7 +176,11 @@ public interface Mutable<T> extends Serializable {
         return false;
       }
       MutableNumber other = (MutableNumber) obj;
-      if (!Arrays.deepEquals(value, other.value)) {
+      if (value == null) {
+        if (other.value != null) {
+          return false;
+        }
+      } else if (!value.equals(other.value)) {
         return false;
       }
       return true;
@@ -184,7 +193,7 @@ public interface Mutable<T> extends Serializable {
 
     @Override
     public T get() {
-      return forceCast(value[0]);
+      return forceCast(value);
     }
 
     public T getAndAdd(final Number operand) {
@@ -211,7 +220,7 @@ public interface Mutable<T> extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + Arrays.deepHashCode(value);
+      result = prime * result + (value == null ? 0 : value.hashCode());
       return result;
     }
 
@@ -235,7 +244,7 @@ public interface Mutable<T> extends Serializable {
 
     @Override
     public MutableNumber<T> set(final T object) {
-      this.value[0] = validate(object);
+      this.value = validate(object);
       return this;
     }
 
@@ -244,13 +253,13 @@ public interface Mutable<T> extends Serializable {
     }
 
     public T subtractAndGet(final Number operand) {
-      this.value[0] = doSubtract(get(), operand);
+      this.value = (T) doSubtract(get(), operand);
       return get();
     }
 
     @Override
     public String toString() {
-      return value[0] == null ? "null" : value[0].toString();
+      return value == null ? "null" : value.toString();
     }
 
   }
@@ -262,69 +271,184 @@ public interface Mutable<T> extends Serializable {
    * @author bingo 下午5:23:01
    *
    */
-  public static class MutableReference<T> implements Mutable<T> {
+  public static class MutableObject<T> implements Mutable<T> {
 
     private static final long serialVersionUID = 6276199153168086544L;
 
-    private final Object[] reference = new Object[] {null};
+    private T value;
 
-    public MutableReference(T reference) {
-      this.reference[0] = reference;
+    public MutableObject() {
+      super();
     }
 
-    public static <X> MutableReference<X> of(X reference) {
-      return new MutableReference<>(reference);
+    public MutableObject(final T value) {
+      super();
+      this.value = value;
     }
 
-    public void accept(Consumer<T> func) {
-      T obj = forceCast(reference[0]);
-      func.accept(obj);
-    }
-
-    public void apply(UnaryOperator<T> func) {
-      T obj = forceCast(reference[0]);
-      reference[0] = func.apply(obj);
-    }
-
-    public T applyAndGet(UnaryOperator<T> func) {
-      T obj = forceCast(reference[0]);
-      reference[0] = func.apply(obj);
-      return forceCast(reference[0]);
-    }
-
-    @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
+    public boolean equals(final Object obj) {
       if (obj == null) {
         return false;
       }
-      if (getClass() != obj.getClass()) {
-        return false;
+      if (this == obj) {
+        return true;
       }
-      MutableReference other = (MutableReference) obj;
-      return Arrays.deepEquals(reference, other.reference);
+      if (this.getClass() == obj.getClass()) {
+        final MutableObject<?> that = (MutableObject<?>) obj;
+        return this.value.equals(that.value);
+      }
+      return false;
     }
 
     @Override
     public T get() {
-      return forceCast(reference[0]);
+      return this.value;
     }
 
     @Override
     public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + Arrays.deepHashCode(reference);
-      return result;
+      return value == null ? 0 : value.hashCode();
     }
 
     @Override
-    public MutableReference<T> set(T reference) {
-      this.reference[0] = reference;
+    public MutableObject<T> set(final T value) {
+      this.value = value;
       return this;
     }
+
+    @Override
+    public String toString() {
+      return value == null ? "null" : value.toString();
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午1:00:35
+   *
+   */
+  public static class MutableString extends MutableObject<String> {
+
+    private static final long serialVersionUID = 4187776698909971470L;
+
+    public String getAndSet(String other) {
+      final String pre = get();
+      set(other);
+      return pre;
+    }
+
+    public String setAndGet(String other) {
+      return set(other).get();
+    }
+  }
+
+  /**
+   *
+   * corant-shared
+   *
+   * @author bingo 上午1:02:18
+   *
+   */
+  @SuppressWarnings("unchecked")
+  public static class MutableTemporal<T extends Temporal> extends MutableObject<T>
+      implements Temporal {
+
+    private static final long serialVersionUID = -5181139992639806156L;
+
+    public MutableTemporal(T value) {
+      super(value);
+    }
+
+    public Temporal getAndMinus(long amountToSubtract, TemporalUnit unit) {
+      final T pre = get();
+      set((T) get().minus(amountToSubtract, unit));
+      return pre;
+    }
+
+    public Temporal getAndMinus(TemporalAmount amount) {
+      final T pre = get();
+      set((T) amount.subtractFrom(get()));
+      return pre;
+    }
+
+    public Temporal getAndPlus(long amountToAdd, TemporalUnit unit) {
+      final T pre = get();
+      set((T) get().plus(amountToAdd, unit));
+      return pre;
+    }
+
+    public Temporal getAndPlus(TemporalAmount amount) {
+      final T pre = get();
+      set((T) amount.addTo(get()));
+      return pre;
+    }
+
+    public T getAndSet(T other) {
+      final T pre = get();
+      set(other);
+      return pre;
+    }
+
+    @Override
+    public long getLong(TemporalField field) {
+      return get().getLong(field);
+    }
+
+    @Override
+    public boolean isSupported(TemporalField field) {
+      return get().isSupported(field);
+    }
+
+    @Override
+    public boolean isSupported(TemporalUnit unit) {
+      return get().isSupported(unit);
+    }
+
+    @Override
+    public MutableTemporal<T> minus(long amountToSubtract, TemporalUnit unit) {
+      return set((T) get().minus(amountToSubtract, unit));
+    }
+
+    @Override
+    public MutableTemporal<T> minus(TemporalAmount amount) {
+      return set((T) amount.subtractFrom(get()));
+    }
+
+    @Override
+    public MutableTemporal<T> plus(long amountToAdd, TemporalUnit unit) {
+      return set((T) get().plus(amountToAdd, unit));
+    }
+
+    @Override
+    public MutableTemporal<T> plus(TemporalAmount amount) {
+      return set((T) amount.addTo(get()));
+    }
+
+    @Override
+    public MutableTemporal<T> set(T value) {
+      return (MutableTemporal<T>) super.set(value);
+    }
+
+    public T setAndGet(T other) {
+      return set(other).get();
+    }
+
+    @Override
+    public long until(Temporal endExclusive, TemporalUnit unit) {
+      return get().until(endExclusive, unit);
+    }
+
+    @Override
+    public MutableTemporal<T> with(TemporalAdjuster adjuster) {
+      return set((T) adjuster.adjustInto(get()));
+    }
+
+    @Override
+    public MutableTemporal<T> with(TemporalField field, long newValue) {
+      return set((T) get().with(field, newValue));
+    }
+
   }
 }

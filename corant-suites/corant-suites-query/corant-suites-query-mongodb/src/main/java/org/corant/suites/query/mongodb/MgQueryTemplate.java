@@ -16,8 +16,8 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
@@ -139,7 +140,11 @@ public class MgQueryTemplate {
     return result.withResults(list);
   }
 
-  public <T> Forwarding<T> forward(Class<T> clazz) {
+  public <T> Forwarding<T> forwardAs(final Class<T> clazz) {
+    return forwardAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
     List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
@@ -148,8 +153,7 @@ public class MgQueryTemplate {
       list.remove(limit);
       result.withHasNext(true);
     }
-    return result.withResults(list.stream().map(r -> QueryObjectMapper.OM.convertValue(r, clazz))
-        .collect(Collectors.toList()));
+    return result.withResults(list.stream().map(converter::apply).collect(Collectors.toList()));
   }
 
   public Map<?, ?> get() {
@@ -157,9 +161,13 @@ public class MgQueryTemplate {
     return it.hasNext() ? convert(it.next()) : null;
   }
 
-  public <T> T get(Class<T> clazz) {
+  public <T> T getAs(final Class<T> clazz) {
+    return getAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> T getAs(final Function<Object, T> converter) {
     Map<?, ?> document = get();
-    return document != null ? QueryObjectMapper.OM.convertValue(document, clazz) : null;
+    return document != null ? converter.apply(document) : null;
   }
 
   public MgQueryTemplate hint(Bson hint) {
@@ -214,7 +222,11 @@ public class MgQueryTemplate {
     return result.withResults(list);
   }
 
-  public <T> Paging<T> page(Class<T> clazz) {
+  public <T> Paging<T> pageAs(final Class<T> clazz) {
+    return pageAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Paging<T> pageAs(final Function<Object, T> converter) {
     Paging<T> result = Paging.of(offset, limit);
     FindIterable<Document> fi = query();
     List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
@@ -226,8 +238,7 @@ public class MgQueryTemplate {
         result.withTotal((int) count());
       }
     }
-    return result.withResults(list.stream().map(r -> QueryObjectMapper.OM.convertValue(r, clazz))
-        .collect(Collectors.toList()));
+    return result.withResults(list.stream().map(converter::apply).collect(Collectors.toList()));
   }
 
   public MgQueryTemplate projection(boolean include, String... propertyNames) {
@@ -273,9 +284,12 @@ public class MgQueryTemplate {
     return streamOf(query()).map(this::convert).collect(Collectors.toList());
   }
 
-  public <T> List<T> select(Class<T> clazz) {
-    return streamOf(query()).map(this::convert)
-        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz)).collect(Collectors.toList());
+  public <T> List<T> selectAs(final Class<T> clazz) {
+    return selectAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> List<T> selectAs(final Function<Object, T> converter) {
+    return streamOf(query()).map(this::convert).map(converter::apply).collect(Collectors.toList());
   }
 
   public MgQueryTemplate sort(Bson sort) {
@@ -293,10 +307,13 @@ public class MgQueryTemplate {
     return streamOf(query()).map(this::convert).map(r -> (Map) r);
   }
 
-  public <T> Stream<T> stream(Class<T> clazz) {
+  public <T> Stream<T> streamAs(final Class<T> clazz) {
+    return streamAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Stream<T> streamAs(final Function<Object, T> converter) {
     limit = 0;// NO LIMIT
-    return streamOf(query()).map(this::convert)
-        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return streamOf(query()).map(this::convert).map(converter::apply);
   }
 
   protected Map<?, ?> convert(Document doc) {

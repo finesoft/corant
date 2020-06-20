@@ -235,6 +235,7 @@ public interface Mutable<T> extends Serializable {
     }
 
     private T innersubtract(Number operand) {
+      shouldNotNull(operand);
       final T current = get();
       if (current instanceof Long) {
         return forceCast(Long.valueOf(current.longValue() - operand.longValue()));

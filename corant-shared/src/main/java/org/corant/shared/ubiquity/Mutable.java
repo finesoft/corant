@@ -219,8 +219,6 @@ public interface Mutable<T> extends Serializable {
         return forceCast(Short.valueOf((short) (current.shortValue() + operand.shortValue())));
       } else if (current instanceof Byte) {
         return forceCast(Byte.valueOf((byte) (current.byteValue() + operand.byteValue())));
-      } else if (current instanceof Byte) {
-        return forceCast(Byte.valueOf((byte) (current.byteValue() + operand.byteValue())));
       } else if (current instanceof Double) {
         return forceCast(Double.valueOf(current.doubleValue() + operand.doubleValue()));
       } else if (current instanceof Float) {
@@ -243,8 +241,6 @@ public interface Mutable<T> extends Serializable {
         return forceCast(Integer.valueOf(current.intValue() - operand.intValue()));
       } else if (current instanceof Short) {
         return forceCast(Short.valueOf((short) (current.shortValue() - operand.shortValue())));
-      } else if (current instanceof Byte) {
-        return forceCast(Byte.valueOf((byte) (current.byteValue() - operand.byteValue())));
       } else if (current instanceof Byte) {
         return forceCast(Byte.valueOf((byte) (current.byteValue() - operand.byteValue())));
       } else if (current instanceof Double) {

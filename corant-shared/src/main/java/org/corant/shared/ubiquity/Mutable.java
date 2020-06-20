@@ -42,6 +42,7 @@ public interface Mutable<T> extends Serializable {
    * @author bingo 下午4:26:18
    *
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static class MutableNumber<T extends Number> extends Number
       implements Mutable<T>, Comparable<MutableNumber<T>>, Serializable, Cloneable {
 
@@ -59,15 +60,61 @@ public interface Mutable<T> extends Serializable {
 
     public static <X extends Number> MutableNumber<X> subtract(MutableNumber<X> m1,
         MutableNumber<X> m2) {
-      return new MutableNumber<>(m1.subtractAndGet(m2));
+      return new MutableNumber<>((X) doSubtract(m1.get(), m2.get()));
     }
 
     public static <X extends Number> MutableNumber<X> sum(MutableNumber<X> m1,
         MutableNumber<X> m2) {
-      return new MutableNumber<>(m1.addAndGet(m2));
+      return new MutableNumber<>((X) doAdd(m1.get(), m2.get()));
     }
 
-    private static Object validate(final Object object) {
+    protected static Number doAdd(Number current, Number operand) {
+      shouldNotNull(operand);
+      if (current instanceof Long) {
+        return Long.valueOf(current.longValue() + operand.longValue());
+      } else if (current instanceof Integer) {
+        return Integer.valueOf(current.intValue() + operand.intValue());
+      } else if (current instanceof Short) {
+        return Short.valueOf((short) (current.shortValue() + operand.shortValue()));
+      } else if (current instanceof Byte) {
+        return Byte.valueOf((byte) (current.byteValue() + operand.byteValue()));
+      } else if (current instanceof Double) {
+        return Double.valueOf(current.doubleValue() + operand.doubleValue());
+      } else if (current instanceof Float) {
+        return Float.valueOf(current.floatValue() + operand.floatValue());
+      } else if (current instanceof BigInteger) {
+        return ((BigInteger) current).add(BigInteger.valueOf(operand.longValue()));
+      } else if (current instanceof BigDecimal) {
+        return ((BigDecimal) current).add(BigDecimal.valueOf(operand.doubleValue()));
+      } else {
+        throw new NotSupportedException();
+      }
+    }
+
+    protected static Number doSubtract(Number current, Number operand) {
+      shouldNotNull(operand);
+      if (current instanceof Long) {
+        return Long.valueOf(current.longValue() - operand.longValue());
+      } else if (current instanceof Integer) {
+        return Integer.valueOf(current.intValue() - operand.intValue());
+      } else if (current instanceof Short) {
+        return Short.valueOf((short) (current.shortValue() - operand.shortValue()));
+      } else if (current instanceof Byte) {
+        return Byte.valueOf((byte) (current.byteValue() - operand.byteValue()));
+      } else if (current instanceof Double) {
+        return Double.valueOf(current.doubleValue() - operand.doubleValue());
+      } else if (current instanceof Float) {
+        return Float.valueOf(current.floatValue() - operand.floatValue());
+      } else if (current instanceof BigInteger) {
+        return ((BigInteger) current).subtract(BigInteger.valueOf(operand.longValue()));
+      } else if (current instanceof BigDecimal) {
+        return ((BigDecimal) current).subtract(BigDecimal.valueOf(operand.doubleValue()));
+      } else {
+        throw new NotSupportedException();
+      }
+    }
+
+    protected static Object validate(final Object object) {
       shouldBeTrue(object != null && (object instanceof Long || object.getClass().equals(Long.TYPE)
           || object instanceof Integer || object.getClass().equals(Integer.TYPE)
           || object instanceof Short || object.getClass().equals(Short.TYPE)
@@ -83,7 +130,7 @@ public interface Mutable<T> extends Serializable {
     }
 
     public T addAndGet(final Number operand) {
-      this.value[0] = innerAdd(operand);
+      this.value[0] = doAdd(get(), operand);
       return get();
     }
 
@@ -92,7 +139,6 @@ public interface Mutable<T> extends Serializable {
       return new MutableNumber<>(get());
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public int compareTo(MutableNumber<T> o) {
       Comparable t1 = (Comparable) get();
@@ -124,7 +170,6 @@ public interface Mutable<T> extends Serializable {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      @SuppressWarnings("rawtypes")
       MutableNumber other = (MutableNumber) obj;
       if (!Arrays.deepEquals(value, other.value)) {
         return false;
@@ -199,62 +244,13 @@ public interface Mutable<T> extends Serializable {
     }
 
     public T subtractAndGet(final Number operand) {
-      this.value[0] = innersubtract(operand);
+      this.value[0] = doSubtract(get(), operand);
       return get();
     }
 
     @Override
     public String toString() {
       return value[0] == null ? "null" : value[0].toString();
-    }
-
-    private T innerAdd(Number operand) {
-      shouldNotNull(operand);
-      final T current = get();
-      if (current instanceof Long) {
-        return forceCast(Long.valueOf(current.longValue() + operand.longValue()));
-      } else if (current instanceof Integer) {
-        return forceCast(Integer.valueOf(current.intValue() + operand.intValue()));
-      } else if (current instanceof Short) {
-        return forceCast(Short.valueOf((short) (current.shortValue() + operand.shortValue())));
-      } else if (current instanceof Byte) {
-        return forceCast(Byte.valueOf((byte) (current.byteValue() + operand.byteValue())));
-      } else if (current instanceof Double) {
-        return forceCast(Double.valueOf(current.doubleValue() + operand.doubleValue()));
-      } else if (current instanceof Float) {
-        return forceCast(Float.valueOf(current.floatValue() + operand.floatValue()));
-      } else if (current instanceof BigInteger) {
-        return forceCast(((BigInteger) current).add(BigInteger.valueOf(operand.longValue())));
-      } else if (current instanceof BigDecimal) {
-        return forceCast(((BigDecimal) current).add(BigDecimal.valueOf(operand.doubleValue())));
-      } else {
-        throw new NotSupportedException();
-      }
-    }
-
-    private T innersubtract(Number operand) {
-      shouldNotNull(operand);
-      final T current = get();
-      if (current instanceof Long) {
-        return forceCast(Long.valueOf(current.longValue() - operand.longValue()));
-      } else if (current instanceof Integer) {
-        return forceCast(Integer.valueOf(current.intValue() - operand.intValue()));
-      } else if (current instanceof Short) {
-        return forceCast(Short.valueOf((short) (current.shortValue() - operand.shortValue())));
-      } else if (current instanceof Byte) {
-        return forceCast(Byte.valueOf((byte) (current.byteValue() - operand.byteValue())));
-      } else if (current instanceof Double) {
-        return forceCast(Double.valueOf(current.doubleValue() - operand.doubleValue()));
-      } else if (current instanceof Float) {
-        return forceCast(Float.valueOf(current.floatValue() - operand.floatValue()));
-      } else if (current instanceof BigInteger) {
-        return forceCast(((BigInteger) current).subtract(BigInteger.valueOf(operand.longValue())));
-      } else if (current instanceof BigDecimal) {
-        return forceCast(
-            ((BigDecimal) current).subtract(BigDecimal.valueOf(operand.doubleValue())));
-      } else {
-        throw new NotSupportedException();
-      }
     }
 
   }

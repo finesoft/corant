@@ -251,9 +251,10 @@ public interface Mutable<T> extends Serializable {
       } else if (current instanceof Float) {
         return forceCast(Float.valueOf(current.floatValue() - operand.floatValue()));
       } else if (current instanceof BigInteger) {
-        return forceCast(((BigInteger) current).add(BigInteger.valueOf(operand.longValue())));
+        return forceCast(((BigInteger) current).subtract(BigInteger.valueOf(operand.longValue())));
       } else if (current instanceof BigDecimal) {
-        return forceCast(((BigDecimal) current).add(BigDecimal.valueOf(operand.doubleValue())));
+        return forceCast(
+            ((BigDecimal) current).subtract(BigDecimal.valueOf(operand.doubleValue())));
       } else {
         throw new NotSupportedException();
       }

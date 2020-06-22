@@ -14,13 +14,13 @@
 package org.corant.suites.query.mongodb;
 
 import static org.corant.shared.util.Classes.getComponentClass;
-import static org.corant.shared.util.Classes.isPrimitiveOrWrapper;
-import static org.corant.shared.util.Classes.primitiveToWrapper;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Primitives.wrap;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -151,7 +151,7 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
-          Class<?> argCls = primitiveToWrapper(arg.getClass());
+          Class<?> argCls = wrap(arg.getClass());
           if (converters.containsKey(argCls)) {
             return OM.writeValueAsString(toBsonValue(arg));
           } else if (isPrimitiveOrWrapper(argCls)) {
@@ -190,7 +190,7 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
     if (args == null) {
       return args;
     }
-    Class<?> cls = primitiveToWrapper(getComponentClass(args));
+    Class<?> cls = wrap(getComponentClass(args));
     if (!converters.containsKey(cls)) {
       return args;
     } else if (args.getClass().isArray() || args instanceof Iterable) {

@@ -13,9 +13,9 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.Classes.isPrimitiveWrapper;
-import static org.corant.shared.util.Classes.wrapperToPrimitive;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.isPrimitiveWrapper;
+import static org.corant.shared.util.Primitives.unwrap;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -96,7 +96,7 @@ public class ConfigExtensionx implements Extension {
     if (type instanceof Class) {
       Class<?> typeClass = (Class<?>) type;
       if (isPrimitiveWrapper(typeClass)) {
-        Class<?> primitiveClass = wrapperToPrimitive(typeClass);
+        Class<?> primitiveClass = unwrap(typeClass);
         resolvedTypes.add(primitiveClass);
         Object array = Array.newInstance(primitiveClass, 0);
         resolvedTypes.add(array.getClass());

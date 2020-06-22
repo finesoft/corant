@@ -15,22 +15,17 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
-import static org.corant.shared.util.Maps.immutableMapOf;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -49,20 +44,6 @@ public class Classes {
   public static final char INNER_CLASS_SEPARATOR_CHAR = '$';
   public static final String INNER_CLASS_SEPARATOR = String.valueOf(INNER_CLASS_SEPARATOR_CHAR);
   public static final String CLASS_FILE_NAME_EXTENSION = ".class";
-
-  public static final Map<String, Class<?>> NAME_PRIMITIVE_MAP =
-      immutableMapOf("boolean", Boolean.TYPE, "byte", Byte.TYPE, "char", Character.TYPE, "short",
-          Short.TYPE, "int", Integer.TYPE, "long", Long.TYPE, "double", Double.TYPE, "float",
-          Float.TYPE, "void", Void.TYPE);
-
-  public static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER_MAP =
-      immutableMapOf(Boolean.TYPE, Boolean.class, Byte.TYPE, Byte.class, Character.TYPE,
-          Character.class, Short.TYPE, Short.class, Integer.TYPE, Integer.class, Long.TYPE,
-          Long.class, Double.TYPE, Double.class, Float.TYPE, Float.class, Void.TYPE, Void.TYPE);
-
-  public static final Map<Class<?>, Class<?>> WRAPPER_PRIMITIVE_MAP =
-      Collections.unmodifiableMap(PRIMITIVE_WRAPPER_MAP.entrySet().stream()
-          .collect(Collectors.toMap(Entry::getValue, Entry::getKey)));
 
   private Classes() {
     super();
@@ -92,7 +73,7 @@ public class Classes {
    */
   public static Class<?> asClass(final ClassLoader classLoader, final String className,
       final boolean initialize) throws ClassNotFoundException {
-    return NAME_PRIMITIVE_MAP.getOrDefault(className,
+    return Primitives.NAME_PRIMITIVE_MAP.getOrDefault(className,
         Class.forName(className, initialize, classLoader));
   }
 
@@ -350,13 +331,13 @@ public class Classes {
     }
     if (autoboxing) {
       if (useCls.isPrimitive() && !toClass.isPrimitive()) {
-        useCls = primitiveToWrapper(useCls);
+        useCls = Primitives.wrap(useCls);
         if (useCls == null) {
           return false;
         }
       }
       if (toClass.isPrimitive() && !useCls.isPrimitive()) {
-        useCls = wrapperToPrimitive(useCls);
+        useCls = Primitives.unwrap(useCls);
         if (useCls == null) {
           return false;
         }
@@ -413,38 +394,6 @@ public class Classes {
         && (clazz.isEnum() || clazz.isArray() && clazz.getComponentType().isEnum());
   }
 
-  public static boolean isPrimitiveArray(Class<?> clazz) {
-    return clazz.isArray() && clazz.getComponentType().isPrimitive();
-  }
-
-  public static boolean isPrimitiveOrWrapper(Class<?> clazz) {
-    return clazz != null && (clazz.isPrimitive() || isPrimitiveWrapper(clazz));
-  }
-
-  public static boolean isPrimitiveWrapper(Class<?> clazz) {
-    return WRAPPER_PRIMITIVE_MAP.containsKey(clazz);
-  }
-
-  public static boolean isPrimitiveWrapperArray(Class<?> clazz) {
-    return clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType());
-  }
-
-  public static Class<?>[] primitivesToWrappers(final Class<?>... classes) {
-    final Class<?>[] convertedClasses = new Class[classes.length];
-    for (int i = 0; i < classes.length; i++) {
-      convertedClasses[i] = primitiveToWrapper(classes[i]);
-    }
-    return convertedClasses;
-  }
-
-  public static Class<?> primitiveToWrapper(final Class<?> clazz) {
-    if (clazz != null && clazz.isPrimitive()) {
-      return PRIMITIVE_WRAPPER_MAP.get(clazz);
-    } else {
-      return clazz;
-    }
-  }
-
   public static void traverseAllInterfaces(final Class<?> clazz,
       Function<Class<?>, Boolean> visitor) {
     if (clazz != null) {
@@ -494,15 +443,4 @@ public class Classes {
     }
   }
 
-  public static Class<?>[] wrappersToPrimitives(final Class<?>... classes) {
-    final Class<?>[] convertedClasses = new Class[classes.length];
-    for (int i = 0; i < classes.length; i++) {
-      convertedClasses[i] = wrapperToPrimitive(classes[i]);
-    }
-    return convertedClasses;
-  }
-
-  public static Class<?> wrapperToPrimitive(final Class<?> cls) {
-    return WRAPPER_PRIMITIVE_MAP.get(cls);
-  }
 }

@@ -27,7 +27,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.eclipse.microprofile.config.ConfigProvider;

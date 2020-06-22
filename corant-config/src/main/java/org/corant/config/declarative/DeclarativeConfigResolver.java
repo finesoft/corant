@@ -22,6 +22,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Fields.traverseFields;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
@@ -42,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Classes;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -176,7 +176,7 @@ public class DeclarativeConfigResolver {
             if (ft.isArray()) {
               ft = ft.getComponentType();
             }
-            ft = Classes.primitiveToWrapper((Class<?>) type);
+            ft = wrap((Class<?>) type);
           } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
             ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
           }

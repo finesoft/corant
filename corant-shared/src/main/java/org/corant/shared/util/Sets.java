@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * corant-shared
@@ -81,6 +82,16 @@ public class Sets {
   }
 
   /**
+   * Collections.newSetFromMap(new ConcurrentHashMap<>());
+   *
+   * @param <T>
+   * @return newConcurrentHashSet
+   */
+  public static <T> Set<T> newConcurrentHashSet() {
+    return Collections.newSetFromMap(new ConcurrentHashMap<>());
+  }
+
+  /**
    * Convert an iterable to linked hash set
    *
    * @param <T>
@@ -104,7 +115,7 @@ public class Sets {
    * @param iterator
    * @return setOf
    */
-  public static <T> Set<T> setOf(Iterator<T> iterator) {
+  public static <T> Set<T> setOf(final Iterator<T> iterator) {
     return collectionOf(HashSet::new, iterator);
   }
 

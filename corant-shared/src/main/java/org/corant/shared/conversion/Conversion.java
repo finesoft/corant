@@ -19,6 +19,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.tryCast;
+import static org.corant.shared.util.Primitives.wrap;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -27,7 +28,6 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
 
 /**
@@ -311,10 +311,8 @@ public class Conversion {
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,
       Map<String, ?> hints) {
-    return Converters
-        .lookup(Classes.primitiveToWrapper(sourceClass), Classes.primitiveToWrapper(targetClass),
-            ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT))
-        .orElse(null);
+    return Converters.lookup(wrap(sourceClass), wrap(targetClass),
+        ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT)).orElse(null);
   }
 
 }

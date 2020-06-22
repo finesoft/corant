@@ -13,8 +13,8 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.Classes.primitiveToWrapper;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
@@ -59,7 +59,7 @@ public class ConfigExtension implements Extension {
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     Set<Type> types = injectionPoints.stream().map(ip -> {
       if (ip.getType() instanceof Class<?>) {
-        return primitiveToWrapper((Class<?>) ip.getType());
+        return wrap((Class<?>) ip.getType());
       } else {
         return ip.getType();
       }

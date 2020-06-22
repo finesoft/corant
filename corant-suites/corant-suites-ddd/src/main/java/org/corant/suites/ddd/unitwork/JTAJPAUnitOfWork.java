@@ -29,7 +29,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
@@ -139,8 +139,8 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
         }
       } else if (obj instanceof Message) {
         registeredMessages.remove(obj);
-      } else if (obj instanceof Pair<?, ?>) {
-        Pair<?, ?> p = (Pair<?, ?>) obj;
+      } else if (obj instanceof Map.Entry<?, ?>) {
+        Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
         registeredVariables.remove(p.getKey());
       }
     } else {

@@ -13,12 +13,12 @@
  */
 package org.corant.suites.query.shared.dynamic.freemarker;
 
-import static org.corant.shared.util.Classes.isPrimitiveOrWrapper;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import java.lang.reflect.Array;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;

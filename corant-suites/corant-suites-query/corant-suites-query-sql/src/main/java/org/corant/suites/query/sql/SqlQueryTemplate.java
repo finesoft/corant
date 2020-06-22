@@ -43,7 +43,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.normal.Names.JndiNames;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -247,7 +247,7 @@ public class SqlQueryTemplate {
     });
   }
 
-  public <T> Stream<T> stream(final Class<T> clazz) {
+  public <T> Stream<T> streamAs(final Class<T> clazz) {
     return streamAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
   }
 

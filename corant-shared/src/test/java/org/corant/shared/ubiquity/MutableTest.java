@@ -17,12 +17,18 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Mutable.MutableNumber;
 import org.corant.shared.ubiquity.Mutable.MutableTemporal;
+import org.corant.shared.util.Threads;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -231,6 +237,41 @@ public class MutableTest extends TestCase {
   }
 
   @Test
+  public void testMutableInstant() {
+    final TemporalAmount d = Duration.ofSeconds(20L);
+    Instant now = Instant.now();
+    MutableTemporal<Instant> m = new MutableTemporal<>(now);
+    assertEquals(now, m.get());
+    m.set(Instant.now());
+    assertFalse(now.equals(m.get()));
+    m.set(now);
+    assertTrue(now.equals(m.getAndPlus(d)));
+    assertTrue(now.plus(d).equals(m.get()));
+    assertTrue(m.minusAndGet(d).equals(now));
+    now = Instant.now();
+    m.set(now);
+    assertTrue(now.equals(m.getAndMinus(d)));
+    assertTrue(now.minus(d).equals(m.get()));
+    assertTrue(m.plusAndGet(d).equals(now));
+    if (m.isSupported(ChronoField.YEAR)) {
+      now.get(ChronoField.YEAR);
+      assertEquals(m.get(ChronoField.YEAR), now.get(ChronoField.YEAR));
+    }
+    if (m.isSupported(ChronoUnit.SECONDS)) {
+      now = Instant.now();
+      m.set(now);
+      assertTrue(now.equals(m.getAndPlus(20, ChronoUnit.SECONDS)));
+      assertTrue(now.plus(20, ChronoUnit.SECONDS).equals(m.get()));
+      assertTrue(m.minusAndGet(20, ChronoUnit.SECONDS).equals(now));
+      now = Instant.now();
+      m.set(now);
+      assertTrue(now.equals(m.getAndMinus(20, ChronoUnit.SECONDS)));
+      assertTrue(now.minus(20, ChronoUnit.SECONDS).equals(m.get()));
+      assertTrue(m.plusAndGet(20, ChronoUnit.SECONDS).equals(now));
+    }
+  }
+
+  @Test
   public void testMutableInteger() {
     MutableNumber<Integer> mi = MutableNumber.of(0);
     mi.add(1);
@@ -344,15 +385,42 @@ public class MutableTest extends TestCase {
   }
 
   @Test
-  public void testMutableTemporal() {
-    final Instant now = Instant.now();
-    MutableTemporal<Instant> m = new MutableTemporal<>(now);
+  public void testMutableZonedDateTime() {
+    final TemporalAmount d = Duration.ofSeconds(20L);
+    ZonedDateTime now = ZonedDateTime.now();
+    MutableTemporal<ZonedDateTime> m = new MutableTemporal<>(now);
     assertEquals(now, m.get());
-    m.set(Instant.now());
+    Threads.tryThreadSleep(100L);
+    m.set(ZonedDateTime.now());
     assertFalse(now.equals(m.get()));
     m.set(now);
-    assertTrue(now.equals(m.getAndPlus(Duration.ofSeconds(20L))));
-    assertTrue(now.plus(Duration.ofSeconds(20L)).equals(m.get()));
+    assertTrue(now.equals(m.getAndPlus(d)));
+    assertTrue(now.plus(d).equals(m.get()));
+    assertTrue(m.minusAndGet(d).equals(now));
+    now = ZonedDateTime.now();
+    m.set(now);
+    assertTrue(now.equals(m.getAndMinus(d)));
+    assertTrue(now.minus(d).equals(m.get()));
+    assertTrue(m.plusAndGet(d).equals(now));
+    if (m.isSupported(ChronoField.YEAR)) {
+      now.get(ChronoField.YEAR);
+      assertEquals(m.get(ChronoField.YEAR), now.get(ChronoField.YEAR));
+    }
+    if (m.isSupported(ChronoUnit.SECONDS)) {
+      now = ZonedDateTime.now();
+      m.set(now);
+      assertTrue(now.equals(m.getAndPlus(20, ChronoUnit.SECONDS)));
+      assertTrue(now.plus(20, ChronoUnit.SECONDS).equals(m.get()));
+      assertTrue(m.minusAndGet(20, ChronoUnit.SECONDS).equals(now));
+      now = ZonedDateTime.now();
+      m.set(now);
+      assertTrue(now.equals(m.getAndMinus(20, ChronoUnit.SECONDS)));
+      assertTrue(now.minus(20, ChronoUnit.SECONDS).equals(m.get()));
+      assertTrue(m.plusAndGet(20, ChronoUnit.SECONDS).equals(now));
+      Threads.tryThreadSleep(100L);
+      Temporal un = ZonedDateTime.now();
+      assertEquals(m.until(un, ChronoUnit.SECONDS), now.until(un, ChronoUnit.SECONDS));
+    }
   }
 
 }

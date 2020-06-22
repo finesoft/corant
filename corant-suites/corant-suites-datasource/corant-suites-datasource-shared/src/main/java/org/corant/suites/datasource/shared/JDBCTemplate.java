@@ -46,7 +46,7 @@ import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-suites-datasource-shared

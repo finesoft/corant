@@ -37,7 +37,7 @@ import org.corant.config.ConfigUtils;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Methods;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.eclipse.microprofile.config.Config;

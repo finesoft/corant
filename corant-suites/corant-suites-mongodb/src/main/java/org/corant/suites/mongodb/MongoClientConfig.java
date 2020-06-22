@@ -41,7 +41,7 @@ import java.util.Set;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.suites.cdi.Qualifiers.NamedObject;
 import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;

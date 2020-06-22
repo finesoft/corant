@@ -34,7 +34,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 

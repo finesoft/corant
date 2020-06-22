@@ -82,7 +82,7 @@ public class Lists {
    * @return an collection that combined by the passed in array
    */
   @SafeVarargs
-  public static <T, C extends Collection<T>> C collectionOf(IntFunction<C> supplier,
+  public static <T, C extends Collection<T>> C collectionOf(final IntFunction<C> supplier,
       final T... objects) {
     if (objects == null || objects.length == 0) {
       return supplier.apply(0);
@@ -104,7 +104,8 @@ public class Lists {
    * @param objects the iterator
    * @return an collection that combined by the passed in iterator
    */
-  public static <T, C extends Collection<T>> C collectionOf(Supplier<C> supplier, Iterator<T> it) {
+  public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
+      final Iterator<T> it) {
     if (it == null) {
       return supplier.get();
     } else {
@@ -258,7 +259,7 @@ public class Lists {
    * @param p
    * @return removeIf
    */
-  public static <C extends Collection<T>, T> C removeIf(C collection, Predicate<T> p) {
+  public static <C extends Collection<T>, T> C removeIf(final C collection, Predicate<T> p) {
     if (collection == null) {
       return null;
     } else if (p == null) {

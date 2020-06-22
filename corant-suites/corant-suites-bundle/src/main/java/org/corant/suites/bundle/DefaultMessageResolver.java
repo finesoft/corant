@@ -31,7 +31,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import org.corant.shared.ubiquity.Readable;
 
 /**
  * corant-suites-bundle

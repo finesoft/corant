@@ -23,6 +23,7 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalField;
 import java.time.temporal.TemporalUnit;
+import java.util.function.Supplier;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -31,11 +32,47 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 下午4:10:40
  *
  */
-public interface Mutable<T> extends Serializable {
+public interface Mutable<T> extends Serializable, Supplier<T> {
 
+  @Override
   T get();
 
   Mutable<T> set(T object);
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午1:00:35
+   *
+   */
+  public static class MutableBoolean extends MutableObject<Boolean>
+      implements Comparable<MutableBoolean> {
+
+    private static final long serialVersionUID = -8744451088815002675L;
+
+    protected MutableBoolean(final boolean value) {
+      super(value);
+    }
+
+    public static MutableBoolean of(final boolean value) {
+      return new MutableBoolean(value);
+    }
+
+    @Override
+    public int compareTo(final MutableBoolean o) {
+      return value == o.value ? 0 : !value ? -1 : 1;
+    }
+
+    public Boolean getAndSet(boolean other) {
+      final Boolean pre = get();
+      set(other);
+      return pre;
+    }
+
+    public Boolean setAndGet(boolean other) {
+      return set(other).get();
+    }
+  }
 
   /**
    * corant-shared
@@ -130,8 +167,9 @@ public interface Mutable<T> extends Serializable {
       }
     }
 
-    public void add(final T operand) {
+    public MutableNumber<T> add(final T operand) {
       addAndGet(operand);
+      return this;
     }
 
     public T addAndGet(final Number operand) {
@@ -151,8 +189,9 @@ public interface Mutable<T> extends Serializable {
       return t1.compareTo(t2);
     }
 
-    public void decrement() {
+    public MutableNumber<T> decrement() {
       subtractAndGet(1);
+      return this;
     }
 
     public T decrementAndGet() {
@@ -224,8 +263,9 @@ public interface Mutable<T> extends Serializable {
       return result;
     }
 
-    public void increment() {
+    public MutableNumber<T> increment() {
       addAndGet(1);
+      return this;
     }
 
     public T incrementAndGet() {
@@ -248,8 +288,9 @@ public interface Mutable<T> extends Serializable {
       return this;
     }
 
-    public void subtract(final T operand) {
+    public MutableNumber<T> subtract(final T operand) {
       subtractAndGet(operand);
+      return this;
     }
 
     public T subtractAndGet(final Number operand) {
@@ -275,13 +316,13 @@ public interface Mutable<T> extends Serializable {
 
     private static final long serialVersionUID = 6276199153168086544L;
 
-    private T value;
+    T value;
 
-    public MutableObject() {
+    protected MutableObject() {
       super();
     }
 
-    public MutableObject(final T value) {
+    protected MutableObject(final T value) {
       super();
       this.value = value;
     }
@@ -329,9 +370,27 @@ public interface Mutable<T> extends Serializable {
    * @author bingo 上午1:00:35
    *
    */
-  public static class MutableString extends MutableObject<String> {
+  public static class MutableString extends MutableObject<String>
+      implements Comparable<MutableString> {
 
     private static final long serialVersionUID = 4187776698909971470L;
+
+    protected MutableString() {
+      super();
+    }
+
+    protected MutableString(final String value) {
+      super(value);
+    }
+
+    public static MutableString of(final String value) {
+      return new MutableString(value);
+    }
+
+    @Override
+    public int compareTo(MutableString o) {
+      return value.compareTo(o.value);
+    }
 
     public String getAndSet(String other) {
       final String pre = get();
@@ -357,29 +416,33 @@ public interface Mutable<T> extends Serializable {
 
     private static final long serialVersionUID = -5181139992639806156L;
 
-    public MutableTemporal(T value) {
+    protected MutableTemporal(final T value) {
       super(value);
     }
 
-    public Temporal getAndMinus(long amountToSubtract, TemporalUnit unit) {
+    public static <X extends Temporal> MutableTemporal<X> of(final X value) {
+      return new MutableTemporal<>(value);
+    }
+
+    public T getAndMinus(long amountToSubtract, TemporalUnit unit) {
       final T pre = get();
       set((T) get().minus(amountToSubtract, unit));
       return pre;
     }
 
-    public Temporal getAndMinus(TemporalAmount amount) {
+    public T getAndMinus(TemporalAmount amount) {
       final T pre = get();
       set((T) amount.subtractFrom(get()));
       return pre;
     }
 
-    public Temporal getAndPlus(long amountToAdd, TemporalUnit unit) {
+    public T getAndPlus(long amountToAdd, TemporalUnit unit) {
       final T pre = get();
       set((T) get().plus(amountToAdd, unit));
       return pre;
     }
 
-    public Temporal getAndPlus(TemporalAmount amount) {
+    public T getAndPlus(TemporalAmount amount) {
       final T pre = get();
       set((T) amount.addTo(get()));
       return pre;
@@ -416,6 +479,14 @@ public interface Mutable<T> extends Serializable {
       return set((T) amount.subtractFrom(get()));
     }
 
+    public T minusAndGet(long amountToSubtract, TemporalUnit unit) {
+      return minus(amountToSubtract, unit).get();
+    }
+
+    public T minusAndGet(TemporalAmount amount) {
+      return minus(amount).get();
+    }
+
     @Override
     public MutableTemporal<T> plus(long amountToAdd, TemporalUnit unit) {
       return set((T) get().plus(amountToAdd, unit));
@@ -424,6 +495,14 @@ public interface Mutable<T> extends Serializable {
     @Override
     public MutableTemporal<T> plus(TemporalAmount amount) {
       return set((T) amount.addTo(get()));
+    }
+
+    public T plusAndGet(long amountToAdd, TemporalUnit unit) {
+      return plus(amountToAdd, unit).get();
+    }
+
+    public T plusAndGet(TemporalAmount amount) {
+      return plus(amount).get();
     }
 
     @Override

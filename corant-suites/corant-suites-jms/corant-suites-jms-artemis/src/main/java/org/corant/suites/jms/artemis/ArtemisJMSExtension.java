@@ -33,7 +33,7 @@ import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Conversions;
 import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.suites.jms.shared.AbstractJMSExtension;

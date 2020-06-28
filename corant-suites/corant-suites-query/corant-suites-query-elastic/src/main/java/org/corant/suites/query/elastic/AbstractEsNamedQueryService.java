@@ -46,8 +46,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(), null, null);
     try {
-      Map<String, Object> result =
-          getExecutor().searchAggregation(resolveIndexName(querier), script);
+      Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(querier),
+          script, querier.getQuery().getProperties());
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
@@ -65,8 +65,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     String script = resolveScript(querier.getScript(), null, maxSize > 0 ? maxSize : null);
     try {
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
-      List<Map<String, Object>> fetchedList = getExecutor()
-          .searchHits(resolveIndexName(querier), script, querier.getHintKeys()).getValue();
+      List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
+          script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
       fetch(fetchedList, querier);
       querier.resolveResultHints(fetchedList);
       if (result instanceof List) {
@@ -117,7 +117,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(), null, null);
     try {
-      Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script);
+      Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script,
+          querier.getQuery().getProperties());
       querier.resolveResultHints(result);
       return result;
     } catch (Exception e) {
@@ -178,7 +179,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     try {
       log(q, querier.getQueryParameter(), script);
       Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(querier), script, querier.getHintKeys());
+          getExecutor().searchHits(resolveIndexName(querier), script,
+              querier.getQuery().getProperties(), querier.getHintKeys());
       List<T> result = new ArrayList<>();
       if (!isEmpty(hits.getValue())) {
         this.fetch(hits.getValue(), querier);

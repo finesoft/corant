@@ -61,6 +61,7 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
 
   @Override
   public boolean isSupportTargetClass(Class<?> targetClass) {
+    // enums use ObjectEnumConverterFactory
     return forType(targetClass).isPresent() && !Enum.class.isAssignableFrom(targetClass);
   }
 

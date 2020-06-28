@@ -220,6 +220,8 @@ public class Classes {
   /**
    * stupid method :) need to reconstruct
    *
+   * TODO FIXME
+   *
    * Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if not
    * resolved
    *
@@ -229,11 +231,10 @@ public class Classes {
   public static Class<?> getComponentClass(Object object) {
     Class<?> clazz = null;
     if (object instanceof Iterable<?>) {
-      Iterator<?> it = ((Iterable<?>) object).iterator();
-      while (clazz == null && it.hasNext()) {
-        Object cmp = it.next();
+      for (Object cmp : (Iterable<?>) object) {
         if (cmp != null) {
           clazz = cmp.getClass();
+          break;
         }
       }
     } else if (object != null && object.getClass().isArray()) {
@@ -320,8 +321,65 @@ public class Classes {
     return getUserClass(instance.getClass());
   }
 
-  public static boolean isAssignable(Class<?> cls, final Class<?> toClass,
-      final boolean autoboxing) {
+  public static boolean isConcrete(Class<?> clazz) {
+    return clazz != null && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
+  }
+
+  public static boolean isEnum(Class<?> clazz) {
+    return clazz != null
+        && (clazz.isEnum() || clazz.isArray() && clazz.getComponentType().isEnum());
+  }
+
+  public static void traverseAllInterfaces(final Class<?> clazz,
+      Function<Class<?>, Boolean> visitor) {
+    if (clazz != null) {
+      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
+      if (usedClazz.isInterface() && !visitor.apply(usedClazz)) {
+        return;
+      }
+      Class<?> current = usedClazz;
+      stop: while (current != null) {
+        Class<?>[] ifcs = current.getInterfaces();
+        for (Class<?> ifc : ifcs) {
+          for (Class<?> cls : getAllInterfaces(ifc)) {
+            if (!visitor.apply(cls)) {
+              break stop;
+            }
+          }
+        }
+        current = current.getSuperclass();
+      }
+    }
+  }
+
+  public static void traverseAllSuperClasses(final Class<?> clazz,
+      Function<Class<?>, Boolean> visitor) {
+    if (clazz != null) {
+      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
+      if (!usedClazz.isInterface() && usedClazz != Object.class) {
+        Class<?> current = usedClazz;
+        while (current.getSuperclass() != null) {
+          if (!visitor.apply(current.getSuperclass())) {
+            break;
+          }
+          current = current.getSuperclass();
+        }
+      }
+    }
+  }
+
+  public static Class<?> tryAsClass(String className) {
+    if (isBlank(className)) {
+      return null;
+    }
+    try {
+      return asClass(defaultClassLoader(), className, true);
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
+  }
+
+  static boolean isAssignable(Class<?> cls, final Class<?> toClass, final boolean autoboxing) {
     Class<?> useCls = cls;
     if (toClass == null) {
       return false;
@@ -383,64 +441,6 @@ public class Classes {
       return false;
     }
     return toClass.isAssignableFrom(useCls);
-  }
-
-  public static boolean isConcrete(Class<?> clazz) {
-    return clazz != null && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
-  }
-
-  public static boolean isEnum(Class<?> clazz) {
-    return clazz != null
-        && (clazz.isEnum() || clazz.isArray() && clazz.getComponentType().isEnum());
-  }
-
-  public static void traverseAllInterfaces(final Class<?> clazz,
-      Function<Class<?>, Boolean> visitor) {
-    if (clazz != null) {
-      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
-      if (usedClazz.isInterface() && !visitor.apply(usedClazz)) {
-        return;
-      }
-      Class<?> current = usedClazz;
-      stop: while (current != null) {
-        Class<?>[] ifcs = current.getInterfaces();
-        for (Class<?> ifc : ifcs) {
-          for (Class<?> cls : getAllInterfaces(ifc)) {
-            if (!visitor.apply(cls)) {
-              break stop;
-            }
-          }
-        }
-        current = current.getSuperclass();
-      }
-    }
-  }
-
-  public static void traverseAllSuperClasses(final Class<?> clazz,
-      Function<Class<?>, Boolean> visitor) {
-    if (clazz != null) {
-      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
-      if (!usedClazz.isInterface() && usedClazz != Object.class) {
-        Class<?> current = usedClazz;
-        while (current.getSuperclass() != null) {
-          if (!visitor.apply(current.getSuperclass())) {
-            break;
-          }
-          current = current.getSuperclass();
-        }
-      }
-    }
-  }
-
-  public static Class<?> tryAsClass(String className) {
-    if (isBlank(className)) {
-      return null;
-    }
-    try {
-      return asClass(defaultClassLoader(), className, true);
-    } catch (ClassNotFoundException e) {
-      return null;
-    }
   }
 
 }

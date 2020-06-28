@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
 import org.corant.shared.util.Resources;
@@ -46,8 +47,8 @@ public class ConverterRegistry { // static?
 
   static final Map<ConverterType<?, ?>, Converter<?, ?>> SUPPORT_CONVERTERS =
       new ConcurrentHashMap<>();
-  static final Map<Type, ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
-      new ConcurrentHashMap<>();
+  static final List<ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
+      new CopyOnWriteArrayList<>();
   static final Map<ConverterType<?, ?>, Set<ConverterType<?, ?>>> SUPPORT_CONVERTER_PIPE_TYPES =
       new ConcurrentHashMap<>();
   static final Set<ConverterType<?, ?>> NOT_SUPPORT_TYPES =
@@ -67,19 +68,8 @@ public class ConverterRegistry { // static?
     deregister(new ConverterType((Class) type[0], (Class) type[1])); // FIXME consider other ways
   }
 
-  public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory,
-      ConverterType<?, ?>... convertFactoryTypes) {
-    Iterator<Entry<Type, ConverterFactory<?, ?>>> it =
-        SUPPORT_CONVERTER_FACTORIES.entrySet().iterator(); // FIXME consider other ways
-    while (it.hasNext()) {
-      Entry<Type, ConverterFactory<?, ?>> next = it.next();
-      if (next.getValue().equals(converterFactory)) {
-        it.remove();
-      }
-    }
-    for (ConverterType<?, ?> converter : convertFactoryTypes) {
-      deregister(converter);
-    }
+  public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory) {
+    SUPPORT_CONVERTER_FACTORIES.remove(converterFactory); // FIXME consider other ways
   }
 
   public static synchronized void deregister(ConverterType<?, ?> converterType) {
@@ -111,8 +101,11 @@ public class ConverterRegistry { // static?
   }
 
   public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
-    Type[] types = resolveTypes(converterFactory);
-    SUPPORT_CONVERTER_FACTORIES.put(types[1], converterFactory);
+    if (converterFactory != null && !SUPPORT_CONVERTER_FACTORIES.contains(converterFactory)) {
+      SUPPORT_CONVERTER_FACTORIES.add(converterFactory);
+      Collections.sort(SUPPORT_CONVERTER_FACTORIES,
+          (f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()));
+    }
   }
 
   public static synchronized void registerNotSupportType(Class<?> sourceClass,
@@ -136,7 +129,7 @@ public class ConverterRegistry { // static?
     return SUPPORT_CONVERTERS.get(converterType);
   }
 
-  static Map<Type, ConverterFactory<?, ?>> getConverterFactories() {
+  static List<ConverterFactory<?, ?>> getConverterFactories() {
     return SUPPORT_CONVERTER_FACTORIES;
   }
 

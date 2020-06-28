@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.util.StopWatch;
 
@@ -382,36 +381,6 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
       zoneId = ZoneId.of(hintZoneId.toString());
     }
     return Optional.ofNullable(zoneId);
-  }
-
-  Integer resolveInteger(Object obj) {
-    if (obj != null) {
-      if (obj instanceof Integer) {
-        return (Integer) obj;
-      } else if (obj.getClass().equals(Integer.TYPE)) {
-        return (Integer) obj;
-      } else if (obj instanceof Number) {
-        return ((Number) obj).intValue();
-      } else if (obj instanceof String) {
-        return Integer.valueOf(obj.toString());
-      }
-    }
-    throw new ConversionException("Can't convert %s to integer!", obj);
-  }
-
-  Long resolveLong(Object obj) {
-    if (obj != null) {
-      if (obj instanceof Long) {
-        return (Long) obj;
-      } else if (obj.getClass().equals(Long.TYPE)) {
-        return (Long) obj;
-      } else if (obj instanceof Number) {
-        return ((Number) obj).longValue();
-      } else if (obj instanceof String) {
-        return Long.valueOf(obj.toString());
-      }
-    }
-    throw new ConversionException("Can't convert %s to long!", obj);
   }
 
   public static class TemporalFormatter {

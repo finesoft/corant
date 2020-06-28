@@ -13,11 +13,15 @@
  */
 package org.corant.suites.jms.shared.send;
 
+import static org.corant.suites.cdi.Instances.resolve;
 import static org.corant.suites.cdi.Instances.resolveApply;
+import java.io.Serializable;
 import java.util.logging.Logger;
 import javax.jms.JMSContext;
 import javax.jms.Message;
+import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
+import org.corant.suites.jms.shared.context.MessageSerializer;
 
 /**
  * corant-suites-jms-shared
@@ -37,6 +41,15 @@ public abstract class AbstractMessageSender implements MessageSender {
     send(jmsc, message, destination, multicast);
   }
 
+  protected Message resolveMessage(JMSContext jmsc, Serializable payload,
+      SerializationSchema schema) {
+    if (payload instanceof Message) {
+      return (Message) payload;
+    } else {
+      return resolve(MessageSerializer.class, schema.qualifier()).serialize(jmsc, payload);
+    }
+  }
+
   protected void send(JMSContext jmsc, Message message, String destination, boolean multicast) {
     if (multicast) {
       jmsc.createProducer().send(jmsc.createTopic(destination), message);
@@ -44,5 +57,4 @@ public abstract class AbstractMessageSender implements MessageSender {
       jmsc.createProducer().send(jmsc.createQueue(destination), message);
     }
   }
-
 }

@@ -49,8 +49,8 @@ import org.corant.shared.conversion.converter.IdentityConverter;
  * target class.
  * 3.For converter factory the target class of parameter must be equals or extends the target class
  * of converter factory supported.
- * 4.In converter pipe, the pre converted value (as next converter parameter) must be equals or
- * extends the source class of the next converter.
+ * 4.In converter pipeline, the pre converted value (as next converter parameter) must be equals or
+ * extends the source class of the next converter. The conversion factory does not participate in the conversion pipeline
  * </pre>
  *
  * @author bingo 下午2:12:57
@@ -127,7 +127,7 @@ public class Converters {
   }
 
   static Converter getMatchedConverterFromFactory(Class<?> sourceClass, Class<?> targetClass) {
-    ConverterFactory factory = ConverterRegistry.getConverterFactories().values().stream()
+    ConverterFactory factory = ConverterRegistry.getConverterFactories().stream()
         .filter(f -> f.isSupports(sourceClass, targetClass)).findFirst().orElse(null);
     if (factory != null) {
       // FIXME initialize parameter

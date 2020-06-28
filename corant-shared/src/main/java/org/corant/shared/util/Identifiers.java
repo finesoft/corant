@@ -51,54 +51,6 @@ public class Identifiers {
     return JAVA_UUID_GENERATOR.generate(null).toString();
   }
 
-  // public static void main(String... strings) throws InterruptedException {
-  // int workers = 2, times = 9876, size = workers * times;
-  // final long[][] arr = new long[workers][times];
-  // ExecutorService es = Executors.newFixedThreadPool(workers);
-  // final CountDownLatch latch = new CountDownLatch(workers);
-  // for (int worker = 0; worker < workers; worker++) {
-  // final int workerId = worker;
-  // es.submit(() -> {
-  // for (int i = 0; i < times; i++) {
-  // arr[workerId][i] =
-  // Identifiers.snowflakeBufferUUID(workerId, true, System::currentTimeMillis);
-  // }
-  // latch.countDown();
-  // });
-  // }
-  // latch.await();
-  // Set<Long> set = new HashSet<>();
-  // Set<Long> timestamps = new HashSet<>();
-  // Map<Long, List<Long>> tmp = new LinkedHashMap<>();
-  // for (long[] ar : arr) {
-  // for (long a : ar) {
-  // set.add(a);
-  // long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
-  // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
-  // long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
-  // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
-  // tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
-  // timestamps.add(time);
-  // System.out.println(
-  // String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
-  // }
-  // }
-  // System.out.println("--------------------------------------------------");
-  // tmp.forEach((k, v) -> {
-  // v.stream().sorted()
-  // .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
-  // });
-  //
-  // timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
-  //
-  // es.shutdown();
-  // if (set.size() != size) {
-  // throw new IllegalStateException();
-  // } else {
-  // System.out.println("FINISHED: " + set.size());
-  // }
-  // }
-
   public static long snowflakeBufferUUID(final int workerId, final boolean useTimeBuff,
       Supplier<Long> timeSupplier) {
     return (long) snowflakeBufferUUIDGenerator(workerId, useTimeBuff).generate(timeSupplier);

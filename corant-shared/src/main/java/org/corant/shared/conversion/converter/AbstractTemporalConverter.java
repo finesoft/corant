@@ -24,19 +24,13 @@ import static java.time.temporal.ChronoField.YEAR;
 import static org.corant.shared.util.Lists.immutableListOf;
 import static org.corant.shared.util.Maps.immutableMapOf;
 import static org.corant.shared.util.Strings.isNotBlank;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.format.TextStyle;
 import java.time.temporal.IsoFields;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,7 +38,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.corant.shared.conversion.ConverterHints;
-import org.corant.shared.util.StopWatch;
 
 /**
  * corant-shared
@@ -281,79 +274,6 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
 
   public static Stream<TemporalFormatter> decideFormatters(String value) {
     return DEFAULT_FORMATTERS.stream().filter(tm -> tm.match(value));
-  }
-
-  public static void main(String... strings) {
-    List<String> values = new ArrayList<>();
-    values.add("19791114");
-    values.add("14-11-1979");
-    values.add("1979-11-14");
-    values.add("11/14/1979");
-    values.add("1979/11/14");
-    values.add("1979.11.14");
-    values.add("1979年11月14日");
-    values.add("14 Nov 1979");
-    values.add("14-Nov-1979");
-    values.add("14 November 1979");
-    values.add("1979-W46-3");
-    values.add("1979W463");
-    values.add("197911141114");
-    values.add("19791114 1114");
-    values.add("14-11-1979 11:14");
-    values.add("1979-11-14 11:14");
-    values.add("1979年11月14日 11时14分");
-    values.add("11/14/1979 11:14");
-    values.add("1979/11/14 11:14");
-    values.add("14 Nov 1979 11:14");
-    values.add("14 November 1979 11:14");
-    values.add("19791114111408");
-    values.add("19791114 111408");
-    values.add("14-11-1979 11:14:08");
-    values.add("1979-11-14 11:14:08");
-    values.add("1979-11-14T11:14:08");
-    values.add("1979-11-14T11:14:08Z");
-    values.add("1979-11-14T11:14:08.080Z");
-    values.add("1979-11-14T11:14:08+08:00");
-    values.add("1979-11-14T11:14:08+08:00[Asia/Shanghai]");
-    values.add("14-11-1979 11:14:08");
-    values.add("1979-11-14 11:14:08");
-    values.add("1979年11月14日 11时14分08秒");
-    values.add("11/14/1979 11:14:08");
-    values.add("1979/11/14 11:14:08");
-    values.add("14 Nov 1979 11:14:08");
-    values.add("14 November 1979 11:14:08");
-    values.add("1979-11-14-11.14.08.888888");
-    values.add("1979-11-14 11:14:08.8888");
-    values.add("Wed, 14 Nov 1979 11:14:08 GMT");
-    values.add("Wed, 14 Nov 1979 11:14:08");
-    values.add("星期三, 14 十一月 1979 11:14:08 GMT");
-    values.add("Wed Nov 14 11:14:08 GMT 1979");
-    values.add("星期三 十一月 14 11:26:28 CST 1979");
-    StopWatch sw = StopWatch.press("Time use");
-    values.forEach(v -> {
-      Optional<TemporalFormatter> tf = decideFormatter(v);
-      if (tf.isPresent()) {
-        try {
-          if (tf.get().isWithTime()) {
-            TemporalAccessor ta = tf.get().getFormatter().parseBest(v, ZonedDateTime::from,
-                Instant::from, LocalDateTime::from);
-            String s = ta.toString();
-            System.out.println(v + "\t=>\t" + s + "\t[" + ta.getClass() + "]\t\tPTN: "
-                + tf.get().getDescription());
-          } else {
-            String s = DateTimeFormatter.ISO_DATE
-                .format(tf.get().getFormatter().parse(v, LocalDate::from));
-            System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
-          }
-        } catch (Exception e) {
-          System.out.println("Error PTN:" + tf.get().getDescription());
-          e.printStackTrace(); // NOSONAR
-        }
-      } else {
-        System.out.println(String.format("Formatter [%s] not found!", v));
-      }
-    });
-    sw.stop(t -> System.out.println(t.getName() + " : " + t.getTimeMillis() + " ms!"));
   }
 
   protected Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {

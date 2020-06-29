@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.corant.shared.util.Identifiers.SnowflakeUUIDGenerator;
+import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
@@ -33,7 +34,8 @@ import junit.framework.TestCase;
  */
 public class IdentifiersTest extends TestCase {
 
-  public static void main(String... strings) throws InterruptedException {
+  @Test
+  public void test() throws InterruptedException {
     int workers = 2, times = 9876, size = workers * times;
     final long[][] arr = new long[workers][times];
     ExecutorService es = Executors.newFixedThreadPool(workers);
@@ -56,25 +58,24 @@ public class IdentifiersTest extends TestCase {
       for (long a : ar) {
         set.add(a);
         long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
-        long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
+        // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
         long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
-        long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
+        // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
         tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
         timestamps.add(time);
-        System.out.println(
-            String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
+        // System.out.println(
+        // String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
       }
     }
-    System.out.println("--------------------------------------------------");
-    tmp.forEach((k, v) -> {
-      v.stream().sorted()
-          .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
-    });
+    // System.out.println("--------------------------------------------------");
+    // tmp.forEach((k, v) -> {
+    // v.stream().sorted()
+    // .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
+    // });
 
-    timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
-
+    // timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
     es.shutdown();
     assertEquals(set.size(), size);
-    System.out.println("FINISHED: " + set.size());
+    // System.out.println("FINISHED: " + set.size());
   }
 }

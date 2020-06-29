@@ -53,7 +53,6 @@ import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Defaults;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.jta.shared.TransactionExtension;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
@@ -136,23 +135,24 @@ public class NarayanaExtension implements TransactionExtension {
   }
 
   synchronized void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
-    String dfltObjStoreDir = getConfig().getObjectsStore()
-        .orElse(Defaults.corantUserDir("-narayana-objects").toString());
+    configEnvironmentBean();// TODO FIXME NOTE: initialization sequence
+  }
+
+  void configEnvironmentBean() {
     final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
-        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
-    nullActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+        configObjectStoreEnvironment(
+            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null), null);
     final ObjectStoreEnvironmentBean defaultActionStoreObjectStoreEnvironmentBean =
-        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default");
-    defaultActionStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+        configObjectStoreEnvironment(
+            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default"), "default");
     final ObjectStoreEnvironmentBean stateStoreObjectStoreEnvironmentBean =
-        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore");
-    stateStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
+        configObjectStoreEnvironment(
+            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore"),
+            "stateStore");
     final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
-        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
-    communicationStoreObjectStoreEnvironmentBean.setObjectStoreDir(dfltObjStoreDir);
-
-    logger.info(() -> String.format("Specify the narayana object store path %s.", dfltObjStoreDir));
-
+        configObjectStoreEnvironment(
+            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore"),
+            "communicationStore");
     final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
 
@@ -200,6 +200,30 @@ public class NarayanaExtension implements TransactionExtension {
     if (recoveryManagerService == null) {
       recoveryManagerService = new NarayanaRecoveryManagerService(config.isAutoRecovery());
     }
+  }
+
+  ObjectStoreEnvironmentBean configObjectStoreEnvironment(ObjectStoreEnvironmentBean bean,
+      String type) {
+    if (type == null || "default".equalsIgnoreCase(type)) {
+      bean.setDropTable(config.getObeDefaultDropTable());
+      bean.setObjectStoreDir(config.getObeDefaultObjectStoreDir());
+      bean.setJdbcAccess(config.getObeDefaultJdbcAccess());
+      bean.setObjectStoreType(config.getObeDefaultObjectStoreType());
+      bean.setTablePrefix(config.getObeDefaultTablePrefix());
+    } else if ("stateStore".equalsIgnoreCase(type)) {
+      bean.setDropTable(config.getObeStateStoreDropTable());
+      bean.setObjectStoreDir(config.getObeStateStoreObjectStoreDir());
+      bean.setJdbcAccess(config.getObeStateStoreJdbcAccess());
+      bean.setObjectStoreType(config.getObeStateStoreObjectStoreType());
+      bean.setTablePrefix(config.getObeStateStoreTablePrefix());
+    } else {
+      bean.setDropTable(config.getObeCommunicationStoreDropTable());
+      bean.setObjectStoreDir(config.getObeCommunicationStoreObjectStoreDir());
+      bean.setJdbcAccess(config.getObeCommunicationStoreJdbcAccess());
+      bean.setObjectStoreType(config.getObeCommunicationStoreObjectStoreType());
+      bean.setTablePrefix(config.getObeCommunicationStoreTablePrefix());
+    }
+    return bean;
   }
 
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {

@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.Temporal;
-import java.util.List;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
@@ -29,11 +28,10 @@ import org.corant.shared.conversion.ConverterFactory;
  * @author bingo 下午8:01:05
  *
  */
-@SuppressWarnings("rawtypes")
-public class ListTemporalConverterFactory implements ConverterFactory<List, Temporal> {
+public class IntArrayTemporalConverterFactory implements ConverterFactory<int[], Temporal> {
 
   @Override
-  public Converter<List, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
+  public Converter<int[], Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
       boolean throwException) {
     return (t, h) -> {
       if (targetClass.equals(LocalTime.class)) {
@@ -48,7 +46,7 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
 
   @Override
   public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return List.class.isAssignableFrom(sourceClass);
+    return int[].class.isAssignableFrom(sourceClass);
   }
 
   @Override
@@ -57,50 +55,45 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
         || targetClass.equals(LocalTime.class);
   }
 
-  Temporal convertLocalDate(List value, Temporal defaultValue) {
+  Temporal convertLocalDate(int[] value, Temporal defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
       if (sizeOf(value) == 3) {
-        return LocalDate.of((Integer) value.get(0), (Integer) value.get(1), (Integer) value.get(2));
+        return LocalDate.of(value[0], value[1], value[2]);
       }
-      throw new ConversionException("Can't convert value to LocalDate from List object.");
+      throw new ConversionException("Can't convert value to LocalDate from int array.");
     }
   }
 
-  Temporal convertLocalDateTime(List value, Temporal defaultValue) {
+  Temporal convertLocalDateTime(int[] value, Temporal defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
-      int size = sizeOf(value);
+      int size = value.length;
       if (size == 5) {
-        return LocalDateTime.of((Integer) value.get(0), (Integer) value.get(1),
-            (Integer) value.get(2), (Integer) value.get(3), (Integer) value.get(4));
+        return LocalDateTime.of(value[0], value[1], value[2], value[3], value[4]);
       } else if (size == 6) {
-        return LocalDateTime.of((Integer) value.get(0), (Integer) value.get(1),
-            (Integer) value.get(2), (Integer) value.get(3), (Integer) value.get(4),
-            (Integer) value.get(5));
+        return LocalDateTime.of(value[0], value[1], value[2], value[3], value[4], value[5]);
       } else if (size == 7) {
-        return LocalDateTime.of((Integer) value.get(0), (Integer) value.get(1),
-            (Integer) value.get(2), (Integer) value.get(3), (Integer) value.get(4),
-            (Integer) value.get(5), (Integer) value.get(6));
+        return LocalDateTime.of(value[0], value[1], value[2], value[3], value[4], value[5],
+            value[6]);
       }
-      throw new ConversionException("Can't convert value to LocalDateTime from List object.");
+      throw new ConversionException("Can't convert value to LocalDateTime from int array.");
     }
   }
 
-  Temporal convertLocalTime(List value, Temporal defaultValue) {
+  Temporal convertLocalTime(int[] value, Temporal defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
-      int size = sizeOf(value);
+      int size = value.length;
       if (size == 3) {
-        return LocalTime.of((Integer) value.get(0), (Integer) value.get(1), (Integer) value.get(2));
+        return LocalTime.of(value[0], value[1], value[2]);
       } else if (size == 4) {
-        return LocalTime.of((Integer) value.get(0), (Integer) value.get(1), (Integer) value.get(2),
-            (Integer) value.get(4));
+        return LocalTime.of(value[0], value[1], value[2], value[4]);
       }
-      throw new ConversionException("Can't convert value to LocalTime from List object.");
+      throw new ConversionException("Can't convert value to LocalTime from int array.");
     }
   }
 

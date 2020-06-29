@@ -13,11 +13,20 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.shared.util.Maps.getMapBoolean;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.getOptMapObject;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativePattern;
+import org.corant.shared.normal.Defaults;
+import org.corant.shared.util.Conversions;
 import org.corant.suites.jta.shared.TransactionConfig;
+import com.arjuna.ats.internal.arjuna.objectstore.ShadowNoFileLockStore;
 
 /**
  * corant-suites-jta-narayana
@@ -30,8 +39,9 @@ public class NarayanaTransactionConfig extends TransactionConfig {
 
   private static final long serialVersionUID = -1353597648110310051L;
 
-  @ConfigKeyItem
-  Optional<String> objectsStore;
+  static final String DFLT_OBJECT_STORE_DIR =
+      Defaults.corantUserDir("-narayana-objects").toString();
+  static final String DFLT_OBJECT_STORE_TYPE = ShadowNoFileLockStore.class.getName();
 
   @ConfigKeyItem
   Optional<Duration> autoRecoveryBackoffPeriod;
@@ -42,47 +52,99 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   @ConfigKeyItem
   Optional<Duration> autoRecoveryInitOffset;
 
+  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
+  Map<String, String> objectStoreEnvironment = new HashMap<>();
+
   @ConfigKeyItem(defaultValue = "false")
   boolean enableMbean;
 
-  /**
-   *
-   * @return the autoRecoveryBackoffPeriod
-   */
   public Optional<Duration> getAutoRecoveryBackoffPeriod() {
     return autoRecoveryBackoffPeriod;
   }
 
-  /**
-   *
-   * @return the autoRecoveryInitOffset
-   */
   public Optional<Duration> getAutoRecoveryInitOffset() {
     return autoRecoveryInitOffset;
   }
 
-  /**
-   *
-   * @return the autoRecoveryPeriod
-   */
   public Optional<Duration> getAutoRecoveryPeriod() {
     return autoRecoveryPeriod;
   }
 
-  /**
-   *
-   * @return getObjectsStore
-   */
-  public Optional<String> getObjectsStore() {
-    return objectsStore;
+  public boolean getObeCommunicationStoreDropTable() {
+    return getOptMapObject(getObjectStoreEnvironment(), "communicationStore.dropTable",
+        Conversions::toBoolean).orElse(getObeDefaultDropTable());
   }
 
-  /**
-   *
-   * @return the enableMbean
-   */
+  public String getObeCommunicationStoreJdbcAccess() {
+    return getOptMapObject(getObjectStoreEnvironment(), "communicationStore.jdbcAccess",
+        Conversions::toString).orElse(getObeDefaultJdbcAccess());
+  }
+
+  public String getObeCommunicationStoreObjectStoreDir() {
+    return getOptMapObject(getObjectStoreEnvironment(), "communicationStore.objectStoreDir",
+        Conversions::toString).orElse(getObeDefaultObjectStoreDir());
+  }
+
+  public String getObeCommunicationStoreObjectStoreType() {
+    return getOptMapObject(getObjectStoreEnvironment(), "communicationStore.objectStoreType",
+        Conversions::toString).orElse(getObeDefaultObjectStoreType());
+  }
+
+  public String getObeCommunicationStoreTablePrefix() {
+    return getOptMapObject(getObjectStoreEnvironment(), "communicationStore.tablePrefix",
+        Conversions::toString).orElse(getObeDefaultTablePrefix());
+  }
+
+  public boolean getObeDefaultDropTable() {
+    return getMapBoolean(getObjectStoreEnvironment(), "dropTable");
+  }
+
+  public String getObeDefaultJdbcAccess() {
+    return getObjectStoreEnvironment().get("jdbcAccess");
+  }
+
+  public String getObeDefaultObjectStoreDir() {
+    return getMapString(getObjectStoreEnvironment(), "objectStoreDir", DFLT_OBJECT_STORE_DIR);
+  }
+
+  public String getObeDefaultObjectStoreType() {
+    return getMapString(getObjectStoreEnvironment(), "objectStoreType", DFLT_OBJECT_STORE_TYPE);
+  }
+
+  public String getObeDefaultTablePrefix() {
+    return getObjectStoreEnvironment().get("tablePrefix");
+  }
+
+  public boolean getObeStateStoreDropTable() {
+    return getOptMapObject(getObjectStoreEnvironment(), "stateStore.dropTable",
+        Conversions::toBoolean).orElse(getObeDefaultDropTable());
+  }
+
+  public String getObeStateStoreJdbcAccess() {
+    return getOptMapObject(getObjectStoreEnvironment(), "stateStore.jdbcAccess",
+        Conversions::toString).orElse(getObeDefaultJdbcAccess());
+  }
+
+  public String getObeStateStoreObjectStoreDir() {
+    return getOptMapObject(getObjectStoreEnvironment(), "stateStore.objectStoreDir",
+        Conversions::toString).orElse(getObeDefaultObjectStoreDir());
+  }
+
+  public String getObeStateStoreObjectStoreType() {
+    return getOptMapObject(getObjectStoreEnvironment(), "stateStore.objectStoreType",
+        Conversions::toString).orElse(getObeDefaultObjectStoreType());
+  }
+
+  public String getObeStateStoreTablePrefix() {
+    return getOptMapObject(getObjectStoreEnvironment(), "stateStore.tablePrefix",
+        Conversions::toString).orElse(getObeDefaultTablePrefix());
+  }
+
+  public Map<String, String> getObjectStoreEnvironment() {
+    return objectStoreEnvironment;
+  }
+
   public boolean isEnableMbean() {
     return enableMbean;
   }
-
 }

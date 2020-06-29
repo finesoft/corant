@@ -39,17 +39,15 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
   public Converter<Map, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
       boolean throwException) {
     return (t, h) -> {
-      Temporal result = null;
       if (targetClass.equals(Instant.class)) {
-        result = convertInstant(t, defaultValue);
+        return convertInstant(t, defaultValue);
       } else if (targetClass.equals(LocalDate.class)) {
-        result = convertLocalDate(t, defaultValue);
+        return convertLocalDate(t, defaultValue);
       } else if (targetClass.equals(LocalDateTime.class)) {
-        result = convertLocalDateTime(t, defaultValue);
+        return convertLocalDateTime(t, defaultValue);
       } else {
-        result = convertLocalTime(t, defaultValue);
+        return convertLocalTime(t, defaultValue);
       }
-      return defaultObject(result, defaultValue);
     };
   }
 

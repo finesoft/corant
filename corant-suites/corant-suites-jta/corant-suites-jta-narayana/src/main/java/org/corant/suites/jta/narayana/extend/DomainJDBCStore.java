@@ -13,17 +13,19 @@
  */
 package org.corant.suites.jta.narayana.extend;
 
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.sql.DataSource;
+import org.corant.shared.exception.NotSupportedException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.exceptions.ObjectStoreException;
 import com.arjuna.ats.arjuna.logging.tsLogger;
 import com.arjuna.ats.arjuna.objectstore.ObjectStoreAPI;
 import com.arjuna.ats.arjuna.objectstore.StateStatus;
-import com.arjuna.ats.arjuna.objectstore.jdbc.JDBCAccess;
 import com.arjuna.ats.arjuna.state.InputBuffer;
 import com.arjuna.ats.arjuna.state.InputObjectState;
 import com.arjuna.ats.arjuna.state.OutputBuffer;
@@ -56,13 +58,12 @@ public class DomainJDBCStore implements ObjectStoreAPI {
     this.jdbcStoreEnvironmentBean = jdbcStoreEnvironmentBean;
     String connectionDetails = jdbcStoreEnvironmentBean.getJdbcAccess();
     String key;
-
     if (connectionDetails == null) {
       throw new ObjectStoreException(tsLogger.i18NLogger.get_objectstore_JDBCStore_5());
     }
     String impleTableName = DEFAULT_TABLE_NAME;
     final String tablePrefix = jdbcStoreEnvironmentBean.getTablePrefix();
-    if (tablePrefix != null && tablePrefix.length() > 0) {
+    if (isNotBlank(tablePrefix)) {
       impleTableName = tablePrefix + impleTableName;
     }
     tableName = impleTableName;
@@ -70,12 +71,10 @@ public class DomainJDBCStore implements ObjectStoreAPI {
     _storeName = storeNames.get(key);
     if (_theImple == null) {
       try {
-        StringTokenizer stringTokenizer = new StringTokenizer(connectionDetails, ";");
-        JDBCAccess jdbcAccess =
-            (JDBCAccess) Class.forName(stringTokenizer.nextToken()).newInstance();
-        AbstractDomainJDBCDriver jdbcImple =
-            (AbstractDomainJDBCDriver) Class.forName(stringTokenizer.nextToken()).newInstance();
+        DomainDataSourceJDBCAccess jdbcAccess = DomainDataSourceJDBCAccess.instance;
+        StringTokenizer stringTokenizer = new StringTokenizer(connectionDetails, "|");
         jdbcAccess.initialise(stringTokenizer);
+        AbstractDomainJDBCDriver jdbcImple = resolveDriver(jdbcAccess.getDriverClass());
         _storeName = jdbcAccess.getClass().getName() + ":" + tableName;
         _theImple = jdbcImple;
         _theImple.initialise(jdbcAccess, tableName, jdbcStoreEnvironmentBean);
@@ -208,4 +207,16 @@ public class DomainJDBCStore implements ObjectStoreAPI {
     return _theImple.write_state(storeUid, tName, state, StateStatus.OS_UNCOMMITTED);
   }
 
+  private AbstractDomainJDBCDriver resolveDriver(Class<?> driverClass) {
+    if (!DataSource.class.isAssignableFrom(driverClass)) {
+      throw new NotSupportedException("We only support javax.sql.DataSource");
+    }
+    if (driverClass.getName().contains("com.microsoft.sqlserver")) {
+      return new DomainMSSqlDriver();
+    } else if (driverClass.getName().contains("com.mysql")) {
+      return new DomainMySqlDriver();
+    } else {
+      throw new NotSupportedException("Can't support domain jdbc driver for %s", driverClass);
+    }
+  }
 }

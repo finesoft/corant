@@ -164,6 +164,10 @@ public class Maps {
     return getMapObject(map, key, Conversions::toBoolean, Boolean.FALSE);
   }
 
+  public static Boolean getMapBoolean(final Map<?, ?> map, final Object key, Boolean nvt) {
+    return getMapObject(map, key, Conversions::toBoolean, nvt);
+  }
+
   /**
    * Convert mapped value to collection, use built-in converter
    *
@@ -430,7 +434,8 @@ public class Maps {
 
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor, final T nvt) {
-    return map != null ? defaultObject(extractor.apply(map.get(key)), nvt) : nvt;
+    Object val = map == null ? null : map.get(key);
+    return val != null ? defaultObject(extractor.apply(val), nvt) : nvt;
   }
 
   /**

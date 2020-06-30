@@ -13,6 +13,9 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +27,14 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -51,6 +62,30 @@ public class Launchs {
     builder.inheritIO();
     Process process = builder.start();
     process.waitFor();
+  }
+
+  public static void deregisterFromMBean(String... objectNamings) {
+    if (isEmpty(objectNamings)) {
+      return;
+    }
+    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+    for (String objectNaming : objectNamings) {
+      if (isNotBlank(objectNaming)) {
+        ObjectName objectName = null;
+        try {
+          objectName = new ObjectName(objectNaming);
+        } catch (MalformedObjectNameException ex) {
+          throw new CorantRuntimeException(ex);
+        }
+        try {
+          if (server.isRegistered(objectName)) {
+            server.unregisterMBean(objectName);
+          }
+        } catch (MBeanRegistrationException | InstanceNotFoundException ex) {
+          throw new CorantRuntimeException(ex);
+        }
+      }
+    }
   }
 
   public static List<String> getClassPathArgs(Predicate<String> filter) {
@@ -120,6 +155,29 @@ public class Launchs {
       }
     }
     return false;
+  }
+
+  public static void registerToMBean(String objectNaming, Object object) {
+    if (object == null || isBlank(objectNaming)) {
+      return;
+    }
+    ObjectName objectName = null;
+    try {
+      objectName = new ObjectName(objectNaming);
+    } catch (MalformedObjectNameException ex) {
+      throw new CorantRuntimeException(ex);
+    }
+
+    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+    try {
+      if (server.isRegistered(objectName)) {
+        server.unregisterMBean(objectName);
+      }
+      server.registerMBean(object, objectName);
+    } catch (InstanceAlreadyExistsException | MBeanRegistrationException
+        | NotCompliantMBeanException | InstanceNotFoundException ex) {
+      throw new CorantRuntimeException(ex);
+    }
   }
 
   public static void runAs() throws IOException, InterruptedException {

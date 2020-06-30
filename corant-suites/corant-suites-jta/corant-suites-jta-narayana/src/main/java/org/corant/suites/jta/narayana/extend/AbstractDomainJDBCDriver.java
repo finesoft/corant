@@ -300,7 +300,7 @@ public abstract class AbstractDomainJDBCDriver
     shouldBeTrue(jdbcAccess instanceof DomainDataSourceJDBCAccess);
     this.jdbcAccess = jdbcAccess;
     this.tableName = tableName;
-    domain = shouldNotBlank(((DomainDataSourceJDBCAccess) jdbcAccess).getDomainName());
+    domain = shouldNotBlank(((DomainDataSourceJDBCAccess) jdbcAccess).getDomain());
     dropTable = jdbcStoreEnvironmentBean.getDropTable();
     createTable = jdbcStoreEnvironmentBean.getCreateTable();
     prepare();

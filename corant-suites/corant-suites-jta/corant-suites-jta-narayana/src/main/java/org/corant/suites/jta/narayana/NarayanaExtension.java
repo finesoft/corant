@@ -15,13 +15,14 @@ package org.corant.suites.jta.narayana;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Launchs.registerToMBean;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.suites.cdi.Instances.select;
-import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,13 +37,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.inject.Singleton;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -54,14 +48,12 @@ import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Launchs;
 import org.corant.suites.jta.shared.TransactionExtension;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
-import com.arjuna.ats.arjuna.common.Uid;
-import com.arjuna.ats.arjuna.coordinator.CheckedAction;
-import com.arjuna.ats.arjuna.logging.tsLogger;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
@@ -84,6 +76,7 @@ public class NarayanaExtension implements TransactionExtension {
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
   protected volatile NarayanaRecoveryManagerService recoveryManagerService;
+  protected List<String> mbeanNames = new ArrayList<>();
 
   @Override
   public NarayanaTransactionConfig getConfig() {
@@ -134,190 +127,73 @@ public class NarayanaExtension implements TransactionExtension {
     }
   }
 
-  synchronized void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
+  void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event) {
     configEnvironmentBean();// TODO FIXME NOTE: initialization sequence
   }
 
   void configEnvironmentBean() {
-    final ObjectStoreEnvironmentBean nullActionStoreObjectStoreEnvironmentBean =
-        configObjectStoreEnvironment(
-            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null), null);
-    final ObjectStoreEnvironmentBean defaultActionStoreObjectStoreEnvironmentBean =
-        configObjectStoreEnvironment(
-            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default"), "default");
-    final ObjectStoreEnvironmentBean stateStoreObjectStoreEnvironmentBean =
-        configObjectStoreEnvironment(
-            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore"),
-            "stateStore");
-    final ObjectStoreEnvironmentBean communicationStoreObjectStoreEnvironmentBean =
-        configObjectStoreEnvironment(
-            BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore"),
-            "communicationStore");
-    final CoordinatorEnvironmentBean coordinatorEnvironmentBean =
+    final ObjectStoreEnvironmentBean nullActionStoreBean =
+        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null);
+    final ObjectStoreEnvironmentBean defaultStoreBean =
+        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default");
+    final ObjectStoreEnvironmentBean stateStoreBean =
+        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore");
+    final ObjectStoreEnvironmentBean commuStoreBean =
+        BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore");
+    final CoordinatorEnvironmentBean coordinatorBean =
         BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class);
-
-    getConfig().getTimeout().ifPresent(t -> {
-      coordinatorEnvironmentBean.setDefaultTimeout(toInteger(t.getSeconds()));
-      logger.fine(
-          () -> "Use thread interrupt checked action for narayana, it can cause inconsistencies.");
-      coordinatorEnvironmentBean.setAllowCheckedActionFactoryOverride(true);
-      coordinatorEnvironmentBean
-          .setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());
-    });
-
-    final CoreEnvironmentBean coreEnvironmentBean =
+    final CoreEnvironmentBean coreBean =
         BeanPopulator.getDefaultInstance(CoreEnvironmentBean.class);
-    final JTAEnvironmentBean jtaEnvironmentBean =
-        BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
-    final RecoveryEnvironmentBean recoveryEnvironmentBean =
+    final JTAEnvironmentBean jtaBean = BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
+    final RecoveryEnvironmentBean recoveryBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
-
-    if (getConfig().isAutoRecovery()) {
-      getConfig().getAutoRecoveryPeriod().ifPresent(
-          p -> recoveryEnvironmentBean.setPeriodicRecoveryPeriod(toInteger(p.getSeconds())));
-      getConfig().getAutoRecoveryInitOffset().ifPresent(p -> recoveryEnvironmentBean
-          .setPeriodicRecoveryInitilizationOffset(toInteger(p.getSeconds())));
-      getConfig().getAutoRecoveryBackoffPeriod().ifPresent(
-          p -> recoveryEnvironmentBean.setRecoveryBackoffPeriod(toInteger(p.getSeconds())));
-    }
-
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
         .sorted(Sortable::compare).forEach(cfgr -> {
           logger.fine(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));
-          cfgr.configCoreEnvironment(coreEnvironmentBean);
-          cfgr.configCoordinatorEnvironment(coordinatorEnvironmentBean);
-          cfgr.configRecoveryEnvironment(recoveryEnvironmentBean);
-          cfgr.configObjectStoreEnvironment(nullActionStoreObjectStoreEnvironmentBean, null);
-          cfgr.configObjectStoreEnvironment(defaultActionStoreObjectStoreEnvironmentBean,
-              "default");
-          cfgr.configObjectStoreEnvironment(stateStoreObjectStoreEnvironmentBean, "stateStore");
-          cfgr.configObjectStoreEnvironment(communicationStoreObjectStoreEnvironmentBean,
-              "communicationStore");
-          cfgr.configJTAEnvironmentBean(jtaEnvironmentBean);
+          cfgr.configCoreEnvironment(coreBean, config);
+          cfgr.configCoordinatorEnvironment(coordinatorBean, config);
+          cfgr.configRecoveryEnvironment(recoveryBean, config);
+          cfgr.configObjectStoreEnvironment(nullActionStoreBean, null, config);
+          cfgr.configObjectStoreEnvironment(defaultStoreBean, "default", config);
+          cfgr.configObjectStoreEnvironment(stateStoreBean, "stateStore", config);
+          cfgr.configObjectStoreEnvironment(commuStoreBean, "communicationStore", config);
+          cfgr.configJTAEnvironmentBean(jtaBean, config);
         });
-
+    if (config.isEnableMbean()) {
+      registerToMBean(resolveMBeanName("ObjStoreEnvBean-nullAction"), nullActionStoreBean);
+      registerToMBean(resolveMBeanName("ObjStoreEnvBean-default"), defaultStoreBean);
+      registerToMBean(resolveMBeanName("ObjStoreEnvBean-stateStore"), stateStoreBean);
+      registerToMBean(resolveMBeanName("ObjStoreEnvBean-communicationStore"), commuStoreBean);
+      registerToMBean(resolveMBeanName("CoordinatorEnvtBean"), coordinatorBean);
+      registerToMBean(resolveMBeanName("JTAEnvBean"), jtaBean);
+      registerToMBean(resolveMBeanName("RecoveryEnvBean"), recoveryBean);
+      logger.info(() -> "Registered narayana environment beans to MBean server.");
+    }
     if (recoveryManagerService == null) {
       recoveryManagerService = new NarayanaRecoveryManagerService(config.isAutoRecovery());
     }
   }
 
-  ObjectStoreEnvironmentBean configObjectStoreEnvironment(ObjectStoreEnvironmentBean bean,
-      String type) {
-    if (type == null || "default".equalsIgnoreCase(type)) {
-      bean.setDropTable(config.getObeDefaultDropTable());
-      bean.setObjectStoreDir(config.getObeDefaultObjectStoreDir());
-      bean.setJdbcAccess(config.getObeDefaultJdbcAccess());
-      bean.setObjectStoreType(config.getObeDefaultObjectStoreType());
-      bean.setTablePrefix(config.getObeDefaultTablePrefix());
-    } else if ("stateStore".equalsIgnoreCase(type)) {
-      bean.setDropTable(config.getObeStateStoreDropTable());
-      bean.setObjectStoreDir(config.getObeStateStoreObjectStoreDir());
-      bean.setJdbcAccess(config.getObeStateStoreJdbcAccess());
-      bean.setObjectStoreType(config.getObeStateStoreObjectStoreType());
-      bean.setTablePrefix(config.getObeStateStoreTablePrefix());
-    } else {
-      bean.setDropTable(config.getObeCommunicationStoreDropTable());
-      bean.setObjectStoreDir(config.getObeCommunicationStoreObjectStoreDir());
-      bean.setJdbcAccess(config.getObeCommunicationStoreJdbcAccess());
-      bean.setObjectStoreType(config.getObeCommunicationStoreObjectStoreType());
-      bean.setTablePrefix(config.getObeCommunicationStoreTablePrefix());
-    }
-    return bean;
-  }
-
   void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
     recoveryManagerService.initialize();
-    registerToMBean();
   }
 
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
       recoveryManagerService.unInitialize();
       recoveryManagerService = null;
+      if (isNotEmpty(mbeanNames)) {
+        mbeanNames.forEach(Launchs::deregisterFromMBean);
+      }
     } catch (Exception e) {
       logger.log(Level.WARNING, e, () -> "Uninitialize recovery manager service occurred error!");
     }
   }
 
-  synchronized void registerToMBean() {
-    if (config.isEnableMbean()) {
-      registerToMBean("ObjectStoreEnvironmentBean-nullAction",
-          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, null));
-      registerToMBean("ObjectStoreEnvironmentBean-default",
-          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "default"));
-      registerToMBean("ObjectStoreEnvironmentBean-stateStore",
-          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore"));
-      registerToMBean("ObjectStoreEnvironmentBean-communicationStore",
-          BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore"));
-      registerToMBean("CoordinatorEnvironmentBean",
-          BeanPopulator.getDefaultInstance(CoordinatorEnvironmentBean.class));
-      registerToMBean("JTAEnvironmentBean",
-          BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
-      registerToMBean("RecoveryEnvironmentBean",
-          BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class));
-      logger.info(() -> "Registered narayana environment beans to MBean server.");
-    }
-  }
-
-  void registerToMBean(String beanName, Object bean) {
-    ObjectName objectName = null;
-    try {
-      objectName = new ObjectName(applicationName() + ":type=narayana,name=" + beanName);
-    } catch (MalformedObjectNameException ex) {
-      throw new CorantRuntimeException(ex);
-    }
-
-    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-    try {
-      if (server.isRegistered(objectName)) {
-        server.unregisterMBean(objectName);
-      }
-      server.registerMBean(bean, objectName);
-    } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-        | NotCompliantMBeanException | InstanceNotFoundException ex) {
-      throw new CorantRuntimeException(ex);
-    }
-  }
-
-  public static class InterruptCheckedAction extends CheckedAction {
-
-    protected final Logger logger = Logger.getLogger(this.getClass().toString());
-
-    @Override
-    public synchronized void check(boolean isCommit, Uid actUid,
-        @SuppressWarnings("rawtypes") Hashtable list) {
-      if (isCommit) {
-        tsLogger.i18NLogger.warn_coordinator_CheckedAction_1(actUid, Integer.toString(list.size()));
-      } else {
-        try {
-          for (Object item : list.values()) {
-            if (item instanceof Thread) {
-              Thread thread = (Thread) item;
-              try {
-                Throwable t =
-                    new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");
-                t.setStackTrace(thread.getStackTrace());
-                logger.log(Level.INFO, t,
-                    () -> String.format("Transaction %s is %s with active thread %s",
-                        actUid.toString(), isCommit ? "committing" : "aborting", thread.getName()));
-              } catch (Exception e) {
-                logger.log(Level.WARNING, e,
-                    () -> String.format(
-                        "Narayana extension checked action execute failed on %s , isCommit %s .",
-                        actUid, isCommit));
-              }
-              thread.interrupt();
-            }
-          }
-        } catch (Exception e) {
-          logger.log(Level.WARNING, e,
-              () -> String.format(
-                  "Narayana extension checked action execute failed on %s , isCommit %s .", actUid,
-                  isCommit));
-        }
-        tsLogger.i18NLogger.warn_coordinator_CheckedAction_2(actUid, Integer.toString(list.size()));
-      }
-    }
+  String resolveMBeanName(String beanName) {
+    String name = applicationName() + ":type=narayana,name=" + beanName;
+    mbeanNames.add(name);
+    return name;
   }
 }

@@ -15,10 +15,11 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Launchs.deregisterFromMBean;
+import static org.corant.shared.util.Launchs.registerToMBean;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
-import java.lang.management.ManagementFactory;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
@@ -35,19 +36,12 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 import org.corant.kernel.boot.Power;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
@@ -131,6 +125,7 @@ public class Corant implements AutoCloseable {
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
   public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
+  public static final String POWER_MBEAN_NAME = applicationName() + ":type=kernel,name=Power";
 
   private static volatile Corant me; // NOSONAR
 
@@ -381,8 +376,8 @@ public class Corant implements AutoCloseable {
     log("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
         Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
         TimeZone.getDefault().getID());
-    log("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(),
-        Launchs.getTotalMemoryMb(), Launchs.getMaxMemoryMb(), boostLine());
+    log("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
+        Launchs.getMaxMemoryMb(), boostLine());
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
@@ -425,26 +420,15 @@ public class Corant implements AutoCloseable {
     synchronized (this) {
       if (power == null) {
         power = new Power(beanClasses, arguments);
-        ObjectName objectName = null;
-        try {
-          objectName = new ObjectName(applicationName() + ":type=kernel,name=Power");
-        } catch (MalformedObjectNameException ex) {
-          throw new CorantRuntimeException(ex);
-        }
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        try {
-          if (!server.isRegistered(objectName)) {
-            server.registerMBean(power, objectName);
-          }
-        } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-            | NotCompliantMBeanException ex) {
-          throw new CorantRuntimeException(ex);
-        }
+        registerToMBean(POWER_MBEAN_NAME, power);
+        Runtime.getRuntime()
+            .addShutdownHook(new Thread(() -> deregisterFromMBean(POWER_MBEAN_NAME)));
       }
       log("Registered %s to MBean server, one can use it for shutdown or restartup the application.",
           applicationName(), Instant.now());
       return true;
     }
+
   }
 
   private String boostLine() {

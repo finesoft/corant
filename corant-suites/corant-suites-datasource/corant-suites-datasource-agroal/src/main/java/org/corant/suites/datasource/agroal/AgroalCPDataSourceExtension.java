@@ -15,29 +15,26 @@ package org.corant.suites.datasource.agroal;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Launchs.registerToMBean;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.tryResolve;
-import java.lang.management.ManagementFactory;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Level;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
@@ -45,6 +42,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Launchs;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
 import io.agroal.api.AgroalDataSource;
@@ -62,6 +60,21 @@ import io.agroal.narayana.NarayanaTransactionIntegration;
  *
  */
 public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
+
+  Set<String> mbeanNames = new CopyOnWriteArraySet<>();
+
+  @Override
+  protected void onBeforeShutdown(@Observes BeforeShutdown bs) {
+    super.onBeforeShutdown(bs);
+    try {
+      if (isNotEmpty(mbeanNames)) {
+        mbeanNames.forEach(Launchs::deregisterFromMBean);
+      }
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e,
+          () -> "Deregister agroal data source %s metrices from jmx error!");
+    }
+  }
 
   /**
    *
@@ -164,22 +177,9 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   void registerMetricsMBean(String name) {
     final String useName = defaultString(name, "unnamed");
     logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
-    ObjectName objectName = null;
-    try {
-      objectName = new ObjectName(applicationName().concat(":type=agroal,name=").concat(useName));
-    } catch (MalformedObjectNameException ex) {
-      throw new CorantRuntimeException(ex);
-    }
-    try {
-      MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-      if (server.isRegistered(objectName)) {
-        server.unregisterMBean(objectName);
-      }
-      server.registerMBean(new AgroalCPDataSourceMetrics(name), objectName);
-    } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-        | NotCompliantMBeanException | InstanceNotFoundException ex) {
-      throw new CorantRuntimeException(ex);
-    }
+    final String mbeanName = applicationName().concat(":type=agroal,name=").concat(useName);
+    registerToMBean(mbeanName, new AgroalCPDataSourceMetrics(name));
+    mbeanNames.add(mbeanName);
   }
 
   void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {

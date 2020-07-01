@@ -97,7 +97,7 @@
     <version.microprofile.lra.api>1.0-RC1</version.microprofile.lra.api>
     <version.mongodb>3.9.1</version.mongodb>
     <version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
-    <version.mysql>5.1.48</version.mysql>
+    <version.mysql>8.0.16</version.mysql>
     <version.narayana>5.10.5.Final</version.narayana>
     <version.netty>4.1.34.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>

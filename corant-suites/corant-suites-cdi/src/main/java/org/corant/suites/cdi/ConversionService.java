@@ -20,7 +20,6 @@ import javax.enterprise.context.ApplicationScoped;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterRegistry;
-import org.corant.shared.conversion.ConverterType;
 import org.corant.shared.conversion.Converters;
 
 /**
@@ -39,8 +38,6 @@ public interface ConversionService {
 
   <C extends Collection<T>, T> C convert(final Object value, final Class<T> clazz,
       final Supplier<C> collectionFactory, Object... hints);
-
-  void deregister(ConverterType<?, ?> converterType);
 
   <S, T> Converter<S, T> getConverter(final Class<S> sourceType, final Class<T> targetType);
 
@@ -70,11 +67,6 @@ public interface ConversionService {
     public <C extends Collection<T>, T> C convert(Object value, Class<T> clazz,
         Supplier<C> collectionFactory, Object... hints) {
       return Conversion.convert(value, clazz, collectionFactory, mapOf(hints));
-    }
-
-    @Override
-    public void deregister(ConverterType<?, ?> converterType) {
-      ConverterRegistry.deregister(converterType);
     }
 
     @Override

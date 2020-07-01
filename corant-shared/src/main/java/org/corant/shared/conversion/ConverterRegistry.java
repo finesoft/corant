@@ -17,6 +17,8 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
@@ -43,41 +45,65 @@ import org.corant.shared.util.Types;
  *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class ConverterRegistry { // static?
+public class ConverterRegistry {
+
+  static final List<ConverterFactory<?, ?>> CONVERTER_FACTORIES = new CopyOnWriteArrayList<>();
 
   static final Map<ConverterType<?, ?>, Converter<?, ?>> SUPPORT_CONVERTERS =
       new ConcurrentHashMap<>();
-  static final List<ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
-      new CopyOnWriteArrayList<>();
+
+  static final Map<ConverterType<?, ?>, ConverterFactory<?, ?>> SUPPORT_CONVERTER_FACTORIES =
+      new ConcurrentHashMap<>();
+
   static final Map<ConverterType<?, ?>, Set<ConverterType<?, ?>>> SUPPORT_CONVERTER_PIPE_TYPES =
       new ConcurrentHashMap<>();
+
   static final Set<ConverterType<?, ?>> NOT_SUPPORT_TYPES =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   static {
-    streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
-        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
-        .forEach(ConverterRegistry::register);
-    streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
-        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
-        .forEach(ConverterRegistry::register);
+    load();
   }
 
+  /**
+   * Remove the registered converter, the type supported by the converter will no longer be
+   * supported. Note that if the type conversion({@link ConverterType}) involved is referenced by
+   * the conversion pipeline, the conversion pipeline will also be removed, but the converter
+   * pipeline may be reorganized when necessary.
+   *
+   * @param <S>
+   * @param <T>
+   * @param converter deregister
+   */
   public static synchronized <S, T> void deregister(Converter<S, T> converter) {
     Type[] type = resolveTypes(converter);
-    deregister(new ConverterType((Class) type[0], (Class) type[1])); // FIXME consider other ways
+    deregister(ConverterType.of((Class) type[0], (Class) type[1])); // FIXME consider other ways
   }
 
+  /**
+   * Remove the registered converter factory, all types supported by converters that created by the
+   * converter factory will no longer be supported. Note that if the type
+   * conversion({@link ConverterType}) involved is referenced by the conversion pipeline, the
+   * conversion pipeline will also be removed, but the converter pipeline may be reorganized when
+   * necessary.
+   *
+   * @param <S>
+   * @param <T>
+   * @param converterFactory deregister
+   */
   public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory) {
-    SUPPORT_CONVERTER_FACTORIES.remove(converterFactory); // FIXME consider other ways
+    CONVERTER_FACTORIES.remove(converterFactory);
+    SUPPORT_CONVERTER_FACTORIES.entrySet().stream()
+        .filter(e -> areEqual(e.getValue(), converterFactory)).map(e -> e.getKey())
+        .forEach(ConverterRegistry::deregister);
   }
 
-  public static synchronized void deregister(ConverterType<?, ?> converterType) {
-    if (SUPPORT_CONVERTERS.remove(converterType) != null) {
-      removeConverterPipeTypes(converterType); // FIXME consider other ways
-    }
-  }
-
+  /**
+   * Return converters and their supported type conversions, except for converters created by
+   * converter factories.
+   *
+   * @return getSupportConverters
+   */
   public static Map<ConverterType<?, ?>, Converter<?, ?>> getSupportConverters() {
     return Collections.unmodifiableMap(SUPPORT_CONVERTERS);
   }
@@ -95,29 +121,74 @@ public class ConverterRegistry { // static?
     });
   }
 
+  /**
+   * Register a converter
+   *
+   * @param <S>
+   * @param <T>
+   * @param converter register
+   */
   public static synchronized <S, T> void register(Converter<S, T> converter) {
     Type[] types = resolveTypes(converter);
     register((Class) types[0], (Class) types[1], converter);
   }
 
+  /**
+   * Register a converter factory
+   *
+   * @param <S>
+   * @param <T>
+   * @param converterFactory register
+   */
   public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
-    if (converterFactory != null && !SUPPORT_CONVERTER_FACTORIES.contains(converterFactory)) {
-      SUPPORT_CONVERTER_FACTORIES.add(converterFactory);
-      Collections.sort(SUPPORT_CONVERTER_FACTORIES,
+    if (converterFactory != null && !CONVERTER_FACTORIES.contains(converterFactory)) {
+      CONVERTER_FACTORIES.add(converterFactory);
+      Collections.sort(CONVERTER_FACTORIES,
           (f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()));
     }
   }
 
+  /**
+   * Register not support type conversion
+   *
+   * @param sourceClass
+   * @param targetClass registerNotSupportType
+   */
   public static synchronized void registerNotSupportType(Class<?> sourceClass,
       Class<?> targetClass) {
     registerNotSupportType(ConverterType.of(sourceClass, targetClass));
   }
 
+  /**
+   * Register not support type conversion
+   *
+   * @param converterType registerNotSupportType
+   */
   public static synchronized void registerNotSupportType(ConverterType converterType) {
     if (!NOT_SUPPORT_TYPES.contains(converterType) && NOT_SUPPORT_TYPES.add(converterType)
         && NOT_SUPPORT_TYPES.size() > 128) {
       ConverterType first = NOT_SUPPORT_TYPES.iterator().next();
       NOT_SUPPORT_TYPES.remove(first);
+      deregister(converterType);
+    }
+  }
+
+  /**
+   * Reset all conversions, clear all cached converters and converter factories and not support
+   * types, reload converters and converter factories.
+   */
+  public static synchronized void reset() {
+    NOT_SUPPORT_TYPES.clear();
+    SUPPORT_CONVERTER_FACTORIES.clear();
+    CONVERTER_FACTORIES.clear();
+    SUPPORT_CONVERTER_PIPE_TYPES.clear();
+    NOT_SUPPORT_TYPES.clear();
+    load();
+  }
+
+  static synchronized void deregister(ConverterType<?, ?> converterType) {
+    if (SUPPORT_CONVERTERS.remove(converterType) != null) {
+      removeConverterPipeTypes(converterType); // FIXME consider other ways
     }
   }
 
@@ -130,7 +201,7 @@ public class ConverterRegistry { // static?
   }
 
   static List<ConverterFactory<?, ?>> getConverterFactories() {
-    return SUPPORT_CONVERTER_FACTORIES;
+    return CONVERTER_FACTORIES;
   }
 
   static Map<ConverterType<?, ?>, Converter<?, ?>> getConverters() {
@@ -157,6 +228,26 @@ public class ConverterRegistry { // static?
     return SUPPORT_CONVERTERS.containsKey(ConverterType.of(sourceClass, targetClass));
   }
 
+  static synchronized void load() {
+    streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
+        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
+        .forEach(ConverterRegistry::register);
+    streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
+        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
+        .forEach(ConverterRegistry::register);
+  }
+
+  static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
+      Converter<S, T> converter, ConverterFactory<?, ?> converterFactory) {
+    ConverterType<S, T> ct = ConverterType.<S, T>of(sourceClass, targetClass);
+    if (SUPPORT_CONVERTERS.put(ct, converter) != null) {
+      SUPPORT_CONVERTER_FACTORIES.put(ct, converterFactory);
+      // has been register, check pipe or not
+      removeNotSupportType(ct);
+      removeConverterPipeTypes(ct);
+    }
+  }
+
   static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
       Converter<S, T> converter, ConverterType<?, ?>... pipeTypes) {
     ConverterType<S, T> ct = ConverterType.<S, T>of(sourceClass, targetClass);
@@ -165,7 +256,7 @@ public class ConverterRegistry { // static?
       removeNotSupportType(ct);
       removeConverterPipeTypes(ct);
     }
-    if (pipeTypes.length > 0) {
+    if (isNotEmpty(pipeTypes)) {
       SUPPORT_CONVERTER_PIPE_TYPES.put(ct, setOf(pipeTypes));
     }
   }

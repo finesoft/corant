@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Resources.SourceType;
 import org.junit.Test;
 import junit.framework.TestCase;
@@ -146,76 +146,69 @@ public class ConversionsTest extends TestCase {
 
   @Test
   public void testPatternStringTemporal() {
-    List<String> values = new ArrayList<>();
-    values.add("19791114");
-    values.add("14-11-1979");
-    values.add("1979-11-14");
-    values.add("11/14/1979");
-    values.add("1979/11/14");
-    values.add("1979.11.14");
-    values.add("1979年11月14日");
-    values.add("14 Nov 1979");
-    values.add("14-Nov-1979");
-    values.add("14 November 1979");
-    values.add("1979-W46-3");
-    values.add("1979W463");
-    values.add("197911141114");
-    values.add("19791114 1114");
-    values.add("14-11-1979 11:14");
-    values.add("1979-11-14 11:14");
-    values.add("1979年11月14日 11时14分");
-    values.add("11/14/1979 11:14");
-    values.add("1979/11/14 11:14");
-    values.add("14 Nov 1979 11:14");
-    values.add("14 November 1979 11:14");
-    values.add("19791114111408");
-    values.add("19791114 111408");
-    values.add("14-11-1979 11:14:08");
-    values.add("1979-11-14 11:14:08");
-    values.add("1979-11-14T11:14:08");
-    values.add("1979-11-14T11:14:08Z");
-    values.add("1979-11-14T11:14:08.080Z");
-    values.add("1979-11-14T11:14:08+08:00");
-    values.add("1979-11-14T11:14:08+08:00[Asia/Shanghai]");
-    values.add("14-11-1979 11:14:08");
-    values.add("1979-11-14 11:14:08");
-    values.add("1979年11月14日 11时14分08秒");
-    values.add("11/14/1979 11:14:08");
-    values.add("1979/11/14 11:14:08");
-    values.add("14 Nov 1979 11:14:08");
-    values.add("14 November 1979 11:14:08");
-    values.add("1979-11-14-11.14.08.888888");
-    values.add("1979-11-14 11:14:08.8888");
-    values.add("Wed, 14 Nov 1979 11:14:08 GMT");
-    values.add("Wed, 14 Nov 1979 11:14:08");
-    values.add("星期三, 14 十一月 1979 11:14:08 GMT");
-    values.add("Wed Nov 14 11:14:08 GMT 1979");
-    values.add("星期三 十一月 14 11:26:28 CST 1979");
-    StopWatch sw = StopWatch.press("Time use");
+    List<Pair<String, String>> values = new ArrayList<>();
+    values.add(Pair.of("19791114", "yyyyMMdd"));
+    values.add(Pair.of("14-11-1979", "dd-MM-yyyy"));
+    values.add(Pair.of("1979-11-14", "yyyy-MM-dd"));
+    values.add(Pair.of("11/14/1979", "MM/dd/yyyy"));
+    values.add(Pair.of("1979/11/14", "yyyy/MM/dd"));
+    values.add(Pair.of("1979.11.14", "yyyy.MM.dd"));
+    values.add(Pair.of("1979年11月14日", "yyyy年MM月dd日"));
+    values.add(Pair.of("14 Nov 1979", "dd MMM yyyy"));
+    values.add(Pair.of("14-Nov-1979", "dd-MMM-yyyy"));
+    values.add(Pair.of("14 November 1979", "dd MMMM yyyy"));
+    values.add(Pair.of("1979-W46-3", "yyyy-Www-D"));
+    values.add(Pair.of("1979W463", "yyyyWwwD"));
+    values.add(Pair.of("197911141114", "yyyyMMddHHmm"));
+    values.add(Pair.of("19791114 1114", "yyyyMMdd HHmm"));
+    values.add(Pair.of("14-11-1979 11:14", "dd-MM-yyyy HH:mm"));
+    values.add(Pair.of("1979-11-14 11:14", "yyyy-MM-dd HH:mm"));
+    values.add(Pair.of("1979年11月14日 11时14分", "yyyy年MM月dd日 HH时mm分"));
+    values.add(Pair.of("11/14/1979 11:14", "MM/dd/yyyy HH:mm"));
+    values.add(Pair.of("1979/11/14 11:14", "yyyy/MM/dd HH:mm"));
+    values.add(Pair.of("14 Nov 1979 11:14", "dd MMM yyyy HH:mm"));
+    values.add(Pair.of("14 November 1979 11:14", "dd MMMM yyyy HH:mm"));
+    values.add(Pair.of("19791114111408", "yyyyMMddHHmmss"));
+    values.add(Pair.of("19791114 111408", "yyyyMMdd HHmmss"));
+    values.add(Pair.of("14-11-1979 11:14:08", "dd-MM-yyyy HH:mm:ss"));
+    values.add(Pair.of("1979-11-14 11:14:08", "yyyy-MM-dd HH:mm:ss"));
+    values.add(Pair.of("1979-11-14T11:14:08", "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]"));
+    values.add(Pair.of("1979-11-14T11:14:08Z", "ISO_INSTANT yyyy-MM-ddTHH:mm:ssZ"));
+    values.add(Pair.of("1979-11-14T11:14:08.080Z", "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]"));
+    values.add(Pair.of("1979-11-14T11:14:08+08:00", "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]"));
+    values.add(Pair.of("1979-11-14T11:14:08+08:00[Asia/Shanghai]",
+        "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]"));
+    values.add(Pair.of("1979年11月14日 11时14分08秒", "yyyy年MM月dd日 HH时mm分ss秒"));
+    values.add(Pair.of("11/14/1979 11:14:08", "MM/dd/yyyy HH:mm:ss"));
+    values.add(Pair.of("1979/11/14 11:14:08", "yyyy/MM/dd HH:mm:ss"));
+    values.add(Pair.of("14 Nov 1979 11:14:08", "dd MMM yyyy HH:mm:ss"));
+    values.add(Pair.of("14 November 1979 11:14:08", "dd MMMM yyyy HH:mm:ss"));
+    values.add(Pair.of("1979-11-14-11.14.08.888888", "yyyy-MM-dd-HH.mm.ss.SSSSSS"));
+    values.add(Pair.of("1979-11-14 11:14:08.8888", "yyyy-MM-dd HH:mm:ss.[S...]"));
+    values.add(Pair.of("Wed, 14 Nov 1979 11:14:08 GMT", "RFC_1123_DATE_TIME"));
+    values.add(Pair.of("Wed, 14 Nov 1979 11:14:08", "RFC_1123_DATE_TIMEX"));
+    values.add(Pair.of("星期三, 14 十一月 1979 11:14:08 GMT", "RFC_1123_DATE_TIME(ZH)"));
+    values.add(Pair.of("Wed Nov 14 11:14:08 GMT 1979", "java.util.Date().toString()"));
+    values.add(Pair.of("星期三 十一月 14 11:26:28 CST 1979", "ZH java.util.Date().toString()"));
     values.forEach(v -> {
-      Optional<TemporalFormatter> tf = AbstractTemporalConverter.decideFormatter(v);
+      Optional<TemporalFormatter> tf = AbstractTemporalConverter.decideFormatter(v.getKey());
       if (tf.isPresent()) {
         try {
           if (tf.get().isWithTime()) {
-            TemporalAccessor ta = tf.get().getFormatter().parseBest(v, ZonedDateTime::from,
-                Instant::from, LocalDateTime::from);
-            String s = ta.toString();
-            System.out.println(v + "\t=>\t" + s + "\t[" + ta.getClass() + "]\t\tPTN: "
-                + tf.get().getDescription());
+            tf.get().getFormatter().parseBest(v.getKey(), ZonedDateTime::from, Instant::from,
+                LocalDateTime::from);
+            assertEquals(tf.get().getDescription(), v.getValue());
           } else {
-            String s = DateTimeFormatter.ISO_DATE
-                .format(tf.get().getFormatter().parse(v, LocalDate::from));
-            System.out.println(v + "\t=>\t" + s + "\t\tPTN: " + tf.get().getDescription());
+            DateTimeFormatter.ISO_DATE
+                .format(tf.get().getFormatter().parse(v.getKey(), LocalDate::from));
+            assertEquals(tf.get().getDescription(), v.getValue());
           }
         } catch (Exception e) {
           System.out.println("Error PTN:" + tf.get().getDescription());
           e.printStackTrace(); // NOSONAR
         }
-      } else {
-        System.out.println(String.format("Formatter [%s] not found!", v));
       }
     });
-    sw.stop(t -> System.out.println(t.getName() + " : " + t.getTimeMillis() + " ms!"));
   }
 
   @Test

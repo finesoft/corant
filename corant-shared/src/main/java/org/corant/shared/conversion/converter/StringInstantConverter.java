@@ -73,10 +73,11 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    if (isDecimalNumber(value)) {
-      return Instant.ofEpochMilli(Long.parseLong(value));
-    } else if (value.contains(",")) {
-      String[] arr = split(value, ",", true, true);
+    String val = value.trim();
+    if (isDecimalNumber(val)) {
+      return Instant.ofEpochMilli(Long.parseLong(val));
+    } else if (val.contains(",")) {
+      String[] arr = split(val, ",", true, true);
       if (arr.length == 2 && isDecimalNumber(arr[0]) && isDecimalNumber(arr[1])) {
         return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]));
       }
@@ -85,12 +86,12 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     boolean strictly = isStrict(hints);
     if (hintDtf.isPresent()) {
-      return hintDtf.get().parse(value, Instant::from);// strictly
+      return hintDtf.get().parse(val, Instant::from);// strictly
     } else {
-      TemporalFormatter m = decideFormatter(value).orElse(null);
+      TemporalFormatter m = decideFormatter(val).orElse(null);
       if (m != null) {
         if (m.withTime) {
-          TemporalAccessor ta = m.formatter.parseBest(value, Instant::from, ZonedDateTime::from,
+          TemporalAccessor ta = m.formatter.parseBest(val, Instant::from, ZonedDateTime::from,
               OffsetDateTime::from, LocalDateTime::from);
           if (ta instanceof Instant) {
             return (Instant) ta;
@@ -102,17 +103,17 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
             if (ozoneId.isPresent()) {
               return ((LocalDateTime) ta).atZone(ozoneId.get()).toInstant();
             } else if (!strictly) {
-              warn(Instant.class, value);
+              warn(Instant.class, val);
               return ((LocalDateTime) ta).atZone(ZoneId.systemDefault()).toInstant();
             }
           }
         } else if (!strictly) {
-          warn(Instant.class, value);
-          LocalDate ta = m.formatter.parse(value, LocalDate::from);
+          warn(Instant.class, val);
+          LocalDate ta = m.formatter.parse(val, LocalDate::from);
           return ta.atStartOfDay(ozoneId.orElse(ZoneId.systemDefault())).toInstant();
         }
       }
-      return Instant.parse(value);
+      return Instant.parse(val);
     }
   }
 }

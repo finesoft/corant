@@ -58,17 +58,15 @@ public class Converters {
           ConverterFactory converterFactory = factoryConverter.getValue();
           ConverterRegistry.register(sourceClass, targetClass, converter, converterFactory);
         }
-        // if (converter == null) {
-        // // indirect way, try to traverse and connect the converters that meet the
-        // // requirements from the available converters
-        // Set<ConverterType<?, ?>> pipeConverterTypes = new LinkedHashSet<>();
-        // converter = ExperimentalConverters.getMatchedConverterx(sourceClass, targetClass,
-        // pipeConverterTypes::addAll);
-        // if (converter != null) {
-        // ConverterRegistry.register(sourceClass, targetClass, (Converter<S, T>) converter,
-        // pipeConverterTypes.toArray(new ConverterType[pipeConverterTypes.size()]));
-        // }
-        // }
+        /*
+         * if (converter == null) { // indirect way, try to traverse and connect the converters that
+         * meet the // requirements from the available converters Set<ConverterType<?, ?>>
+         * pipeConverterTypes = new LinkedHashSet<>(); converter =
+         * ExperimentalConverters.getMatchedConverterx(sourceClass, targetClass,
+         * pipeConverterTypes::addAll); if (converter != null) {
+         * ConverterRegistry.register(sourceClass, targetClass, (Converter<S, T>) converter,
+         * pipeConverterTypes.toArray(new ConverterType[pipeConverterTypes.size()])); } }
+         */
       } else {
         ConverterRegistry.register(sourceClass, targetClass, converter);
       }

@@ -66,24 +66,25 @@ public class StringLocalDateConverter extends AbstractTemporalConverter<String, 
     if (isEmpty(value)) {
       return getDefaultValue();
     }
+    String val = value.trim();
     Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     boolean strictly = isStrict(hints);
     if (hintDtf.isPresent()) {
-      return hintDtf.get().parse(value, LocalDate::from);// strictly
+      return hintDtf.get().parse(val, LocalDate::from);// strictly
     } else {
-      TemporalFormatter m = decideFormatter(value).orElse(null);
+      TemporalFormatter m = decideFormatter(val).orElse(null);
       if (m != null) {
         if (!m.withTime) {
-          return m.formatter.parse(value, LocalDate::from);
+          return m.formatter.parse(val, LocalDate::from);
         } else {
-          TemporalAccessor ta = m.formatter.parseBest(value, LocalDateTime::from,
-              ZonedDateTime::from, OffsetDateTime::from, Instant::from);
+          TemporalAccessor ta = m.formatter.parseBest(val, LocalDateTime::from, ZonedDateTime::from,
+              OffsetDateTime::from, Instant::from);
           if (ta instanceof Instant) {
             if (ozoneId.isPresent()) {
               return ((Instant) ta).atZone(ozoneId.get()).toLocalDate();
             } else if (!strictly) {
-              warn(LocalDate.class, value);
+              warn(LocalDate.class, val);
               return ((Instant) ta).atZone(ZoneId.systemDefault()).toLocalDate();
             }
           } else if (ta instanceof ZonedDateTime) {
@@ -95,7 +96,7 @@ public class StringLocalDateConverter extends AbstractTemporalConverter<String, 
           }
         }
       }
-      return LocalDate.parse(value);
+      return LocalDate.parse(val);
     }
 
   }

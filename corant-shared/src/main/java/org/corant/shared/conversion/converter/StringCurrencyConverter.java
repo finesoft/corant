@@ -58,7 +58,7 @@ public class StringCurrencyConverter extends AbstractConverter<String, Currency>
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Currency.getInstance(value);
+    return Currency.getInstance(value.trim());
   }
 
 }

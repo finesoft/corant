@@ -17,6 +17,7 @@ import static org.corant.shared.util.Conversions.toBigDecimal;
 import static org.corant.shared.util.Conversions.toBigInteger;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toInstant;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toLocalDate;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.listOf;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -215,5 +217,31 @@ public class ConversionsTest extends TestCase {
   public void testStringObject() {
     String s = "PT15M";
     assertEquals(Conversions.toDuration(s), Duration.ofMinutes(15));
+  }
+
+  @Test
+  public void testStringToNumber() {
+    assertEquals(toInteger("0xff"), toInteger("255"));
+    assertEquals(toObject("0xff", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 10)),
+        toInteger("255"));
+    assertEquals(toInteger("0377"), toInteger("0xff"));
+    assertEquals(toObject("377", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 8)),
+        toInteger("0xff"));
+    assertEquals(toObject("ff", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 16)),
+        toInteger("0xff"));
+    assertEquals(toObject("1111111", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 2)),
+        toInteger("127"));
+
+    assertEquals(toBigInteger("0xff"), toBigInteger("255"));
+    assertEquals(toObject("0xff", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 10)),
+        toBigInteger("255"));
+    assertEquals(toBigInteger("0377"), toBigInteger("0xff"));
+    assertEquals(toObject("377", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 8)),
+        toBigInteger("0xff"));
+    assertEquals(toObject("ff", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 16)),
+        toBigInteger("0xff"));
+    assertEquals(
+        toObject("1111111", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 2)),
+        toBigInteger("127"));
   }
 }

@@ -57,7 +57,6 @@ public class StringFloatConveter extends AbstractNumberConverter<String, Float> 
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Float.valueOf(value);
+    return Float.valueOf(value.trim());
   }
-
 }

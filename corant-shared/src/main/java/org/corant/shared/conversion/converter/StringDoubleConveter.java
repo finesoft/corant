@@ -57,7 +57,7 @@ public class StringDoubleConveter extends AbstractNumberConverter<String, Double
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Double.valueOf(value);
+    return Double.valueOf(value.trim());
   }
 
 }

@@ -49,7 +49,7 @@ public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    final String stringValue = value.toLowerCase(Locale.getDefault());
+    final String stringValue = value.toLowerCase(Locale.getDefault()).trim();
     for (String trueString : trues) {
       if (trueString.equals(stringValue)) {
         return Boolean.TRUE;

@@ -58,6 +58,18 @@ public interface ElasticDocumentService {
   int bulkIndex(List<? extends ElasticDocument> docs, boolean flush);
 
   /**
+   * Batch document indexing
+   *
+   * @param indexName the document index name
+   * @param id the document id
+   * @param objs the objects to index
+   * @param flush whether to refresh immediately, if true then use RefreshPolicy.IMMEDIATE else
+   *        RefreshPolicy.NONE
+   * @return index successfully or no
+   */
+  int bulkIndex(String indexName, List<Map<?, ?>> objs, boolean flush);
+
+  /**
    * Delete document indexing by index name and document id, no flush immediately.
    *
    * @param indexName the document index name

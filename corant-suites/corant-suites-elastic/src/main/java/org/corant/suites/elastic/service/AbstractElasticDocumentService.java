@@ -15,6 +15,8 @@ package org.corant.suites.elastic.service;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNotNull;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -39,6 +41,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -80,10 +83,36 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
       List<ElasticDocument> docs = entry.getValue();
       for (ElasticDocument doc : docs) {
         requestBuilder.add(indexRequestBuilder(indexing.getName(), doc.getId(), doc.getRId(),
-            mapping.toMap(doc), false, 0l, null).request());
+            mapping.toMap(doc), false, 0L, null).request());
       }
     }
     docMap.clear();
+    try {
+      return Arrays.stream(requestBuilder.execute().actionGet().getItems()).map(response -> {
+        if (response.isFailed()) {
+          logger.log(Level.WARNING, response.getFailure().getCause(), response::getFailureMessage);
+          return 0;
+        }
+        return 1;
+      }).reduce(Integer.valueOf(0), Integer::sum);
+    } catch (ElasticsearchException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  @Override
+  public int bulkIndex(String indexName, List<Map<?, ?>> objs, boolean flush) {
+    if (isEmpty(objs)) {
+      return 0;
+    }
+    // create bulk request builder
+    final BulkRequestBuilder requestBuilder = getTransportClient().prepareBulk()
+        .setRefreshPolicy(flush ? RefreshPolicy.IMMEDIATE : RefreshPolicy.NONE);
+    for (Map<?, ?> doc : objs) {
+      requestBuilder
+          .add(indexRequestBuilder(indexName, getMapString(doc, "id"), null, doc, false, 0L, null)
+              .request());
+    }
     try {
       return Arrays.stream(requestBuilder.execute().actionGet().getItems()).map(response -> {
         if (response.isFailed()) {
@@ -105,6 +134,12 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  @Override
+  public TransportClient getTransportClient() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

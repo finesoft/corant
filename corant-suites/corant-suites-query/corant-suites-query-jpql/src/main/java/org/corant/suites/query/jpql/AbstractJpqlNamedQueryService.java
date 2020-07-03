@@ -73,11 +73,9 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       query.setFirstResult(offset).setMaxResults(limit + 1);
       List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       int size = list.size();
-      if (size > 0) {
-        if (size > limit) {
-          list.remove(limit);
-          result.withHasNext(true);
-        }
+      if (size > 0 && size > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
       }
       return result.withResults(list);
     } finally {

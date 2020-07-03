@@ -171,7 +171,7 @@ public class DirectRunner {
     try {
       return Corant.current() != null && Corant.current().isRuning();
     } catch (Exception t) {
-      throw new RuntimeException("Can't check corant running! please check logging.");
+      throw new CorantRuntimeException("Can't check corant running! please check logging.");
     }
   }
 
@@ -238,7 +238,7 @@ public class DirectRunner {
       }
     } catch (Exception t) {
       t.printStackTrace();
-      throw new RuntimeException("Can't start corant! please check logging.");
+      throw new CorantRuntimeException("Can't start corant! please check logging.");
     }
   }
 
@@ -259,7 +259,7 @@ public class DirectRunner {
       }
     } catch (Exception t) {
       t.printStackTrace();
-      throw new RuntimeException("Can't stop corant! please check logging.");
+      throw new CorantRuntimeException("Can't stop corant! please check logging.");
     }
   }
 

@@ -26,7 +26,10 @@ import org.elasticsearch.index.IndexSettings;
  */
 public class MixedZhEnNGramTokenFilterFactory extends AbstractTokenFilterFactory {
 
-  private final int zhMinGram, zhMaxGram, enMinGram, enMaxGram;
+  private final int zhMinGram;
+  private final int zhMaxGram;
+  private final int enMinGram;
+  private final int enMaxGram;
   private final boolean retainToken;
 
   /**

@@ -569,7 +569,7 @@ public class Encrypts {
     if (b == null) {
       return new byte[0];
     }
-    MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+    MessageDigest md = MessageDigest.getInstance("MD5");
     md.update(b);
     return md.digest();
   }

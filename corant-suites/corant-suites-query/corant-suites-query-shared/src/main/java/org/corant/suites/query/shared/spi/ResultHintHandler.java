@@ -33,9 +33,7 @@ public interface ResultHintHandler extends AutoCloseable {
   }
 
   @Override
-  default void close() throws Exception {
-    return;
-  }
+  default void close() throws Exception {}
 
   default boolean exclusive() {
     return true;

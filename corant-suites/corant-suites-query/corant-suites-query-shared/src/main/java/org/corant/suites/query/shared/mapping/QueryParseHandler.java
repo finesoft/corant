@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Resources.URLResource;
@@ -231,11 +230,12 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       FetchQueryParameter fqp = new FetchQueryParameter();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           fqp.setName(atv);
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
-          fqp.setSource(Conversions.toEnum(atv, FetchQueryParameterSource.class));
+          fqp.setSource(toEnum(atv, FetchQueryParameterSource.class));
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
           fqp.setSourceName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {

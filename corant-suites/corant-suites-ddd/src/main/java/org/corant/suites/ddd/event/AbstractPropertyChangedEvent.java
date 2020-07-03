@@ -24,25 +24,25 @@ import org.corant.suites.ddd.model.Aggregate;
  *
  */
 @Events
-public abstract class AbstractPropertyChangedEvent<T extends Aggregate, PT> extends AbstractEvent {
+public abstract class AbstractPropertyChangedEvent<T extends Aggregate, P> extends AbstractEvent {
 
   private static final long serialVersionUID = 6311499831097921960L;
 
-  private final PT oldValue;
+  private final P oldValue;
 
-  private final PT newValue;
+  private final P newValue;
 
-  public AbstractPropertyChangedEvent(T source, PT oldValue, PT newValue) {
+  public AbstractPropertyChangedEvent(T source, P oldValue, P newValue) {
     super(source);
     this.oldValue = oldValue;
     this.newValue = newValue;
   }
 
-  public PT getNewValue() {
+  public P getNewValue() {
     return this.newValue;
   }
 
-  public PT getOldValue() {
+  public P getOldValue() {
     return this.oldValue;
   }
 

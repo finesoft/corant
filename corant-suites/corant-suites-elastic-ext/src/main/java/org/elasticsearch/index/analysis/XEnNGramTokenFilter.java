@@ -50,7 +50,8 @@ public class XEnNGramTokenFilter extends TokenFilter {
   private int curPosLen;
   private char[] curTermBuffer;
   private int curTermLength;
-  private int minGram, maxGram;
+  private int minGram;
+  private int maxGram;
   private int tokEnd;
   private int tokStart;
   private final int xMinGram;

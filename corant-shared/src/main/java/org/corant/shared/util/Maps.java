@@ -347,7 +347,7 @@ public class Maps {
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Function<Object, T> singleElementExtractor) {
-    return getMapObjectList(map, key, v -> Conversions.toList(v, singleElementExtractor));
+    return getMapObjectList(map, key, v -> toList(v, singleElementExtractor));
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
@@ -415,7 +415,7 @@ public class Maps {
    * @return getMapObject
    */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
-    return Conversions.toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
+    return toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }
 
   /**
@@ -489,7 +489,7 @@ public class Maps {
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
       final Function<Object, T> objFunc) {
-    return new HashSet<>(getMapObjectList(map, key, v -> Conversions.toList(v, objFunc)));
+    return new HashSet<>(getMapObjectList(map, key, v -> toList(v, objFunc)));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {

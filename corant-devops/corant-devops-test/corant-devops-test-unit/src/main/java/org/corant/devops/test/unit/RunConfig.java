@@ -18,7 +18,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.shared.normal.Priorities.ConfigPriorities;
 
 /**
  * corant-devops-test-unit
@@ -34,7 +33,7 @@ public @interface RunConfig {
   /**
    * additional config property, the priorities is tmp
    *
-   * @see ConfigPriorities.APPLICATION_TMP_ORDINAL
+   * @see org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_TMP_ORDINAL
    * @return properties
    */
   AddiConfigProperty[] addiConfigProperties() default {};

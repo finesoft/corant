@@ -15,6 +15,8 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toEnum;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultString;
@@ -189,15 +191,16 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       FetchQuery fq = new FetchQuery();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryName(atv);
         } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryType(Conversions.toEnum(atv, QueryType.class));
+          fq.setReferenceQueryType(toEnum(atv, QueryType.class));
         } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryQualifier(atv);
         } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
-          fq.setMaxSize(Conversions.toInteger(atv));
+          fq.setMaxSize(toInteger(atv));
         } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
           fq.setInjectPropertyName(atv);
         } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
@@ -207,7 +210,7 @@ public class QueryParseHandler extends DefaultHandler {
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
           fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
-          fq.setMultiRecords(isBlank(atv) ? true : Conversions.toBoolean(atv));
+          fq.setMultiRecords(isBlank(atv) ? true : toBoolean(atv));
         }
       }
       valueStack.push(fq);
@@ -310,9 +313,9 @@ public class QueryParseHandler extends DefaultHandler {
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           q.setName(atv);
         } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {
-          q.setCache(Conversions.toBoolean(atv));
+          q.setCache(toBoolean(atv));
         } else if (SchemaNames.QUE_ATT_CACHE_RS_MD.equalsIgnoreCase(aqn)) {
-          q.setCacheResultSetMetadata(Conversions.toBoolean(atv));
+          q.setCacheResultSetMetadata(toBoolean(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
           q.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.QUE_ATT_RST_SET_CLS.equalsIgnoreCase(aqn)) {

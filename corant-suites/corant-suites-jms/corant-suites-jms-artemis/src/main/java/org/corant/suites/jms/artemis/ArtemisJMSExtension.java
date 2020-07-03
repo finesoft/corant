@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -93,7 +92,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
               .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {
                 try {
-                  return buildConnectionFactory(beans, forceCast(dsc));
+                  return buildConnectionFactory(forceCast(dsc));
                 } catch (Exception e) {
                   throw new CorantRuntimeException(e);
                 }
@@ -116,8 +115,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     }
   }
 
-  private ActiveMQConnectionFactory buildConnectionFactory(Instance<Object> beans,
-      ArtemisConfig cfg) throws Exception {
+  private ActiveMQConnectionFactory buildConnectionFactory(ArtemisConfig cfg) throws Exception {
 
     final ActiveMQConnectionFactory activeMQConnectionFactory;
     if (cfg.getUrl() != null) {

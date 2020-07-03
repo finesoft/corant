@@ -42,7 +42,6 @@ import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
-import org.corant.shared.normal.Names;
 import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
 import org.jboss.weld.environment.se.Weld;
@@ -399,7 +398,7 @@ public class Corant implements AutoCloseable {
 
   synchronized void initializeContainer(Consumer<Weld> preInitializer, StopWatch stopWatch) {
     stopWatch.start("Initialization of the CDI container is completed");
-    String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    String id = applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
     Weld weld = new Weld(id);
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());

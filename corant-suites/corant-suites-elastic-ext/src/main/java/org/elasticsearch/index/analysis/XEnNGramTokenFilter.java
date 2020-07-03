@@ -46,13 +46,15 @@ public class XEnNGramTokenFilter extends TokenFilter {
   private int curCodePointCount;
   private int curGramSize;
   private int curPos;
-  private int curPosInc, curPosLen;
+  private int curPosInc;
+  private int curPosLen;
   private char[] curTermBuffer;
   private int curTermLength;
   private int minGram, maxGram;
   private int tokEnd;
   private int tokStart;
-  private final int xMinGram, xMaxGram;
+  private final int xMinGram;
+  private final int xMaxGram;
 
   private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
   private final PositionIncrementAttribute posIncAtt;

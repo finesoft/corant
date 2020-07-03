@@ -139,7 +139,7 @@ public class DomainDataSourceJDBCAccess implements JDBCAccess {
         String value = dataSourceConfigs.get(key);
         Method method = null;
         try {
-          method = dataSource.getClass().getMethod("set" + key, java.lang.String.class);
+          method = dataSource.getClass().getMethod("set" + key, String.class);
           method.invoke(dataSource, value.replace("\\semi", ";"));
         } catch (NoSuchMethodException nsme) {
           method = dataSource.getClass().getMethod("set" + key, int.class);
@@ -194,10 +194,8 @@ public class DomainDataSourceJDBCAccess implements JDBCAccess {
     public void close() throws SQLException {
       if (maxHoldedSize > 0) {
         holdedConnections.remove(this);
-        if (isValid(validateConnectionTimeout) && !isClosed()) {
-          if (!cachedConnections.offer(this)) {
-            closeImpl();// queue is full.
-          }
+        if (isValid(validateConnectionTimeout) && !isClosed() && !cachedConnections.offer(this)) {
+          closeImpl();// queue is full.
         }
       } else {
         closeImpl();

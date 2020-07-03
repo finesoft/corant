@@ -47,8 +47,6 @@ public interface ResultHintHandler extends AutoCloseable {
 
   void handle(QueryHint qh, Object parameter, Object result) throws Exception;
 
-  default void validate(QueryHint qh) {
-    return;
-  }
+  default void validate(QueryHint qh) {}
 
 }

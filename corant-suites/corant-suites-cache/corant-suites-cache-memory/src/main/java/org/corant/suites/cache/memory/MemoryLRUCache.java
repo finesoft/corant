@@ -46,7 +46,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   }
 
   public MemoryLRUCache(int initialCapacity, int maxSize) {
-    this.map = new LRUMap<>(initialCapacity);
+    this.map = new LRUMap<>(initialCapacity, maxSize);
   }
 
   public MemoryLRUCache(Map<? extends K, ? extends V> m, int maxSize) {

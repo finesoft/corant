@@ -267,9 +267,9 @@ public class ResolverUtils {
         shouldBeFalse(fm.containsKey(e.fieldName()));
         Map<String, Object> pm = new HashMap<>();
         for (EsMultiFieldsPair p : e.pairs()) {
-          if (p.valueType() == java.lang.String.class) {
+          if (p.valueType() == String.class) {
             pm.put(p.key(), p.value());
-          } else if (p.valueType() == java.lang.Boolean.class) {
+          } else if (p.valueType() == Boolean.class) {
             pm.put(p.key(), toBoolean(p.value()));
           }
 
@@ -319,8 +319,7 @@ public class ResolverUtils {
   }
 
   public static Type getCollectionFieldEleType(Field f, Class<?> contextRawType) {
-    return Types
-        .canonicalize(Types.getCollectionElementType(f.getGenericType(), contextRawType));
+    return Types.canonicalize(Types.getCollectionElementType(f.getGenericType(), contextRawType));
   }
 
   public static Type[] getMapFieldKeyValTypes(Field f, Class<?> contextRawType) {

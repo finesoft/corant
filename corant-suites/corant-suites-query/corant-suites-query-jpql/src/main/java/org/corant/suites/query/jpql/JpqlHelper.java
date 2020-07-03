@@ -46,7 +46,9 @@ public class JpqlHelper {
     final String lowercase = sb.toLowerCase(Locale.ROOT); // case-insensitive match
     final int len = lowercase.length();
     final int searchlen = search.length();
-    int pos = -1, depth = 0, cur = fromIndex;
+    int pos = -1;
+    int depth = 0;
+    int cur = fromIndex;
     do {
       pos = lowercase.indexOf(search, cur);
       if (pos != -1) {

@@ -56,7 +56,7 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
 
   @Override
   public void destroy(T instance, CreationalContext<T> creationalContext) {
-
+    return;
   }
 
   @Override

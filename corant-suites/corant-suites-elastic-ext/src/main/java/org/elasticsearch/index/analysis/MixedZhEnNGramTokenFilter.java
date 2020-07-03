@@ -48,13 +48,18 @@ public class MixedZhEnNGramTokenFilter extends TokenFilter {
   private int curCodePointCount;
   private int curGramSize;
   private int curPos;
-  private int curPosInc, curPosLen;
+  private int curPosInc;
+  private int curPosLen;
   private char[] curTermBuffer;
   private int curTermLength;
-  private int minGram, maxGram;
+  private int minGram;
+  private int maxGram;
   private int tokEnd;
   private int tokStart;
-  private final int zhMinGram, zhMaxGram, enMinGram, enMaxGram;
+  private final int zhMinGram;
+  private final int zhMaxGram;
+  private final int enMinGram;
+  private final int enMaxGram;
 
   private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
   private final PositionIncrementAttribute posIncAtt;

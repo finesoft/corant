@@ -57,7 +57,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Inject
   @Any
-  protected Instance<MessageDispatcher> messageDispatch;
+  protected Instance<MessageDispatcher> messageDispatcher;
 
   @Inject
   @Any
@@ -144,7 +144,7 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
 
   @Override
   public MessageDispatcher getMessageDispatcher() {
-    return messageDispatch.isResolvable() ? messageDispatch.get() : MessageDispatcher.DUMMY_INST;
+    return messageDispatcher.isResolvable() ? messageDispatcher.get() : MessageDispatcher.DUMMY_INST;
   }
 
   @Override

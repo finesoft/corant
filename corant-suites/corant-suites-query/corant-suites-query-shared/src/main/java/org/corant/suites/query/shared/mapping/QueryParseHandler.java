@@ -268,7 +268,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       ParameterMapping pm = new ParameterMapping();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
         } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
@@ -288,7 +289,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       Property pm = new Property();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
@@ -309,7 +311,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       Query q = new Query(url);
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           q.setName(atv);
         } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {

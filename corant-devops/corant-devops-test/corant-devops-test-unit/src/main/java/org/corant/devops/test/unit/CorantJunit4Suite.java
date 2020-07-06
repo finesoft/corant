@@ -15,7 +15,9 @@ package org.corant.devops.test.unit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.Suite;
@@ -32,43 +34,17 @@ import org.junit.runners.model.Statement;
 public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
 
   protected boolean embedded = false;
+  protected final Set<Class<?>> suiteClasses = new HashSet<>();
 
   /**
-   * @param klass
-   * @param suiteClasses
-   * @throws InitializationError
-   */
-  public CorantJunit4Suite(Class<?> klass, Class<?>[] suiteClasses) throws InitializationError {
-    super(klass, suiteClasses);
-  }
-
-  /**
-   * @param klass
-   * @param runners
-   * @throws InitializationError
-   */
-  public CorantJunit4Suite(Class<?> klass, List<Runner> runners) throws InitializationError {
-    super(klass, runners);
-  }
-
-  /**
-   * @param klass
-   * @param builder
-   * @throws InitializationError
+   * Called reflectively on classes annotated with @RunWith(Suite.class)
+   *
+   * @param klass the root class
+   * @param builder builds runners for classes in the suite
    */
   public CorantJunit4Suite(Class<?> klass, RunnerBuilder builder) throws InitializationError {
     super(klass, builder);
-  }
-
-  /**
-   * @param builder
-   * @param klass
-   * @param suiteClasses
-   * @throws InitializationError
-   */
-  public CorantJunit4Suite(RunnerBuilder builder, Class<?> klass, Class<?>[] suiteClasses)
-      throws InitializationError {
-    super(builder, klass, suiteClasses);
+    resolveSuites(klass);
   }
 
   /**
@@ -78,6 +54,39 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
    */
   public CorantJunit4Suite(RunnerBuilder builder, Class<?>[] classes) throws InitializationError {
     super(builder, classes);
+    resolveSuites(null, classes);
+  }
+
+  /**
+   * @param klass
+   * @param suiteClasses
+   * @throws InitializationError
+   */
+  protected CorantJunit4Suite(Class<?> klass, Class<?>[] suiteClasses) throws InitializationError {
+    super(klass, suiteClasses);
+    resolveSuites(klass, suiteClasses);
+  }
+
+  /**
+   * @param klass
+   * @param runners
+   * @throws InitializationError
+   */
+  protected CorantJunit4Suite(Class<?> klass, List<Runner> runners) throws InitializationError {
+    super(klass, runners);
+    resolveSuites(klass);
+  }
+
+  /**
+   * @param builder
+   * @param klass
+   * @param suiteClasses
+   * @throws InitializationError
+   */
+  protected CorantJunit4Suite(RunnerBuilder builder, Class<?> klass, Class<?>[] suiteClasses)
+      throws InitializationError {
+    super(builder, klass, suiteClasses);
+    resolveSuites(klass, suiteClasses);
   }
 
   @Override
@@ -92,7 +101,8 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
 
   @Override
   protected Statement classBlock(RunNotifier notifier) {
-    return classBlockWithCorant(getTestClass().getJavaClass(), () -> super.classBlock(notifier));
+    return classBlockWithCorant(getTestClass().getJavaClass(), suiteClasses,
+        () -> super.classBlock(notifier));
   }
 
   @Override
@@ -105,6 +115,26 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
       runners.add(runner);
     });
     return Collections.unmodifiableList(runners);
+  }
+
+  void resolveSuites(Class<?> root, Class<?>... classes) {
+    if (root != null) {
+      SuiteClasses annedClasses = root.getAnnotation(SuiteClasses.class);
+      if (annedClasses != null) {
+        for (Class<?> cls : annedClasses.value()) {
+          if (!suiteClasses.contains(cls)) {
+            suiteClasses.add(cls);
+          }
+        }
+      }
+    }
+    if (classes != null) {
+      for (Class<?> cls : classes) {
+        if (!suiteClasses.contains(cls)) {
+          suiteClasses.add(cls);
+        }
+      }
+    }
   }
 
 }

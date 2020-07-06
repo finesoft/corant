@@ -13,6 +13,7 @@
  */
 package org.corant.devops.test.unit;
 
+import java.util.Collections;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
@@ -48,7 +49,7 @@ public class CorantJUnit4ClassRunner extends BlockJUnit4ClassRunner implements C
 
   @Override
   protected Statement classBlock(RunNotifier notifier) {
-    return classBlockWithCorant(getTestClass().getJavaClass(),
+    return classBlockWithCorant(getTestClass().getJavaClass(), Collections.emptySet(),
         () -> CorantJUnit4ClassRunner.super.classBlock(notifier));
   }
 

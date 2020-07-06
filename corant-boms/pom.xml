@@ -106,7 +106,7 @@
     <version.pinyin4j>2.5.1</version.pinyin4j>
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.11.2</version.redisson>
-    <version.rest-assured>4.1.2</version.rest-assured>
+    <version.rest-assured>4.3.1</version.rest-assured>
     <version.resteasy>4.5.3.Final</version.resteasy>
     <version.rsocket>1.0.0-RC5</version.rsocket>
     <version.smallrye-config>1.7.0</version.smallrye-config>

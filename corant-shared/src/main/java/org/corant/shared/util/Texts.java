@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -221,6 +222,14 @@ public class Texts {
     });
   }
 
+  public static Stream<String> lines(final String filePath) {
+    return lines(new File(filePath));
+  }
+
+  public static List<String> readFromFile(String path) {
+    return Texts.lines(new File(path)).collect(Collectors.toList());
+  }
+
   /**
    * Convert input stream to String
    *
@@ -259,7 +268,7 @@ public class Texts {
     writeToFile(file, append, StandardCharsets.UTF_8, lines);
   }
 
-  public static void writeToFile(File file, List<String> data) throws IOException {
-    writeToFile(file, true, data.stream());
+  public static void writeToFile(File file, Iterable<String> data) throws IOException {
+    writeToFile(file, true, streamOf(data));
   }
 }

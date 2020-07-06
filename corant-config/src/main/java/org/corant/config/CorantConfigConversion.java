@@ -14,9 +14,12 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -159,21 +162,21 @@ public class CorantConfigConversion implements Serializable {
           }
         } else if (type instanceof ParameterizedType) {
           ParameterizedType ptype = (ParameterizedType) type;
-          Class<?> rType = forceCast(ptype.getRawType());
+          Class<?> rtype = forceCast(ptype.getRawType());
           Type argType = ptype.getActualTypeArguments()[0];
-          if (Class.class.isAssignableFrom(rType)) {
+          if (Class.class.isAssignableFrom(rtype)) {
             result = convertSingle(value, Class.class);
-          } else if (List.class.isAssignableFrom(rType)) {
+          } else if (List.class.isAssignableFrom(rtype)) {
             result = convertCollection(value, argType, ArrayList::new);
-          } else if (Set.class.isAssignableFrom(rType)) {
+          } else if (Set.class.isAssignableFrom(rtype)) {
             result = convertCollection(value, argType, HashSet::new);
-          } else if (Optional.class.isAssignableFrom(rType)) {
+          } else if (Optional.class.isAssignableFrom(rtype)) {
             result = Optional.ofNullable(convert(value, argType));
-          } else if (Supplier.class.isAssignableFrom(rType)) {
+          } else if (Supplier.class.isAssignableFrom(rtype)) {
             result = (Supplier<?>) () -> convert(value, argType);
-          } else if (Provider.class.isAssignableFrom(rType)) {
+          } else if (Provider.class.isAssignableFrom(rtype)) {
             result = (Provider<?>) () -> convert(value, argType);
-          } else if (Map.class.isAssignableFrom(rType)) {
+          } else if (Map.class.isAssignableFrom(rtype)) {
             result = convertMap(value, ptype);
           } else {
             throw new IllegalStateException(
@@ -188,7 +191,6 @@ public class CorantConfigConversion implements Serializable {
             e);
       }
     }
-
     return result;
   }
 
@@ -254,21 +256,46 @@ public class CorantConfigConversion implements Serializable {
     return result;
   }
 
-  public Map<Object, Object> convertMap(String rawValue, Class<?> kt, Class<?> vt) {
-    String[] values = ConfigUtils.splitValue(rawValue);
-    Map<String, String> temp = mapOf((Object[]) values);
+  /**
+   * Convert string to map, use {@link #tryConvertStringMap(String)} to transform string to
+   * Map&lt;String,String&gt; and then convert Map&lt;String,String&gt; value to the specified
+   * {@code keyType} {@code valueType} type.
+   *
+   * @param rawValue
+   * @param keyType
+   * @param valueType
+   * @return convertMap
+   */
+  public Map<Object, Object> convertMap(String rawValue, Class<?> keyType, Class<?> valueType) {
+    Map<String, String> temp = tryConvertStringMap(rawValue);
     Map<Object, Object> result = new HashMap<>();
-    temp.forEach((k, v) -> result.put(convert(k, kt), convert(v, vt)));
+    temp.forEach((k, v) -> result.put(convert(k, keyType), convert(v, valueType)));
     return result;
   }
 
+  /**
+   * Convert string to map, use {@link #tryConvertStringMap(String)} to transform string to
+   * Map&lt;String,String&gt; and then convert Map&lt;String,String&gt; value to the specified
+   * ParameterizedType type.
+   *
+   * @see tryConvertStringMap
+   *
+   * @param rawValue
+   * @param properyType
+   * @return convertMap
+   */
   public Map<Object, Object> convertMap(String rawValue, ParameterizedType properyType) {
-    String[] values = ConfigUtils.splitValue(rawValue);
     if (properyType.getActualTypeArguments().length == 0) {
-      return mapOf((Object[]) values);
+      return convertMap(rawValue, Object.class, Object.class);
     } else if (properyType.getActualTypeArguments().length == 2) {
-      Class<?> kt = (Class<?>) properyType.getActualTypeArguments()[0];
-      Class<?> vt = (Class<?>) properyType.getActualTypeArguments()[1];
+      Class<?> kt = Object.class;
+      Class<?> vt = Object.class;
+      if (properyType.getActualTypeArguments()[0] instanceof Class) {
+        kt = (Class<?>) properyType.getActualTypeArguments()[0];
+      }
+      if (properyType.getActualTypeArguments()[1] instanceof Class) {
+        kt = (Class<?>) properyType.getActualTypeArguments()[0];
+      }
       return convertMap(rawValue, kt, vt);
     }
     return null;
@@ -294,6 +321,59 @@ public class CorantConfigConversion implements Serializable {
 
   public boolean isSupport(Class<?> cls) {
     return converters.get().containsKey(cls);
+  }
+
+  /**
+   * Supports string to Map&lt;String,String&gt;.
+   *
+   * <p>
+   * Use a {@code ','} to cut the string into segments,if each segment contains {@code '='} (and
+   * does not start with {@code '='}) then each segment is treated as a key-value pair; otherwise
+   * the odd segment is the key of the key-value pair , The next even segment is the value of the
+   * key-value pair. All key and value are trimed.
+   * </p>
+   *
+   * <pre>
+   * "key1"                                 =>  { "key":"" }
+   * "key=value"                            =>  { "key":"value" }
+   * "key,value"                            =>  { "key":"value" }
+   * "key1=value1,key2=value2,key3="        =>  { "key1":"value1", "key2":"value2", "key3":"" }
+   * "key1=value1,key2=value2,key3"         =>  { "key1=value1":"key2=value2", "key3":"" }
+   * "key1=value1,key2=value2&x=1&y=2"      =>  { "key1":"value1", "key2":"value2&x=1&y=2" }
+   * "key1,value1,key2,value2"              =>  { "key1":"value1", "key2":"value2" }
+   * "key1,value1,key2,value2&x=1&y=2"      =>  { "key1":"value1", "key2":"value2&x=1&y=2" }
+   * </pre>
+   *
+   * @param rawValue
+   * @return tryConvertStringMap
+   */
+  protected Map<String, String> tryConvertStringMap(String rawValue) {
+    String[] values = ConfigUtils.splitValue(rawValue);
+    if (isEmpty(values)) {
+      Collections.emptyMap();
+    }
+    List<String> vals = new ArrayList<>();
+    boolean useKvs = true;
+    for (String val : values) {
+      int s = val.indexOf('=');
+      if (s > 0 && s < val.length()) {
+        String kvKey = trim(val.substring(0, s));
+        String kvVal = trim(val.substring(s + 1));
+        if (isNotBlank(kvKey)) {
+          vals.add(kvKey);// key
+          vals.add(kvVal);// value
+          useKvs &= true;
+        }
+      } else {
+        useKvs = false;
+        break;
+      }
+    }
+    if (useKvs) {
+      values = vals.toArray(new String[vals.size()]);
+      vals.clear();
+    }
+    return mapOf((Object[]) values);
   }
 
   void closeCloseableConverters() {

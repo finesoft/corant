@@ -39,6 +39,13 @@ public @interface RunConfig {
   AddiConfigProperty[] addiConfigProperties() default {};
 
   /**
+   * the application arguments
+   *
+   * @return properties
+   */
+  String[] arguments() default {};
+
+  /**
    * Dispose Corant instance, clear test object and resource after test end in test thread. If use
    * in test suite, the children of suite not affected. all dispose operation will be run after test
    * suite finished when test suite class set autoDispose true.

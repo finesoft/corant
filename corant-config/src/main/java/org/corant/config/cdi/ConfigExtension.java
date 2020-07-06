@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import javax.enterprise.context.Dependent;
@@ -54,6 +55,8 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  */
 public class ConfigExtension implements Extension {
 
+  private static final Logger logger = Logger.getLogger(ConfigExtension.class.getName());
+
   private Set<InjectionPoint> injectionPoints = new HashSet<>();
 
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
@@ -81,9 +84,9 @@ public class ConfigExtension implements Extension {
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
-    ConfigProperty configProperty =
-        pip.getInjectionPoint().getAnnotated().getAnnotation(ConfigProperty.class);
-    if (configProperty != null) {
+    if (pip.getInjectionPoint().getAnnotated().getAnnotation(ConfigProperty.class) != null) {
+      logger.fine(
+          () -> String.format("Find config property inject point %s", pip.getInjectionPoint()));
       injectionPoints.add(pip.getInjectionPoint());
     }
   }

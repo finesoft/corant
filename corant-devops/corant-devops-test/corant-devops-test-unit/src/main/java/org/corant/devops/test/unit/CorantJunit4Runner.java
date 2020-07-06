@@ -17,14 +17,13 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.suites.cdi.Instances.resolve;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.Corant;
-import org.corant.suites.cdi.UnmanageableInstance;
+import org.corant.suites.cdi.Instances;
 import org.junit.runners.model.Statement;
 
 /**
@@ -42,8 +41,7 @@ public interface CorantJunit4Runner {
   ThreadLocal<Class<?>[]> BEAN_CLASSES = new ThreadLocal<>();
   ThreadLocal<Boolean> AUTO_DISPOSES = ThreadLocal.withInitial(() -> Boolean.TRUE);
   ThreadLocal<Map<String, String>> ADDI_CFG_PROS = ThreadLocal.withInitial(HashMap::new);
-  ThreadLocal<Map<Class<?>, UnmanageableInstance<?>>> TEST_OBJECTS =
-      ThreadLocal.withInitial(HashMap::new);
+  ThreadLocal<Map<Class<?>, Object>> TEST_OBJECTS = ThreadLocal.withInitial(HashMap::new);
 
   default Statement classBlockWithCorant(final Class<?> testClass, final Set<Class<?>> suiteClasses,
       final Supplier<Statement> classBlock) {
@@ -65,7 +63,7 @@ public interface CorantJunit4Runner {
             System.clearProperty(CFG_LOCATION_EXCLUDE_PATTERN);
             if (AUTO_DISPOSES.get().booleanValue()) {
               if (TEST_OBJECTS.get() != null) {
-                TEST_OBJECTS.get().values().forEach(umi -> umi.preDestroy().dispose());
+                // TEST_OBJECTS.get().values().forEach(umi -> umi.preDestroy().dispose());
                 TEST_OBJECTS.get().clear();
                 TEST_OBJECTS.remove();
               }
@@ -126,12 +124,11 @@ public interface CorantJunit4Runner {
   }
 
   default Object createTestWithCorant(Class<?> clazz) {
-    // if (TEST_OBJECTS.get() == null) {
-    // TEST_OBJECTS.set(new HashMap<>());
-    // }
-    // return TEST_OBJECTS.get().computeIfAbsent(clazz,
-    // cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct()).get();
-    return resolve(clazz);
+    if (TEST_OBJECTS.get() == null) {
+      TEST_OBJECTS.set(new HashMap<>());
+    }
+    return TEST_OBJECTS.get().computeIfAbsent(clazz, cls -> Instances.resolve(cls));
+    /* cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct() ).get(); */
   }
 
   default boolean isEmbedded() {

@@ -38,6 +38,11 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
   protected Logger logger;
 
   @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
+
+  @Override
   public EsNamedQuerier resolve(String key, Object param) {
     FreemarkerEsQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);

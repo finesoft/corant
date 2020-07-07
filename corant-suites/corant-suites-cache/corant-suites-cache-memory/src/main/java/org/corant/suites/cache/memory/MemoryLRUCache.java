@@ -57,6 +57,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   public void clear() {
     Lock rl = lock.writeLock();
     try {
+      rl.lock();
       map.clear();
     } finally {
       rl.unlock();
@@ -67,6 +68,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
     Lock rl = lock.writeLock();
     try {
+      rl.lock();
       return MemoryCache.super.computeIfAbsent(key, mappingFunction);
     } finally {
       rl.unlock();
@@ -77,6 +79,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   public V get(K key) {
     Lock rl = lock.readLock();
     try {
+      rl.lock();
       return map.get(key);
     } finally {
       rl.unlock();
@@ -87,6 +90,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   public V put(K key, V value) {
     Lock rl = lock.writeLock();
     try {
+      rl.lock();
       return map.put(key, value);
     } finally {
       rl.unlock();
@@ -97,6 +101,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   public V remove(K key) {
     Lock rl = lock.writeLock();
     try {
+      rl.lock();
       return map.remove(key);
     } finally {
       rl.unlock();

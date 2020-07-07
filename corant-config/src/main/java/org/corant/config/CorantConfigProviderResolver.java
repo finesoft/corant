@@ -37,10 +37,10 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
   private static final Map<ClassLoader, Config> configs = new HashMap<>();
-  private static final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+  private static final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
   public void clear() {
-    Lock lock = rwLock.writeLock();
+    Lock lock = rwl.writeLock();
     try {
       lock.lock();
       configs.clear();
@@ -62,13 +62,13 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
   @Override
   public Config getConfig(ClassLoader classLoader) {
     final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
-    Lock lock = rwLock.readLock();
+    Lock lock = rwl.readLock();
     try {
       lock.lock();
       Config config = configs.get(useClassLoader);
       if (null == config) {
         lock.unlock();
-        lock = rwLock.writeLock();
+        lock = rwl.writeLock();
         lock.lock();
         config = buildConfig(useClassLoader);
         cacheConfig(useClassLoader, config);
@@ -81,7 +81,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
   @Override
   public void registerConfig(Config config, ClassLoader classLoader) {
-    Lock lock = rwLock.writeLock();
+    Lock lock = rwl.writeLock();
     try {
       lock.lock();
       cacheConfig(defaultObject(classLoader, Classes::defaultClassLoader), config);
@@ -92,7 +92,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
   @Override
   public void releaseConfig(final Config config) {
-    Lock lock = rwLock.readLock();
+    Lock lock = rwl.readLock();
     try {
       lock.lock();
       Iterator<Map.Entry<ClassLoader, Config>> iterator = configs.entrySet().iterator();

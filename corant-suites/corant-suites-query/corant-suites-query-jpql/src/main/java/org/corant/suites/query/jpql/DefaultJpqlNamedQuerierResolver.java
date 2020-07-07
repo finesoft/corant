@@ -45,6 +45,11 @@ public class DefaultJpqlNamedQuerierResolver
   protected Logger logger;
 
   @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
+
+  @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {
     DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return forceCast(builder.build(param));

@@ -51,6 +51,11 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   protected Optional<String> mappingFilePaths;
 
   @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
+
+  @Override
   public DefaultCasNamedQuerier resolve(String key, Object param) {
     DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return forceCast(builder.build(param));

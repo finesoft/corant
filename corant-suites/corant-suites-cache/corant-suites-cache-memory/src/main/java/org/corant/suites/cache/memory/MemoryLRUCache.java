@@ -23,10 +23,9 @@ import java.util.function.Function;
 /**
  * corant-suites-query-shared
  *
- * Unfinish yet!
+ * <p>Unfinish yet!
  *
  * @author bingo 下午12:54:42
- *
  */
 public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
@@ -37,16 +36,8 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
     this.map = new LRUMap<>(maxSize);
   }
 
-  public MemoryLRUCache(int initialCapacity, float loadFactor, boolean accessOrder, int maxSize) {
-    this.map = new LRUMap<>(initialCapacity, loadFactor, accessOrder, maxSize);
-  }
-
   public MemoryLRUCache(int initialCapacity, float loadFactor, int maxSize) {
     this.map = new LRUMap<>(initialCapacity, loadFactor, maxSize);
-  }
-
-  public MemoryLRUCache(int initialCapacity, int maxSize) {
-    this.map = new LRUMap<>(initialCapacity, maxSize);
   }
 
   public MemoryLRUCache(Map<? extends K, ? extends V> m, int maxSize) {
@@ -114,24 +105,13 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
     private final int maxSize;
 
     public LRUMap(int maxSize) {
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public LRUMap(int initialCapacity, float loadFactor, boolean accessOrder, int maxSize) {
-      super(initialCapacity, loadFactor, accessOrder);
+      super(1 << 4, 0.75f, true);
       this.maxSize = maxSize;
       checkSize();
     }
 
     public LRUMap(int initialCapacity, float loadFactor, int maxSize) {
-      super(initialCapacity, loadFactor);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public LRUMap(int initialCapacity, int maxSize) {
-      super(initialCapacity);
+      super(initialCapacity, loadFactor, true);
       this.maxSize = maxSize;
       checkSize();
     }

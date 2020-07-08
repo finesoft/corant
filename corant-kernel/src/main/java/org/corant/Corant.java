@@ -158,7 +158,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Construct Coarnt instance with given bean classes and class loader and arguments. If the given
+   * Construct Corant instance with given bean classes and class loader and arguments. If the given
    * bean classes are not null then they will be added to the set of bean classes for the synthetic
    * bean archive. If the given class loader is not null then it will be set to the context
    * ClassLoader for current Thread and the CDI container class loader else we use Corant.class

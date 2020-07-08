@@ -23,25 +23,48 @@ import java.util.function.Function;
 /**
  * corant-suites-query-shared
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午12:54:42
  */
 public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
-  protected final LRUMap<K, V> map;
+  protected final Map<K, V> map;
   protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+  protected final int maxSize;
 
-  public MemoryLRUCache(int maxSize) {
-    this.map = new LRUMap<>(maxSize);
+  public MemoryLRUCache(final int maxSize) {
+    this.maxSize = checkSize(maxSize);
+    this.map = new LinkedHashMap<K, V>(1 << 4, 0.75f, true) {
+
+      private static final long serialVersionUID = 152381119030226885L;
+
+      @Override
+      protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+        return MemoryLRUCache.this.removeEldestEntry(size());
+      }
+    };
   }
 
-  public MemoryLRUCache(int initialCapacity, float loadFactor, int maxSize) {
-    this.map = new LRUMap<>(initialCapacity, loadFactor, maxSize);
+  public MemoryLRUCache(final int initialCapacity, final float loadFactor, final int maxSize) {
+    this.maxSize = checkSize(maxSize);
+    this.map = new LinkedHashMap<K, V>(initialCapacity, loadFactor, true) {
+
+      private static final long serialVersionUID = -8204490126870926733L;
+
+      @Override
+      protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+        return MemoryLRUCache.this.removeEldestEntry(size());
+      }
+    };
   }
 
-  public MemoryLRUCache(Map<? extends K, ? extends V> m, int maxSize) {
-    this.map = new LRUMap<>(m, maxSize);
+  private static int checkSize(int maxSize) {
+    if (maxSize < 1) {
+      throw new IllegalArgumentException("maxSize must be >= 1");
+    }
+    return maxSize;
   }
 
   @Override
@@ -99,38 +122,8 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
     }
   }
 
-  static class LRUMap<K, V> extends LinkedHashMap<K, V> {
-
-    private static final long serialVersionUID = 7293780572467721980L;
-    private final int maxSize;
-
-    public LRUMap(int maxSize) {
-      super(1 << 4, 0.75f, true);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public LRUMap(int initialCapacity, float loadFactor, int maxSize) {
-      super(initialCapacity, loadFactor, true);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public LRUMap(Map<? extends K, ? extends V> m, int maxSize) {
-      super(m);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-      return size() > maxSize;
-    }
-
-    private void checkSize() {
-      if (maxSize < 1) {
-        throw new IllegalArgumentException("maxSize must be >= 1");
-      }
-    }
+  protected boolean removeEldestEntry(int currentSize) {
+    return currentSize > maxSize;
   }
+
 }

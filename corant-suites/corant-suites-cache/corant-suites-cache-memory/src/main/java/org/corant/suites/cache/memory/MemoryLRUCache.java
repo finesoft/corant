@@ -13,6 +13,7 @@
  */
 package org.corant.suites.cache.memory;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -31,7 +32,7 @@ import java.util.function.Function;
 public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
   protected final Map<K, V> map;
-  protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+  protected final ReadWriteLock rwl = new ReentrantReadWriteLock();
   protected final int maxSize;
 
   public MemoryLRUCache(final int maxSize) {
@@ -69,7 +70,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
   @Override
   public void clear() {
-    Lock rl = lock.writeLock();
+    Lock rl = rwl.writeLock();
     try {
       rl.lock();
       map.clear();
@@ -80,18 +81,30 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
   @Override
   public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
-    Lock rl = lock.writeLock();
-    try {
-      rl.lock();
-      return MemoryCache.super.computeIfAbsent(key, mappingFunction);
-    } finally {
-      rl.unlock();
+    shouldNotNull(mappingFunction);
+    V v = null;
+    rwl.readLock().lock();
+    if ((v = map.get(key)) == null) {
+      rwl.readLock().unlock();
+      rwl.writeLock().lock();
+      try {
+        if ((v = map.get(key)) == null) {
+          if ((v = mappingFunction.apply(key)) != null) {
+            map.put(key, v);
+          }
+        }
+      } finally {
+        rwl.writeLock().unlock();
+      }
+    } else {
+      rwl.readLock().unlock();
     }
+    return v;
   }
 
   @Override
   public V get(K key) {
-    Lock rl = lock.readLock();
+    Lock rl = rwl.readLock();
     try {
       rl.lock();
       return map.get(key);
@@ -102,7 +115,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
   @Override
   public V put(K key, V value) {
-    Lock rl = lock.writeLock();
+    Lock rl = rwl.writeLock();
     try {
       rl.lock();
       return map.put(key, value);
@@ -113,7 +126,7 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
 
   @Override
   public V remove(K key) {
-    Lock rl = lock.writeLock();
+    Lock rl = rwl.writeLock();
     try {
       rl.lock();
       return map.remove(key);

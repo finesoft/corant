@@ -90,6 +90,10 @@ public class Texts {
         || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
   }
 
+  public static boolean isZhChar(int c) {
+    return isZhChar((char) c);
+  }
+
   /**
    * String lines from file, use for read txt file line by line.
    *

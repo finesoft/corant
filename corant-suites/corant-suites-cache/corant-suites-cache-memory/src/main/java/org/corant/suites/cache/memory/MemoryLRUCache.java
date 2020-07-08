@@ -82,13 +82,11 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
   @Override
   public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
     shouldNotNull(mappingFunction);
-    V v = null;
-    rwl.readLock().lock();
-    if ((v = map.get(key)) == null) {
-      rwl.readLock().unlock();
+    V v = get(key);
+    if (v == null) {
       rwl.writeLock().lock();
       try {
-        if ((v = map.get(key)) == null) {
+        if ((v = map.get(key)) == null) { // try again
           if ((v = mappingFunction.apply(key)) != null) {
             map.put(key, v);
           }
@@ -96,8 +94,6 @@ public class MemoryLRUCache<K, V> implements MemoryCache<K, V> {
       } finally {
         rwl.writeLock().unlock();
       }
-    } else {
-      rwl.readLock().unlock();
     }
     return v;
   }

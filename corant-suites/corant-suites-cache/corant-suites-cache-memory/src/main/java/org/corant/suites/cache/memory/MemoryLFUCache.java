@@ -16,20 +16,14 @@ package org.corant.suites.cache.memory;
 /**
  * corant-suites-query-shared
  *
- * Unfinish yet!
+ * <p>Unfinish yet!
  *
  * @author bingo 下午2:01:05
- *
  */
-public class MemoryLFUCache<K, V> implements MemoryCache<K, V> {
+public class MemoryLFUCache<K, V> extends AbstractMemoryCacheMap<K, V> {
 
   @Override
-  public V get(K key) {
-    return null;
-  }
+  protected void pruneCache() {
 
-  @Override
-  public V put(K key, V value) {
-    return null;
   }
 }

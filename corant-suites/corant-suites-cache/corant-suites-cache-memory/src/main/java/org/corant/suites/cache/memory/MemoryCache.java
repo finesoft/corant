@@ -20,7 +20,6 @@ import java.util.function.Function;
  * corant-suites-cache-memory
  *
  * @author bingo 下午3:16:30
- *
  */
 public interface MemoryCache<K, V> {
 
@@ -41,9 +40,11 @@ public interface MemoryCache<K, V> {
 
   V get(K key);
 
+  boolean isFull();
+
   V put(K key, V value);
 
-  default V remove(K key) {
-    return null;
-  }
+  V remove(K key);
+
+  int size();
 }

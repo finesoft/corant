@@ -15,10 +15,6 @@ package org.corant.suites.cache.memory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Function;
 
 /**
  * corant-suites-query-shared
@@ -27,115 +23,23 @@ import java.util.function.Function;
  *
  * @author bingo 下午2:02:27
  */
-public class MemoryFIFOCache<K, V> implements MemoryCache<K, V> {
+public class MemoryFIFOCache<K, V> extends AbstractMemoryCacheMap<K, V> {
 
-  protected final FIFOMap<K, V> map;
-  protected final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-  public MemoryFIFOCache(int maxSize) {
-    this.map = new FIFOMap<>(maxSize);
-  }
-
-  public MemoryFIFOCache(int initialCapacity, float loadFactor, int maxSize) {
-    this.map = new MemoryFIFOCache.FIFOMap<>(initialCapacity, loadFactor, maxSize);
-  }
-
-  public MemoryFIFOCache(int initialCapacity, int maxSize) {
-    this.map = new MemoryFIFOCache.FIFOMap<>(initialCapacity, maxSize);
+  public MemoryFIFOCache(final int cacheSize) {
+    this.maxCacheSize = cacheSize;
+    cacheMap =
+        new LinkedHashMap<K, MemoryCacheObject<K, V>>(cacheSize + 1, 0.75f, false) {
+          @Override
+          protected boolean removeEldestEntry(Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
+            return MemoryFIFOCache.this.removeEldestEntry(size());
+          }
+        };
   }
 
   @Override
-  public void clear() {
-    Lock rl = lock.writeLock();
-    try {
-      rl.lock();
-      map.clear();
-    } finally {
-      rl.unlock();
-    }
-  }
+  protected void pruneCache() {}
 
-  @Override
-  public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
-    Lock rl = lock.writeLock();
-    try {
-      rl.lock();
-      return MemoryCache.super.computeIfAbsent(key, mappingFunction);
-    } finally {
-      rl.unlock();
-    }
-  }
-
-  @Override
-  public V get(K key) {
-    Lock rl = lock.readLock();
-    try {
-      rl.lock();
-      return map.get(key);
-    } finally {
-      rl.unlock();
-    }
-  }
-
-  @Override
-  public V put(K key, V value) {
-    Lock rl = lock.writeLock();
-    try {
-      rl.lock();
-      return map.put(key, value);
-    } finally {
-      rl.unlock();
-    }
-  }
-
-  @Override
-  public V remove(K key) {
-    Lock rl = lock.writeLock();
-    try {
-      rl.lock();
-      return map.remove(key);
-    } finally {
-      rl.unlock();
-    }
-  }
-
-  static class FIFOMap<K, V> extends LinkedHashMap<K, V> {
-
-    private static final long serialVersionUID = -2853520196107667114L;
-    private final int maxSize;
-
-    public FIFOMap(int maxSize) {
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public FIFOMap(int initialCapacity, float loadFactor, int maxSize) {
-      super(initialCapacity, loadFactor);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public FIFOMap(int initialCapacity, int maxSize) {
-      super(initialCapacity);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    public FIFOMap(Map<? extends K, ? extends V> m, int maxSize) {
-      super(m);
-      this.maxSize = maxSize;
-      checkSize();
-    }
-
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-      return size() > maxSize;
-    }
-
-    private void checkSize() {
-      if (maxSize < 1) {
-        throw new IllegalArgumentException("maxSize must be >= 1");
-      }
-    }
+  protected boolean removeEldestEntry(int currentSize) {
+    return currentSize > maxCacheSize;
   }
 }

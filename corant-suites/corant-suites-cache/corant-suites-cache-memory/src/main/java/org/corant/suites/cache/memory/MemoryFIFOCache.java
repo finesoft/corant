@@ -19,21 +19,23 @@ import java.util.Map;
 /**
  * corant-suites-query-shared
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午2:02:27
  */
 public class MemoryFIFOCache<K, V> extends AbstractMemoryCacheMap<K, V> {
 
   public MemoryFIFOCache(final int cacheSize) {
-    this.maxCacheSize = cacheSize;
-    cacheMap =
-        new LinkedHashMap<K, MemoryCacheObject<K, V>>(cacheSize + 1, 0.75f, false) {
-          @Override
-          protected boolean removeEldestEntry(Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
-            return MemoryFIFOCache.this.removeEldestEntry(size());
-          }
-        };
+    maxCacheSize = cacheSize;
+    cacheMap = new LinkedHashMap<K, MemoryCacheObject<K, V>>(cacheSize + 1, 0.75f, false) {
+      private static final long serialVersionUID = -1536681027894088591L;
+
+      @Override
+      protected boolean removeEldestEntry(Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
+        return MemoryFIFOCache.this.removeEldestEntry(size());
+      }
+    };
   }
 
   @Override

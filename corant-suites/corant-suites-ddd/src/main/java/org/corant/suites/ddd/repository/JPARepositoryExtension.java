@@ -66,7 +66,7 @@ public class JPARepositoryExtension implements Extension {
     qualifiers.clear();
     qualifiers.putAll(Qualifiers.resolveNameds(names));
     qualifiers.forEach((k, v) -> abd.<JPARepository>addBean().addQualifiers(v)
-        .addTransitiveTypeClosure(JPARepository.class).beanClass(JPARepository.class)
+        .addTransitiveTypeClosure(DefaultJPARepository.class).beanClass(DefaultJPARepository.class)
         .scope(ApplicationScoped.class).stereotypes(setOf(Repositories.class))
         .produceWith(beans -> produce(beans, k)).disposeWith((repo, beans) -> {
         }));
@@ -85,6 +85,8 @@ public class JPARepositoryExtension implements Extension {
    *
    */
   public static final class DefaultJPARepository extends AbstractJPARepository {
+
+    protected DefaultJPARepository() {}
 
     protected DefaultJPARepository(PersistenceContext pc, JTAJPAUnitOfWorksManager uofm) {
       super();

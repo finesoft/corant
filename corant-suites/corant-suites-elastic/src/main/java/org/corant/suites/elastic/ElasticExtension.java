@@ -119,20 +119,20 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
             .produceWith(beans -> getTransportClient(c.getClusterName()))
             .disposeWith((tc, beans) -> tc.close());// FIXME proxy error on TransportClient
         event.<ElasticDocumentService>addBean().addQualifiers(q)
-            .addTransitiveTypeClosure(ElasticDocumentService.class)
-            .beanClass(ElasticDocumentService.class).scope(Singleton.class)
+            .addTransitiveTypeClosure(DefaultElasticDocumentService.class)
+            .beanClass(DefaultElasticDocumentService.class).scope(Singleton.class)
             .produceWith(beans -> new DefaultElasticDocumentService(beans, c))
             .disposeWith((tc, beans) -> {
             });
         event.<ElasticIndicesService>addBean().addQualifiers(q)
-            .addTransitiveTypeClosure(ElasticIndicesService.class)
-            .beanClass(ElasticIndicesService.class).scope(Singleton.class)
+            .addTransitiveTypeClosure(DefaultElasticIndicesService.class)
+            .beanClass(DefaultElasticIndicesService.class).scope(Singleton.class)
             .produceWith(beans -> new DefaultElasticIndicesService(beans, c))
             .disposeWith((tc, beans) -> {
             });
         event.<ElasticIndexingResolver>addBean().addQualifiers(q)
-            .addTransitiveTypeClosure(ElasticIndexingResolver.class)
-            .beanClass(ElasticIndexingResolver.class).scope(Singleton.class)
+            .addTransitiveTypeClosure(DefaultElasticIndexingResolver.class)
+            .beanClass(DefaultElasticIndexingResolver.class).scope(Singleton.class)
             .produceWith(beans -> new DefaultElasticIndexingResolver(c))
             .disposeWith((tc, beans) -> {
             });
@@ -140,7 +140,6 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     }
   }
 
-  @SuppressWarnings("resource")
   PreBuiltTransportClient produce(String clusterName) {
     ElasticConfig cfg = shouldNotNull(configManager.get(clusterName));
     Builder builder = Settings.builder();

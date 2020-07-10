@@ -33,9 +33,7 @@ public class MemoryLFUCache<K, V> extends AbstractMemoryCache<K, V> {
 
   @Override
   protected void pruneCache() {
-    MemoryCacheObject<K, V> comin =
-        cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount).orElse(null);
-    if (comin != null) {
+    cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount).ifPresent(comin -> {
       long minAccessCount = comin.getAccessCount().get();
       Iterator<MemoryCacheObject<K, V>> values = cacheMap.values().iterator();
       while (values.hasNext()) {
@@ -47,6 +45,6 @@ public class MemoryLFUCache<K, V> extends AbstractMemoryCache<K, V> {
           break;
         }
       }
-    }
+    });
   }
 }

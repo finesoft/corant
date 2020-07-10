@@ -44,6 +44,9 @@ public abstract class AbstractMemoryCache<K, V> implements MemoryCache<K, V> {
           v = cacheObject.getValue();
         } else {
           if ((v = mappingFunction.apply(key)) != null) {
+            if (isReallyFull(key)) {
+              pruneCache();
+            }
             cacheMap.put(key, new MemoryCacheObject<>(key, v));
           }
         }

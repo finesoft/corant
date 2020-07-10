@@ -14,7 +14,6 @@
 package org.corant.suites.cache.memory;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * corant-suites-query-shared
@@ -33,18 +32,7 @@ public class MemoryLFUCache<K, V> extends AbstractMemoryCache<K, V> {
 
   @Override
   protected void pruneCache() {
-    cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount).ifPresent(comin -> {
-      long minAccessCount = comin.getAccessCount().get();
-      Iterator<MemoryCacheObject<K, V>> values = cacheMap.values().iterator();
-      while (values.hasNext()) {
-        MemoryCacheObject<K, V> co = values.next();
-        long accessCount = co.getAccessCount().get();
-        accessCount -= minAccessCount;
-        if (accessCount <= 0) {
-          values.remove();
-          break;
-        }
-      }
-    });
+    cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount)
+        .ifPresent(comin -> cacheMap.remove(comin.getKey()));
   }
 }

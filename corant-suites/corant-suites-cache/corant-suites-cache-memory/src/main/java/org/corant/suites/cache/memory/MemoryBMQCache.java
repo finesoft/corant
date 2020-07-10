@@ -16,13 +16,13 @@ package org.corant.suites.cache.memory;
 /**
  * corant-suites-query-shared
  *
- * <p>BeladyMinQuery
+ * <p>
+ * BeladyMinQuery
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午2:04:12
  */
-public class MemoryBMQCache<K, V> extends AbstractMemoryCacheMap<K, V> {
-  @Override
-  protected void pruneCache() {}
+public class MemoryBMQCache<K, V> extends AbstractMemoryCache<K, V> {
 }

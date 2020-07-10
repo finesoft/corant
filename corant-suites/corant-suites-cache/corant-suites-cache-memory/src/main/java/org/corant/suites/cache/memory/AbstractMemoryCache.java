@@ -1,13 +1,12 @@
 package org.corant.suites.cache.memory;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
-
-import static org.corant.shared.util.Assertions.shouldNotNull;
 
 /**
  * corant <br>
@@ -16,7 +15,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
  * @auther sushuaihao 2020/7/8
  * @since
  */
-public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> {
+public abstract class AbstractMemoryCache<K, V> implements MemoryCache<K, V> {
 
   protected final ReadWriteLock rwl = new ReentrantReadWriteLock();
   protected Map<K, MemoryCacheObject<K, V>> cacheMap;
@@ -40,12 +39,12 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
     if (v == null) {
       rwl.writeLock().lock();
       try {
-        MemoryCacheObject<K, V> memoryCacheObject = cacheMap.get(key); // try again
-        if (memoryCacheObject != null) {
-          v = memoryCacheObject.cachedObject;
+        MemoryCacheObject<K, V> cacheObject = cacheMap.get(key); // try again
+        if (cacheObject != null) {
+          v = cacheObject.getValue();
         } else {
           if ((v = mappingFunction.apply(key)) != null) {
-            cacheMap.put(key, new MemoryCacheObject<K, V>(key, v));
+            cacheMap.put(key, new MemoryCacheObject<>(key, v));
           }
         }
       } finally {
@@ -57,15 +56,15 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
 
   @Override
   public V get(K key) {
-    V getValue = null;
+    V v = null;
     Lock rl = rwl.readLock();
     try {
       rl.lock();
       MemoryCacheObject<K, V> cacheObject = cacheMap.get(key);
       if (cacheObject != null) {
-        getValue = cacheObject.getObject();
+        v = cacheObject.getValue();
       }
-      return getValue;
+      return v;
     } finally {
       rl.unlock();
     }
@@ -97,18 +96,18 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
 
   @Override
   public V remove(K key) {
-    V removedValue = null;
+    V v = null;
     Lock rl = rwl.writeLock();
     try {
       rl.lock();
       MemoryCacheObject<K, V> co = cacheMap.remove(key);
       if (co != null) {
-        removedValue = co.cachedObject;
+        v = co.value;
       }
     } finally {
       rl.unlock();
     }
-    return removedValue;
+    return v;
   }
 
   @Override
@@ -133,22 +132,44 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
     }
   }
 
-  protected abstract void pruneCache();
+  protected void pruneCache() {
+    return;
+  }
 
-  class MemoryCacheObject<K1, V1> {
-    final K1 key;
-    final V1 cachedObject;
-    AtomicLong accessCount;
+  static class MemoryCacheObject<CK, CV> {
+    final CK key;
+    final CV value;
+    final AtomicLong accessCount = new AtomicLong();
+    final long timestamp = System.currentTimeMillis();
 
-    MemoryCacheObject(final K1 key, final V1 object) {
+    MemoryCacheObject(final CK key, final CV object) {
       this.key = key;
-      this.cachedObject = object;
-      this.accessCount = new AtomicLong();
+      this.value = object;
     }
 
-    V1 getObject() {
+    static int compareAccessCount(MemoryCacheObject<?, ?> o1, MemoryCacheObject<?, ?> o2) {
+      return Long.compare(o1.accessCount.get(), o2.accessCount.get());
+    }
+
+    static int compareTimestamp(MemoryCacheObject<?, ?> o1, MemoryCacheObject<?, ?> o2) {
+      return Long.compare(o1.timestamp, o2.timestamp);
+    }
+
+    AtomicLong getAccessCount() {
+      return accessCount;
+    }
+
+    CK getKey() {
+      return key;
+    }
+
+    long getTimestamp() {
+      return timestamp;
+    }
+
+    CV getValue() {
       accessCount.incrementAndGet();
-      return cachedObject;
+      return value;
     }
   }
 }

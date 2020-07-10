@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author bingo 下午2:02:27
  */
-public class MemoryFIFOCache<K, V> extends AbstractMemoryCacheMap<K, V> {
+public class MemoryFIFOCache<K, V> extends AbstractMemoryCache<K, V> {
 
   public MemoryFIFOCache(final int cacheSize) {
     maxCacheSize = cacheSize;
@@ -37,9 +37,6 @@ public class MemoryFIFOCache<K, V> extends AbstractMemoryCacheMap<K, V> {
       }
     };
   }
-
-  @Override
-  protected void pruneCache() {}
 
   protected boolean removeEldestEntry(int currentSize) {
     return currentSize > maxCacheSize;

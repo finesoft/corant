@@ -19,11 +19,12 @@ import java.util.Iterator;
 /**
  * corant-suites-query-shared
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午2:01:05
  */
-public class MemoryLFUCache<K, V> extends AbstractMemoryCacheMap<K, V> {
+public class MemoryLFUCache<K, V> extends AbstractMemoryCache<K, V> {
 
   public MemoryLFUCache(final int maxSize) {
     maxCacheSize = maxSize;
@@ -32,22 +33,14 @@ public class MemoryLFUCache<K, V> extends AbstractMemoryCacheMap<K, V> {
 
   @Override
   protected void pruneCache() {
-    MemoryCacheObject<K, V> comin;
-    comin =
-        cacheMap.values().stream()
-            .min(
-                (o1, o2) -> {
-                  Long l1 = o1.accessCount.get();
-                  Long l2 = o2.accessCount.get();
-                  return l1.compareTo(l2);
-                })
-            .get();
+    MemoryCacheObject<K, V> comin =
+        cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount).orElse(null);
     if (comin != null) {
-      long minAccessCount = comin.accessCount.get();
+      long minAccessCount = comin.getAccessCount().get();
       Iterator<MemoryCacheObject<K, V>> values = cacheMap.values().iterator();
       while (values.hasNext()) {
         MemoryCacheObject<K, V> co = values.next();
-        long accessCount = co.accessCount.get();
+        long accessCount = co.getAccessCount().get();
         accessCount -= minAccessCount;
         if (accessCount <= 0) {
           values.remove();

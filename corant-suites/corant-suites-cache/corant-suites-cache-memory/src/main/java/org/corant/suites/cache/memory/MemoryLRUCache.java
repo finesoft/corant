@@ -19,42 +19,38 @@ import java.util.Map;
 /**
  * corant-suites-query-shared
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午12:54:42
  */
-public class MemoryLRUCache<K, V> extends AbstractMemoryCacheMap<K, V> {
+public class MemoryLRUCache<K, V> extends AbstractMemoryCache<K, V> {
 
   public MemoryLRUCache(final int maxSize) {
     maxCacheSize = maxSize;
-    cacheMap =
-        new LinkedHashMap<K, MemoryCacheObject<K, V>>(maxSize + 1, 0.75f, true) {
+    cacheMap = new LinkedHashMap<K, MemoryCacheObject<K, V>>(maxSize + 1, 0.75f, true) {
 
-          private static final long serialVersionUID = 152381119030226885L;
+      private static final long serialVersionUID = 152381119030226885L;
 
-          @Override
-          protected boolean removeEldestEntry(final Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
-            return MemoryLRUCache.this.removeEldestEntry(size());
-          }
-        };
+      @Override
+      protected boolean removeEldestEntry(final Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
+        return MemoryLRUCache.this.removeEldestEntry(size());
+      }
+    };
   }
 
   public MemoryLRUCache(final int initialCapacity, final float loadFactor, final int maxSize) {
     maxCacheSize = maxSize;
-    cacheMap =
-        new LinkedHashMap<K, MemoryCacheObject<K, V>>(initialCapacity, loadFactor, true) {
+    cacheMap = new LinkedHashMap<K, MemoryCacheObject<K, V>>(initialCapacity, loadFactor, true) {
 
-          private static final long serialVersionUID = -8204490126870926733L;
+      private static final long serialVersionUID = -8204490126870926733L;
 
-          @Override
-          protected boolean removeEldestEntry(final Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
-            return MemoryLRUCache.this.removeEldestEntry(size());
-          }
-        };
+      @Override
+      protected boolean removeEldestEntry(final Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
+        return MemoryLRUCache.this.removeEldestEntry(size());
+      }
+    };
   }
-
-  @Override
-  protected void pruneCache() {}
 
   protected boolean removeEldestEntry(int currentSize) {
     return currentSize > maxCacheSize;

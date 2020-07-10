@@ -16,12 +16,11 @@ package org.corant.suites.cache.memory;
 /**
  * corant-suites-query-shared
  *
- * <p>Unfinish yet!
+ * <p>
+ * Unfinish yet!
  *
  * @author bingo 下午2:03:02
  */
-public class MemoryNMRUCache<K, V> extends AbstractMemoryCacheMap<K, V> {
+public class MemoryNMRUCache<K, V> extends AbstractMemoryCache<K, V> {
 
-  @Override
-  protected void pruneCache() {}
 }

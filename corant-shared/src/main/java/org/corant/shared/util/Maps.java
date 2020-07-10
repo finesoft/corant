@@ -462,7 +462,8 @@ public class Maps {
    * @return getMapList
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
-    return new HashSet<>(getMapList(map, key, Objects::forceCast));
+    List<T> list = getMapList(map, key, Objects::forceCast);
+    return list != null ? new HashSet<>(list) : null;
   }
 
   /**
@@ -489,7 +490,8 @@ public class Maps {
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
       final Function<Object, T> objFunc) {
-    return new HashSet<>(getMapObjectList(map, key, v -> toList(v, objFunc)));
+    List<T> list = getMapObjectList(map, key, v -> toList(v, objFunc));
+    return list != null ? new HashSet<>(list) : null;
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {

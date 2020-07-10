@@ -12,6 +12,8 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 /**
  * corant <br>
  *
+ * code base from jodd-core
+ *
  * @auther sushuaihao 2020/7/8
  * @since
  */
@@ -142,6 +144,7 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
     MemoryCacheObject(final K1 key, final V1 object) {
       this.key = key;
       this.cachedObject = object;
+      this.accessCount = new AtomicLong();
     }
 
     V1 getObject() {

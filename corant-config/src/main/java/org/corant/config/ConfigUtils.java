@@ -20,7 +20,7 @@ import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.group;
+import static org.corant.shared.util.Strings.aggregate;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.Arrays;
@@ -142,7 +142,7 @@ public class ConfigUtils {
   public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return group(configs, filter::test, s -> {
+    return aggregate(configs, filter::test, s -> {
       String[] arr = splitKey(s);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};

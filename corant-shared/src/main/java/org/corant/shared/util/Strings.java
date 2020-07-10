@@ -40,6 +40,26 @@ public class Strings {
   }
 
   /**
+   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
+   *
+   * @param iterable
+   * @param prefix
+   * @return group
+   */
+  public static Map<String, List<String>> aggregate(Iterable<String> iterable,
+      Predicate<String> filter, Function<String, String[]> func) {
+    Map<String, List<String>> map = new LinkedHashMap<>();
+    if (iterable != null && filter != null) {
+      streamOf(iterable).filter(filter).sorted().map(func).forEach(s -> {
+        if (s.length > 1) {
+          map.computeIfAbsent(s[0], k -> new ArrayList<>()).add(s[1]);
+        }
+      });
+    }
+    return map;
+  }
+
+  /**
    * <pre>
    * Strings.defaultString(null)  = ""
    * Strings.defaultString("")    = ""
@@ -144,23 +164,93 @@ public class Strings {
   }
 
   /**
-   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
+   * Group string into a string array with Predicate, delete blank elements or trim elements as
+   * needed.
    *
-   * @param iterable
-   * @param prefix
+   * @see Strings#group(String, Predicate)
+   *
+   * @param str
+   * @param removeBlank
+   * @param trim
+   * @param predicate
    * @return group
    */
-  public static Map<String, List<String>> group(Iterable<String> iterable, Predicate<String> filter,
-      Function<String, String[]> func) {
-    Map<String, List<String>> map = new LinkedHashMap<>();
-    if (iterable != null && filter != null) {
-      streamOf(iterable).filter(filter).sorted().map(func).forEach(s -> {
-        if (s.length > 1) {
-          map.computeIfAbsent(s[0], k -> new ArrayList<>()).add(s[1]);
+  public static String[] group(final String str, final boolean removeBlank, final boolean trim,
+      final Predicate<Character> predicate) {
+    String[] grouped = group(str, predicate);
+    if (!removeBlank && !trim) {
+      return grouped;
+    } else {
+      String[] result = new String[grouped.length];
+      int i = 0;
+      for (String e : grouped) {
+        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
+          result[i++] = trim ? trim(e) : e;
         }
-      });
+      }
+      return Arrays.copyOf(result, i);
     }
-    return map;
+  }
+
+  /**
+   * Group string into a string array with Predicate.
+   *
+   * <pre>
+   * Strings.group("abc123efg456", Character::isDigit)        =       ["abc","123","efg","456"]
+   * Strings.group("abc,efg", c -> c==',')                    =       ["abc",",","efg"]
+   * Strings.group("123", Character::isDigit)                 =       ["123"]
+   * Strings.group(null, Character::isDigit)                  =       []
+   * Strings.group("abc", Character::isDigit)                 =       ["abc"]
+   * Strings.group("abc", null)                               =       ["abc"]
+   * Strings.group(null, null)                                =       []
+   * </pre>
+   *
+   * @param str
+   * @param splitor
+   * @return split
+   */
+  public static String[] group(final String str, final Predicate<Character> predicate) {
+    int len;
+    if (str == null || (len = str.length()) == 0) {
+      return new String[0];
+    }
+    if (predicate == null) {
+      return new String[] {str};
+    }
+    int i = 0;
+    int s = 0;
+    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int ai = 0;
+    String[] array = new String[g];
+    boolean match = false;
+    for (; i < len; i++) {
+      if (predicate.test(str.charAt(i))) {
+        if (!match && i > 0) {
+          if (ai == g) {
+            array = Arrays.copyOf(array, g += g);
+          }
+          array[ai++] = str.substring(s, i);
+          s = i;
+        }
+        match = true;
+      } else {
+        if (match) {
+          if (ai == g) {
+            array = Arrays.copyOf(array, g += g);
+          }
+          array[ai++] = str.substring(s, i);
+          s = i;
+        }
+        match = false;
+      }
+    }
+    if (s < len) {
+      array = Arrays.copyOf(array, ai + 1);
+      array[ai] = str.substring(s);
+      return array;
+    } else {
+      return Arrays.copyOf(array, ai);
+    }
   }
 
   /**
@@ -481,7 +571,7 @@ public class Strings {
   }
 
   /**
-   * Replace string use for short string not regex.
+   * Replace string use for short string, not regex.
    *
    * @param source
    * @param orginal
@@ -544,7 +634,17 @@ public class Strings {
   }
 
   /**
-   * Split string with Predicate<Character>
+   * Split the string into a string array with Predicate.
+   *
+   * <pre>
+   * Strings.split("abc123efg456", Character::isDigit)        =       ["abc","efg"]
+   * Strings.split("abc,efg", c -> c==',')                    =       ["abc","efg"]
+   * Strings.split("123", Character::isDigit)                 =       []
+   * Strings.split(null, Character::isDigit)                  =       []
+   * Strings.split("abc", Character::isDigit)                 =       ["abc"]
+   * Strings.split("abc", null)                               =       ["abc"]
+   * Strings.split(null, null)                                =       []
+   * </pre>
    *
    * @param str
    * @param splitor
@@ -589,7 +689,7 @@ public class Strings {
   }
 
   /**
-   * Split string with whole spreator string not regex.
+   * Split the string into a string array with whole spreator string, not regex.
    *
    * @param str
    * @param wholeSpreator
@@ -635,18 +735,21 @@ public class Strings {
   }
 
   /**
-   * Return not blank elements
+   * Split the string into a string array, delete blank elements or trim elements as needed.
    *
    * @param str
    * @param wholeSpreator
+   * @param removeBlank
    * @param trim
    * @return split
    */
   public static String[] split(final String str, final String wholeSpreator,
       final boolean removeBlank, final boolean trim) {
     String[] splits = split(str, wholeSpreator);
-    String[] result = new String[splits.length];
-    if (splits.length > 0) {
+    if (!removeBlank && !trim) {
+      return splits;
+    } else {
+      String[] result = new String[splits.length];
       int i = 0;
       for (String e : splits) {
         if (isNotBlank(e) || isBlank(e) && !removeBlank) {
@@ -654,8 +757,6 @@ public class Strings {
         }
       }
       return Arrays.copyOf(result, i);
-    } else {
-      return result;
     }
   }
 

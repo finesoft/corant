@@ -42,7 +42,7 @@ public interface MemoryCache<K, V> {
 
   boolean isFull();
 
-  V put(K key, V value);
+  void put(K key, V value);
 
   V remove(K key);
 

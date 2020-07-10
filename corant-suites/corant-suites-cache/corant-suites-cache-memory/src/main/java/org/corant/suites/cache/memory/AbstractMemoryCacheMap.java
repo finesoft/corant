@@ -11,7 +11,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 
 /**
  * corant <br>
- *
  * code base from jodd-core
  *
  * @auther sushuaihao 2020/7/8
@@ -81,7 +80,7 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
   }
 
   @Override
-  public V put(K key, V value) {
+  public void put(K key, V value) {
     shouldNotNull(value);
     Lock rl = rwl.writeLock();
     try {
@@ -90,7 +89,7 @@ public abstract class AbstractMemoryCacheMap<K, V> implements MemoryCache<K, V> 
       if (isReallyFull(key)) {
         pruneCache();
       }
-      return cacheMap.put(key, co).cachedObject;
+      cacheMap.put(key, co);
     } finally {
       rl.unlock();
     }

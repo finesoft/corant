@@ -158,7 +158,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result = convertDocument(fi.iterator().tryNext(), querier);
+    Document document = fi.iterator().tryNext();
+    if (document == null) {
+      return null;
+    }
+    Map<String, Object> result = convertDocument(document, querier);
     this.fetch(result, querier);
     return querier.resolveResult(result);
   }

@@ -13,13 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.suites.cdi.Instances.find;
-import java.lang.annotation.Annotation;
-import java.util.Optional;
 import java.util.stream.Stream;
-import org.corant.suites.ddd.message.MessageDispatcher;
-import org.corant.suites.ddd.message.MessageStorage;
-import org.corant.suites.ddd.saga.SagaService;
 import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
@@ -29,25 +23,13 @@ import org.corant.suites.jpa.shared.PersistenceService;
  */
 public interface UnitOfWorksManager {
 
-  @SuppressWarnings("unchecked")
-  static <U extends UnitOfWork> Optional<U> currentUnitOfWork(Annotation... annotations) {
-    Optional<UnitOfWorksManager> uowm = find(UnitOfWorksManager.class, annotations);
-    return Optional.ofNullable(uowm.isPresent() ? (U) uowm.get().getCurrentUnitOfWork() : null);
-  }
-
   UnitOfWork getCurrentUnitOfWork();
 
   Stream<UnitOfWorksHandler> getHandlers();
 
   Stream<UnitOfWorksListener> getListeners();
 
-  MessageDispatcher getMessageDispatcher();
-
-  MessageStorage getMessageStorage();
-
   PersistenceService getPersistenceService();
-
-  SagaService getSagaService();
 
   @FunctionalInterface
   public interface UnitOfWorksHandler {

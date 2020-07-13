@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -31,11 +30,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.message.MessageDispatcher;
-import org.corant.suites.ddd.message.MessageStorage;
-import org.corant.suites.ddd.saga.SagaService;
-import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
  * corant-suites-ddd
@@ -43,34 +38,21 @@ import org.corant.suites.jpa.shared.PersistenceService;
  * @author bingo 下午2:14:21
  *
  */
-@ApplicationScoped
-@InfrastructureServices
-public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
+public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOfWorksManager {
 
-  protected final Map<Object, JTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
+  protected final Map<Object, AbstractJTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
   protected TransactionManager transactionManager;
 
   @Inject
-  protected PersistenceService persistenceService;
-
-  @Inject
   @Any
   protected Instance<MessageDispatcher> messageDispatcher;
 
-  @Inject
-  @Any
-  protected Instance<MessageStorage> messageStorage;
-
-  @Inject
-  @Any
-  protected Instance<SagaService> sagaService;
-
-  public static JTAJPAUnitOfWork curUow() {
-    Optional<UnitOfWork> curuow = UnitOfWorksManager.currentUnitOfWork();
-    if (curuow.isPresent() && curuow.get() instanceof JTAJPAUnitOfWork) {
-      return (JTAJPAUnitOfWork) curuow.get();
+  public static AbstractJTAJPAUnitOfWork curUow() {
+    Optional<AbstractJTAJPAUnitOfWork> curuow = UnitOfWorks.currentDefaultUnitOfWork();
+    if (curuow.isPresent() && curuow.get() instanceof JTAXAJPAUnitOfWork) {
+      return curuow.get();
     } else {
       throw new NotSupportedException();
     }
@@ -123,14 +105,14 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
   }
 
   @Override
-  public JTAJPAUnitOfWork getCurrentUnitOfWork() {
+  public AbstractJTAJPAUnitOfWork getCurrentUnitOfWork() {
     try {
       final Transaction curTx = shouldNotNull(getTransactionManager().getTransaction(),
           "For now we only support transactional unit of work.");
       return uows.computeIfAbsent(wrapUintOfWorksKey(curTx), key -> {
         try {
           logger.fine(() -> "Register an new unit of work with the current transacion context.");
-          JTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
+          AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
           curTx.registerSynchronization(uow);
           return uow;
         } catch (IllegalStateException | RollbackException | SystemException e) {
@@ -142,33 +124,16 @@ public class JTAJPAUnitOfWorksManager extends AbstractUnitOfWorksManager {
     }
   }
 
-  @Override
   public MessageDispatcher getMessageDispatcher() {
-    return messageDispatcher.isResolvable() ? messageDispatcher.get() : MessageDispatcher.DUMMY_INST;
-  }
-
-  @Override
-  public MessageStorage getMessageStorage() {
-    return messageStorage.isResolvable() ? messageStorage.get() : MessageStorage.DUMMY_INST;
-  }
-
-  @Override
-  public PersistenceService getPersistenceService() {
-    return persistenceService;
-  }
-
-  @Override
-  public SagaService getSagaService() {
-    return sagaService.isResolvable() ? sagaService.get() : SagaService.empty();
+    return messageDispatcher.isResolvable() ? messageDispatcher.get()
+        : MessageDispatcher.DUMMY_INST;
   }
 
   public TransactionManager getTransactionManager() {
     return transactionManager;
   }
 
-  protected JTAJPAUnitOfWork buildUnitOfWork(Transaction transaction) {
-    return new JTAJPAUnitOfWork(this, transaction);
-  }
+  protected abstract AbstractJTAJPAUnitOfWork buildUnitOfWork(Transaction transaction);
 
   protected void clearCurrentUnitOfWorks(Object key) {
     logger.fine(() -> "Deregister the unit of work with the current transacion context.");

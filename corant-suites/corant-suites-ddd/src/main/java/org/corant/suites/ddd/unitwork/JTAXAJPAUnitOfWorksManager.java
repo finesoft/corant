@@ -13,45 +13,25 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import javax.transaction.Transaction;
+import org.corant.suites.ddd.annotation.qualifier.JTAXA;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 
 /**
  * corant-suites-ddd
  *
- * @author bingo 上午11:39:15
+ * @author bingo 下午2:14:21
  *
  */
+@JTAXA
 @ApplicationScoped
 @InfrastructureServices
-public abstract class AbstractUnitOfWorksManager implements UnitOfWorksManager {
-
-  protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
-
-  @Inject
-  protected Instance<UnitOfWorksListener> listeners;
-
-  @Inject
-  protected Instance<UnitOfWorksHandler> handlers;
+public class JTAXAJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager {
 
   @Override
-  public Stream<UnitOfWorksHandler> getHandlers() {
-    if (!handlers.isUnsatisfied()) {
-      return handlers.stream().sorted(UnitOfWorksHandler::compare);
-    }
-    return Stream.empty();
-  }
-
-  @Override
-  public Stream<UnitOfWorksListener> getListeners() {
-    if (!listeners.isUnsatisfied()) {
-      return listeners.stream();
-    }
-    return Stream.empty();
+  protected JTAXAJPAUnitOfWork buildUnitOfWork(Transaction transaction) {
+    return new JTAXAJPAUnitOfWork(this, transaction);
   }
 
 }

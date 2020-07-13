@@ -19,6 +19,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.suites.cdi.Instances.find;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -28,17 +29,18 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
-import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.AbstractJTAJPAUnitOfWork;
+import org.corant.suites.ddd.unitwork.UnitOfWorks;
 import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
@@ -57,12 +59,13 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-  @Inject
-  protected JTAJPAUnitOfWorksManager unitOfWorksManager;
-
   @Override
   public EntityManager getEntityManager(Class<?> cls) {
-    return unitOfWorksManager.getCurrentUnitOfWork().getEntityManager(getPersistenceContext(cls));
+    Optional<AbstractJTAJPAUnitOfWork> uowo = UnitOfWorks.currentDefaultUnitOfWork();
+    if (uowo.isPresent()) {
+      return uowo.get().getEntityManager(getPersistenceContext(cls));
+    }
+    throw new NotSupportedException();
   }
 
   @Override

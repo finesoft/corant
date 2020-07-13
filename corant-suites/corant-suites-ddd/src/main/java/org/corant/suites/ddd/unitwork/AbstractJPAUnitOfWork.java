@@ -21,14 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 import org.corant.suites.cdi.CDIs;
@@ -44,91 +39,37 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
- * corant-suites-ddd
- *
- * <pre>
- * All entityManager from this unit of work are SynchronizationType.SYNCHRONIZED,
- * and must be in transactional.
- * </pre>
- *
- * @author bingo 上午11:38:39
- *
+ * @author bingo 下午7:13:58
  */
-public class JTAJPAUnitOfWork extends AbstractUnitOfWork
-    implements Synchronization, EntityManagerProvider {
+public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
 
-  static final String LOG_BEGIN_UOW_FMT = "Begin unit of work [%s].";
-  static final String LOG_END_UOW_FMT = "End unit of work [%s].";
-  static final String LOG_BEF_UOW_CMP_FMT =
-      "Enforce entity managers %s flush to collect the messages, before %s completion.";
-  static final String LOG_HDL_MSG_FMT = "Sorted the flushed messages and store them if nessuary,"
-      + " dispatch them to the message dispatcher, before %s completion.";
-  static final String LOG_MSG_CYCLE_FMT = "Can not handle messages!";
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("ddd.unitofwork.use-manual-flush", Boolean.class).orElse(Boolean.FALSE);
 
-  final Transaction transaction;
-  final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
-  final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
-  final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
-  final LinkedList<Message> registeredMessages = new LinkedList<>();
+  protected final Logger logger = Logger.getLogger(this.getClass().toString());
 
-  protected JTAJPAUnitOfWork(JTAJPAUnitOfWorksManager manager, Transaction transaction) {
-    super(manager);
-    this.transaction = transaction;
-    logger.fine(() -> String.format(LOG_BEGIN_UOW_FMT, transaction.toString()));
+  protected final UnitOfWorksManager manager;
+  protected final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
+  protected final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
+  protected final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
+  protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
+  protected final LinkedList<Message> registeredMessages = new LinkedList<>();
+
+  protected volatile boolean activated = false;
+
+  protected AbstractJPAUnitOfWork(UnitOfWorksManager manager) {
+    this.manager = manager;
+    activated = true;
   }
 
   @Override
-  public void afterCompletion(int status) {
-    final boolean success = status == Status.STATUS_COMMITTED;
-    try {
-      complete(success);
-    } finally {
-      logger.fine(() -> String.format(LOG_END_UOW_FMT, transaction.toString()));
-      handlePostCompleted(success);
-      clear();
-    }
+  public void complete(boolean success) {
+    activated = false;
   }
 
-  @Override
-  public void beforeCompletion() {
-    entityManagers.values().forEach(em -> {
-      logger.fine(() -> String.format(LOG_BEF_UOW_CMP_FMT, em, transaction.toString()));
-      if (USE_MANUAL_FLUSH_MODEL) {
-        final FlushModeType fm = em.getFlushMode();
-        try {
-          if (fm != FlushModeType.COMMIT) {
-            em.setFlushMode(FlushModeType.COMMIT);
-          }
-          em.flush();
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
-        } finally {
-          if (fm != em.getFlushMode()) {
-            em.setFlushMode(fm);
-          }
-        }
-      } else {
-        em.flush();
-      }
-    }); // flush to dump dirty
-    handleMessage();
-    handlePreComplete();
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * <p>
-   * This method must be invoked in a transaction.
-   *
-   * @see #register(Object)
-   */
   @Override
   public void deregister(Object obj) {
-    if (activated) {
+    if (isActivated()) {
       if (obj instanceof Aggregate) {
         Aggregate aggregate = (Aggregate) obj;
         if (aggregate.getId() != null) {
@@ -148,20 +89,24 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     }
   }
 
-  @Override
-  public EntityManager getEntityManager(PersistenceContext pc) {
-    return entityManagers.computeIfAbsent(pc, persistenceService::getEntityManager);
+  /**
+   * Aggregates in the scope of the current unit of work.
+   *
+   * @return the registered aggregates
+   */
+  public Map<AggregateIdentifier, Lifecycle> getAggregates() {
+    return Collections.unmodifiableMap(registeredAggregates);
   }
 
   @Override
-  public Transaction getId() {
-    return transaction;
+  public EntityManager getEntityManager(PersistenceContext pc) {
+    return entityManagers.computeIfAbsent(pc, manager.getPersistenceService()::getEntityManager);
   }
 
   /**
    * Message queue collected by the current unit of work.
    *
-   * @return getMessages
+   * @return the registered messsages
    */
   public List<Message> getMessages() {
     return Collections.unmodifiableList(registeredMessages);
@@ -175,36 +120,15 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
   /**
    * Variables in the scope of the current unit of work.
    *
-   * @return getVariables
+   * @return the registered variables
    */
   public Map<Object, Object> getVariables() {
-    return registeredVariables;
-  }
-
-  /**
-   * Represents whether the current transaction is still in progress
-   *
-   * @return isInTransaction
-   */
-  public boolean isInTransaction() {
-    try {
-      if (transaction == null) {
-        return false;
-      } else {
-        int status = transaction.getStatus();
-        return status == Status.STATUS_ACTIVE || status == Status.STATUS_COMMITTING
-            || status == Status.STATUS_MARKED_ROLLBACK || status == Status.STATUS_PREPARED
-            || status == Status.STATUS_PREPARING || status == Status.STATUS_ROLLING_BACK;
-      }
-    } catch (SystemException e) {
-      throw new GeneralRuntimeException(e, PkgMsgCds.ERR_UOW_TRANS);
-    }
+    return Collections.unmodifiableMap(registeredVariables);
   }
 
   /**
    * {@inheritDoc}
    * <p>
-   * This method must be invoked in a transaction.
    * <ul>
    * <b>Parameter descriptions</b>
    * <li>If the parameter is aggregation, the aggregation id and life cycle state, as well as the
@@ -221,7 +145,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
    */
   @Override
   public void register(Object obj) {
-    if (activated && isInTransaction()) {
+    if (isActivated()) {
       if (obj instanceof Aggregate) {
         Aggregate aggregate = (Aggregate) obj;
         if (aggregate.getId() != null) {
@@ -246,46 +170,29 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     }
   }
 
-  @Override
-  public String toString() {
-    return transaction.toString();
-  }
-
   protected void clear() {
-    try {
-      entityManagers.values().forEach(em -> {
-        if (em.isOpen()) {
-          em.close();
-        }
-      });
-      evolutiveAggregates.clear();
-      registeredAggregates.clear();
-      registeredMessages.clear();
-      registeredVariables.clear();
-    } finally {
-      getManager().clearCurrentUnitOfWorks(transaction);
-    }
-  }
-
-  @Override
-  protected JTAJPAUnitOfWorksManager getManager() {
-    return (JTAJPAUnitOfWorksManager) super.getManager();
-  }
-
-  protected void handleMessage() {
-    logger.fine(() -> String.format(LOG_HDL_MSG_FMT, transaction.toString()));
-    LinkedList<Message> messages = new LinkedList<>();
-    extractMessages(messages);
-    int cycles = 128;
-    while (!messages.isEmpty()) {
-      Message msg = messages.pop();
-      messageStorage.apply(msg);
-      sagaService.trigger(msg);// FIXME Is it right to do so?
-      messageDispatcher.accept(new Message[] {msg});
-      if (extractMessages(messages) && --cycles < 0) {
-        throw new CorantRuntimeException(LOG_MSG_CYCLE_FMT);
+    entityManagers.values().forEach(em -> {
+      if (em.isOpen()) {
+        em.close();
       }
+    });
+    evolutiveAggregates.clear();
+    registeredAggregates.clear();
+    registeredMessages.clear();
+    registeredVariables.clear();
+  }
+
+  protected boolean extractMessages(LinkedList<Message> messages) {
+    if (!registeredMessages.isEmpty()) {
+      registeredMessages.stream().sorted(Message::compare).forEach(messages::offer);
+      registeredMessages.clear();
+      return true;
     }
+    return false;
+  }
+
+  protected UnitOfWorksManager getManager() {
+    return manager;
   }
 
   protected void handlePostCompleted(final boolean success) {
@@ -311,13 +218,18 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     }
   }
 
-  boolean extractMessages(LinkedList<Message> messages) {
-    if (!registeredMessages.isEmpty()) {
-      registeredMessages.stream().sorted(Message::compare).forEach(messages::offer);
-      registeredMessages.clear();
-      return true;
-    }
-    return false;
+  protected void handlePreComplete() {
+    manager.getHandlers().forEach(handler -> {
+      try {
+        handler.onPreComplete(this);
+      } catch (Exception ex) {
+        logger.log(Level.WARNING, ex, () -> "Handle UOW pre-complete occurred error!");
+      }
+    });
+  }
+
+  protected boolean isActivated() {
+    return activated;
   }
 
   /**
@@ -331,7 +243,7 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     final Map<AggregateIdentifier, Lifecycle> aggregates;
     final Map<Object, Object> variables;
 
-    Registration(JTAJPAUnitOfWork uow) {
+    Registration(AbstractJPAUnitOfWork uow) {
       aggregates = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredAggregates));
       variables = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
     }
@@ -343,6 +255,5 @@ public class JTAJPAUnitOfWork extends AbstractUnitOfWork
     public Map<Object, Object> getVariables() {
       return variables;
     }
-
   }
 }

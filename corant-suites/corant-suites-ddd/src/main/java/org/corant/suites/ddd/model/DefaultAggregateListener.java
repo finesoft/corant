@@ -13,9 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.suites.cdi.Instances.select;
+import java.util.Optional;
 import java.util.logging.Logger;
-import javax.enterprise.inject.Instance;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -24,7 +23,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
-import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.UnitOfWork;
+import org.corant.suites.ddd.unitwork.UnitOfWorks;
 
 /**
  * corant-suites-ddd
@@ -123,9 +123,9 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(Object o) {
-    Instance<UnitOfWorksManager> um = select(UnitOfWorksManager.class);
-    if (um.isResolvable()) {
-      um.get().getCurrentUnitOfWork().register(o);
+    Optional<? extends UnitOfWork> uow = UnitOfWorks.currentDefaultUnitOfWork();
+    if (uow.isPresent()) {
+      uow.get().register(o);
     } else {
       logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
     }

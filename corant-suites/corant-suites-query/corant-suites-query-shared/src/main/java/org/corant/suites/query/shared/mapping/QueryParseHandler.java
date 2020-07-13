@@ -127,7 +127,7 @@ public class QueryParseHandler extends DefaultHandler {
   public QueryMapping getMapping() {
     mapping.getQueries().forEach(q -> {
       q.setParamMappings(mapping.getParaMapping());
-      q.immunize();
+      q.postConstruct();
     });
     return mapping;
   }

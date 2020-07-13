@@ -262,6 +262,29 @@ public class Query implements Serializable {
     getProperties().put(name, value);
   }
 
+  /**
+   * Make query immutable
+   */
+  protected void postConstruct() {
+    if (fetchQueries != null) {
+      fetchQueries.forEach(FetchQuery::postConstuct);
+      fetchQueries = Collections.unmodifiableList(fetchQueries);
+    } else {
+      fetchQueries = Collections.emptyList();
+    }
+    if (hints != null) {
+      hints.forEach(QueryHint::postConstruct);
+      hints = Collections.unmodifiableList(hints);
+    } else {
+      hints = Collections.emptyList();
+    }
+    setParamMappings(getParamMappings() == null ? Collections.emptyMap()
+        : Collections.unmodifiableMap(getParamMappings()));
+    setProperties(getProperties() == null ? Collections.emptyMap()
+        : Collections.unmodifiableMap(getProperties()));
+
+  }
+
   protected void setCache(boolean cache) {
     this.cache = cache;
   }
@@ -312,29 +335,6 @@ public class Query implements Serializable {
 
   protected void setVersion(String version) {
     this.version = version;
-  }
-
-  /**
-   * Make query immutable
-   */
-  void immunize() {
-    if (fetchQueries != null) {
-      fetchQueries.forEach(FetchQuery::immunize);
-      fetchQueries = Collections.unmodifiableList(fetchQueries);
-    } else {
-      fetchQueries = Collections.emptyList();
-    }
-    if (hints != null) {
-      hints.forEach(QueryHint::immunize);
-      hints = Collections.unmodifiableList(hints);
-    } else {
-      hints = Collections.emptyList();
-    }
-    setParamMappings(getParamMappings() == null ? Collections.emptyMap()
-        : Collections.unmodifiableMap(getParamMappings()));
-    setProperties(getProperties() == null ? Collections.emptyMap()
-        : Collections.unmodifiableMap(getProperties()));
-
   }
 
   public enum QueryType {

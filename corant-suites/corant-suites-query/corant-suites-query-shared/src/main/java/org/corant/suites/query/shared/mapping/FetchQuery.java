@@ -165,6 +165,14 @@ public class FetchQuery implements Serializable {
   }
 
   /**
+   * Make query immutable
+   */
+  protected void postConstuct() {
+    parameters =
+        parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
+  }
+
+  /**
    *
    * @param eagerInject the eagerInject to set
    */
@@ -227,14 +235,6 @@ public class FetchQuery implements Serializable {
 
   protected void setResultClass(Class<?> resultClass) {
     this.resultClass = defaultObject(resultClass, Map.class);
-  }
-
-  /**
-   * Make query immutable
-   */
-  void immunize() {
-    parameters =
-        parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
   }
 
   public static class FetchQueryParameter implements Serializable {

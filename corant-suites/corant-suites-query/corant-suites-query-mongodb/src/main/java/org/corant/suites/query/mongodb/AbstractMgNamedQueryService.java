@@ -109,7 +109,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     bson.ifPresent(ai::hint);
     resovleCollation(querier).ifPresent(ai::collation);
     List<Map<String, Object>> list =
-        streamOf(ai).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
+        streamOf(ai).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
+            .collect(Collectors.toList());
     this.fetch(list, querier);
     return querier.resolveResult(list);
   }
@@ -141,7 +142,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
+            .collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > limit) {
@@ -158,11 +160,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Document document = fi.iterator().tryNext();
-    if (document == null) {
-      return null;
-    }
-    Map<String, Object> result = convertDocument(document, querier);
+    Map<String, Object> result =
+        convertDocument(fi.iterator().tryNext(), querier, isAutoSetIdField(querier));
     this.fetch(result, querier);
     return querier.resolveResult(result);
   }
@@ -176,7 +175,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
     List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
+            .collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size < limit) {
@@ -196,7 +196,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier)).collect(Collectors.toList());
+        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
+            .collect(Collectors.toList());
     int size = list.size();
     if (size > 0) {
       if (size > maxSelectSize) {
@@ -209,7 +210,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return querier.resolveResult(list);
   }
 
-  protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier) {
+  protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
+      boolean autoSetIdField) {
     return doc;
   }
 
@@ -217,6 +219,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
+
+  protected boolean isAutoSetIdField(MgNamedQuerier querier) {
+    return resolveProperties(querier, PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+  }
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
     FindIterable<Document> fi = getDataBase().getCollection(resolveCollectionName(querier)).find();
@@ -265,8 +271,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         .ifPresent(t -> fi.maxTime(t, TimeUnit.MILLISECONDS));
     getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, Conversions::toBoolean)
         .ifPresent(fi::noCursorTimeout);
-    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, Conversions::toBoolean)
-        .ifPresent(fi::oplogReplay);
+    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, Conversions::toBoolean).ifPresent(fi::oplogReplay);
     getOptMapObject(pros, PRO_KEY_PARTIAL, Conversions::toBoolean).ifPresent(fi::partial);
     getOptMapObject(pros, PRO_KEY_RETURN_KEY, Conversions::toBoolean).ifPresent(fi::returnKey);
     getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, Conversions::toBoolean)

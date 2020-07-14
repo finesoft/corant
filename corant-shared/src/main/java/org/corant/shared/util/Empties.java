@@ -131,26 +131,6 @@ public class Empties {
     return object == null || object.length == 0;
   }
 
-  public static boolean isEmptyOrNull(final Object object) {
-    if (object instanceof Collection<?>) {
-      return isEmpty((Collection<?>) object);
-    } else if (object instanceof Map<?, ?>) {
-      return isEmpty((Map<?, ?>) object);
-    } else if (object instanceof Object[]) {
-      return isEmpty((Object[]) object);
-    } else if (object instanceof CharSequence) {
-      return isEmpty((CharSequence) object);
-    } else if (object instanceof Iterator<?>) {
-      return isEmpty((Iterator<?>) object);
-    } else if (object instanceof Iterable<?>) {
-      return isEmpty((Iterable<?>) object);
-    } else if (object instanceof Enumeration<?>) {
-      return isEmpty((Enumeration<?>) object);
-    } else {
-      return object == null;
-    }
-  }
-
   /**
    * <pre>
    * Empties.isNotEmpty(null)      = false

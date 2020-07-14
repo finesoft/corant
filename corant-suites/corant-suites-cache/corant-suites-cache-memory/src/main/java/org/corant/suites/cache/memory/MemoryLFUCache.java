@@ -18,6 +18,8 @@ import java.util.HashMap;
 /**
  * corant-suites-query-shared
  *
+ *
+ * NOTE: NOT FINISHED!!! NEED TO RE-IMPLEMENT ALL!!!
  * <p>
  * Unfinish yet!
  *

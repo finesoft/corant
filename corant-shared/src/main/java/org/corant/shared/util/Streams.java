@@ -72,7 +72,7 @@ public class Streams {
    * @param source
    * @return batchStream
    */
-  public static <T> Stream<List<T>> batchStream(int batchSize, Iterable<T> source) {
+  public static <T> Stream<List<T>> batchStream(int batchSize, Iterable<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
@@ -86,12 +86,12 @@ public class Streams {
    * @param it
    * @return batchStream
    */
-  public static <T> Stream<List<T>> batchStream(int batchSize, Iterator<T> it) {
+  public static <T> Stream<List<T>> batchStream(int batchSize, Iterator<? extends T> it) {
 
     return streamOf(new Iterator<List<T>>() {
 
       final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
-      final Iterator<T> useIt = shouldNotNull(it);
+      final Iterator<? extends T> useIt = shouldNotNull(it);
       final List<T> buffer = new ArrayList<>(useBatchSize);
       boolean end = false;
 
@@ -137,7 +137,7 @@ public class Streams {
    * @param source
    * @return batchStream
    */
-  public static <T> Stream<List<T>> batchStream(int batchSize, Stream<T> source) {
+  public static <T> Stream<List<T>> batchStream(int batchSize, Stream<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
@@ -200,7 +200,7 @@ public class Streams {
    * @param enumeration
    * @return streamOf
    */
-  public static <T> Stream<T> streamOf(final Enumeration<T> enumeration) {
+  public static <T> Stream<T> streamOf(final Enumeration<? extends T> enumeration) {
     if (enumeration != null) {
       return streamOf(new Iterator<T>() {
         @Override
@@ -228,11 +228,11 @@ public class Streams {
    * @return streamOf
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static <T> Stream<T> streamOf(final Iterable<T> iterable) {
+  public static <T> Stream<T> streamOf(final Iterable<? extends T> iterable) {
     if (iterable instanceof Collection) {
       return ((Collection) iterable).stream();
     } else if (iterable != null) {
-      return StreamSupport.stream(iterable.spliterator(), false);
+      return (Stream<T>) StreamSupport.stream(iterable.spliterator(), false);
     }
     return Stream.empty();
   }
@@ -244,7 +244,7 @@ public class Streams {
    * @param iterator
    * @return streamOf
    */
-  public static <T> Stream<T> streamOf(final Iterator<T> iterator) {
+  public static <T> Stream<T> streamOf(final Iterator<? extends T> iterator) {
     if (iterator != null) {
       return StreamSupport
           .stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);

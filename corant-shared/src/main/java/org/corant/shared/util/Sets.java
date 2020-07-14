@@ -42,7 +42,7 @@ public class Sets {
    * @param right
    * @return difference
    */
-  public static <T> Set<T> difference(Set<T> left, Set<T> right) {
+  public static <T> Set<T> difference(Set<? extends T> left, Set<? extends T> right) {
     Set<T> diffs = new HashSet<>();
     if (isNotEmpty(left)) {
       if (isEmpty(right)) {
@@ -98,7 +98,7 @@ public class Sets {
    * @param iterable
    * @return setOf
    */
-  public static <T> Set<T> setOf(final Iterable<T> iterable) {
+  public static <T> Set<T> setOf(final Iterable<? extends T> iterable) {
     if (iterable instanceof Set) {
       return forceCast(iterable);
     } else if (iterable != null) {
@@ -115,7 +115,7 @@ public class Sets {
    * @param iterator
    * @return setOf
    */
-  public static <T> Set<T> setOf(final Iterator<T> iterator) {
+  public static <T> Set<T> setOf(final Iterator<? extends T> iterator) {
     return collectionOf(HashSet::new, iterator);
   }
 

@@ -105,7 +105,7 @@ public class Lists {
    * @return an collection that combined by the passed in iterator
    */
   public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
-      final Iterator<T> it) {
+      final Iterator<? extends T> it) {
     if (it == null) {
       return supplier.get();
     } else {
@@ -157,7 +157,7 @@ public class Lists {
    * @param objects
    * @return a list that combined by the passed in enumeration
    */
-  public static <T> List<T> listOf(final Enumeration<T> enumeration) {
+  public static <T> List<T> listOf(final Enumeration<? extends T> enumeration) {
     List<T> list = new ArrayList<>();
     if (enumeration != null) {
       while (enumeration.hasMoreElements()) {
@@ -174,7 +174,7 @@ public class Lists {
    * @param iterable
    * @return a list that combined by the passed in iterable
    */
-  public static <T> List<T> listOf(final Iterable<T> iterable) {
+  public static <T> List<T> listOf(final Iterable<? extends T> iterable) {
     if (iterable instanceof List) {
       return forceCast(iterable);
     } else if (iterable != null) {
@@ -191,7 +191,7 @@ public class Lists {
    * @param iterator
    * @return a list that combined by the passed in iterator
    */
-  public static <T> List<T> listOf(final Iterator<T> iterator) {
+  public static <T> List<T> listOf(final Iterator<? extends T> iterator) {
     List<T> list = new ArrayList<>();
     if (iterator != null) {
       while (iterator.hasNext()) {
@@ -279,7 +279,7 @@ public class Lists {
    * @param i
    * @param j swap
    */
-  public static <T> void swap(List<T> l, int i, int j) {
+  public static <T> void swap(List<? extends T> l, int i, int j) {
     Collections.swap(l, i, j);
   }
 

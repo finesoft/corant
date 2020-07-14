@@ -19,6 +19,7 @@ import java.util.Map;
 /**
  * corant-suites-query-shared
  *
+ * NOTE: NOT FINISHED!!! NEED TO RE-IMPLEMENT ALL!!!
  * <p>
  * Unfinish yet!
  *

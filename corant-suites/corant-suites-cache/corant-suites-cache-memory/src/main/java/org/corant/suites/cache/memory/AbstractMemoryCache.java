@@ -12,6 +12,8 @@ import java.util.function.Function;
  * corant <br>
  * code base from jodd-core
  *
+ * NOTE: NOT FINISHED!!! NEED TO RE-IMPLEMENT ALL!!!
+ *
  * @auther sushuaihao 2020/7/8
  * @since
  */

@@ -45,20 +45,24 @@ public class Iterables {
     return new BreadthIterable<>(obj).iterator();
   }
 
-  public static <T> Iterable<T> concat(@SuppressWarnings("unchecked") final Iterable<T>... inputs) {
+  public static <T> Iterable<T> concat(
+      @SuppressWarnings("unchecked") final Iterable<? extends T>... inputs) {
     shouldNotNull(inputs);
     return new Iterable<T>() {
-      final Iterable<T>[] iterables = Arrays.copyOf(inputs, inputs.length);
+      final Iterable<? extends T>[] iterables = Arrays.copyOf(inputs, inputs.length);
 
+      @SuppressWarnings("unchecked")
       @Override
       public Iterator<T> iterator() {
-        return Stream.of(iterables).map(it -> StreamSupport.stream(it.spliterator(), false))
-            .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
+        return (Iterator<T>) Stream.of(iterables)
+            .map(it -> StreamSupport.stream(it.spliterator(), false)).reduce(Stream::concat)
+            .orElseGet(Stream::empty).iterator();
       }
     };
   }
 
-  public static <T> Iterator<T> concat(@SuppressWarnings("unchecked") final Iterator<T>... inputs) {
+  public static <T> Iterator<T> concat(
+      @SuppressWarnings("unchecked") final Iterator<? extends T>... inputs) {
     shouldNotNull(inputs);
     return new Iterator<T>() {
       @SuppressWarnings("unchecked")
@@ -122,8 +126,8 @@ public class Iterables {
     };
   }
 
-  public static <T> Enumeration<T> enumerationOf(Iterator<T> it) {
-    final Iterator<T> useIt = it == null ? emptyIterator() : it;
+  public static <T> Enumeration<T> enumerationOf(Iterator<? extends T> it) {
+    final Iterator<? extends T> useIt = it == null ? emptyIterator() : it;
     return new Enumeration<T>() {
 
       @Override
@@ -138,7 +142,7 @@ public class Iterables {
     };
   }
 
-  public static <T> T get(final Enumeration<T> e, final int index) {
+  public static <T> T get(final Enumeration<? extends T> e, final int index) {
     int i = index;
     if (i < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
@@ -153,7 +157,7 @@ public class Iterables {
     throw new IndexOutOfBoundsException("Entry does not exist: " + i);
   }
 
-  public static <E> E get(final Iterable<E> iterable, final int index) {
+  public static <E> E get(final Iterable<? extends E> iterable, final int index) {
     int i = index;
     if (i < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
@@ -165,7 +169,7 @@ public class Iterables {
     return get(iterable.iterator(), index);
   }
 
-  public static <E> E get(final Iterator<E> iterator, final int index) {
+  public static <E> E get(final Iterator<? extends E> iterator, final int index) {
     int i = index;
     if (i < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
@@ -180,9 +184,9 @@ public class Iterables {
     throw new IndexOutOfBoundsException("Entry does not exist: " + i);
   }
 
-  public static <T> Iterable<T> iterableOf(final Enumeration<T> enums) {
+  public static <T> Iterable<T> iterableOf(final Enumeration<? extends T> enums) {
     return enums == null ? emptyIterable() : () -> new Iterator<T>() {
-      final Enumeration<T> fromEnums = enums;
+      final Enumeration<? extends T> fromEnums = enums;
 
       @Override
       public boolean hasNext() {

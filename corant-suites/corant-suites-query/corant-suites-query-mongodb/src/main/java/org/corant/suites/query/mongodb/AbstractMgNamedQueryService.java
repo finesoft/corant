@@ -14,6 +14,7 @@ package org.corant.suites.query.mongodb;
  */
 
 import static org.corant.shared.util.Conversions.toEnum;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -123,7 +124,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
-    List<Map<String, Object>> fetchedList = streamOf(fi).collect(Collectors.toList());
+    List<Map<String, Object>> fetchedList = listOf(fi);// streamOf(fi).collect(Collectors.toList());
     fetch(fetchedList, querier);
     querier.resolveResultHints(fetchedList);
     if (result instanceof List) {

@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Spliterator;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -54,9 +55,9 @@ public class Iterables {
       @SuppressWarnings("unchecked")
       @Override
       public Iterator<T> iterator() {
-        return (Iterator<T>) Stream.of(iterables)
-            .map(it -> StreamSupport.stream(it.spliterator(), false)).reduce(Stream::concat)
-            .orElseGet(Stream::empty).iterator();
+        return Stream.of(iterables)
+            .map(it -> StreamSupport.stream((Spliterator<T>) it.spliterator(), false))
+            .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
       }
     };
   }

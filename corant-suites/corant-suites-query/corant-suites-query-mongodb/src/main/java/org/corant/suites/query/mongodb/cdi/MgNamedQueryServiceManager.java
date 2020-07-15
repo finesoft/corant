@@ -14,10 +14,10 @@
 package org.corant.suites.query.mongodb.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.asDefaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -167,10 +167,11 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     }
 
     @Override
-    protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier) {
-      boolean autoSetIdField =
-          resolveProperties(querier, PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
-      if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
+    protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
+        boolean autoSetIdField) {
+      if (doc == null) {
+        return doc;
+      } else if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
         doc.put("id", doc.get("_id"));
       }
       return convertDecimal ? Decimal128Utils.convert(doc) : doc;

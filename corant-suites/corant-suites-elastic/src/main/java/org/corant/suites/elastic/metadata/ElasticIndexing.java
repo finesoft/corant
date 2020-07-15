@@ -13,8 +13,8 @@
  */
 package org.corant.suites.elastic.metadata;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.ObjectUtils.isEquals;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,11 +50,11 @@ public class ElasticIndexing {
   }
 
   public ElasticMapping getMapping(Class<?> clazz) {
-    if (isEquals(mapping.getDocumentClass(), clazz)) {
+    if (areEqual(mapping.getDocumentClass(), clazz)) {
       return forceCast(mapping);
     } else {
       for (ElasticMapping childMapping : mapping) {
-        if (isEquals(childMapping.getDocumentClass(), clazz)) {
+        if (areEqual(childMapping.getDocumentClass(), clazz)) {
           return forceCast(childMapping);
         }
       }

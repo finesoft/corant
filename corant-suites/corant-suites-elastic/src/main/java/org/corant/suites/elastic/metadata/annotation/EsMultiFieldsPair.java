@@ -34,5 +34,5 @@ public @interface EsMultiFieldsPair {
 
   String value();
 
-  Class<?> valueType() default java.lang.String.class;
+  Class<?> valueType() default String.class;
 }

@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.boot;
 
-import org.corant.shared.util.LaunchUtils;
+import org.corant.shared.util.Launchs;
 
 /**
  * corant-kernel
@@ -24,7 +24,7 @@ import org.corant.shared.util.LaunchUtils;
 public class DebugRunner {
 
   public void run(String... args) throws Exception {
-    LaunchUtils.debugAs();
+    Launchs.debugAs();
   }
 
 }

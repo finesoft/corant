@@ -13,14 +13,14 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNoneBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.cdi.ConversionService;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -74,7 +74,7 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  * </p>
  *
  * @see ConversionService
- * @see org.corant.shared.conversion.Conversions
+ * @see org.corant.shared.conversion.Conversion
  * @author bingo 下午12:02:08
  *
  */
@@ -140,7 +140,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
-    return conversionService != null && hint != null && isEquals(hint.getKey(), HINT_NAME);
+    return conversionService != null && hint != null && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

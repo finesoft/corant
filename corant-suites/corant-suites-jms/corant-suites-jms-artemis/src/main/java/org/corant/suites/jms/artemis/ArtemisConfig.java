@@ -13,13 +13,13 @@
  */
 package org.corant.suites.jms.artemis;
 
-import static org.corant.shared.util.ConversionUtils.toInteger;
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Conversions.toInteger;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNoneBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNoneBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,8 +37,8 @@ import org.corant.config.ConfigUtils;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.MethodUtils;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Methods;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.eclipse.microprofile.config.Config;
 
@@ -80,7 +80,7 @@ public class ArtemisConfig extends AbstractJMSConfig {
     Map<String, Method> settingsMap = new HashMap<>();
     Method[] methods = ActiveMQConnectionFactory.class.getDeclaredMethods();
     for (Method method : methods) {
-      if (MethodUtils.isSetter(method)) {
+      if (Methods.isSetter(method)) {
         Class<?> parameterType = method.getParameterTypes()[0];
         if (String.class.equals(parameterType) || int.class.equals(parameterType)
             || long.class.equals(parameterType) || double.class.equals(parameterType)

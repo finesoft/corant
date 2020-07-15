@@ -13,15 +13,15 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Annotations.findAnnotation;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Objects.defaultObject;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.AbstractJPAUnitOfWorksManager;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
 /**
@@ -32,7 +32,7 @@ import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral
  */
 public abstract class AbstractJPARepository implements JPARepository {
 
-  protected JTAJPAUnitOfWorksManager unitOfWorkManager;
+  protected AbstractJPAUnitOfWorksManager unitOfWorkManager;
 
   protected volatile PersistenceContext persistenceContext;
 

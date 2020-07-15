@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.undertow;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.util.SerializationUtils.ObjectInputStreamWithLoader;
+import org.corant.shared.util.Serializations.ObjectInputStreamWithLoader;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.undertow.servlet.UndertowServletLogger;
 import io.undertow.servlet.api.SessionPersistenceManager;

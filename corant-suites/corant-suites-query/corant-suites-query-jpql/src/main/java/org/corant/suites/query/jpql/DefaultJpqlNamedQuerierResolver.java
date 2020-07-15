@@ -14,7 +14,7 @@
 package org.corant.suites.query.jpql;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -43,6 +43,11 @@ public class DefaultJpqlNamedQuerierResolver
 
   @Inject
   protected Logger logger;
+
+  @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
 
   @Override
   public DefaultJpqlNamedQuerier resolve(String key, Object param) {

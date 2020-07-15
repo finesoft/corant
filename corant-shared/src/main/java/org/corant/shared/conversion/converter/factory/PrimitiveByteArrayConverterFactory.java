@@ -13,14 +13,14 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
-import org.corant.shared.util.BitUtils;
+import org.corant.shared.util.Bytes;
 
 /**
  * corant-shared
@@ -39,17 +39,17 @@ public class PrimitiveByteArrayConverterFactory implements ConverterFactory<Obje
       byte[] result = null;
       try {
         if (t instanceof Long) {
-          result = BitUtils.toBytes((Long) t);
+          result = Bytes.toBytes((Long) t);
         } else if (t instanceof Integer) {
-          result = BitUtils.toBytes((Integer) t);
+          result = Bytes.toBytes((Integer) t);
         } else if (t instanceof Short) {
-          result = BitUtils.toBytes((Short) t);
+          result = Bytes.toBytes((Short) t);
         } else if (t instanceof Character) {
-          result = BitUtils.toBytes((Character) t);
+          result = Bytes.toBytes((Character) t);
         } else if (t instanceof Float) {
-          result = BitUtils.toBytes((Float) t);
+          result = Bytes.toBytes((Float) t);
         } else if (t instanceof Double) {
-          result = BitUtils.toBytes((Double) t);
+          result = Bytes.toBytes((Double) t);
         }
       } catch (Exception e) {
         if (throwException) {

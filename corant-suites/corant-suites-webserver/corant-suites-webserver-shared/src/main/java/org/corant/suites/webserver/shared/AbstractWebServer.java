@@ -228,13 +228,13 @@ public abstract class AbstractWebServer implements WebServer {
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType)
         throws CertificateException {
-      // Fake noop
+      // FakeInstantOffsetDateTime noop
     }
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType)
         throws CertificateException {
-      // Fake noop
+      // FakeInstantOffsetDateTime noop
     }
 
     @Override

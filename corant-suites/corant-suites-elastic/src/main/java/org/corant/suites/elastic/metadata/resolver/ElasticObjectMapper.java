@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassUtils;
+import org.corant.shared.util.Primitives;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ public class ElasticObjectMapper {
   static final Map<Class<?>, Class<?>> SIMPLE_TYPE_WRAPPER_MAP = new HashMap<>();
 
   static {
-    SIMPLE_TYPE_WRAPPER_MAP.putAll(ClassUtils.PRIMITIVE_WRAPPER_MAP);
+    SIMPLE_TYPE_WRAPPER_MAP.putAll(Primitives.PRIMITIVE_WRAPPER_MAP);
     SIMPLE_TYPE_WRAPPER_MAP.put(String.class, String.class);
     SIMPLE_TYPE_WRAPPER_MAP.put(Date.class, Date.class);
     SIMPLE_TYPE_WRAPPER_MAP.put(Temporal.class, Temporal.class);

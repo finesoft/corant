@@ -16,12 +16,13 @@ package org.corant.config;
 import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.group;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.aggregate;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-config
@@ -41,7 +41,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class ConfigUtils {
 
   public static final int SEPARATOR_LEN = NAME_SPACE_SEPARATORS.length();
-
   public static final String VALUE_DELIMITER = "(?<!\\\\),";
   public static final String KEY_DELIMITER = "(?<!\\\\)\\.";
 
@@ -54,12 +53,12 @@ public class ConfigUtils {
     if (isNotBlank(key)) {
       int s;
       int e;
-      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1) {
+      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1 && e - s > 2) {
         String proKey = key.substring(s + 2, e);
         if (proKey.length() > 0) {
           Set<String> set = new LinkedHashSet<>();
-          for (String proVal : ConfigUtils
-              .splitValue(ConfigProvider.getConfig().getValue(proKey, String.class))) {
+          String proVals = getConfig().getOptionalValue(proKey, String.class).orElse(null);
+          for (String proVal : splitValue(proVals)) {
             set.add(new StringBuilder(key.substring(0, s)).append(proVal)
                 .append(key.substring(e + 1)).toString());
           }
@@ -74,12 +73,12 @@ public class ConfigUtils {
     if (isNotBlank(key)) {
       int s;
       int e;
-      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1) {
+      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1 && e - s > 2) {
         String proKey = key.substring(s + 2, e);
         if (proKey.length() > 0) {
-          return new StringBuilder(key.substring(0, s))
-              .append(ConfigProvider.getConfig().getValue(proKey, String.class))
-              .append(key.substring(e + 1)).toString();
+          String proVals = getConfig().getOptionalValue(proKey, String.class).get();
+          return new StringBuilder(key.substring(0, s)).append(proVals).append(key.substring(e + 1))
+              .toString();
         }
       }
     }
@@ -143,7 +142,7 @@ public class ConfigUtils {
   public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return group(configs, filter::test, s -> {
+    return aggregate(configs, filter::test, s -> {
       String[] arr = splitKey(s);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};

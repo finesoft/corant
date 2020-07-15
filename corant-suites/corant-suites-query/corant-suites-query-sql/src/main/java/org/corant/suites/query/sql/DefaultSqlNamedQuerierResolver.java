@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sql;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +46,11 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   @Inject
   @ConfigProperty(name = "query.sql.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
+
+  @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
 
   @Override
   public DefaultSqlNamedQuerier resolve(String key, Object param) {

@@ -14,8 +14,8 @@
 package org.corant.suites.query.shared.spi;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,7 +86,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
-    return hint != null && isEquals(hint.getKey(), HINT_NAME)
+    return hint != null && areEqual(hint.getKey(), HINT_NAME)
         && isNotBlank(hint.getScript().getCode());
   }
 

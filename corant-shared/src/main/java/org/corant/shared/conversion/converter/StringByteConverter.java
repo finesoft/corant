@@ -56,11 +56,14 @@ public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
   protected Byte convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
-    } else if (hasHex(value)) {
-      return Byte.decode(value);
     } else {
-      Integer radix = getHintsRadix(hints);
-      return radix != null ? Byte.valueOf(value, radix) : Byte.valueOf(value);
+      String val = value.trim();
+      if (hasHex(val)) {
+        return Byte.decode(val);
+      } else {
+        Integer radix = getHintsRadix(hints);
+        return radix != null ? Byte.valueOf(val, radix) : Byte.valueOf(val);
+      }
     }
   }
 

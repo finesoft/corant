@@ -14,8 +14,8 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Qualifiers.resolveNameds;
 import java.lang.annotation.Annotation;
 import java.util.Collections;

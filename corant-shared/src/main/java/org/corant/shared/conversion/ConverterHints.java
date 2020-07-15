@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion;
 
+import static org.corant.shared.util.Objects.defaultObject;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -60,7 +61,7 @@ public class ConverterHints {
   private static final Map<String, ?> sys_hints = Collections.unmodifiableMap(resolveSysProHints());// static?
 
   public static boolean containsKey(Map<String, ?> hints, String key) {
-    return hints != null && hints.containsKey(key);
+    return hints != null && hints.containsKey(key) || sys_hints.containsKey(key);
   }
 
   public static <T> T getHint(Map<String, ?> hints, String key) {
@@ -76,10 +77,7 @@ public class ConverterHints {
         hint = (T) obj;
       }
     }
-    if (hint == null && sys_hints.containsKey(key)) {
-      hint = (T) sys_hints.get(key);
-    }
-    return hint == null ? altVal : hint;
+    return (T) defaultObject(hint, () -> defaultObject(sys_hints.get(key), altVal));
   }
 
   static Map<String, Object> resolveSysProHints() {

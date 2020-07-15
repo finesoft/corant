@@ -13,7 +13,7 @@
  */
 package org.corant.suites.cdi;
 
-import static org.corant.shared.util.ClassUtils.asClass;
+import static org.corant.shared.util.Classes.asClass;
 import java.util.Hashtable;
 import javax.enterprise.inject.spi.CDI;
 import javax.naming.Context;

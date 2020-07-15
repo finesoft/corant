@@ -14,9 +14,9 @@
 package org.corant.suites.query.jpql;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapBoolean;
-import static org.corant.shared.util.MapUtils.getMapEnum;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Maps.getMapBoolean;
+import static org.corant.shared.util.Maps.getMapEnum;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -73,11 +73,9 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       query.setFirstResult(offset).setMaxResults(limit + 1);
       List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       int size = list.size();
-      if (size > 0) {
-        if (size > limit) {
-          list.remove(limit);
-          result.withHasNext(true);
-        }
+      if (size > 0 && size > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
       }
       return result.withResults(list);
     } finally {

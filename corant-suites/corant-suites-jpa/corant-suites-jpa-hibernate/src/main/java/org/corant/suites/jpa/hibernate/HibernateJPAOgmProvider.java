@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
@@ -45,7 +45,7 @@ public class HibernateJPAOgmProvider implements JPAProvider {
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",
         AssociationStorageStrategy.IN_ENTITY);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.grid_dialect",
-        org.corant.suites.jpa.hibernate.HibernateMongoDBDialect.class);
+        HibernateMongoDBDialect.class);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.maxConnectionIdleTime", 6000);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.socketTimeout", 300000);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.connectTimeout", 300000);

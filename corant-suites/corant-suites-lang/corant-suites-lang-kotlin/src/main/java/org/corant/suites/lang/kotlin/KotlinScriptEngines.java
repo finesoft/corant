@@ -13,8 +13,8 @@
  */
 package org.corant.suites.lang.kotlin;
 
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.script.Bindings;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.concurrency;
 
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.time.Duration;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.RejectPolicy;
 

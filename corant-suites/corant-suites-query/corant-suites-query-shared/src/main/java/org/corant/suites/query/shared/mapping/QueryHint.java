@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,20 +83,20 @@ public class QueryHint implements Serializable {
     parameters.computeIfAbsent(parameter.getName(), n -> new ArrayList<>()).add(parameter);
   }
 
+  /**
+   * Make query immutable
+   */
+  protected void postConstruct() {
+    parameters =
+        parameters == null ? Collections.emptyMap() : Collections.unmodifiableMap(parameters);
+  }
+
   protected void setKey(String key) {
     this.key = key;
   }
 
   protected void setScript(Script script) {
     this.script = defaultObject(script, Script.EMPTY);
-  }
-
-  /**
-   * Make query immutable
-   */
-  void immunize() {
-    parameters =
-        parameters == null ? Collections.emptyMap() : Collections.unmodifiableMap(parameters);
   }
 
   public static class QueryHintParameter implements Serializable {

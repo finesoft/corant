@@ -17,16 +17,17 @@ import static org.corant.config.ConfigUtils.concatKey;
 import static org.corant.config.ConfigUtils.dashify;
 import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
+import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.setOf;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.FieldUtils.traverseFields;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.EMPTY;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Fields.traverseFields;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Primitives.wrap;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -42,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ClassUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -176,7 +176,7 @@ public class DeclarativeConfigResolver {
             if (ft.isArray()) {
               ft = ft.getComponentType();
             }
-            ft = ClassUtils.primitiveToWrapper((Class<?>) type);
+            ft = wrap((Class<?>) type);
           } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
             ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
           }

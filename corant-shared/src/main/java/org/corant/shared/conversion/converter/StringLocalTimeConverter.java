@@ -60,11 +60,12 @@ public class StringLocalTimeConverter extends AbstractTemporalConverter<String, 
     if (isEmpty(value)) {
       return getDefaultValue();
     }
+    String val = value.trim();
     Optional<DateTimeFormatter> dtf = resolveHintFormatter(hints);
     if (dtf.isPresent()) {
-      return dtf.get().parse(value, LocalTime::from);
+      return dtf.get().parse(val, LocalTime::from);
     } else {
-      return LocalTime.parse(value, DateTimeFormatter.ISO_TIME);
+      return LocalTime.parse(val, DateTimeFormatter.ISO_TIME);
     }
   }
 

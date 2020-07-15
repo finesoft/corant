@@ -14,15 +14,15 @@
 package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.CollectionUtils.linkedListOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.getMapInteger;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Maps.getMapInteger;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.naming.InitialContext;
@@ -42,8 +43,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.normal.Names.JndiNames;
-import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
@@ -118,11 +119,15 @@ public class SqlQueryTemplate {
     return result.withResults(list);
   }
 
-  public <T> Forwarding<T> forward(Class<T> clazz) {
+  public <T> Forwarding<T> forwardAs(final Class<T> clazz) {
+    return forwardAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<Map<String, Object>> forwarding = forward();
     Forwarding<T> result = Forwarding.inst();
-    return result.withHasNext(forwarding.hasNext()).withResults(forwarding.getResults().stream()
-        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz)).collect(Collectors.toList()));
+    return result.withHasNext(forwarding.hasNext()).withResults(
+        forwarding.getResults().stream().map(converter::apply).collect(Collectors.toList()));
   }
 
   public Map<?, ?> get() {
@@ -130,18 +135,22 @@ public class SqlQueryTemplate {
     return get(ps.getLeft(), ps.getRight());
   }
 
-  public <T> T get(Class<T> clazz) {
+  public <T> T getAs(final Class<T> clazz) {
+    return getAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> T getAs(final Function<Object, T> converter) {
     Map<?, ?> r = get();
-    return r == null ? null : QueryObjectMapper.OM.convertValue(r, clazz);
+    return r == null ? null : converter.apply(r);
   }
 
   public SqlQueryTemplate limit(int limit) {
-    this.limit = ObjectUtils.max(limit, 1);
+    this.limit = Objects.max(limit, 1);
     return this;
   }
 
   public SqlQueryTemplate offset(int offset) {
-    this.offset = ObjectUtils.max(offset, 0);
+    this.offset = Objects.max(offset, 0);
     return this;
   }
 
@@ -168,12 +177,16 @@ public class SqlQueryTemplate {
     }
   }
 
-  public <T> Paging<T> page(Class<T> clazz) {
+  public <T> Paging<T> page(final Class<T> clazz) {
+    return pageAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Paging<T> pageAs(final Function<Object, T> converter) {
     Paging<Map<String, Object>> paging = page();
     Paging<T> result = Paging.of(paging.getOffset(), limit);
     result.withTotal(paging.getTotal());
-    result.withResults(paging.getResults().stream()
-        .map(r -> QueryObjectMapper.OM.convertValue(r, clazz)).collect(Collectors.toList()));
+    result.withResults(
+        paging.getResults().stream().map(converter::apply).collect(Collectors.toList()));
     return result;
   }
 
@@ -192,9 +205,12 @@ public class SqlQueryTemplate {
     }
   }
 
-  public <T> List<T> select(Class<T> clazz) {
-    return select().stream().map(r -> QueryObjectMapper.OM.convertValue(r, clazz))
-        .collect(Collectors.toList());
+  public <T> List<T> selectAs(final Class<T> clazz) {
+    return selectAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> List<T> selectAs(final Function<Object, T> converter) {
+    return select().stream().map(converter::apply).collect(Collectors.toList());
   }
 
   public SqlQueryTemplate sql(String sql) {
@@ -231,8 +247,12 @@ public class SqlQueryTemplate {
     });
   }
 
-  public <T> Stream<T> stream(Class<T> clazz) {
-    return stream().map(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  public <T> Stream<T> streamAs(final Class<T> clazz) {
+    return streamAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+  }
+
+  public <T> Stream<T> streamAs(final Function<Object, T> converter) {
+    return stream().map(converter::apply);
   }
 
   protected Map<String, Object> get(String sql, Object... parameter) {

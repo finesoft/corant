@@ -15,9 +15,9 @@ package org.corant.suites.query.shared.mapping;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -25,6 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -46,6 +49,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class QueryMappingService {
 
   protected final Map<String, Query> queries = new HashMap<>();
+  protected final ReadWriteLock rwl = new ReentrantReadWriteLock();
   protected volatile boolean initialized = false;
 
   @Inject
@@ -61,21 +65,114 @@ public class QueryMappingService {
 
   @Inject
   @Any
-  protected Instance<QueryMappingFilePathResolver> mappingFilePathSupplier;
+  protected Instance<QueryMappingClient> resolver;
 
   public String getMappingFilePaths() {
     return mappingFilePaths;
   }
 
   public List<Query> getQueries() {
-    return new ArrayList<>(queries.values());
+    Lock l = rwl.readLock();
+    try {
+      l.lock();
+      return new ArrayList<>(queries.values());
+    } finally {
+      l.unlock();
+    }
   }
 
   public Query getQuery(String name) {
-    return queries.get(name);
+    Lock l = rwl.readLock();
+    try {
+      l.lock();
+      return queries.get(name);
+    } finally {
+      l.unlock();
+    }
   }
 
-  protected synchronized void initialize() {
+  public void reinitialize() {
+    Lock l = rwl.writeLock();
+    try {
+      l.lock();
+      initialized = false;
+      queries.clear();
+      if (!resolver.isUnsatisfied()) {
+        resolver.forEach(QueryMappingClient::onServiceInitialize);
+      }
+      initialize();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  protected void initialize() {
+    Lock l = rwl.writeLock();
+    try {
+      l.lock();
+      doInitialize();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  @PostConstruct
+  protected void onPostConstruct() {
+    Lock l = rwl.writeLock();
+    try {
+      l.lock();
+      initialize();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  @PreDestroy
+  protected void onPreDestroy() {
+    Lock l = rwl.writeLock();
+    try {
+      l.lock();
+      queries.clear();
+      initialized = false;
+      logger.fine(() -> "Clear all query mappings.");
+    } finally {
+      l.unlock();
+    }
+  }
+
+  protected String[] resolveMappingFilePaths() {
+    Set<String> paths = new LinkedHashSet<>();
+    if (!resolver.isUnsatisfied()) {
+      resolver.forEach(s -> {
+        Set<String> ps = s.getMappingFilePaths();
+        if (isNotEmpty(ps)) {
+          for (String p : ps) {
+            if (isNotBlank(p)) {
+              paths.add(p);
+            }
+          }
+        }
+      });
+    } // FIXME still has not figured out
+    if (isEmpty(paths)) {
+      for (String p : resolvePaths(mappingFilePaths)) {
+        paths.add(p);
+      }
+    }
+    return paths.toArray(new String[paths.size()]);
+  }
+
+  Set<String> resolvePaths(String... paths) {
+    Set<String> resolved = new LinkedHashSet<>();
+    for (String path : paths) {
+      for (String r : split(path, ",", true, true)) {
+        resolved.add(r);
+      }
+    }
+    return resolved;
+  }
+
+  private void doInitialize() {
     if (initialized) {
       return;
     }
@@ -101,7 +198,7 @@ public class QueryMappingService {
       while (!tmp.isEmpty()) {
         String tq = tmp.remove(0);
         refs.add(tq);
-        if (isEquals(tq, q)) {
+        if (areEqual(tq, q)) {
           throw new QueryRuntimeException(
               "The queries in system circular reference occurred on [%s -> %s]", q,
               String.join(" -> ", refs));
@@ -124,51 +221,9 @@ public class QueryMappingService {
         mappingFilePaths));
   }
 
-  @PostConstruct
-  protected void onPostConstruct() {
-    initialize();
-  }
+  public interface QueryMappingClient {
 
-  @PreDestroy
-  protected synchronized void onPreDestroy() {
-    queries.clear();
-    initialized = false;
-    logger.fine(() -> "Clear all query mappings.");
-  }
-
-  protected String[] resolveMappingFilePaths() {
-    Set<String> paths = new LinkedHashSet<>();
-    if (!mappingFilePathSupplier.isUnsatisfied()) {
-      mappingFilePathSupplier.forEach(s -> {
-        Set<String> ps = s.getMappingFilePaths();
-        if (isNotEmpty(ps)) {
-          for (String p : ps) {
-            if (isNotBlank(p)) {
-              paths.add(p);
-            }
-          }
-        }
-      });
-    } // FIXME still has not figured out
-    if (isEmpty(paths)) {
-      for (String p : QueryMappingFilePathResolver.resolvePaths(mappingFilePaths)) {
-        paths.add(p);
-      }
-    }
-    return paths.toArray(new String[paths.size()]);
-  }
-
-  public interface QueryMappingFilePathResolver {
-
-    static Set<String> resolvePaths(String... paths) {
-      Set<String> resolved = new LinkedHashSet<>();
-      for (String path : paths) {
-        for (String r : split(path, ",", true, true)) {
-          resolved.add(r);
-        }
-      }
-      return resolved;
-    }
+    void onServiceInitialize();
 
     Set<String> getMappingFilePaths();
   }

@@ -14,8 +14,8 @@ package org.corant.suites.query.mongodb;
  */
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;

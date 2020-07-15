@@ -13,23 +13,28 @@
  */
 package org.corant.suites.cache.memory;
 
+import java.util.HashMap;
+
 /**
  * corant-suites-query-shared
  *
+ *
+ * NOTE: NOT FINISHED!!! NEED TO RE-IMPLEMENT ALL!!!
+ * <p>
  * Unfinish yet!
  *
  * @author bingo 下午2:01:05
- *
  */
-public class MemoryLFUCache<K, V> implements MemoryCache<K, V> {
+public class MemoryLFUCache<K, V> extends AbstractMemoryCache<K, V> {
 
-  @Override
-  public V get(K key) {
-    return null;
+  public MemoryLFUCache(final int maxSize) {
+    maxCacheSize = maxSize;
+    cacheMap = new HashMap<>(maxSize + 1);
   }
 
   @Override
-  public V put(K key, V value) {
-    return null;
+  protected void pruneCache() {
+    cacheMap.values().stream().min(MemoryCacheObject::compareAccessCount)
+        .ifPresent(comin -> cacheMap.remove(comin.getKey()));
   }
 }

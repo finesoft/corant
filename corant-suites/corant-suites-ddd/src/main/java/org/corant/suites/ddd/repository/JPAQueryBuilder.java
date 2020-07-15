@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.repository;
 
-import static org.corant.shared.util.ObjectUtils.asString;
+import static org.corant.shared.util.Objects.asString;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;

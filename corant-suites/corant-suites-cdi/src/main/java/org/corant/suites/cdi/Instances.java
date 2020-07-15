@@ -14,11 +14,11 @@
 package org.corant.suites.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.suites.cdi.Qualifiers.resolveNameds;
 import java.lang.annotation.Annotation;
 import java.util.List;

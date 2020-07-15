@@ -13,7 +13,7 @@
  */
 package org.corant.suites.webserver.undertow;
 
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

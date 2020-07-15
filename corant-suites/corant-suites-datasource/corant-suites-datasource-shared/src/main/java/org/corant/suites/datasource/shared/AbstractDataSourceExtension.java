@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.shared;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.logging.Logger;

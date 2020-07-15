@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Objects.forceCast;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -27,7 +27,8 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JTAXAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JTARLJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
 
 /**
@@ -119,7 +120,8 @@ public interface Aggregate extends Entity {
    * @param messages
    *
    * @see UnitOfWork
-   * @see JTAJPAUnitOfWorksManager
+   * @see JTAXAJPAUnitOfWorksManager
+   * @see JTARLJPAUnitOfWorksManager
    */
   void raise(Message... messages);
 

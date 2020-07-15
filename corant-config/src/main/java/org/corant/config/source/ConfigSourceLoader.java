@@ -13,11 +13,11 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.URLResource;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -58,7 +58,7 @@ public class ConfigSourceLoader {
             .map(ConfigSourceLoader::toURI).forEach(loadedUrls::add);
       }
     }
-    return loadedUrls.stream().map(uri -> load(toURL(uri), ordinal)).filter(ObjectUtils::isNotNull)
+    return loadedUrls.stream().map(uri -> load(toURL(uri), ordinal)).filter(Objects::isNotNull)
         .collect(Collectors.toList());
   }
 

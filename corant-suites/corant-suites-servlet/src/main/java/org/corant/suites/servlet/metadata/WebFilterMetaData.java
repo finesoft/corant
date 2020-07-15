@@ -14,7 +14,7 @@
 package org.corant.suites.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

@@ -14,7 +14,7 @@
 package org.corant.suites.dsa.cluster.kmeans;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.linkedHashMapOf;
+import static org.corant.shared.util.Maps.linkedHashMapOf;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;

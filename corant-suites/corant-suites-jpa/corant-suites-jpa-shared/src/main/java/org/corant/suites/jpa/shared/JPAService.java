@@ -14,7 +14,7 @@
 package org.corant.suites.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.suites.cdi.Instances.resolveApply;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.Map;

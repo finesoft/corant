@@ -15,7 +15,7 @@ package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
@@ -26,7 +26,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.corant.shared.util.StreamUtils;
+import org.corant.shared.util.Streams;
 import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
@@ -91,7 +91,7 @@ public class StreamNamedQueryServices {
   }
 
   public <T> Stream<List<T>> batch() {
-    return StreamUtils.batchStream(parameter.getLimit(), stream());
+    return Streams.batchStream(parameter.getLimit(), stream());
   }
 
   public StreamNamedQueryServices context(Map<String, Object> context) {

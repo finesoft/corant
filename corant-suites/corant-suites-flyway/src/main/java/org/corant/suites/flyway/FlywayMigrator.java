@@ -13,11 +13,11 @@
  */
 package org.corant.suites.flyway;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -38,7 +38,7 @@ import javax.sql.DataSource;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import org.corant.suites.datasource.shared.AbstractDataSourceExtension;
 import org.corant.suites.datasource.shared.DataSourceConfig;
@@ -89,7 +89,7 @@ public class FlywayMigrator {
   public void migrate(@Observes PostCorantReadyEvent e) {
     if (globalFlywayConfig.isEnable()) {
       logger.info(() -> "Perform migrate process if necessary...");
-      getConfigProviders().map(this::build).filter(ObjectUtils::isNotNull).forEach(this::doMigrate);
+      getConfigProviders().map(this::build).filter(Objects::isNotNull).forEach(this::doMigrate);
       logger.info(() -> "Finished migrate process.");
     } else {
       logger.fine(() -> String.format(

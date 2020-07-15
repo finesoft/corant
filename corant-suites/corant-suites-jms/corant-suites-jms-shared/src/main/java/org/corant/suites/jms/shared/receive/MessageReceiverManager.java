@@ -15,14 +15,12 @@ package org.corant.suites.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +32,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Sets;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 
@@ -56,8 +55,7 @@ public class MessageReceiverManager {
   protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
       new HashMap<>();
 
-  protected final Set<MessageReceiverMetaData> receiveMetaDatas =
-      Collections.newSetFromMap(new ConcurrentHashMap<MessageReceiverMetaData, Boolean>());
+  protected final Set<MessageReceiverMetaData> receiveMetaDatas = Sets.newConcurrentHashSet();
 
   protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.fine(() -> "Shut down the message receiver executor services");

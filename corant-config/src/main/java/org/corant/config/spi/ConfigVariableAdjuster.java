@@ -13,8 +13,8 @@
  */
 package org.corant.config.spi;
 
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -37,7 +37,7 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
     Map<String, String> adjustered = new HashMap<>(properties);
     final Set<String> stack = new LinkedHashSet<>();
     properties.forEach((k, v) -> {
-      if (hasVariable(v) && isEquals(v, resolveValue(k, originalSources))) {
+      if (hasVariable(v) && areEqual(v, resolveValue(k, originalSources))) {
         String av = resolveVariables(k, v, originalSources, stack);
         stack.clear();
         adjustered.put(k, av);

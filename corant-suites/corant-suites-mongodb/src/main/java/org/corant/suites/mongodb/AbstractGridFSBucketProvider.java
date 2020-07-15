@@ -14,7 +14,7 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;

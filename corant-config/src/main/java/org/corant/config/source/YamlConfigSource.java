@@ -14,9 +14,9 @@
 package org.corant.config.source;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.MapUtils.flatStringMap;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Maps.flatStringMap;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

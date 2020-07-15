@@ -13,10 +13,10 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.CollectionUtils.append;
+import static org.corant.shared.util.Lists.append;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.asDefaultString;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;

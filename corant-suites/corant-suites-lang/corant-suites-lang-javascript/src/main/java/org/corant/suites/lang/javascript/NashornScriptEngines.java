@@ -15,7 +15,7 @@ package org.corant.suites.lang.javascript;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -28,7 +28,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 /**

@@ -14,11 +14,12 @@
 package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Sets.setOf;
 import static org.corant.suites.cdi.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
@@ -35,7 +36,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.cdi.Qualifiers;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.EntityLifecycleManager;
-import org.corant.suites.ddd.unitwork.JTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.AbstractJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.AbstractJTAJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.UnitOfWorks;
 import org.corant.suites.jpa.shared.JPAExtension;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
@@ -66,15 +69,16 @@ public class JPARepositoryExtension implements Extension {
     qualifiers.clear();
     qualifiers.putAll(Qualifiers.resolveNameds(names));
     qualifiers.forEach((k, v) -> abd.<JPARepository>addBean().addQualifiers(v)
-        .addTransitiveTypeClosure(JPARepository.class).beanClass(JPARepository.class)
+        .addTransitiveTypeClosure(DefaultJPARepository.class).beanClass(DefaultJPARepository.class)
         .scope(ApplicationScoped.class).stereotypes(setOf(Repositories.class))
         .produceWith(beans -> produce(beans, k)).disposeWith((repo, beans) -> {
         }));
   }
 
   JPARepository produce(Instance<Object> instances, String unitName) {
-    Instance<JTAJPAUnitOfWorksManager> uowm = instances.select(JTAJPAUnitOfWorksManager.class);
-    shouldBeTrue(uowm.isResolvable());
+    Optional<AbstractJTAJPAUnitOfWorksManager> uowm =
+        instances.select(UnitOfWorks.class).get().currentDefaultUnitOfWorksManager();
+    shouldBeTrue(uowm.isPresent());
     return new DefaultJPARepository(PersistenceContextLiteral.of(unitName), uowm.get());
   }
 
@@ -86,7 +90,9 @@ public class JPARepositoryExtension implements Extension {
    */
   public static final class DefaultJPARepository extends AbstractJPARepository {
 
-    protected DefaultJPARepository(PersistenceContext pc, JTAJPAUnitOfWorksManager uofm) {
+    protected DefaultJPARepository() {}
+
+    protected DefaultJPARepository(PersistenceContext pc, AbstractJPAUnitOfWorksManager uofm) {
       super();
       persistenceContext = pc;
       unitOfWorkManager = uofm;

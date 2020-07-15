@@ -14,14 +14,14 @@
 package org.corant.suites.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.linkedListOf;
-import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.emptyConsumer;
-import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Functions.emptyConsumer;
+import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,7 +46,7 @@ import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-suites-datasource-shared

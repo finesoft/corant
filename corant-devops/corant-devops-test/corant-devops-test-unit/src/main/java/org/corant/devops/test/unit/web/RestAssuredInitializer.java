@@ -13,7 +13,7 @@
  */
 package org.corant.devops.test.unit.web;
 
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.util.Map;

@@ -14,8 +14,8 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StringUtils.isDecimalNumber;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.isDecimalNumber;
+import static org.corant.shared.util.Strings.split;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -68,18 +68,19 @@ public class StringLocalDateTimeConverter extends AbstractTemporalConverter<Stri
     if (isEmpty(value)) {
       return getDefaultValue();
     }
+    String val = value.trim();
     Optional<DateTimeFormatter> hintDtf = resolveHintFormatter(hints);
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     boolean strictly = isStrict(hints);
-    if (value.contains(",")) {
+    if (val.contains(",")) {
       // violate JSR-310
-      String[] arr = split(value, ",", true, true);
+      String[] arr = split(val, ",", true, true);
       if (arr.length == 2 && isDecimalNumber(arr[0]) && isDecimalNumber(arr[1])) {
         if (ozoneId.isPresent()) {
           return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]))
               .atZone(ozoneId.get()).toLocalDateTime();
         } else if (!strictly) {
-          warn(LocalDateTime.class, value);
+          warn(LocalDateTime.class, val);
           return Instant.ofEpochSecond(Long.parseLong(arr[0]), Long.parseLong(arr[1]))
               .atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
@@ -87,13 +88,13 @@ public class StringLocalDateTimeConverter extends AbstractTemporalConverter<Stri
     }
 
     if (hintDtf.isPresent()) {
-      return hintDtf.get().parse(value, LocalDateTime::from);// strictly
+      return hintDtf.get().parse(val, LocalDateTime::from);// strictly
     } else {
-      TemporalFormatter m = decideFormatter(value).orElse(null);
+      TemporalFormatter m = decideFormatter(val).orElse(null);
       if (m != null) {
         if (m.withTime) {
-          TemporalAccessor ta = m.formatter.parseBest(value, LocalDateTime::from,
-              ZonedDateTime::from, OffsetDateTime::from, Instant::from);
+          TemporalAccessor ta = m.formatter.parseBest(val, LocalDateTime::from, ZonedDateTime::from,
+              OffsetDateTime::from, Instant::from);
           if (ta instanceof LocalDateTime || ta instanceof ZonedDateTime
               || ta instanceof OffsetDateTime) {
             return LocalDateTime.from(ta);
@@ -101,16 +102,16 @@ public class StringLocalDateTimeConverter extends AbstractTemporalConverter<Stri
             if (ozoneId.isPresent()) {
               return ((Instant) ta).atZone(ozoneId.get()).toLocalDateTime();
             } else if (!strictly) {
-              warn(LocalDateTime.class, value);
+              warn(LocalDateTime.class, val);
               return ((Instant) ta).atZone(ZoneId.systemDefault()).toLocalDateTime();
             }
           }
         } else if (!strictly) {
-          warn(LocalDateTime.class, value);
-          return m.formatter.parse(value, LocalDate::from).atStartOfDay();
+          warn(LocalDateTime.class, val);
+          return m.formatter.parse(val, LocalDate::from).atStartOfDay();
         }
       }
-      return LocalDateTime.parse(value);
+      return LocalDateTime.parse(val);
     }
   }
 }

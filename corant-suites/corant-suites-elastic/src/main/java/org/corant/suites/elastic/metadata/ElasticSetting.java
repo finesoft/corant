@@ -13,8 +13,8 @@
  */
 package org.corant.suites.elastic.metadata;
 
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;

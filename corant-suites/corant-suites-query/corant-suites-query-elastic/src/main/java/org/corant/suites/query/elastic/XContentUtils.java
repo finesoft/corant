@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Sets.setOf;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

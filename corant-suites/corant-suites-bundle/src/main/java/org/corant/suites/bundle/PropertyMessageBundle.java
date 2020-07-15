@@ -13,8 +13,9 @@
  */
 package org.corant.suites.bundle;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.split;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -28,7 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -57,15 +58,16 @@ public class PropertyMessageBundle implements MessageBundle {
     if (key == null) {
       throw new NoSuchBundleException("The message property key can't null");
     } else {
-      Map<String, MessageFormat> mfMap = holder.get(locale);
+      Locale useLocale = defaultObject(locale, Locale::getDefault);
+      Map<String, MessageFormat> mfMap = holder.get(useLocale);
       if (mfMap == null) {
         throw new NoSuchBundleException("Can't find message for %s with locale %s", key.toString(),
-            locale == null ? null : locale.toString());
+            useLocale.toString());
       } else {
         MessageFormat mf = mfMap.get(key);
         if (mf == null) {
           throw new NoSuchBundleException("Can't find message for %s with locale %s",
-              key.toString(), locale == null ? null : locale.toString());
+              key.toString(), useLocale.toString());
         } else {
           return mf.format(args);
         }
@@ -110,7 +112,7 @@ public class PropertyMessageBundle implements MessageBundle {
           try {
             onPreDestroy();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(StringUtils::isNotBlank).forEach(pkg -> {
+            paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Find message resource from %s", s));
                 Map<String, MessageFormat> localeMap = res.dump().entrySet().stream()

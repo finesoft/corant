@@ -15,6 +15,7 @@ package org.corant.suites.ddd.model;
 
 import static org.corant.suites.bundle.Preconditions.requireFalse;
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,7 +41,7 @@ import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
-import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.UnitOfWorks;
 
 /**
  * @author bingo 下午3:25:51
@@ -114,8 +115,8 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   @Transient
   @javax.persistence.Transient
-  protected <U extends UnitOfWork> Optional<U> currentUnitOfWork() {
-    return UnitOfWorksManager.currentUnitOfWork();
+  protected Optional<? extends UnitOfWork> currentUnitOfWork() {
+    return resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
   }
 
   /**

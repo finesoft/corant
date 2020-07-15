@@ -13,24 +13,34 @@
  */
 package org.corant.suites.cache.memory;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * corant-suites-query-shared
  *
+ * NOTE: NOT FINISHED!!! NEED TO RE-IMPLEMENT ALL!!!
+ *
+ * <p>
  * Unfinish yet!
  *
  * @author bingo 下午2:02:27
- *
  */
-public class MemoryFIFOCache<K, V> implements MemoryCache<K, V> {
+public class MemoryFIFOCache<K, V> extends AbstractMemoryCache<K, V> {
 
-  @Override
-  public V get(K key) {
-    return null;
+  public MemoryFIFOCache(final int cacheSize) {
+    maxCacheSize = cacheSize;
+    cacheMap = new LinkedHashMap<K, MemoryCacheObject<K, V>>(cacheSize + 1, 0.75f, false) {
+      private static final long serialVersionUID = -1536681027894088591L;
+
+      @Override
+      protected boolean removeEldestEntry(Map.Entry<K, MemoryCacheObject<K, V>> eldest) {
+        return MemoryFIFOCache.this.removeEldestEntry(size());
+      }
+    };
   }
 
-  @Override
-  public V put(K key, V value) {
-    return null;
+  protected boolean removeEldestEntry(int currentSize) {
+    return currentSize > maxCacheSize;
   }
-
 }

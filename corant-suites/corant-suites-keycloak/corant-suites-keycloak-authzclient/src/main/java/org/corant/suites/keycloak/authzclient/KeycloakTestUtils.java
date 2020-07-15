@@ -13,8 +13,8 @@
  */
 package org.corant.suites.keycloak.authzclient;
 
-import static org.corant.shared.util.MapUtils.getMapString;
-import static org.corant.shared.util.MapUtils.mapOf;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.mapOf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -27,7 +27,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.eclipse.microprofile.config.ConfigProvider;

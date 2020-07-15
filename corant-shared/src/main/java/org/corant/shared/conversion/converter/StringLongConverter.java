@@ -56,21 +56,24 @@ public class StringLongConverter extends AbstractNumberConverter<String, Long> {
   protected Long convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
-    } else if (hasHex(value)) {
-      return Long.decode(value);
     } else {
-      Integer radix = getHintsRadix(hints);
-      if (isHintsUnsigned(hints)) {
-        if (radix != null) {
-          return Long.parseUnsignedLong(value, radix);
-        } else {
-          return Long.parseUnsignedLong(value);
-        }
+      String val = value.trim();
+      if (hasHex(val)) {
+        return Long.decode(val);
       } else {
-        if (radix != null) {
-          return Long.valueOf(value, radix);
+        Integer radix = getHintsRadix(hints);
+        if (isHintsUnsigned(hints)) {
+          if (radix != null) {
+            return Long.parseUnsignedLong(val, radix);
+          } else {
+            return Long.parseUnsignedLong(val);
+          }
         } else {
-          return Long.valueOf(value);
+          if (radix != null) {
+            return Long.valueOf(val, radix);
+          } else {
+            return Long.valueOf(val);
+          }
         }
       }
     }

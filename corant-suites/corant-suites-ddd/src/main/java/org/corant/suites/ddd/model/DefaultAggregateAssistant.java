@@ -14,20 +14,20 @@
 package org.corant.suites.ddd.model;
 
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
-import static org.corant.suites.cdi.Instances.select;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.logging.Logger;
-import javax.enterprise.inject.Instance;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
-import org.corant.suites.ddd.unitwork.UnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.UnitOfWorks;
 
 /**
  * @author bingo 上午10:57:03
@@ -69,13 +69,12 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
         }
       }
     } else {
-      Instance<UnitOfWorksManager> um = select(UnitOfWorksManager.class);
-      if (um.isResolvable()) {
-        UnitOfWork uow = um.get().getCurrentUnitOfWork();
+      Optional<? extends UnitOfWork> uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
+      if (uow.isPresent()) {
         for (Message msg : messages) {
           if (msg != null) {
             logger.fine(() -> String.format(RISE_LOG, msg.toString()));
-            uow.register(msg);
+            uow.get().register(msg);
           }
         }
       } else {

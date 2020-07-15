@@ -15,7 +15,7 @@ package org.corant.suites.query.elastic;
 
 import java.io.IOException;
 import java.util.Map;
-import org.corant.shared.ubiquity.Triple;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;

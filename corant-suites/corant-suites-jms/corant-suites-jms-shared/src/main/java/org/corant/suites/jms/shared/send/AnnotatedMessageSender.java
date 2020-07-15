@@ -13,13 +13,12 @@
  */
 package org.corant.suites.jms.shared.send;
 
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
+import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.CollectionUtils.listOf;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.suites.cdi.Instances.resolveApply;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,12 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.jms.shared.annotation.MessageSend;
-import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
 import org.corant.suites.jms.shared.annotation.MessageSends;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
-import org.corant.suites.jms.shared.context.MessageSerializer;
 
 /**
  * corant-suites-jms-shared
@@ -62,15 +59,6 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
     }
   }
 
-  protected Message resolveMessage(JMSContext jmsc, Serializable payload,
-      SerializationSchema schema) {
-    if (payload instanceof Message) {
-      return (Message) payload;
-    } else {
-      return resolve(MessageSerializer.class, schema.qualifier()).serialize(jmsc, payload);
-    }
-  }
-
   protected Set<MessageSenderMetaData> resolveMetaDatas(Class<?> messageClass) {
     Set<MessageSenderMetaData> sends = new LinkedHashSet<>();
     MessageSends anns = findAnnotation(messageClass, MessageSends.class, false);// FIXME inherit
@@ -84,5 +72,4 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
     }
     return sends;
   }
-
 }

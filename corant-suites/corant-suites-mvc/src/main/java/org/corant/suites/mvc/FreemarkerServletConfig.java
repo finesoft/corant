@@ -13,7 +13,7 @@
  */
 package org.corant.suites.mvc;
 
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import org.corant.config.declarative.ConfigKeyItem;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.cassandra;
 
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.shared.ubiquity.Triple;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -49,6 +49,11 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   @Inject
   @ConfigProperty(name = "query.cassandra.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
+
+  @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
 
   @Override
   public DefaultCasNamedQuerier resolve(String key, Object param) {

@@ -2,3 +2,6 @@ org.corant.shared.conversion.converter.factory.ObjectEnumConverterFactory
 org.corant.shared.conversion.converter.factory.StringObjectConverterFactory
 org.corant.shared.conversion.converter.factory.PrimitiveByteArrayConverterFactory
 org.corant.shared.conversion.converter.factory.ByteArrayPrimitiveConverterFactory
+org.corant.shared.conversion.converter.factory.ListTemporalConverterFactory
+org.corant.shared.conversion.converter.factory.IntArrayTemporalConverterFactory
+org.corant.shared.conversion.converter.factory.MapTemporalConverterFactory

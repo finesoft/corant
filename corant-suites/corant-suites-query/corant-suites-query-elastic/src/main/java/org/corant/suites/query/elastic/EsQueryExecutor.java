@@ -13,16 +13,19 @@
  */
 package org.corant.suites.query.elastic;
 
-import static org.corant.shared.util.MapUtils.getMapKeyPathValues;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.getMapKeyPathValues;
+import static org.corant.shared.util.Maps.getOptMapObject;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Conversions;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -44,6 +47,16 @@ public interface EsQueryExecutor {
   String AGG_RS_ETR_PATH = "aggregations";
   String SUG_RS_ERT_PATH = "suggest";
 
+  String PRO_KEY_ROUTING = ".routing";
+  String PRO_KEY_PREFERENCE = ".preference";
+  String PRO_KEY_TYPES = ".types";
+  String PRO_KEY_SEARCH_TYPE = ".search_type";
+  String PRO_KEY_BATCHED_REDUCE_SIZE = ".batched_reduce_size";
+  String PRO_KEY_PRE_FILTER_SHARD_SIZE = ".pre_filter_shard_size";
+  String PRO_KEY_MAX_CONCURRENT_SHARD_REQS = ".max_concurrent_shard_requests";
+  String PRO_KEY_ALLOW_PARTIAL_SEARCH_RESULTS = ".allow_partial_search_results";
+  String PRO_KEY_REQ_CACHE = ".request_cache";
+
   static SearchSourceBuilder buildSearchSourceBuilder(String script) {
     try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
       return SearchSourceBuilder.fromXContent(parser);
@@ -52,18 +65,43 @@ public interface EsQueryExecutor {
     }
   }
 
-  default SearchRequest buildSearchRequest(String script, String... indexNames) {
-    return new SearchRequest(indexNames).source(buildSearchSourceBuilder(script));
+  default SearchRequest buildSearchRequest(String script, Map<String, String> properties,
+      String... indexNames) {
+    final SearchRequest searchRequest =
+        new SearchRequest(indexNames).source(buildSearchSourceBuilder(script));
+    if (isNotEmpty(properties)) {
+      getOptMapObject(properties, PRO_KEY_ROUTING, Conversions::toString)
+          .ifPresent(s -> searchRequest.routing(split(s, ",", true, true)));
+      getOptMapObject(properties, PRO_KEY_PREFERENCE, Conversions::toString)
+          .ifPresent(searchRequest::preference);
+      getOptMapObject(properties, PRO_KEY_TYPES, Conversions::toString)
+          .ifPresent(s -> searchRequest.types(split(s, ",", true, true)));
+      getOptMapObject(properties, PRO_KEY_SEARCH_TYPE, Conversions::toString)
+          .ifPresent(searchRequest::searchType);
+      getOptMapObject(properties, PRO_KEY_BATCHED_REDUCE_SIZE, Conversions::toInteger)
+          .ifPresent(searchRequest::setBatchedReduceSize);
+      getOptMapObject(properties, PRO_KEY_PRE_FILTER_SHARD_SIZE, Conversions::toInteger)
+          .ifPresent(searchRequest::setPreFilterShardSize);
+      getOptMapObject(properties, PRO_KEY_MAX_CONCURRENT_SHARD_REQS, Conversions::toInteger)
+          .ifPresent(searchRequest::setMaxConcurrentShardRequests);
+      getOptMapObject(properties, PRO_KEY_ALLOW_PARTIAL_SEARCH_RESULTS, Conversions::toBoolean)
+          .ifPresent(searchRequest::allowPartialSearchResults);
+      getOptMapObject(properties, PRO_KEY_REQ_CACHE, Conversions::toBoolean)
+          .ifPresent(searchRequest::requestCache);
+    }
+    return searchRequest;
   }
 
   SearchResponse execute(SearchRequest searchRequest) throws Exception;
 
-  default SearchResponse execute(String indexName, String script) throws Exception {
-    return execute(buildSearchRequest(script, indexName));
+  default SearchResponse execute(String indexName, String script, Map<String, String> properties)
+      throws Exception {
+    return execute(buildSearchRequest(script, properties, indexName));
   }
 
-  default Map<String, Object> search(String indexName, String script) throws Exception {
-    SearchResponse searchResponse = execute(indexName, script);
+  default Map<String, Object> search(String indexName, String script,
+      Map<String, String> properties) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script, properties);
     if (searchResponse != null) {
       return XContentUtils.searchResponseToMap(searchResponse);
     } else {
@@ -71,8 +109,9 @@ public interface EsQueryExecutor {
     }
   }
 
-  default Map<String, Object> searchAggregation(String indexName, String script) throws Exception {
-    SearchResponse searchResponse = execute(indexName, script);
+  default Map<String, Object> searchAggregation(String indexName, String script,
+      Map<String, String> properties) throws Exception {
+    SearchResponse searchResponse = execute(indexName, script, properties);
     if (searchResponse != null) {
       Map<String, Object> result =
           XContentUtils.searchResponseToMap(searchResponse, AGG_RS_ETR_PATH);
@@ -85,9 +124,9 @@ public interface EsQueryExecutor {
   }
 
   default Pair<Long, List<Map<String, Object>>> searchHits(String indexName, String script,
-      String... hintKeys) throws Exception {
+      Map<String, String> properties, String... hintKeys) throws Exception {
     List<Map<String, Object>> list = new ArrayList<>();
-    SearchResponse searchResponse = execute(indexName, script);
+    SearchResponse searchResponse = execute(indexName, script, properties);
     long total = 0;
     if (searchResponse != null) {
       total = searchResponse.getHits() != null ? searchResponse.getHits().getTotalHits() : 0;

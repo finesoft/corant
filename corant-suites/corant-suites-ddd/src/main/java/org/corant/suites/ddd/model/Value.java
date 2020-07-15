@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
 import java.time.temporal.Temporal;
 import java.util.Collection;

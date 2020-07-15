@@ -57,11 +57,14 @@ public class StringBigIntegerConverter extends AbstractNumberConverter<String, B
   protected BigInteger convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
-    } else if (hasHex(value)) {
-      return BigInteger.valueOf(Long.decode(value));
+    } else {
+      String val = value.trim();
+      if (hasHex(val)) {
+        return BigInteger.valueOf(Long.decode(val));
+      }
+      Integer radix = getHintsRadix(hints);
+      return radix != null ? new BigInteger(val, radix) : new BigInteger(val);
     }
-    Integer radix = getHintsRadix(hints);
-    return radix != null ? new BigInteger(value, radix) : new BigInteger(value);
   }
 
 }

@@ -14,7 +14,7 @@
 package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;

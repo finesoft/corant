@@ -13,8 +13,21 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.model.Aggregate;
+
 /**
  * corant-suites-ddd
+ *
+ * <p>
+ * The unit of work represents a series of works within the business scope. These works may change
+ * the state of the business entity (aggregate) and persist the entity state, or generate certain
+ * messages that can be propagated to other business systems outside the boundary or even in other
+ * areas.
+ * </p>
+ *
+ * @see Aggregate
+ * @see Message
  *
  * @author bingo 下午3:02:04
  *
@@ -22,7 +35,7 @@ package org.corant.suites.ddd.unitwork;
 public interface UnitOfWork {
 
   /**
-   * Complete unit of works, clean registers, release effect.
+   * Complete unit of work, clean registers, release effect.
    */
   void complete(boolean success);
 

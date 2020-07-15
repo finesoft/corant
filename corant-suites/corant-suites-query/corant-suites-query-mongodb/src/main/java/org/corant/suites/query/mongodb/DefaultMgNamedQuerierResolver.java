@@ -38,6 +38,11 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   protected Logger logger;
 
   @Override
+  public void onServiceInitialize() {
+    onPreDestroy();
+  }
+
+  @Override
   public MgNamedQuerier resolve(String key, Object param) {
     FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
     return builder.build(param);
@@ -56,5 +61,4 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
     builders.clear();
     logger.fine(() -> "Clear default mongodb named querier resolver builders");
   }
-
 }

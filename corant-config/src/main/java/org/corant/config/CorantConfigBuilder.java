@@ -14,7 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;

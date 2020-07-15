@@ -13,15 +13,16 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.ClassUtils.primitiveToWrapper;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.wrap;
+import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import javax.enterprise.context.Dependent;
@@ -42,7 +43,7 @@ import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
 import org.corant.config.CorantConfigProviderResolver;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
@@ -54,12 +55,14 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  */
 public class ConfigExtension implements Extension {
 
+  private static final Logger logger = Logger.getLogger(ConfigExtension.class.getName());
+
   private Set<InjectionPoint> injectionPoints = new HashSet<>();
 
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     Set<Type> types = injectionPoints.stream().map(ip -> {
       if (ip.getType() instanceof Class<?>) {
-        return primitiveToWrapper((Class<?>) ip.getType());
+        return wrap((Class<?>) ip.getType());
       } else {
         return ip.getType();
       }
@@ -81,9 +84,9 @@ public class ConfigExtension implements Extension {
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
-    ConfigProperty configProperty =
-        pip.getInjectionPoint().getAnnotated().getAnnotation(ConfigProperty.class);
-    if (configProperty != null) {
+    if (pip.getInjectionPoint().getAnnotated().getAnnotation(ConfigProperty.class) != null) {
+      logger.fine(
+          () -> String.format("Find config property inject point %s", pip.getInjectionPoint()));
       injectionPoints.add(pip.getInjectionPoint());
     }
   }
@@ -121,7 +124,7 @@ public class ConfigExtension implements Extension {
 
     @Override
     public String getId() {
-      return "ConfigInjectionBean_" + String.join("_", ObjectUtils.asStrings(types));
+      return "ConfigInjectionBean_" + String.join("_", Objects.asStrings(types));
     }
 
     @Override
@@ -131,7 +134,7 @@ public class ConfigExtension implements Extension {
 
     @Override
     public String getName() {
-      return "ConfigInjectionBean_" + String.join("_", ObjectUtils.asStrings(types));
+      return "ConfigInjectionBean_" + String.join("_", Objects.asStrings(types));
     }
 
     @Override

@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jms.shared.context;
 
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultTrim;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -102,8 +102,8 @@ public class JMSContextKey implements Serializable {
       return false;
     }
     final JMSContextKey key = (JMSContextKey) o;
-    return isEquals(connectionFactoryId, key.connectionFactoryId)
-        && isEquals(sessionMode, key.sessionMode);
+    return areEqual(connectionFactoryId, key.connectionFactoryId)
+        && areEqual(sessionMode, key.sessionMode);
 
   }
 

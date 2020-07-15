@@ -14,11 +14,11 @@
 package org.corant.suites.bundle;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.isDeepEquals;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.contains;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.areDeepEqual;
+import static org.corant.shared.util.Strings.contains;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.corant.shared.util.ValidateUtils;
+import org.corant.shared.util.Validates;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 
 /**
@@ -90,7 +90,7 @@ public class Preconditions {
   }
 
   public static <T> T requireDeepEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (isDeepEquals(obj1, obj2)) {
+    if (areDeepEqual(obj1, obj2)) {
       return obj1;
     } else {
       throw new GeneralRuntimeException(code, parameters);
@@ -142,7 +142,7 @@ public class Preconditions {
    * @param parameters
    */
   public static <T> T requireEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (isEquals(obj1, obj2)) {
+    if (areEqual(obj1, obj2)) {
       return obj1;
     } else {
       throw new GeneralRuntimeException(code, parameters);
@@ -188,7 +188,7 @@ public class Preconditions {
    */
   public static <T extends Comparable<T>> T requireGaet(T obj, T compareObj, Object code,
       Object... parameters) {
-    if (isEquals(obj, compareObj)) {
+    if (areEqual(obj, compareObj)) {
       return obj;
     }
     if (obj == null || compareObj == null) {
@@ -228,7 +228,7 @@ public class Preconditions {
    */
   public static void requireImage(InputStream is, String[] formatNames, Object code,
       Object... parameters) {
-    requireTrue(ValidateUtils.isImage(is, formatNames), code, parameters);
+    requireTrue(Validates.isImage(is, formatNames), code, parameters);
   }
 
   /**
@@ -255,7 +255,7 @@ public class Preconditions {
    * @param parameters
    */
   public static String requireIp4Address(String ipAddress, Object code, Object... parameters) {
-    if (!ValidateUtils.isIp4Address(ipAddress)) {
+    if (!Validates.isIp4Address(ipAddress)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return ipAddress;
@@ -271,7 +271,7 @@ public class Preconditions {
    */
   public static <T extends Comparable<T>> T requireLaet(T obj, T compareObj, Object code,
       Object... parameters) {
-    if (isEquals(obj, compareObj)) {
+    if (areEqual(obj, compareObj)) {
       return obj;
     }
     if (obj == null || compareObj == null) {
@@ -294,7 +294,7 @@ public class Preconditions {
    */
   public static String requireLength(String object, int minLen, int maxLen, Object code,
       Object... parameters) {
-    if (!ValidateUtils.minMaxLength(object, minLen, maxLen)) {
+    if (!Validates.minMaxLength(object, minLen, maxLen)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return object;
@@ -327,7 +327,7 @@ public class Preconditions {
    * @param parameters
    */
   public static String requireMailAddress(String mailAddress, Object code, Object... parameters) {
-    if (!ValidateUtils.isMailAddress(mailAddress)) {
+    if (!Validates.isMailAddress(mailAddress)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return mailAddress;
@@ -362,7 +362,7 @@ public class Preconditions {
    */
   public static String requireMaxLength(String object, int maxLen, Object code,
       Object... parameters) {
-    if (!ValidateUtils.maxLength(object, maxLen)) {
+    if (!Validates.maxLength(object, maxLen)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return object;
@@ -378,7 +378,7 @@ public class Preconditions {
    */
   public static String requireMinLength(String object, int minLen, Object code,
       Object... parameters) {
-    if (!ValidateUtils.minLength(object, minLen)) {
+    if (!Validates.minLength(object, minLen)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return object;
@@ -664,7 +664,7 @@ public class Preconditions {
    */
   public static String requireZhMobileNumber(String mobileNumber, Object code,
       Object... parameters) {
-    if (!ValidateUtils.isZhMobileNumber(mobileNumber)) {
+    if (!Validates.isZhMobileNumber(mobileNumber)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return mobileNumber;
@@ -677,7 +677,7 @@ public class Preconditions {
    * @param code
    */
   public static String requireZhPhoneNumber(String phoneNumber, Object code, Object... parameters) {
-    if (!ValidateUtils.isZhPhoneNumber(phoneNumber)) {
+    if (!Validates.isZhPhoneNumber(phoneNumber)) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return phoneNumber;

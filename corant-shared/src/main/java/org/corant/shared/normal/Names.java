@@ -13,7 +13,7 @@
  */
 package org.corant.shared.normal;
 
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.defaultString;
 
 /**
  * corant-kernel

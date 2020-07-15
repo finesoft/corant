@@ -14,12 +14,12 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.MapUtils.immutableMapOf;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class Resources {
    * Note: If the incoming path non start with {@link SourceType} that means not specified schema
    * then use class path.
    *
-   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
+   * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    * @param <T>
    * @param path
    * @return
@@ -107,7 +107,7 @@ public class Resources {
    * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
-   * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
+   * 4.if path is blank ({@code Strings.isBlank}) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
@@ -158,7 +158,7 @@ public class Resources {
   /**
    * Use path string to find file system resource. Support glob/regex expression
    *
-   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
+   * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    * @param path
    * @return
    * @throws IOException fromFileSystem
@@ -403,7 +403,7 @@ public class Resources {
     }
 
     public static ClassPathResource of(String classPath, ClassLoader classLoader, URL url) {
-      if (classPath.endsWith(ClassUtils.CLASS_FILE_NAME_EXTENSION)) {
+      if (classPath.endsWith(Classes.CLASS_FILE_NAME_EXTENSION)) {
         return new ClassResource(classPath, classLoader, url);
       } else {
         return new ClassPathResource(classPath, classLoader, url);
@@ -500,9 +500,9 @@ public class Resources {
         useClassPath = useClassPath.substring(
             useClassPath.indexOf(ClassPaths.CLASSES_FOLDER) + ClassPaths.CLASSES_FOLDER.length());
       }
-      int classNameEnd = useClassPath.length() - ClassUtils.CLASS_FILE_NAME_EXTENSION.length();
+      int classNameEnd = useClassPath.length() - Classes.CLASS_FILE_NAME_EXTENSION.length();
       className = useClassPath.substring(0, classNameEnd).replace(ClassPaths.PATH_SEPARATOR,
-          ClassUtils.PACKAGE_SEPARATOR_CHAR);
+          Classes.PACKAGE_SEPARATOR_CHAR);
     }
 
     @Override
@@ -532,11 +532,11 @@ public class Resources {
     }
 
     public String getPackageName() {
-      return ClassUtils.getPackageName(className);
+      return Classes.getPackageName(className);
     }
 
     public String getSimpleName() {
-      return ClassUtils.getShortClassName(className);
+      return Classes.getShortClassName(className);
     }
 
     @Override

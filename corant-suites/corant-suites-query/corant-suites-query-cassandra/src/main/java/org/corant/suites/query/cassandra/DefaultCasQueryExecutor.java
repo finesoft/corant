@@ -15,7 +15,7 @@ package org.corant.suites.query.cassandra;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.ObjectUtils.max;
+import static org.corant.shared.util.Objects.max;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

@@ -28,14 +28,16 @@ import com.arjuna.ats.jta.common.JTAEnvironmentBean;
  */
 public interface NarayanaConfigurator extends Sortable {
 
-  void configCoordinatorEnvironment(CoordinatorEnvironmentBean bean);
+  void configCoordinatorEnvironment(CoordinatorEnvironmentBean bean,
+      NarayanaTransactionConfig config);
 
-  void configCoreEnvironment(CoreEnvironmentBean bean);
+  void configCoreEnvironment(CoreEnvironmentBean bean, NarayanaTransactionConfig config);
 
-  void configJTAEnvironmentBean(JTAEnvironmentBean bean);
+  void configJTAEnvironmentBean(JTAEnvironmentBean bean, NarayanaTransactionConfig config);
 
-  void configObjectStoreEnvironment(ObjectStoreEnvironmentBean bean, String name);
+  void configObjectStoreEnvironment(ObjectStoreEnvironmentBean bean, String name,
+      NarayanaTransactionConfig config);
 
-  void configRecoveryEnvironment(RecoveryEnvironmentBean bean);
+  void configRecoveryEnvironment(RecoveryEnvironmentBean bean, NarayanaTransactionConfig config);
 
 }

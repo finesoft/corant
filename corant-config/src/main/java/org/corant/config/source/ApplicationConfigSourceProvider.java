@@ -17,9 +17,7 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.defaultBlank;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
@@ -32,7 +30,7 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils;
+import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
@@ -53,21 +51,27 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String[] classPaths =
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
+  static String getLocation() {
+    String location = System.getProperty(CFG_LOCATION_KEY);
+    if (isBlank(location)) {
+      location = ConfigUtils.extractSysEnv(
+          AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
+          CFG_LOCATION_KEY);
+    }
+    return location;
+  }
+
   static Predicate<URL> resolveExPattern() {
     String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
     return u -> isBlank(cfgUrlExPattern)
-        || !PathUtils.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
+        || !PathMatcher.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
   }
 
   static String[] resolveLocations() {
-    String sysLcPro = System.getProperty(CFG_LOCATION_KEY);
-    String sysLcEnv = ConfigUtils.extractSysEnv(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-        CFG_LOCATION_KEY);
-    String locationDir = defaultString(defaultBlank(sysLcPro, sysLcEnv));
-    return isBlank(locationDir) ? new String[0]
+    final String locDir = getLocation();
+    return isBlank(locDir) ? new String[0]
         : Arrays.stream(appExtName)
-            .map(e -> locationDir + SourceType.decideSeparator(locationDir) + appBaseName + e)
+            .map(e -> locDir + SourceType.decideSeparator(locDir) + appBaseName + e)
             .toArray(String[]::new);
   }
 

@@ -15,12 +15,12 @@ package org.corant.suites.mongodb;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.MapUtils.getMapInstant;
-import static org.corant.shared.util.MapUtils.mapOf;
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Maps.getMapInstant;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import static org.corant.suites.cdi.Instances.find;
 import static org.corant.suites.cdi.Instances.findNamed;
 import static org.corant.suites.cdi.Instances.select;

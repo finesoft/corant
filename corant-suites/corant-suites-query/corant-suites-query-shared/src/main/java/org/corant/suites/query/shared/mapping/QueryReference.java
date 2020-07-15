@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 

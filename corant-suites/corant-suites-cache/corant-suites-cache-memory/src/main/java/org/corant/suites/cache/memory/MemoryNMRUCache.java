@@ -16,21 +16,11 @@ package org.corant.suites.cache.memory;
 /**
  * corant-suites-query-shared
  *
+ * <p>
  * Unfinish yet!
  *
  * @author bingo 下午2:03:02
- *
  */
-public class MemoryNMRUCache<K, V> implements MemoryCache<K, V> {
-
-  @Override
-  public V get(K key) {
-    return null;
-  }
-
-  @Override
-  public V put(K key, V value) {
-    return null;
-  }
+public class MemoryNMRUCache<K, V> extends AbstractMemoryCache<K, V> {
 
 }

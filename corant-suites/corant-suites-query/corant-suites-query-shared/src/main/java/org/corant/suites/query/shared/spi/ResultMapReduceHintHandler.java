@@ -13,13 +13,13 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import static org.corant.shared.util.CollectionUtils.linkedHashSetOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.MapUtils.extractMapKeyPathValue;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Maps.extractMapKeyPathValue;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.normal.Names;
-import org.corant.shared.ubiquity.Pair;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -64,7 +64,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
     return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
-        && isEquals(hint.getKey(), HINT_NAME);
+        && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @Override

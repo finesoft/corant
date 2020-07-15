@@ -13,14 +13,16 @@
  */
 package org.corant.suites.query.shared.mapping;
 
-import static org.corant.shared.util.ClassUtils.asClass;
-import static org.corant.shared.util.ConversionUtils.toBoolean;
-import static org.corant.shared.util.ConversionUtils.toObject;
-import static org.corant.shared.util.ObjectUtils.forceCast;
-import static org.corant.shared.util.StringUtils.defaultString;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.trim;
+import static org.corant.shared.util.Classes.asClass;
+import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toEnum;
+import static org.corant.shared.util.Conversions.toInteger;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,7 +31,6 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.ConversionUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Resources.URLResource;
@@ -126,7 +127,7 @@ public class QueryParseHandler extends DefaultHandler {
   public QueryMapping getMapping() {
     mapping.getQueries().forEach(q -> {
       q.setParamMappings(mapping.getParaMapping());
-      q.immunize();
+      q.postConstruct();
     });
     return mapping;
   }
@@ -189,15 +190,16 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       FetchQuery fq = new FetchQuery();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryName(atv);
         } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryType(ConversionUtils.toEnum(atv, QueryType.class));
+          fq.setReferenceQueryType(toEnum(atv, QueryType.class));
         } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
           fq.setReferenceQueryQualifier(atv);
         } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
-          fq.setMaxSize(ConversionUtils.toInteger(atv));
+          fq.setMaxSize(toInteger(atv));
         } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
           fq.setInjectPropertyName(atv);
         } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
@@ -207,7 +209,7 @@ public class QueryParseHandler extends DefaultHandler {
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
           fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
-          fq.setMultiRecords(isBlank(atv) ? true : ConversionUtils.toBoolean(atv));
+          fq.setMultiRecords(isBlank(atv) ? true : toBoolean(atv));
         }
       }
       valueStack.push(fq);
@@ -228,11 +230,12 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       FetchQueryParameter fqp = new FetchQueryParameter();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           fqp.setName(atv);
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
-          fqp.setSource(ConversionUtils.toEnum(atv, FetchQueryParameterSource.class));
+          fqp.setSource(toEnum(atv, FetchQueryParameterSource.class));
         } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
           fqp.setSourceName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
@@ -265,7 +268,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       ParameterMapping pm = new ParameterMapping();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
         } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
@@ -285,7 +289,8 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       Property pm = new Property();
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           pm.setName(atv);
         } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
@@ -306,13 +311,14 @@ public class QueryParseHandler extends DefaultHandler {
     if (start) {
       Query q = new Query(url);
       for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i), atv = attributes.getValue(i);
+        String aqn = attributes.getQName(i);
+        String atv = attributes.getValue(i);
         if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
           q.setName(atv);
         } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {
-          q.setCache(ConversionUtils.toBoolean(atv));
+          q.setCache(toBoolean(atv));
         } else if (SchemaNames.QUE_ATT_CACHE_RS_MD.equalsIgnoreCase(aqn)) {
-          q.setCacheResultSetMetadata(ConversionUtils.toBoolean(atv));
+          q.setCacheResultSetMetadata(toBoolean(atv));
         } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
           q.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
         } else if (SchemaNames.QUE_ATT_RST_SET_CLS.equalsIgnoreCase(aqn)) {

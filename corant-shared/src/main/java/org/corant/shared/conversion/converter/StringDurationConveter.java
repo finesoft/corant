@@ -58,7 +58,7 @@ public class StringDurationConveter extends AbstractConverter<String, Duration> 
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Duration.parse(value);
+    return Duration.parse(value.trim());
   }
 
 }

@@ -15,10 +15,11 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Launchs.deregisterFromMBean;
+import static org.corant.shared.util.Launchs.registerToMBean;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
-import java.lang.management.ManagementFactory;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
@@ -35,21 +36,13 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 import org.corant.kernel.boot.Power;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
-import org.corant.shared.util.LaunchUtils;
+import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
@@ -131,6 +124,7 @@ public class Corant implements AutoCloseable {
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
   public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
+  public static final String POWER_MBEAN_NAME = applicationName() + ":type=kernel,name=Power";
 
   private static volatile Corant me; // NOSONAR
 
@@ -164,7 +158,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Construct Coarnt instance with given bean classes and class loader and arguments. If the given
+   * Construct Corant instance with given bean classes and class loader and arguments. If the given
    * bean classes are not null then they will be added to the set of bean classes for the synthetic
    * bean archive. If the given class loader is not null then it will be set to the context
    * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
@@ -379,10 +373,10 @@ public class Corant implements AutoCloseable {
     });
 
     log("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
-        LaunchUtils.getPid(), LaunchUtils.getJavaVersion(), Locale.getDefault(),
+        Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
         TimeZone.getDefault().getID());
-    log("Final memory: %sM/%sM/%sM%s", LaunchUtils.getUsedMemoryMb(),
-        LaunchUtils.getTotalMemoryMb(), LaunchUtils.getMaxMemoryMb(), boostLine());
+    log("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
+        Launchs.getMaxMemoryMb(), boostLine());
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
@@ -404,7 +398,7 @@ public class Corant implements AutoCloseable {
 
   synchronized void initializeContainer(Consumer<Weld> preInitializer, StopWatch stopWatch) {
     stopWatch.start("Initialization of the CDI container is completed");
-    String id = Names.applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    String id = applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
     Weld weld = new Weld(id);
     weld.setClassLoader(classLoader);
     weld.addExtensions(new CorantExtension());
@@ -425,26 +419,15 @@ public class Corant implements AutoCloseable {
     synchronized (this) {
       if (power == null) {
         power = new Power(beanClasses, arguments);
-        ObjectName objectName = null;
-        try {
-          objectName = new ObjectName(applicationName() + ":type=kernel,name=Power");
-        } catch (MalformedObjectNameException ex) {
-          throw new CorantRuntimeException(ex);
-        }
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        try {
-          if (!server.isRegistered(objectName)) {
-            server.registerMBean(power, objectName);
-          }
-        } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-            | NotCompliantMBeanException ex) {
-          throw new CorantRuntimeException(ex);
-        }
+        registerToMBean(POWER_MBEAN_NAME, power);
+        Runtime.getRuntime()
+            .addShutdownHook(new Thread(() -> deregisterFromMBean(POWER_MBEAN_NAME)));
       }
       log("Registered %s to MBean server, one can use it for shutdown or restartup the application.",
           applicationName(), Instant.now());
       return true;
     }
+
   }
 
   private String boostLine() {

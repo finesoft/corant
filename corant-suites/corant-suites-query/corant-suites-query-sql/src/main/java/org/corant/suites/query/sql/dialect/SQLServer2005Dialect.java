@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.sql.dialect;
 
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.Locale;
 import org.corant.suites.query.shared.dynamic.SqlHelper;
 

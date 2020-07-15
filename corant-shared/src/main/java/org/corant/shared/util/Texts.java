@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -87,6 +88,10 @@ public class Texts {
         || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
         || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
         || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
+  }
+
+  public static boolean isZhChar(int c) {
+    return isZhChar((char) c);
   }
 
   /**
@@ -221,6 +226,14 @@ public class Texts {
     });
   }
 
+  public static Stream<String> lines(final String filePath) {
+    return lines(new File(filePath));
+  }
+
+  public static List<String> readFromFile(String path) {
+    return Texts.lines(new File(path)).collect(Collectors.toList());
+  }
+
   /**
    * Convert input stream to String
    *
@@ -259,7 +272,7 @@ public class Texts {
     writeToFile(file, append, StandardCharsets.UTF_8, lines);
   }
 
-  public static void writeToFile(File file, List<String> data) throws IOException {
-    writeToFile(file, true, data.stream());
+  public static void writeToFile(File file, Iterable<String> data) throws IOException {
+    writeToFile(file, true, streamOf(data));
   }
 }

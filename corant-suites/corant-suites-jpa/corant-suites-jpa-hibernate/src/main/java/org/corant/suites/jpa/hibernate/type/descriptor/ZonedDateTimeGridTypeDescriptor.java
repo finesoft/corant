@@ -1,6 +1,6 @@
 package org.corant.suites.jpa.hibernate.type.descriptor;
 
-import static org.corant.shared.util.ConversionUtils.toObject;
+import static org.corant.shared.util.Conversions.toObject;
 import java.time.ZonedDateTime;
 import org.hibernate.ogm.model.spi.Tuple;
 import org.hibernate.ogm.type.descriptor.impl.BasicGridBinder;

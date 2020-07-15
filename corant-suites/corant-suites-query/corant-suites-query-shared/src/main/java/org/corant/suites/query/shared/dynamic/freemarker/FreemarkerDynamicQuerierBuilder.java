@@ -14,14 +14,14 @@
 package org.corant.suites.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.suites.cdi.Instances.select;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-import org.corant.shared.ubiquity.Triple;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;

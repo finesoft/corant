@@ -14,7 +14,7 @@
 package org.corant.suites.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.forceCast;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -33,8 +32,8 @@ import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Pair;
-import org.corant.shared.util.ConversionUtils;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Conversions;
 import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 
@@ -93,7 +92,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
               .beanClass(ActiveMQConnectionFactory.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {
                 try {
-                  return buildConnectionFactory(beans, forceCast(dsc));
+                  return buildConnectionFactory(forceCast(dsc));
                 } catch (Exception e) {
                   throw new CorantRuntimeException(e);
                 }
@@ -116,8 +115,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     }
   }
 
-  private ActiveMQConnectionFactory buildConnectionFactory(Instance<Object> beans,
-      ArtemisConfig cfg) throws Exception {
+  private ActiveMQConnectionFactory buildConnectionFactory(ArtemisConfig cfg) throws Exception {
 
     final ActiveMQConnectionFactory activeMQConnectionFactory;
     if (cfg.getUrl() != null) {
@@ -153,15 +151,15 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
         try {
           Class<?> parameterType = m.getParameterTypes()[0];
           if (String.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toString(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toString(v.get()));
           } else if (int.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toInteger(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toInteger(v.get()));
           } else if (long.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toLong(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toLong(v.get()));
           } else if (boolean.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toBoolean(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toBoolean(v.get()));
           } else if (double.class.equals(parameterType)) {
-            m.invoke(activeMQConnectionFactory, ConversionUtils.toDouble(v.get()));
+            m.invoke(activeMQConnectionFactory, Conversions.toDouble(v.get()));
           }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
           throw new CorantRuntimeException(e);

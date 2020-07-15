@@ -14,9 +14,9 @@
 package org.corant.suites.cdi;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.trim;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.trim;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
-import org.corant.shared.util.StringUtils;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-suites-cdi
@@ -39,7 +39,7 @@ public class Qualifiers {
   public static final Map<String, Annotation[]> resolveNameds(Set<String> names) {
     Map<String, Annotation[]> nameds = new HashMap<>();
     if (isNotEmpty(names)) {
-      Set<String> tNames = names.stream().map(StringUtils::defaultTrim).collect(Collectors.toSet());
+      Set<String> tNames = names.stream().map(Strings::defaultTrim).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = defaultTrim(tNames.iterator().next());
         if (isBlank(name)) {

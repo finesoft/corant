@@ -13,11 +13,11 @@
  */
 package org.corant.suites.query.shared.spi;
 
-import static org.corant.shared.util.CollectionUtils.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.isEquals;
-import static org.corant.shared.util.StringUtils.defaultString;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +96,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {
-    boolean can = hint != null && isEquals(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
+    boolean can = hint != null && areEqual(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
     if (can) {
       Named named = resolveBeanNamed(hint);
       can = named != null && instances.select(named).isResolvable();

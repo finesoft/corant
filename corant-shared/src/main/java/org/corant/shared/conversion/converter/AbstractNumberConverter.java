@@ -26,7 +26,8 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
 
   private static final long serialVersionUID = 5110029130020305766L;
 
-  static final String[] HEX_PREFIXES = {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#"};
+  static final String[] HEX_PREFIXES =
+      {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#", "0", "-0", "+0"};
 
   /**
    *

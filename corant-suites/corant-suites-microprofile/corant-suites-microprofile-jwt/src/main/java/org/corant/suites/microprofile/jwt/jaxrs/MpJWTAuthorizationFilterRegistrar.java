@@ -13,7 +13,7 @@
  */
 package org.corant.suites.microprofile.jwt.jaxrs;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -51,17 +51,15 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 
   @Override
   public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), ri -> {
-      return new Consumer<FeatureContext>() {
-        private final Object registration = resolveRegistration(ri);
+    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), ri -> new Consumer<FeatureContext>() {
+      private final Object registration = resolveRegistration(ri);
 
-        @Override
-        public void accept(FeatureContext featureContext) {
-          if (registration != null) {
-            featureContext.register(registration);
-          }
+      @Override
+      public void accept(FeatureContext featureContext) {
+        if (registration != null) {
+          featureContext.register(registration);
         }
-      };
+      }
     }).accept(context);
   }
 

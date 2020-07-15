@@ -56,21 +56,24 @@ public class StringIntegerConverter extends AbstractNumberConverter<String, Inte
   protected Integer convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
-    } else if (hasHex(value)) {
-      return Integer.decode(value);
     } else {
-      Integer radix = getHintsRadix(hints);
-      if (isHintsUnsigned(hints)) {
-        if (radix != null) {
-          return Integer.parseUnsignedInt(value, radix);
-        } else {
-          return Integer.parseUnsignedInt(value);
-        }
+      String val = value.trim();
+      if (hasHex(val)) {
+        return Integer.decode(val);
       } else {
-        if (radix != null) {
-          return Integer.valueOf(value, radix);
+        Integer radix = getHintsRadix(hints);
+        if (isHintsUnsigned(hints)) {
+          if (radix != null) {
+            return Integer.parseUnsignedInt(val, radix);
+          } else {
+            return Integer.parseUnsignedInt(val);
+          }
         } else {
-          return Integer.valueOf(value);
+          if (radix != null) {
+            return Integer.valueOf(val, radix);
+          } else {
+            return Integer.valueOf(val);
+          }
         }
       }
     }

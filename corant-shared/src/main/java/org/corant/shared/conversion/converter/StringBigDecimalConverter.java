@@ -58,7 +58,7 @@ public class StringBigDecimalConverter extends AbstractNumberConverter<String, B
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return new BigDecimal(value);
+    return new BigDecimal(value.trim());
   }
 
 }

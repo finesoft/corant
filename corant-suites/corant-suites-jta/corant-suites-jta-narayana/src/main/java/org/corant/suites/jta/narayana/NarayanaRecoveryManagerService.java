@@ -14,7 +14,7 @@
 package org.corant.suites.jta.narayana;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;

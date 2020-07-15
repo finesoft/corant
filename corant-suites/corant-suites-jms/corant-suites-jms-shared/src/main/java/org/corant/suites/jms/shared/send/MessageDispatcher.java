@@ -14,8 +14,8 @@
 package org.corant.suites.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.tryAsClass;
-import static org.corant.shared.util.StreamUtils.copy;
+import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Streams.copy;
 import static org.corant.suites.cdi.Instances.resolveApply;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

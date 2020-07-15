@@ -56,14 +56,17 @@ public class StringShortConverter extends AbstractNumberConverter<String, Short>
   protected Short convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
-    } else if (hasHex(value)) {
-      return Short.decode(value);
     } else {
-      Integer radix = getHintsRadix(hints);
-      if (radix != null) {
-        return Short.valueOf(value, radix);
+      String val = value.trim();
+      if (hasHex(val)) {
+        return Short.decode(val);
+      } else {
+        Integer radix = getHintsRadix(hints);
+        if (radix != null) {
+          return Short.valueOf(val, radix);
+        }
+        return Short.valueOf(val);
       }
-      return Short.valueOf(value);
     }
   }
 

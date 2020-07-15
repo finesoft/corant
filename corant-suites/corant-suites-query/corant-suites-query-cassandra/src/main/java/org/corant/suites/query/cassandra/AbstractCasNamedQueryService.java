@@ -14,8 +14,8 @@
 package org.corant.suites.query.cassandra;
 
 import static org.corant.shared.util.Empties.sizeOf;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.List;
 import java.util.Map;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;

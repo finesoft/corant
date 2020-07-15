@@ -13,10 +13,10 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
-import static org.corant.shared.util.StreamUtils.batchCollectStream;
-import static org.corant.shared.util.StreamUtils.batchStream;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.batchCollectStream;
+import static org.corant.shared.util.Streams.batchStream;
+import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.suites.cdi.Instances.resolve;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

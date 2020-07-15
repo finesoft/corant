@@ -14,9 +14,9 @@
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.StreamUtils.streamOf;
+import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
@@ -29,7 +29,7 @@ import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.shared.util.ObjectUtils;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.StopWatch;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
@@ -288,7 +288,7 @@ public class UndertowWebServer extends AbstractWebServer {
         return si;
       }
       return null;
-    }).filter(ObjectUtils::isNotNull).forEach(di::addServlet);
+    }).filter(Objects::isNotNull).forEach(di::addServlet);
   }
 
   protected void resolveSocketOptions(Builder builder) {

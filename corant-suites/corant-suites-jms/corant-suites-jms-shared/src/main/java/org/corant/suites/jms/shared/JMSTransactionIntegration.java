@@ -15,7 +15,7 @@ package org.corant.suites.jms.shared;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.ObjectUtils.asStrings;
+import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.suites.cdi.Instances.findNamed;
 import java.io.Serializable;
 import java.util.ArrayList;

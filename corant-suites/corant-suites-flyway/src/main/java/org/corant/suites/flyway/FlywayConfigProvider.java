@@ -13,7 +13,7 @@
  */
 package org.corant.suites.flyway;
 
-import static org.corant.shared.util.CollectionUtils.setOf;
+import static org.corant.shared.util.Sets.setOf;
 import java.util.Collection;
 import java.util.Set;
 import javax.sql.DataSource;

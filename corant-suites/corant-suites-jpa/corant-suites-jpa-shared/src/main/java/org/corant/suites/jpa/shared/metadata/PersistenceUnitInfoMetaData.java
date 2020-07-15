@@ -14,11 +14,11 @@
 package org.corant.suites.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.ClassUtils.getUserClass;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.defaultTrim;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;

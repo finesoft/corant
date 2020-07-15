@@ -16,12 +16,12 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.CollectionUtils.listOf;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.ObjectUtils.max;
-import static org.corant.shared.util.StreamUtils.streamOf;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
 
 /**
@@ -124,7 +122,7 @@ public class FileUtils {
   public static void copyToFile(final InputStream source, final File destination)
       throws IOException {
     try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
-      StreamUtils.copy(in, out);
+      Streams.copy(in, out);
     }
   }
 
@@ -161,11 +159,11 @@ public class FileUtils {
         if (useFilter.test(each)) {
           Path eachPath = dest.resolve(each.getName().replace('/', File.separatorChar));
           if (each.isDirectory()) {
-            if (!Files.exists(eachPath)) {
-              Files.createDirectories(eachPath);
+            if (!java.nio.file.Files.exists(eachPath)) {
+              java.nio.file.Files.createDirectories(eachPath);
             }
           } else {
-            Files.copy(jar.getInputStream(each), eachPath);
+            java.nio.file.Files.copy(jar.getInputStream(each), eachPath);
           }
         }
       }
@@ -173,7 +171,7 @@ public class FileUtils {
   }
 
   public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
-    if (streamOf(JARS).anyMatch(p -> ObjectUtils.isEquals(p, jarUrl.getProtocol()))) {
+    if (streamOf(JARS).anyMatch(p -> Objects.areEqual(p, jarUrl.getProtocol()))) {
       String urlFile = jarUrl.getFile();
       int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
       if (separatorIndex != -1) {
@@ -196,7 +194,7 @@ public class FileUtils {
 
   public static String getContentType(String fileName) {
     try {
-      return Files.probeContentType(Paths.get(fileName));
+      return java.nio.file.Files.probeContentType(Paths.get(fileName));
     } catch (IOException e) {
       // Noop!
     }
@@ -271,7 +269,7 @@ public class FileUtils {
   public static List<File> selectFiles(String path) {
     String pathExp = SourceType.FILE_SYSTEM.resolve(path);
     pathExp = isNotBlank(pathExp) ? pathExp.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR) : pathExp;
-    Optional<PathMatcher> matcher = PathUtils.decidePathMatcher(pathExp, false, true);
+    Optional<PathMatcher> matcher = PathMatcher.decidePathMatcher(pathExp, false, true);
     if (matcher.isPresent()) {
       final PathMatcher useMatcher = matcher.get();
       return selectFiles(useMatcher.getPlainParent(UNIX_SEPARATOR_STR), f -> {

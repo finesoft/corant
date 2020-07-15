@@ -14,8 +14,8 @@
 package org.corant.suites.jpa.shared.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.StringUtils.defaultBlank;
-import static org.corant.shared.util.StringUtils.isBlank;
+import static org.corant.shared.util.Strings.defaultBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.logging.Logger;

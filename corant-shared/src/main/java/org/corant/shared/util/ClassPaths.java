@@ -15,14 +15,14 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.ClassUtils.defaultClassLoader;
-import static org.corant.shared.util.CollectionUtils.immutableSetOf;
-import static org.corant.shared.util.ObjectUtils.asString;
-import static org.corant.shared.util.ObjectUtils.defaultObject;
-import static org.corant.shared.util.StringUtils.isBlank;
-import static org.corant.shared.util.StringUtils.isNotBlank;
-import static org.corant.shared.util.StringUtils.replace;
-import static org.corant.shared.util.StringUtils.split;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.immutableSetOf;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.replace;
+import static org.corant.shared.util.Strings.split;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -57,7 +57,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.PathUtils.PathMatcher;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Resources.URLResource;
@@ -175,12 +174,12 @@ public class ClassPaths {
    * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
-   * 4.if path is blank ({@code StringUtils.isBlank}) then will scan all class path in the system.
+   * 4.if path is blank ({@code Strings.isBlank}) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
    *
-   * @see PathUtils#decidePathMatcher(String, boolean, boolean)
+   * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    *
    * @param classLoader
    * @param path
@@ -191,7 +190,8 @@ public class ClassPaths {
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
       boolean ignoreCase) throws IOException {
     final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
-    final Optional<PathMatcher> pathMatcher = PathUtils.decidePathMatcher(path, false, ignoreCase);
+    final Optional<PathMatcher> pathMatcher =
+        PathMatcher.decidePathMatcher(path, false, ignoreCase);
     if (pathMatcher.isPresent()) {
       Scanner scanner = new Scanner(new ClassPathMatcher(pathMatcher.get()));
       for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(useClassLoader,

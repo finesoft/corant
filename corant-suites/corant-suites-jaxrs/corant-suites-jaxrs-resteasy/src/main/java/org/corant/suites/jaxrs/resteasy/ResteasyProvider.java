@@ -13,8 +13,8 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
-import static org.corant.shared.util.AnnotationUtils.findAnnotation;
-import static org.corant.shared.util.ClassUtils.getUserClass;
+import static org.corant.shared.util.Annotations.findAnnotation;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import org.corant.shared.util.ClassUtils;
+import org.corant.shared.util.Classes;
 import org.corant.suites.servlet.WebMetaDataProvider;
 import org.corant.suites.servlet.metadata.WebInitParamMetaData;
 import org.corant.suites.servlet.metadata.WebServletMetaData;
@@ -76,9 +76,9 @@ public class ResteasyProvider implements WebMetaDataProvider {
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
           appInfo.toResteasyDeployment(d -> {
             d.setScannedResourceClasses(extension.getResources().stream()
-                .map(ClassUtils::getUserClass).map(Class::getName).collect(Collectors.toList()));
+                .map(Classes::getUserClass).map(Class::getName).collect(Collectors.toList()));
             d.setScannedProviderClasses(extension.getProviders().stream()
-                .map(ClassUtils::getUserClass).map(Class::getName).collect(Collectors.toList()));
+                .map(Classes::getUserClass).map(Class::getName).collect(Collectors.toList()));
           }));
     }
   }

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -129,5 +130,21 @@ public class Sets {
   @SafeVarargs
   public static <T> Set<T> setOf(final T... objects) {
     return collectionOf(HashSet::new, objects);
+  }
+
+  /**
+   * Convert an array to tree set
+   *
+   * @param <T>
+   * @param objects
+   * @return treeSetOf
+   */
+  @SafeVarargs
+  public static <T> Set<T> treeSetOf(final T... objects) {
+    TreeSet<T> set = new TreeSet<>();
+    if (objects != null) {
+      Collections.addAll(set, objects);
+    }
+    return set;
   }
 }

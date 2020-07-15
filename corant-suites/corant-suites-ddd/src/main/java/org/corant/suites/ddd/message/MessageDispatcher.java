@@ -35,6 +35,10 @@ public interface MessageDispatcher extends Consumer<Message[]> {
     }
   };
 
+  static MessageDispatcher empty() {
+    return DUMMY_INST;
+  }
+
   default void prepare() {}
 
 }

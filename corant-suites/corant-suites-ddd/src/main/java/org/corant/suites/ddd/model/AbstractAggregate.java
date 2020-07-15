@@ -15,6 +15,7 @@ package org.corant.suites.ddd.model;
 
 import static org.corant.suites.bundle.Preconditions.requireFalse;
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -115,7 +116,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   @Transient
   @javax.persistence.Transient
   protected Optional<? extends UnitOfWork> currentUnitOfWork() {
-    return UnitOfWorks.currentDefaultUnitOfWork();
+    return resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
   }
 
   /**

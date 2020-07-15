@@ -29,6 +29,7 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -59,9 +60,12 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
+  @Inject
+  UnitOfWorks unitOfWorks;
+
   @Override
   public EntityManager getEntityManager(Class<?> cls) {
-    Optional<AbstractJTAJPAUnitOfWork> uowo = UnitOfWorks.currentDefaultUnitOfWork();
+    Optional<AbstractJTAJPAUnitOfWork> uowo = unitOfWorks.currentDefaultUnitOfWork();
     if (uowo.isPresent()) {
       return uowo.get().getEntityManager(getPersistenceContext(cls));
     }

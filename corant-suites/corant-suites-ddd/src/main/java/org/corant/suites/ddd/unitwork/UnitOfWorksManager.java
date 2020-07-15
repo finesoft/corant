@@ -19,18 +19,46 @@ import org.corant.suites.jpa.shared.PersistenceService;
 /**
  * corant-suites-ddd
  *
+ * <p>
+ * The unit of works manager, responsible for creating or destroying work units, and providing
+ * resources or services needed by work units
+ * </p>
+ *
  * @author bingo 上午11:51:01
  */
 public interface UnitOfWorksManager {
 
+  /**
+   * Return the current unit of work
+   */
   UnitOfWork getCurrentUnitOfWork();
 
+  /**
+   * Return the unit of work handler and provide them to the unit of work managed.
+   */
   Stream<UnitOfWorksHandler> getHandlers();
 
+  /**
+   * Return the unit of work listener and provide them to the unit of work managed.
+   */
   Stream<UnitOfWorksListener> getListeners();
 
+  /**
+   * Return the persistence service and provide them to the unit of work managed.
+   */
   PersistenceService getPersistenceService();
 
+  /**
+   * corant-suites-ddd
+   *
+   * <p>
+   * The unit of works handler is used as a callback notification to signal that the unit of work is
+   * in the process of being completed.
+   * </p>
+   *
+   * @author bingo 10:38:33
+   *
+   */
   @FunctionalInterface
   public interface UnitOfWorksHandler {
 
@@ -42,11 +70,35 @@ public interface UnitOfWorksManager {
       return 0;
     }
 
+    /**
+     * Callback notified before the unit of work is completed.
+     *
+     * @param uow the unit of work
+     */
     void onPreComplete(UnitOfWork uow);
   }
 
+  /**
+   * corant-suites-ddd
+   *
+   * <p>
+   * The unit of work listener, when the unit of work is completed, all listeners will be called.
+   * The listener accepts two parameters, one is the information that has been registered in the
+   * unit of work, and the other is whether the unit of work is successfully executed or not.
+   * </p>
+   *
+   * @author bingo 10:44:46
+   *
+   */
   @FunctionalInterface
   public interface UnitOfWorksListener {
+
+    /**
+     * Callback notified after the unit of work is completed.
+     *
+     * @param registration the information been registered in the unit of work
+     * @param success whether the unit of work is successfully executed or not
+     */
     void onCompleted(Object registration, boolean success);
   }
 

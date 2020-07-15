@@ -76,7 +76,8 @@ public class JPARepositoryExtension implements Extension {
   }
 
   JPARepository produce(Instance<Object> instances, String unitName) {
-    Optional<AbstractJTAJPAUnitOfWorksManager> uowm = UnitOfWorks.currentDefaultUnitOfWorksManager();
+    Optional<AbstractJTAJPAUnitOfWorksManager> uowm =
+        instances.select(UnitOfWorks.class).get().currentDefaultUnitOfWorksManager();
     shouldBeTrue(uowm.isPresent());
     return new DefaultJPARepository(PersistenceContextLiteral.of(unitName), uowm.get());
   }

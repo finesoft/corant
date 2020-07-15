@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.model;
 
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,7 +69,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
         }
       }
     } else {
-      Optional<? extends UnitOfWork> uow = UnitOfWorks.currentDefaultUnitOfWork();
+      Optional<? extends UnitOfWork> uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
       if (uow.isPresent()) {
         for (Message msg : messages) {
           if (msg != null) {

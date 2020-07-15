@@ -160,6 +160,28 @@ public class Streams {
   }
 
   /**
+   * Convert an Iterable object to parallel Stream object
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Stream<T> parallelStreamOf(final Iterable<? extends T> iterable) {
+    if (iterable != null) {
+      return StreamSupport.stream((Spliterator<T>) iterable.spliterator(), true);
+    }
+    return Stream.empty();
+  }
+
+  /**
+   * Convert Iterator object to parallel Stream object
+   */
+  public static <T> Stream<T> parallelStreamOf(final Iterator<? extends T> iterator) {
+    if (iterator != null) {
+      return StreamSupport
+          .stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true);
+    }
+    return Stream.empty();
+  }
+
+  /**
    * Read the input stream to byte array.
    *
    * @param is
@@ -232,7 +254,7 @@ public class Streams {
     if (iterable instanceof Collection) {
       return ((Collection) iterable).stream();
     } else if (iterable != null) {
-      return (Stream<T>) StreamSupport.stream(iterable.spliterator(), false);
+      return StreamSupport.stream((Spliterator<T>) iterable.spliterator(), false);
     }
     return Stream.empty();
   }

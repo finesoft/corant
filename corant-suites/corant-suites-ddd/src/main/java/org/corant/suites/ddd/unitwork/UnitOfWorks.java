@@ -16,37 +16,47 @@ package org.corant.suites.ddd.unitwork;
 import static org.corant.suites.cdi.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-import org.corant.suites.ddd.annotation.qualifier.JTAXA;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.corant.suites.ddd.annotation.qualifier.JTARL;
-import org.eclipse.microprofile.config.ConfigProvider;
+import org.corant.suites.ddd.annotation.qualifier.JTAXA;
+import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-suites-ddd
  *
+ * <p>
+ * Used to provide the current unit of work manager or unit of work, If you do not apply the
+ * existing mechanism, return to the custom unit of work instance by overriding this class.
+ * </p>
+ *
  * @author bingo 12:17:01
  *
  */
+@ApplicationScoped
+@InfrastructureServices
 public class UnitOfWorks {
 
-  static final boolean USE_JTA_XA_MODEL = ConfigProvider.getConfig()
-      .getOptionalValue("ddd.unitofwork.use-xa", Boolean.class).orElse(Boolean.TRUE);
+  @Inject
+  @ConfigProperty(name = "ddd.unitofwork.use-xa", defaultValue = "true")
+  protected boolean useJtaXa;
 
-  public static Optional<AbstractJTAJPAUnitOfWork> currentDefaultUnitOfWork() {
+  public Optional<AbstractJTAJPAUnitOfWork> currentDefaultUnitOfWork() {
     Optional<AbstractJTAJPAUnitOfWorksManager> uowm = currentDefaultUnitOfWorksManager();
     return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
   }
 
-  public static Optional<AbstractJTAJPAUnitOfWorksManager> currentDefaultUnitOfWorksManager() {
-    return find(AbstractJTAJPAUnitOfWorksManager.class,
-        USE_JTA_XA_MODEL ? JTAXA.INSTANCE : JTARL.INSTANCE);
+  public Optional<AbstractJTAJPAUnitOfWorksManager> currentDefaultUnitOfWorksManager() {
+    return find(AbstractJTAJPAUnitOfWorksManager.class, useJtaXa ? JTAXA.INSTANCE : JTARL.INSTANCE);
   }
 
-  public static Optional<UnitOfWork> currentUnitOfWork(Annotation... qualifiers) {
+  public Optional<UnitOfWork> currentUnitOfWork(Annotation... qualifiers) {
     Optional<UnitOfWorksManager> uowm = currentUnitOfWorksManager(qualifiers);
     return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
   }
 
-  public static Optional<UnitOfWorksManager> currentUnitOfWorksManager(Annotation... qualifiers) {
+  public Optional<UnitOfWorksManager> currentUnitOfWorksManager(Annotation... qualifiers) {
     return find(UnitOfWorksManager.class, qualifiers);
   }
 }

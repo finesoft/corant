@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.suites.cdi.Instances.resolve;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.persistence.PostLoad;
@@ -123,7 +124,7 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(Object o) {
-    Optional<? extends UnitOfWork> uow = UnitOfWorks.currentDefaultUnitOfWork();
+    Optional<? extends UnitOfWork> uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
     if (uow.isPresent()) {
       uow.get().register(o);
     } else {

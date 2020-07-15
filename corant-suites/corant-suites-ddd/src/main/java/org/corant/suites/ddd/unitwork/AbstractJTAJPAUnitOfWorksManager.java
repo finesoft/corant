@@ -14,6 +14,7 @@
 package org.corant.suites.ddd.unitwork;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +36,11 @@ import org.corant.suites.ddd.message.MessageDispatcher;
 /**
  * corant-suites-ddd
  *
+ * <p>
+ * The JTA JPA unit of works manager, use for create and destroy the unit of works, provide
+ * thenecessary transaction manager and message dispatch service for the unit of work.
+ * </p>
+ *
  * @author bingo 下午2:14:21
  *
  */
@@ -50,7 +56,8 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   protected Instance<MessageDispatcher> messageDispatcher;
 
   public static AbstractJTAJPAUnitOfWork curUow() {
-    Optional<AbstractJTAJPAUnitOfWork> curuow = UnitOfWorks.currentDefaultUnitOfWork();
+    Optional<AbstractJTAJPAUnitOfWork> curuow =
+        resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
     if (curuow.isPresent() && curuow.get() instanceof JTAXAJPAUnitOfWork) {
       return curuow.get();
     } else {
@@ -125,8 +132,7 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   }
 
   public MessageDispatcher getMessageDispatcher() {
-    return messageDispatcher.isResolvable() ? messageDispatcher.get()
-        : MessageDispatcher.DUMMY_INST;
+    return messageDispatcher.isResolvable() ? messageDispatcher.get() : MessageDispatcher.empty();
   }
 
   public TransactionManager getTransactionManager() {

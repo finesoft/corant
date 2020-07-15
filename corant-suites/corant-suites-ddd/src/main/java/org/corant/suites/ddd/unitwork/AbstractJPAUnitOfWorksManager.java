@@ -24,6 +24,14 @@ import org.corant.suites.jpa.shared.PersistenceService;
 /**
  * corant-suites-ddd
  *
+ * <p>
+ * Abstract unit of works manager implementation, using JPA as a persistent implementation. This
+ * implementation can provide the {@link UnitOfWorksListener}/pre-post
+ * {@link UnitOfWorksHandler}/JPA {@link PersistenceService} involved in the use of the unit of
+ * work.
+ * </p>
+ *
+ *
  * @author bingo 上午11:39:15
  *
  */

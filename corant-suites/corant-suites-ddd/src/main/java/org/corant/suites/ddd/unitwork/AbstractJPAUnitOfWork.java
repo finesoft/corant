@@ -39,7 +39,21 @@ import org.corant.suites.ddd.model.Entity.EntityManagerProvider;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
+ *
+ * corant-suites-ddd
+ *
+ * <p>
+ * Abstract unit of work implementation, using JPA as a persistent implementation; this
+ * implementation records the life cycle changes of entities and provide related registration and
+ * deregistration operations, also provide the {@link EntityManager}.
+ * </p>
+ * <p>
+ * Note that in the current implementation, a unit of work can contain multiple EntityManagers, each
+ * of which has a specific {@link PersistenceContext}.
+ * </p>
+ *
  * @author bingo 下午7:13:58
+ *
  */
 public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
 

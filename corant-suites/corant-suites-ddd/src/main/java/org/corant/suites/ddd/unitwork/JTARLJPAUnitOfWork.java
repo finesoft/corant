@@ -25,10 +25,18 @@ import org.corant.suites.ddd.saga.SagaService;
 /**
  * corant-suites-ddd
  *
- * <pre>
- * All entityManager from this unit of work are SynchronizationType.SYNCHRONIZED,
- * and must be in transactional.
- * </pre>
+ * <p>
+ * The JPA unit of work based on JTA local resource transaction (non-XA) boundaries, generally used
+ * for single database and/or use non-XA message queue scenarios. Through JTA's transaction
+ * management, the state of the business entity and messages are persisted before the transaction is
+ * committed (in general, the message also uses the same database as the business entities use, so
+ * as to keep the message from being lost), and the messages are sent(generally use async sending)
+ * after the transaction is successfully. If the message sending is unsuccessful, some retry
+ * mechanism is required, and after the message is successfully sent, it needs to be cleaned
+ * up.<br/>
+ * This solution cannot guarantee full consistency, usually this solution is used with SAGA /LRA and
+ * other finally consistent components.
+ * </p>
  *
  * @author bingo 上午11:38:39
  *

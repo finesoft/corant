@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.cdi.ConversionService;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -128,11 +129,10 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
       List<QueryHintParameter> aggNames = qh.getParameters(HNIT_PARA_AGGS_NME);
       List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
       try {
-        Set<String> fieldNames;
+        Pair<Boolean, Set<String>> fieldNames = resolveAggFieldNames(aggFieldNames);
         String aggName = null;
-        if (isNotEmpty(aggFieldNames) && isNotEmpty(aggNames)
-            && isNotBlank(aggName = aggNames.get(0).getValue()) && isNotEmpty(fieldNames =
-                linkedHashSetOf(split(aggFieldNames.get(0).getValue(), ",", true, true)))) {
+        if (!fieldNames.isEmpty() && isNotEmpty(aggNames)
+            && isNotBlank(aggName = aggNames.get(0).getValue())) {
           final String useAggName = aggName;
           return caches.computeIfAbsent(qh.getId(), k -> list -> {
             Map<Map<Object, Object>, List<Map<Object, Object>>> temp =
@@ -141,10 +141,18 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
               Map<Object, Object> key = new LinkedHashMap<>();
               Map<Object, Object> val = new LinkedHashMap<>();
               for (Map.Entry<?, ?> e : src.entrySet()) {
-                if (!fieldNames.contains(e.getKey())) {
-                  val.put(e.getKey(), e.getValue());
+                if (fieldNames.getKey()) {
+                  if (fieldNames.getValue().contains(e.getKey())) {
+                    val.put(e.getKey(), e.getValue());
+                  } else {
+                    key.put(e.getKey(), e.getValue());
+                  }
                 } else {
-                  key.put(e.getKey(), e.getValue());
+                  if (!fieldNames.getValue().contains(e.getKey())) {
+                    val.put(e.getKey(), e.getValue());
+                  } else {
+                    key.put(e.getKey(), e.getValue());
+                  }
                 }
               }
               temp.computeIfAbsent(key, vk -> new ArrayList<>()).add(val);
@@ -163,5 +171,18 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
+  }
+
+  private Pair<Boolean, Set<String>> resolveAggFieldNames(List<QueryHintParameter> aggFieldNames) {
+    if (isEmpty(aggFieldNames)) {
+      return Pair.empty();
+    } else {
+      String names = aggFieldNames.get(0).getValue();
+      boolean exclude = names.startsWith("!");
+      if (exclude) {
+        names = names.substring(1);
+      }
+      return Pair.of(exclude, linkedHashSetOf(split(names, ",", true, true)));
+    }
   }
 }

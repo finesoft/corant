@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared;
 
-import java.util.concurrent.atomic.AtomicReference;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
@@ -33,7 +33,7 @@ public interface NamedQueryServiceManager {
    * @return NamedQueryService
    */
   static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
-    AtomicReference<NamedQueryService> ref = new AtomicReference<>();
+    MutableObject<NamedQueryService> ref = new MutableObject<>();
     Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
       if (nqs.getType() == queryType) {
         ref.set(nqs.get(qualifier));

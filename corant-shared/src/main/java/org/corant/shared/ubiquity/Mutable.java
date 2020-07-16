@@ -318,7 +318,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
 
     T value;
 
-    protected MutableObject() {
+    public MutableObject() {
       super();
     }
 

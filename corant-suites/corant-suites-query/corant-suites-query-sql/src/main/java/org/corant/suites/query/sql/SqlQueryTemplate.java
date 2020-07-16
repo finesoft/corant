@@ -107,7 +107,7 @@ public class SqlQueryTemplate {
 
   public Forwarding<Map<String, Object>> forward() {
     Pair<String, Object[]> ps = processSqlAndParams(sql, parameters);
-    String limitSql = dialect.getLimitSql(sql, offset, limit + 1);
+    String limitSql = dialect.getLimitSql(ps.getLeft(), offset, limit + 1);
     final Object[] params = ps.getRight();
     Forwarding<Map<String, Object>> result = Forwarding.inst();
     List<Map<String, Object>> list = query(limitSql, params);

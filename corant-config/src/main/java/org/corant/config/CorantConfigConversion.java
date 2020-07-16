@@ -334,7 +334,7 @@ public class CorantConfigConversion implements Serializable {
    * </p>
    *
    * <pre>
-   * "key1"                                 =>  { "key":"" }
+   * "key"                                  =>  { "key":"" }
    * "key=value"                            =>  { "key":"value" }
    * "key,value"                            =>  { "key":"value" }
    * "key1=value1,key2=value2,key3="        =>  { "key1":"value1", "key2":"value2", "key3":"" }

@@ -17,6 +17,8 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
+ * corant-suites-ddd
+ *
  * @author bingo 上午10:41:55
  */
 public interface Message extends Serializable {

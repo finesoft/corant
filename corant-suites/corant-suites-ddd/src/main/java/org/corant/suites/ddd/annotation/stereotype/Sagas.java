@@ -23,6 +23,8 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 
 /**
+ * corant-suites-ddd
+ *
  * @author bingo 下午4:21:15
  *
  */

@@ -30,7 +30,10 @@ import org.corant.suites.ddd.unitwork.UnitOfWork;
 import org.corant.suites.ddd.unitwork.UnitOfWorks;
 
 /**
+ * corant-suites-ddd
+ *
  * @author bingo 上午10:57:03
+ *
  */
 public class DefaultAggregateAssistant implements AggregateAssistant {
 
@@ -48,6 +51,11 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   @Override
   public void clearMessages() {
     messages.clear();
+  }
+
+  @Override
+  public Optional<? extends UnitOfWork> currentUnitOfWork() {
+    return resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
   }
 
   @Override
@@ -69,7 +77,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
         }
       }
     } else {
-      Optional<? extends UnitOfWork> uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
+      Optional<? extends UnitOfWork> uow = currentUnitOfWork();
       if (uow.isPresent()) {
         for (Message msg : messages) {
           if (msg != null) {
@@ -78,7 +86,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
           }
         }
       } else {
-        logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
+        logger.warning(() -> "The UnitOfWork not found! please check the implements!");
       }
     }
   }

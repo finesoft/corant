@@ -24,6 +24,12 @@ import java.lang.annotation.Target;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 
+/**
+ * corant-suites-ddd
+ *
+ * @author bingo 10:48:52
+ *
+ */
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD})

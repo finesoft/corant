@@ -45,7 +45,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWorks;
 import org.corant.suites.jpa.shared.PersistenceService;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-ddd
+ *
  * <p>
  * The default entity life cycle manager, use EDA mechanism.
  *

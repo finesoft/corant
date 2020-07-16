@@ -15,8 +15,9 @@ package org.corant.suites.ddd.model;
 
 /**
  * corant-suites-ddd
+ *
  * <p>
- * Represents an object that can be persisted or deleted
+ * Represents an object that can be persisted or deleted.
  *
  * @author bingo 下午9:05:07
  *

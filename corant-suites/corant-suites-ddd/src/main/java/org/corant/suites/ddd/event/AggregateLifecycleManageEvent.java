@@ -19,6 +19,9 @@ import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
 
 /**
+ * corant-suites-ddd
+ *
+ * <p>
  * The lifecycle manage event, the infrastructure service will listen this event and do persist or
  * destroy the aggregate.
  *

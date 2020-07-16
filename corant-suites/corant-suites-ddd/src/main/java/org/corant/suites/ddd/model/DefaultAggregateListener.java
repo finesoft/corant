@@ -29,8 +29,9 @@ import org.corant.suites.ddd.unitwork.UnitOfWorks;
 
 /**
  * corant-suites-ddd
+ *
  * <p>
- * Entity listener, used to coordinate the unit of work.
+ * Entity listener, working with the {@link UnitOfWork}.
  *
  * @author bingo 下午3:35:44
  *
@@ -128,7 +129,7 @@ public class DefaultAggregateListener {
     if (uow.isPresent()) {
       uow.get().register(o);
     } else {
-      logger.warning(() -> "UnitOfWorksService not found! please check the implements!");
+      logger.warning(() -> "The UnitOfWork not found! please check the implements!");
     }
   }
 }

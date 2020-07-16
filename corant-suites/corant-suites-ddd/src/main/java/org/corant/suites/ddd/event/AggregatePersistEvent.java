@@ -24,6 +24,9 @@ import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
 /**
+ * corant-suites-ddd
+ *
+ * <p>
  * Every aggregate that extends AbstractAggregate when life cycle on persistence change then will
  * asynchronous fire AggregatePersistEvent . The Event triggers occur when the aggregate is
  * persisted/deleted/updated and has been updated to the persistence layer and the JTA transaction

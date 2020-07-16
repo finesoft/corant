@@ -27,6 +27,7 @@ import java.util.function.Function;
 /**
  * corant-suites-ddd
  *
+ * <p>
  * The value objects are things like numbers, dates, monies and strings. Usually, they are small
  * objects which are used quite widely. Their identity is based on their state rather than on their
  * object identity.

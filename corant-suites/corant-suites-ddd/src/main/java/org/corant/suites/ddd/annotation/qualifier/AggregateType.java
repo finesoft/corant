@@ -27,8 +27,9 @@ import javax.inject.Qualifier;
 import org.corant.suites.ddd.model.Aggregate;
 
 /**
- * @author bingo 下午9:05:13
+ * corant-suites-ddd
  *
+ * @author bingo 下午9:05:13
  */
 @Documented
 @Retention(RUNTIME)

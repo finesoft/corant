@@ -22,6 +22,9 @@ import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 
 /**
+ * corant-suites-ddd
+ *
+ * <p>
  * Every aggregate that extends AbstractAggregate when life cycle change then will fire
  * AggregateLifecycleEvent. The Event triggers occur when the aggregate is persisted/deleted/updated
  * and has been propagated to the persistence context and the JTA transaction has not yet finished.

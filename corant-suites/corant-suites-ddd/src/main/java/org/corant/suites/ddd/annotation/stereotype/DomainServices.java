@@ -25,8 +25,9 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * @author bingo 下午6:29:53
+ * corant-suites-ddd
  *
+ * @author bingo 下午6:29:53
  */
 @Documented
 @Retention(RUNTIME)

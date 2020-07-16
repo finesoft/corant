@@ -164,96 +164,6 @@ public class Strings {
   }
 
   /**
-   * Group string into a string array with Predicate, delete blank elements or trim elements as
-   * needed.
-   *
-   * @see Strings#group(String, Predicate)
-   *
-   * @param str
-   * @param removeBlank
-   * @param trim
-   * @param predicate
-   * @return group
-   */
-  public static String[] group(final String str, final boolean removeBlank, final boolean trim,
-      final Predicate<Character> predicate) {
-    String[] grouped = group(str, predicate);
-    if (!removeBlank && !trim) {
-      return grouped;
-    } else {
-      String[] result = new String[grouped.length];
-      int i = 0;
-      for (String e : grouped) {
-        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
-          result[i++] = trim ? trim(e) : e;
-        }
-      }
-      return Arrays.copyOf(result, i);
-    }
-  }
-
-  /**
-   * Group string into a string array with Predicate.
-   *
-   * <pre>
-   * Strings.group("abc123efg456", Character::isDigit)        =       ["abc","123","efg","456"]
-   * Strings.group("abc,efg", c -> c==',')                    =       ["abc",",","efg"]
-   * Strings.group("123", Character::isDigit)                 =       ["123"]
-   * Strings.group(null, Character::isDigit)                  =       []
-   * Strings.group("abc", Character::isDigit)                 =       ["abc"]
-   * Strings.group("abc", null)                               =       ["abc"]
-   * Strings.group(null, null)                                =       []
-   * </pre>
-   *
-   * @param str
-   * @param splitor
-   * @return split
-   */
-  public static String[] group(final String str, final Predicate<Character> predicate) {
-    int len;
-    if (str == null || (len = str.length()) == 0) {
-      return new String[0];
-    }
-    if (predicate == null) {
-      return new String[] {str};
-    }
-    int i = 0;
-    int s = 0;
-    int g = len > 16 ? 16 : (len >> 1) + 1;
-    int ai = 0;
-    String[] array = new String[g];
-    boolean match = false;
-    for (; i < len; i++) {
-      if (predicate.test(str.charAt(i))) {
-        if (!match && i > 0) {
-          if (ai == g) {
-            array = Arrays.copyOf(array, g += g);
-          }
-          array[ai++] = str.substring(s, i);
-          s = i;
-        }
-        match = true;
-      } else {
-        if (match) {
-          if (ai == g) {
-            array = Arrays.copyOf(array, g += g);
-          }
-          array[ai++] = str.substring(s, i);
-          s = i;
-        }
-        match = false;
-      }
-    }
-    if (s < len) {
-      array = Arrays.copyOf(array, ai + 1);
-      array[ai] = str.substring(s);
-      return array;
-    } else {
-      return Arrays.copyOf(array, ai);
-    }
-  }
-
-  /**
    * <pre>
    * Strings.isBlank(null)      = true
    * Strings.isBlank("")        = true
@@ -631,6 +541,98 @@ public class Strings {
       return str;
     }
     return str.substring(strLen - len);
+  }
+
+  /**
+   * Segment string into a string array with Predicate, delete blank elements or trim elements as
+   * needed. The difference with {@link #split(String, Predicate)} is that this method does not
+   * delete any characters.
+   *
+   * @see Strings#segment(String, Predicate)
+   *
+   * @param str
+   * @param removeBlank
+   * @param trim
+   * @param predicate
+   * @return segments
+   */
+  public static String[] segment(final String str, final boolean removeBlank, final boolean trim,
+      final Predicate<Character> predicate) {
+    String[] grouped = segment(str, predicate);
+    if (!removeBlank && !trim) {
+      return grouped;
+    } else {
+      String[] result = new String[grouped.length];
+      int i = 0;
+      for (String e : grouped) {
+        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
+          result[i++] = trim ? trim(e) : e;
+        }
+      }
+      return Arrays.copyOf(result, i);
+    }
+  }
+
+  /**
+   * Segment string into a string array with Predicate, the difference with
+   * {@link #split(String, Predicate)} is that this method does not delete any characters.
+   *
+   * <pre>
+   * Strings.group("abc123efg456", Character::isDigit)        =       ["abc","123","efg","456"]
+   * Strings.group("abc,efg", c -> c==',')                    =       ["abc",",","efg"]
+   * Strings.group("123", Character::isDigit)                 =       ["123"]
+   * Strings.group(null, Character::isDigit)                  =       []
+   * Strings.group("abc", Character::isDigit)                 =       ["abc"]
+   * Strings.group("abc", null)                               =       ["abc"]
+   * Strings.group(null, null)                                =       []
+   * </pre>
+   *
+   * @param str
+   * @param predicate
+   * @return segments
+   */
+  public static String[] segment(final String str, final Predicate<Character> predicate) {
+    int len;
+    if (str == null || (len = str.length()) == 0) {
+      return new String[0];
+    }
+    if (predicate == null) {
+      return new String[] {str};
+    }
+    int i = 0;
+    int s = 0;
+    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int ai = 0;
+    String[] array = new String[g];
+    boolean match = false;
+    for (; i < len; i++) {
+      if (predicate.test(str.charAt(i))) {
+        if (!match && i > 0) {
+          if (ai == g) {
+            array = Arrays.copyOf(array, g += g);
+          }
+          array[ai++] = str.substring(s, i);
+          s = i;
+        }
+        match = true;
+      } else {
+        if (match) {
+          if (ai == g) {
+            array = Arrays.copyOf(array, g += g);
+          }
+          array[ai++] = str.substring(s, i);
+          s = i;
+        }
+        match = false;
+      }
+    }
+    if (s < len) {
+      array = Arrays.copyOf(array, ai + 1);
+      array[ai] = str.substring(s);
+      return array;
+    } else {
+      return Arrays.copyOf(array, ai);
+    }
   }
 
   /**

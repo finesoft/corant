@@ -16,6 +16,9 @@ package org.corant.suites.ddd.model;
 import javax.persistence.MappedSuperclass;
 
 /**
+ * corant-suites-ddd
+ *
+ * <p>
  * An abstract aggregate that part of the implementation of event processing and other related
  * functions, use JPA.
  *

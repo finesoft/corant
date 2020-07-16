@@ -22,6 +22,7 @@ import javax.persistence.PersistenceContext;
 /**
  *
  * corant-suites-ddd
+ *
  * <p>
  * An object fundamentally defined not by its attributes, but by a thread of continuity and identity
  *

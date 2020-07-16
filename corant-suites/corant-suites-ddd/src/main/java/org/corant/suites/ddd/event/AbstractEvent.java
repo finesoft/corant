@@ -20,6 +20,8 @@ import java.time.Instant;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 
 /**
+ * corant-suites-ddd
+ *
  * @author bingo 上午11:26:08
  */
 @Events

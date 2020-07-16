@@ -42,7 +42,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 /**
- * corant-asosat-ddd
+ * corant-suites-json
  *
  * @author bingo 下午2:40:27
  *

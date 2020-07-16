@@ -18,6 +18,9 @@ import java.util.function.Function;
 import javax.persistence.MappedSuperclass;
 
 /**
+ * corant-suites-ddd
+ *
+ *
  * @author bingo 下午7:42:44
  *
  */

@@ -21,7 +21,6 @@ import org.corant.suites.ddd.model.Aggregate;
  * corant-suites-ddd
  *
  * @author bingo 下午5:57:36
- *
  */
 @Events
 public abstract class AbstractPropertyChangedEvent<T extends Aggregate, P> extends AbstractEvent {

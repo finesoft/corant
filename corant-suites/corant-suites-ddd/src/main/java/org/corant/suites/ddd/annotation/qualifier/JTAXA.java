@@ -25,8 +25,9 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
 /**
- * @author bingo 下午9:05:13
+ * corant-suites-ddd
  *
+ * @author bingo 下午9:05:13
  */
 @Documented
 @Retention(RUNTIME)

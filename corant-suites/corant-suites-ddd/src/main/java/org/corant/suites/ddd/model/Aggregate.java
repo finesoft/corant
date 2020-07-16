@@ -27,19 +27,23 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.unitwork.JTAXAJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.JTARLJPAUnitOfWorksManager;
+import org.corant.suites.ddd.unitwork.JTAXAJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
 
 /**
+ * corant-suites-ddd
+ *
+ * <p>
  * Aggregate a cluster of associated objects that are treated as a unit for the purpose of data
  * changes. External references are restricted to one member of the AGGREGATE, designated as the
  * root. A set of consistency rules applies within the AGGREGATE’S boundaries.
  * <p>
  * Aggregates are the basic element of transfer of data storage - you request to load or save whole
- * aggregates. Transactions should not cross aggregate boundaries.
+ * aggregates. If possable, the transactions({@link UnitOfWork}) should not cross aggregate
+ * boundaries.
  * <p>
- * Generally speaking the aggregate is the DDD aggregate root entity.
+ * Generally the aggregate is the DDD aggregate root entity.
  *
  * @author bingo 下午4:23:02
  * @since
@@ -47,8 +51,8 @@ import org.corant.suites.ddd.unitwork.UnitOfWork;
 public interface Aggregate extends Entity {
 
   /**
-   * Extract the buffered messages that aggregate raised, this method was invoked before unit of
-   * work completed.
+   * Extract the buffered messages that have been raised by the aggregate, this method was invoked
+   * before unit of work completed.
    *
    * @param flush if true then clear messages buffer
    * @return extractMessages
@@ -92,8 +96,9 @@ public interface Aggregate extends Entity {
   /**
    * Raise event, use the CDI event mechanism to emit event.
    * <p>
-   * Generally speaking the event is not the DDD domain event. It is simply event-driven
-   * architecture for decoupling.
+   * Generally the event is not the DDD domain event. It is simply event-driven architecture for
+   * decoupling.
+   * </p>
    *
    * @param event
    * @param qualifiers raise
@@ -102,7 +107,6 @@ public interface Aggregate extends Entity {
 
   /**
    * Raise message, add the message to the buffer and do not publish it immediately.
-   * {@link #extractMessages(boolean)}.
    * <p>
    *
    * <pre>
@@ -115,7 +119,7 @@ public interface Aggregate extends Entity {
    * successfully.
    * </pre>
    *
-   * Generally speaking the message is the DDD domain event.
+   * Generally the message is the DDD domain event.
    *
    * @param messages
    *

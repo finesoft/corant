@@ -25,6 +25,8 @@ import javax.enterprise.inject.Stereotype;
 import org.corant.suites.ddd.message.Message.MessageHandling;
 
 /**
+ * corant-suites-ddd
+ *
  * @author bingo 下午6:51:41
  *
  */

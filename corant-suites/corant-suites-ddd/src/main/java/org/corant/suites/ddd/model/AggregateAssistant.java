@@ -15,11 +15,18 @@ package org.corant.suites.ddd.model;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.unitwork.UnitOfWork;
 
 /**
  * corant-suites-ddd
+ *
+ * <p>
+ * The aggregate assistant, use for help the aggregate to emit events or maintain the messages. The
+ * aggregate should focus on domain logic, the other work can use this to handle.
+ * </p>
  *
  * @author bingo 下午3:11:06
  *
@@ -30,6 +37,13 @@ public interface AggregateAssistant {
    * Clear the message queue.
    */
   void clearMessages();
+
+  /**
+   * The current unit of work or null
+   *
+   * @return currentUnitOfWork
+   */
+  Optional<? extends UnitOfWork> currentUnitOfWork();
 
   /**
    * Obtain the message queue, if flush is true then clear queue.

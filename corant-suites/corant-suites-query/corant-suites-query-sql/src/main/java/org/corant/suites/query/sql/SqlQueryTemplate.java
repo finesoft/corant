@@ -14,8 +14,10 @@
 package org.corant.suites.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -24,6 +26,7 @@ import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,8 +114,7 @@ public class SqlQueryTemplate {
     final Object[] params = ps.getRight();
     Forwarding<Map<String, Object>> result = Forwarding.inst();
     List<Map<String, Object>> list = query(limitSql, params);
-    int size = list == null ? 0 : list.size();
-    if (size > 0 && size > limit) {
+    if (sizeOf(list) > limit) {
       list.remove(limit);
       result.withHasNext(true);
     }
@@ -120,7 +122,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> Forwarding<T> forwardAs(final Class<T> clazz) {
-    return forwardAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return forwardAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
@@ -136,7 +138,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> T getAs(final Class<T> clazz) {
-    return getAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return getAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> T getAs(final Function<Object, T> converter) {
@@ -162,7 +164,7 @@ public class SqlQueryTemplate {
     try {
       List<Map<String, Object>> list = query(limitSql, params);
       Paging<Map<String, Object>> result = Paging.of(offset, limit);
-      int size = list == null ? 0 : list.size();
+      int size = sizeOf(list);
       if (size > 0) {
         if (size < limit) {
           result.withTotal(offset + size);
@@ -178,7 +180,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> Paging<T> page(final Class<T> clazz) {
-    return pageAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return pageAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Paging<T> pageAs(final Function<Object, T> converter) {
@@ -206,11 +208,20 @@ public class SqlQueryTemplate {
   }
 
   public <T> List<T> selectAs(final Class<T> clazz) {
-    return selectAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return selectAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> List<T> selectAs(final Function<Object, T> converter) {
     return select().stream().map(converter::apply).collect(Collectors.toList());
+  }
+
+  public <T> T single(final Class<T> clazz) {
+    Map<?, ?> result = get();
+    if (isEmpty(result)) {
+      return null;
+    } else {
+      return toObject(result.entrySet().iterator().next().getValue(), clazz);
+    }
   }
 
   public SqlQueryTemplate sql(String sql) {
@@ -248,7 +259,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> Stream<T> streamAs(final Class<T> clazz) {
-    return streamAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return streamAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {

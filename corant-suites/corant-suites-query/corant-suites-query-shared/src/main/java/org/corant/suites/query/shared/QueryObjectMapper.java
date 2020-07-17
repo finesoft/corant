@@ -13,29 +13,16 @@
  */
 package org.corant.suites.query.shared;
 
-import org.corant.suites.json.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * corant-suites-query-shared
  *
- * @author bingo 下午6:48:41
+ * @author bingo 11:39:34
+ *
  */
-public class QueryObjectMapper {
+public interface QueryObjectMapper {
 
-  public static final ObjectMapper OM;
+  String toJsonString(Object object, boolean Escape, boolean pretty);
 
-  static {
-    OM = JsonUtils.copyMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  }
+  <T> T toObject(Object from, Class<T> type);
 
-  public static String toString(Object obj) {
-    try {
-      return OM.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-    } catch (JsonProcessingException e) {
-      return null;
-    }
-  }
 }

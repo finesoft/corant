@@ -177,7 +177,7 @@ public class Conversions {
 
   /**
    * Convert an object to Boolean object. If object is string then only {"true", "yes", "y", "on",
-   * "1", "是"} return Boolean.TRUE.
+   * "1", "是"} return Boolean.TRUE else return Boolean.FALSE.
    *
    * @param obj the object that to be converted
    * @return toBoolean

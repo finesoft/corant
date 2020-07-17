@@ -23,12 +23,9 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
 import org.corant.suites.query.shared.Querier;
-import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 
 /**
  * corant-suites-query
@@ -160,17 +157,13 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected String resolveScript(Map<Object, Object> s, Integer offset, Integer limit) {
-    try {
-      if (offset != null) {
-        s.put("from", offset);
-      }
-      if (limit != null) {
-        s.put("size", limit);
-      }
-      return QueryObjectMapper.OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(s);
-    } catch (JsonProcessingException e) {
-      throw new QueryRuntimeException(e);
+    if (offset != null) {
+      s.put("from", offset);
     }
+    if (limit != null) {
+      s.put("size", limit);
+    }
+    return getQuerierResolver().getQueryResolver().getObjectMapper().toJsonString(s, true, false);
   }
 
   protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,

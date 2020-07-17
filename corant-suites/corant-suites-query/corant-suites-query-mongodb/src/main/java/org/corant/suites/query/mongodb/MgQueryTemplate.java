@@ -16,12 +16,16 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.suites.cdi.Instances.findNamed;
+import static org.corant.suites.cdi.Instances.resolve;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -132,8 +136,7 @@ public class MgQueryTemplate {
     Forwarding<Map<?, ?>> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
     List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0 && size > limit) {
+    if (sizeOf(list) > limit) {
       list.remove(limit);
       result.withHasNext(true);
     }
@@ -141,15 +144,14 @@ public class MgQueryTemplate {
   }
 
   public <T> Forwarding<T> forwardAs(final Class<T> clazz) {
-    return forwardAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return forwardAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
     List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0 && size > limit) {
+    if (sizeOf(list) > limit) {
       list.remove(limit);
       result.withHasNext(true);
     }
@@ -162,7 +164,7 @@ public class MgQueryTemplate {
   }
 
   public <T> T getAs(final Class<T> clazz) {
-    return getAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return getAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> T getAs(final Function<Object, T> converter) {
@@ -223,7 +225,7 @@ public class MgQueryTemplate {
   }
 
   public <T> Paging<T> pageAs(final Class<T> clazz) {
-    return pageAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return pageAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Paging<T> pageAs(final Function<Object, T> converter) {
@@ -285,11 +287,20 @@ public class MgQueryTemplate {
   }
 
   public <T> List<T> selectAs(final Class<T> clazz) {
-    return selectAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return selectAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> List<T> selectAs(final Function<Object, T> converter) {
     return streamOf(query()).map(this::convert).map(converter::apply).collect(Collectors.toList());
+  }
+
+  public <T> T single(final Class<T> clazz) {
+    Map<?, ?> result = get();
+    if (isEmpty(result)) {
+      return null;
+    } else {
+      return toObject(result.entrySet().iterator().next().getValue(), clazz);
+    }
   }
 
   public MgQueryTemplate sort(Bson sort) {
@@ -308,7 +319,7 @@ public class MgQueryTemplate {
   }
 
   public <T> Stream<T> streamAs(final Class<T> clazz) {
-    return streamAs(r -> QueryObjectMapper.OM.convertValue(r, clazz));
+    return streamAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
@@ -317,7 +328,7 @@ public class MgQueryTemplate {
   }
 
   protected Map<?, ?> convert(Document doc) {
-    if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
+    if (doc != null && autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
       doc.put("id", doc.get("_id"));
     }
     return doc;

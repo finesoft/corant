@@ -23,8 +23,7 @@ import org.corant.suites.query.shared.mapping.QueryMappingService.QueryMappingCl
  *
  * @author bingo 下午12:07:37
  */
-public interface NamedQuerierResolver<K, P, Q extends NamedQuerier>
-    extends QueryMappingClient {
+public interface NamedQuerierResolver<K, P, Q extends NamedQuerier> extends QueryMappingClient {
 
   @Override
   default Set<String> getMappingFilePaths() {
@@ -32,5 +31,4 @@ public interface NamedQuerierResolver<K, P, Q extends NamedQuerier>
   }
 
   Q resolve(K key, P param);
-
 }

@@ -52,6 +52,14 @@ public class DefaultQueryResolver implements QueryResolver {
   @Inject
   protected ConversionService conversionService;
 
+  @Inject
+  protected QueryObjectMapper objectMapper;
+
+  @Override
+  public QueryObjectMapper getObjectMapper() {
+    return objectMapper;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveParameter(Query query, Object param) {
@@ -144,7 +152,7 @@ public class DefaultQueryResolver implements QueryResolver {
    * @return the converted record
    */
   protected <T> T convertRecord(Object record, Class<T> expectedClass) {
-    return QueryObjectMapper.OM.convertValue(record, expectedClass);
+    return objectMapper.toObject(record, expectedClass);
   }
 
   @PreDestroy

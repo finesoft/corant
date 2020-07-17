@@ -36,6 +36,13 @@ public interface FetchQueryResolver {
   boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery);
 
   /**
+   * Return the QueryObjectMapper to process result type conversion or query script conversion.
+   *
+   * @return getObjectMapper
+   */
+  QueryObjectMapper getObjectMapper();
+
+  /**
    * Inject fetch query result in to single parent query result, the parameter 'fetchResult' may be
    * modified.
    *

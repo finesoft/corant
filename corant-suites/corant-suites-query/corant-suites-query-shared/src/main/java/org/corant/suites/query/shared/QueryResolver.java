@@ -27,6 +27,13 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
 public interface QueryResolver {
 
   /**
+   * Return the QueryObjectMapper to process result type conversion or query script conversion.
+   *
+   * @return getObjectMapper
+   */
+  QueryObjectMapper getObjectMapper();
+
+  /**
    * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
    * return it.
    *

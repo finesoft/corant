@@ -56,18 +56,21 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   protected ConversionService conversionService;
 
   @Inject
+  protected QueryObjectMapper objectMapper;
+
+  @Inject
   protected Logger logger;
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
-    Function<Object[], Object> sf = QueryScriptEngines.resolveFetchPredicates(fetchQuery);
-    if (sf != null) {
-      Boolean b = toBoolean(sf.apply(new Object[] {queryParameter, result}));
-      if (b == null || !b.booleanValue()) {
-        return false;
-      }
-    }
-    return true;
+    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchPredicates(fetchQuery);
+    return fun == null
+        || toBoolean(fun.apply(new Object[] {queryParameter, result})).booleanValue();
+  }
+
+  @Override
+  public QueryObjectMapper getObjectMapper() {
+    return objectMapper;
   }
 
   @Override
@@ -75,12 +78,11 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (result == null) {
       return;
     }
-    final Function<Object[], Object> injection =
-        QueryScriptEngines.resolveFetchInjections(fetchQuery);
-    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
-    if (injection == null) {
-      // use inject pro name
-      shouldNotEmpty(injectProNamePath);
+    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    if (fun != null) {
+      fun.apply(new Object[] {new Object[] {result}, fetchedResults});
+    } else {
+      String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
         injectFetchedResult(result, null, injectProNamePath);
       } else {
@@ -90,9 +92,6 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
           injectFetchedResult(result, fetchedResults.iterator().next(), injectProNamePath);
         }
       }
-    } else {
-      injection.apply(
-          new Object[] {new Object[] {result}, defaultObject(fetchedResults, ArrayList::new)});
     }
   }
 
@@ -102,12 +101,11 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
     if (isEmpty(results)) {
       return;
     }
-    final Function<Object[], Object> injection =
-        QueryScriptEngines.resolveFetchInjections(fetchQuery);
-    final String[] injectProNamePath = fetchQuery.getInjectPropertyNamePath();
-    if (injection == null) {
-      // use inject pro name
-      shouldNotEmpty(injectProNamePath);
+    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    if (fun != null) {
+      fun.apply(new Object[] {results, defaultObject(fetchedResults, ArrayList::new)});
+    } else {
+      String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
         for (Object result : results) {
           injectFetchedResult(result, null, injectProNamePath);
@@ -121,11 +119,6 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
           }
         }
       }
-    } else {
-      // use inject script
-      // for (Object result : results) {
-      injection.apply(new Object[] {results, defaultObject(fetchedResults, ArrayList::new)});
-      // }
     }
   }
 
@@ -151,7 +144,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       if (criteria instanceof Map) {
         ((Map) criteria).forEach((k, v) -> map.put(asDefaultString(k), v));
       } else if (criteria != null) {
-        QueryObjectMapper.OM.convertValue(criteria, Map.class)
+        objectMapper.toObject(criteria, Map.class)
             .forEach((k, v) -> map.put(asDefaultString(k), v));
       }
     }
@@ -185,17 +178,17 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
       Class<?> type = parameter.getType();
       boolean distinct = parameter.isDistinct();
       String name = parameter.getName();
-      if (parameter.getSource() == FetchQueryParameterSource.C) {
+      FetchQueryParameterSource source = parameter.getSource();
+      if (source == FetchQueryParameterSource.C) {
         fetchCriteria.put(name, convertCriteriaValue(parameter.getValue(), type));
-      } else if (parameter.getSource() == FetchQueryParameterSource.P) {
+      } else if (source == FetchQueryParameterSource.P) {
         String sourceName = parameter.getSourceName();
         fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
       } else if (result != null) {
         String[] namePath = parameter.getSourceNamePath();
-        Object criteriaValue = null;
         try {
-          // handle multi results
           if (result instanceof List) {
+            // handle multi results
             Collection<Object> values = distinct ? new LinkedHashSet<>() : new ArrayList<>();
             for (Object resultItem : (List<?>) result) {
               Object resultItemValue = resolveFetchQueryCriteriaValue(resultItem, namePath);
@@ -205,12 +198,12 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
                 values.add(convertCriteriaValue(resultItemValue, type));
               }
             }
-            criteriaValue = values;
+            fetchCriteria.put(name, values);
           } else {
+            // handle single results
             Object resultValue = resolveFetchQueryCriteriaValue(result, namePath);
-            criteriaValue = convertCriteriaValue(resultValue, type);
+            fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
           }
-          fetchCriteria.put(name, criteriaValue);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
           throw new QueryRuntimeException(e,
               "Can not extract value from query result for resolve fetch query [%s] parameter!",

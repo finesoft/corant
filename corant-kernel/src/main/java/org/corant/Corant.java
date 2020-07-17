@@ -28,6 +28,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -212,6 +213,8 @@ public class Corant implements AutoCloseable {
       } else {
         run(new Class[0], arguments);
       }
+    } else if (!current().isRuning()) {
+      current().start(null);
     }
     return CDI.current().select(beanClass, annotations).get();
   }
@@ -226,6 +229,18 @@ public class Corant implements AutoCloseable {
 
   public static Corant current() {
     return me;
+  }
+
+  public static void execute(Runnable runnable, String... arguments) {
+    if (current() == null) {
+      run(new Class[0], arguments);
+    } else if (!current().isRuning()) {
+      current().start(null);
+    }
+    runnable.run();
+    if (current() != null && current().isRuning()) {
+      current().stop();
+    }
   }
 
   public static synchronized Corant run() {
@@ -258,6 +273,19 @@ public class Corant implements AutoCloseable {
 
   public static synchronized Corant run(String... arguments) {
     return run(new Class[0], null, null, arguments);
+  }
+
+  public static <T> T supplier(Supplier<T> supplier, String... arguments) {
+    if (current() == null) {
+      run(new Class[0], arguments);
+    } else if (!current().isRuning()) {
+      current().start(null);
+    }
+    T result = supplier.get();
+    if (current() != null && current().isRuning()) {
+      current().stop();
+    }
+    return result;
   }
 
   private static synchronized void setMe(Corant me) {

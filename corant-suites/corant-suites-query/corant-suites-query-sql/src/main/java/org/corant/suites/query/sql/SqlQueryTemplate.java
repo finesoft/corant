@@ -83,30 +83,61 @@ public class SqlQueryTemplate {
   protected final Dialect dialect;
   protected final DataSource datasource;
 
-  private SqlQueryTemplate(String database, DBMS dbms) {
-    if (isNotBlank(database) && database.startsWith(JndiNames.JNDI_COMP_NME)) {
+  public SqlQueryTemplate(DataSource dataSource, DBMS dbms) {
+    datasource = dataSource;
+    dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
+    runner = new QueryRunner(dataSource);
+  }
+
+  public SqlQueryTemplate(DBMS dbms, String dataSourceName) {
+    if (isNotBlank(dataSourceName) && dataSourceName.startsWith(JndiNames.JNDI_COMP_NME)) {
       try {
-        datasource = forceCast(new InitialContext().lookup(database));
+        datasource = forceCast(new InitialContext().lookup(dataSourceName));
       } catch (NamingException e) {
         throw new QueryRuntimeException(e);
       }
     } else {
-      datasource = findNamed(DataSource.class, database).orElseThrow(QueryRuntimeException::new);
+      datasource =
+          findNamed(DataSource.class, dataSourceName).orElseThrow(QueryRuntimeException::new);
     }
     dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
     runner = new QueryRunner(datasource);
   }
 
-  public static SqlQueryTemplate database(DBMS dbms, String database) {
-    return new SqlQueryTemplate(database, dbms);
+  public static SqlQueryTemplate mysql(DataSource dataSource) {
+    return new SqlQueryTemplate(dataSource, DBMS.MYSQL);
   }
 
-  public static SqlQueryTemplate mysql(String database) {
-    return new SqlQueryTemplate(database, DBMS.MYSQL);
+  public static SqlQueryTemplate mysql(String dataSourceName) {
+    return new SqlQueryTemplate(DBMS.MYSQL, dataSourceName);
   }
 
-  public static SqlQueryTemplate sql2012(String database) {
-    return new SqlQueryTemplate(database, DBMS.SQLSERVER2012);
+  public static SqlQueryTemplate of(DBMS dbms, String dataSourceName) {
+    return new SqlQueryTemplate(dbms, dataSourceName);
+  }
+
+  public static SqlQueryTemplate oracle(DataSource dataSource) {
+    return new SqlQueryTemplate(dataSource, DBMS.ORACLE);
+  }
+
+  public static SqlQueryTemplate oracle(String dataSourceName) {
+    return new SqlQueryTemplate(DBMS.ORACLE, dataSourceName);
+  }
+
+  public static SqlQueryTemplate postgre(DataSource dataSource) {
+    return new SqlQueryTemplate(dataSource, DBMS.POSTGRE);
+  }
+
+  public static SqlQueryTemplate postgre(String dataSourceName) {
+    return new SqlQueryTemplate(DBMS.POSTGRE, dataSourceName);
+  }
+
+  public static SqlQueryTemplate sql2012(DataSource dataSource) {
+    return new SqlQueryTemplate(dataSource, DBMS.SQLSERVER2012);
+  }
+
+  public static SqlQueryTemplate sql2012(String dataSourceName) {
+    return new SqlQueryTemplate(DBMS.SQLSERVER2012, dataSourceName);
   }
 
   public Forwarding<Map<String, Object>> forward() {
@@ -221,7 +252,9 @@ public class SqlQueryTemplate {
     if (isEmpty(result)) {
       return null;
     } else {
-      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, QueryRuntimeException::new);
+      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, () -> new QueryRuntimeException(
+          "The size %s of query result set must not greater than one and the result record must have only one field. SQL: %s",
+          result.size(), sql));
       return toObject(result.get(0).entrySet().iterator().next().getValue(), clazz);
     }
   }

@@ -300,7 +300,9 @@ public class MgQueryTemplate {
     if (isEmpty(result)) {
       return null;
     } else {
-      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, QueryRuntimeException::new);
+      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, () -> new QueryRuntimeException(
+          "The size %s of query result set must not greater than one and the result record must have only one field.",
+          result.size()));
       return toObject(result.get(0).entrySet().iterator().next().getValue(), clazz);
     }
   }

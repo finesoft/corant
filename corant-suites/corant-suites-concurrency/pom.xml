@@ -23,6 +23,10 @@
 			<artifactId>javax.enterprise.concurrent-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.microprofile.context-propagation</groupId>
+			<artifactId>microprofile-context-propagation-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.enterprise.concurrent</artifactId>
 		</dependency>

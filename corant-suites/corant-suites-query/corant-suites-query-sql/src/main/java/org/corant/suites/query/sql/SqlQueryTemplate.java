@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.sql;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -216,11 +217,12 @@ public class SqlQueryTemplate {
   }
 
   public <T> T single(final Class<T> clazz) {
-    Map<?, ?> result = get();
+    List<Map<String, Object>> result = select();
     if (isEmpty(result)) {
       return null;
     } else {
-      return toObject(result.entrySet().iterator().next().getValue(), clazz);
+      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, QueryRuntimeException::new);
+      return toObject(result.get(0).entrySet().iterator().next().getValue(), clazz);
     }
   }
 

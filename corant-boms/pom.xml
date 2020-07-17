@@ -95,6 +95,7 @@
 		<version.microprofile-opentracing-api>1.3.3</version.microprofile-opentracing-api>
 		<version.microprofile-rest-client-api>1.4.0</version.microprofile-rest-client-api>
 		<version.microprofile.lra.api>1.0-RC1</version.microprofile.lra.api>
+		<version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
 		<version.mongodb>3.9.1</version.mongodb>
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
@@ -338,6 +339,11 @@
 				<artifactId>microprofile-rest-client-api</artifactId>
 				<version>${version.microprofile-rest-client-api}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.context-propagation</groupId>
+                <artifactId>microprofile-context-propagation-api</artifactId>
+                <version>${version.microprofile.context-propagation}</version>
+            </dependency>
 			<dependency>
 				<groupId>org.eclipse.microprofile.lra</groupId>
 				<artifactId>microprofile-lra-api</artifactId>

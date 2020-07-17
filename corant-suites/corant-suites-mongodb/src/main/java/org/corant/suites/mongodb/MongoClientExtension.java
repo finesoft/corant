@@ -231,14 +231,13 @@ public class MongoClientExtension implements Extension {
     }
   }
 
-  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip, BeanManager beanManager) {
+  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, GridFSBucket> pip,
+      BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();
-    if (GridFSBucket.class.equals(ip.getType())) {
-      Named named = ip.getAnnotated().getAnnotation(Named.class);
-      String[] names = split(named.value(), Names.NAME_SPACE_SEPARATORS, true, true);
-      if (!isEmpty(names) && names.length > 1) {
-        gridFSBucketNames.add(named.value());
-      }
+    Named named = ip.getAnnotated().getAnnotation(Named.class);
+    String[] names = split(named.value(), Names.NAME_SPACE_SEPARATORS, true, true);
+    if (!isEmpty(names) && names.length > 1) {
+      gridFSBucketNames.add(named.value());
     }
   }
 

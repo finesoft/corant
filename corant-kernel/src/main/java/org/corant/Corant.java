@@ -69,8 +69,8 @@ import org.jboss.weld.manager.api.WeldManager;
  * </p>
  *
  * <p>
- * In most circumstances the static {@link #run(Class, String[])} method can be called directly from
- * your {@literal main} method to bootstrap your application:
+ * In most circumstances the static {@link #startup(Class, String[])} method can be called directly
+ * from your {@literal main} method to bootstrap your application:
  *
  * <pre>
  * public class MyApplication {
@@ -205,13 +205,13 @@ public class Corant implements AutoCloseable {
     this(null, null, arguments);
   }
 
-  public static <T> T call(boolean synthetic, Class<T> beanClass, Annotation[] annotations,
-      String[] arguments) {
+  public static synchronized <T> T call(boolean synthetic, Class<T> beanClass,
+      Annotation[] annotations, String[] arguments) {
     if (current() == null) {
       if (synthetic) {
-        run(beanClass, arguments);
+        startup(beanClass, arguments);
       } else {
-        run(new Class[0], arguments);
+        startup(new Class[0], arguments);
       }
     } else if (!current().isRuning()) {
       current().start(null);
@@ -219,11 +219,11 @@ public class Corant implements AutoCloseable {
     return CDI.current().select(beanClass, annotations).get();
   }
 
-  public static <T> T call(Class<T> beanClass, String... arguments) {
+  public static synchronized <T> T call(Class<T> beanClass, String... arguments) {
     return call(false, beanClass, new Annotation[0], arguments);
   }
 
-  public static <T> T callSynthetic(Class<T> beanClass, String... arguments) {
+  public static synchronized <T> T callSynthetic(Class<T> beanClass, String... arguments) {
     return call(true, beanClass, new Annotation[0], arguments);
   }
 
@@ -231,9 +231,9 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
-  public static void execute(Runnable runnable, String... arguments) {
+  public static synchronized void run(Runnable runnable, String... arguments) {
     if (current() == null) {
-      run(new Class[0], arguments);
+      startup(new Class[0], arguments);
     } else if (!current().isRuning()) {
       current().start(null);
     }
@@ -243,41 +243,50 @@ public class Corant implements AutoCloseable {
     }
   }
 
-  public static synchronized Corant run() {
-    return run(new Class[0], null, null);
+  public static synchronized void shutdown() {
+    if (current() != null) {
+      if (current().isRuning()) {
+        current().stop();
+      }
+      me = null;
+    }
   }
 
-  public static synchronized Corant run(Class<?>... beanClasses) {
-    return run(beanClasses, null, null);
+  public static synchronized Corant startup() {
+    return startup(new Class[0], null, null);
   }
 
-  public static synchronized Corant run(Class<?> configClass, String[] arguments) {
-    return run(new Class[] {configClass}, null, null, arguments);
+  public static synchronized Corant startup(Class<?>... beanClasses) {
+    return startup(beanClasses, null, null);
   }
 
-  public static synchronized Corant run(Class<?>[] beanClasses, ClassLoader classLoader,
+  public static synchronized Corant startup(Class<?> configClass, String[] arguments) {
+    return startup(new Class[] {configClass}, null, null, arguments);
+  }
+
+  public static synchronized Corant startup(Class<?>[] beanClasses, ClassLoader classLoader,
       Consumer<Weld> preInitializer, String... arguments) {
     Corant corant = new Corant(beanClasses, classLoader, arguments);
     corant.start(preInitializer);
     return corant;
   }
 
-  public static synchronized Corant run(Class<?>[] beanClasses, String[] arguments) {
-    return run(beanClasses, null, null, arguments);
+  public static synchronized Corant startup(Class<?>[] beanClasses, String[] arguments) {
+    return startup(beanClasses, null, null, arguments);
   }
 
-  public static synchronized Corant run(ClassLoader classLoader, Consumer<Weld> preInitializer,
+  public static synchronized Corant startup(ClassLoader classLoader, Consumer<Weld> preInitializer,
       String... arguments) {
-    return run(null, classLoader, preInitializer, arguments);
+    return startup(null, classLoader, preInitializer, arguments);
   }
 
-  public static synchronized Corant run(String... arguments) {
-    return run(new Class[0], null, null, arguments);
+  public static synchronized Corant startup(String... arguments) {
+    return startup(new Class[0], null, null, arguments);
   }
 
-  public static <T> T supplier(Supplier<T> supplier, String... arguments) {
+  public static synchronized <T> T supplier(Supplier<T> supplier, String... arguments) {
     if (current() == null) {
-      run(new Class[0], arguments);
+      startup(new Class[0], arguments);
     } else if (!current().isRuning()) {
       current().start(null);
     }

@@ -50,7 +50,7 @@ public class Power implements PowerMBean {
   public synchronized void start() {
     try {
       if (Corant.current() == null) {
-        Corant.run(beanClasses, arguments);
+        Corant.startup(beanClasses, arguments);
       } else if (!Corant.current().isRuning()) {
         Corant.current().start(Functions.emptyConsumer());
       }

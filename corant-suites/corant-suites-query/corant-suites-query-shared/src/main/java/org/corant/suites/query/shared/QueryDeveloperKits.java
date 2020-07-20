@@ -80,7 +80,7 @@ public class QueryDeveloperKits {
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
     ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
-    return Corant.run(QueryDeveloperKits.class, new String[] {Corant.DISABLE_BOOST_LINE_CMD});
+    return Corant.startup(QueryDeveloperKits.class, new String[] {Corant.DISABLE_BOOST_LINE_CMD});
   }
 
   protected static void validateFetchQueryScript(Query query, FetchQuery fq,

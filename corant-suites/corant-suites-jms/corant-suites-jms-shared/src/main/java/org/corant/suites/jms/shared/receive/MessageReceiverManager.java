@@ -58,7 +58,7 @@ public class MessageReceiverManager {
   protected final Set<MessageReceiverMetaData> receiveMetaDatas = Sets.newConcurrentHashSet();
 
   protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
-    logger.fine(() -> "Shut down the message receiver executor services");
+    logger.fine(() -> "Shut down the message receiver executor services.");
     Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
         executorServices.entrySet().iterator();
     while (it.hasNext()) {

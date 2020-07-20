@@ -145,14 +145,14 @@ public class DirectRunner {
           if (lastState != state) {
             lastState = state;
             if (state == SIGNAL_STOP) {
-              stop();
+              stop(false);
             } else if (state == SIGNAL_START) {
               start(false);
             } else if (state == SIGNAL_RESTART) {
-              stop();
+              stop(false);
               start(false);
             } else if (state == SIGNAL_SHUTDOWN) {
-              stop();
+              stop(true);
               break;
             }
           }
@@ -164,14 +164,6 @@ public class DirectRunner {
       UnsafeAccessors.free(mbb);
     } finally {
       currentCtrlPath().toFile().deleteOnExit();
-    }
-  }
-
-  protected synchronized boolean isRunning() {
-    try {
-      return Corant.current() != null && Corant.current().isRuning();
-    } catch (Exception t) {
-      throw new CorantRuntimeException("Can't check corant running! please check logging.");
     }
   }
 
@@ -229,11 +221,11 @@ public class DirectRunner {
   protected synchronized void start(boolean await) {
     try {
       if (Corant.current() == null) {
-        Corant.run(arguments);
+        Corant.startup(arguments);
         if (await) {
           await();
         }
-      } else if (!isRunning()) {
+      } else if (!Corant.current().isRuning()) {
         Corant.current().start(Functions.emptyConsumer());
       }
     } catch (Exception t) {
@@ -252,9 +244,11 @@ public class DirectRunner {
     start(true);
   }
 
-  protected synchronized void stop() {
+  protected synchronized void stop(boolean exist) {
     try {
-      if (isRunning()) {
+      if (exist) {
+        Corant.shutdown();
+      } else {
         Corant.current().stop();
       }
     } catch (Exception t) {

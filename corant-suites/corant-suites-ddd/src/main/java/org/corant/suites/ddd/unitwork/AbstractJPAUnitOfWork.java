@@ -137,7 +137,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    * @return the registered variables
    */
   public Map<Object, Object> getVariables() {
-    return Collections.unmodifiableMap(registeredVariables);
+    return registeredVariables;
   }
 
   /**

@@ -105,6 +105,22 @@ import org.jboss.weld.manager.api.WeldManager;
  *   }
  * }
  * </pre>
+ *
+ * OR
+ *
+ * <pre>
+ * Corant.run(() -> {
+ *   // ... some runnable works in CDI
+ * });
+ * </pre>
+ *
+ * OR
+ *
+ * <pre>
+ * return Corant.supplier(() -> {
+ *   // ... some supplier works in CDI
+ * });
+ * </pre>
  * <p>
  *
  * @see Corant#Corant(String...)
@@ -231,6 +247,13 @@ public class Corant implements AutoCloseable {
     return me;
   }
 
+  /**
+   * Run a runnable program in the CDI environment. This method will try to start the Corant
+   * application and automatically close the Corant application after execution.
+   *
+   * @param runnable
+   * @param arguments
+   */
   public static synchronized void run(Runnable runnable, String... arguments) {
     if (current() == null) {
       startup(new Class[0], arguments);
@@ -243,6 +266,10 @@ public class Corant implements AutoCloseable {
     }
   }
 
+  /**
+   * Shut down the Coarnt applicaton, and then only use startup to start the application again.
+   * {@link #startup()}
+   */
   public static synchronized void shutdown() {
     if (current() != null) {
       if (current().isRuning()) {
@@ -252,6 +279,11 @@ public class Corant implements AutoCloseable {
     }
   }
 
+  /**
+   * Startup the coarnt application.
+   *
+   * @return startup
+   */
   public static synchronized Corant startup() {
     return startup(new Class[0], null, null);
   }
@@ -284,6 +316,15 @@ public class Corant implements AutoCloseable {
     return startup(new Class[0], null, null, arguments);
   }
 
+  /**
+   * Run a supplier program in the CDI environment. This method will try to start the Corant
+   * application and automatically close the Corant application after execution.
+   *
+   * @param <T>
+   * @param supplier
+   * @param arguments
+   * @return supplier
+   */
   public static synchronized <T> T supplier(Supplier<T> supplier, String... arguments) {
     if (current() == null) {
       startup(new Class[0], arguments);

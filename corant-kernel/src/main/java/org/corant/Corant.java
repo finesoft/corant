@@ -76,7 +76,7 @@ import org.jboss.weld.manager.api.WeldManager;
  * public class MyApplication {
  *   // ... Bean definitions
  *   public static void main(String[] arguments) throws Exception {
- *     try(Corant corant = Corant.run(MyApplication.class, arguments)){
+ *     try(Corant corant = Corant.startup(MyApplication.class, arguments)){
  *      //... some works in CDI
  *   }
  * }
@@ -88,7 +88,7 @@ import org.jboss.weld.manager.api.WeldManager;
  * public class MyApplication {
  *   // ... Bean definitions
  *   public static void main(String[] arguments) throws Exception {
- *    Corant corant = Corant.run(MyApplication.class, arguments)
+ *    Corant corant = Corant.startup(MyApplication.class, arguments)
  *   }
  * }
  * </pre>
@@ -100,7 +100,7 @@ import org.jboss.weld.manager.api.WeldManager;
  *   // ... Bean definitions
  *   public static void main(String[] arguments) throws Exception {
  *     try (Corant corant =
- *         Corant.run(new Class[] {MyApplication.class, MyAnother.class}, arguments)) {
+ *         Corant.startup(new Class[] {MyApplication.class, MyAnother.class}, arguments)) {
  *     }
  *   }
  * }

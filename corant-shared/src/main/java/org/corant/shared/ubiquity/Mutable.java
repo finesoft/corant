@@ -77,6 +77,271 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
   /**
    * corant-shared
    *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableByte extends MutableNumber<Byte> {
+    private static final long serialVersionUID = 7448907394279327148L;
+
+    public MutableByte(final byte object) {
+      super(object);
+    }
+
+    public MutableByte(final Number object) {
+      super(object.byteValue());
+    }
+
+    @Override
+    public MutableByte add(Byte operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableByte clone() {
+      return new MutableByte(get());
+    }
+
+    @Override
+    public MutableByte decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableByte increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableByte set(Byte object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableByte subtract(Byte operand) {
+      super.subtract(operand);
+      return this;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableDouble extends MutableNumber<Double> {
+    private static final long serialVersionUID = -8025777846150268416L;
+
+    public MutableDouble(double object) {
+      super(object);
+    }
+
+    public MutableDouble(Number object) {
+      super(object.doubleValue());
+    }
+
+    @Override
+    public MutableDouble add(Double operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableDouble clone() {
+      return new MutableDouble(get());
+    }
+
+    @Override
+    public MutableDouble decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableDouble increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableDouble set(Double object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableDouble subtract(Double operand) {
+      super.subtract(operand);
+      return this;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableFloat extends MutableNumber<Float> {
+    private static final long serialVersionUID = 8230534097662673489L;
+
+    public MutableFloat(float object) {
+      super(object);
+    }
+
+    public MutableFloat(Number object) {
+      super(object.floatValue());
+    }
+
+    @Override
+    public MutableFloat add(Float operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableFloat clone() {
+      return new MutableFloat(get());
+    }
+
+    @Override
+    public MutableFloat decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableFloat increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableFloat set(Float object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableFloat subtract(Float operand) {
+      super.subtract(operand);
+      return this;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableInteger extends MutableNumber<Integer> {
+    private static final long serialVersionUID = -5952332917787746814L;
+
+    public MutableInteger(int object) {
+      super(object);
+    }
+
+    public MutableInteger(Number object) {
+      super(object.intValue());
+    }
+
+    @Override
+    public MutableInteger add(Integer operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableInteger clone() {
+      return new MutableInteger(get());
+    }
+
+    @Override
+    public MutableInteger decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableInteger increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableInteger set(Integer object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableInteger subtract(Integer operand) {
+      super.subtract(operand);
+      return this;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableLong extends MutableNumber<Long> {
+    private static final long serialVersionUID = -8400347013924878207L;
+
+    public MutableLong(long object) {
+      super(object);
+    }
+
+    public MutableLong(Number object) {
+      super(object.longValue());
+    }
+
+    @Override
+    public MutableLong add(Long operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableLong clone() {
+      return new MutableLong(get());
+    }
+
+    @Override
+    public MutableLong decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableLong increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableLong set(Long object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableLong subtract(Long operand) {
+      super.subtract(operand);
+      return this;
+    }
+  }
+
+  /**
+   * corant-shared
+   *
    * @author bingo 下午4:26:18
    *
    */
@@ -361,6 +626,59 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public String toString() {
       return value == null ? "null" : value.toString();
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 14:12:27
+   *
+   */
+  public static class MutableShort extends MutableNumber<Short> {
+    private static final long serialVersionUID = -6018676211622288641L;
+
+    public MutableShort(Number object) {
+      super(object.shortValue());
+    }
+
+    public MutableShort(short object) {
+      super(object);
+    }
+
+    @Override
+    public MutableShort add(Short operand) {
+      super.add(operand);
+      return this;
+    }
+
+    @Override
+    public MutableShort clone() {
+      return new MutableShort(get());
+    }
+
+    @Override
+    public MutableShort decrement() {
+      super.decrement();
+      return this;
+    }
+
+    @Override
+    public MutableShort increment() {
+      super.increment();
+      return this;
+    }
+
+    @Override
+    public MutableShort set(Short object) {
+      super.set(object);
+      return this;
+    }
+
+    @Override
+    public MutableShort subtract(Short operand) {
+      super.subtract(operand);
+      return this;
     }
   }
 

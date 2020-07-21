@@ -121,15 +121,19 @@ public class DirectRunner {
 
   protected String[] arguments = new String[0];
 
-  protected DirectRunner() {}
+  protected DirectRunner(String[] arguments) {
+    if (arguments != null) {
+      this.arguments = arguments;
+    }
+  }
 
   public static void main(String... args) {
     if (isEmpty(args)) {
-      new DirectRunner().perform(null);
+      new DirectRunner(args).perform(null);
     } else {
       String cmd = defaultString(args[args.length - 1]);
       if (cmd.startsWith(COMMAND_SPLITOR)) {
-        new DirectRunner().perform(cmd.substring(1));
+        new DirectRunner(args).perform(cmd.substring(1));
       }
     }
   }

@@ -25,7 +25,7 @@ import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
 import org.corant.shared.ubiquity.Mutable.MutableNumber;
 import org.corant.shared.ubiquity.Mutable.MutableTemporal;
 import org.corant.shared.util.Threads;
@@ -73,11 +73,11 @@ public class MutableTest extends TestCase {
     assertTrue(MutableNumber.of(1).equals(MutableNumber.of(1)));
   }
 
-  @Test(expected = NotSupportedException.class)
+  @Test
   public void testMubtableNumberLegality() {
-    // exceptionRule.expect(NotSupportedException.class);
-    // AtomicInteger ai = new AtomicInteger();
-    // MutableNumber.of(ai);
+    MutableInteger mi = new MutableInteger(0);
+    assertEquals(mi.add(10).intValue(), 10);
+    assertEquals(mi, new MutableInteger(10));
   }
 
   @Test

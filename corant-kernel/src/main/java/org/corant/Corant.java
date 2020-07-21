@@ -34,6 +34,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
@@ -160,10 +161,10 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use given config class and arguments construct Corant instance. If the given config class is
-   * not null then the class loader of the current thread context and the CDI container will be set
-   * with the given config class class loader. The given arguments will be propagate to all
-   * CorantBootHandler and all CorantLifecycleEvent listeners.
+   * Use given config class(synthetic bean class) and arguments construct Corant instance. If the
+   * given config class is not null then the class loader of the current thread context and the CDI
+   * container will be set with the given config class class loader. The given arguments will be
+   * propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
    *
    * @see #Corant(Class, ClassLoader, String...)
    * @param configClass
@@ -175,12 +176,12 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Construct Corant instance with given bean classes and class loader and arguments. If the given
-   * bean classes are not null then they will be added to the set of bean classes for the synthetic
-   * bean archive. If the given class loader is not null then it will be set to the context
-   * ClassLoader for current Thread and the CDI container class loader else we use Corant.class
-   * class loader. The given arguments will be propagate to all CorantBootHandler and all
-   * CorantLifecycleEvent listeners.
+   * Construct Corant instance with given bean classes(synthetic bean class) and class loader and
+   * arguments. If the given bean classes are not null then they will be added to the set of bean
+   * classes for the synthetic bean archive. If the given class loader is not null then it will be
+   * set to the context ClassLoader for current Thread and the CDI container class loader else we
+   * use Corant.class class loader. The given arguments will be propagate to all CorantBootHandler
+   * and all CorantLifecycleEvent listeners.
    *
    * @param beanClasses
    * @param classLoader
@@ -221,6 +222,18 @@ public class Corant implements AutoCloseable {
     this(null, null, arguments);
   }
 
+  /**
+   * Return a CDI bean instance through the bean class(non synthetic) and qualifiers; mainly used
+   * for temporary works. If the Coarnt application is not currently started, this method will try
+   * to start it with incoming arguments, and this method does not directly close it.
+   *
+   * @param <T> The bean type
+   * @param synthetic Whether the bean class is synthetic
+   * @param beanClass The bean class
+   * @param annotations The qualifiers
+   * @param arguments The application arguments
+   * @return The managed bean instance
+   */
   public static synchronized <T> T call(boolean synthetic, Class<T> beanClass,
       Annotation[] annotations, String[] arguments) {
     if (current() == null) {
@@ -235,14 +248,39 @@ public class Corant implements AutoCloseable {
     return CDI.current().select(beanClass, annotations).get();
   }
 
-  public static synchronized <T> T call(Class<T> beanClass, String... arguments) {
-    return call(false, beanClass, new Annotation[0], arguments);
+  /**
+   * Return a CDI bean instance through the bean class(non synthetic) and qualifiers; mainly used
+   * for temporary works. If the Coarnt application is not currently started, this method will try
+   * to start it, and this method does not directly close it.
+   *
+   * @param <T>
+   * @param beanClass The bean classes
+   * @param annotations The bean qualifiers
+   * @return The managed bean instance
+   */
+  public static synchronized <T> T call(Class<T> beanClass, Annotation... annotations) {
+    return call(false, beanClass, annotations, new String[0]);
   }
 
+  /**
+   * Return a CDI bean instance through the bean class(synthetic); mainly used for temporary works.
+   * If the Coarnt application is not currently started, this method will try to start it, and this
+   * method does not directly close it.
+   *
+   * @param <T>
+   * @param beanClass
+   * @param arguments
+   * @return callSynthetic
+   */
   public static synchronized <T> T callSynthetic(Class<T> beanClass, String... arguments) {
     return call(true, beanClass, new Annotation[0], arguments);
   }
 
+  /**
+   * Return the current Corant instance, may be return null if the Corant application isn't started.
+   *
+   * @return current
+   */
   public static Corant current() {
     return me;
   }
@@ -267,35 +305,66 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Shut down the Coarnt applicaton, and then only use startup to start the application again.
-   * {@link #startup()}
+   * Shut down the Corant application, If you want to start it again, you can only start it through
+   * the {@link #startup()} method, or instantiate Coarnt and call the {@link #start(Consumer)}
+   * method.
    */
   public static synchronized void shutdown() {
     if (current() != null) {
       if (current().isRuning()) {
         current().stop();
       }
+      if (current().power() != null) {
+        Launchs.deregisterFromMBean(POWER_MBEAN_NAME);
+      }
       me = null;
     }
   }
 
   /**
-   * Startup the coarnt application.
+   * Startup the coarnt application, construct Corant instance and start it.
    *
-   * @return startup
+   * @return The Coarnt instance
    */
   public static synchronized Corant startup() {
     return startup(new Class[0], null, null);
   }
 
+  /**
+   * Use the specified synthetic bean classes to construct Corant instance and start it.
+   *
+   * @param beanClasses The synthetic bean classes
+   * @return The Corant instance
+   */
   public static synchronized Corant startup(Class<?>... beanClasses) {
     return startup(beanClasses, null, null);
   }
 
+  /**
+   * Use the specified synthetic config class and arguments to construct Corant instance and start
+   * it, the incoming arguments will be propagate to all CorantBootHandler and all
+   * CorantLifecycleEvent listeners.
+   *
+   * @param configClass The synthetic bean class
+   * @param arguments
+   * @return The Corant instance
+   */
   public static synchronized Corant startup(Class<?> configClass, String[] arguments) {
     return startup(new Class[] {configClass}, null, null, arguments);
   }
 
+  /**
+   * The complete startup method, this method will use incoming bean classes(synthetic) and
+   * classloader and arguments to construct Corant instance and start it, before start this method
+   * also provide a pre-initializer callback to handle before the CDI container initialize. The
+   * pre-initializer can use for configurate the CDI container before initialize it.
+   *
+   * @param beanClasses The synthetic bean class
+   * @param classLoader The class loader use for the current thread context and the CDI container
+   * @param preInitializer The pre-initializer callback use for configurate the CDI container
+   * @param arguments The application arguments can be propagated to related processors
+   * @return The Corant instance
+   */
   public static synchronized Corant startup(Class<?>[] beanClasses, ClassLoader classLoader,
       Consumer<Weld> preInitializer, String... arguments) {
     Corant corant = new Corant(beanClasses, classLoader, arguments);
@@ -303,15 +372,40 @@ public class Corant implements AutoCloseable {
     return corant;
   }
 
+  /**
+   * Use the specified synthetic bean classes and arguments to construct Corant instance and start
+   * it, the incoming arguments will be propagate to all CorantBootHandler and
+   * allCorantLifecycleEvent listeners.
+   *
+   * @param beanClasses The synthetic bean class
+   * @param arguments The application arguments can be propagated to related processors
+   * @return The Corant instance
+   *
+   */
   public static synchronized Corant startup(Class<?>[] beanClasses, String[] arguments) {
     return startup(beanClasses, null, null, arguments);
   }
 
-  public static synchronized Corant startup(ClassLoader classLoader, Consumer<Weld> preInitializer,
-      String... arguments) {
-    return startup(null, classLoader, preInitializer, arguments);
+  /**
+   * Use the specified arguments to construct Corant instance and start it, the incoming arguments
+   * will be propagate to all CorantBootHandler andallCorantLifecycleEvent listeners, The incoming
+   * pre-initializer can use for configurate the CDI container before initialize it.
+   *
+   * @param preInitializer The pre-initializer callback use for configurate CDI container
+   * @param arguments The application arguments can be propagated to related processors
+   * @return The Corant instance
+   */
+  public static synchronized Corant startup(Consumer<Weld> preInitializer, String... arguments) {
+    return startup(null, null, preInitializer, arguments);
   }
 
+  /**
+   * Use the specified arguments to construct Corant instance and start it, the incoming arguments
+   * will be propagate to all CorantBootHandler and allCorantLifecycleEvent listeners.
+   *
+   * @param arguments The application arguments can be propagated to related processors
+   * @return The Corant instance
+   */
   public static synchronized Corant startup(String... arguments) {
     return startup(new Class[0], null, null, arguments);
   }
@@ -321,9 +415,9 @@ public class Corant implements AutoCloseable {
    * application and automatically close the Corant application after execution.
    *
    * @param <T>
-   * @param supplier
-   * @param arguments
-   * @return supplier
+   * @param supplier The supplier that will be invoked after Corant started
+   * @param arguments The application arguments
+   * @return The result
    */
   public static synchronized <T> T supplier(Supplier<T> supplier, String... arguments) {
     if (current() == null) {
@@ -359,6 +453,9 @@ public class Corant implements AutoCloseable {
     return null;
   }
 
+  /**
+   * Stop the Corant application, one can restart it.
+   */
   @Override
   public void close() throws Exception {
     stop();
@@ -375,6 +472,9 @@ public class Corant implements AutoCloseable {
     return (WeldManager) container.getBeanManager();
   }
 
+  /**
+   * Return the application ClassLoader.
+   */
   public ClassLoader getClassLoader() {
     return classLoader;
   }
@@ -383,10 +483,22 @@ public class Corant implements AutoCloseable {
     return container.getId();
   }
 
+  /**
+   * Return whether the application is running
+   *
+   * @see SeContainer#isRunning()
+   */
   public synchronized boolean isRuning() {
     return container != null && container.isRunning();
   }
 
+  /**
+   * Start the Corant application. Configure the CDI container and initialize it, call the
+   * appropriate pre-post boot handler and fire some appropriate events, the pre-initializer is used
+   * to configure the CDI container before it starts.
+   *
+   * @param preInitializer start
+   */
   public synchronized void start(Consumer<Weld> preInitializer) {
     if (isRuning()) {
       return;
@@ -401,6 +513,11 @@ public class Corant implements AutoCloseable {
     doOnReady();
   }
 
+  /**
+   * Stop the Corant application. Call the appropriate pre-post boot handler and fire some
+   * appropriate events, after calling this method, you can continue to restart the Corant
+   * application.
+   */
   public synchronized void stop() {
     if (isRuning()) {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
@@ -522,6 +639,10 @@ public class Corant implements AutoCloseable {
     } else {
       Logger.getLogger(Corant.class.getName()).info(() -> msgOrFmt);
     }
+  }
+
+  private Power power() {
+    return power;
   }
 
   class CorantExtension implements Extension {

@@ -13,15 +13,17 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.corant.shared.util.Maps.mapOf;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import org.corant.suites.jpa.shared.JPAProvider;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.suites.jta.shared.TransactionService;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.ogm.datastore.mongodb.dialect.impl.AssociationStorageStrategy;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
@@ -36,8 +38,13 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider implements JPAProvider {
 
-  protected final Map<String, Object> PROPERTIES = mapOf(AvailableSettings.JTA_PLATFORM,
-      new JTAPlatform(), AvailableSettings.CDI_BEAN_MANAGER, CDI.current().getBeanManager());
+  @Inject
+  protected TransactionService transactionService;
+
+  @Inject
+  protected BeanManager beanManager;
+
+  protected final Map<String, Object> PROPERTIES = new HashMap<>();
 
   Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
   {
@@ -68,4 +75,9 @@ public class HibernateJPAOgmProvider implements JPAProvider {
     return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, properties);
   }
 
+  @PostConstruct
+  protected void onPostConstruct() {
+    PROPERTIES.put(AvailableSettings.JTA_PLATFORM, new JTAPlatform(transactionService));
+    PROPERTIES.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
+  }
 }

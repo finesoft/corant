@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import org.corant.suites.jta.shared.TransactionService;
@@ -29,14 +28,20 @@ public class JTAPlatform extends AbstractJtaPlatform {
 
   private static final long serialVersionUID = -6662006780960101741L;
 
+  final TransactionService transactionService;
+
+  public JTAPlatform(TransactionService transactionService) {
+    this.transactionService = transactionService;
+  }
+
   @Override
   protected TransactionManager locateTransactionManager() {
-    return CDI.current().select(TransactionService.class).get().getTransactionManager();
+    return transactionService.getTransactionManager();
   }
 
   @Override
   protected UserTransaction locateUserTransaction() {
-    return CDI.current().select(TransactionService.class).get().getUserTransaction();
+    return transactionService.getUserTransaction();
   }
 
 }

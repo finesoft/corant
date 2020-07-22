@@ -125,9 +125,6 @@ import org.corant.shared.util.StopWatch;
  * @see Corant#Corant(ClassLoader, String...)
  * @see Corant#Corant(Class[], ClassLoader, String...)
  * @see CorantBootHandler
- * @see ApplicationConfigSourceProvider
- * @see ApplicationAdjustConfigSourceProvider
- * @see ApplicationProfileConfigSourceProvider
  *
  * @author bingo 上午11:52:09
  *

@@ -13,11 +13,11 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.context.Instances.resolve;
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Threads.tryThreadSleep;
-import static org.corant.suites.cdi.Instances.resolve;
-import static org.corant.suites.cdi.Instances.select;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,9 +43,9 @@ import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
+import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;

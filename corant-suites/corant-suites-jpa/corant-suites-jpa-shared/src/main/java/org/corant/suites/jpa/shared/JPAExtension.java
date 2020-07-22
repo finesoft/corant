@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jpa.shared;
 
+import static org.corant.context.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.suites.cdi.Qualifiers.resolveNameds;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
@@ -34,8 +34,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import org.corant.context.NamingReference;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.cdi.NamingReference;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.suites.jpa.shared.cdi.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;

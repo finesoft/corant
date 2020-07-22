@@ -13,9 +13,9 @@
  */
 package org.corant.suites.jaxrs.resteasy;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.getUserClass;
-import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

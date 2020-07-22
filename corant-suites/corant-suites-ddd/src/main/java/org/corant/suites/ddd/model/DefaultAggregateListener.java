@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.model;
 
-import static org.corant.suites.cdi.Instances.resolve;
+import static org.corant.context.Instances.resolve;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.persistence.PostLoad;

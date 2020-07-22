@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -20,15 +21,14 @@ import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
-import static org.corant.suites.cdi.Instances.select;
 import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.jms.ConnectionFactory;
 import org.corant.config.ConfigUtils;
+import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.suites.cdi.proxy.ContextualMethodHandler;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.context.JMSExceptionListener;

@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.ServiceLoader;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -35,7 +34,9 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.se.SeContainer;
+import javax.enterprise.inject.se.SeContainerInitializer;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.boot.Power;
@@ -46,9 +47,6 @@ import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
-import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-kernel
@@ -83,8 +81,6 @@ import org.jboss.weld.manager.api.WeldManager;
  * }
  * </pre>
  *
- * OR
- *
  * <pre>
  * public class MyApplication {
  *   // ... Bean definitions
@@ -93,8 +89,6 @@ import org.jboss.weld.manager.api.WeldManager;
  *   }
  * }
  * </pre>
- *
- * OR
  *
  * <pre>
  * public class MyApplication {
@@ -107,7 +101,7 @@ import org.jboss.weld.manager.api.WeldManager;
  * }
  * </pre>
  *
- * OR
+ * You can also use the following code snippets to do some work:
  *
  * <pre>
  * Corant.run(() -> {
@@ -115,7 +109,9 @@ import org.jboss.weld.manager.api.WeldManager;
  * });
  * </pre>
  *
- * OR
+ * <pre>
+ * Corant.call(MyBean.class).myBeanMethod();
+ * </pre>
  *
  * <pre>
  * return Corant.supplier(() -> {
@@ -149,7 +145,7 @@ public class Corant implements AutoCloseable {
   private final Class<?>[] beanClasses;
   private final String[] arguments;
   private final ClassLoader classLoader;
-  private WeldContainer container;
+  private SeContainer container;
   private volatile Power power;
 
   /**
@@ -223,9 +219,9 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Return a CDI bean instance through the bean class(non synthetic) and qualifiers; mainly used
-   * for temporary works. If the Coarnt application is not currently started, this method will try
-   * to start it with incoming arguments, and this method does not directly close it.
+   * Return a CDI bean instance through the bean class and qualifiers; mainly used for temporary
+   * works. If the Coarnt application is not started, this method will try to start it with incoming
+   * arguments, and this method does not directly close it.
    *
    * @param <T> The bean type
    * @param synthetic Whether the bean class is synthetic
@@ -250,8 +246,8 @@ public class Corant implements AutoCloseable {
 
   /**
    * Return a CDI bean instance through the bean class(non synthetic) and qualifiers; mainly used
-   * for temporary works. If the Coarnt application is not currently started, this method will try
-   * to start it, and this method does not directly close it.
+   * for temporary works. If the Coarnt application is not started, this method will try to start
+   * it, and this method does not directly close it.
    *
    * @param <T>
    * @param beanClass The bean classes
@@ -264,8 +260,8 @@ public class Corant implements AutoCloseable {
 
   /**
    * Return a CDI bean instance through the bean class(synthetic); mainly used for temporary works.
-   * If the Coarnt application is not currently started, this method will try to start it, and this
-   * method does not directly close it.
+   * If the Coarnt application is not started, this method will try to start it, and this method
+   * does not directly close it.
    *
    * @param <T>
    * @param beanClass
@@ -287,7 +283,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Run a runnable program in the CDI environment. This method will try to start the Corant
-   * application and automatically close the Corant application after execution.
+   * application and automatically close it after the runnable executed.
    *
    * @param runnable
    * @param arguments
@@ -322,7 +318,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Startup the coarnt application, construct Corant instance and start it.
+   * Startup the Coarnt application, construct Corant instance and start it.
    *
    * @return The Coarnt instance
    */
@@ -366,7 +362,7 @@ public class Corant implements AutoCloseable {
    * @return The Corant instance
    */
   public static synchronized Corant startup(Class<?>[] beanClasses, ClassLoader classLoader,
-      Consumer<Weld> preInitializer, String... arguments) {
+      Consumer<SeContainerInitializer> preInitializer, String... arguments) {
     Corant corant = new Corant(beanClasses, classLoader, arguments);
     corant.start(preInitializer);
     return corant;
@@ -395,7 +391,8 @@ public class Corant implements AutoCloseable {
    * @param arguments The application arguments can be propagated to related processors
    * @return The Corant instance
    */
-  public static synchronized Corant startup(Consumer<Weld> preInitializer, String... arguments) {
+  public static synchronized Corant startup(Consumer<SeContainerInitializer> preInitializer,
+      String... arguments) {
     return startup(null, null, preInitializer, arguments);
   }
 
@@ -462,14 +459,13 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * This method is not normally used, and should be use CDI.current().getBeanManager(), except to
-   * take advantage of some of the features of Weld.
+   * This method is not normally used, and should be use CDI.current().getBeanManager().
    *
    * @return getBeanManager
    */
-  public synchronized WeldManager getBeanManager() {
+  public synchronized BeanManager getBeanManager() {
     shouldBeTrue(isRuning(), "The corant instance is null or is not in running");
-    return (WeldManager) container.getBeanManager();
+    return container.getBeanManager();
   }
 
   /**
@@ -477,10 +473,6 @@ public class Corant implements AutoCloseable {
    */
   public ClassLoader getClassLoader() {
     return classLoader;
-  }
-
-  public synchronized Object getId() {
-    return container.getId();
   }
 
   /**
@@ -499,7 +491,7 @@ public class Corant implements AutoCloseable {
    *
    * @param preInitializer start
    */
-  public synchronized void start(Consumer<Weld> preInitializer) {
+  public synchronized void start(Consumer<SeContainerInitializer> preInitializer) {
     if (isRuning()) {
       return;
     }
@@ -591,19 +583,20 @@ public class Corant implements AutoCloseable {
     emitter.fire(new PostCorantReadyEvent(arguments));
   }
 
-  synchronized void initializeContainer(Consumer<Weld> preInitializer, StopWatch stopWatch) {
+  synchronized void initializeContainer(Consumer<SeContainerInitializer> preInitializer,
+      StopWatch stopWatch) {
     stopWatch.start("Initialization of the CDI container is completed");
-    String id = applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
-    Weld weld = new Weld(id);
-    weld.setClassLoader(classLoader);
-    weld.addExtensions(new CorantExtension());
+    // String id = applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
+    initializer.setClassLoader(classLoader);
+    initializer.addExtensions(new CorantExtension());
     if (beanClasses != null) {
-      weld.addBeanClasses(beanClasses);
+      initializer.addBeanClasses(beanClasses);
     }
     if (preInitializer != null) {
-      preInitializer.accept(weld);
+      preInitializer.accept(initializer);
     }
-    container = weld.addProperty(Weld.SHUTDOWN_HOOK_SYSTEM_PROPERTY, true).initialize();
+    container = initializer.initialize();
     stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 

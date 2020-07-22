@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.sql;
 
+import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Conversions.toObject;
@@ -26,8 +28,6 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.suites.cdi.Instances.findNamed;
-import static org.corant.suites.cdi.Instances.resolve;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;

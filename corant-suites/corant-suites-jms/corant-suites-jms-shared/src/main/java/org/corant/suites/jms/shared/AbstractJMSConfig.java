@@ -18,8 +18,8 @@ import java.time.Duration;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
+import org.corant.context.Qualifiers.NamedObject;
 import org.corant.shared.util.Strings;
-import org.corant.suites.cdi.Qualifiers.NamedObject;
 
 /**
  * corant-suites-jms-shared

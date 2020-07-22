@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jms.shared;
 
+import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.asStrings;
-import static org.corant.suites.cdi.Instances.findNamed;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ import javax.jms.XASession;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-import org.corant.suites.cdi.CDIs;
+import org.corant.context.CDIs;
 import org.corant.suites.jta.shared.TransactionIntegration;
 
 /**

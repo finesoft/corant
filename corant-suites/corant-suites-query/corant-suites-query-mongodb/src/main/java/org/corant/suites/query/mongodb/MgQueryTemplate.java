@@ -13,6 +13,8 @@
  */
 package org.corant.suites.query.mongodb;
 
+import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
@@ -25,8 +27,6 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.suites.cdi.Instances.findNamed;
-import static org.corant.suites.cdi.Instances.resolve;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;

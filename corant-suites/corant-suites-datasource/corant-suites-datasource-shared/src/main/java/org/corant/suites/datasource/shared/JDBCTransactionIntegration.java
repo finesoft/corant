@@ -35,8 +35,8 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import org.corant.config.PropertyInjector;
+import org.corant.context.CDIs;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.cdi.CDIs;
 import org.corant.suites.jta.shared.TransactionIntegration;
 
 /**

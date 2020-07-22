@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.sql.cdi;
 
+import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -20,7 +21,6 @@ import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
-import static org.corant.suites.cdi.Instances.findNamed;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;

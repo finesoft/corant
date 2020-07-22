@@ -13,16 +13,16 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.context.Instances.resolve;
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
-import static org.corant.suites.cdi.Instances.resolve;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.logging.Logger;
+import org.corant.context.CDIs;
 import org.corant.suites.bundle.GlobalMessageCodes;
-import org.corant.suites.cdi.CDIs;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.message.MessageUtils;

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jta.shared;
 
-import static org.corant.suites.cdi.Instances.resolveAnyway;
+import static org.corant.context.Instances.resolveAnyway;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;

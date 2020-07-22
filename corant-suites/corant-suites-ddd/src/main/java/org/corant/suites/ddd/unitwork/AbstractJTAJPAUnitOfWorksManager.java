@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.suites.cdi.Instances.resolve;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

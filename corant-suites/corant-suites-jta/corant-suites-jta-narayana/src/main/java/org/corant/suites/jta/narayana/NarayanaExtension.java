@@ -13,13 +13,13 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Launchs.registerToMBean;
 import static org.corant.shared.util.Streams.streamOf;
-import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

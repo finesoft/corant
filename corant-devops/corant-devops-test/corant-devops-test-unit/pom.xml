@@ -17,8 +17,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-cdi</artifactId>
-		</dependency>
+			<artifactId>corant-context</artifactId>
+		</dependency>			
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

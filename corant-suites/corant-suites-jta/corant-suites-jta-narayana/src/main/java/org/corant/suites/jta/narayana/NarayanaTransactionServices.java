@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jta.narayana;
 
+import static org.corant.context.Instances.find;
+import static org.corant.context.Instances.resolveApply;
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.suites.cdi.Instances.find;
-import static org.corant.suites.cdi.Instances.resolveApply;
-import static org.corant.suites.cdi.Instances.select;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.transaction.RollbackException;

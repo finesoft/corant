@@ -13,7 +13,7 @@
  */
 package org.corant.suites.microprofile.restclient;
 
-import static org.corant.suites.cdi.Instances.select;
+import static org.corant.context.Instances.select;
 import java.util.logging.Logger;
 import javax.ws.rs.Priorities;
 import org.corant.shared.ubiquity.Sortable;

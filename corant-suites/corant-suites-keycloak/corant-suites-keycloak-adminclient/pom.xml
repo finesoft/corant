@@ -11,10 +11,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-cdi</artifactId>
+			<artifactId>corant-context</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Special version for resteasy4.final  -->
+			<!-- Special version for resteasy4.final -->
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
 			<version>6.0.1-resteasy_4_5_3_final</version>

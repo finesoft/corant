@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.xa.XAResource;
-import org.corant.suites.cdi.CDIs;
+import org.corant.context.CDIs;
 
 /**
  * corant-suites-jta-shared

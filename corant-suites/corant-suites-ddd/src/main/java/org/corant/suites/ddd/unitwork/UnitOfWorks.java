@@ -13,7 +13,7 @@
  */
 package org.corant.suites.ddd.unitwork;
 
-import static org.corant.suites.cdi.Instances.find;
+import static org.corant.context.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;

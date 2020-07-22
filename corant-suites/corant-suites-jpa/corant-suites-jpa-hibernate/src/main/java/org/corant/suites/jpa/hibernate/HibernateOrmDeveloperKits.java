@@ -13,10 +13,10 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.propertiesOf;
 import static org.corant.shared.util.Strings.replace;
-import static org.corant.suites.cdi.Instances.select;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;

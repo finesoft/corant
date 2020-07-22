@@ -13,6 +13,9 @@
  */
 package org.corant.suites.mongodb;
 
+import static org.corant.context.Instances.find;
+import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;
@@ -21,9 +24,6 @@ import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
-import static org.corant.suites.cdi.Instances.find;
-import static org.corant.suites.cdi.Instances.findNamed;
-import static org.corant.suites.cdi.Instances.select;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -53,11 +53,11 @@ import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.corant.context.NamingReference;
+import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.suites.cdi.NamingReference;
-import org.corant.suites.cdi.Qualifiers.DefaultNamedQualifierObjectManager;
-import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;

@@ -24,8 +24,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import org.corant.context.AbstractBean;
 import org.corant.shared.normal.Names;
-import org.corant.suites.cdi.AbstractBean;
 import org.corant.suites.jpa.shared.PersistenceService;
 
 /**

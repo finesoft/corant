@@ -13,8 +13,8 @@
  */
 package org.corant.suites.ddd.unitwork;
 
+import static org.corant.context.Instances.find;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.suites.cdi.Instances.find;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;

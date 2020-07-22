@@ -26,9 +26,9 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 import javax.transaction.Transactional.TxType;
 import javax.transaction.TransactionalException;
+import org.corant.context.Instances;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.suites.cdi.Instances;
 
 /**
  * corant-suites-jta-shared

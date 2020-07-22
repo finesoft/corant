@@ -18,6 +18,7 @@
     <module>corant-kernel</module>
     <module>corant-shared</module>
     <module>corant-suites</module>
+    <module>corant-context</module>
   </modules>
   <distributionManagement>
     <repository>

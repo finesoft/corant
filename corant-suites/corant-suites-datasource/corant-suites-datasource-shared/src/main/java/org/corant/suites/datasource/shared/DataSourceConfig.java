@@ -20,10 +20,10 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
+import org.corant.context.Unnamed;
+import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Strings;
-import org.corant.suites.cdi.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
-import org.corant.suites.cdi.Unnamed;
 import org.eclipse.microprofile.config.Config;
 
 /**

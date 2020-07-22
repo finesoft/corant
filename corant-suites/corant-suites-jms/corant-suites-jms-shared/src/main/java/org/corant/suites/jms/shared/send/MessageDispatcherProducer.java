@@ -22,7 +22,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.JMSDestinationDefinition;
 import javax.jms.JMSDestinationDefinitions;
 import javax.jms.JMSSessionMode;
-import org.corant.suites.cdi.CDIs;
+import org.corant.context.CDIs;
 import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.send.MessageDispatcher.GroupMessageDispatcherImpl;
 import org.corant.suites.jms.shared.send.MessageDispatcher.MessageDispatcherImpl;

@@ -13,8 +13,8 @@
  */
 package org.corant.suites.query.shared;
 
+import org.corant.context.Instances;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
-import org.corant.suites.cdi.Instances;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**

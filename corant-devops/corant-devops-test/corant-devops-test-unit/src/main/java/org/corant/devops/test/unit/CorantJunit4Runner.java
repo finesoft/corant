@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.Corant;
-import org.corant.suites.cdi.Instances;
+import org.corant.context.Instances;
 import org.junit.runners.model.Statement;
 
 /**

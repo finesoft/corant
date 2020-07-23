@@ -18,7 +18,7 @@ import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Launchs.registerToMBean;
+import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +48,7 @@ import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.Launchs;
+import org.corant.shared.util.MBeans;
 import org.corant.suites.jta.shared.TransactionExtension;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
@@ -184,7 +184,7 @@ public class NarayanaExtension implements TransactionExtension {
       recoveryManagerService.unInitialize();
       recoveryManagerService = null;
       if (isNotEmpty(mbeanNames)) {
-        mbeanNames.forEach(Launchs::deregisterFromMBean);
+        mbeanNames.forEach(MBeans::deregisterFromMBean);
       }
     } catch (Exception e) {
       logger.log(Level.WARNING, e, () -> "Uninitialize recovery manager service occurred error!");

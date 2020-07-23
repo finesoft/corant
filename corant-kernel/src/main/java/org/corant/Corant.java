@@ -15,8 +15,8 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Launchs.deregisterFromMBean;
-import static org.corant.shared.util.Launchs.registerToMBean;
+import static org.corant.shared.util.MBeans.deregisterFromMBean;
+import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
@@ -308,7 +308,7 @@ public class Corant implements AutoCloseable {
         current().stop();
       }
       if (current().power() != null) {
-        Launchs.deregisterFromMBean(POWER_MBEAN_NAME);
+        deregisterFromMBean(POWER_MBEAN_NAME);
       }
       me = null;
     }

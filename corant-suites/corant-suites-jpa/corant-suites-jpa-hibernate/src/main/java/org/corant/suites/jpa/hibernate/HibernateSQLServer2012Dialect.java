@@ -26,7 +26,7 @@ import org.hibernate.type.StandardBasicTypes;
  */
 public class HibernateSQLServer2012Dialect extends SQLServer2012Dialect {
 
-  private static final int MAX_LENGTH = 8000;
+  public static final int MAX_LENGTH = 8000;
 
   public HibernateSQLServer2012Dialect() {
     this.registerColumnType(Types.VARCHAR, "nvarchar($l)");

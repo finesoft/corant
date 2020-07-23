@@ -130,7 +130,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   /**
    * Get the extracted and converted parameter from template method.
    *
-   * <pre>
+   * <p>
    * The args passed in is a List, the first element (args.get(0)) is the actural parameter value;
    *
    * If args has more than one elements then the second element (args.get(1)) must be a string that
@@ -139,12 +139,14 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    * If args has more than three elements then starting with the third element, each of the
    * following two elements represents a key-value pair that use for converter as hints.
    *
+   * <pre>
    * example:
    *    TM(val, "java.time.LocalDateTime", "converter.zone-id", "UTC")
    *    value = val
    *    type = "java.time.LocalDateTime"
    *    hints = {"converter.zone-id","UTC"}
    * </pre>
+   * </p>
    *
    * @param args
    * @see ConverterHints

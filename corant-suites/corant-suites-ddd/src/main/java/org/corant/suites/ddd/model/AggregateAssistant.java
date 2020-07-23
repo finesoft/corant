@@ -25,7 +25,7 @@ import org.corant.suites.ddd.unitwork.UnitOfWork;
  *
  * <p>
  * The aggregate assistant, use for help the aggregate to emit events or maintain the messages. The
- * aggregate should focus on domain logic, the other work can use this to handle.
+ * aggregate should focus on core domain logic, the other work can use this to handle.
  * </p>
  *
  * @author bingo 下午3:11:06

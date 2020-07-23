@@ -61,26 +61,13 @@ import io.agroal.narayana.NarayanaTransactionIntegration;
  */
 public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
-  Set<String> mbeanNames = new CopyOnWriteArraySet<>();
-
-  @Override
-  protected void onBeforeShutdown(@Observes BeforeShutdown bs) {
-    super.onBeforeShutdown(bs);
-    try {
-      if (isNotEmpty(mbeanNames)) {
-        mbeanNames.forEach(Launchs::deregisterFromMBean);
-      }
-    } catch (Exception e) {
-      logger.log(Level.WARNING, e,
-          () -> "Deregister agroal data source %s metrices from jmx error!");
-    }
-  }
+  protected Set<String> mbeanNames = new CopyOnWriteArraySet<>();
 
   /**
    *
    * @param event onAfterBeanDiscovery
    */
-  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+  protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
         event.<DataSource>addBean().addQualifiers(dsn)
@@ -99,7 +86,20 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
-  AgroalDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
+  @Override
+  protected void onBeforeShutdown(@Observes BeforeShutdown bs) {
+    super.onBeforeShutdown(bs);
+    try {
+      if (isNotEmpty(mbeanNames)) {
+        mbeanNames.forEach(Launchs::deregisterFromMBean);
+      }
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e,
+          () -> "Deregister agroal data source %s metrices from jmx error!");
+    }
+  }
+
+  protected AgroalDataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws SQLException, NamingException {
 
     AgroalDataSourceConfigurationSupplier cfgs = new AgroalDataSourceConfigurationSupplier();
@@ -174,7 +174,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     return agroalDataSource;
   }
 
-  void registerMetricsMBean(String name) {
+  protected void registerMetricsMBean(String name) {
     final String useName = defaultString(name, "unnamed");
     logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
     final String mbeanName = applicationName().concat(":type=agroal,name=").concat(useName);
@@ -182,7 +182,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     mbeanNames.add(mbeanName);
   }
 
-  void transactionIntegration(DataSourceConfig cfg, AgroalDataSourceConfigurationSupplier cfgs) {
+  protected void transactionIntegration(DataSourceConfig cfg,
+      AgroalDataSourceConfigurationSupplier cfgs) {
     if (cfg.isJta() || cfg.isXa()) {
       TransactionManager tm = tryResolve(TransactionManager.class);
       TransactionSynchronizationRegistry tsr = tryResolve(TransactionSynchronizationRegistry.class);

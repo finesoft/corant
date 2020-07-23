@@ -28,7 +28,7 @@ public class JTAPlatform extends AbstractJtaPlatform {
 
   private static final long serialVersionUID = -6662006780960101741L;
 
-  final TransactionService transactionService;
+  protected final TransactionService transactionService;
 
   public JTAPlatform(TransactionService transactionService) {
     this.transactionService = transactionService;

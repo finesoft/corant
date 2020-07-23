@@ -32,6 +32,11 @@ import org.corant.suites.ddd.unitwork.UnitOfWorks;
 /**
  * corant-suites-ddd
  *
+ * <p>
+ * Use for the collaboration between Aggregate Root and external, such as fire events
+ * enqueue/dequeue messages.
+ * </p>
+ *
  * @author bingo 上午10:57:03
  *
  */

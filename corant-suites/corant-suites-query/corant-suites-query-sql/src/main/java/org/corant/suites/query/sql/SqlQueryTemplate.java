@@ -50,6 +50,7 @@ import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
+import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -178,11 +179,22 @@ public class SqlQueryTemplate {
     return r == null ? null : converter.apply(r);
   }
 
+  /**
+   * @see QueryParameter#getLimit()
+   *
+   * @param limit
+   * @return limit
+   */
   public SqlQueryTemplate limit(int limit) {
     this.limit = Objects.max(limit, 1);
     return this;
   }
 
+  /**
+   * @see QueryParameter#getOffset()
+   * @param offset
+   * @return offset
+   */
   public SqlQueryTemplate offset(int offset) {
     this.offset = Objects.max(offset, 0);
     return this;

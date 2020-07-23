@@ -26,7 +26,7 @@ import org.hibernate.type.StandardBasicTypes;
  */
 public class HibernateMySQLDialect extends MySQL57Dialect {
 
-  private static final int MAX_LENGTH = 4000;
+  public static final int MAX_LENGTH = 4000;
 
   public HibernateMySQLDialect() {
     this.registerColumnType(Types.VARCHAR, "nvarchar($l)");

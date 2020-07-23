@@ -46,7 +46,7 @@ public class HibernateJPAOgmProvider implements JPAProvider {
 
   protected final Map<String, Object> PROPERTIES = new HashMap<>();
 
-  Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
+  protected final Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
   {
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.create_database", true);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",

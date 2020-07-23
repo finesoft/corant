@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate;
 
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toObject;
@@ -20,7 +21,6 @@ import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.right;
-import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -44,10 +44,10 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
  *
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
+  public static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
+  public static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
+  public static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
-  static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
-  static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
-  static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
   static Identifiers.IdentifierGenerator GENERATOR;
   static volatile boolean ENABLED = false;
   static volatile int DATA_CENTER_ID;

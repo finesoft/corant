@@ -16,6 +16,7 @@ package org.corant.suites.ddd.model;
 import static org.corant.context.Instances.resolve;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.persistence.ExcludeDefaultListeners;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -31,7 +32,9 @@ import org.corant.suites.ddd.unitwork.UnitOfWorks;
  * corant-suites-ddd
  *
  * <p>
- * Entity listener, working with the {@link UnitOfWork}.
+ * Entity listener, working with the {@link UnitOfWork}. This class is annotated on
+ * {@link #AbstractAggregate}, if you want to rewrite it use {@link ExcludeDefaultListeners}
+ * <p>
  *
  * @author bingo 下午3:35:44
  *

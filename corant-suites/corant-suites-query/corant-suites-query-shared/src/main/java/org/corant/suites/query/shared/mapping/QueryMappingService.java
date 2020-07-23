@@ -106,6 +106,55 @@ public class QueryMappingService {
     }
   }
 
+  protected void doInitialize() {
+    if (initialized) {
+      return;
+    }
+    new QueryParser().parse(resolveMappingFilePaths()).forEach(m -> {
+      List<String> brokens = m.selfValidate();
+      if (!brokens.isEmpty()) {
+        throw new QueryRuntimeException(String.join("\n", brokens));
+      }
+      m.getQueries().forEach(q -> {
+        // q.setParamMappings(m.getParaMapping());// copy
+        if (queries.containsKey(q.getVersionedName())) {
+          throw new QueryRuntimeException(
+              "The 'name' [%s] of query element in query file [%s] can not repeat!",
+              q.getVersionedName(), m.getUrl());
+        } else {
+          queries.put(q.getVersionedName(), q);
+        }
+      });
+    });
+    queries.keySet().forEach(q -> {
+      List<String> refs = new LinkedList<>();
+      List<String> tmp = new LinkedList<>(queries.get(q).getVersionedFetchQueryNames());
+      while (!tmp.isEmpty()) {
+        String tq = tmp.remove(0);
+        refs.add(tq);
+        if (areEqual(tq, q)) {
+          throw new QueryRuntimeException(
+              "The queries in system circular reference occurred on [%s -> %s]", q,
+              String.join(" -> ", refs));
+        }
+        Query fq = queries.get(tq);
+        if (fq == null) {
+          throw new QueryRuntimeException(
+              "The 'name' [%s] of 'fetch-query' in query [%s] in system can not found the refered query!",
+              tq, q);
+        }
+        tmp.addAll(queries.get(tq).getVersionedFetchQueryNames());
+      }
+      refs.clear();
+    });
+    if (!queryProvider.isUnsatisfied()) {
+      queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
+    }
+    initialized = true;
+    logger.info(() -> String.format("Find %s queries from mapping file path %s.", queries.size(),
+        mappingFilePaths));
+  }
+
   protected void initialize() {
     Lock l = rwl.writeLock();
     try {
@@ -162,7 +211,7 @@ public class QueryMappingService {
     return paths.toArray(new String[paths.size()]);
   }
 
-  Set<String> resolvePaths(String... paths) {
+  protected Set<String> resolvePaths(String... paths) {
     Set<String> resolved = new LinkedHashSet<>();
     for (String path : paths) {
       for (String r : split(path, ",", true, true)) {
@@ -172,59 +221,10 @@ public class QueryMappingService {
     return resolved;
   }
 
-  private void doInitialize() {
-    if (initialized) {
-      return;
-    }
-    new QueryParser().parse(resolveMappingFilePaths()).forEach(m -> {
-      List<String> brokens = m.selfValidate();
-      if (!brokens.isEmpty()) {
-        throw new QueryRuntimeException(String.join("\n", brokens));
-      }
-      m.getQueries().forEach(q -> {
-        // q.setParamMappings(m.getParaMapping());// copy
-        if (queries.containsKey(q.getVersionedName())) {
-          throw new QueryRuntimeException(
-              "The 'name' [%s] of query element in query file [%s] can not repeat!",
-              q.getVersionedName(), m.getUrl());
-        } else {
-          queries.put(q.getVersionedName(), q);
-        }
-      });
-    });
-    queries.keySet().forEach(q -> {
-      List<String> refs = new LinkedList<>();
-      List<String> tmp = new LinkedList<>(queries.get(q).getVersionedFetchQueryNames());
-      while (!tmp.isEmpty()) {
-        String tq = tmp.remove(0);
-        refs.add(tq);
-        if (areEqual(tq, q)) {
-          throw new QueryRuntimeException(
-              "The queries in system circular reference occurred on [%s -> %s]", q,
-              String.join(" -> ", refs));
-        }
-        Query fq = queries.get(tq);
-        if (fq == null) {
-          throw new QueryRuntimeException(
-              "The 'name' [%s] of 'fetch-query' in query [%s] in system can not found the refered query!",
-              tq, q);
-        }
-        tmp.addAll(queries.get(tq).getVersionedFetchQueryNames());
-      }
-      refs.clear();
-    });
-    if (!queryProvider.isUnsatisfied()) {
-      queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
-    }
-    initialized = true;
-    logger.info(() -> String.format("Find %s queries from mapping file path %s.", queries.size(),
-        mappingFilePaths));
-  }
-
   public interface QueryMappingClient {
 
-    void onServiceInitialize();
-
     Set<String> getMappingFilePaths();
+
+    void onServiceInitialize();
   }
 }

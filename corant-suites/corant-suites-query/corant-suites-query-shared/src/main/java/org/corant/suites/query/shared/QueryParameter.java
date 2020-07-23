@@ -54,10 +54,17 @@ public interface QueryParameter extends Serializable {
   Object getCriteria();
 
   /**
-   * Returns the number of query result records, usually used for paging queries or specified range
-   * queries. Default return -1, means that if it is used in paging query value is 16 else is 128.
+   * Returns the expected number of query result set, usually used for queries with expected bounds
+   * in the result set, such as paging queries({@link QueryService#page(Object, Object)}) or
+   * specified forwarding range queries({@link QueryService#forward(Object, Object)}) or select
+   * queries({@link QueryService#select(Object, Object)}) , but in streaming
+   * queries({@link QueryService#stream(Object, Object)}), this value represents the size of the
+   * result set fetched from the underlying database in each iteration. Default is null, means that
+   * if it is used in paging/forwarding/streaming query value is 16.
    *
-   * @return getLimit
+   *
+   * @return The expected number of query result set or the expected size of the result set of each
+   *         iteration of the streaming query.
    */
   default Integer getLimit() {
     return null;

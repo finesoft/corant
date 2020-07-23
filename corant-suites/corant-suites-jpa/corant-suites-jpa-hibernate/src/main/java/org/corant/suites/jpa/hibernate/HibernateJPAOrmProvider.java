@@ -48,7 +48,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
 
   protected final Map<String, Object> PROPERTIES = new HashMap<>();
 
-  Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
+  protected final Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
   {
     DEFAULT_PROPERTIES.put("hibernate.show_sql", false);
     DEFAULT_PROPERTIES.put("hibernate.format_sql", false);
@@ -60,7 +60,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
   }
 
   @Inject
-  DataSourceService dataSourceService;
+  protected DataSourceService dataSourceService;
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,

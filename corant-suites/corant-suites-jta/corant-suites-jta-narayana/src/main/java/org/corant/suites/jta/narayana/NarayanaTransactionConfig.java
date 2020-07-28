@@ -55,6 +55,9 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   Map<String, String> objectStoreEnvironment = new HashMap<>();
 
+  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
+  Map<String, String> coordinatorEnvironment = new HashMap<>();
+
   @ConfigKeyItem(defaultValue = "false")
   boolean enableMbean;
 
@@ -68,6 +71,15 @@ public class NarayanaTransactionConfig extends TransactionConfig {
 
   public Optional<Duration> getAutoRecoveryPeriod() {
     return autoRecoveryPeriod;
+  }
+
+  public boolean getCeTransactionStatusManagerEnable() {
+    return getOptMapObject(getCoordinatorEnvironment(), "transactionStatusManagerEnable",
+        Conversions::toBoolean).orElse(Boolean.TRUE);
+  }
+
+  public Map<String, String> getCoordinatorEnvironment() {
+    return coordinatorEnvironment;
   }
 
   public boolean getObeCommunicationStoreDropTable() {

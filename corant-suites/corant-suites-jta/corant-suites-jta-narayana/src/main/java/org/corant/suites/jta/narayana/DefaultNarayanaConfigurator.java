@@ -46,7 +46,7 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
       bean.setAllowCheckedActionFactoryOverride(true);
       bean.setCheckedActionFactory((txId, actionType) -> new InterruptCheckedAction());
     });
-
+    bean.setTransactionStatusManagerEnable(config.getCeTransactionStatusManagerEnable());
   }
 
   @Override

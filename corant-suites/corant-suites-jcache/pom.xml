@@ -5,9 +5,10 @@
     <artifactId>corant-suites</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-suites-cache</artifactId>
+  <artifactId>corant-suites-jcache</artifactId>
   <packaging>pom</packaging>
   <modules>
-  	<module>corant-suites-cache-memory</module>
+  	<module>corant-suites-jcache-caffeine</module>
+  	<module>corant-suites-jcache-redisson</module>
   </modules>
 </project>

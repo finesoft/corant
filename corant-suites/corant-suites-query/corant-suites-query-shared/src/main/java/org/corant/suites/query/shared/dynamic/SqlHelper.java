@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 /**
  * corant-suites-query
  *
+ * NOTE: Some code come from hibernate, if there is infringement, please inform
+ * me(finesoft@gmail.com).
+ *
  * @author bingo 上午11:04:34
  *
  */

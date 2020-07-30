@@ -87,10 +87,10 @@ public class SqlHelper {
   }
 
   // public static void main(String... regex) {
-  // String sql =
-  // "SELECT distinct a.*,basd,asd as aa ,asdasd,(selectr top 1 sss from xxx where sss.sdd = aass
-  // order by aa asc) FROM TABLE WHERE XXXX IN (SELECT TOP 1 X FROM XX ORDER BY XX) order \t \n by
-  // ss asc,sss desc,assss asc";
+  // String sql = "SELECT distinct a.*,basd,asd as aa ,asdasd,"
+  // + "(selectr top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
+  // + "WHERE " + "XXXX IN (SELECT TOP 1 X FROM XX ORDER BY XX) "
+  // + "order \t \n by ss asc,sss desc,assss asc";
   // System.out.println(sql);
   // System.out.println("========================Remove Order By==========================");
   // System.out.println(removeOrderBy(sql));
@@ -103,10 +103,13 @@ public class SqlHelper {
   // }
 
   public static String removeOrderBy(String sql) {
-    if (sql != null && !sql.contains("?")) {
+    if (sql != null) {
       int pos = shallowIndexOfPattern(sql, ORDER_BY_PATTERN, 0);
       if (pos > 0) {
-        return sql.substring(0, pos);
+        // Some database allow prepare statment use place holder FIXME
+        if (sql.substring(pos).indexOf('?') == -1) {
+          return sql.substring(0, pos);
+        }
       }
     }
     return sql;

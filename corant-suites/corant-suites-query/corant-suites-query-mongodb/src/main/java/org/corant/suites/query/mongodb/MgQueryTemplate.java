@@ -38,6 +38,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryObjectMapper;
+import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -182,6 +183,15 @@ public class MgQueryTemplate {
     return hint((Bson) parse(defaultObject(hint, HashMap::new)));
   }
 
+  /**
+   * The expected number of query result set or the expected size of the result set of each
+   * iteration of the streaming query
+   *
+   * @see QueryParameter#getLimit()
+   *
+   * @param limit
+   * @return limit
+   */
   public MgQueryTemplate limit(int limit) {
     this.limit = Objects.max(limit, 1);
     return this;

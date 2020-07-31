@@ -79,7 +79,7 @@ public class SqlQueryTemplate {
   protected final QueryRunner runner;
   protected String sql;
   protected Object[] parameters = new Object[0];
-  protected int limit = 1;
+  protected int limit = 16;
   protected int offset = 0;
   protected final Dialect dialect;
   protected final DataSource datasource;
@@ -180,6 +180,9 @@ public class SqlQueryTemplate {
   }
 
   /**
+   * The expected number of query result set or the expected size of the result set of each
+   * iteration of the streaming query
+   *
    * @see QueryParameter#getLimit()
    *
    * @param limit

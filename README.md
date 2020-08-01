@@ -20,8 +20,7 @@ The following projects are under the corant project.
 # 5. corant-kernel 
     Initialize the application and the container, provide related operations such as boot/startup/shutdown, and related pre-processing and post-processing.
 # 6. corant-context 
-    The global shared project, contains utility classes for resource handling, 
-    string handling, reflection, object conversion, assertion, etc. Most projects rely on this.    
+   Container and context processing module, providing some convenient context processing classes.   
 # 7. corant-suites 
     Integration project. Thie project includes many subprojects that integrate JEE or other open source components
     to make integration and development easier. Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/MICROPROFILES ,etc., 

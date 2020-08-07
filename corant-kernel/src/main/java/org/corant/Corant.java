@@ -45,6 +45,7 @@ import org.corant.kernel.event.PostContainerStartedEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Launchs;
 import org.corant.shared.util.StopWatch;
 
@@ -286,14 +287,19 @@ public class Corant implements AutoCloseable {
    * @param arguments
    */
   public static synchronized void run(Runnable runnable, String... arguments) {
-    if (current() == null) {
-      startup(new Class[0], arguments);
-    } else if (!current().isRuning()) {
-      current().start(null);
-    }
-    runnable.run();
-    if (current() != null && current().isRuning()) {
-      current().stop();
+    try {
+      if (current() == null) {
+        startup(new Class[0], arguments);
+      } else if (!current().isRuning()) {
+        current().start(null);
+      }
+      runnable.run();
+    } catch (Throwable e) {
+      throw new CorantRuntimeException(e);
+    } finally {
+      if (current() != null && current().isRuning()) {
+        current().stop();
+      }
     }
   }
 
@@ -414,16 +420,20 @@ public class Corant implements AutoCloseable {
    * @return The result
    */
   public static synchronized <T> T supplier(Supplier<T> supplier, String... arguments) {
-    if (current() == null) {
-      startup(new Class[0], arguments);
-    } else if (!current().isRuning()) {
-      current().start(null);
+    try {
+      if (current() == null) {
+        startup(new Class[0], arguments);
+      } else if (!current().isRuning()) {
+        current().start(null);
+      }
+      return supplier.get();
+    } catch (Throwable e) {
+      throw new CorantRuntimeException(e);
+    } finally {
+      if (current() != null && current().isRuning()) {
+        current().stop();
+      }
     }
-    T result = supplier.get();
-    if (current() != null && current().isRuning()) {
-      current().stop();
-    }
-    return result;
   }
 
   private static synchronized void setMe(Corant me) {

@@ -14,11 +14,13 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.corant.Corant;
@@ -26,7 +28,6 @@ import org.corant.config.ConfigUtils;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
-import org.corant.suites.lang.kotlin.KotlinScriptEngines;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerConfigurations;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
@@ -85,31 +86,42 @@ public class QueryDeveloperKits {
 
   protected static void validateFetchQueryScript(Query query, FetchQuery fq,
       List<Throwable> throwabls) {
-    if (fq.getPredicateScript().isValid() && fq.getPredicateScript().getType() == ScriptType.JS) {
+    if (fq.getPredicateScript().isValid()) {
       try {
-        NashornScriptEngines.createFunction(fq.getPredicateScript().getCode(), "p", "r");
+        QueryScriptEngines.resolveFetchPredicates(fq)
+            .apply(new Object[] {new HashMap<>(), new HashMap<>()});
       } catch (Exception e) {
         throwabls
             .add(new CorantRuntimeException(e, "FETCH-QUERY-PREDICATE-SCRIPT-ERROR : [%s -> %s]",
                 query.getName(), fq.getReferenceQuery()));
       }
     }
-    if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.JS) {
+    if (fq.getInjectionScript().isValid()) {
       try {
-        NashornScriptEngines.createFunction(fq.getInjectionScript().getCode(), "r", "fr");
+        QueryScriptEngines.resolveFetchInjections(fq)
+            .apply(new Object[] {new ArrayList<>(), new ArrayList<>()});
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
             query.getName(), fq.getReferenceQuery()));
       }
     }
-    if (fq.getInjectionScript().isValid() && fq.getInjectionScript().getType() == ScriptType.KT) {
-      try {
-        KotlinScriptEngines.createFunction(fq.getInjectionScript().getCode(), "r", "fr");
-      } catch (Exception e) {
-        throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
-            query.getName(), fq.getReferenceQuery()));
-      }
+  }
+
+  protected static void validateHintScript(Query query, List<Throwable> throwabls) {
+    if (isEmpty(query.getHints())) {
+      return;
     }
+    query.getHints().forEach(qh -> {
+      try {
+        if (qh.getScript().isValid()) {
+          QueryScriptEngines.resolveQueryHintResultScriptMappers(qh)
+              .accept(new Object[] {new HashMap<>(), new HashMap<>()});
+        }
+      } catch (Exception e) {
+        throwabls.add(new CorantRuntimeException(e, "QUERY-HINT-SCRIPT-ERROR : [%s -> %s]",
+            query.getName(), qh.getKey()));
+      }
+    });
   }
 
   protected static void validateQueryScript(Query query, List<Throwable> throwabls,
@@ -142,6 +154,7 @@ public class QueryDeveloperKits {
       }
     }
     query.getFetchQueries().forEach(fq -> validateFetchQueryScript(query, fq, throwabls));
+    validateHintScript(query, throwabls);
   }
 
   static void outLine(String... strings) {

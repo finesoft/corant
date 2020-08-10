@@ -15,6 +15,8 @@ package org.corant.suites.dsa.structure;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Iterator;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-suites-dsa
@@ -51,6 +53,11 @@ public class Trie<T> implements Comparable<Trie<T>>, Serializable {
 
   private Trie(char index) {
     this.index = index;
+  }
+
+  public static <T> Iterator<Pair<String, T>> tokenize(Trie<T> trie, String text) {
+
+    return null;
   }
 
   @SuppressWarnings("unchecked")
@@ -219,5 +226,4 @@ public class Trie<T> implements Comparable<Trie<T>>, Serializable {
   protected void setValue(T value) {
     this.value = value;
   }
-
 }

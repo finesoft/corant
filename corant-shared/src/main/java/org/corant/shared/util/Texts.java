@@ -79,21 +79,6 @@ public class Texts {
     return sb.toString();
   }
 
-  public static boolean isZhChar(char c) {
-    Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
-    return ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-        || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-        || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
-        || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-        || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
-        || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
-        || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION;
-  }
-
-  public static boolean isZhChar(int c) {
-    return isZhChar((char) c);
-  }
-
   /**
    * String lines from file, use for read txt file line by line.
    *

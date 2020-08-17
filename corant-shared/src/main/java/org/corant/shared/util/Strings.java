@@ -189,62 +189,6 @@ public class Strings {
   }
 
   /**
-   * Determine if a string is decimal number. Hexadecimal and scientific notations and octal number
-   * are not considered
-   *
-   * <pre>
-   * Strings.isDecimalNumber(null)      =false
-   * Strings.isDecimalNumber("")        =false
-   * Strings.isDecimalNumber(" ")       =false
-   * Strings.isDecimalNumber("123")     =true
-   * Strings.isDecimalNumber("0123")    =true
-   * Strings.isDecimalNumber("1.23")    =true
-   * Strings.isDecimalNumber(".123")    =true
-   * Strings.isDecimalNumber("-123")    =true
-   * Strings.isDecimalNumber("-.123")   =true
-   * Strings.isDecimalNumber("+123")    =true
-   * Strings.isDecimalNumber("+.123")   =true
-   * Strings.isDecimalNumber("-.")      =false
-   * Strings.isDecimalNumber(".0")      =true
-   * Strings.isDecimalNumber("12 3")    =false
-   * Strings.isDecimalNumber(" 123")    =false
-   * Strings.isDecimalNumber("a123")    =false
-   * </pre>
-   *
-   * @param obj
-   * @return isDecimalNumber
-   */
-  public static boolean isDecimalNumber(final String obj) {
-    int len;
-    if (obj == null || (len = obj.length()) == 0) {
-      return false;
-    }
-    if (obj.charAt(len - 1) == '.') {
-      return false;
-    }
-    int idx = 0;
-    if (obj.charAt(0) == '-' || obj.charAt(0) == '+') {
-      if (len == 1) {
-        return false;
-      }
-      idx = 1;
-    }
-    int point = 0;
-    for (int i = idx; i < len; i++) {
-      if (obj.charAt(i) == '.') {
-        if (++point > 1) {
-          return false;
-        }
-        continue;
-      }
-      if (!Character.isDigit(obj.charAt(i))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
    * <pre>
    * Strings.isNoneBlank((String) null)    = false
    * Strings.isNoneBlank((String[]) null)  = true

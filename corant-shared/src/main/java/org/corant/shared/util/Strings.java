@@ -502,19 +502,7 @@ public class Strings {
    */
   public static String[] segment(final String str, final boolean removeBlank, final boolean trim,
       final Predicate<Character> predicate) {
-    String[] grouped = segment(str, predicate);
-    if (!removeBlank && !trim) {
-      return grouped;
-    } else {
-      String[] result = new String[grouped.length];
-      int i = 0;
-      for (String e : grouped) {
-        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
-          result[i++] = trim ? trim(e) : e;
-        }
-      }
-      return Arrays.copyOf(result, i);
-    }
+    return regulateSplits(segment(str, predicate), removeBlank, trim);
   }
 
   /**
@@ -577,6 +565,20 @@ public class Strings {
     } else {
       return Arrays.copyOf(array, ai);
     }
+  }
+
+  /**
+   * Split the string into a string array, delete blank elements or trim elements as needed.
+   *
+   * @param str
+   * @param removeBlank
+   * @param trim
+   * @param predicate
+   * @return split
+   */
+  public static String[] split(final String str, final boolean removeBlank, final boolean trim,
+      Predicate<Character> p) {
+    return regulateSplits(split(str, p), removeBlank, trim);
   }
 
   /**
@@ -691,19 +693,7 @@ public class Strings {
    */
   public static String[] split(final String str, final String wholeSpreator,
       final boolean removeBlank, final boolean trim) {
-    String[] splits = split(str, wholeSpreator);
-    if (!removeBlank && !trim) {
-      return splits;
-    } else {
-      String[] result = new String[splits.length];
-      int i = 0;
-      for (String e : splits) {
-        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
-          result[i++] = trim ? trim(e) : e;
-        }
-      }
-      return Arrays.copyOf(result, i);
-    }
+    return regulateSplits(split(str, wholeSpreator), removeBlank, trim);
   }
 
   /**
@@ -720,6 +710,22 @@ public class Strings {
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();
+  }
+
+  private static String[] regulateSplits(String[] splits, final boolean removeBlank,
+      final boolean trim) {
+    if (!removeBlank && !trim) {
+      return splits;
+    } else {
+      String[] result = new String[splits.length];
+      int i = 0;
+      for (String e : splits) {
+        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
+          result[i++] = trim ? trim(e) : e;
+        }
+      }
+      return Arrays.copyOf(result, i);
+    }
   }
 
   /**

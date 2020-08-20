@@ -233,6 +233,14 @@ public class Texts {
     }
   }
 
+  public static void tryWriteToFile(File file, Iterable<String> data) {
+    try {
+      writeToFile(file, false, streamOf(data));
+    } catch (IOException e) {
+
+    }
+  }
+
   public static void writeToFile(File file, boolean append, Charset charset, Stream<String> lines)
       throws IOException {
     if (!file.exists()) {
@@ -257,7 +265,14 @@ public class Texts {
     writeToFile(file, append, StandardCharsets.UTF_8, lines);
   }
 
+  /**
+   * Write string to file line by line, string lines will be written to the beginning of the file.
+   *
+   * @param file
+   * @param data
+   * @throws IOException writeToFile
+   */
   public static void writeToFile(File file, Iterable<String> data) throws IOException {
-    writeToFile(file, true, streamOf(data));
+    writeToFile(file, false, streamOf(data));
   }
 }

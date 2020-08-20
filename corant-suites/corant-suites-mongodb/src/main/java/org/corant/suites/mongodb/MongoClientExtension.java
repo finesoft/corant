@@ -15,7 +15,7 @@ package org.corant.suites.mongodb;
 
 import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;
@@ -41,7 +41,6 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
-import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
@@ -119,6 +118,10 @@ public class MongoClientExtension implements Extension {
         () -> new CorantRuntimeException("Can not find any mongo database named %s", namespace));
   }
 
+  public static GridFSBucket getGridFSBucket(String namespace) {
+    return resolve(MongoClientExtension.class).produceGridFSBucket(namespace);
+  }
+
   /**
    *
    * @return the clientConfigManager
@@ -141,14 +144,6 @@ public class MongoClientExtension implements Extension {
         "localTime");
   }
 
-  public GridFSBucket getGridFSBucket(String namespace) {
-    if (CDI.current() == null) { // FIXME EXCEPTION
-      return null;
-    }
-    Instance<GridFSBucket> inst = select(GridFSBucket.class, NamedLiteral.of(namespace));
-    return inst.isResolvable() ? inst.get() : null;
-  }
-
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       clientConfigManager.getAllWithQualifiers().forEach((c, n) -> {
@@ -168,6 +163,7 @@ public class MongoClientExtension implements Extension {
       });
 
       for (final String gfn : gridFSBucketNames) {
+        // TODO FIXME to be remove
         event.<GridFSBucket>addBean().addQualifier(NamedLiteral.of(gfn))
             .addTransitiveTypeClosure(GridFSBucket.class).beanClass(GridFSBucket.class)
             .scope(ApplicationScoped.class).produceWith(beans -> produceGridFSBucket(gfn));
@@ -231,6 +227,7 @@ public class MongoClientExtension implements Extension {
     }
   }
 
+  @Deprecated // TODO FIXME to be remove
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, GridFSBucket> pip,
       BeanManager beanManager) {
     final InjectionPoint ip = pip.getInjectionPoint();

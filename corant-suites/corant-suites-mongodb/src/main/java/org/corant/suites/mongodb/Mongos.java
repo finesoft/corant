@@ -18,6 +18,7 @@ import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;
 import static org.corant.shared.util.Streams.batchStream;
 import static org.corant.shared.util.Streams.streamOf;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -42,16 +43,17 @@ public class Mongos {
   }
 
   public static void cloneDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
-      int batchSize, BiConsumer<String, Document> consumer) {
+      int batchSize, BiConsumer<String, List<Document>> consumer) {
     MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
+    final BiConsumer<String, List<Document>> useConsumer = consumer == null ? (cn, docs) -> {
+    } : consumer;
     for (String c : s.listCollectionNames()) {
       MongoCollection<Document> dest = d.getCollection(c);
       batchStream(batchSize, s.getCollection(c).find().batchSize(batchSize)).forEach(b -> {
-        if (consumer != null) {
-          b.forEach(cs -> cs.append(c, d));
-        }
+        b.forEach(cs -> cs.append(c, d));
         dest.insertMany(b);
+        useConsumer.accept(c, b);
       });
     }
   }
@@ -93,17 +95,18 @@ public class Mongos {
   }
 
   public static void copyDatabase(String srcDatabaseNameSpace, String destDatabaseNameSpace,
-      int batchSize, BiConsumer<String, Document> consumer, String... collections) {
+      int batchSize, BiConsumer<String, List<Document>> consumer, String... collections) {
     MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
+    final BiConsumer<String, List<Document>> useConsumer = consumer == null ? (cn, docs) -> {
+    } : consumer;
     for (String c : setOf(collections)) {
       MongoCollection<Document> dest = d.getCollection(c);
       batchCollectStream(batchSize, streamOf(s.getCollection(c).find().batchSize(batchSize)))
           .forEach(b -> {
-            if (consumer != null) {
-              b.forEach(cs -> cs.append(c, d));
-            }
+            b.forEach(cs -> cs.append(c, d));
             dest.insertMany(b);
+            useConsumer.accept(c, b);
           });
     }
   }

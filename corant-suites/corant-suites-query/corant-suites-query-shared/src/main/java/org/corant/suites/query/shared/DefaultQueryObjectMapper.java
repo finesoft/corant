@@ -13,13 +13,12 @@
  */
 package org.corant.suites.query.shared;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.json.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import javax.enterprise.context.ApplicationScoped;
+import org.corant.suites.json.JsonUtils;
 
 /**
  * corant-suites-query-shared
@@ -29,8 +28,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 @ApplicationScoped
 public class DefaultQueryObjectMapper implements QueryObjectMapper {
 
-  protected ObjectMapper OM =
-      JsonUtils.copyMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  protected ObjectMapper OM =  JsonUtils.copyMapper();
 
   @Override
   public String toJsonString(Object object, boolean escape, boolean pretty) {

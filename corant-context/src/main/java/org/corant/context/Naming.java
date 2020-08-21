@@ -17,6 +17,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -30,6 +31,30 @@ import javax.inject.Qualifier;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface Naming {
+
+  public static final NamingLiteral INSTANCE = new NamingLiteral("");
+
   @Nonbinding
   String value() default "";
+
+  public static class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
+
+    private static final long serialVersionUID = 2627528079165566439L;
+
+    private final String value;
+
+    private NamingLiteral(String value) {
+      this.value = value;
+    }
+
+    public static NamingLiteral of(String value) {
+      return new NamingLiteral(value);
+    }
+
+    @Override
+    public String value() {
+      return value;
+    }
+
+  }
 }

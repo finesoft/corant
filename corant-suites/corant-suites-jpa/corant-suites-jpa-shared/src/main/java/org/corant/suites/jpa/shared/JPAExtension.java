@@ -47,6 +47,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * Initialize the named qualifier Entity Manager Factory bean for injection, use Unnamed qualifier
  * for injection while the configurations do not assign a name.
  *
+ * TODO: Check persistence unit data source availability AfterDeploymentValidation.
+ *
  * @author bingo 上午11:32:56
  *
  */

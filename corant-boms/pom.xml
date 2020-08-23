@@ -50,6 +50,7 @@
 		<version.glassfish.soteria>1.0</version.glassfish.soteria>
 		<version.groovy>3.0.3</version.groovy>
 		<version.grpc>1.31.0</version.grpc>
+		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
@@ -340,11 +341,11 @@
 				<artifactId>microprofile-rest-client-api</artifactId>
 				<version>${version.microprofile-rest-client-api}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.eclipse.microprofile.context-propagation</groupId>
-                <artifactId>microprofile-context-propagation-api</artifactId>
-                <version>${version.microprofile.context-propagation}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.eclipse.microprofile.context-propagation</groupId>
+				<artifactId>microprofile-context-propagation-api</artifactId>
+				<version>${version.microprofile.context-propagation}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.eclipse.microprofile.lra</groupId>
 				<artifactId>microprofile-lra-api</artifactId>
@@ -871,6 +872,11 @@
 				<artifactId>ansj_seg</artifactId>
 				<version>${version.ansj_seg}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.hankcs</groupId>
+				<artifactId>hanlp</artifactId>
+				<version>${version.hanlp}</version>
+			</dependency>
 
 			<!-- RPC -->
 			<dependency>
@@ -1168,7 +1174,7 @@
 				<artifactId>kafka-cdi-extension</artifactId>
 				<version>${version.kafka-cdi-extension}</version>
 			</dependency>
-			
+
 			<!-- Corant -->
 			<dependency>
 				<groupId>org.corant</groupId>
@@ -1184,7 +1190,7 @@
 				<groupId>org.corant</groupId>
 				<artifactId>corant-context</artifactId>
 				<version>${project.version}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-config</artifactId>
@@ -1442,7 +1448,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<build>
 		<pluginManagement>
 			<plugins>

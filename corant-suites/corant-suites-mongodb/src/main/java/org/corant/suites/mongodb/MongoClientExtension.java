@@ -29,22 +29,21 @@ import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ProcessInjectionPoint;
-import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import org.bson.BsonInt32;
@@ -52,6 +51,7 @@ import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.corant.context.Naming;
 import org.corant.context.NamingReference;
 import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
@@ -80,7 +80,6 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 public class MongoClientExtension implements Extension {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
-  Set<String> gridFSBucketNames = new HashSet<>();
   volatile InitialContext jndi;
   volatile NamedQualifierObjectManager<MongoClientConfig> clientConfigManager =
       NamedQualifierObjectManager.empty();
@@ -161,13 +160,6 @@ public class MongoClientExtension implements Extension {
             .addTransitiveTypeClosure(MongoDatabase.class).beanClass(MongoDatabase.class)
             .scope(ApplicationScoped.class).produceWith(beans -> produceDatabase(beans, c));
       });
-
-      for (final String gfn : gridFSBucketNames) {
-        // TODO FIXME to be remove
-        event.<GridFSBucket>addBean().addQualifier(NamedLiteral.of(gfn))
-            .addTransitiveTypeClosure(GridFSBucket.class).beanClass(GridFSBucket.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> produceGridFSBucket(gfn));
-      }
     }
   }
 
@@ -189,7 +181,6 @@ public class MongoClientExtension implements Extension {
   }
 
   protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
-    gridFSBucketNames.clear();
     clientConfigManager.destroy();
     databaseConfigManager.destroy();
   }
@@ -227,17 +218,6 @@ public class MongoClientExtension implements Extension {
     }
   }
 
-  @Deprecated // TODO FIXME to be remove
-  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, GridFSBucket> pip,
-      BeanManager beanManager) {
-    final InjectionPoint ip = pip.getInjectionPoint();
-    Named named = ip.getAnnotated().getAnnotation(Named.class);
-    String[] names = split(named.value(), Names.NAME_SPACE_SEPARATORS, true, true);
-    if (!isEmpty(names) && names.length > 1) {
-      gridFSBucketNames.add(named.value());
-    }
-  }
-
   void resolveJndi(String name, Annotation[] qualifiers) {
     if (isNotBlank(name)) {
       synchronized (this) {
@@ -253,6 +233,31 @@ public class MongoClientExtension implements Extension {
           throw new CorantRuntimeException(e);
         }
       }
+    }
+  }
+
+  @ApplicationScoped
+  public static class GridFSBucketProducer {
+
+    @Produces
+    @Dependent
+    @Naming
+    GridFSBucket produce(InjectionPoint ip) {
+      Naming naming = null;
+      if (ip.getAnnotated() != null) {
+        naming = ip.getAnnotated().getAnnotation(Naming.class);
+      }
+      if (naming == null) {
+        Optional<Annotation> annop = ip.getQualifiers().stream()
+            .filter(p -> p.annotationType().equals(Naming.class)).findFirst();
+        if (annop.isPresent()) {
+          naming = (Naming) annop.get();
+        }
+      }
+      if (naming != null) {
+        return MongoClientExtension.getGridFSBucket(naming.value());
+      }
+      return null;
     }
   }
 }

@@ -14,10 +14,12 @@
 package org.corant.suites.mongodb;
 
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;
 import static org.corant.shared.util.Streams.batchStream;
 import static org.corant.shared.util.Streams.streamOf;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -27,6 +29,10 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
+import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 
 /**
  * corant-suites-mongodb
@@ -109,6 +115,22 @@ public class Mongos {
             useConsumer.accept(c, b);
           });
     }
+  }
+
+  public static void copyGridFSBucket(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      String srcGridFSBucketName, String destGridFSBucketName, int batchSize) {
+    MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
+    MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
+    GridFSBucket sg = GridFSBuckets.create(s, srcGridFSBucketName);
+    GridFSBucket dg = GridFSBuckets.create(d, destGridFSBucketName);
+    batchStream(batchSize, sg.find()).forEach(gfses -> {
+      gfses.forEach(gf -> {
+        try (GridFSDownloadStream gfos = sg.openDownloadStream(gf.getId())) {
+          dg.uploadFromStream(gf.getId(), gf.getFilename(), gfos, new GridFSUploadOptions()
+              .metadata(new Document(defaultObject(gf.getMetadata(), Collections::emptyMap))));
+        }
+      });
+    });
   }
 
 }

@@ -13,6 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.agroal>1.8</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
+		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
 		<version.apache-poi>4.1.2</version.apache-poi>
 		<version.apache.arrow>0.16.0</version.apache.arrow>
@@ -1167,6 +1168,11 @@
 				<groupId>com.aliyun</groupId>
 				<artifactId>aliyun-java-sdk-core</artifactId>
 				<version>${version.aliyun-java-sdk-core}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.aliyun.oss</groupId>
+				<artifactId>aliyun-sdk-oss</artifactId>
+				<version>${version.aliyun-sdk-oss}</version>
 			</dependency>
 
 			<dependency>

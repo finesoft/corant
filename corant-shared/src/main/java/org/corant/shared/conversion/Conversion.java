@@ -286,7 +286,7 @@ public class Conversion {
    * @param <C>
    * @param value the array value to convert
    * @param collectionFactory the constructor of collection
-   * @param targetItemClass the target collection class
+   * @param targetItemClass the target class of item of the collection
    * @param hints the converter hints use for intervening converters
    * @return A collection of items converted according to the target type
    */

@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
 
 /**
  * corant-shared
@@ -111,6 +113,10 @@ public class Empties {
       return isEmpty((Iterable<?>) object);
     } else if (object instanceof Enumeration<?>) {
       return isEmpty((Enumeration<?>) object);
+    } else if (object instanceof Pair<?, ?>) {
+      return isEmpty((Pair<?, ?>) object);
+    } else if (object instanceof Triple<?, ?, ?>) {
+      return isEmpty((Triple<?, ?, ?>) object);
     } else {
       try {
         return Array.getLength(object) == 0;
@@ -129,6 +135,26 @@ public class Empties {
    */
   public static boolean isEmpty(final Object[] object) {
     return object == null || object.length == 0;
+  }
+
+  /**
+   * Return true if object is null and object.isEmpty() == true
+   *
+   * @param object
+   * @return isEmpty
+   */
+  public static boolean isEmpty(final Pair<?, ?> object) {
+    return object == null || object.isEmpty();
+  }
+
+  /**
+   * Return true if object is null and object.isEmpty() == true
+   *
+   * @param object
+   * @return isEmpty
+   */
+  public static boolean isEmpty(final Triple<?, ?, ?> object) {
+    return object == null || object.isEmpty();
   }
 
   /**
@@ -208,6 +234,26 @@ public class Empties {
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Object[] object) {
+    return !isEmpty(object);
+  }
+
+  /**
+   * Return true if only if object is not null and object.isEmpty() == false
+   *
+   * @param object
+   * @return isNotEmpty
+   */
+  public static boolean isNotEmpty(final Pair<?, ?> object) {
+    return !isEmpty(object);
+  }
+
+  /**
+   * Return true if only if object is not null and object.isEmpty() == false
+   *
+   * @param object
+   * @return isNotEmpty
+   */
+  public static boolean isNotEmpty(final Triple<?, ?, ?> object) {
     return !isEmpty(object);
   }
 

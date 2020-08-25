@@ -81,6 +81,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    *
    */
   public static class MutableByte extends MutableNumber<Byte> {
+
     private static final long serialVersionUID = 7448907394279327148L;
 
     public MutableByte(final byte object) {
@@ -91,6 +92,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object.byteValue());
     }
 
+    public static MutableByte of(final byte object) {
+      return new MutableByte(object);
+    }
+
+    public static MutableByte subtract(MutableByte m1, MutableByte m2) {
+      return new MutableByte(m1.subtractAndGet(m2));
+    }
+
+    public static MutableByte sum(MutableByte m1, MutableByte m2) {
+      return new MutableByte(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableByte add(Byte operand) {
       super.add(operand);
@@ -98,8 +111,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableByte clone() {
-      return new MutableByte(get());
+    public Byte addAndGet(Number operand) {
+      final Byte current = value;
+      value = Byte.valueOf((byte) (current.byteValue() + shouldNotNull(operand).byteValue()));
+      return value;
     }
 
     @Override
@@ -125,6 +140,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super.subtract(operand);
       return this;
     }
+
+    @Override
+    public Byte subtractAndGet(final Number operand) {
+      final Byte current = value;
+      value = Byte.valueOf((byte) (current.byteValue() - shouldNotNull(operand).byteValue()));
+      return value;
+    }
   }
 
   /**
@@ -134,6 +156,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    *
    */
   public static class MutableDouble extends MutableNumber<Double> {
+
     private static final long serialVersionUID = -8025777846150268416L;
 
     public MutableDouble(double object) {
@@ -144,6 +167,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object.doubleValue());
     }
 
+    public static MutableDouble of(final double object) {
+      return new MutableDouble(object);
+    }
+
+    public static MutableDouble subtract(MutableDouble m1, MutableDouble m2) {
+      return new MutableDouble(m1.subtractAndGet(m2));
+    }
+
+    public static MutableDouble sum(MutableDouble m1, MutableDouble m2) {
+      return new MutableDouble(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableDouble add(Double operand) {
       super.add(operand);
@@ -151,8 +186,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableDouble clone() {
-      return new MutableDouble(get());
+    public Double addAndGet(Number operand) {
+      final Double current = value;
+      value = Double.valueOf(current.doubleValue() + shouldNotNull(operand).doubleValue());
+      return value;
     }
 
     @Override
@@ -178,6 +215,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super.subtract(operand);
       return this;
     }
+
+    @Override
+    public Double subtractAndGet(Number operand) {
+      final Double current = value;
+      value = Double.valueOf(current.doubleValue() - shouldNotNull(operand).doubleValue());
+      return value;
+    }
   }
 
   /**
@@ -187,6 +231,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    *
    */
   public static class MutableFloat extends MutableNumber<Float> {
+
     private static final long serialVersionUID = 8230534097662673489L;
 
     public MutableFloat(float object) {
@@ -197,6 +242,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object.floatValue());
     }
 
+    public static MutableFloat of(final float object) {
+      return new MutableFloat(object);
+    }
+
+    public static MutableFloat subtract(MutableFloat m1, MutableFloat m2) {
+      return new MutableFloat(m1.subtractAndGet(m2));
+    }
+
+    public static MutableFloat sum(MutableFloat m1, MutableFloat m2) {
+      return new MutableFloat(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableFloat add(Float operand) {
       super.add(operand);
@@ -204,8 +261,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableFloat clone() {
-      return new MutableFloat(get());
+    public Float addAndGet(Number operand) {
+      final Float current = value;
+      value = Float.valueOf(current.floatValue() + shouldNotNull(operand).floatValue());
+      return value;
     }
 
     @Override
@@ -231,6 +290,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super.subtract(operand);
       return this;
     }
+
+    @Override
+    public Float subtractAndGet(Number operand) {
+      final Float current = value;
+      value = Float.valueOf(current.floatValue() - shouldNotNull(operand).floatValue());
+      return value;
+    }
   }
 
   /**
@@ -240,6 +306,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    *
    */
   public static class MutableInteger extends MutableNumber<Integer> {
+
     private static final long serialVersionUID = -5952332917787746814L;
 
     public MutableInteger(int object) {
@@ -250,6 +317,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object.intValue());
     }
 
+    public static MutableInteger of(final int object) {
+      return new MutableInteger(object);
+    }
+
+    public static MutableInteger subtract(MutableInteger m1, MutableInteger m2) {
+      return new MutableInteger(m1.subtractAndGet(m2));
+    }
+
+    public static MutableInteger sum(MutableInteger m1, MutableInteger m2) {
+      return new MutableInteger(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableInteger add(Integer operand) {
       super.add(operand);
@@ -257,8 +336,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableInteger clone() {
-      return new MutableInteger(get());
+    public Integer addAndGet(Number operand) {
+      final Integer current = value;
+      value = Integer.valueOf(current.intValue() + shouldNotNull(operand).intValue());
+      return value;
     }
 
     @Override
@@ -284,6 +365,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super.subtract(operand);
       return this;
     }
+
+    @Override
+    public Integer subtractAndGet(Number operand) {
+      final Integer current = value;
+      value = Integer.valueOf(current.intValue() - shouldNotNull(operand).intValue());
+      return value;
+    }
   }
 
   /**
@@ -293,6 +381,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    *
    */
   public static class MutableLong extends MutableNumber<Long> {
+
     private static final long serialVersionUID = -8400347013924878207L;
 
     public MutableLong(long object) {
@@ -303,6 +392,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object.longValue());
     }
 
+    public static MutableLong of(final long object) {
+      return new MutableLong(object);
+    }
+
+    public static MutableLong subtract(MutableLong m1, MutableLong m2) {
+      return new MutableLong(m1.subtractAndGet(m2));
+    }
+
+    public static MutableLong sum(MutableLong m1, MutableLong m2) {
+      return new MutableLong(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableLong add(Long operand) {
       super.add(operand);
@@ -310,8 +411,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableLong clone() {
-      return new MutableLong(get());
+    public Long addAndGet(Number operand) {
+      final Long current = value;
+      value = Long.valueOf(current.longValue() + shouldNotNull(operand).longValue());
+      return value;
     }
 
     @Override
@@ -337,6 +440,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super.subtract(operand);
       return this;
     }
+
+    @Override
+    public Long subtractAndGet(Number operand) {
+      final Long current = value;
+      value = Long.valueOf(current.longValue() - shouldNotNull(operand).longValue());
+      return value;
+    }
   }
 
   /**
@@ -347,14 +457,14 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static class MutableNumber<T extends Number> extends Number
-      implements Mutable<T>, Comparable<MutableNumber<T>>, Serializable, Cloneable {
+      implements Mutable<T>, Comparable<MutableNumber<T>>, Serializable {
 
     private static final long serialVersionUID = -6244772495084570391L;
 
-    private T value = null;
+    T value = null;
 
     protected MutableNumber(final T object) {
-      this.value = validate(object);
+      value = validate(object);
     }
 
     public static <X extends Number> MutableNumber<X> of(X object) {
@@ -438,13 +548,8 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     public T addAndGet(final Number operand) {
-      this.value = (T) doAdd(get(), operand);
+      value = (T) doAdd(get(), operand);
       return get();
-    }
-
-    @Override
-    public MutableNumber<T> clone() {
-      return new MutableNumber<>(get());
     }
 
     @Override
@@ -549,7 +654,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
 
     @Override
     public MutableNumber<T> set(final T object) {
-      this.value = validate(object);
+      value = validate(object);
       return this;
     }
 
@@ -559,7 +664,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     public T subtractAndGet(final Number operand) {
-      this.value = (T) doSubtract(get(), operand);
+      value = (T) doSubtract(get(), operand);
       return get();
     }
 
@@ -646,6 +751,18 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super(object);
     }
 
+    public static MutableShort of(final short object) {
+      return new MutableShort(object);
+    }
+
+    public static MutableShort subtract(MutableShort m1, MutableShort m2) {
+      return new MutableShort(m1.subtractAndGet(m2));
+    }
+
+    public static MutableShort sum(MutableShort m1, MutableShort m2) {
+      return new MutableShort(m1.addAndGet(m2));
+    }
+
     @Override
     public MutableShort add(Short operand) {
       super.add(operand);
@@ -653,8 +770,10 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     }
 
     @Override
-    public MutableShort clone() {
-      return new MutableShort(get());
+    public Short addAndGet(Number operand) {
+      final Short current = value;
+      value = Short.valueOf((short) (current.shortValue() + shouldNotNull(operand).shortValue()));
+      return value;
     }
 
     @Override
@@ -679,6 +798,13 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     public MutableShort subtract(Short operand) {
       super.subtract(operand);
       return this;
+    }
+
+    @Override
+    public Short subtractAndGet(Number operand) {
+      final Short current = value;
+      value = Short.valueOf((short) (current.shortValue() - shouldNotNull(operand).shortValue()));
+      return value;
     }
   }
 

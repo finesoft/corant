@@ -75,7 +75,7 @@ import org.corant.suites.jms.shared.AbstractJMSExtension;
  *
  * <p>
  * Attention: For now we do not supported JMSProducer.setDeliveryDelay/setTimeToLive...(six methods)
- * , Artemis implemetions use singleton JMSProducer in one JMSContext, this can be problematic.
+ * , Artemis implementations use singleton JMSProducer in one JMSContext, this can be problematic.
  * </p>
  *
  * @author bingo 下午4:12:15

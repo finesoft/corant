@@ -1309,11 +1309,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-logging</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-elastic</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1329,12 +1324,27 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-redis</artifactId>
+				<artifactId>corant-suites-query-cassandra</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-query-cassandra</artifactId>
+				<artifactId>corant-suites-jcache-shared</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-jcache-caffeine</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-redis</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

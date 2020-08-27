@@ -1,38 +1,31 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.corant</groupId>
-        <artifactId>corant-suites-jcache</artifactId>
-        <version>${revision}</version>
-    </parent>
-    <artifactId>corant-suites-jcache-caffeine</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.corant</groupId>
+		<artifactId>corant-suites-jcache</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>corant-suites-jcache-caffeine</artifactId>
 
-    <dependencies>
+	<dependencies>
 
-        <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/jcache -->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>jcache</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>jcache</artifactId>
+		</dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.jsr107.ri/cache-annotations-ri-cdi -->
-        <dependency>
-            <groupId>org.jsr107.ri</groupId>
-            <artifactId>cache-annotations-ri-cdi</artifactId>
-            <version>1.1.1</version>
-        </dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-suites-jcache-shared</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.corant</groupId>
-            <artifactId>corant-context</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
+	</dependencies>
 </project>

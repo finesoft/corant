@@ -10,5 +10,6 @@
   <modules>
   	<module>corant-suites-jcache-caffeine</module>
   	<module>corant-suites-jcache-redisson</module>
+  	<module>corant-suites-jcache-shared</module>
   </modules>
 </project>

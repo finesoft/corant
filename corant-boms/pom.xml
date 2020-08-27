@@ -760,6 +760,11 @@
 				<artifactId>caffeine</artifactId>
 				<version>${version.caffeine}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.github.ben-manes.caffeine</groupId>
+				<artifactId>jcache</artifactId>
+				<version>${version.caffeine}</version>
+			</dependency>
 
 
 			<!-- POI -->

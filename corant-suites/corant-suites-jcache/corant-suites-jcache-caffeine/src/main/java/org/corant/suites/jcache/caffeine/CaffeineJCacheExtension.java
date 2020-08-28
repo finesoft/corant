@@ -1,5 +1,7 @@
 package org.corant.suites.jcache.caffeine;
 
+import org.eclipse.microprofile.config.ConfigProvider;
+
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
@@ -19,8 +21,15 @@ public class CaffeineJCacheExtension implements Extension {
   private CacheManager cacheManager;
   private CachingProvider cachingProvider;
 
-  public void observeAfterBeanDiscovery(@Observes AfterBeanDiscovery afterBeanDiscovery,
-      final BeanManager beanManager) {
+  // config caffeine's caches from this resource
+  private String caffeineConfigResource =
+      ConfigProvider.getConfig()
+          .getOptionalValue("caffeine.config.resource", String.class)
+          .orElse("META-INF/application.properties");
+
+  public void observeAfterBeanDiscovery(
+      @Observes AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) {
+    System.setProperty("config.resource", caffeineConfigResource);
     cachingProvider = Caching.getCachingProvider();
     cacheManager = cachingProvider.getCacheManager();
     afterBeanDiscovery.addBean(new CacheManagerBean(beanManager, cacheManager));

@@ -19,9 +19,11 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.corant.config.CorantConfig;
 import org.corant.config.declarative.DeclarativeConfigResolver.ConfigField;
@@ -62,13 +64,22 @@ public enum DeclarativePattern {
       if (isNotEmpty(map)) {
         Field field = configField.getField();
         Class<?> filedType = field.getType();
-        Map<String, Object> valueMap = new HashMap<>();
         if (filedType.equals(Map.class)) {
+          Map<String, Object> valueMap = null;
+          Object defaultFieldValue = field.get(configObject);
+          if (defaultFieldValue instanceof LinkedHashMap) {
+            valueMap = new LinkedHashMap<>();
+          } else if (defaultFieldValue instanceof TreeMap) {
+            valueMap = new TreeMap<>();
+          } else {
+            valueMap = new HashMap<>();
+          }
+          final Map<String, Object> useValueMap = valueMap;
           for (Entry<String, Optional<String>> entry : map.entrySet()) {
             entry.getValue().ifPresent(
-                v -> valueMap.put(removeSplitor(entry.getKey().substring(prefixLen)), v));
+                v -> useValueMap.put(removeSplitor(entry.getKey().substring(prefixLen)), v));
           }
-          field.set(configObject, valueMap);
+          field.set(configObject, valueMap); // FIXME need merge???
         }
       }
     }

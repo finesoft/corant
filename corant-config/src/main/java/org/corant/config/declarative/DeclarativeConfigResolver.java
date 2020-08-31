@@ -29,6 +29,7 @@ import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.security.AccessController;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -75,7 +75,7 @@ public class DeclarativeConfigResolver {
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
-        map = resolveConfigInstances(config, setOf(EMPTY), configClass);
+        map = resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME EMPTY?
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -83,13 +83,13 @@ public class DeclarativeConfigResolver {
     return map.isEmpty() ? null : map.values().iterator().next();
   }
 
-  static boolean isConverterSupport(Class<?> cls) {
-    Config cfg = ConfigProvider.getConfig();
-    if (cfg instanceof CorantConfig) {
-      return ((CorantConfig) cfg).getConversion().isSupport(cls);
-    }
-    return false;
-  }
+  // static boolean isConverterSupport(Class<?> cls) {
+  // Config cfg = ConfigProvider.getConfig();
+  // if (cfg instanceof CorantConfig) {
+  // return ((CorantConfig) cfg).getConversion().isSupport(cls);
+  // }
+  // return false;
+  // }
 
   static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
     ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
@@ -166,22 +166,24 @@ public class DeclarativeConfigResolver {
       keyIndex = ckr.keyIndex();
       ignoreNoAnnotatedItem = ckr.ignoreNoAnnotatedItem();
       traverseFields(cls, f -> {
-        if (f.isAnnotationPresent(ConfigKeyItem.class)) {
-          getFields().add(new ConfigField(this, f));
-        } else if (!ignoreNoAnnotatedItem) {
-          Type type = f.getGenericType();
-          Class<?> ft = null;
-          if (type instanceof Class) {
-            ft = (Class<?>) type;
-            if (ft.isArray()) {
-              ft = ft.getComponentType();
-            }
-            ft = wrap((Class<?>) type);
-          } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
-            ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-          }
-          if (isConverterSupport(ft) || Map.class.isAssignableFrom(ft)) {
+        if (!Modifier.isFinal(f.getModifiers())) {
+          if (f.isAnnotationPresent(ConfigKeyItem.class)) {
             getFields().add(new ConfigField(this, f));
+          } else if (!ignoreNoAnnotatedItem) {
+            Type type = f.getGenericType();
+            Class<?> ft = null;
+            if (type instanceof Class) {
+              ft = (Class<?>) type;
+              if (ft.isArray()) {
+                ft = ft.getComponentType();
+              }
+              ft = wrap((Class<?>) type);
+            } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
+              ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+            }
+            if (/* isConverterSupport(ft) || */ Map.class.isAssignableFrom(ft)) {
+              getFields().add(new ConfigField(this, f));
+            }
           }
         }
       });

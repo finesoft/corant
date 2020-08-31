@@ -18,9 +18,13 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
+import org.corant.config.declarative.DeclarativePattern;
 import org.eclipse.microprofile.config.Config;
 import com.aliyun.oss.ClientBuilderConfiguration;
 import com.aliyun.oss.common.auth.RequestSigner;
@@ -46,6 +50,9 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
   protected String endpoint;
 
   protected List<String> signerHandlerClasses = new ArrayList<>();
+
+  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
+  protected Map<String, String> defaultRequestHeaders = new LinkedHashMap<>();
 
   public String getAccessKeyId() {
     return accessKeyId;

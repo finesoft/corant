@@ -13,15 +13,17 @@
  */
 package org.corant.suites.cloud.alibaba.oss;
 
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
+import java.lang.annotation.Annotation;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import java.lang.annotation.Annotation;
-
-import static org.corant.shared.util.Strings.asDefaultString;
+import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.context.Naming;
+import org.corant.shared.util.Strings;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 
 /**
  * corant <br>
@@ -32,41 +34,36 @@ import static org.corant.shared.util.Strings.asDefaultString;
 @ApplicationScoped
 public class OSSClientProducer {
 
+  OSS build(OSSClientConfiguration config) {
+    if (isNotBlank(config.getSecurityToken())) {
+      return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
+          config.getAccessKeyId(), config.getSecurityToken(), config);
+    } else {
+      return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
+          config.getAccessKeyId(), config);
+    }
+  }
+
   @Produces
-  @OSSClient
-  public OSS produce(InjectionPoint ip) {
-    Annotation qualifier = null;
+  @Naming
+  OSS produce(InjectionPoint ip) {
+    Naming naming = null;
     for (Annotation a : ip.getQualifiers()) {
-      if (a.annotationType().equals(OSSClient.class)) {
-        qualifier = a;
+      if (a.annotationType().equals(Naming.class)) {
+        naming = (Naming) a;
         break;
       }
     }
-    return new OSSClientBuilder()
-        .build(getEndpoint(qualifier), getAccessKey(qualifier), getSecretKey(qualifier));
+    String name = Strings.EMPTY;
+    if (naming != null) {
+      name = trim(naming.value());
+    }
+    OSSClientConfiguration config =
+        DeclarativeConfigResolver.resolveMulti(OSSClientConfiguration.class).get(name);
+    if (config != null) {
+      return build(config);
+    }
+    return null;
   }
 
-  private String getAccessKey(Annotation qualifier) {
-    if (qualifier instanceof OSSClient) {
-      return ((OSSClient) qualifier).accessKey();
-    } else {
-      return asDefaultString(qualifier);
-    }
-  }
-
-  private String getEndpoint(Annotation qualifier) {
-    if (qualifier instanceof OSSClient) {
-      return ((OSSClient) qualifier).endpoint();
-    } else {
-      return asDefaultString(qualifier);
-    }
-  }
-
-  private String getSecretKey(Annotation qualifier) {
-    if (qualifier instanceof OSSClient) {
-      return ((OSSClient) qualifier).secretKey();
-    } else {
-      return asDefaultString(qualifier);
-    }
-  }
 }

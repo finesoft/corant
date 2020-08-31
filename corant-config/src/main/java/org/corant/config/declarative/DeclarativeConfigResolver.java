@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.shared.conversion.Converters;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -82,14 +83,6 @@ public class DeclarativeConfigResolver {
     }
     return map.isEmpty() ? null : map.values().iterator().next();
   }
-
-  // static boolean isConverterSupport(Class<?> cls) {
-  // Config cfg = ConfigProvider.getConfig();
-  // if (cfg instanceof CorantConfig) {
-  // return ((CorantConfig) cfg).getConversion().isSupport(cls);
-  // }
-  // return false;
-  // }
 
   static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
     ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
@@ -134,15 +127,20 @@ public class DeclarativeConfigResolver {
         itemKeys.add(itemKey);
       }
     }
-    Set<String> dfltKeys = new HashSet<>(itemKeys);
-    dfltKeys.retainAll(configClass.getDefaultItemKeys());
+    Set<String> dfltKeys = new HashSet<>();
+    configClass.getDefaultItemKeys().forEach(dik -> {
+      if (itemKeys.removeIf(ik -> ik.startsWith(dik))) {
+        dfltKeys.add(dik);
+      }
+    });
     if (isNotEmpty(dfltKeys)) {
       keys.add(EMPTY);
     }
     itemKeys.removeAll(dfltKeys);
     if (isNotEmpty(itemKeys)) {
       keys.addAll(getGroupConfigKeys(config,
-          s -> defaultString(s).startsWith(prefix) && !dfltKeys.contains(s),
+          s -> defaultString(s).startsWith(prefix)
+              && dfltKeys.stream().noneMatch(dk -> s.startsWith(dk)),
           configClass.getKeyIndex()).keySet());
     }
     return keys;
@@ -181,7 +179,8 @@ public class DeclarativeConfigResolver {
             } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
               ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
             }
-            if (/* isConverterSupport(ft) || */ Map.class.isAssignableFrom(ft)) {
+            if (Converters.lookup(String.class, ft, 3).isPresent()
+                || Map.class.isAssignableFrom(ft)) { // FIXME use lookup??
               getFields().add(new ConfigField(this, f));
             }
           }

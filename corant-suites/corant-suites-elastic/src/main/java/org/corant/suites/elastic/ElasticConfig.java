@@ -69,7 +69,7 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> properties = new HashMap<>();
 
-  protected Map<String, Object> setting = new LinkedHashMap<>();
+  protected final Map<String, Object> setting = new LinkedHashMap<>();
 
   @Override
   public boolean equals(Object obj) {

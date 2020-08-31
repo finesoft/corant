@@ -315,14 +315,6 @@ public class CorantConfigConversion implements Serializable {
     }
   }
 
-  // public Set<Type> getSupportTypes() {
-  // return new HashSet<>(converters.get().keySet());
-  // }
-  //
-  // public boolean isSupport(Class<?> cls) {
-  // return converters.get().containsKey(cls);
-  // }
-
   /**
    * Supports string to Map&lt;String,String&gt;.
    *

@@ -72,9 +72,9 @@ public class ArtemisConfig extends AbstractJMSConfig {
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, Object> additionProperties = new HashMap<>();
 
-  protected Map<Method, Optional<?>> properties = new LinkedHashMap<>();
+  protected final Map<Method, Optional<?>> properties = new LinkedHashMap<>();
 
-  protected Set<Pair<String, Integer>> hostPortPairs = new LinkedHashSet<>();
+  protected final Set<Pair<String, Integer>> hostPortPairs = new LinkedHashSet<>();
 
   static Map<String, Method> createSettingsMap() {
     Map<String, Method> settingsMap = new HashMap<>();

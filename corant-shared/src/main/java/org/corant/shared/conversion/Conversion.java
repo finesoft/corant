@@ -13,8 +13,6 @@
  */
 package org.corant.shared.conversion;
 
-import static org.corant.shared.conversion.ConverterHints.CVT_MAX_NEST_DEPT;
-import static org.corant.shared.conversion.ConverterHints.CVT_NEST_DEPT_KEY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
@@ -311,8 +309,7 @@ public class Conversion {
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,
       Map<String, ?> hints) {
-    return Converters.lookup(wrap(sourceClass), wrap(targetClass),
-        ConverterHints.getHint(hints, CVT_NEST_DEPT_KEY, CVT_MAX_NEST_DEPT)).orElse(null);
+    return Converters.lookup(wrap(sourceClass), wrap(targetClass)).orElse(null);
   }
 
 }

@@ -38,8 +38,8 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Converters {
 
-  public static <S, T> Optional<Converter<S, T>> lookup(Class<S> sourceClass, Class<T> targetClass,
-      int maxNestingDepth) {
+  public static <S, T> Optional<Converter<S, T>> lookup(Class<S> sourceClass,
+      Class<T> targetClass) {
     if (targetClass.isAssignableFrom(sourceClass)) {
       return optional((Converter<S, T>) IdentityConverter.INSTANCE);
     } else if (ConverterRegistry.isSupportType(sourceClass, targetClass)) {

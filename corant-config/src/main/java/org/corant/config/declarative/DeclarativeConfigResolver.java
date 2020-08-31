@@ -19,6 +19,7 @@ import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Fields.traverseFields;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -158,29 +159,16 @@ public class DeclarativeConfigResolver {
     private final boolean ignoreNoAnnotatedItem;
 
     public ConfigClass(Class<T> cls) {
-      ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
+      ConfigKeyRoot ckr = shouldNotNull(findAnnotation(cls, ConfigKeyRoot.class, true));
       keyRoot = ckr.value();
       clazz = cls;
       keyIndex = ckr.keyIndex();
       ignoreNoAnnotatedItem = ckr.ignoreNoAnnotatedItem();
       traverseFields(cls, f -> {
         if (!Modifier.isFinal(f.getModifiers())) {
-          if (f.isAnnotationPresent(ConfigKeyItem.class)) {
-            getFields().add(new ConfigField(this, f));
-          } else if (!ignoreNoAnnotatedItem) {
-            Type type = f.getGenericType();
-            Class<?> ft = null;
-            if (type instanceof Class) {
-              ft = (Class<?>) type;
-              if (ft.isArray()) {
-                ft = ft.getComponentType();
-              }
-              ft = wrap((Class<?>) type);
-            } else if (type instanceof ParameterizedType || !(type instanceof Map)) {
-              ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
-            if (Converters.lookup(String.class, ft, 3).isPresent()
-                || Map.class.isAssignableFrom(ft)) { // FIXME use lookup??
+          Class<?> ft = resolveFieldType(f);
+          if (Converters.lookup(String.class, ft).isPresent() || Map.class.isAssignableFrom(ft)) {
+            if (f.isAnnotationPresent(ConfigKeyItem.class) || !ignoreNoAnnotatedItem) {
               getFields().add(new ConfigField(this, f));
             }
           }
@@ -218,6 +206,24 @@ public class DeclarativeConfigResolver {
           + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
     }
 
+    Class<?> resolveFieldType(Field field) {
+      Type type = field.getGenericType();
+      Class<?> ft = null;
+      if (type instanceof Class) {
+        ft = (Class<?>) type;
+        if (ft.isArray()) {
+          ft = ft.getComponentType();
+        }
+        ft = wrap((Class<?>) type);
+      } else if (type instanceof ParameterizedType) {
+        if (type instanceof Map) {
+          ft = Map.class;
+        } else {
+          ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+        }
+      }
+      return ft;
+    }
   }
 
   public static class ConfigField {

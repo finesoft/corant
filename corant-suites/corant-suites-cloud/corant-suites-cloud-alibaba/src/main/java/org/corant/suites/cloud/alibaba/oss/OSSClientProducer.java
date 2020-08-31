@@ -16,6 +16,8 @@ package org.corant.suites.cloud.alibaba.oss;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.trim;
 import java.lang.annotation.Annotation;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -34,6 +36,8 @@ import com.aliyun.oss.OSSClientBuilder;
 @ApplicationScoped
 public class OSSClientProducer {
 
+  Map<String, OSSClientConfiguration> configs;
+
   OSS build(OSSClientConfiguration config) {
     if (isNotBlank(config.getSecurityToken())) {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
@@ -42,6 +46,11 @@ public class OSSClientProducer {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
           config.getSecretAccessKey(), config);
     }
+  }
+
+  @PostConstruct
+  void onPostConstruct() {
+    configs = DeclarativeConfigResolver.resolveMulti(OSSClientConfiguration.class);
   }
 
   @Produces
@@ -58,12 +67,10 @@ public class OSSClientProducer {
     if (naming != null) {
       name = trim(naming.value());
     }
-    OSSClientConfiguration config =
-        DeclarativeConfigResolver.resolveMulti(OSSClientConfiguration.class).get(name);
+    OSSClientConfiguration config = configs.get(name);
     if (config != null) {
       return build(config);
     }
     return null;
   }
-
 }

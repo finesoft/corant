@@ -37,10 +37,10 @@ public class OSSClientProducer {
   OSS build(OSSClientConfiguration config) {
     if (isNotBlank(config.getSecurityToken())) {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
-          config.getAccessKeyId(), config.getSecurityToken(), config);
+          config.getSecretAccessKey(), config.getSecurityToken(), config);
     } else {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
-          config.getAccessKeyId(), config);
+          config.getSecretAccessKey(), config);
     }
   }
 

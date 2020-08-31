@@ -87,6 +87,9 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
         }
       }
     }
+    if (isNotEmpty(defaultRequestHeaders)) {
+      defaultHeaders.putAll(defaultRequestHeaders);
+    }
   }
 
 }

@@ -256,6 +256,18 @@ public class CorantConfigConversion implements Serializable {
     return result;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public Map convertMap(Map<String, Optional<String>> rawMap, Supplier<Map<?, ?>> factory,
+      Type keyType, Type valueType) {
+    Map map = factory.get();
+    rawMap.forEach((rk, rv) -> {
+      Object key = convert(rk, keyType);
+      Object value = rv.isPresent() ? convert(rv.get(), valueType) : null;
+      map.put(key, value);
+    });
+    return map;
+  }
+
   /**
    * Convert string to map, use {@link #tryConvertStringMap(String)} to transform string to
    * Map&lt;String,String&gt; and then convert Map&lt;String,String&gt; value to the specified

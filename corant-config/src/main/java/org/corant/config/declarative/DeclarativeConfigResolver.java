@@ -13,37 +13,21 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.config.ConfigUtils.concatKey;
-import static org.corant.config.ConfigUtils.dashify;
 import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.Annotations.findAnnotation;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Fields.traverseFields;
-import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.corant.shared.conversion.Converters;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -147,153 +131,8 @@ public class DeclarativeConfigResolver {
     return keys;
   }
 
-  private static Class<?> getFieldActualTypeArguments(Field field, int index) {
+  static Class<?> getFieldActualTypeArguments(Field field, int index) {
     return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
-  }
-
-  public static class ConfigClass<T extends DeclarativeConfig> {
-    private final String keyRoot;
-    private final int keyIndex;
-    private final Class<T> clazz;
-    private final List<ConfigField> fields = new ArrayList<>();
-    private final boolean ignoreNoAnnotatedItem;
-
-    public ConfigClass(Class<T> cls) {
-      ConfigKeyRoot ckr = shouldNotNull(findAnnotation(cls, ConfigKeyRoot.class, true));
-      keyRoot = ckr.value();
-      clazz = cls;
-      keyIndex = ckr.keyIndex();
-      ignoreNoAnnotatedItem = ckr.ignoreNoAnnotatedItem();
-      traverseFields(cls, f -> {
-        if (!Modifier.isFinal(f.getModifiers())) {
-          Class<?> ft = resolveFieldType(f);
-          if (Converters.lookup(String.class, ft).isPresent() || Map.class.isAssignableFrom(ft)) {
-            if (f.isAnnotationPresent(ConfigKeyItem.class) || !ignoreNoAnnotatedItem) {
-              getFields().add(new ConfigField(this, f));
-            }
-          }
-        }
-      });
-    }
-
-    public Class<T> getClazz() {
-      return clazz;
-    }
-
-    public Set<String> getDefaultItemKeys() {
-      return getFields().stream().map(ConfigField::getDefaultKey).collect(Collectors.toSet());
-    }
-
-    public List<ConfigField> getFields() {
-      return fields;
-    }
-
-    public int getKeyIndex() {
-      return keyIndex;
-    }
-
-    public String getKeyRoot() {
-      return keyRoot;
-    }
-
-    public boolean isIgnoreNoAnnotatedItem() {
-      return ignoreNoAnnotatedItem;
-    }
-
-    @Override
-    public String toString() {
-      return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
-          + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
-    }
-
-    Class<?> resolveFieldType(Field field) {
-      Type type = field.getGenericType();
-      Class<?> ft = null;
-      if (type instanceof Class) {
-        ft = (Class<?>) type;
-        if (ft.isArray()) {
-          ft = ft.getComponentType();
-        }
-        ft = wrap((Class<?>) type);
-      } else if (type instanceof ParameterizedType) {
-        if (type instanceof Map) {
-          ft = Map.class;
-        } else {
-          ft = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-        }
-      }
-      return ft;
-    }
-  }
-
-  public static class ConfigField {
-    private final ConfigClass<?> configClass;
-    private final Field field;
-    private final String keyItem;
-    private final DeclarativePattern pattern;
-    private final String defaultValue;
-    private final String defaultKey;
-
-    ConfigField(ConfigClass<?> configClass, Field field) {
-      this.configClass = configClass;
-      ConfigKeyItem cki =
-          defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
-      this.field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-        field.setAccessible(true);
-        return field;
-      });
-      keyItem = isBlank(cki.value()) ? dashify(field.getName()) : cki.value();
-      pattern = defaultObject(cki.pattern(), DeclarativePattern.SUFFIX);
-      defaultValue = cki.defaultValue();
-      defaultKey = concatKey(configClass.getKeyRoot(), getKeyItem());
-      if (pattern == DeclarativePattern.PREFIX) {
-        shouldBeTrue(field.getType().equals(Map.class),
-            "We only support Map field type for PREFIX pattern %s %s.",
-            configClass.getClazz().getName(), field.getName());
-        Class<?> mapKeyType = getFieldActualTypeArguments(field, 0);
-        Class<?> mapValType = getFieldActualTypeArguments(field, 1);
-        shouldBeTrue(
-            mapKeyType.equals(String.class)
-                && (mapValType.equals(Object.class) || mapValType.equals(String.class)),
-            "We only support Map<String,Object> or Map<String,String> field type for PREFIX pattern %s %s.",
-            configClass.getClazz().getName(), field.getName());
-      }
-    }
-
-    public String getDefaultKey() {
-      return defaultKey;
-    }
-
-    public String getDefaultValue() {
-      return defaultValue.equals(ConfigKeyItem.NO_DFLT_VALUE) ? null : defaultValue;
-    }
-
-    public Field getField() {
-      return field;
-    }
-
-    public String getKey(String infix) {
-      if (isBlank(infix)) {
-        return getDefaultKey();
-      } else {
-        return concatKey(configClass.getKeyRoot(), infix, getKeyItem());
-      }
-    }
-
-    public String getKeyItem() {
-      return keyItem;
-    }
-
-    public DeclarativePattern getPattern() {
-      return pattern;
-    }
-
-    @Override
-    public String toString() {
-      return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
-          + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
-          + "]";
-    }
   }
 
 }

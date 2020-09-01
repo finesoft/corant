@@ -13,6 +13,7 @@
  */
 package org.corant.config.declarative;
 
+import java.beans.Transient;
 import java.io.Serializable;
 import org.eclipse.microprofile.config.Config;
 
@@ -24,6 +25,7 @@ import org.eclipse.microprofile.config.Config;
  */
 public interface DeclarativeConfig extends Serializable {
 
+  @Transient
   default boolean isValid() {
     return true;
   }

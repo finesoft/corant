@@ -18,15 +18,17 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import org.corant.config.CorantConfig;
-import org.corant.config.declarative.DeclarativeConfigResolver.ConfigField;
+import org.corant.config.CorantConfigConversion;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -53,34 +55,46 @@ public enum DeclarativePattern {
   },
 
   PREFIX() {
+    @SuppressWarnings("rawtypes")
     @Override
     public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
         ConfigField configField) throws Exception {
+
+      Map<String, Optional<String>> rawMap = new HashMap<>();
       String key = configField.getKey(infix);
-      int prefixLen = key.length();
-      Map<String, Optional<String>> map =
-          streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key))
-              .collect(Collectors.toMap(k -> k, v -> config.getOptionalValue(v, String.class)));
-      if (isNotEmpty(map)) {
+      streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> {
+        rawMap.put(removeSplitor(k.substring(key.length())),
+            config.getOptionalValue(k, String.class));
+      });
+
+      if (isNotEmpty(rawMap)) {
         Field field = configField.getField();
-        Class<?> filedType = field.getType();
-        if (filedType.equals(Map.class)) {
-          Map<String, Object> valueMap = null;
-          Object defaultFieldValue = field.get(configObject);
-          if (defaultFieldValue instanceof LinkedHashMap) {
-            valueMap = new LinkedHashMap<>();
-          } else if (defaultFieldValue instanceof TreeMap) {
-            valueMap = new TreeMap<>();
-          } else {
-            valueMap = new HashMap<>();
-          }
-          final Map<String, Object> useValueMap = valueMap;
-          for (Entry<String, Optional<String>> entry : map.entrySet()) {
-            entry.getValue().ifPresent(
-                v -> useValueMap.put(removeSplitor(entry.getKey().substring(prefixLen)), v));
-          }
-          field.set(configObject, valueMap); // FIXME need merge???
+        Type fieldType = field.getGenericType();
+        Supplier<Map<?, ?>> factory = null;
+        Object defaultFieldValue = field.get(configObject);
+        if (defaultFieldValue instanceof LinkedHashMap) {
+          factory = () -> new LinkedHashMap<>();
+        } else if (defaultFieldValue instanceof TreeMap) {
+          factory = () -> new TreeMap<>();
+        } else {
+          factory = () -> new HashMap<>();
         }
+        CorantConfig corantConfig = forceCast(config);
+        CorantConfigConversion conversion = corantConfig.getConversion();
+        Map valueMap = null;
+        Type keyType = Object.class;
+        Type valueType = Object.class;
+        if (fieldType instanceof ParameterizedType) {
+          ParameterizedType parameterizedFieldType = (ParameterizedType) fieldType;
+          if (!(parameterizedFieldType.getActualTypeArguments()[0] instanceof WildcardType)) {
+            keyType = parameterizedFieldType.getActualTypeArguments()[0];
+          }
+          if (!(parameterizedFieldType.getActualTypeArguments()[1] instanceof WildcardType)) {
+            valueType = parameterizedFieldType.getActualTypeArguments()[1];
+          }
+        }
+        valueMap = conversion.convertMap(rawMap, factory, keyType, valueType);
+        field.set(configObject, valueMap); // FIXME need merge???
       }
     }
   };

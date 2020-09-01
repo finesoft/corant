@@ -44,7 +44,9 @@ public class ConfigClass<T extends DeclarativeConfig> {
     ignoreNoAnnotatedItem = configKeyRoot.ignoreNoAnnotatedItem();
     traverseFields(clazz, field -> {
       if (!Modifier.isFinal(field.getModifiers())) {
-        fields.add(new ConfigField(this, field));
+        if (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null) {
+          fields.add(new ConfigField(this, field));
+        }
       }
     });
   }

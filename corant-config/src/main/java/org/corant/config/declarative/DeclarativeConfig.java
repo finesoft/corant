@@ -20,7 +20,48 @@ import org.eclipse.microprofile.config.Config;
 /**
  * corant-config
  *
- * @author bingo 下午7:43:15
+ * <p>
+ * Declarative configuration object, used to construct configuration information into configuration
+ * object. Configuration information comes from microprofile config sources. Usually used with
+ * {@link ConfigKeyItem} and {@link ConfigKeyItem} and {@link DeclarativeConfigResolver}.
+ *
+ * <p>
+ * For example:
+ *
+ * <pre>
+ * The declarative configuration object:
+ *
+ * &#64;ConfigKeyRoot(value = "datasource")
+ * public class DatasourceConfig implements DeclarativeConfig {
+ *   String url;
+ *   Class<?> driver;
+ * }
+ *
+ * The application properties:
+ *
+ * datasource.url = jdbc:sqlserver://localhost:1433;databaseName=example
+ * datasource.driver = com.microsoft.sqlserver.jdbc.SQLServerXADataSource
+ *
+ * datasource.blog.url = jdbc:mysql://localhost:3306/blog
+ * datasource.blog.driver = com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+ *
+ * </pre>
+ *
+ * <p>
+ * All configuration item information whose key starts with "datasource" will be mapped to the
+ * properties of the declarative configuration object DatasourceConfig, where the name between the
+ * property name and "datasource" can be used as the name of the declarative configuration object.
+ *
+ * The above example DatasourceConfig object has two properties, the names are called "url" and
+ * "driver", and the configuration items are named "datasource.blog.url" and
+ * "datasource.blog.driver". In this case, the configuration item values of "datasource.blog.url"and
+ * "datasource.blog.driver" will be mapped to the DatasourceConfig object named blog.
+ *
+ * <p>
+ * The above example can be mapped to two DataSourceConfig declarative objects, one with a name and
+ * one without a name.
+ *
+ * @author bingo 下午7:39:01
  *
  */
 public interface DeclarativeConfig extends Serializable {

@@ -22,8 +22,8 @@ The following projects are under the corant project.
 # 6. corant-context 
    Container and context processing module, providing some convenient context processing classes.   
 # 7. corant-suites 
-    Integration project. Thie project includes many subprojects that integrate JEE or other open source components
-    to make integration and development easier. Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/MICROPROFILES ,etc., 
-    supported components or  frameworks are ElasticSearch/Mongodb/Redis/Undertow, etc., and also provide some common development practices such as DDD, DynamicSQL/NoSQL query framework, etc.
+    Integration project. This project includes many subprojects that integrate JEE or other open source components
+    to make integration and development easier. Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc., 
+    supported components or  frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc., and also provide some common development practices such as DDD, Dynamic SQL/NoSQL query framework, etc.
 
 

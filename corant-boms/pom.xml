@@ -25,6 +25,7 @@
 		<version.asciidoctor-pdf>1.5.0-alpha.16</version.asciidoctor-pdf>
 		<version.assertj>3.10.0</version.assertj>
 		<version.atomikos>5.0.3</version.atomikos>
+		<version.bouncycastle>1.66</version.bouncycastle>
 		<version.calcite>1.17.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
@@ -45,6 +46,7 @@
 		<version.ehcache>3.8.1</version.ehcache>
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
+		<version.feign>11.0</version.feign>
 		<version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>
 		<version.flyway>6.0.6</version.flyway>
 		<version.freemarker>2.3.30</version.freemarker>
@@ -73,6 +75,7 @@
 		<version.javax.validation-api>2.0.1.Final</version.javax.validation-api>
 		<version.javax.ws.rs-api>2.1</version.javax.ws.rs-api>
 		<version.jcip-annotations>1.0-1</version.jcip-annotations>
+		<version.jose4j>0.7.2</version.jose4j>
 		<version.junit>4.12</version.junit>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
 		<version.keycloak>6.0.1</version.keycloak>
@@ -112,6 +115,7 @@
 		<version.rest-assured>4.3.1</version.rest-assured>
 		<version.resteasy>4.5.6.Final</version.resteasy>
 		<version.rsocket>1.0.1</version.rsocket>
+		<version.shiro-all>1.6.0</version.shiro-all>
 		<version.smallrye-config>1.7.0</version.smallrye-config>
 		<version.smallrye-fault-tolerance>4.2.0</version.smallrye-fault-tolerance>
 		<version.smallrye-open-api>1.2.1</version.smallrye-open-api>
@@ -910,6 +914,21 @@
 				<artifactId>rsocket-transport-netty</artifactId>
 				<version>${version.rsocket}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-core</artifactId>
+				<version>${version.feign}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-ribbon</artifactId>
+				<version>${version.feign}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-hystrix</artifactId>
+				<version>${version.feign}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.vertx</groupId>
@@ -1087,6 +1106,18 @@
 
 			<!-- Security -->
 			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-all</artifactId>
+				<version>${version.shiro-all}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.bitbucket.b_c</groupId>
+				<artifactId>jose4j</artifactId>
+				<version>${version.jose4j}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.soteria</groupId>
 				<artifactId>javax.security.enterprise</artifactId>
 				<version>${version.glassfish.soteria}</version>
@@ -1150,6 +1181,16 @@
 				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-installed-adapter</artifactId>
 				<version>${version.keycloak}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>${version.bouncycastle}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${version.bouncycastle}</version>
 			</dependency>
 
 			<dependency>
@@ -1465,6 +1506,11 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-dsa</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-security-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

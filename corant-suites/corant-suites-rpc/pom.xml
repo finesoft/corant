@@ -10,5 +10,6 @@
   <modules>
   	<module>corant-suites-rpc-grpc</module>
   	<module>corant-suites-rpc-rsocket</module>
+  	<module>corant-suites-rpc-feign</module>
   </modules>
 </project>

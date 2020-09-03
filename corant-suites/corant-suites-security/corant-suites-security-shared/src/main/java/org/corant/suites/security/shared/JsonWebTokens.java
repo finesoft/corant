@@ -22,7 +22,6 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
-import io.smallrye.jwt.KeyUtils;
 
 /**
  * corant-suites-security-shared
@@ -63,15 +62,6 @@ public class JsonWebTokens {
     jws.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
     jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
     return jws.getCompactSerialization();
-  }
-
-  public static void main(String... setting) throws GeneralSecurityException {
-    String pubKeyPem =
-        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxTgUIiGmSAWFhcbYdDHgPMP3w5AWf6w40rYosR6yhEJmy7ugLWU_wVB90YMx_mUBoSUQzXyaTYjWLGh8t3_VEHC52lNlbbz0lVsTFOa3dgxo9WgxeP0VHcrF7yBfi69dr-V9Y-XI_YRT9uhpaB_WhfCYdWo8wumXmWW_dqsytVurxAiqIooKbFocI6E6_aTWZvmT33NmRu0I0b3Sy7jy_fM1CoyHTOhJ5kDv0OWJVAtEBXP8oBDDJDwMIkMuxM9omVw92DIoUVdVRFGRSkGvt4Hcrxdj9OSLOnenjVFtnxkI-oEOnfcteDqml1IZXsy7SOiQAUbHXSDRbD-zJZeslwIDAQAB";
-
-    assert KeyUtils.decodePublicKey(pubKeyPem) != null;
-
-    assert Keys.decodePublicKey(pubKeyPem, "RSA") != null;
   }
 
 }

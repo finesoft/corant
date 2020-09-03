@@ -56,7 +56,7 @@ public class Keys {
   static final Logger LOGGER = Logger.getLogger(Keys.class.getName());
 
   public static String createKeyId(Key key, String algo) throws GeneralSecurityException {
-    return Base64.getUrlEncoder().encodeToString(
+    return Base64.getEncoder().encodeToString(
         MessageDigest.getInstance(defaultString(algo, "SHA-256")).digest(key.getEncoded()));
   }
 
@@ -156,7 +156,7 @@ public class Keys {
 
   public static byte[] pemToDer(String pem) {
     pem = removeBeginEnd(pem);
-    return Base64.getUrlDecoder().decode(pem);
+    return Base64.getDecoder().decode(pem);
   }
 
   public static String toPem(Key key) {
@@ -166,7 +166,7 @@ public class Keys {
     }
     StringBuilder sb = new StringBuilder();
     sb.append("-----BEGIN ").append(name).append("-----\n");
-    sb.append(Base64.getUrlEncoder().encodeToString(key.getEncoded())).append("\n");
+    sb.append(Base64.getEncoder().encodeToString(key.getEncoded())).append("\n");
     sb.append("-----END ").append(name).append("-----\n");
     return sb.toString();
   }

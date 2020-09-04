@@ -35,19 +35,19 @@ public class Retry {
 
   static final Logger logger = Logger.getLogger(Retry.class.toString());
 
-  public static <T> Retryer<T> retrier() {
+  public static <T> Retryer<T> retryer() {
     return new Retryer<>();
   }
 
-  public static <T> T retry(int times, Duration interval, Function<Integer, T> runnable) {
+  public static <T> T execute(int times, Duration interval, Function<Integer, T> runnable) {
     return new Retryer<T>().times(times).interval(interval).task(runnable).execute();
   }
 
-  public static void retry(int times, Duration interval, Runnable runnable) {
+  public static void execute(int times, Duration interval, Runnable runnable) {
     new Retryer<>().times(times).interval(interval).task(runnable).execute();
   }
 
-  public static <T> T retry(int times, Duration interval, Supplier<T> supplier) {
+  public static <T> T execute(int times, Duration interval, Supplier<T> supplier) {
     return new Retryer<T>().times(times).interval(interval).task(supplier).execute();
   }
 

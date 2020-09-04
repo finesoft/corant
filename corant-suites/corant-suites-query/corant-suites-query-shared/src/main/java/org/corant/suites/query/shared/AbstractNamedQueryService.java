@@ -19,7 +19,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
@@ -275,9 +274,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
-          return forceCast(Retry.retryer().times(parameter.getRetryTimes())
+          return Retry.retryer().times(parameter.getRetryTimes())
               .backoff(parameter.getRetryBackoff()).interval(parameter.getRetryInterval())
-              .task(() -> forward(queryName, parameter)).execute());
+              .execute(() -> forward(queryName, parameter));
         } else {
           return forward(queryName, parameter);
         }

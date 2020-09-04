@@ -35,20 +35,20 @@ public class Retry {
 
   static final Logger logger = Logger.getLogger(Retry.class.toString());
 
-  public static <T> Retryer<T> retryer() {
-    return new Retryer<>();
-  }
-
   public static <T> T execute(int times, Duration interval, Function<Integer, T> runnable) {
-    return new Retryer<T>().times(times).interval(interval).task(runnable).execute();
+    return new Retryer().times(times).interval(interval).execute(runnable);
   }
 
   public static void execute(int times, Duration interval, Runnable runnable) {
-    new Retryer<>().times(times).interval(interval).task(runnable).execute();
+    new Retryer().times(times).interval(interval).execute(runnable);
   }
 
   public static <T> T execute(int times, Duration interval, Supplier<T> supplier) {
-    return new Retryer<T>().times(times).interval(interval).task(supplier).execute();
+    return new Retryer().times(times).interval(interval).execute(supplier);
+  }
+
+  public static Retryer retryer() {
+    return new Retryer();
   }
 
   /**
@@ -57,22 +57,53 @@ public class Retry {
    * @author bingo 10:41:29
    *
    */
-  public static class Retryer<T> {
+  public static class Retryer {
 
     private int times = 8;
     private long interval = 2000L;
     private double backoff = 0.0;
     private BiConsumer<Integer, Throwable> thrower;
-    private Function<Integer, T> executable;
 
     private int attempt = 0;
 
-    public Retryer<T> backoff(double backoff) {
+    public Retryer backoff(double backoff) {
       this.backoff = backoff;
       return this;
     }
 
-    public T execute() {
+    public <T> T execute(Function<Integer, T> executable) {
+      return doExecute(executable);
+    }
+
+    public void execute(Runnable runnable) {
+      doExecute(i -> {
+        runnable.run();
+        return null;
+      });
+    }
+
+    public <T> T execute(Supplier<T> supplier) {
+      return doExecute((i) -> forceCast(supplier.get()));
+    }
+
+    public Retryer interval(Duration interval) {
+      this.interval = interval == null || interval.toMillis() < 0 ? 0L : interval.toMillis();
+      return this;
+    }
+
+    public Retryer thrower(BiConsumer<Integer, Throwable> thrower) {
+      this.thrower = thrower;
+      return this;
+    }
+
+    public Retryer times(int times) {
+      this.times = max(1, times);
+      return this;
+    }
+
+    protected <T> T doExecute(Function<Integer, T> executable) {
+
+      shouldNotNull(executable);
 
       while (true) {
 
@@ -106,44 +137,6 @@ public class Retry {
       }
     }
 
-    public Retryer<T> interval(Duration interval) {
-      this.interval = interval == null || interval.toMillis() < 0 ? 0L : interval.toMillis();
-      return this;
-    }
-
-    public Retryer<T> task(Function<Integer, T> executable) {
-      shouldNotNull(executable);
-      this.executable = executable;
-      return this;
-    }
-
-    public Retryer<T> task(Runnable runnable) {
-      shouldNotNull(runnable);
-      this.executable = (i) -> {
-        runnable.run();
-        return null;
-      };
-      return this;
-    }
-
-    public Retryer<T> task(Supplier<T> supplier) {
-      shouldNotNull(supplier);
-      this.executable = (i) -> {
-        return forceCast(supplier.get());
-      };
-      return this;
-    }
-
-    public Retryer<T> thrower(BiConsumer<Integer, Throwable> thrower) {
-      this.thrower = thrower;
-      return this;
-    }
-
-    public Retryer<T> times(int times) {
-      this.times = max(1, times);
-      return this;
-    }
-
     long computeInterval(double backoffFactor, long base, int attempt) {
       if (backoffFactor > 0) {
         long interval = base * (int) Math.pow(2, attempt);
@@ -155,7 +148,7 @@ public class Retry {
 
     void logRetry(Throwable e) {
       logger.log(Level.WARNING, e, () -> String.format(
-          "An exception [%s] occurred during execution, enter the retry phase, the retry attempts [%s], interval [%s], message : [%s]",
+          "An exception [%s] occurred during execution, enter the retry phase, the retry attempt [%s], interval [%s], message : [%s]",
           e.getClass().getName(), attempt, interval, defaultString(e.getMessage(), "unknown")));
     }
   }

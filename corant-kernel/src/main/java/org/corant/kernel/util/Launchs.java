@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.util;
+package org.corant.kernel.util;
 
 import static org.corant.shared.util.Strings.split;
 import java.io.File;
@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.corant.shared.normal.Defaults;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-shared

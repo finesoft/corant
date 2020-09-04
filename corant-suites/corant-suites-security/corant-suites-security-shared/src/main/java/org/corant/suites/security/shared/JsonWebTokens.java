@@ -48,20 +48,13 @@ public class JsonWebTokens {
   public static String grantJWTRSASHA256AccessToken(String rsaPublicKeyPem, String rsaPrivateKeyPem,
       String sha256keyId, Consumer<JwtClaims> setting)
       throws JoseException, GeneralSecurityException {
+
     RsaJsonWebKey rsaJsonWebKey =
         new RsaJsonWebKey((RSAPublicKey) Keys.decodePublicKey(rsaPublicKeyPem, "RSA"));
     rsaJsonWebKey.setKeyId(sha256keyId);
     rsaJsonWebKey.setPrivateKey(Keys.decodePrivateKey(rsaPrivateKeyPem, "RSA"));
-    JwtClaims claims = new JwtClaims();
-    if (setting != null) {
-      setting.accept(claims);
-    }
-    JsonWebSignature jws = new JsonWebSignature();
-    jws.setPayload(claims.toJson());
-    jws.setKey(rsaJsonWebKey.getPrivateKey());
-    jws.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
-    jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
-    return jws.getCompactSerialization();
+
+    return grantJWTAccessToken(rsaJsonWebKey, setting, AlgorithmIdentifiers.RSA_USING_SHA256);
   }
 
 }

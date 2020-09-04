@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
-import org.corant.kernel.util.Retries.SupplierRetrier;
+import org.corant.shared.util.Retry;
 import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
@@ -275,9 +275,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
-          return forceCast(new SupplierRetrier<>(() -> forward(queryName, parameter))
-              .times(parameter.getRetryTimes()).interval(parameter.getRetryInterval())
-              .transfer(parameter.getErrorTransfer()).execute());
+          return forceCast(Retry.retrier().times(parameter.getRetryTimes())
+              .backoff(parameter.getRetryBackoff()).interval(parameter.getRetryInterval())
+              .task(() -> forward(queryName, parameter)).execute());
         } else {
           return forward(queryName, parameter);
         }

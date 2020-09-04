@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 
 /**
  * corant-suites-query-shared
@@ -265,9 +264,9 @@ public interface QueryParameter extends Serializable {
 
     protected int retryTimes = 0;
 
-    protected Duration retryInterval = defRtyItl;
+    protected double retryBackoff = 0.0;
 
-    protected transient Function<Exception, RuntimeException> errorTransfer;
+    protected Duration retryInterval = defRtyItl;
 
     protected transient BiPredicate<Integer, Object> terminater;
 
@@ -284,7 +283,7 @@ public interface QueryParameter extends Serializable {
     public StreamQueryParameter(StreamQueryParameter other) {
       super(other);
       enhancer(other.enhancer).retryInterval(other.retryInterval).retryTimes(other.retryTimes)
-          .errorTransfer(other.errorTransfer).terminater(other.terminater);
+          .retryBackoff(other.retryBackoff).terminater(other.terminater);
     }
 
     @Override
@@ -310,11 +309,6 @@ public interface QueryParameter extends Serializable {
       return this;
     }
 
-    public StreamQueryParameter errorTransfer(Function<Exception, RuntimeException> errorTransfer) {
-      this.errorTransfer = errorTransfer;
-      return this;
-    }
-
     public StreamQueryParameter forward(Object current) {
       if (enhancer != null) {
         enhancer.accept(current, this);
@@ -330,10 +324,10 @@ public interface QueryParameter extends Serializable {
 
     /**
      *
-     * @return the errorTransfer
+     * @return the retryBackoff
      */
-    public Function<Exception, RuntimeException> getErrorTransfer() {
-      return errorTransfer;
+    public double getRetryBackoff() {
+      return retryBackoff;
     }
 
     /**
@@ -383,6 +377,11 @@ public interface QueryParameter extends Serializable {
     @Override
     public StreamQueryParameter offset(Integer offset) {
       super.offset(offset);
+      return this;
+    }
+
+    public StreamQueryParameter retryBackoff(double retryBackoff) {
+      this.retryBackoff = retryBackoff;
       return this;
     }
 

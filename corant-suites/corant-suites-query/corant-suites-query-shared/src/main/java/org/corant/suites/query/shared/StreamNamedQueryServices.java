@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.shared.util.Streams;
@@ -129,12 +128,6 @@ public class StreamNamedQueryServices {
     return this;
   }
 
-  public StreamNamedQueryServices errorTransfer(
-      Function<Exception, RuntimeException> errorTransfer) {
-    parameter.errorTransfer(errorTransfer);
-    return this;
-  }
-
   public StreamNamedQueryServices limit(Integer limit) {
     parameter.limit(limit);
     return this;
@@ -142,6 +135,11 @@ public class StreamNamedQueryServices {
 
   public StreamNamedQueryServices offset(Integer offset) {
     parameter.offset(offset);
+    return this;
+  }
+
+  public StreamNamedQueryServices retryBackoff(double retryBackoff) {
+    parameter.retryBackoff(retryBackoff);
     return this;
   }
 

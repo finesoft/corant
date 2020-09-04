@@ -13,7 +13,7 @@
  */
 package org.corant.kernel.boot;
 
-import org.corant.shared.util.Launchs;
+import org.corant.kernel.util.Launchs;
 
 /**
  * corant-kernel

@@ -78,7 +78,6 @@ public class Retry {
 
         try {
 
-          logRecover();
           return executable.apply(attempt);
 
         } catch (RuntimeException | AssertionError e) {
@@ -151,13 +150,6 @@ public class Retry {
         return Randoms.randomLong(interval);
       } else {
         return base;
-      }
-    }
-
-    void logRecover() {
-      if (attempt > 0) {
-        logger.log(Level.INFO, () -> String
-            .format("The retry execution resume normal operation total attempts [%s]!", attempt));
       }
     }
 

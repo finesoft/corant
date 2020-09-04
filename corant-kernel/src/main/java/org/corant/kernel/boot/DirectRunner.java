@@ -229,7 +229,7 @@ public class DirectRunner {
         if (await) {
           await();
         }
-      } else if (!Corant.current().isRuning()) {
+      } else if (!Corant.current().isRunning()) {
         Corant.current().start(Functions.emptyConsumer());
       }
     } catch (Exception t) {

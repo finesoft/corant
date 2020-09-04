@@ -236,7 +236,7 @@ public class Corant implements AutoCloseable {
       } else {
         startup(new Class[0], arguments);
       }
-    } else if (!current().isRuning()) {
+    } else if (!current().isRunning()) {
       current().start(null);
     }
     return CDI.current().select(beanClass, annotations).get();
@@ -290,14 +290,14 @@ public class Corant implements AutoCloseable {
     try {
       if (current() == null) {
         startup(new Class[0], arguments);
-      } else if (!current().isRuning()) {
+      } else if (!current().isRunning()) {
         current().start(null);
       }
       runnable.run();
     } catch (Throwable e) {
       throw new CorantRuntimeException(e);
     } finally {
-      if (current() != null && current().isRuning()) {
+      if (current() != null && current().isRunning()) {
         current().stop();
       }
     }
@@ -310,7 +310,7 @@ public class Corant implements AutoCloseable {
    */
   public static synchronized void shutdown() {
     if (current() != null) {
-      if (current().isRuning()) {
+      if (current().isRunning()) {
         current().stop();
       }
       if (current().power() != null) {
@@ -423,14 +423,14 @@ public class Corant implements AutoCloseable {
     try {
       if (current() == null) {
         startup(new Class[0], arguments);
-      } else if (!current().isRuning()) {
+      } else if (!current().isRunning()) {
         current().start(null);
       }
       return supplier.get();
     } catch (Throwable e) {
       throw new CorantRuntimeException(e);
     } finally {
-      if (current() != null && current().isRuning()) {
+      if (current() != null && current().isRunning()) {
         current().stop();
       }
     }
@@ -471,7 +471,7 @@ public class Corant implements AutoCloseable {
    * @return getBeanManager
    */
   public synchronized BeanManager getBeanManager() {
-    shouldBeTrue(isRuning(), "The corant instance is null or is not in running");
+    shouldBeTrue(isRunning(), "The corant instance is null or is not in running");
     return container.getBeanManager();
   }
 
@@ -487,7 +487,7 @@ public class Corant implements AutoCloseable {
    *
    * @see SeContainer#isRunning()
    */
-  public synchronized boolean isRuning() {
+  public synchronized boolean isRunning() {
     return container != null && container.isRunning();
   }
 
@@ -499,7 +499,7 @@ public class Corant implements AutoCloseable {
    * @param preInitializer start
    */
   public synchronized void start(Consumer<SeContainerInitializer> preInitializer) {
-    if (isRuning()) {
+    if (isRunning()) {
       return;
     }
     final StopWatch stopWatch = new StopWatch(applicationName());
@@ -518,7 +518,7 @@ public class Corant implements AutoCloseable {
    * application.
    */
   public synchronized void stop() {
-    if (isRuning()) {
+    if (isRunning()) {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
       emitter.fire(new PreContainerStopEvent(arguments));
       container.close();

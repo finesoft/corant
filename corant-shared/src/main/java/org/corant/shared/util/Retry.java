@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
@@ -63,11 +64,20 @@ public class Retry {
     private long interval = 2000L;
     private double backoff = 0.0;
     private BiConsumer<Integer, Throwable> thrower;
-
-    private int attempt = 0;
+    private Supplier<Boolean> breaker = () -> true;
 
     public Retryer backoff(double backoff) {
+      if (backoff > 0) {
+        shouldBeTrue(backoff > 1);
+      }
       this.backoff = backoff;
+      return this;
+    }
+
+    public Retryer breaker(final Supplier<Boolean> breaker) {
+      if (breaker != null) {
+        this.breaker = breaker;
+      }
       return this;
     }
 
@@ -75,54 +85,48 @@ public class Retry {
       return doExecute(executable);
     }
 
-    public void execute(Runnable runnable) {
+    public void execute(final Runnable runnable) {
       doExecute(i -> {
         runnable.run();
         return null;
       });
     }
 
-    public <T> T execute(Supplier<T> supplier) {
+    public <T> T execute(final Supplier<T> supplier) {
       return doExecute((i) -> forceCast(supplier.get()));
     }
 
-    public Retryer interval(Duration interval) {
+    public Retryer interval(final Duration interval) {
       this.interval = interval == null || interval.toMillis() < 0 ? 0L : interval.toMillis();
       return this;
     }
 
-    public Retryer thrower(BiConsumer<Integer, Throwable> thrower) {
+    public Retryer thrower(final BiConsumer<Integer, Throwable> thrower) {
       this.thrower = thrower;
       return this;
     }
 
-    public Retryer times(int times) {
+    public Retryer times(final int times) {
       this.times = max(1, times);
       return this;
     }
 
-    protected <T> T doExecute(Function<Integer, T> executable) {
-
+    protected <T> T doExecute(final Function<Integer, T> executable) {
       shouldNotNull(executable);
-
-      while (true) {
-
+      int remaining = times;
+      int attempt = 0;
+      while (breaker.get()) {
         try {
-
           return executable.apply(attempt);
-
         } catch (RuntimeException | AssertionError e) {
-
           if (thrower != null) {
             thrower.accept(attempt, e);
           }
-
-          times--;
+          remaining--;
           attempt++;
-
-          if (times > 0) {
+          if (remaining > 0) {
             long wait = computeInterval(backoff, interval, attempt);
-            logRetry(e, wait);
+            logRetry(e, attempt, wait);
             try {
               if (wait > 0) {
                 Thread.sleep(wait);
@@ -136,6 +140,7 @@ public class Retry {
           }
         } // end catch
       }
+      return null;
     }
 
     long computeInterval(double backoffFactor, long base, int attempt) {
@@ -147,10 +152,10 @@ public class Retry {
       }
     }
 
-    void logRetry(Throwable e, long nextWait) {
+    void logRetry(Throwable e, int attempt, long wait) {
       logger.log(Level.WARNING, e, () -> String.format(
           "An exception [%s] occurred during execution, enter the retry phase, the retry attempt [%s], interval [%s], message : [%s]",
-          e.getClass().getName(), attempt, nextWait, defaultString(e.getMessage(), "unknown")));
+          e.getClass().getName(), attempt, wait, defaultString(e.getMessage(), "unknown")));
     }
   }
 

@@ -121,10 +121,11 @@ public class Retry {
           attempt++;
 
           if (times > 0) {
-            logRetry(e);
+            long wait = computeInterval(backoff, interval, attempt);
+            logRetry(e, wait);
             try {
-              if (interval > 0) {
-                Thread.sleep(computeInterval(backoff, interval, attempt));
+              if (wait > 0) {
+                Thread.sleep(wait);
               }
             } catch (InterruptedException ie) {
               ie.addSuppressed(e);
@@ -138,18 +139,18 @@ public class Retry {
     }
 
     long computeInterval(double backoffFactor, long base, int attempt) {
-      if (backoffFactor > 0) {
-        long interval = base * (int) Math.pow(2, attempt);
+      if (backoffFactor > 1) {
+        long interval = base * (int) Math.pow(backoffFactor, attempt);
         return Randoms.randomLong(interval);
       } else {
         return base;
       }
     }
 
-    void logRetry(Throwable e) {
+    void logRetry(Throwable e, long nextWait) {
       logger.log(Level.WARNING, e, () -> String.format(
           "An exception [%s] occurred during execution, enter the retry phase, the retry attempt [%s], interval [%s], message : [%s]",
-          e.getClass().getName(), attempt, interval, defaultString(e.getMessage(), "unknown")));
+          e.getClass().getName(), attempt, nextWait, defaultString(e.getMessage(), "unknown")));
     }
   }
 

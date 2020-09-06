@@ -30,9 +30,9 @@ import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
  *
  */
 @Provider
-public class MpSmallRyeJWTAuthJaxRsFeature implements Feature {
+public class MpJWTAuthJaxRsFeature implements Feature {
 
-  private static Logger logger = Logger.getLogger(MpSmallRyeJWTAuthJaxRsFeature.class);
+  private static Logger logger = Logger.getLogger(MpJWTAuthJaxRsFeature.class);
 
   @Context
   private Application restApplication;
@@ -42,7 +42,7 @@ public class MpSmallRyeJWTAuthJaxRsFeature implements Feature {
     boolean enabled = mpJwtEnabled();
     if (enabled) {
       context.register(MpJWTAuthorizationFilterRegistrar.class);
-      context.register(MpBlackListFilter.class);
+      context.register(MpJWTBlackListFilter.class);
       if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
         context.register(MpJWTAuthenticationFilter.class);
         logger.debugf("EE Security is not in use, %s has been registered",

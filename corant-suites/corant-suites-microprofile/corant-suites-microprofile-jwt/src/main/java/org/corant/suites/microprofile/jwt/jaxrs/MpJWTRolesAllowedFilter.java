@@ -34,7 +34,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  *
  */
 @Priority(Priorities.AUTHORIZATION)
-public class MpRolesAllowedFilter implements ContainerRequestFilter {
+public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
 
   public static final String PERMIT_ALL_ROLES = "*";
 
@@ -42,7 +42,7 @@ public class MpRolesAllowedFilter implements ContainerRequestFilter {
   private final Set<WildcardMatcher> allowedRoleWildcards = new HashSet<>();
   private final boolean permitAll;
 
-  public MpRolesAllowedFilter(String... allowedRoles) {
+  public MpJWTRolesAllowedFilter(String... allowedRoles) {
     boolean permitAll = false;
     for (String allowedRole : allowedRoles) {
       if (isNotBlank(allowedRole)) {

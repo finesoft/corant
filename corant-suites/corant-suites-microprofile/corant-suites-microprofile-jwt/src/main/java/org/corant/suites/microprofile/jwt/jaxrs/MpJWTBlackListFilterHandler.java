@@ -13,28 +13,16 @@
  */
 package org.corant.suites.microprofile.jwt.jaxrs;
 
-import javax.annotation.Priority;
-import javax.enterprise.inject.spi.CDI;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import org.jboss.logging.Logger;
 
 /**
  * corant-suites-mp-jwt
  *
- * @author bingo 上午11:33:50
+ * @author bingo 下午7:49:14
  *
  */
-@Priority(Priorities.AUTHENTICATION + 1)
-public class MpBlackListFilter implements ContainerRequestFilter {
+public interface MpJWTBlackListFilterHandler {
 
-  private static Logger logger = Logger.getLogger(MpBlackListFilter.class);
-
-  @Override
-  public void filter(ContainerRequestContext requestContext) {
-    CDI.current().select(MpBlackListFilterHandler.class).forEach(h -> h.handle(requestContext));
-    logger.debugf("Success");
-  }
+  void handle(ContainerRequestContext requestContext);
 
 }

@@ -20,7 +20,7 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.suites.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
-import org.corant.suites.microprofile.jwt.jaxrs.MpSmallRyeJWTAuthJaxRsFeature;
+import org.corant.suites.microprofile.jwt.jaxrs.MpJWTAuthJaxRsFeature;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
@@ -75,7 +75,7 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     addAnnotatedType(event, beanManager, MpJWTAuthenticationFilter.class);
     addAnnotatedType(event, beanManager, PrincipalProducer.class);
     addAnnotatedType(event, beanManager, RawClaimTypeProducer.class);
-    addAnnotatedType(event, beanManager, MpSmallRyeJWTAuthJaxRsFeature.class);
+    addAnnotatedType(event, beanManager, MpJWTAuthJaxRsFeature.class);
     addAnnotatedType(event, beanManager, DefaultJWTParser.class);
 
     if (isEESecurityAvailable()) {

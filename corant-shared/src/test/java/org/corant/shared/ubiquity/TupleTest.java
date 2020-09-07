@@ -15,7 +15,9 @@ package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Sets.setOf;
+import java.math.BigDecimal;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.junit.Test;
 import junit.framework.TestCase;
@@ -44,6 +46,22 @@ public class TupleTest extends TestCase {
     assertTrue(Pair.empty().isEmpty());
     assertFalse(p1.isEmpty());
     assertEquals(mapOf("1", "a", "2", "b").entrySet(), setOf(Pair.of("1", "a"), Pair.of("2", "b")));
+  }
+
+  public void testRange() {
+    Range<Integer> r1 = Range.of(1, 10);
+    Range<Integer> r2 = Range.of(1, 9);
+    assertFalse(r1.equals(r2));
+    assertTrue(r1.isConflict(r2));
+    r2 = Range.of(1, 10);
+    assertTrue(r1.equals(r2));
+    assertTrue(r1.same(r2));
+    Range<BigDecimal> rd1 = Range.of(new BigDecimal("1.0"), new BigDecimal("10.0"));
+    Range<BigDecimal> rd2 = Range.of(new BigDecimal("1.0"), new BigDecimal("10"));
+    assertFalse(rd1.equals(rd2));
+    assertTrue(rd1.same(rd2));
+    rd2 = Range.of(new BigDecimal("10.1"), new BigDecimal("20.0"));
+    assertFalse(rd1.isConflict(rd2));
   }
 
   @Test

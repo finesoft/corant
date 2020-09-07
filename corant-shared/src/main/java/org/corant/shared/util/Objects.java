@@ -92,6 +92,17 @@ public class Objects {
     }
   }
 
+  public static <T extends Comparable<? super T>> int compare(final T c1, final T c2) {
+    if (c1 == c2) {
+      return 0;
+    } else if (c1 == null) {
+      return -1;
+    } else if (c2 == null) {
+      return 1;
+    }
+    return c1.compareTo(c2);
+  }
+
   public static <T> int compare(T a, T b, Comparator<? super T> c) {
     return java.util.Objects.compare(a, b, c);
   }

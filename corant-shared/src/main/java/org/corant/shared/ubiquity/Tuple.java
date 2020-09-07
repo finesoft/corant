@@ -13,6 +13,8 @@
  */
 package org.corant.shared.ubiquity;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Objects.compare;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Map;
@@ -137,6 +139,117 @@ public interface Tuple {
     public Pair<L, R> withValue(final R value) {
       return new Pair<>(getKey(), value);
     }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 20:26:59
+   *
+   */
+  public static class Range<T extends Comparable<T>> {
+
+    private final T start;
+    private final T end;
+
+    protected Range(T start, T end) {
+      super();
+      this.start = start;
+      this.end = end;
+    }
+
+    public static <T extends Comparable<T>> Range<T> of(T start, T end) {
+      shouldBeTrue(compare(start, end) <= 0, IllegalArgumentException::new);
+      return new Range<>(start, end);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      Range other = (Range) obj;
+      if (end == null) {
+        if (other.end != null) {
+          return false;
+        }
+      } else if (!end.equals(other.end)) {
+        return false;
+      }
+      if (start == null) {
+        if (other.start != null) {
+          return false;
+        }
+      } else if (!start.equals(other.start)) {
+        return false;
+      }
+      return true;
+    }
+
+    public T getEnd() {
+      return end;
+    }
+
+    public T getStart() {
+      return start;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (end == null ? 0 : end.hashCode());
+      result = prime * result + (start == null ? 0 : start.hashCode());
+      return result;
+    }
+
+    public boolean isConflict(Range<T> other) {
+      return equalOrAfter(start, other.getStart()) && equalOrBefore(start, other.getEnd())
+          || equalOrBefore(start, other.getStart()) && equalOrAfter(end, other.getEnd())
+          || equalOrAfter(end, other.getStart()) && equalOrBefore(end, other.getEnd());
+    }
+
+    public boolean isCover(Range<T> other) {
+      return equalOrBefore(start, other.getStart()) && equalOrAfter(end, other.getEnd());
+    }
+
+    public boolean isCover(T timePoint) {
+      return equalOrBefore(start, timePoint) && equalOrAfter(end, timePoint);
+    }
+
+    public boolean same(Range<T> other) {
+      if (other == null) {
+        return false;
+      } else if (this.equals(other)) {
+        return true;
+      } else {
+        return compare(start, other.start) == 0 && compare(end, other.end) == 0;
+      }
+    }
+
+    public Range<T> withEnd(T end) {
+      return of(start, end);
+    }
+
+    public Range<T> withStart(T start) {
+      return of(start, end);
+    }
+
+    private boolean equalOrAfter(T d1, T d2) {
+      return compare(d1, d2) >= 0;
+    }
+
+    private boolean equalOrBefore(T d1, T d2) {
+      return compare(d1, d2) <= 0;
+    }
+
   }
 
   /**

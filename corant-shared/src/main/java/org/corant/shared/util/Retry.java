@@ -64,7 +64,7 @@ public class Retry {
    * Try to execute and supply a result
    *
    * @param <T> The result type
-   * @param times Total number of attempts to execute the {@code runnable}
+   * @param times Total number of attempts to execute the {@code supplier}
    * @param interval Time interval between two attempts
    * @param supplier The work unit
    * @return The result

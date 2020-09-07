@@ -13,8 +13,9 @@
  */
 package org.corant.suites.microprofile.jwt.jaxrs;
 
+import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Empties.isEmpty;
 import javax.annotation.Priority;
-import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
@@ -22,6 +23,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import org.corant.suites.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
 import org.corant.suites.microprofile.jwt.authorization.MpJWTPermitsAuthorizer;
+import org.corant.suites.security.shared.authorization.Authorizer;
 
 /**
  * corant-suites-mp-jwt
@@ -34,11 +36,10 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
 
   private final String[] allowedPermits;
 
-  @Inject
-  MpJWTPermitsAuthorizer authorizer;
+  volatile MpJWTPermitsAuthorizer authorizer;
 
   public MpJWTPermitsAllowedFilter(String... allowedPermits) {
-    if (allowedPermits == null || allowedPermits.length == 0) {
+    if (isEmpty(allowedPermits)) {
       this.allowedPermits = new String[] {AbstractMpJWTAuthorizer.PERMIT_ALL};
     } else {
       this.allowedPermits = allowedPermits;
@@ -47,7 +48,7 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    if (!authorizer.isAllowed(requestContext, allowedPermits)) {
+    if (!authorizer().isAllowed(requestContext, allowedPermits)) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
         if (ex instanceof Exception) {
@@ -60,5 +61,16 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
         throw new ForbiddenException();
       }
     }
+  }
+
+  protected Authorizer<ContainerRequestContext, String[]> authorizer() {
+    if (authorizer == null) {
+      synchronized (this) {
+        if (authorizer == null) {
+          authorizer = resolve(MpJWTPermitsAuthorizer.class);
+        }
+      }
+    }
+    return authorizer;
   }
 }

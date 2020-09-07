@@ -13,19 +13,15 @@
  */
 package org.corant.suites.microprofile.jwt.jaxrs;
 
-import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.isNotBlank;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.SecurityContext;
-import org.corant.shared.util.Strings.WildcardMatcher;
-import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.corant.suites.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
+import org.corant.suites.microprofile.jwt.authorization.MpJWTRolesAuthorizer;
 
 /**
  * corant-suites-mp-jwt
@@ -36,47 +32,22 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
 
-  public static final String PERMIT_ALL_ROLES = "*";
+  private final String[] allowedRoles;
 
-  private final Set<String> allowedRoles = new HashSet<>();
-  private final Set<WildcardMatcher> allowedRoleWildcards = new HashSet<>();
-  private final boolean permitAll;
+  @Inject
+  MpJWTRolesAuthorizer authorizer;
 
   public MpJWTRolesAllowedFilter(String... allowedRoles) {
-    boolean permitAll = false;
-    for (String allowedRole : allowedRoles) {
-      if (isNotBlank(allowedRole)) {
-        if ("*".equals(allowedRole)) {
-          permitAll = true;
-          break;
-        } else if (WildcardMatcher.hasWildcard(allowedRole)) {
-          allowedRoleWildcards.add(WildcardMatcher.of(true, allowedRole));
-        } else {
-          this.allowedRoles.add(allowedRole);
-        }
-      }
+    if (allowedRoles == null || allowedRoles.length == 0) {
+      this.allowedRoles = new String[] {AbstractMpJWTAuthorizer.PERMIT_ALL};
+    } else {
+      this.allowedRoles = allowedRoles;
     }
-    this.permitAll = permitAll;
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    SecurityContext securityContext = requestContext.getSecurityContext();
-    boolean isForbidden;
-    if (permitAll) {
-      isForbidden = securityContext.getUserPrincipal() == null;
-    } else {
-      isForbidden = allowedRoles.stream().noneMatch(securityContext::isUserInRole);
-      if (isForbidden && securityContext.getUserPrincipal() instanceof JsonWebToken
-          && !allowedRoleWildcards.isEmpty()) {
-        JsonWebToken jwt = JsonWebToken.class.cast(securityContext.getUserPrincipal());
-        if (isNotEmpty(jwt.getGroups())) {
-          isForbidden = jwt.getGroups().stream()
-              .noneMatch(g -> allowedRoleWildcards.stream().anyMatch(p -> p.test(g)));
-        }
-      }
-    }
-    if (isForbidden) {
+    if (!authorizer.isAllowed(requestContext, allowedRoles)) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
         if (ex instanceof Exception) {

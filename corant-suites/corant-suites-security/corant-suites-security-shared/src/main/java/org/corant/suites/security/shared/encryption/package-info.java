@@ -11,14 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.shared.api;
-
 /**
  * corant-suites-security-shared
  * 
- * @author bingo 12:25:41
+ * @author bingo 9:59:17
  *
  */
-public interface Authenticator {
-
-}
+package org.corant.suites.security.shared.encryption;

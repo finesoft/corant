@@ -11,10 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.microprofile.jwt.authorization;
+
+import static org.corant.shared.util.Empties.isNotEmpty;
+import java.util.function.Predicate;
+import javax.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 /**
  * corant-suites-microprofile-jwt
- * 
- * @author bingo 12:35:11
+ *
+ * @author bingo 12:36:33
  *
  */
-package org.corant.suites.microprofile.jwt.impl;
+@ApplicationScoped
+public class MpJWTRolesAuthorizer extends AbstractMpJWTAuthorizer {
+
+  @Override
+  protected boolean isAllowed(Predicate<String> p, JsonWebToken jwt) {
+    if (isNotEmpty(jwt.getGroups())) {
+      return jwt.getGroups().stream().anyMatch(p);
+    }
+    return false;
+  }
+
+}

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.microprofile.jwt.impl;
+package org.corant.suites.microprofile.jwt.authorization;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.function.Predicate;
@@ -29,7 +29,7 @@ public class MpJWTPermitsAuthorizer extends AbstractMpJWTAuthorizer {
 
   @Override
   protected boolean isAllowed(Predicate<String> p, JsonWebToken jwt) {
-    if (isNotEmpty(jwt.getGroups())) {
+    if (isNotEmpty(jwt.getGroups())) { // FIXME use another
       return jwt.getGroups().stream().anyMatch(p);
     }
     return false;

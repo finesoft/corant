@@ -20,7 +20,8 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import org.corant.suites.microprofile.jwt.impl.MpJWTPermitsAuthorizer;
+import org.corant.suites.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
+import org.corant.suites.microprofile.jwt.authorization.MpJWTPermitsAuthorizer;
 
 /**
  * corant-suites-mp-jwt
@@ -31,15 +32,17 @@ import org.corant.suites.microprofile.jwt.impl.MpJWTPermitsAuthorizer;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
 
-  public static final String PERMIT_ALL_ROLES = "*";
-
   private final String[] allowedPermits;
 
   @Inject
   MpJWTPermitsAuthorizer authorizer;
 
   public MpJWTPermitsAllowedFilter(String... allowedPermits) {
-    this.allowedPermits = allowedPermits;
+    if (allowedPermits == null || allowedPermits.length == 0) {
+      this.allowedPermits = new String[] {AbstractMpJWTAuthorizer.PERMIT_ALL};
+    } else {
+      this.allowedPermits = allowedPermits;
+    }
   }
 
   @Override

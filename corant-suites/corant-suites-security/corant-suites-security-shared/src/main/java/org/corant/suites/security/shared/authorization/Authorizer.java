@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.security.shared.api;
+package org.corant.suites.security.shared.authorization;
 
 /**
  * corant-suites-security-shared
@@ -23,6 +23,6 @@ public interface Authorizer<P, T> {
 
   void check(P principal, T t) throws AuthorizationException;
 
-  boolean isAllowed(P principal, T t);
+  boolean isAllowed(P principal, T roleOrPermit);
 
 }

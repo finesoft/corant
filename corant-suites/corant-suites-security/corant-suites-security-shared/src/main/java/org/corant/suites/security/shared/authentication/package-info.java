@@ -14,7 +14,7 @@
 /**
  * corant-suites-security-shared
  * 
- * @author bingo 12:34:43
+ * @author bingo 9:58:27
  *
  */
-package org.corant.suites.security.shared.api;
+package org.corant.suites.security.shared.authentication;

@@ -27,6 +27,7 @@
 		<version.atomikos>5.0.3</version.atomikos>
 		<version.bouncycastle>1.66</version.bouncycastle>
 		<version.calcite>1.17.0</version.calcite>
+		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.commons-codec>1.13</version.commons-codec>
@@ -111,7 +112,7 @@
 		<version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
 		<version.pinyin4j>2.5.1</version.pinyin4j>
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
-		<version.redisson>3.13.2</version.redisson>
+		<version.redisson>3.13.4</version.redisson>
 		<version.rest-assured>4.3.1</version.rest-assured>
 		<version.resteasy>4.5.6.Final</version.resteasy>
 		<version.rsocket>1.0.1</version.rsocket>
@@ -691,6 +692,12 @@
 				<groupId>org.redisson</groupId>
 				<artifactId>redisson</artifactId>
 				<version>${version.redisson}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.cache</groupId>
+						<artifactId>cache-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -749,6 +756,11 @@
 			</dependency>
 
 			<!-- Cache -->
+			<dependency>
+				<groupId>org.jsr107.ri</groupId>
+				<artifactId>cache-annotations-ri-cdi</artifactId>
+				<version>${version.cache-annotations-ri-cdi}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>

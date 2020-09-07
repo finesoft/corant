@@ -220,8 +220,8 @@ public interface Tuple {
       return equalOrBefore(start, other.getStart()) && equalOrAfter(end, other.getEnd());
     }
 
-    public boolean isCover(T timePoint) {
-      return equalOrBefore(start, timePoint) && equalOrAfter(end, timePoint);
+    public boolean isCover(T value) {
+      return equalOrBefore(start, value) && equalOrAfter(end, value);
     }
 
     public boolean same(Range<T> other) {

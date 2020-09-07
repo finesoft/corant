@@ -19,6 +19,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
 
 /**
@@ -153,6 +154,16 @@ public class Empties {
    * @param object
    * @return isEmpty
    */
+  public static boolean isEmpty(final Range<? extends Comparable<?>> object) {
+    return object == null || object.isEmpty();
+  }
+
+  /**
+   * Return true if object is null and object.isEmpty() == true
+   *
+   * @param object
+   * @return isEmpty
+   */
   public static boolean isEmpty(final Triple<?, ?, ?> object) {
     return object == null || object.isEmpty();
   }
@@ -244,6 +255,16 @@ public class Empties {
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Pair<?, ?> object) {
+    return !isEmpty(object);
+  }
+
+  /**
+   * Return true if only if object is not null and object.isEmpty() == false
+   *
+   * @param object
+   * @return isNotEmpty
+   */
+  public static boolean isNotEmpty(final Range<? extends Comparable<?>> object) {
     return !isEmpty(object);
   }
 

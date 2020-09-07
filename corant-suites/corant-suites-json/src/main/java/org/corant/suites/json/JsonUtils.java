@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
@@ -55,6 +56,8 @@ public class JsonUtils {
     SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
         .addDeserializer(Pair.class, new PairDeserializer())
         .addSerializer(Pair.class, new PairSerializer())
+        .addDeserializer(Range.class, new RangeDeserializer())
+        .addSerializer(Range.class, new RangeSerializer())
         .addDeserializer(Triple.class, new TripleDeserializer())
         .addSerializer(Triple.class, new TripleSerializer());
     objectMapper.registerModules(simpleModule);
@@ -257,6 +260,41 @@ public class JsonUtils {
     }
   }
 
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:10
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class RangeDeserializer extends JsonDeserializer<Range> {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Range deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+        throws IOException {
+      final Object[] array = jsonParser.readValueAs(Object[].class);
+      return Range.of((Comparable) array[0], (Comparable) array[1]);
+    }
+  }
+
+  /**
+   * corant-suites-json
+   *
+   * @author bingo 下午12:10:14
+   *
+   */
+  @SuppressWarnings("rawtypes")
+  static class RangeSerializer extends JsonSerializer<Range> {
+    @Override
+    public void serialize(Range range, JsonGenerator gen, SerializerProvider serializerProvider)
+        throws IOException {
+      gen.writeStartArray(2);
+      gen.writeObject(range.getStart());
+      gen.writeObject(range.getEnd());
+      gen.writeEndArray();
+    }
+  }
+
   /** 日期转数组 */
   static class SqlDateSerializer extends JsonSerializer<java.sql.Date> {
 
@@ -307,5 +345,4 @@ public class JsonUtils {
       gen.writeEndArray();
     }
   }
-
 }

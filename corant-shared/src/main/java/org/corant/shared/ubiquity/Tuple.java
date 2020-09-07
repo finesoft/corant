@@ -149,6 +149,9 @@ public interface Tuple {
    */
   public static class Range<T extends Comparable<T>> {
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static final Range emptyInstance = new Range(null, null);
+
     private final T start;
     private final T end;
 
@@ -158,9 +161,26 @@ public interface Tuple {
       this.end = end;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <X extends Comparable<X>> Range<X> empty() {
+      return emptyInstance;
+    }
+
     public static <T extends Comparable<T>> Range<T> of(T start, T end) {
       shouldBeTrue(compare(start, end) <= 0, IllegalArgumentException::new);
       return new Range<>(start, end);
+    }
+
+    public String asString(final String format) {
+      return String.format(format, getStart(), getEnd());
+    }
+
+    public boolean contains(Range<T> other) {
+      return lae(start, other.getStart()) && gae(end, other.getEnd());
+    }
+
+    public boolean contains(T value) {
+      return lae(start, value) && gae(end, value);
     }
 
     @SuppressWarnings("rawtypes")
@@ -210,18 +230,14 @@ public interface Tuple {
       return result;
     }
 
-    public boolean isConflict(Range<T> other) {
-      return equalOrAfter(start, other.getStart()) && equalOrBefore(start, other.getEnd())
-          || equalOrBefore(start, other.getStart()) && equalOrAfter(end, other.getEnd())
-          || equalOrAfter(end, other.getStart()) && equalOrBefore(end, other.getEnd());
+    public boolean isEmpty() {
+      return start == null && end == null;
     }
 
-    public boolean isCover(Range<T> other) {
-      return equalOrBefore(start, other.getStart()) && equalOrAfter(end, other.getEnd());
-    }
-
-    public boolean isCover(T value) {
-      return equalOrBefore(start, value) && equalOrAfter(end, value);
+    public boolean overlap(Range<T> other) {
+      return gae(start, other.getStart()) && lae(start, other.getEnd())
+          || lae(start, other.getStart()) && gae(end, other.getEnd())
+          || gae(end, other.getStart()) && lae(end, other.getEnd());
     }
 
     public boolean same(Range<T> other) {
@@ -234,6 +250,15 @@ public interface Tuple {
       }
     }
 
+    public Pair<T, T> toPair() {
+      return Pair.of(getStart(), getEnd());
+    }
+
+    @Override
+    public String toString() {
+      return asString("[%s,%s]");
+    }
+
     public Range<T> withEnd(T end) {
       return of(start, end);
     }
@@ -242,11 +267,11 @@ public interface Tuple {
       return of(start, end);
     }
 
-    private boolean equalOrAfter(T d1, T d2) {
+    private boolean gae(T d1, T d2) {
       return compare(d1, d2) >= 0;
     }
 
-    private boolean equalOrBefore(T d1, T d2) {
+    private boolean lae(T d1, T d2) {
       return compare(d1, d2) <= 0;
     }
 

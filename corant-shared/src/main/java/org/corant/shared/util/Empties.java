@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
@@ -118,6 +119,10 @@ public class Empties {
       return isEmpty((Pair<?, ?>) object);
     } else if (object instanceof Triple<?, ?, ?>) {
       return isEmpty((Triple<?, ?, ?>) object);
+    } else if (object instanceof Range<?>) {
+      return isEmpty((Range<?>) object);
+    } else if (object instanceof Optional<?>) {
+      return isEmpty((Optional<?>) object);
     } else {
       try {
         return Array.getLength(object) == 0;
@@ -136,6 +141,16 @@ public class Empties {
    */
   public static boolean isEmpty(final Object[] object) {
     return object == null || object.length == 0;
+  }
+
+  /**
+   * Return true if object is null or object.iterator().hasNext() == false
+   *
+   * @param object
+   * @return isEmpty
+   */
+  public static boolean isEmpty(final Optional<?> object) {
+    return object == null || !object.isPresent();
   }
 
   /**
@@ -245,6 +260,10 @@ public class Empties {
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Object[] object) {
+    return !isEmpty(object);
+  }
+
+  public static boolean isNotEmpty(final Optional<?> object) {
     return !isEmpty(object);
   }
 

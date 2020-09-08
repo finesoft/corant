@@ -1,16 +1,17 @@
 package org.corant.suites.redis;
 
-import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import java.util.Optional;
 
 @Dependent
 public class RedissonClientProducer {
@@ -30,6 +31,22 @@ public class RedissonClientProducer {
   @Inject
   @ConfigProperty(name = "redis.timeout")
   private Optional<Integer> timeout;
+
+  public String getAddress() {
+    return address;
+  }
+
+  public Optional<Integer> getDatabase() {
+    return database;
+  }
+
+  public Optional<String> getPassword() {
+    return password;
+  }
+
+  public Optional<Integer> getTimeout() {
+    return timeout;
+  }
 
   @Produces
   @ApplicationScoped

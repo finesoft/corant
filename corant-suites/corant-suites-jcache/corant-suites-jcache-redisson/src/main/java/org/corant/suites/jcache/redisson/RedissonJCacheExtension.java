@@ -34,10 +34,11 @@ public class RedissonJCacheExtension implements Extension {
 
   public void observeAfterBeanDiscovery(
       @Observes AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) {
-    cachingProvider = Caching.getCachingProvider();
-    cacheManager = cachingProvider.getCacheManager();
+    cachingProvider =
+        Caching.getCachingProvider("org.corant.suites.jcache.redisson.RedissonJCachingProvider");
+    cacheManager = this.cachingProvider.getCacheManager();
     afterBeanDiscovery.addBean(new CacheManagerBean(beanManager, cacheManager));
-    afterBeanDiscovery.addBean(new CacheProviderBean(beanManager, cachingProvider));
+    afterBeanDiscovery.addBean(new CacheProviderBean(beanManager, this.cachingProvider));
   }
 
   public void onBeforeShutdown(final @Observes BeforeShutdown beforeShutdown) {

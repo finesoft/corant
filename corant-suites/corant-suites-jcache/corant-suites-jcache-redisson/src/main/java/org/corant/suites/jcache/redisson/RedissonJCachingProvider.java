@@ -13,7 +13,17 @@
  */
 package org.corant.suites.jcache.redisson;
 
-import static org.corant.shared.util.Objects.forceCast;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.redis.RedissonClientProducer;
+import org.redisson.Redisson;
+import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
+import org.redisson.jcache.JCacheManager;
+
+import javax.cache.CacheException;
+import javax.cache.CacheManager;
+import javax.cache.configuration.OptionalFeature;
+import javax.cache.spi.CachingProvider;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,27 +37,21 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.cache.CacheException;
-import javax.cache.CacheManager;
-import javax.cache.configuration.OptionalFeature;
-import javax.cache.spi.CachingProvider;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.redisson.Redisson;
-import org.redisson.config.Config;
-import org.redisson.jcache.JCacheManager;
-import org.redisson.jcache.JCachingProvider;
+
+import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Objects.forceCast;
 
 /**
  * corant-suites-jcache-redisson
  *
  * @author bingo 18:53:45
- *
  */
 public class RedissonJCachingProvider implements CachingProvider {
 
   static final String DEFAULT_URI_PATH = "jsr107-default-config";
 
   static URI defaulturi;
+
   static {
     try {
       defaulturi = new URI(DEFAULT_URI_PATH);
@@ -167,16 +171,21 @@ public class RedissonJCachingProvider implements CachingProvider {
     return false;
   }
 
-  protected JCacheManager createCacheManager(Redisson redisson, ClassLoader classLoader,
-      Properties properties, URI uri) {
-    Constructor<?> cst = AccessController.doPrivileged((PrivilegedAction<Constructor<?>>) () -> {
-      Constructor<?> c = JCacheManager.class.getDeclaredConstructors()[0];
-      c.setAccessible(true);
-      return c;
-    });
+  protected JCacheManager createCacheManager(
+      Redisson redisson, ClassLoader classLoader, Properties properties, URI uri) {
+    Constructor<?> cst =
+        AccessController.doPrivileged(
+            (PrivilegedAction<Constructor<?>>)
+                () -> {
+                  Constructor<?> c = JCacheManager.class.getDeclaredConstructors()[0];
+                  c.setAccessible(true);
+                  return c;
+                });
     try {
       return forceCast(cst.newInstance(redisson, classLoader, this, properties, uri));
-    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
         | InvocationTargetException e) {
       throw new CorantRuntimeException(e);
     }
@@ -184,34 +193,20 @@ public class RedissonJCachingProvider implements CachingProvider {
 
   @SuppressWarnings("deprecation")
   private Config loadConfig(URI uri) {
-    Config config = null;
-    try {
-      URL jsonUrl = null;
-      if (DEFAULT_URI_PATH.equals(uri.getPath())) {
-        jsonUrl = JCachingProvider.class.getResource("/redisson-jcache.json");
-      } else {
-        jsonUrl = uri.toURL();
-      }
-      if (jsonUrl == null) {
-        throw new IOException();
-      }
-      config = Config.fromJSON(jsonUrl);
-    } catch (IOException e) {
+    Config config = new Config();
+    SingleServerConfig singleServerConfig = config.useSingleServer();
+    if (DEFAULT_URI_PATH.equals(uri.getPath())) {
+      RedissonClientProducer redissonConfig = resolve(RedissonClientProducer.class);
+      singleServerConfig.setAddress(redissonConfig.getAddress());
+    } else {
+      URL yamlUrl;
       try {
-        URL yamlUrl = null;
-        if (DEFAULT_URI_PATH.equals(uri.getPath())) {
-          yamlUrl = JCachingProvider.class.getResource("/redisson-jcache.yaml");
-        } else {
-          yamlUrl = uri.toURL();
-        }
-        if (yamlUrl != null) {
-          config = Config.fromYAML(yamlUrl);
-        }
-      } catch (IOException e2) {
-        // skip
+        yamlUrl = uri.toURL();
+        config = Config.fromYAML(yamlUrl);
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
     return config;
   }
-
 }

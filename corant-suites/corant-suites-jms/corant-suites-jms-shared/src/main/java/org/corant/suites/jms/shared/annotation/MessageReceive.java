@@ -46,6 +46,15 @@ public @interface MessageReceive {
   int acknowledge() default Session.CLIENT_ACKNOWLEDGE;
 
   /**
+   * The breaked backoff factor, for Exponential backoff + jitter algorithm to compute the delay.
+   * The value of backoff factor must greater then 1.0, default is 0 means do not enable Exponential
+   * backoff + jitter algorithm.
+   *
+   * @return breakedBackoff
+   */
+  double breakedBackoff() default 0;
+
+  /**
    * The breaked duration, if exceeds then start try mode.
    *
    * @return breakedDuration

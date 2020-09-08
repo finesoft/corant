@@ -46,6 +46,7 @@ import javax.transaction.SystemException;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Retry;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
@@ -98,6 +99,7 @@ public class MessageReceiverTask implements Runnable {
   // controll circuit break
   protected final int failureThreshold;
   protected final Duration breakedDuration;
+  protected final double breakedBackoff;
   protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
@@ -119,6 +121,7 @@ public class MessageReceiverTask implements Runnable {
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     breakedDuration = metaData.getBreakedDuration();
+    breakedBackoff = metaData.getBreakedBackoff();
     tryThreshold = metaData.getTryThreshold();
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
@@ -167,6 +170,14 @@ public class MessageReceiverTask implements Runnable {
       postRun();
       log(Level.FINE, null, "Stopped message receive task.");
     }
+  }
+
+  protected long calculateBreakedDuration() {
+    long baseBreakedMills = breakedDuration.toMillis();
+    if (breakedBackoff > 1) {
+      return Retry.computeInterval(breakedBackoff, baseBreakedMills, failureCounter.intValue());
+    }
+    return baseBreakedMills;
   }
 
   protected void closeConnectionIfNecessary(boolean forceClose) {
@@ -453,8 +464,7 @@ public class MessageReceiverTask implements Runnable {
 
   protected boolean preRun() {
     if (state == STATE_BRK) {
-      long countdownMs =
-          breakedDuration.toMillis() - (System.currentTimeMillis() - breakedTimePoint);
+      long countdownMs = calculateBreakedDuration() - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {
         if (countdownMs < loopInterval * 3) {
           log(Level.INFO, null, "The message receive task was breaked countdown %s ms, [%s]!",

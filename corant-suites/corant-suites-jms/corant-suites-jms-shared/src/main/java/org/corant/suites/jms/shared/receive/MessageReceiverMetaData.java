@@ -57,6 +57,7 @@ public class MessageReceiverMetaData {
   private final int tryThreshold;
   private final long loopIntervalMs;
   private final Duration breakedDuration;
+  private final double breakedBackoff;
   private final boolean xa;
 
   MessageReceiverMetaData(ContextualMethodHandler method, String destinationName) {
@@ -78,6 +79,12 @@ public class MessageReceiverMetaData {
     loopIntervalMs = max(500L, ann.loopIntervalMs());
     breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
         : Duration.parse(ann.breakedDuration()), Duration.ofSeconds(8L));
+    if (ann.breakedBackoff() > 0) {
+      shouldBeTrue(ann.breakedBackoff() > 1);
+      breakedBackoff = ann.breakedBackoff();
+    } else {
+      breakedBackoff = 0;
+    }
     xa = ann.xa();
   }
 
@@ -140,6 +147,14 @@ public class MessageReceiverMetaData {
    */
   public int getAcknowledge() {
     return acknowledge;
+  }
+
+  /**
+   *
+   * @return the breakedBackoff
+   */
+  public double getBreakedBackoff() {
+    return breakedBackoff;
   }
 
   /**

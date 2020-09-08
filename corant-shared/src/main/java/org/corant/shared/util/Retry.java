@@ -37,6 +37,23 @@ public class Retry {
   static final Logger logger = Logger.getLogger(Retry.class.toString());
 
   /**
+   * Use Exponential backoff + jitter algorithm to compute the delay
+   *
+   * @param backoffFactor
+   * @param base
+   * @param attempt
+   * @return computeInterval
+   */
+  public static long computeInterval(double backoffFactor, long base, int attempt) {
+    if (backoffFactor > 1) {
+      long interval = base * (int) Math.pow(backoffFactor, attempt);
+      return Randoms.randomLong(interval);
+    } else {
+      return base;
+    }
+  }
+
+  /**
    * Try to execute and return a result
    *
    * @param <T> the result type
@@ -191,15 +208,6 @@ public class Retry {
         } // end catch
       }
       return null;
-    }
-
-    long computeInterval(double backoffFactor, long base, int attempt) {
-      if (backoffFactor > 1) {
-        long interval = base * (int) Math.pow(backoffFactor, attempt);
-        return Randoms.randomLong(interval);
-      } else {
-        return base;
-      }
     }
 
     void logRetry(Throwable e, int attempt, long wait) {

@@ -22,7 +22,7 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import org.corant.suites.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
-import org.corant.suites.microprofile.jwt.authorization.MpJWTPermitsAuthorizer;
+import org.corant.suites.microprofile.jwt.authorization.MpJWTRolesAuthorizer;
 import org.corant.suites.security.shared.authorization.Authorizer;
 
 /**
@@ -36,7 +36,7 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
 
   private final String[] allowedRoles;
 
-  volatile MpJWTPermitsAuthorizer authorizer;
+  volatile MpJWTRolesAuthorizer authorizer;
 
   public MpJWTRolesAllowedFilter(String... allowedRoles) {
     if (isEmpty(allowedRoles)) {
@@ -67,7 +67,7 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
     if (authorizer == null) {
       synchronized (this) {
         if (authorizer == null) {
-          authorizer = resolve(MpJWTPermitsAuthorizer.class);
+          authorizer = resolve(MpJWTRolesAuthorizer.class);
         }
       }
     }

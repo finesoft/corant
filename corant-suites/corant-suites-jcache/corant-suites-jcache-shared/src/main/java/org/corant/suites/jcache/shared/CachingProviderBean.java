@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.corant.suites.jcache.redisson;
+package org.corant.suites.jcache.shared;
 
 import org.corant.context.AbstractBean;
 
@@ -26,12 +26,12 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.BeanManager;
 
-public class CacheProviderBean extends AbstractBean<CachingProvider> {
+public class CachingProviderBean extends AbstractBean<CachingProvider> {
   private final CachingProvider provider;
 
-  public CacheProviderBean(BeanManager beanManager, final CachingProvider cacheManager) {
+  public CachingProviderBean(BeanManager beanManager, final CachingProvider cachingProvider) {
     super(beanManager);
-    provider = cacheManager;
+    provider = cachingProvider;
     types.add(CachingProvider.class);
     types.add(Object.class);
     qualifiers.add(Default.Literal.INSTANCE);

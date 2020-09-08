@@ -13,14 +13,18 @@
  */
 package org.corant.suites.jcache.redisson;
 
-import static org.corant.context.Instances.resolve;
-import static org.corant.shared.util.Objects.forceCast;
-import java.io.IOException;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.redisson.Redisson;
+import org.redisson.jcache.JCacheManager;
+
+import javax.cache.CacheException;
+import javax.cache.CacheManager;
+import javax.cache.configuration.OptionalFeature;
+import javax.cache.spi.CachingProvider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
@@ -28,16 +32,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.cache.CacheException;
-import javax.cache.CacheManager;
-import javax.cache.configuration.OptionalFeature;
-import javax.cache.spi.CachingProvider;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.suites.redis.RedissonClientProducer;
-import org.redisson.Redisson;
-import org.redisson.config.Config;
-import org.redisson.config.SingleServerConfig;
-import org.redisson.jcache.JCacheManager;
+
+import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Objects.forceCast;
 
 /**
  * corant-suites-jcache-redisson
@@ -130,12 +127,8 @@ public class RedissonJCachingProvider implements CachingProvider {
       return manager;
     }
 
-    Config config = loadConfig(uri);
+    Redisson redisson = resolve(Redisson.class);
 
-    Redisson redisson = null;
-    if (config != null) {
-      redisson = (Redisson) Redisson.create(config);
-    }
     // manager = new JCacheManager(redisson, classLoader, this, properties, uri);
     manager = createCacheManager(redisson, classLoader, properties, uri);
     CacheManager oldManager = value.putIfAbsent(uri, manager);
@@ -169,36 +162,23 @@ public class RedissonJCachingProvider implements CachingProvider {
     return false;
   }
 
-  protected JCacheManager createCacheManager(Redisson redisson, ClassLoader classLoader,
-      Properties properties, URI uri) {
-    Constructor<?> cst = AccessController.doPrivileged((PrivilegedAction<Constructor<?>>) () -> {
-      Constructor<?> c = JCacheManager.class.getDeclaredConstructors()[0];
-      c.setAccessible(true);
-      return c;
-    });
+  protected JCacheManager createCacheManager(
+      Redisson redisson, ClassLoader classLoader, Properties properties, URI uri) {
+    Constructor<?> cst =
+        AccessController.doPrivileged(
+            (PrivilegedAction<Constructor<?>>)
+                () -> {
+                  Constructor<?> c = JCacheManager.class.getDeclaredConstructors()[0];
+                  c.setAccessible(true);
+                  return c;
+                });
     try {
       return forceCast(cst.newInstance(redisson, classLoader, this, properties, uri));
-    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
         | InvocationTargetException e) {
       throw new CorantRuntimeException(e);
     }
-  }
-
-  private Config loadConfig(URI uri) {
-    Config config = new Config();
-    SingleServerConfig singleServerConfig = config.useSingleServer();
-    if (DEFAULT_URI_PATH.equals(uri.getPath())) {
-      RedissonClientProducer redissonConfig = resolve(RedissonClientProducer.class);
-      singleServerConfig.setAddress(redissonConfig.getAddress());
-    } else {
-      URL yamlUrl;
-      try {
-        yamlUrl = uri.toURL();
-        config = Config.fromYAML(yamlUrl);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    return config;
   }
 }

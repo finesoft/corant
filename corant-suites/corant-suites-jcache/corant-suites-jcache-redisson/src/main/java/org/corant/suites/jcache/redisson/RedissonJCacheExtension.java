@@ -13,14 +13,14 @@
  */
 package org.corant.suites.jcache.redisson;
 
-import javax.cache.CacheManager;
+import org.corant.shared.exception.CorantRuntimeException;
+
 import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+
+import static org.corant.shared.util.Empties.isEmpty;
 
 /**
  * corant <br>
@@ -29,24 +29,14 @@ import javax.enterprise.inject.spi.Extension;
  * @since
  */
 public class RedissonJCacheExtension implements Extension {
-  private CacheManager cacheManager;
-  private CachingProvider cachingProvider;
+  public static final String CACHE_PROVIDER_NAME = RedissonJCachingProvider.class.getName();
 
-  public void observeAfterBeanDiscovery(
-      @Observes AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) {
-    cachingProvider =
-        Caching.getCachingProvider("org.corant.suites.jcache.redisson.RedissonJCachingProvider");
-    cacheManager = this.cachingProvider.getCacheManager();
-    afterBeanDiscovery.addBean(new CacheManagerBean(beanManager, cacheManager));
-    afterBeanDiscovery.addBean(new CacheProviderBean(beanManager, this.cachingProvider));
-  }
-
-  public void onBeforeShutdown(final @Observes BeforeShutdown beforeShutdown) {
-    if (cacheManager != null) {
-      cacheManager.close();
-    }
-    if (cachingProvider != null) {
-      cachingProvider.close();
+  public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
+    if (isEmpty(System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      System.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+        .equals(CACHE_PROVIDER_NAME)) {
+      throw new CorantRuntimeException("");
     }
   }
 }

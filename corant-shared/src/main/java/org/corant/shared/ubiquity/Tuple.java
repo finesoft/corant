@@ -152,11 +152,12 @@ public interface Tuple {
     @SuppressWarnings({"unchecked", "rawtypes"})
     static final Range emptyInstance = new Range(null, null);
 
-    private final T start;
-    private final T end;
+    protected final T start;
+    protected final T end;
 
     protected Range(T start, T end) {
       super();
+      shouldBeTrue(compare(start, end) <= 0, IllegalArgumentException::new);
       this.start = start;
       this.end = end;
     }
@@ -167,7 +168,6 @@ public interface Tuple {
     }
 
     public static <T extends Comparable<T>> Range<T> of(T start, T end) {
-      shouldBeTrue(compare(start, end) <= 0, IllegalArgumentException::new);
       return new Range<>(start, end);
     }
 
@@ -175,11 +175,21 @@ public interface Tuple {
       return String.format(format, getStart(), getEnd());
     }
 
-    public boolean contains(Range<T> other) {
+    public boolean coincide(Range<T> other) {
+      if (other == null) {
+        return false;
+      } else if (this.equals(other)) {
+        return true;
+      } else {
+        return compare(start, other.start) == 0 && compare(end, other.end) == 0;
+      }
+    }
+
+    public boolean cover(Range<T> other) {
       return lae(start, other.getStart()) && gae(end, other.getEnd());
     }
 
-    public boolean contains(T value) {
+    public boolean cover(T value) {
       return lae(start, value) && gae(end, value);
     }
 
@@ -230,24 +240,14 @@ public interface Tuple {
       return result;
     }
 
-    public boolean isEmpty() {
-      return start == null && end == null;
-    }
-
-    public boolean overlap(Range<T> other) {
+    public boolean intersect(Range<T> other) {
       return gae(start, other.getStart()) && lae(start, other.getEnd())
           || lae(start, other.getStart()) && gae(end, other.getEnd())
           || gae(end, other.getStart()) && lae(end, other.getEnd());
     }
 
-    public boolean same(Range<T> other) {
-      if (other == null) {
-        return false;
-      } else if (this.equals(other)) {
-        return true;
-      } else {
-        return compare(start, other.start) == 0 && compare(end, other.end) == 0;
-      }
+    public boolean isEmpty() {
+      return start == null && end == null;
     }
 
     public Pair<T, T> toPair() {

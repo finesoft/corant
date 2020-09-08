@@ -52,16 +52,16 @@ public class TupleTest extends TestCase {
     Range<Integer> r1 = Range.of(1, 10);
     Range<Integer> r2 = Range.of(1, 9);
     assertFalse(r1.equals(r2));
-    assertTrue(r1.overlap(r2));
+    assertTrue(r1.intersect(r2));
     r2 = Range.of(1, 10);
     assertTrue(r1.equals(r2));
-    assertTrue(r1.same(r2));
+    assertTrue(r1.coincide(r2));
     Range<BigDecimal> rd1 = Range.of(new BigDecimal("1.0"), new BigDecimal("10.0"));
     Range<BigDecimal> rd2 = Range.of(new BigDecimal("1.0"), new BigDecimal("10"));
     assertFalse(rd1.equals(rd2));
-    assertTrue(rd1.same(rd2));
+    assertTrue(rd1.coincide(rd2));
     rd2 = Range.of(new BigDecimal("10.1"), new BigDecimal("20.0"));
-    assertFalse(rd1.overlap(rd2));
+    assertFalse(rd1.intersect(rd2));
   }
 
   @Test

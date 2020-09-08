@@ -13,17 +13,14 @@
  */
 package org.corant.suites.jcache.caffeine;
 
-import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.eclipse.microprofile.config.ConfigProvider;
-
+import static org.corant.shared.util.Empties.isEmpty;
 import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-
-import static org.corant.shared.util.Empties.isEmpty;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.eclipse.microprofile.config.ConfigProvider;
+import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
 
 /**
  * corant <br>
@@ -35,12 +32,9 @@ public class CaffeineJCacheExtension implements Extension {
 
   public static final String CACHE_PROVIDER_NAME = CaffeineCachingProvider.class.getName();
 
-  private CachingProvider cachingProvider;
-
   // config caffeine's caches from this resource
   private String caffeineConfigResource =
-      ConfigProvider.getConfig()
-          .getOptionalValue("caffeine.config.resource", String.class)
+      ConfigProvider.getConfig().getOptionalValue("caffeine.config.resource", String.class)
           .orElse("META-INF/application.properties");
 
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {

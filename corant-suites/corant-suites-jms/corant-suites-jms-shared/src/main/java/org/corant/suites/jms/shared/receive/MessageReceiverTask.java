@@ -105,9 +105,11 @@ public class MessageReceiverTask implements Runnable {
   protected volatile byte state = STATE_RUN;
   protected volatile boolean lastExecutionSuccessfully = false;// 20200602 change to false
   protected volatile long breakedTimePoint;
+  protected volatile long breakedInterval;
 
   protected final AtomicInteger failureCounter = new AtomicInteger(0);
   protected final AtomicInteger tryCounter = new AtomicInteger(0);
+  protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
   /**
    * @param meta
@@ -174,8 +176,10 @@ public class MessageReceiverTask implements Runnable {
 
   protected long calculateBreakedDuration() {
     long baseBreakedMills = breakedDuration.toMillis();
-    if (breakedBackoff > 1) {
-      return Retry.computeInterval(breakedBackoff, baseBreakedMills, failureCounter.intValue());
+    if (breakedBackoff > 1 && tryFailureCounter.get() > 0) {
+      // The capped FIXME
+      return Retry.computeInterval(breakedBackoff, baseBreakedMills * 64, baseBreakedMills,
+          tryFailureCounter.intValue());
     }
     return baseBreakedMills;
   }
@@ -432,8 +436,10 @@ public class MessageReceiverTask implements Runnable {
       } else if (state == STATE_TRY) {
         if (failureCounter.intValue() > 0) {
           stateBrk();
+          tryFailureCounter.incrementAndGet();
           return;
         } else {
+          tryFailureCounter.set(0);
           if (tryCounter.incrementAndGet() >= tryThreshold) {
             stateRun();
           }
@@ -464,7 +470,7 @@ public class MessageReceiverTask implements Runnable {
 
   protected boolean preRun() {
     if (state == STATE_BRK) {
-      long countdownMs = calculateBreakedDuration() - (System.currentTimeMillis() - breakedTimePoint);
+      long countdownMs = breakedInterval - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {
         if (countdownMs < loopInterval * 3) {
           log(Level.INFO, null, "The message receive task was breaked countdown %s ms, [%s]!",
@@ -500,6 +506,7 @@ public class MessageReceiverTask implements Runnable {
   protected void stateBrk() {
     resetMonitors();
     breakedTimePoint = System.currentTimeMillis();
+    breakedInterval = calculateBreakedDuration();
     state = STATE_BRK;
     log(Level.WARNING, null, "The message receive task start break mode, [%s]!", meta);
     release(true);

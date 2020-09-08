@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Objects.min;
 import static org.corant.shared.util.Strings.defaultString;
 import java.time.Duration;
 import java.util.function.BiConsumer;
@@ -40,13 +41,14 @@ public class Retry {
    * Use Exponential backoff + jitter algorithm to compute the delay
    *
    * @param backoffFactor
+   * @param cap
    * @param base
    * @param attempt
    * @return computeInterval
    */
-  public static long computeInterval(double backoffFactor, long base, int attempt) {
+  public static long computeInterval(double backoffFactor, long cap, long base, int attempt) {
     if (backoffFactor > 1) {
-      long interval = base * (int) Math.pow(backoffFactor, attempt);
+      long interval = min(cap, base * (long) Math.pow(backoffFactor, attempt));
       return Randoms.randomLong(interval);
     } else {
       return base;
@@ -104,6 +106,7 @@ public class Retry {
 
     private int times = 8;
     private long interval = 2000L;
+    private long maxInterval = 512000L;
     private double backoff = 0.0;
     private BiConsumer<Integer, Throwable> thrower;
     private Supplier<Boolean> breaker = () -> true;
@@ -158,7 +161,13 @@ public class Retry {
     }
 
     public Retryer interval(final Duration interval) {
-      this.interval = interval == null || interval.toMillis() < 0 ? 0L : interval.toMillis();
+      return interval(interval, interval.multipliedBy(64));
+    }
+
+    public Retryer interval(final Duration interval, final Duration maxInterval) {
+      shouldBeTrue(interval != null && maxInterval != null && maxInterval.compareTo(interval) > 0);
+      this.maxInterval = maxInterval.toMillis() < 0 ? 0L : maxInterval.toMillis();
+      this.interval = interval.toMillis() < 0 ? 0L : interval.toMillis();
       return this;
     }
 
@@ -192,13 +201,14 @@ public class Retry {
           remaining--;
           attempt++;
           if (remaining > 0) {
-            long wait = computeInterval(backoff, interval, attempt);
+            long wait = computeInterval(backoff, maxInterval, interval, attempt);
             logRetry(e, attempt, wait);
             try {
               if (wait > 0) {
                 Thread.sleep(wait);
               }
             } catch (InterruptedException ie) {
+              Thread.currentThread().interrupt();
               ie.addSuppressed(e);
               throw new CorantRuntimeException(ie);
             }

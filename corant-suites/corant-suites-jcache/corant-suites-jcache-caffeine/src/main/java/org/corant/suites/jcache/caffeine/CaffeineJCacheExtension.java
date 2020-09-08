@@ -13,16 +13,17 @@
  */
 package org.corant.suites.jcache.caffeine;
 
+import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+
+import static org.corant.shared.util.Empties.isEmpty;
 
 /**
  * corant <br>
@@ -31,7 +32,9 @@ import javax.enterprise.inject.spi.Extension;
  * @since
  */
 public class CaffeineJCacheExtension implements Extension {
-  private CacheManager cacheManager;
+
+  public static final String CACHE_PROVIDER_NAME = CaffeineCachingProvider.class.getName();
+
   private CachingProvider cachingProvider;
 
   // config caffeine's caches from this resource
@@ -40,21 +43,13 @@ public class CaffeineJCacheExtension implements Extension {
           .getOptionalValue("caffeine.config.resource", String.class)
           .orElse("META-INF/application.properties");
 
-  public void observeAfterBeanDiscovery(
-      @Observes AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) {
+  public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
     System.setProperty("config.resource", caffeineConfigResource);
-    cachingProvider = Caching.getCachingProvider();
-    cacheManager = cachingProvider.getCacheManager();
-    afterBeanDiscovery.addBean(new CacheManagerBean(beanManager, cacheManager));
-    afterBeanDiscovery.addBean(new CacheProviderBean(beanManager, cachingProvider));
-  }
-
-  public void onBeforeShutdown(final @Observes BeforeShutdown beforeShutdown) {
-    if (cacheManager != null) {
-      cacheManager.close();
-    }
-    if (cachingProvider != null) {
-      cachingProvider.close();
+    if (isEmpty(System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      System.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+        .equals(CACHE_PROVIDER_NAME)) {
+      throw new CorantRuntimeException("");
     }
   }
 }

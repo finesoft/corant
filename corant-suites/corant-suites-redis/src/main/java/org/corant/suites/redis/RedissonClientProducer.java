@@ -50,14 +50,14 @@ public class RedissonClientProducer {
 
   @Produces
   @ApplicationScoped
-  public RedissonClient produce() {
+  public Redisson produce() {
     Config config = new Config();
     SingleServerConfig serverConfig = config.useSingleServer();
     serverConfig.setAddress("redis://" + address);
     password.ifPresent(serverConfig::setPassword);
     database.ifPresent(serverConfig::setDatabase);
     timeout.ifPresent(serverConfig::setTimeout);
-    return Redisson.create(config);
+    return (Redisson) Redisson.create(config);
   }
 
   void dispose(@Disposes RedissonClient client) {

@@ -1,13 +1,18 @@
 package org.corant.suites.jcache.shared;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterTypeDiscovery;
-import javax.enterprise.inject.spi.Extension;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jsr107.ri.annotations.cdi.CachePutInterceptor;
 import org.jsr107.ri.annotations.cdi.CacheRemoveAllInterceptor;
 import org.jsr107.ri.annotations.cdi.CacheRemoveEntryInterceptor;
 import org.jsr107.ri.annotations.cdi.CacheResultInterceptor;
+
+import javax.cache.Caching;
+import javax.cache.spi.CachingProvider;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterTypeDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.Extension;
 
 /**
  * corant <br>
@@ -17,8 +22,17 @@ import org.jsr107.ri.annotations.cdi.CacheResultInterceptor;
  */
 public class JCacheExtension implements Extension {
 
-  private boolean enableGlobalAnnotation = ConfigProvider.getConfig()
-      .getOptionalValue("jcache.enable_global_annotation", Boolean.class).orElse(Boolean.TRUE);
+  private boolean enableGlobalAnnotation =
+      ConfigProvider.getConfig()
+          .getOptionalValue("jcache.enable_global_annotation", Boolean.class)
+          .orElse(Boolean.TRUE);
+
+  private CachingProvider cachingProvider;
+
+  public void observeAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, final BeanManager bm) {
+    cachingProvider = Caching.getCachingProvider();
+    abd.addBean(new CachingProviderBean(bm, cachingProvider));
+  }
 
   public void observeAfterTypeDiscovery(@Observes AfterTypeDiscovery afterTypeDiscovery) {
     if (enableGlobalAnnotation) {
@@ -28,5 +42,4 @@ public class JCacheExtension implements Extension {
       afterTypeDiscovery.getInterceptors().add(CachePutInterceptor.class);
     }
   }
-
 }

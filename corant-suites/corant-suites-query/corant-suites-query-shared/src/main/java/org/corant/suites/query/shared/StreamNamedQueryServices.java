@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.mapOf;
 import java.lang.annotation.Annotation;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -135,6 +136,17 @@ public class StreamNamedQueryServices {
 
   public StreamNamedQueryServices offset(Integer offset) {
     parameter.offset(offset);
+    return this;
+  }
+
+  /**
+   * No backoff interval
+   *
+   * @param retryInterval
+   * @return retryInterval
+   */
+  public StreamNamedQueryServices retryInterval(Duration retryInterval) {
+    parameter.retryInterval(RetryInterval.noBackoff(retryInterval));
     return this;
   }
 

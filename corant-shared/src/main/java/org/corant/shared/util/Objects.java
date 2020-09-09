@@ -92,6 +92,16 @@ public class Objects {
     }
   }
 
+  /**
+   * Null safe comparison of Comparables. null is assumed to be less than a non-null value.
+   *
+   * Note: Code come from apache.
+   *
+   * @param <T>
+   * @param c1
+   * @param c2
+   * @return compare
+   */
   public static <T extends Comparable<? super T>> int compare(final T c1, final T c2) {
     if (c1 == c2) {
       return 0;

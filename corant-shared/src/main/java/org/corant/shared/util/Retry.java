@@ -94,7 +94,7 @@ public class Retry {
   public static long computeExpoBackoffEqualJitter(double backoffFactor, long cap, long base,
       int attempts) {
     long expoBackoff = computeExpoBackoff(backoffFactor, cap, base, attempts);
-    long temp = expoBackoff / 2;
+    long temp = expoBackoff >>> 1;
     return temp + Randoms.randomLong(temp);
   }
 

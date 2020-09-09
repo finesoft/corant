@@ -18,13 +18,13 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.mapOf;
 import java.lang.annotation.Annotation;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.corant.shared.util.Retry.RetryInterval;
 import org.corant.shared.util.Streams;
 import org.corant.suites.query.shared.QueryParameter.StreamQueryParameter;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
@@ -138,12 +138,7 @@ public class StreamNamedQueryServices {
     return this;
   }
 
-  public StreamNamedQueryServices retryBackoff(double retryBackoff) {
-    parameter.retryBackoff(retryBackoff);
-    return this;
-  }
-
-  public StreamNamedQueryServices retryInterval(Duration retryInterval) {
+  public StreamNamedQueryServices retryInterval(RetryInterval retryInterval) {
     parameter.retryInterval(retryInterval);
     return this;
   }

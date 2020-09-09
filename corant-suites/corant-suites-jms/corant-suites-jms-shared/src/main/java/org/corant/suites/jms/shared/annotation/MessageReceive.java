@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import javax.jms.JMSContext;
 import javax.jms.Session;
+import org.corant.shared.util.Retry.BackoffAlgorithm;
 
 /**
  * corant-suites-jms-shared
@@ -52,7 +53,13 @@ public @interface MessageReceive {
    *
    * @return breakedBackoff
    */
-  double breakedBackoff() default 0;
+  double breakedBackoffFactor() default 2.0;
+
+  /**
+   *
+   * @return tryBackoffAlgo
+   */
+  BackoffAlgorithm breakedBackoffAlgo() default BackoffAlgorithm.NONE;
 
   /**
    * The breaked duration, if exceeds then start try mode.
@@ -112,6 +119,13 @@ public @interface MessageReceive {
    * @return loopIntervalMs
    */
   long loopIntervalMs() default 500L;
+
+  /**
+   * The max breaked duration, if exceeds then start try mode.
+   *
+   * @return breakedDuration
+   */
+  String maxBreakedDuration() default "PT1H";
 
   /**
    * Marks whether a queue or topic.

@@ -692,7 +692,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
       super();
     }
 
-    protected MutableObject(final T value) {
+    public MutableObject(final T value) {
       super();
       this.value = value;
     }

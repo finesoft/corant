@@ -19,6 +19,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Objects.min;
 import static org.corant.shared.util.Strings.defaultString;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -38,21 +39,83 @@ public class Retry {
   static final Logger logger = Logger.getLogger(Retry.class.toString());
 
   /**
-   * Use Exponential backoff + jitter algorithm to compute the delay
+   * Use Exponential Backoff algorithm to compute the delay. The backoff factor accepted by this
+   * method must be greater than 1 or null, default is 2.0.
+   *
+   * @see <a href=
+   *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+   *      Backoff And Jitter</a>
    *
    * @param backoffFactor
    * @param cap
    * @param base
-   * @param attempt
-   * @return computeInterval
+   * @param attempts
+   * @return computeExpoBackoff
    */
-  public static long computeInterval(double backoffFactor, long cap, long base, int attempt) {
-    if (backoffFactor > 1) {
-      long interval = min(cap, base * (long) Math.pow(backoffFactor, attempt));
-      return Randoms.randomLong(interval);
-    } else {
-      return base;
-    }
+  public static long computeExpoBackoff(double backoffFactor, long cap, long base, int attempts) {
+    return min(cap, base * (long) Math.pow(backoffFactor, attempts));
+  }
+
+  /**
+   * Use Exponential Backoff Decorr algorithm to compute the delay. The backoff factor accepted by
+   * this method must be greater than 1 or null, default is 2.0.
+   *
+   * @see <a href=
+   *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+   *      Backoff And Jitter</a>
+   *
+   * @param backoffFactor
+   * @param cap
+   * @param base
+   * @param attempts
+   * @param sleep
+   * @return computeExpoBackoffDecorr
+   */
+  public static long computeExpoBackoffDecorr(double backoffFactor, long cap, long base,
+      int attempts, long sleep) {
+    long useSleep = sleep <= 0 ? base : sleep;
+    return min(cap, Randoms.randomLong(base, useSleep * 3));
+  }
+
+  /**
+   * Use Exponential Backoff Equal Jitter algorithm to compute the delay. The backoff factor
+   * accepted by this method must be greater than 1 or null, default is 2.0.
+   *
+   * @see <a href=
+   *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+   *      Backoff And Jitter</a>
+   *
+   * @param backoffFactor
+   * @param cap
+   * @param base
+   * @param attempts
+   * @return computeExpoBackoffEqualJitter
+   */
+  public static long computeExpoBackoffEqualJitter(double backoffFactor, long cap, long base,
+      int attempts) {
+    long expoBackoff = computeExpoBackoff(backoffFactor, cap, base, attempts);
+    long temp = expoBackoff / 2;
+    return temp + Randoms.randomLong(temp);
+  }
+
+  /**
+   * Use Exponential Backoff Full Jitter algorithm to compute the delay. The backoff factor accepted
+   * by this method must be greater than 1 or null, default is 2.0.
+   *
+   * @see <a href=
+   *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+   *      Backoff And Jitter</a>
+   *
+   * @param backoffFactor
+   * @param cap
+   * @param base
+   * @param attempts
+   * @return computeExpoBackoffFullJitter
+   */
+  public static long computeExpoBackoffFullJitter(double backoffFactor, long cap, long base,
+      int attempts) {
+    long expoBackoff = computeExpoBackoff(backoffFactor, cap, base, attempts);
+    return Randoms.randomLong(expoBackoff);
   }
 
   /**
@@ -65,7 +128,7 @@ public class Retry {
    * @return The result
    */
   public static <T> T execute(int times, Duration interval, Function<Integer, T> runnable) {
-    return new Retryer().times(times).interval(interval).execute(runnable);
+    return new Retryer().times(times).noBackoff(interval).execute(runnable);
   }
 
   /**
@@ -76,7 +139,7 @@ public class Retry {
    * @param runnable The work unit
    */
   public static void execute(int times, Duration interval, Runnable runnable) {
-    new Retryer().times(times).interval(interval).execute(runnable);
+    new Retryer().times(times).noBackoff(interval).execute(runnable);
   }
 
   /**
@@ -89,11 +152,29 @@ public class Retry {
    * @return The result
    */
   public static <T> T execute(int times, Duration interval, Supplier<T> supplier) {
-    return new Retryer().times(times).interval(interval).execute(supplier);
+    return new Retryer().times(times).noBackoff(interval).execute(supplier);
   }
 
+  /**
+   * Create retryer for more granular control retry mechanism.
+   *
+   * @return retryer
+   */
   public static Retryer retryer() {
     return new Retryer();
+  }
+
+  /**
+   * corant-shared
+   *
+   * @see <a href=
+   *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+   *      Backoff And Jitter</a>
+   * @author bingo 9:37:51
+   *
+   */
+  public enum BackoffAlgorithm {
+    NONE, EXPO, EXPO_DECORR, EXPO_EQUAL_JITTER, EXPO_FULL_JITTER
   }
 
   /**
@@ -105,30 +186,9 @@ public class Retry {
   public static class Retryer {
 
     private int times = 8;
-    private long interval = 2000L;
-    private long maxInterval = 512000L;
-    private double backoff = 0.0;
+    private RetryInterval interval = RetryInterval.noBackoff(Duration.ofMillis(2000L));
     private BiConsumer<Integer, Throwable> thrower;
     private Supplier<Boolean> breaker = () -> true;
-
-    /**
-     * Use Exponential backoff + jitter algorithm to compute the delay. The backoff factor accepted
-     * by this method must be greater than 1 or equal to 0, equal to 0 means that the algorithm is
-     * not enabled, and the default is 0.
-     *
-     * @see <a href=
-     *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
-     *      backoff + jitter</a>
-     * @param backoff
-     * @return backoff
-     */
-    public Retryer backoff(double backoff) {
-      if (backoff > 0) {
-        shouldBeTrue(backoff > 1);
-      }
-      this.backoff = backoff;
-      return this;
-    }
 
     /**
      * The breaker, it will be called every attempt, if the breaker returns false, it will not enter
@@ -160,14 +220,73 @@ public class Retry {
       return doExecute((i) -> forceCast(supplier.get()));
     }
 
-    public Retryer interval(final Duration interval) {
-      return interval(interval, interval.multipliedBy(64));
+    /**
+     * @see RetryInterval#expoBackoff(Duration, Duration, Double)
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoff
+     */
+    public Retryer expoBackoff(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoff(interval, maxInterval, backoffFactor);
+      return this;
     }
 
-    public Retryer interval(final Duration interval, final Duration maxInterval) {
-      shouldBeTrue(interval != null && maxInterval != null && maxInterval.compareTo(interval) > 0);
-      this.maxInterval = maxInterval.toMillis() < 0 ? 0L : maxInterval.toMillis();
-      this.interval = interval.toMillis() < 0 ? 0L : interval.toMillis();
+    /**
+     * @see RetryInterval#expoBackoffDecorr(Duration, Duration, Double)
+     *
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffDecorr
+     */
+    public Retryer expoBackoffDecorr(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffDecorr(interval, maxInterval, backoffFactor);
+      return this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoffEqualJitter(Duration, Duration, Double)
+     *
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffEqualJitter
+     */
+    public Retryer expoBackoffEqualJitter(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffEqualJitter(interval, maxInterval, backoffFactor);
+      return this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoffFullJitter(Duration, Duration, Double)
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffFullJitter
+     */
+    public Retryer expoBackoffFullJitter(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffFullJitter(interval, maxInterval, backoffFactor);
+      return this;
+    }
+
+    public Retryer interval(RetryInterval interval) {
+      this.interval = shouldNotNull(interval);
+      return this;
+    }
+
+    /**
+     * No backoff, the same interval between each retry.
+     *
+     * @param interval
+     * @return noBackoff
+     */
+    public Retryer noBackoff(final Duration interval) {
+      this.interval = RetryInterval.noBackoff(interval);
       return this;
     }
 
@@ -182,6 +301,12 @@ public class Retry {
       return this;
     }
 
+    /**
+     * The max try times
+     *
+     * @param times
+     * @return times
+     */
     public Retryer times(final int times) {
       this.times = max(1, times);
       return this;
@@ -189,20 +314,21 @@ public class Retry {
 
     protected <T> T doExecute(final Function<Integer, T> executable) {
       shouldNotNull(executable);
+      interval.reset();
       int remaining = times;
-      int attempt = 0;
+      int attempts = 0;
       while (breaker.get()) {
         try {
-          return executable.apply(attempt);
+          return executable.apply(attempts);
         } catch (RuntimeException | AssertionError e) {
           if (thrower != null) {
-            thrower.accept(attempt, e);
+            thrower.accept(attempts, e);
           }
           remaining--;
-          attempt++;
+          attempts++;
           if (remaining > 0) {
-            long wait = computeInterval(backoff, maxInterval, interval, attempt);
-            logRetry(e, attempt, wait);
+            long wait = interval.calculateMills(attempts).toMillis();
+            logRetry(e, attempts, wait);
             try {
               if (wait > 0) {
                 Thread.sleep(wait);
@@ -227,4 +353,214 @@ public class Retry {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 11:23:16
+   *
+   */
+  public static class RetryInterval implements Serializable {
+
+    private static final long serialVersionUID = 1960222218031605834L;
+
+    protected final Duration interval;
+    protected final Duration maxInterval;
+    protected final double backoffFactor;
+    protected final BackoffAlgorithm backoffAlgo;
+    protected volatile Duration base;
+
+    protected RetryInterval(BackoffAlgorithm backoffAlgo, Duration interval, Duration maxInterval,
+        double backoffFactor) {
+      super();
+      this.interval = interval;
+      this.maxInterval = maxInterval;
+      this.backoffFactor = backoffFactor;
+      this.backoffAlgo = backoffAlgo;
+      reset();
+    }
+
+    /**
+     * Use Exponential Backoff algorithm to compute the delay. The backoff factor accepted by this
+     * method must be greater than 1 or null, default is 2.0.
+     *
+     * @see <a href=
+     *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+     *      Backoff And Jitter</a>
+     *
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoff
+     */
+    public static RetryInterval expoBackoff(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      return backoff(BackoffAlgorithm.EXPO, interval, maxInterval, backoffFactor);
+    }
+
+    /**
+     * Use Exponential Backoff Decorr algorithm to compute the delay. The backoff factor accepted by
+     * this method must be greater than 1 or null, default is 2.0.
+     *
+     * @see <a href=
+     *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+     *      Backoff And Jitter</a>
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffDecorr
+     */
+    public static RetryInterval expoBackoffDecorr(final Duration interval,
+        final Duration maxInterval, final Double backoffFactor) {
+      return backoff(BackoffAlgorithm.EXPO_DECORR, interval, maxInterval, backoffFactor);
+    }
+
+    /**
+     * Use Exponential Backoff Equal Jitter algorithm to compute the delay. The backoff factor
+     * accepted by this method must be greater than 1 or null, default is 2.0.
+     *
+     * @see <a href=
+     *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+     *      Backoff And Jitter</a>
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffEqualJitter
+     */
+    public static RetryInterval expoBackoffEqualJitter(final Duration interval,
+        final Duration maxInterval, final Double backoffFactor) {
+      return backoff(BackoffAlgorithm.EXPO_EQUAL_JITTER, interval, maxInterval, backoffFactor);
+    }
+
+    /**
+     * Use Exponential Backoff Full Jitter algorithm to compute the delay. The backoff factor
+     * accepted by this method must be greater than 1 or null, default is 2.0.
+     *
+     * @see <a href=
+     *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
+     *      Backoff And Jitter</a>
+     * @param interval
+     * @param maxInterval
+     * @param backoffFactor
+     * @return expoBackoffFullJitter
+     */
+    public static RetryInterval expoBackoffFullJitter(final Duration interval,
+        final Duration maxInterval, final Double backoffFactor) {
+      return backoff(BackoffAlgorithm.EXPO_FULL_JITTER, interval, maxInterval, backoffFactor);
+    }
+
+    /**
+     * No backoff, the same interval between each retry.
+     *
+     * @param interval
+     * @return noBackoff
+     */
+    public static RetryInterval noBackoff(Duration interval) {
+      shouldBeTrue(interval != null && interval.toMillis() >= 0);
+      return new RetryInterval(BackoffAlgorithm.NONE, interval, null, 0.0);
+    }
+
+    static RetryInterval backoff(final BackoffAlgorithm algo, final Duration interval,
+        final Duration maxInterval, final Double backoffFactor) {
+      shouldBeTrue(interval != null && interval.toMillis() >= 0 && maxInterval != null
+          && maxInterval.compareTo(interval) > 0);
+      if (backoffFactor != null) {
+        shouldBeTrue(backoffFactor > 1);
+      }
+      return new RetryInterval(algo, interval, maxInterval,
+          backoffFactor == null ? 2.0 : backoffFactor.doubleValue());
+    }
+
+    public Duration calculateMills(int attempts) {
+      if (backoffAlgo == BackoffAlgorithm.NONE || attempts <= 1) {
+        return base;
+      } else if (backoffAlgo == BackoffAlgorithm.EXPO) {
+        return Duration.ofMillis(
+            computeExpoBackoff(backoffFactor, maxInterval.toMillis(), base.toMillis(), attempts));
+      } else if (backoffAlgo == BackoffAlgorithm.EXPO_DECORR) {
+        base = Duration.ofMillis(computeExpoBackoffDecorr(backoffFactor, maxInterval.toMillis(),
+            base.toMillis(), attempts, base.toMillis()));
+        return base;
+      } else if (backoffAlgo == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
+        return Duration.ofMillis(computeExpoBackoffEqualJitter(backoffFactor,
+            maxInterval.toMillis(), base.toMillis(), attempts));
+      } else {
+        return Duration.ofMillis(computeExpoBackoffFullJitter(backoffFactor, maxInterval.toMillis(),
+            base.toMillis(), attempts));
+      }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      RetryInterval other = (RetryInterval) obj;
+      if (backoffAlgo != other.backoffAlgo) {
+        return false;
+      }
+      if (Double.doubleToLongBits(backoffFactor) != Double.doubleToLongBits(other.backoffFactor)) {
+        return false;
+      }
+      if (interval == null) {
+        if (other.interval != null) {
+          return false;
+        }
+      } else if (!interval.equals(other.interval)) {
+        return false;
+      }
+      if (maxInterval == null) {
+        if (other.maxInterval != null) {
+          return false;
+        }
+      } else if (!maxInterval.equals(other.maxInterval)) {
+        return false;
+      }
+      return true;
+    }
+
+    public BackoffAlgorithm getBackoffAlgo() {
+      return backoffAlgo;
+    }
+
+    public double getBackoffFactor() {
+      return backoffFactor;
+    }
+
+    public Duration getBase() {
+      return base;
+    }
+
+    public Duration getInterval() {
+      return interval;
+    }
+
+    public Duration getMaxInterval() {
+      return maxInterval;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (backoffAlgo == null ? 0 : backoffAlgo.hashCode());
+      long temp;
+      temp = Double.doubleToLongBits(backoffFactor);
+      result = prime * result + (int) (temp ^ temp >>> 32);
+      result = prime * result + (interval == null ? 0 : interval.hashCode());
+      result = prime * result + (maxInterval == null ? 0 : maxInterval.hashCode());
+      return result;
+    }
+
+    public RetryInterval reset() {
+      base = interval;
+      return this;
+    }
+
+  }
 }

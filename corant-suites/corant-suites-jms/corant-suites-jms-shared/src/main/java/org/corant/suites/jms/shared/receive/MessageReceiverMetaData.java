@@ -29,6 +29,8 @@ import javax.jms.ConnectionFactory;
 import org.corant.config.ConfigUtils;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Retry.BackoffAlgorithm;
+import org.corant.shared.util.Retry.RetryInterval;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.context.JMSExceptionListener;
@@ -55,9 +57,8 @@ public class MessageReceiverMetaData {
   private final int receiveThreshold;
   private final int failureThreshold;
   private final int tryThreshold;
+  private final RetryInterval breakedInterval;
   private final long loopIntervalMs;
-  private final Duration breakedDuration;
-  private final double breakedBackoff;
   private final boolean xa;
 
   MessageReceiverMetaData(ContextualMethodHandler method, String destinationName) {
@@ -77,13 +78,22 @@ public class MessageReceiverMetaData {
     failureThreshold = max(4, ann.failureThreshold());
     tryThreshold = max(2, ann.tryThreshold());
     loopIntervalMs = max(500L, ann.loopIntervalMs());
-    breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
+    Duration breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
         : Duration.parse(ann.breakedDuration()), Duration.ofSeconds(8L));
-    if (ann.breakedBackoff() > 0) {
-      shouldBeTrue(ann.breakedBackoff() > 1);
-      breakedBackoff = ann.breakedBackoff();
+    if (ann.breakedBackoffAlgo() == BackoffAlgorithm.NONE) {
+      breakedInterval = RetryInterval.noBackoff(breakedDuration);
+    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO) {
+      breakedInterval = RetryInterval.expoBackoff(breakedDuration,
+          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
+      breakedInterval = RetryInterval.expoBackoffDecorr(breakedDuration,
+          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
+      breakedInterval = RetryInterval.expoBackoffEqualJitter(breakedDuration,
+          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
     } else {
-      breakedBackoff = 0;
+      breakedInterval = RetryInterval.expoBackoffFullJitter(breakedDuration,
+          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
     }
     xa = ann.xa();
   }
@@ -141,58 +151,26 @@ public class MessageReceiverMetaData {
     return true;
   }
 
-  /**
-   *
-   * @return the acknowledge
-   */
   public int getAcknowledge() {
     return acknowledge;
   }
 
-  /**
-   *
-   * @return the breakedBackoff
-   */
-  public double getBreakedBackoff() {
-    return breakedBackoff;
+  public RetryInterval getBreakedInterval() {
+    return breakedInterval;
   }
 
-  /**
-   *
-   * @return the breakedDuration
-   */
-  public Duration getBreakedDuration() {
-    return breakedDuration;
-  }
-
-  /**
-   *
-   * @return the cacheLevel
-   */
   public int getCacheLevel() {
     return cacheLevel;
   }
 
-  /**
-   *
-   * @return the clientID
-   */
   public String getClientID() {
     return clientID;
   }
 
-  /**
-   *
-   * @return the connectionFactoryId
-   */
   public String getConnectionFactoryId() {
     return connectionFactoryId;
   }
 
-  /**
-   *
-   * @return the destination
-   */
   public String getDestination() {
     return destination;
   }
@@ -201,26 +179,14 @@ public class MessageReceiverMetaData {
     return failureThreshold;
   }
 
-  /**
-   *
-   * @return the loopIntervalMs
-   */
   public long getLoopIntervalMs() {
     return loopIntervalMs;
   }
 
-  /**
-   *
-   * @return the method
-   */
   public ContextualMethodHandler getMethod() {
     return method;
   }
 
-  /**
-   *
-   * @return the receiveThreshold
-   */
   public int getReceiveThreshold() {
     return receiveThreshold;
   }
@@ -229,26 +195,14 @@ public class MessageReceiverMetaData {
     return receiveTimeout;
   }
 
-  /**
-   *
-   * @return the selector
-   */
   public String getSelector() {
     return selector;
   }
 
-  /**
-   *
-   * @return the tryThreshold
-   */
   public int getTryThreshold() {
     return tryThreshold;
   }
 
-  /**
-   *
-   * @return the type
-   */
   public Class<?> getType() {
     return type;
   }
@@ -264,32 +218,12 @@ public class MessageReceiverMetaData {
     return result;
   }
 
-  /**
-   *
-   * @return the multicast
-   */
   public boolean isMulticast() {
     return multicast;
   }
 
-  /**
-   *
-   * @return the subscriptionDurable
-   */
   public boolean isSubscriptionDurable() {
     return subscriptionDurable;
-  }
-
-  @Override
-  public String toString() {
-    return "MessageReceiverMetaData [method=" + method + ", acknowledge=" + acknowledge
-        + ", clientID=" + clientID + ", connectionFactoryId=" + connectionFactoryId
-        + ", destination=" + destination + ", multicast=" + multicast + ", selector=" + selector
-        + ", subscriptionDurable=" + subscriptionDurable + ", type=" + type + ", cacheLevel="
-        + cacheLevel + ", receiveTimeout=" + receiveTimeout + ", receiveThreshold="
-        + receiveThreshold + ", failureThreshold=" + failureThreshold + ", tryThreshold="
-        + tryThreshold + ", loopIntervalMs=" + loopIntervalMs + ", breakedDuration="
-        + breakedDuration + "]";
   }
 
   ConnectionFactory connectionFactory() {

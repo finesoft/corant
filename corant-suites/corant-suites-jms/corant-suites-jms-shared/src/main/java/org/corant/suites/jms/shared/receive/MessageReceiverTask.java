@@ -19,7 +19,6 @@ import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Threads.tryThreadSleep;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +45,7 @@ import javax.transaction.SystemException;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.Retry;
+import org.corant.shared.util.Retry.RetryInterval;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jta.shared.TransactionService;
@@ -98,14 +97,13 @@ public class MessageReceiverTask implements Runnable {
 
   // controll circuit break
   protected final int failureThreshold;
-  protected final Duration breakedDuration;
-  protected final double breakedBackoff;
+  protected final RetryInterval breakedInterval;
   protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
   protected volatile boolean lastExecutionSuccessfully = false;// 20200602 change to false
   protected volatile long breakedTimePoint;
-  protected volatile long breakedInterval;
+  protected volatile long breakedMills;
 
   protected final AtomicInteger failureCounter = new AtomicInteger(0);
   protected final AtomicInteger tryCounter = new AtomicInteger(0);
@@ -122,8 +120,7 @@ public class MessageReceiverTask implements Runnable {
     messageListener = new MessageHandler(metaData.getMethod());
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
-    breakedDuration = metaData.getBreakedDuration();
-    breakedBackoff = metaData.getBreakedBackoff();
+    breakedInterval = metaData.getBreakedInterval();
     tryThreshold = metaData.getTryThreshold();
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
@@ -172,16 +169,6 @@ public class MessageReceiverTask implements Runnable {
       postRun();
       log(Level.FINE, null, "Stopped message receive task.");
     }
-  }
-
-  protected long calculateBreakedDuration() {
-    long baseBreakedMills = breakedDuration.toMillis();
-    if (breakedBackoff > 1 && tryFailureCounter.get() > 0) {
-      // The capped FIXME
-      return Retry.computeInterval(breakedBackoff, baseBreakedMills * 64, baseBreakedMills,
-          tryFailureCounter.intValue());
-    }
-    return baseBreakedMills;
   }
 
   protected void closeConnectionIfNecessary(boolean forceClose) {
@@ -435,11 +422,12 @@ public class MessageReceiverTask implements Runnable {
         }
       } else if (state == STATE_TRY) {
         if (failureCounter.intValue() > 0) {
-          stateBrk();
           tryFailureCounter.incrementAndGet();
+          stateBrk();
           return;
         } else {
           tryFailureCounter.set(0);
+          breakedInterval.reset();
           if (tryCounter.incrementAndGet() >= tryThreshold) {
             stateRun();
           }
@@ -470,7 +458,7 @@ public class MessageReceiverTask implements Runnable {
 
   protected boolean preRun() {
     if (state == STATE_BRK) {
-      long countdownMs = breakedInterval - (System.currentTimeMillis() - breakedTimePoint);
+      long countdownMs = breakedMills - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {
         if (countdownMs < loopInterval * 3) {
           log(Level.INFO, null, "The message receive task was breaked countdown %s ms, [%s]!",
@@ -482,6 +470,7 @@ public class MessageReceiverTask implements Runnable {
         return true;
       }
     }
+    breakedMills = 0L;
     return true;
   }
 
@@ -506,7 +495,7 @@ public class MessageReceiverTask implements Runnable {
   protected void stateBrk() {
     resetMonitors();
     breakedTimePoint = System.currentTimeMillis();
-    breakedInterval = calculateBreakedDuration();
+    breakedMills = breakedInterval.calculateMills(tryFailureCounter.get()).toMillis();
     state = STATE_BRK;
     log(Level.WARNING, null, "The message receive task start break mode, [%s]!", meta);
     release(true);

@@ -14,6 +14,7 @@
 package org.corant.suites.query.shared;
 
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import java.io.Serializable;
 import java.time.Duration;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import org.corant.shared.util.Retry.RetryInterval;
 
 /**
  * corant-suites-query-shared
@@ -264,9 +266,7 @@ public interface QueryParameter extends Serializable {
 
     protected int retryTimes = 0;
 
-    protected double retryBackoff = 0.0;
-
-    protected Duration retryInterval = defRtyItl;
+    protected RetryInterval retryInterval = RetryInterval.noBackoff(defRtyItl);
 
     protected transient BiPredicate<Integer, Object> terminater;
 
@@ -283,7 +283,7 @@ public interface QueryParameter extends Serializable {
     public StreamQueryParameter(StreamQueryParameter other) {
       super(other);
       enhancer(other.enhancer).retryInterval(other.retryInterval).retryTimes(other.retryTimes)
-          .retryBackoff(other.retryBackoff).terminater(other.terminater);
+          .terminater(other.terminater);
     }
 
     @Override
@@ -323,19 +323,11 @@ public interface QueryParameter extends Serializable {
     }
 
     /**
-     *
-     * @return the retryBackoff
-     */
-    public double getRetryBackoff() {
-      return retryBackoff;
-    }
-
-    /**
-     * @see #retryInterval(Duration)
+     * @see #retryInterval(RetryInterval)
      *
      * @return getRetryInterval
      */
-    public Duration getRetryInterval() {
+    public RetryInterval getRetryInterval() {
       return retryInterval;
     }
 
@@ -380,11 +372,6 @@ public interface QueryParameter extends Serializable {
       return this;
     }
 
-    public StreamQueryParameter retryBackoff(double retryBackoff) {
-      this.retryBackoff = retryBackoff;
-      return this;
-    }
-
     /**
      * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
      * batches, in this process the exception may be occurred, the query may retry after exception
@@ -394,10 +381,9 @@ public interface QueryParameter extends Serializable {
      * @param retryInterval
      * @return retryInterval
      */
-    public StreamQueryParameter retryInterval(Duration retryInterval) {
-      if (retryInterval != null) {
-        this.retryInterval = retryInterval;
-      }
+    public StreamQueryParameter retryInterval(RetryInterval retryInterval) {
+      this.retryInterval =
+          defaultObject(retryInterval, RetryInterval.noBackoff(Duration.ofMillis(2000L)));
       return this;
     }
 

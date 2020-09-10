@@ -495,7 +495,7 @@ public class MessageReceiverTask implements Runnable {
   protected void stateBrk() {
     resetMonitors();
     breakedTimePoint = System.currentTimeMillis();
-    breakedMills = breakedInterval.calculateMills(tryFailureCounter.get()).toMillis();
+    breakedMills = breakedInterval.calculateMillis(tryFailureCounter.get());
     state = STATE_BRK;
     log(Level.WARNING, null, "The message receive task start break mode, [%s]!", meta);
     release(true);

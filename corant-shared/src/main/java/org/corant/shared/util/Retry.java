@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Objects.min;
@@ -53,7 +54,8 @@ public class Retry {
    * @return computeExpoBackoff
    */
   public static long computeExpoBackoff(double backoffFactor, long cap, long base, int attempts) {
-    return min(cap, base * (long) Math.pow(backoffFactor, attempts));
+    long exp = min(cap, base * (long) Math.pow(backoffFactor, attempts));
+    return exp > 0 ? exp : cap;
   }
 
   /**
@@ -175,6 +177,138 @@ public class Retry {
    */
   public enum BackoffAlgorithm {
     NONE, EXPO, EXPO_DECORR, EXPO_EQUAL_JITTER, EXPO_FULL_JITTER
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 11:23:16
+   *
+   */
+  public static class DefaultRetryInterval implements RetryInterval, Serializable {
+
+    private static final long serialVersionUID = 1960222218031605834L;
+
+    protected final BackoffAlgorithm backoffAlgo;
+    protected final Duration interval;
+    protected final Duration maxInterval;
+    protected final double backoffFactor;
+    protected volatile long base;
+
+    protected DefaultRetryInterval(BackoffAlgorithm backoffAlgo, Duration interval,
+        Duration maxInterval, Double backoffFactor) {
+      super();
+      this.backoffAlgo = shouldNotNull(backoffAlgo, "The retry interval algo can't null!");
+      shouldBeTrue(interval != null && interval.toMillis() >= 0, "The retry interval error!");
+      this.interval = interval;
+      if (backoffAlgo != BackoffAlgorithm.NONE) {
+        shouldBeTrue(maxInterval != null && maxInterval.toMillis() >= 0
+            && maxInterval.compareTo(interval) > 0, "The retry interval error!");
+        if (backoffFactor != null) {
+          shouldBeTrue(backoffFactor.doubleValue() > 1,
+              "The retry backoff must greater then 1 or null");
+        }
+      }
+      this.maxInterval = maxInterval;
+      this.backoffFactor = defaultObject(backoffFactor, 2.0);
+      reset();
+    }
+
+    @Override
+    public long calculateMillis(int attempts) {
+      if (attempts <= 1) {
+        return base;
+      }
+      switch (backoffAlgo) {
+        case EXPO:
+          return computeExpoBackoff(backoffFactor, maxInterval.toMillis(), base, attempts);
+        case EXPO_DECORR:
+          return base = computeExpoBackoffDecorr(backoffFactor, maxInterval.toMillis(),
+              interval.toMillis(), attempts, base);
+        case EXPO_EQUAL_JITTER:
+          return computeExpoBackoffEqualJitter(backoffFactor, maxInterval.toMillis(), base,
+              attempts);
+        case EXPO_FULL_JITTER:
+          return computeExpoBackoffFullJitter(backoffFactor, maxInterval.toMillis(), base,
+              attempts);
+        default:
+          return base;
+      }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      DefaultRetryInterval other = (DefaultRetryInterval) obj;
+      if (backoffAlgo != other.backoffAlgo) {
+        return false;
+      }
+      if (Double.doubleToLongBits(backoffFactor) != Double.doubleToLongBits(other.backoffFactor)) {
+        return false;
+      }
+      if (interval == null) {
+        if (other.interval != null) {
+          return false;
+        }
+      } else if (!interval.equals(other.interval)) {
+        return false;
+      }
+      if (maxInterval == null) {
+        if (other.maxInterval != null) {
+          return false;
+        }
+      } else if (!maxInterval.equals(other.maxInterval)) {
+        return false;
+      }
+      return true;
+    }
+
+    public BackoffAlgorithm getBackoffAlgo() {
+      return backoffAlgo;
+    }
+
+    public double getBackoffFactor() {
+      return backoffFactor;
+    }
+
+    public long getBase() {
+      return base;
+    }
+
+    public Duration getInterval() {
+      return interval;
+    }
+
+    public Duration getMaxInterval() {
+      return maxInterval;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (backoffAlgo == null ? 0 : backoffAlgo.hashCode());
+      long temp;
+      temp = Double.doubleToLongBits(backoffFactor);
+      result = prime * result + (int) (temp ^ temp >>> 32);
+      result = prime * result + (interval == null ? 0 : interval.hashCode());
+      result = prime * result + (maxInterval == null ? 0 : maxInterval.hashCode());
+      return result;
+    }
+
+    @Override
+    public DefaultRetryInterval reset() {
+      base = interval.toMillis();
+      return this;
+    }
   }
 
   /**
@@ -327,7 +461,7 @@ public class Retry {
           remaining--;
           attempts++;
           if (remaining > 0) {
-            long wait = interval.calculateMills(attempts).toMillis();
+            long wait = interval.calculateMillis(attempts);
             logRetry(e, attempts, wait);
             try {
               if (wait > 0) {
@@ -356,28 +490,11 @@ public class Retry {
   /**
    * corant-shared
    *
-   * @author bingo 11:23:16
+   * @author bingo 0:47:22
    *
    */
-  public static class RetryInterval implements Serializable {
-
-    private static final long serialVersionUID = 1960222218031605834L;
-
-    protected final Duration interval;
-    protected final Duration maxInterval;
-    protected final double backoffFactor;
-    protected final BackoffAlgorithm backoffAlgo;
-    protected volatile Duration base;
-
-    protected RetryInterval(BackoffAlgorithm backoffAlgo, Duration interval, Duration maxInterval,
-        double backoffFactor) {
-      super();
-      this.interval = interval;
-      this.maxInterval = maxInterval;
-      this.backoffFactor = backoffFactor;
-      this.backoffAlgo = backoffAlgo;
-      reset();
-    }
+  @FunctionalInterface
+  public interface RetryInterval {
 
     /**
      * Use Exponential Backoff algorithm to compute the delay. The backoff factor accepted by this
@@ -392,9 +509,9 @@ public class Retry {
      * @param backoffFactor
      * @return expoBackoff
      */
-    public static RetryInterval expoBackoff(final Duration interval, final Duration maxInterval,
+    static DefaultRetryInterval expoBackoff(final Duration interval, final Duration maxInterval,
         final Double backoffFactor) {
-      return backoff(BackoffAlgorithm.EXPO, interval, maxInterval, backoffFactor);
+      return new DefaultRetryInterval(BackoffAlgorithm.EXPO, interval, maxInterval, backoffFactor);
     }
 
     /**
@@ -409,9 +526,10 @@ public class Retry {
      * @param backoffFactor
      * @return expoBackoffDecorr
      */
-    public static RetryInterval expoBackoffDecorr(final Duration interval,
+    static DefaultRetryInterval expoBackoffDecorr(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
-      return backoff(BackoffAlgorithm.EXPO_DECORR, interval, maxInterval, backoffFactor);
+      return new DefaultRetryInterval(BackoffAlgorithm.EXPO_DECORR, interval, maxInterval,
+          backoffFactor);
     }
 
     /**
@@ -426,9 +544,10 @@ public class Retry {
      * @param backoffFactor
      * @return expoBackoffEqualJitter
      */
-    public static RetryInterval expoBackoffEqualJitter(final Duration interval,
+    static DefaultRetryInterval expoBackoffEqualJitter(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
-      return backoff(BackoffAlgorithm.EXPO_EQUAL_JITTER, interval, maxInterval, backoffFactor);
+      return new DefaultRetryInterval(BackoffAlgorithm.EXPO_EQUAL_JITTER, interval, maxInterval,
+          backoffFactor);
     }
 
     /**
@@ -443,9 +562,10 @@ public class Retry {
      * @param backoffFactor
      * @return expoBackoffFullJitter
      */
-    public static RetryInterval expoBackoffFullJitter(final Duration interval,
+    static DefaultRetryInterval expoBackoffFullJitter(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
-      return backoff(BackoffAlgorithm.EXPO_FULL_JITTER, interval, maxInterval, backoffFactor);
+      return new DefaultRetryInterval(BackoffAlgorithm.EXPO_FULL_JITTER, interval, maxInterval,
+          backoffFactor);
     }
 
     /**
@@ -454,113 +574,26 @@ public class Retry {
      * @param interval
      * @return noBackoff
      */
-    public static RetryInterval noBackoff(Duration interval) {
+    static DefaultRetryInterval noBackoff(Duration interval) {
       shouldBeTrue(interval != null && interval.toMillis() >= 0);
-      return new RetryInterval(BackoffAlgorithm.NONE, interval, null, 0.0);
+      return new DefaultRetryInterval(BackoffAlgorithm.NONE, interval, null, 0.0);
     }
 
-    static RetryInterval backoff(final BackoffAlgorithm algo, final Duration interval,
-        final Duration maxInterval, final Double backoffFactor) {
-      shouldBeTrue(interval != null && interval.toMillis() >= 0 && maxInterval != null
-          && maxInterval.compareTo(interval) > 0);
-      if (backoffFactor != null) {
-        shouldBeTrue(backoffFactor > 1);
-      }
-      return new RetryInterval(algo, interval, maxInterval,
-          backoffFactor == null ? 2.0 : backoffFactor.doubleValue());
-    }
+    /**
+     * Calculate millis with attempts
+     *
+     * @param attempts
+     * @return calculateMillis
+     */
+    long calculateMillis(int attempts);
 
-    public Duration calculateMills(int attempts) {
-      if (backoffAlgo == BackoffAlgorithm.NONE || attempts <= 1) {
-        return base;
-      } else if (backoffAlgo == BackoffAlgorithm.EXPO) {
-        return Duration.ofMillis(
-            computeExpoBackoff(backoffFactor, maxInterval.toMillis(), base.toMillis(), attempts));
-      } else if (backoffAlgo == BackoffAlgorithm.EXPO_DECORR) {
-        base = Duration.ofMillis(computeExpoBackoffDecorr(backoffFactor, maxInterval.toMillis(),
-            base.toMillis(), attempts, base.toMillis()));
-        return base;
-      } else if (backoffAlgo == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
-        return Duration.ofMillis(computeExpoBackoffEqualJitter(backoffFactor,
-            maxInterval.toMillis(), base.toMillis(), attempts));
-      } else {
-        return Duration.ofMillis(computeExpoBackoffFullJitter(backoffFactor, maxInterval.toMillis(),
-            base.toMillis(), attempts));
-      }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      RetryInterval other = (RetryInterval) obj;
-      if (backoffAlgo != other.backoffAlgo) {
-        return false;
-      }
-      if (Double.doubleToLongBits(backoffFactor) != Double.doubleToLongBits(other.backoffFactor)) {
-        return false;
-      }
-      if (interval == null) {
-        if (other.interval != null) {
-          return false;
-        }
-      } else if (!interval.equals(other.interval)) {
-        return false;
-      }
-      if (maxInterval == null) {
-        if (other.maxInterval != null) {
-          return false;
-        }
-      } else if (!maxInterval.equals(other.maxInterval)) {
-        return false;
-      }
-      return true;
-    }
-
-    public BackoffAlgorithm getBackoffAlgo() {
-      return backoffAlgo;
-    }
-
-    public double getBackoffFactor() {
-      return backoffFactor;
-    }
-
-    public Duration getBase() {
-      return base;
-    }
-
-    public Duration getInterval() {
-      return interval;
-    }
-
-    public Duration getMaxInterval() {
-      return maxInterval;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (backoffAlgo == null ? 0 : backoffAlgo.hashCode());
-      long temp;
-      temp = Double.doubleToLongBits(backoffFactor);
-      result = prime * result + (int) (temp ^ temp >>> 32);
-      result = prime * result + (interval == null ? 0 : interval.hashCode());
-      result = prime * result + (maxInterval == null ? 0 : maxInterval.hashCode());
-      return result;
-    }
-
-    public RetryInterval reset() {
-      base = interval;
+    /**
+     * Use for clear
+     *
+     * @return reset
+     */
+    default RetryInterval reset() {
       return this;
     }
-
   }
 }

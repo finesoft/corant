@@ -63,12 +63,13 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
   String resolveVariables(String key, String value, final Collection<ConfigSource> originalSources,
       final Set<String> stack) {
     int startVar = 0;
-    while ((startVar = value.indexOf("${", startVar)) >= 0) {
-      int endVar = value.indexOf('}', startVar);
+    String resolvedValue = value;
+    while ((startVar = resolvedValue.indexOf("${", startVar)) >= 0) {
+      int endVar = resolvedValue.indexOf('}', startVar);
       if (endVar <= 0) {
         break;
       }
-      String varName = value.substring(startVar + 2, endVar);
+      String varName = resolvedValue.substring(startVar + 2, endVar);
       if (varName.isEmpty()) {
         break;
       } else if (varName.equals(key)) {
@@ -80,11 +81,11 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       }
       String varVal = resolveValue(varName, originalSources);
       if (varVal != null) {
-        value = resolveVariables(key, value.replace("${" + varName + "}", varVal), originalSources,
-            stack);
+        resolvedValue = resolveVariables(key, resolvedValue.replace("${" + varName + "}", varVal),
+            originalSources, stack);
       }
       startVar++;
     }
-    return value;
+    return resolvedValue;
   }
 }

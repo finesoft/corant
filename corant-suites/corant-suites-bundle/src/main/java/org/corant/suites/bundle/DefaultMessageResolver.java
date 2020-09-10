@@ -64,17 +64,17 @@ public class DefaultMessageResolver implements MessageResolver {
       return null;
     }
     String codes = asDefaultString(messageSource.getCodes());
-    locale = defaultObject(locale, Locale::getDefault);
-    Object[] parameters = genParameters(locale, messageSource.getParameters());
-    return messageBundle.getMessage(locale, codes, parameters,
+    Locale useLocale = defaultObject(locale, Locale::getDefault);
+    Object[] parameters = genParameters(useLocale, messageSource.getParameters());
+    return messageBundle.getMessage(useLocale, codes, parameters,
         l -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
-    locale = defaultObject(locale, Locale::getDefault);
-    Object[] parameters = genParameters(locale, params);
-    return messageBundle.getMessage(locale, codes, parameters,
+    Locale useLocale = defaultObject(locale, Locale::getDefault);
+    Object[] parameters = genParameters(useLocale, params);
+    return messageBundle.getMessage(useLocale, codes, parameters,
         l -> String.format("Can't find any message for %s", codes));
   }
 

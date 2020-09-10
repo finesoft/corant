@@ -38,12 +38,13 @@ public class Chars {
   public static int foldToAscii(char[] input, int inputPos, char[] output, int outputPos,
       int length) {
     final int end = inputPos + length;
+    int ops = outputPos;
     for (int pos = inputPos; pos < end; ++pos) {
       final char c = input[pos];
 
       // Quick test: if it's not in range then just keep current character
       if (c < '\u0080') {
-        output[outputPos++] = c;
+        output[ops++] = c;
       } else {
         switch (c) {
           case '\u00C0': // À [LATIN CAPITAL LETTER A WITH GRAVE]

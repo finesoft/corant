@@ -13,8 +13,10 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.toMap;
 import static org.corant.shared.util.Strings.asDefaultString;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
@@ -38,12 +40,13 @@ public class XmlConfigSource extends CorantConfigSource {
   final Map<String, String> properties;
 
   XmlConfigSource(URL resourceUrl, int ordinal) {
+    super(shouldNotNull(resourceUrl).toExternalForm(), ordinal);
     Properties props = new Properties();
     try (InputStream is = resourceUrl.openStream()) {
       props.loadFromXML(is);
       props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));
       properties = Collections.unmodifiableMap(toMap(props));
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
   }

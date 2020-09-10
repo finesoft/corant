@@ -13,6 +13,7 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.net.URL;
 import java.util.Map;
 import org.corant.config.CorantConfigSource;
@@ -28,6 +29,7 @@ public class JsonConfigSource extends CorantConfigSource {
   private static final long serialVersionUID = 4384365167157384602L;
 
   JsonConfigSource(URL resourceUrl, int ordinal) {
+    super(shouldNotNull(resourceUrl).toExternalForm(), ordinal);
     // TODO
   }
 

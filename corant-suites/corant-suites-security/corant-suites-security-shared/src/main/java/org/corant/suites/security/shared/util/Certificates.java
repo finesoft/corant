@@ -44,6 +44,7 @@ import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-suites-security-shared
@@ -73,7 +74,7 @@ public class Certificates {
       return new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
           .build(PrivateKeyFactory.createKey(privateKey.getEncoded()));
     } catch (Exception e) {
-      throw new RuntimeException("Could not create content signer.", e);
+      throw new CorantRuntimeException("Could not create content signer.", e);
     }
   }
 
@@ -109,7 +110,7 @@ public class Certificates {
 
       return new JcaX509CertificateConverter().getCertificate(holder);
     } catch (Exception e) {
-      throw new RuntimeException("Error creating X509v1Certificate.", e);
+      throw new CorantRuntimeException("Error creating X509v1Certificate.", e);
     }
   }
 

@@ -108,11 +108,9 @@ public class SqlHelper {
   public static String removeOrderBy(String sql) {
     if (sql != null) {
       int pos = shallowIndexOfPattern(sql, ORDER_BY_PATTERN, 0);
-      if (pos > 0) {
+      if (pos > 0 && sql.substring(pos).indexOf('?') == -1) {
         // Some database allow prepare statment use place holder FIXME
-        if (sql.substring(pos).indexOf('?') == -1) {
-          return sql.substring(0, pos);
-        }
+        return sql.substring(0, pos);
       }
     }
     return sql;

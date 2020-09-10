@@ -33,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -155,12 +156,12 @@ public class Keys {
   }
 
   public static byte[] pemToDer(String pem) {
-    pem = removeBeginEnd(pem);
-    return Base64.getDecoder().decode(pem);
+    String usePem = removeBeginEnd(pem);
+    return Base64.getDecoder().decode(usePem);
   }
 
   public static String toPem(Key key) {
-    String name = key.getClass().getSimpleName().toUpperCase();
+    String name = key.getClass().getSimpleName().toUpperCase(Locale.ENGLISH);
     if (name.endsWith("KEY")) {
       name = name.substring(0, name.length() - 3).concat(" KEY");
     }
@@ -172,11 +173,11 @@ public class Keys {
   }
 
   static String removeBeginEnd(String pem) {
-    pem = pem.replaceAll("-----BEGIN (.*)-----", "");
-    pem = pem.replaceAll("-----END (.*)----", "");
-    pem = pem.replaceAll("\r\n", "");
-    pem = pem.replaceAll("\n", "");
-    return pem.trim();
+    String rpem = pem.replaceAll("-----BEGIN (.*)-----", "");
+    rpem = rpem.replaceAll("-----END (.*)----", "");
+    rpem = rpem.replaceAll("\r\n", "");
+    rpem = rpem.replaceAll("\n", "");
+    return rpem.trim();
   }
 
 }

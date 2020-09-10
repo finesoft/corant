@@ -75,11 +75,11 @@ public class Conversion {
    */
   public static <T> Iterable<T> convert(Iterable<?> value, Class<?> sourceClass,
       Class<T> targetClass, Map<String, ?> hints) {
-    Converter converter = resolveConverter(sourceClass, targetClass, hints);
+    Converter converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
       return converter.iterable(value, hints);
     } else {
-      Converter stringConverter = resolveConverter(String.class, targetClass, hints);
+      Converter stringConverter = resolveConverter(String.class, targetClass);
       if (stringConverter != null) {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
@@ -124,11 +124,11 @@ public class Conversion {
         }
         final Class<?> nextClass = next.getClass();
         if (converter == null || sourceClass == null || !sourceClass.equals(nextClass)) {
-          converter = resolveConverter(nextClass, targetClass, hints);
+          converter = resolveConverter(nextClass, targetClass);
           sourceClass = nextClass;
           if (converter == null) {
             tryStringConverter = true;
-            converter = resolveConverter(String.class, targetClass, hints);
+            converter = resolveConverter(String.class, targetClass);
           } else {
             tryStringConverter = false;
           }
@@ -198,11 +198,11 @@ public class Conversion {
     if (targetClass.isAssignableFrom(sourceClass)) {
       return (T) value;
     }
-    Converter<S, T> converter = resolveConverter(sourceClass, targetClass, hints);
+    Converter<S, T> converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
       return converter.apply((S) value, hints);
     } else {
-      Converter<String, T> stringConverter = resolveConverter(String.class, targetClass, hints);
+      Converter<String, T> stringConverter = resolveConverter(String.class, targetClass);
       if (stringConverter != null) {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
@@ -307,8 +307,7 @@ public class Conversion {
    * @param lastSourceClass
    * @param targetClass
    */
-  private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass,
-      Map<String, ?> hints) {
+  private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass) {
     return Converters.lookup(wrap(sourceClass), wrap(targetClass)).orElse(null);
   }
 

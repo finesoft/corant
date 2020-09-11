@@ -1382,6 +1382,21 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-cloud</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-cloud-alibaba</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-cloud-tencent</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jcache-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>

@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-suites-cloud-alibaba</module>
+  	<module>corant-suites-cloud-tencent</module>
   </modules>
 </project>

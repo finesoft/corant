@@ -38,7 +38,9 @@ public class DomainDataSourceAccess extends AbstractDomainJDBCAccess {
   protected volatile String database;
 
   @Override
-  public void finalize() {}
+  public void finalize() {
+    // Noop! we are pooled
+  }
 
   @Override
   public Connection getConnection() throws SQLException {

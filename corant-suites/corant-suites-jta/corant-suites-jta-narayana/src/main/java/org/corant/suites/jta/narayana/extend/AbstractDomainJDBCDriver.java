@@ -297,10 +297,10 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public void initialise(final JDBCAccess jdbcAccess, String tableName,
       ObjectStoreEnvironmentBean jdbcStoreEnvironmentBean) throws SQLException, NamingException {
-    shouldBeTrue(jdbcAccess instanceof DomainDataSourceJDBCAccess);
+    shouldBeTrue(jdbcAccess instanceof AbstractDomainJDBCAccess);
     this.jdbcAccess = jdbcAccess;
     this.tableName = tableName;
-    domain = shouldNotBlank(((DomainDataSourceJDBCAccess) jdbcAccess).getDomain());
+    domain = shouldNotBlank(((AbstractDomainJDBCAccess) jdbcAccess).getDomain());
     dropTable = jdbcStoreEnvironmentBean.getDropTable();
     createTable = jdbcStoreEnvironmentBean.getCreateTable();
     prepare();
@@ -530,9 +530,7 @@ public abstract class AbstractDomainJDBCDriver
                 }
               }
               // This can be the case when triggering via EmptyObjectStore
-              if (!connection.getAutoCommit()) {
-                connection.commit();
-              }
+              connection.commit();
             } catch (SQLException e) {
               throw new CorantRuntimeException(e);
             }

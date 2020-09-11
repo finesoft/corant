@@ -22,10 +22,11 @@ import javax.enterprise.context.ApplicationScoped;
  *
  */
 @ApplicationScoped
-public class DomainJDBCStoreManager {
+public class DomainStoreManager {
 
   public void clear() {
-    DomainDataSourceJDBCAccess.instance.finalize();
+    DomainDataSourceAccess.instance.finalize();
+    DomainJDBCAccess.instance.finalize();
   }
 
 }

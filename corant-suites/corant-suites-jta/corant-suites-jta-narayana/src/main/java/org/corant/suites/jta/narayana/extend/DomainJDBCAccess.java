@@ -15,8 +15,6 @@ package org.corant.suites.jta.narayana.extend;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Maps.getMapInteger;
-import static org.corant.shared.util.Strings.isNoneBlank;
-import static org.corant.shared.util.Strings.split;
 import java.lang.reflect.Method;
 import java.sql.Array;
 import java.sql.Blob;
@@ -33,7 +31,6 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -42,8 +39,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.sql.DataSource;
+import org.corant.shared.exception.NotSupportedException;
 import com.arjuna.ats.arjuna.exceptions.FatalError;
-import com.arjuna.ats.arjuna.objectstore.jdbc.JDBCAccess;
 
 /**
  * corant-suites-jta-narayana
@@ -51,9 +48,9 @@ import com.arjuna.ats.arjuna.objectstore.jdbc.JDBCAccess;
  * @author bingo 下午3:30:52
  *
  */
-public class DomainDataSourceJDBCAccess implements JDBCAccess {
+public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
 
-  protected static final DomainDataSourceJDBCAccess instance = new DomainDataSourceJDBCAccess();
+  protected static final DomainJDBCAccess instance = new DomainJDBCAccess();
   protected volatile BlockingQueue<XConnection> cachedConnections;
   protected volatile BlockingQueue<XConnection> holdedConnections;
   private volatile int validateConnectionTimeout = 8;
@@ -109,8 +106,23 @@ public class DomainDataSourceJDBCAccess implements JDBCAccess {
     return dataSource;
   }
 
+  @Override
   public String getDomain() {
     return domain;
+  }
+
+  @Override
+  public AbstractDomainJDBCDriver getDriver() {
+    if (!DataSource.class.isAssignableFrom(driverClass)) {
+      throw new NotSupportedException("We only support javax.sql.DataSource");
+    }
+    if (driverClass.getName().contains("com.microsoft.sqlserver")) {
+      return new DomainMSSqlDriver();
+    } else if (driverClass.getName().contains("com.mysql")) {
+      return new DomainMySqlDriver();
+    } else {
+      throw new NotSupportedException("Can't support domain jdbc driver for %s", driverClass);
+    }
   }
 
   public Class<?> getDriverClass() {
@@ -156,21 +168,6 @@ public class DomainDataSourceJDBCAccess implements JDBCAccess {
     Connection connection = dataSource.getConnection();
     connection.setAutoCommit(false);
     return connection;
-  }
-
-  Map<String, String> resolveConfig(String str) {
-    Map<String, String> configuration = new HashMap<>();
-    for (String s : split(str, ";", true, true)) {
-      int pos = s.indexOf('=');
-      if (pos > 0) {
-        String key = s.substring(0, pos);
-        String val = s.substring(pos + 1);
-        if (isNoneBlank(key, val)) {
-          configuration.put(key, val);
-        }
-      }
-    }
-    return configuration;
   }
 
   class XConnection implements Connection {

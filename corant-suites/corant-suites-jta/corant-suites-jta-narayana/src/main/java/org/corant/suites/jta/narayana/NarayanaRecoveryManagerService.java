@@ -19,7 +19,14 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import org.corant.Corant;
+import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PreContainerStopEvent;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jta.shared.TransactionIntegration;
 import com.arjuna.ats.arjuna.recovery.RecoveryManager;
 import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
@@ -31,23 +38,19 @@ import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
  * @author bingo 上午12:02:18
  *
  */
+@ApplicationScoped
 public class NarayanaRecoveryManagerService extends RecoveryManagerService {
 
   protected final Logger logger = Logger.getLogger(NarayanaRecoveryManagerService.class.getName());
-  protected final boolean autoRecovery;
   protected final List<NarayanaXAResourceRecoveryHelper> helpers = new CopyOnWriteArrayList<>();
 
-  public NarayanaRecoveryManagerService(boolean autoRecovery) {
-    this.autoRecovery = autoRecovery;
-    if (autoRecovery) {
-      RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
-    } else {
-      RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
-    }
-  }
+  @Inject
+  protected NarayanaExtension extension;
 
-  public void initialize() {
-    if (autoRecovery) {
+  private volatile boolean recoveryManagerReady = false;
+
+  void initialize() {
+    if (extension.getConfig().isAutoRecovery()) {
       logger.info(() -> "Initialize automatic JTA recovery processes.");
     } else {
       logger.info(() -> "Initialize manual JTA recovery processes.");
@@ -60,20 +63,48 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
     if (xaRecoveryModule != null && isNotEmpty(helpers)) {
       helpers.stream().forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
     }
-    if (autoRecovery) {
+    if (extension.getConfig().isAutoRecovery()) {
       start();
       logger.info(() -> "JTA automatic recovery processes has been started.");
     }
   }
 
-  public void unInitialize() throws Exception {
+  @PostConstruct
+  void onPostConstruct() {
+    if (!recoveryManagerReady) {
+      synchronized (NarayanaRecoveryManagerService.class) {
+        if (!recoveryManagerReady) {
+          if (extension.getConfig().isAutoRecovery()) {
+            RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
+          } else {
+            RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
+          }
+          recoveryManagerReady = true;
+        }
+      }
+    }
+  }
+
+  void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
+    initialize();
+  }
+
+  void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
+    try {
+      unInitialize();
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  void unInitialize() throws Exception {
     stop();
     helpers.stream().forEach(helper -> {
       XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
       helper.destory();
     });
     helpers.clear();
-    if (autoRecovery) {
+    if (extension.getConfig().isAutoRecovery()) {
       logger.info(() -> "JTA automatic recovery processes has been stopped.");
     } else {
       logger.info(() -> "JTA manual recovery processes has been stopped.");

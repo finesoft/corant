@@ -31,7 +31,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Default;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -44,7 +43,6 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
 import org.corant.config.declarative.DeclarativeConfigResolver;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -54,7 +52,6 @@ import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
-import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
@@ -75,7 +72,6 @@ public class NarayanaExtension implements TransactionExtension {
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
       DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
-  protected volatile NarayanaRecoveryManagerService recoveryManagerService;
   protected List<String> mbeanNames = new ArrayList<>();
 
   @Override
@@ -119,11 +115,6 @@ public class NarayanaExtension implements TransactionExtension {
           .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE).scope(Singleton.class)
           .createWith(cc -> BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class));
 
-      event.<RecoveryManagerService>addBean().addTransitiveTypeClosure(RecoveryManagerService.class)
-          .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE,
-              NamedLiteral.of("narayana-jta"))
-          .scope(Singleton.class).createWith(cc -> recoveryManagerService)
-          .disposeWith((t, inst) -> t.destroy());
     }
   }
 
@@ -170,19 +161,11 @@ public class NarayanaExtension implements TransactionExtension {
       registerToMBean(resolveMBeanName("RecoveryEnvBean"), recoveryBean);
       logger.info(() -> "Registered narayana environment beans to MBean server.");
     }
-    if (recoveryManagerService == null) {
-      recoveryManagerService = new NarayanaRecoveryManagerService(config.isAutoRecovery());
-    }
-  }
 
-  void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
-    recoveryManagerService.initialize();
   }
 
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
-      recoveryManagerService.unInitialize();
-      recoveryManagerService = null;
       if (isNotEmpty(mbeanNames)) {
         mbeanNames.forEach(MBeans::deregisterFromMBean);
       }

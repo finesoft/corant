@@ -1,10 +1,8 @@
 package org.corant.suites.cloud.tencent.wechat;
 
-import org.corant.config.declarative.ConfigKeyRoot;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant <br>
@@ -31,6 +29,11 @@ public class WechatOAuthConfig {
   @ConfigProperty(name = "cloud.tencent.wechat.qr-code-url")
   private String qrCodeUrl;
 
+  /**
+   * 应用唯一标识
+   *
+   * @return getAppid
+   */
   public String getAppid() {
     return appid;
   }

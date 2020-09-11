@@ -53,7 +53,10 @@ public class DistPackager implements Packager {
 
   public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
+  public static final String LAUNCH_BATS =
+      "startup.bat,start.bat,stop.bat,restart.bat,shutdown.bat";
   public static final String RUN_SH = "run.sh";
+  public static final String LAUNCH_SHS = "startup.sh,start.sh,stop.sh,restart.sh,shutdown.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
   public static final String RUN_APP_ARGS = "#APPLICATION_ARGUMENTS#";
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
@@ -134,6 +137,7 @@ public class DistPackager implements Packager {
     List<Entry> entries = new ArrayList<>();
     entries.add(resolveRunbat());
     entries.add(resolveRunsh());
+    entries.addAll(resolveLaunchs());
     return entries;
   }
 
@@ -152,6 +156,20 @@ public class DistPackager implements Packager {
       }
     }
     entries.add(ClassPathEntry.of(JVM_OPT, JVM_OPT));
+    return entries;
+  }
+
+  List<Entry> resolveLaunchs() throws IOException {
+    List<Entry> entries = new ArrayList<>();
+    if (getMojo().isUseDirectRunner()) {
+      String[] bats = LAUNCH_BATS.split(",");
+      String applicationName = resolveApplicationName();
+      for (String bat : bats) {
+        String runbat = IOUtils.toString(ClassPathEntry.of(bat, bat).getInputStream(), CHARSET);
+        final String usebat = runbat.replaceAll(RUN_APP_NAME_PH, applicationName);
+        entries.add(new ScriptEntry(bat, usebat));
+      }
+    }
     return entries;
   }
 
@@ -185,7 +203,11 @@ public class DistPackager implements Packager {
         .replaceAll(RUN_APP_NAME_PH, applicationName)
         .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
         .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
-        .replaceAll(RUN_APP_ARGS, getMojo().getAppArgs())
+        .replaceAll(RUN_APP_ARGS,
+            getMojo().isUseDirectRunner()
+                ? getMojo().getAppArgs().isEmpty() ? getMojo().getAppArgs().concat("%1")
+                    : getMojo().getAppArgs().concat(" %1")
+                : getMojo().getAppArgs())
         .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
         .replaceAll(RUN_ADD_SYS_PROS, getMojo().getSysPros());
     return new ScriptEntry(RUN_BAT, usebat);

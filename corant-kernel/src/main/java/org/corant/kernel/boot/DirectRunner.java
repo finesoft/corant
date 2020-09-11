@@ -172,7 +172,9 @@ public class DirectRunner {
   }
 
   protected synchronized void perform(String cmd) {
-    if (isBlank(cmd) || cmd.startsWith(COMMAND_STARTUP)) {
+    if (isBlank(cmd) || cmd.startsWith(COMMAND_STARTUP)
+        || !cmd.startsWith(COMMAND_RESTART) && !cmd.startsWith(COMMAND_SHUTDOWN)
+            && !cmd.startsWith(COMMAND_START) && !cmd.startsWith(COMMAND_STOP)) {
       startup();
     } else {
       String[] cmds = split(cmd, COMMAND_SPLITOR, true, true);

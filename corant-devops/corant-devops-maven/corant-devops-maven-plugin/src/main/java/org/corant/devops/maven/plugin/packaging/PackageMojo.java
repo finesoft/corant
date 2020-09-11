@@ -59,6 +59,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "zip", property = "corant.maven-mojo.dist-format")
   protected String distFormat;
 
+  @Parameter(defaultValue = "false", property = "corant.maven-mojo.use-direct-runner")
+  protected boolean useDirectRunner;
+
   @Parameter(property = "corant.maven-mojo.main-class")
   protected String mainClass;
 
@@ -159,6 +162,10 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isJar() {
     return project.getPackaging().equals("jar");
+  }
+
+  public boolean isUseDirectRunner() {
+    return useDirectRunner;
   }
 
   public boolean isWar() {

@@ -54,8 +54,8 @@ public class Retry {
    * @return computeExpoBackoff
    */
   public static long computeExpoBackoff(double backoffFactor, long cap, long base, int attempts) {
-    long exp = min(cap, base * (long) Math.pow(backoffFactor, attempts));
-    return exp > 0 ? exp : cap;
+    long result = min(cap, base * (long) Math.pow(backoffFactor, attempts));
+    return result > 0 ? result : cap;
   }
 
   /**
@@ -75,8 +75,8 @@ public class Retry {
    */
   public static long computeExpoBackoffDecorr(double backoffFactor, long cap, long base,
       int attempts, long sleep) {
-    long useSleep = sleep <= 0 ? base : sleep;
-    return min(cap, Randoms.randomLong(base, useSleep * 3));
+    long result = min(cap, Randoms.randomLong(base, (sleep <= 0 ? base : sleep) * 3));
+    return result > 0 ? result : cap;
   }
 
   /**

@@ -226,6 +226,12 @@ public class MessageReceiverMetaData {
     return subscriptionDurable;
   }
 
+  @Override
+  public String toString() {
+    return "MessageReceiverMetaData [method=" + method + ", clientID=" + clientID
+        + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination + "]";
+  }
+
   ConnectionFactory connectionFactory() {
     return AbstractJMSExtension.getConnectionFactory(connectionFactoryId);
 

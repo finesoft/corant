@@ -79,7 +79,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     this.breakedInterval = breakedInterval;
     tryThreshold = metaData.getTryThreshold();
-    logger.log(Level.FINE, "Create message receive task for %s", metaData);
+    logger.log(Level.FINE, () -> String.format("Create message receive task for %s", metaData));
   }
 
   public boolean isInProgress() {
@@ -151,9 +151,8 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
       long countdownMs = breakedMillis - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {
         if (countdownMs < loopInterval * 3) {
-          logger.log(Level.INFO,
-              () -> String.format("The message receive task was breaked countdown %s ms, [%s]!",
-                  countdownMs, meta));
+          logger.log(Level.INFO, () -> String
+              .format("The execution was breaked countdown %s ms, [%s]!", countdownMs, meta));
         }
         return false;
       } else {
@@ -187,23 +186,21 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     breakedTimePoint = System.currentTimeMillis();
     breakedMillis = breakedInterval.calculateMillis(tryFailureCounter.get());
     state = STATE_BRK;
-    logger.log(Level.WARNING,
-        () -> String.format("The message receive task start break mode, [%s]!", meta));
+    logger.log(Level.WARNING, () -> String
+        .format("The execution enters breaking mode wait for [%s] ms, [%s]!", breakedMillis, meta));
     release(true);
   }
 
   protected void stateRun() {
     resetMonitors();
     state = STATE_RUN;
-    logger.log(Level.INFO,
-        () -> String.format("The message receive task start run mode, [%s]!", meta));
+    logger.log(Level.INFO, () -> String.format("The execution enters running mode, [%s]!", meta));
   }
 
   protected void stateTry() {
     resetMonitors();
     state = STATE_TRY;
-    logger.log(Level.INFO,
-        () -> String.format("The message receive task start try mode, [%s]!", meta));
+    logger.log(Level.INFO, () -> String.format("TThe execution enters trying mode, [%s]!", meta));
   }
 
 }

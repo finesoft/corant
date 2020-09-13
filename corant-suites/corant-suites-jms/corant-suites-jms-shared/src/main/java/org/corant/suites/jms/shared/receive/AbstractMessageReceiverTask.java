@@ -154,19 +154,19 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
   }
 
   protected void execute() {
+    logger.log(Level.FINE, () -> String.format("Start receiving messages, %s", meta));
     Throwable throwable = null;
     try {
       if (initialize()) {
         int rt = receiveThreshold;
         while (--rt >= 0) {
-          logger.log(Level.FINE, () -> "Start receiving messages.");
           preConsume();
           Message message = consume();
           postConsume(message);
           if (message == null) {
+            logger.log(Level.FINE, () -> String.format("No message for now, %s", meta));
             break;
           }
-          logger.log(Level.FINE, () -> "Stop receiving messages.");
         }
       }
     } catch (Exception e) {
@@ -174,6 +174,7 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
       throwable = e;
     } finally {
       lastExecutionSuccessfully = throwable == null;
+      logger.log(Level.FINE, () -> String.format("Stop receiving messages, %s", meta));
     }
   }
 

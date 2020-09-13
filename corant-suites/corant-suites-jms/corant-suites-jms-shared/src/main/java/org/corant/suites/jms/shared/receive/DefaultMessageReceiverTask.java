@@ -18,6 +18,7 @@ import static org.corant.shared.util.Threads.tryThreadSleep;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.jms.JMSException;
+import org.corant.context.CDIs;
 import org.corant.shared.util.Retry.RetryInterval;
 
 /**
@@ -133,6 +134,9 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
   }
 
   protected boolean preRun() {
+    if (!CDIs.isEnabled()) {
+      return false;
+    }
     if (state == STATE_BRK) {
       long countdownMs = breakedMillis - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {

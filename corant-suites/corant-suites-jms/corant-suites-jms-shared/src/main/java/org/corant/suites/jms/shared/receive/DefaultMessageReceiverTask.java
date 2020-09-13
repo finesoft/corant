@@ -63,7 +63,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
   protected final AtomicInteger tryCounter = new AtomicInteger(0);
   protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
-  protected DefaultMessageReceiverTask(MessageReceiverMetaData metaData) {
+  public DefaultMessageReceiverTask(MessageReceiverMetaData metaData) {
     super(metaData);
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
@@ -72,7 +72,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     logger.log(Level.FINE, "Create message receive task for %s", metaData);
   }
 
-  protected DefaultMessageReceiverTask(MessageReceiverMetaData metaData,
+  public DefaultMessageReceiverTask(MessageReceiverMetaData metaData,
       RetryInterval breakedInterval) {
     super(metaData);
     failureThreshold = metaData.getFailureThreshold();

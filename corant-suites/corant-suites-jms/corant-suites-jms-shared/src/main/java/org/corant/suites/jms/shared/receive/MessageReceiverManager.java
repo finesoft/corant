@@ -52,6 +52,9 @@ public class MessageReceiverManager {
   @Inject
   protected AbstractJMSExtension extesion;
 
+  @Inject
+  protected MessageReceiverTaskFactory taskFactory;
+
   protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
       new HashMap<>();
 
@@ -76,10 +79,6 @@ public class MessageReceiverManager {
     }
   }
 
-  protected MessageReceiverTask buildTask(MessageReceiverMetaData metaData) {
-    return new MessageReceiverTask(metaData);
-  }
-
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     Set<Pair<String, String>> anycasts = new HashSet<>();
     for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
@@ -100,8 +99,9 @@ public class MessageReceiverManager {
         ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
             "Can not schedule message receiver task, connection factory id [%s] not found. message receiver [%s].",
             cfg.getConnectionFactoryId(), metaData);
-        ses.scheduleWithFixedDelay(buildTask(metaData), cfg.getReceiveTaskInitialDelay().toMillis(),
-            cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
+        ses.scheduleWithFixedDelay(taskFactory.create(metaData),
+            cfg.getReceiveTaskInitialDelay().toMillis(), cfg.getReceiveTaskDelay().toMillis(),
+            TimeUnit.MICROSECONDS);
         logger.fine(() -> String.format(
             "Scheduled message receiver task, connection factory id [%s], destination [%s], initial delay [%s]Ms",
             metaData.getConnectionFactoryId(), metaData.getDestination(),

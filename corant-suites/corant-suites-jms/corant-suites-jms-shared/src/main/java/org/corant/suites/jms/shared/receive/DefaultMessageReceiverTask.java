@@ -72,6 +72,16 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     logger.log(Level.FINE, "Create message receive task for %s", metaData);
   }
 
+  protected DefaultMessageReceiverTask(MessageReceiverMetaData metaData,
+      RetryInterval breakedInterval) {
+    super(metaData);
+    failureThreshold = metaData.getFailureThreshold();
+    jmsFailureThreshold = max(failureThreshold / 2, 2);
+    this.breakedInterval = breakedInterval;
+    tryThreshold = metaData.getTryThreshold();
+    logger.log(Level.FINE, "Create message receive task for %s", metaData);
+  }
+
   public boolean isInProgress() {
     return inProgress;
   }

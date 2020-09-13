@@ -228,8 +228,9 @@ public class MessageReceiverMetaData {
 
   @Override
   public String toString() {
-    return "MessageReceiverMetaData [method=" + method + ", clientID=" + clientID
-        + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination + "]";
+    return "MessageReceiverMetaData [method=" + method.getMethod().toGenericString() + ", clientID="
+        + clientID + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination
+        + "]";
   }
 
   ConnectionFactory connectionFactory() {

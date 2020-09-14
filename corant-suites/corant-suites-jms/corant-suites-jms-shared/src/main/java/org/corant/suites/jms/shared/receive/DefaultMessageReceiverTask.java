@@ -64,12 +64,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
   protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
   public DefaultMessageReceiverTask(MessageReceiverMetaData metaData) {
-    super(metaData);
-    failureThreshold = metaData.getFailureThreshold();
-    jmsFailureThreshold = max(failureThreshold / 2, 2);
-    breakedInterval = metaData.getBreakedInterval();
-    tryThreshold = metaData.getTryThreshold();
-    logger.log(Level.FINE, "Create message receive task for %s", metaData);
+    this(metaData, metaData.getBreakedInterval());
   }
 
   public DefaultMessageReceiverTask(MessageReceiverMetaData metaData,
@@ -92,7 +87,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
       execute();
       postRun();
     } else {
-      tryThreadSleep(loopInterval);
+      tryThreadSleep(loopIntervalMillis);
       return;
     }
   }
@@ -139,18 +134,20 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
       release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));// FIXME
     } catch (Exception e) {
       logger.log(Level.SEVERE, e,
-          () -> String.format("On post run message receive task occurred error, %s", meta));
+          () -> String.format("The execution status occurred error, %s", meta));
     }
   }
 
   protected boolean preRun() {
     if (!CDIs.isEnabled()) {
+      logger.log(Level.SEVERE,
+          () -> String.format("The executeion can't run because the CDI not enabled, %s", meta));
       return false;
     }
     if (state == STATE_BRK) {
       long countdownMs = breakedMillis - (System.currentTimeMillis() - breakedTimePoint);
       if (countdownMs > 0) {
-        if (countdownMs < loopInterval * 3) {
+        if (countdownMs < loopIntervalMillis * 3) {
           logger.log(Level.INFO, () -> String
               .format("The execution was breaked countdown %s ms, [%s]!", countdownMs, meta));
         }
@@ -200,7 +197,7 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
   protected void stateTry() {
     resetMonitors();
     state = STATE_TRY;
-    logger.log(Level.INFO, () -> String.format("TThe execution enters trying mode, [%s]!", meta));
+    logger.log(Level.INFO, () -> String.format("The execution enters trying mode, [%s]!", meta));
   }
 
 }

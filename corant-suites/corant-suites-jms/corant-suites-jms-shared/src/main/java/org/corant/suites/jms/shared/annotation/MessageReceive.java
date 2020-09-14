@@ -47,6 +47,12 @@ public @interface MessageReceive {
   int acknowledge() default Session.CLIENT_ACKNOWLEDGE;
 
   /**
+   *
+   * @return tryBackoffAlgo
+   */
+  BackoffAlgorithm breakedBackoffAlgo() default BackoffAlgorithm.NONE;
+
+  /**
    * The breaked backoff factor, for Exponential backoff + jitter algorithm to compute the delay.
    * The value of backoff factor must greater then 1.0, default is 0 means do not enable Exponential
    * backoff + jitter algorithm.
@@ -54,12 +60,6 @@ public @interface MessageReceive {
    * @return breakedBackoff
    */
   double breakedBackoffFactor() default 2.0;
-
-  /**
-   *
-   * @return tryBackoffAlgo
-   */
-  BackoffAlgorithm breakedBackoffAlgo() default BackoffAlgorithm.NONE;
 
   /**
    * The breaked duration, if exceeds then start try mode.
@@ -118,7 +118,7 @@ public @interface MessageReceive {
    *
    * @return loopIntervalMs
    */
-  long loopIntervalMs() default 500L;
+  long loopIntervalMs() default 1000L;
 
   /**
    * The max breaked duration, if exceeds then start try mode.

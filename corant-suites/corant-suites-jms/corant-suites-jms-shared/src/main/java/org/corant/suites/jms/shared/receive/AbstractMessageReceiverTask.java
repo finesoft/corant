@@ -71,18 +71,18 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
 
   // config
   protected final MessageReceiverMetaData meta;
-  protected final ConnectionFactory connectionFactory;
-  protected final MessageListener messageListener;
   protected final boolean xa;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
-  protected final long loopInterval;
+  protected final long loopIntervalMillis;
 
   // worker object
+  protected final ConnectionFactory connectionFactory;
+  protected final MessageListener messageListener;
   protected volatile Connection connection;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
-  protected volatile boolean lastExecutionSuccessfully = false;// 20200602 change to false
+  protected volatile boolean lastExecutionSuccessfully = false;
 
   protected AbstractMessageReceiverTask(MessageReceiverMetaData metaData) {
     super();
@@ -92,7 +92,7 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
     messageListener = new MessageHandler(metaData.getMethod());
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
-    loopInterval = metaData.getLoopIntervalMs();
+    loopIntervalMillis = metaData.getLoopIntervalMs();
   }
 
   protected void closeConnectionIfNecessary(boolean forceClose) {

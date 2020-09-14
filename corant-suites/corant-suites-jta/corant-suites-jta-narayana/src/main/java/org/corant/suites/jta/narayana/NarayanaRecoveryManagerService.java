@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -47,39 +46,47 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
   @Inject
   protected NarayanaExtension extension;
 
-  private volatile boolean recoveryManagerReady = false;
+  protected volatile boolean initialized = false;
+  protected volatile boolean ready = false;
 
   void initialize() {
-    if (extension.getConfig().isAutoRecovery()) {
-      logger.info(() -> "Initialize automatic JTA recovery processes.");
-    } else {
-      logger.info(() -> "Initialize manual JTA recovery processes.");
-    }
-    create();
-    helpers.clear();
-    streamOf(ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-        .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
-    XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
-    if (xaRecoveryModule != null && isNotEmpty(helpers)) {
-      helpers.stream().forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
-    }
-    if (extension.getConfig().isAutoRecovery()) {
-      start();
-      logger.info(() -> "JTA automatic recovery processes has been started.");
-    }
-  }
-
-  @PostConstruct
-  void onPostConstruct() {
-    if (!recoveryManagerReady) {
+    // initialize the recovery manager
+    if (!initialized) {
       synchronized (NarayanaRecoveryManagerService.class) {
-        if (!recoveryManagerReady) {
+        if (!initialized) {
           if (extension.getConfig().isAutoRecovery()) {
             RecoveryManager.manager(RecoveryManager.INDIRECT_MANAGEMENT);
           } else {
             RecoveryManager.manager(RecoveryManager.DIRECT_MANAGEMENT);
           }
-          recoveryManagerReady = true;
+          initialized = true;
+        }
+      }
+    }
+
+    if (!ready) {
+      synchronized (NarayanaRecoveryManagerService.class) {
+        if (!ready) {
+          // start the recovery manager
+          if (extension.getConfig().isAutoRecovery()) {
+            logger.info(() -> "Initialize automatic JTA recovery processes.");
+          } else {
+            logger.info(() -> "Initialize manual JTA recovery processes.");
+          }
+          create();
+          helpers.clear();
+          streamOf(
+              ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
+                  .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
+          XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
+          if (xaRecoveryModule != null && isNotEmpty(helpers)) {
+            helpers.stream().forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
+          }
+          if (extension.getConfig().isAutoRecovery()) {
+            start();
+            logger.info(() -> "JTA automatic recovery processes has been started.");
+          }
+          ready = true;
         }
       }
     }
@@ -98,16 +105,18 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
   }
 
   void unInitialize() throws Exception {
-    stop();
-    helpers.stream().forEach(helper -> {
-      XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
-      helper.destory();
-    });
-    helpers.clear();
-    if (extension.getConfig().isAutoRecovery()) {
-      logger.info(() -> "JTA automatic recovery processes has been stopped.");
-    } else {
-      logger.info(() -> "JTA manual recovery processes has been stopped.");
+    if (ready) {
+      stop();
+      helpers.stream().forEach(helper -> {
+        XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
+        helper.destory();
+      });
+      helpers.clear();
+      if (extension.getConfig().isAutoRecovery()) {
+        logger.info(() -> "JTA automatic recovery processes has been stopped.");
+      } else {
+        logger.info(() -> "JTA manual recovery processes has been stopped.");
+      }
     }
   }
 

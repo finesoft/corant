@@ -47,7 +47,7 @@ public interface WechatOAuthClient {
    * @param appid 应用唯一标识，在微信开放平台提交应用审核通过后获得
    * @param secret 应用密钥AppSecret，在微信开放平台提交应用审核通过后获得
    * @param code 获取的code参数
-   * @param grantType authorization_code
+   * @param grantType 填authorization_code
    * @return
    */
   @GET
@@ -62,7 +62,7 @@ public interface WechatOAuthClient {
    *      "https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Authorized_Interface_Calling_UnionID.html">
    *      刷新或续期access_token使用</a>
    * @param appid 应用唯一标识
-   * @param grantType refresh_token
+   * @param grantType 填refresh_token
    * @param refreshToken 填写通过access_token获取到的refresh_token参数
    * @return
    */

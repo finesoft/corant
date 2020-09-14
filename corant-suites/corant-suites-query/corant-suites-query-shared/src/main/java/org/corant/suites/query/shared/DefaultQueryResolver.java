@@ -133,7 +133,7 @@ public class DefaultQueryResolver implements QueryResolver {
     if (param != null) {
       param.forEach((k, v) -> {
         Class<?> cls = null;
-        if (convertSchema != null && (cls = convertSchema.get(k)) != null) {
+        if (k != null && convertSchema != null && (cls = convertSchema.get(k)) != null) {
           convertedParam.put(k.toString(), conversionService.convert(v, cls));
         } else if (k != null) {
           convertedParam.put(k.toString(), v);
@@ -147,7 +147,7 @@ public class DefaultQueryResolver implements QueryResolver {
    * Convert single record to expected class object.
    *
    * @param <T>
-   * @param result
+   * @param record
    * @param expectedClass
    * @return the converted record
    */

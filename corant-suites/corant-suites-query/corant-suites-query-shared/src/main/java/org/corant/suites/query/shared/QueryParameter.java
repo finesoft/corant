@@ -120,7 +120,7 @@ public interface QueryParameter extends Serializable {
 
     /**
      *
-     * @param context the context to set
+     * @param objects the context to set
      */
     public DefaultQueryParameter context(Object... objects) {
       context = mapOf(objects);

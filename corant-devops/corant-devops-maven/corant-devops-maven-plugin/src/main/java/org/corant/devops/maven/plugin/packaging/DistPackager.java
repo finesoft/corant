@@ -266,7 +266,7 @@ public class DistPackager implements Packager {
     private final String name;
 
     /**
-     * @param usebat
+     * @param script
      */
     ScriptEntry(String name, String script) {
       this.name = name;

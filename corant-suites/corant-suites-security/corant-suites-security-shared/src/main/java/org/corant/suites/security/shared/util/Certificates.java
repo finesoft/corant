@@ -74,7 +74,7 @@ public class Certificates {
       return new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
           .build(PrivateKeyFactory.createKey(privateKey.getEncoded()));
     } catch (Exception e) {
-      throw new CorantRuntimeException("Could not create content signer.", e);
+      throw new CorantRuntimeException(e, "Could not create content signer.");
     }
   }
 
@@ -110,7 +110,7 @@ public class Certificates {
 
       return new JcaX509CertificateConverter().getCertificate(holder);
     } catch (Exception e) {
-      throw new CorantRuntimeException("Error creating X509v1Certificate.", e);
+      throw new CorantRuntimeException(e, "Error creating X509v1Certificate.");
     }
   }
 

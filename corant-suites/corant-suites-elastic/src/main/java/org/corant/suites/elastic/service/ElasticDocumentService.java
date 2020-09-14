@@ -61,11 +61,11 @@ public interface ElasticDocumentService {
    * Batch document indexing
    *
    * @param indexName the document index name
-   * @param id the document id
-   * @param objs the objects to index
+   * @param objs the documents
    * @param flush whether to refresh immediately, if true then use RefreshPolicy.IMMEDIATE else
    *        RefreshPolicy.NONE
    * @return index successfully or no
+   *
    */
   int bulkIndex(String indexName, List<Map<?, ?>> objs, boolean flush);
 

@@ -175,7 +175,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
 
     /**
      * @param instance
-     * @param config
+     * @param ec
      */
     public DefaultElasticDocumentService(Instance<Object> instance, ElasticConfig ec) {
       transportClient =

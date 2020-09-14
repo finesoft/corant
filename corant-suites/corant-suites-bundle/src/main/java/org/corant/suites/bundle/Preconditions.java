@@ -14,8 +14,8 @@
 package org.corant.suites.bundle;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.areDeepEqual;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.contains;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -659,8 +659,10 @@ public class Preconditions {
   /**
    * 手机号码校验
    *
-   * @param mailAddress
+   * @param mobileNumber
    * @param code
+   * @param parameters
+   * @return requireZhMobileNumber
    */
   public static String requireZhMobileNumber(String mobileNumber, Object code,
       Object... parameters) {
@@ -671,10 +673,12 @@ public class Preconditions {
   }
 
   /**
-   * 手机号码校验 正确格式 012-87654321、0123-87654321、0123－7654321
+   * 电话号码校验 正确格式 012-87654321、0123-87654321、0123－7654321
    *
-   * @param mailAddress
+   * @param phoneNumber
    * @param code
+   * @param parameters
+   * @return requireZhPhoneNumber
    */
   public static String requireZhPhoneNumber(String phoneNumber, Object code, Object... parameters) {
     if (!Validates.isZhPhoneNumber(phoneNumber)) {

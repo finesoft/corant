@@ -26,9 +26,6 @@ public final class IdentityConverter<T> extends AbstractConverter<T, T> {
   private static final long serialVersionUID = -1142975657520192953L;
   public static final IdentityConverter<?> INSTANCE = new IdentityConverter<>();
 
-  /**
-   * @param nullable
-   */
   private IdentityConverter() {
     super();
   }

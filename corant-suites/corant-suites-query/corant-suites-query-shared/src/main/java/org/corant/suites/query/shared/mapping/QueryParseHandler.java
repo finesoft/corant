@@ -189,27 +189,29 @@ public class QueryParseHandler extends DefaultHandler {
   void handleFetchQuery(boolean start, String qName, Attributes attributes) {
     if (start) {
       FetchQuery fq = new FetchQuery();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryName(atv);
-        } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryType(toEnum(atv, QueryType.class));
-        } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryQualifier(atv);
-        } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
-          fq.setMaxSize(toInteger(atv));
-        } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
-          fq.setInjectPropertyName(atv);
-        } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
-          fq.setEagerInject(isBlank(atv) ? true : toBoolean(atv));
-        } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
-          fq.setReferenceQueryversion(defaultString(atv));
-        } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
-          fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
-        } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
-          fq.setMultiRecords(isBlank(atv) ? true : toBoolean(atv));
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.FQE_ATT_REF_QUE.equalsIgnoreCase(aqn)) {
+            fq.setReferenceQueryName(atv);
+          } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
+            fq.setReferenceQueryType(toEnum(atv, QueryType.class));
+          } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
+            fq.setReferenceQueryQualifier(atv);
+          } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
+            fq.setMaxSize(toInteger(atv));
+          } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
+            fq.setInjectPropertyName(atv);
+          } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
+            fq.setEagerInject(isBlank(atv) ? true : toBoolean(atv));
+          } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
+            fq.setReferenceQueryversion(defaultString(atv));
+          } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
+            fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
+          } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
+            fq.setMultiRecords(isBlank(atv) ? true : toBoolean(atv));
+          }
         }
       }
       valueStack.push(fq);
@@ -229,24 +231,26 @@ public class QueryParseHandler extends DefaultHandler {
   void handleFetchQueryParameter(boolean start, String qName, Attributes attributes) {
     if (start) {
       FetchQueryParameter fqp = new FetchQueryParameter();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
-          fqp.setName(atv);
-        } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
-          fqp.setSource(toEnum(atv, FetchQueryParameterSource.class));
-        } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
-          fqp.setSourceName(atv);
-        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
-          fqp.setValue(atv);
-        } else if (SchemaNames.X_DISTINCT.equalsIgnoreCase(aqn)) {
-          fqp.setDistinct(toBoolean(atv));
-        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-          if (isNotBlank(atv)) {
-            fqp.setType(asClass(atv));
-          } else {
-            fqp.setType(null);
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+            fqp.setName(atv);
+          } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
+            fqp.setSource(toEnum(atv, FetchQueryParameterSource.class));
+          } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC_NME.equalsIgnoreCase(aqn)) {
+            fqp.setSourceName(atv);
+          } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
+            fqp.setValue(atv);
+          } else if (SchemaNames.X_DISTINCT.equalsIgnoreCase(aqn)) {
+            fqp.setDistinct(toBoolean(atv));
+          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+            if (isNotBlank(atv)) {
+              fqp.setType(asClass(atv));
+            } else {
+              fqp.setType(null);
+            }
           }
         }
       }
@@ -267,13 +271,15 @@ public class QueryParseHandler extends DefaultHandler {
   void handleParamEntry(boolean start, String qName, Attributes attributes) {
     if (start) {
       ParameterMapping pm = new ParameterMapping();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
-          pm.setName(atv);
-        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-          pm.setType(asClass(atv));
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+            pm.setName(atv);
+          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+            pm.setType(asClass(atv));
+          }
         }
       }
       valueStack.push(pm);
@@ -288,13 +294,15 @@ public class QueryParseHandler extends DefaultHandler {
   void handleProperty(boolean start, String qName, Attributes attributes) {
     if (start) {
       Property pm = new Property();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
-          pm.setName(atv);
-        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
-          pm.setValue(atv);
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+            pm.setName(atv);
+          } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
+            pm.setValue(atv);
+          }
         }
       }
       valueStack.push(pm);
@@ -310,21 +318,23 @@ public class QueryParseHandler extends DefaultHandler {
   void handleQuery(boolean start, String qName, Attributes attributes) {
     if (start) {
       Query q = new Query(url);
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
-          q.setName(atv);
-        } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {
-          q.setCache(toBoolean(atv));
-        } else if (SchemaNames.QUE_ATT_CACHE_RS_MD.equalsIgnoreCase(aqn)) {
-          q.setCacheResultSetMetadata(toBoolean(atv));
-        } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
-          q.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
-        } else if (SchemaNames.QUE_ATT_RST_SET_CLS.equalsIgnoreCase(aqn)) {
-          q.setResultSetMapping(isBlank(atv) ? null : asClass(atv));
-        } else if (SchemaNames.QUE_ATT_VER.equalsIgnoreCase(aqn)) {
-          q.setVersion(defaultString(atv));
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+            q.setName(atv);
+          } else if (SchemaNames.QUE_ATT_CACHE.equalsIgnoreCase(aqn)) {
+            q.setCache(toBoolean(atv));
+          } else if (SchemaNames.QUE_ATT_CACHE_RS_MD.equalsIgnoreCase(aqn)) {
+            q.setCacheResultSetMetadata(toBoolean(atv));
+          } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
+            q.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
+          } else if (SchemaNames.QUE_ATT_RST_SET_CLS.equalsIgnoreCase(aqn)) {
+            q.setResultSetMapping(isBlank(atv) ? null : asClass(atv));
+          } else if (SchemaNames.QUE_ATT_VER.equalsIgnoreCase(aqn)) {
+            q.setVersion(defaultString(atv));
+          }
         }
       }
       valueStack.push(q);
@@ -355,11 +365,13 @@ public class QueryParseHandler extends DefaultHandler {
   void handleQueryHint(boolean start, String qName, Attributes attributes) {
     if (start) {
       QueryHint hit = new QueryHint();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_KEY.equalsIgnoreCase(aqn)) {
-          hit.setKey(atv);
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_KEY.equalsIgnoreCase(aqn)) {
+            hit.setKey(atv);
+          }
         }
       }
       valueStack.push(hit);
@@ -379,15 +391,17 @@ public class QueryParseHandler extends DefaultHandler {
   void handleQueryHintParameter(boolean start, String qName, Attributes attributes) {
     if (start) {
       QueryHintParameter qhp = new QueryHintParameter();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
-          qhp.setName(atv);
-        } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
-          qhp.setValue(atv);
-        } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-          qhp.setType(atv);
+      if (attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+            qhp.setName(atv);
+          } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
+            qhp.setValue(atv);
+          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+            qhp.setType(atv);
+          }
         }
       }
       valueStack.push(qhp);
@@ -426,20 +440,23 @@ public class QueryParseHandler extends DefaultHandler {
   void handleScript(boolean start, String qName, Attributes attributes) {
     if (start) {
       Script st = new Script();
-      ScriptType typ = null;
-      String src = null;
-      for (int i = 0; i < attributes.getLength(); i++) {
-        String aqn = attributes.getQName(i);
-        String atv = attributes.getValue(i);
-        if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-          typ = toObject(atv, ScriptType.class);
-        } else if (SchemaNames.X_SRC.equalsIgnoreCase(aqn)) {
-          src = atv;
+      if (attributes != null) {
+        ScriptType typ = null;
+        String src = null;
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String aqn = attributes.getQName(i);
+          String atv = attributes.getValue(i);
+          if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+            typ = toObject(atv, ScriptType.class);
+          } else if (SchemaNames.X_SRC.equalsIgnoreCase(aqn)) {
+            src = atv;
+          }
         }
+        st.setType(
+            typ == null ? this.currentObject() instanceof Query ? ScriptType.FM : ScriptType.JS
+                : typ);
+        st.setSrc(src);
       }
-      st.setType(typ == null ? this.currentObject() instanceof Query ? ScriptType.FM : ScriptType.JS
-          : typ);
-      st.setSrc(src);
       valueStack.push(st);
       nameStack.push(qName);
     } else {
@@ -478,7 +495,8 @@ public class QueryParseHandler extends DefaultHandler {
           FetchQuery q = this.currentObject();
           if (q == null || !obj.isValid()) {
             throw new QueryRuntimeException(
-                "Parse %s error the fetch query predicate script must be in predicate-script element and script can't null!");
+                "Parse %s error the fetch query predicate script must be in predicate-script element and script can't null!",
+                url);
           }
           q.setPredicateScript(obj);
         }
@@ -487,7 +505,8 @@ public class QueryParseHandler extends DefaultHandler {
           FetchQuery q = this.currentObject();
           if (q == null || !obj.isValid()) {
             throw new QueryRuntimeException(
-                "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!");
+                "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!",
+                url);
           }
           q.setInjectionScript(obj);
         }

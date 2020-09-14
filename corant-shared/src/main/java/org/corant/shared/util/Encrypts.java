@@ -390,7 +390,7 @@ public class Encrypts {
   /**
    * 正整数转为26进制的大写字母组合，1->A，2->B...26->Z，27->AA...
    *
-   * @param num
+   * @param number
    * @return
    */
   public static String intToAlphabetScale(int number) {
@@ -413,7 +413,7 @@ public class Encrypts {
   /**
    * 将62进制字符串转为long型
    *
-   * @param r26s
+   * @param r62String
    * @return
    */
   public static long r62StringToLong(String r62String) {
@@ -433,7 +433,7 @@ public class Encrypts {
           break;
         }
       }
-      result += tableIndex * Math.pow(R62_MAX_LEN, r62str.length() - index - 1d);
+      result += tableIndex * (long) Math.pow(R62_MAX_LEN, r62str.length() - index - 1d);
     }
 
     return negative ? result * -1 : result;
@@ -640,7 +640,7 @@ public class Encrypts {
   /**
    * 转为62进制字符串
    *
-   * @param r62n
+   * @param r62Number
    * @return
    */
   public static String toR62String(long r62Number) {

@@ -61,7 +61,7 @@ public class DoublePointRecord implements Clusterable {
 
   /**
    * @param id
-   * @param point
+   * @param features
    */
   public DoublePointRecord(Object id, TreeMap<?, Double> features) {
     super();

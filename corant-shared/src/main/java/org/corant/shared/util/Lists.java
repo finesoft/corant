@@ -101,7 +101,7 @@ public class Lists {
    * @param <T>
    * @param <C>
    * @param supplier the collection instance builder
-   * @param objects the iterator
+   * @param it the iterator
    * @return an collection that combined by the passed in iterator
    */
   public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
@@ -154,7 +154,7 @@ public class Lists {
    * Convert an enumeration to list
    *
    * @param <T>
-   * @param objects
+   * @param enumeration
    * @return a list that combined by the passed in enumeration
    */
   public static <T> List<T> listOf(final Enumeration<? extends T> enumeration) {
@@ -213,19 +213,19 @@ public class Lists {
     return collectionOf(ArrayList::new, objects);
   }
 
-  /**
-   * Merge a list and another list elements to a new list. Like SQL select join clause.
-   *
-   * @param <F> a list element type
-   * @param <J> another list element type
-   * @param <T> the return element type
-   * @param from a list
-   * @param join another list
-   * @param combination the combination function that merge two element objects to a new object
-   * @param condition the join conditions like SQL ON clause
-   * @param type the join type INNER LEFT CARTESIAN(CROSS-JOIN)
-   * @return the merged new list
-   */
+  // /**
+  // * Merge a list and another list elements to a new list. Like SQL select join clause.
+  // *
+  // * @param <F> a list element type
+  // * @param <J> another list element type
+  // * @param <T> the return element type
+  // * @param from a list
+  // * @param join another list
+  // * @param combination the combination function that merge two element objects to a new object
+  // * @param condition the join conditions like SQL ON clause
+  // * @param type the join type INNER LEFT CARTESIAN(CROSS-JOIN)
+  // * @return the merged new list
+  // */
   // public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
   // final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
   // return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
@@ -297,12 +297,12 @@ public class Lists {
     a[j] = t;
   }
 
-  /**
-   * corant-shared
-   *
-   * @author bingo 下午2:36:15
-   *
-   */
+  // /**
+  // * corant-shared
+  // *
+  // * @author bingo 下午2:36:15
+  // *
+  // */
   // public static class ListJoins<F, J, T> {
   //
   // private List<F> from;

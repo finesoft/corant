@@ -101,7 +101,8 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
         connection.stop();
         connection.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e, () -> String.format("Close connection occurred error!", meta));
+        logger.log(Level.SEVERE, e,
+            () -> String.format("Close connection occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
         session = null;
@@ -115,7 +116,8 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
       try {
         messageConsumer.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e, () -> String.format("Close consumer occurred error!", meta));
+        logger.log(Level.SEVERE, e,
+            () -> String.format("Close consumer occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
       }
@@ -130,7 +132,8 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
           connection.stop();
         }
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e, () -> String.format("Close session occurred error!", meta));
+        logger.log(Level.SEVERE, e,
+            () -> String.format("Close session occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
         session = null;

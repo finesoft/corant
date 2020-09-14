@@ -54,7 +54,7 @@ public interface Querier {
    * Inject the fetched result to single result
    *
    * @param result
-   * @param fetchResult
+   * @param fetchedResult
    * @param fetchQuery
    * @see FetchQueryResolver#resolveFetchedResult(Object, List, FetchQuery)
    */
@@ -64,7 +64,7 @@ public interface Querier {
    * Inject the fetched result to result list
    *
    * @param result
-   * @param fetchResult
+   * @param fetchedResult
    * @param fetchQuery
    * @see FetchQueryResolver#resolveFetchedResults(List, List, FetchQuery)
    */

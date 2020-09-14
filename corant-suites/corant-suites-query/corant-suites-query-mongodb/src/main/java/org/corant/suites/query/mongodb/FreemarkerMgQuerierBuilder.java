@@ -46,14 +46,8 @@ public class FreemarkerMgQuerierBuilder extends
   }
 
   /**
-   * @param query
-   * @param queryParameter
-   * @param parameterResolver
-   * @param queryResolver
-   * @param mgQuery
-   * @param originalScript
+   * processed
    */
-
   @Override
   protected DefaultMgNamedQuerier build(
       Triple<QueryParameter, Map<String, Object>, String> processed) {

@@ -55,7 +55,7 @@ public abstract class TransactionalAction<T> {
   final Synchronization synchronization;
 
   /**
-   * @param type;
+   * @param type
    * @param supplier
    * @param synchronization
    * @param rollbackOn

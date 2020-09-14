@@ -110,7 +110,7 @@ public class MessageReceiverTask implements Runnable {
   protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
   /**
-   * @param meta
+   * @param metaData
    */
   protected MessageReceiverTask(MessageReceiverMetaData metaData) {
     super();

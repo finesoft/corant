@@ -108,7 +108,7 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
 
   @PreDestroy
   protected void onPreDestroy() {
-    final Long ms = terminationTimeout.toMillis();
+    final long ms = terminationTimeout.toMillis();
     try {
       dispatcher.awaitTermination(ms, TimeUnit.MICROSECONDS);
     } catch (InterruptedException e) {

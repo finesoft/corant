@@ -60,9 +60,9 @@ public class DefaultMgNamedQuerier
    * @param originalScript
    */
   protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
+      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
       String originalScript) {
-    super(query, queryParameter, resultResolver, fetchQueryResolver);
+    super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);

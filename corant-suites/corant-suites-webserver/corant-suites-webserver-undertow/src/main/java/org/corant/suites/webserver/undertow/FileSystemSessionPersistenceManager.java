@@ -62,8 +62,8 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
       ClassLoader classLoader) {
     final File file = getStore(deploymentName);
     if (file.canRead() && file.length() > 0) {
-      try (ObjectInputStream stream =
-          new ObjectInputStreamWithLoader(new FileInputStream(file), classLoader)) {
+      try (FileInputStream fis = new FileInputStream(file);
+          ObjectInputStream stream = new ObjectInputStreamWithLoader(fis, classLoader)) {
         Map<String, SerializablePersistentSession> session = forceCast(stream.readObject());
         long time = System.currentTimeMillis();
         Map<String, PersistentSession> result = new LinkedHashMap<>();
@@ -86,8 +86,8 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
 
   @Override
   public void persistSessions(String deploymentName, Map<String, PersistentSession> sessionData) {
-    try (ObjectOutputStream stream =
-        new ObjectOutputStream(new FileOutputStream(getStore(deploymentName)))) {
+    try (FileOutputStream fos = new FileOutputStream(getStore(deploymentName));
+        ObjectOutputStream stream = new ObjectOutputStream(fos)) {
       Map<String, Serializable> session = new LinkedHashMap<>();
       for (Map.Entry<String, PersistentSession> entry : sessionData.entrySet()) {
         session.put(entry.getKey(), new SerializablePersistentSession(entry.getValue()));

@@ -42,9 +42,9 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
    * @param script
    */
   protected DefaultCasNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver, Object[] scriptParameter,
+      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver, Object[] scriptParameter,
       String script) {
-    super(query, queryParameter, resultResolver, fetchQueryResolver);
+    super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;
     this.script = script.replaceAll("[\\t\\n\\r]", " ");

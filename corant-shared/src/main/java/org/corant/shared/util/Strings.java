@@ -43,7 +43,8 @@ public class Strings {
    * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
    *
    * @param iterable
-   * @param prefix
+   * @param filter
+   * @param func
    * @return group
    */
   public static Map<String, List<String>> aggregate(Iterable<String> iterable,
@@ -343,7 +344,7 @@ public class Strings {
    * </pre>
    *
    * @param str
-   * @param pos
+   * @param start
    * @param len
    * @return mid
    */
@@ -573,7 +574,7 @@ public class Strings {
    * @param str
    * @param removeBlank
    * @param trim
-   * @param predicate
+   * @param p
    * @return split
    */
   public static String[] split(final String str, final boolean removeBlank, final boolean trim,

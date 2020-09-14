@@ -353,7 +353,7 @@ public class MongoClientConfig implements NamedObject {
 
   /**
    *
-   * @param databaseName the client databaseName to set
+   * @param name the client databaseName to set
    */
   protected void setName(String name) {
     this.name = defaultTrim(name);

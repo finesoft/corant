@@ -31,7 +31,7 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
 
   protected final Query query;
-  protected final QueryResolver resultResolver;
+  protected final QueryResolver queryResolver;
   protected final FetchQueryResolver fetchQueryResolver;
   protected final QueryParameter queryParameter;
 
@@ -42,11 +42,11 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
    * @param fetchQueryResolver
    */
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver) {
+      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver) {
     super();
     this.query = query;
     this.queryParameter = queryParameter;
-    this.resultResolver = resultResolver;
+    this.queryResolver = queryResolver;
     this.fetchQueryResolver = fetchQueryResolver;
   }
 
@@ -83,19 +83,19 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> resolveResult(List<?> results) {
-    return resultResolver.resolveResults((List<Object>) results,
+    return queryResolver.resolveResults((List<Object>) results,
         forceCast(getQuery().getResultClass()), getQuery().getHints(), getQueryParameter());
   }
 
   @Override
   public <T> T resolveResult(Object result) {
-    return resultResolver.resolveResult(result, forceCast(getQuery().getResultClass()),
+    return queryResolver.resolveResult(result, forceCast(getQuery().getResultClass()),
         getQuery().getHints(), getQueryParameter());
   }
 
   @Override
   public void resolveResultHints(Object result) {
-    resultResolver.resolveResultHints(result, Map.class, getQuery().getHints(),
+    queryResolver.resolveResultHints(result, Map.class, getQuery().getHints(),
         getQueryParameter());// FIXME map class
   }
 

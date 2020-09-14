@@ -68,7 +68,7 @@ public class Conversion {
    *
    * @param <T>
    * @param value the value to convert
-   * @param lastSourceClass the knowed item source class
+   * @param sourceClass the knowed item source class
    * @param targetClass the item target class that will be convertted
    * @param hints the converter hints use for intervening converters
    * @return An iterable of items converted according to the target type
@@ -304,7 +304,7 @@ public class Conversion {
   /**
    * Use source class and target class to find out the right converter
    *
-   * @param lastSourceClass
+   * @param sourceClass
    * @param targetClass
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass) {

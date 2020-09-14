@@ -110,7 +110,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     final AtomicReference<XASession> session = new AtomicReference<>();
 
     /**
-     * @param factory
+     * @param config
      */
     protected JMSRecoveryXAResource(AbstractJMSConfig config) {
       super();

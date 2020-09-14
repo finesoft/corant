@@ -88,7 +88,7 @@ public interface PersistenceService {
 
     /**
      * @param name
-     * @param unit
+     * @param unitName
      * @param type
      * @param synchronization
      * @param properties
@@ -217,7 +217,7 @@ public interface PersistenceService {
 
     /**
      * @param name
-     * @param unit
+     * @param unitName
      */
     protected PersistenceUnitLiteral(String name, String unitName) {
       super();

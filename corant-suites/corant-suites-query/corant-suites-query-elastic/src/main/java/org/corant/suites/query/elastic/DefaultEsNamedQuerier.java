@@ -49,9 +49,9 @@ public class DefaultEsNamedQuerier extends
    */
   @SuppressWarnings("rawtypes")
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver resultResolver, FetchQueryResolver fetchQueryResolver,
+      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver,
       Map<Object, Object> scriptMap) {
-    super(query, queryParameter, resultResolver, fetchQueryResolver);
+    super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();
     String[] useHintKeys = new String[] {EsQueryExecutor.HIT_RS_KEY};
     if (isNotEmpty(scriptMap)) {

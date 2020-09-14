@@ -125,8 +125,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
     /**
      * @param emf
-     * @param resolver
-     * @param maxSelectSize
+     * @param manager
      */
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
         JpqlNamedQueryServiceManager manager) {

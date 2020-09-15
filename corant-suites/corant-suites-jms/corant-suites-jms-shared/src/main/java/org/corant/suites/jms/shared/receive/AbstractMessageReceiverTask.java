@@ -19,19 +19,14 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XASession;
@@ -363,27 +358,14 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
     }
 
     Object resolvePayload(Message message) throws JMSException {
-      if (messageClass == Message.class) {
-        return message;
-      } else if (messageClass == TextMessage.class) {
-        return TextMessage.class.cast(message);
-      } else if (messageClass == BytesMessage.class) {
-        return BytesMessage.class.cast(message);
-      } else if (messageClass == MapMessage.class) {
-        return MapMessage.class.cast(message);
-      } else if (messageClass == StreamMessage.class) {
-        return StreamMessage.class.cast(message);
-      } else if (messageClass == ObjectMessage.class) {
-        return ObjectMessage.class.cast(message);
+      String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
+      if (isNotBlank(serialSchema)) {
+        MessageSerializer serializer =
+            resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
+        return serializer.deserialize(message, messageClass);
       } else {
-        String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
-        if (isNotBlank(serialSchema)) {
-          MessageSerializer serializer =
-              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
-          return serializer.deserialize(message, messageClass);
-        }
+        return message;
       }
-      throw new IllegalArgumentException("Can not convert message payload to " + messageClass);
     }
 
   }

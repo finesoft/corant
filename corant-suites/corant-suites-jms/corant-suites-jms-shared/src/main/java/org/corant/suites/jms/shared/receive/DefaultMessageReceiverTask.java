@@ -25,10 +25,8 @@ import org.corant.shared.util.Retry.RetryInterval;
  * corant-suites-jms-shared
  *
  * <p>
- * JMS objects like connection, session, consumer and producer were designed to be re-used, but non
- * thread safe. In most implementations connection and session are pretty heavyweight to setup and
- * consumer usually requires a network round trip to set up. Producer is often more lightweight,
- * although there is often some overhead in creating it.
+ * Default message receiving task, supports retry and circuit break, and supports various retry
+ * interval compensation algorithms.
  *
  * Unfinish: use connection or session pool
  *

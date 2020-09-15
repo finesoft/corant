@@ -66,9 +66,6 @@ public class PackageMojo extends AbstractMojo {
   protected String mainClass;
 
   @Parameter
-  protected String sysPros;
-
-  @Parameter
   protected String vmArgs;
 
   @Parameter
@@ -146,10 +143,6 @@ public class PackageMojo extends AbstractMojo {
 
   public MavenProject getProject() {
     return project;
-  }
-
-  public String getSysPros() {
-    return sysPros != null && !sysPros.isEmpty() ? sysPros.trim().replace('\n', ' ') : "";
   }
 
   public String getUsedConfigLocation() {

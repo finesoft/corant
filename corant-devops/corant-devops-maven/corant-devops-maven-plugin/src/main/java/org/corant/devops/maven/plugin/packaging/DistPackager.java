@@ -53,8 +53,7 @@ public class DistPackager implements Packager {
 
   public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
-  public static final String LAUNCH_BATS =
-      "startup.bat,start.bat,stop.bat,restart.bat,shutdown.bat";
+  public static final String LAUNCH_BATS = "startup.bat,start.bat,stop.bat,restart.bat,shutdown.bat";
   public static final String RUN_SH = "run.sh";
   public static final String LAUNCH_SHS = "startup.sh,start.sh,stop.sh,restart.sh,shutdown.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
@@ -62,8 +61,8 @@ public class DistPackager implements Packager {
   public static final String RUN_MAIN_CLASS_PH = "#MAIN_CLASS#";
   public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
   public static final String RUN_USED_CONFIG_PROFILE = "#USED_CONFIG_PROFILE#";
-  public static final String RUN_ADD_SYS_PROS = "#ADDITIONAL_SYSTEM_PROPERTIES#";
   public static final String RUN_ADD_VM_ARGS = "#ADDITIONAL_VM_ARGUMENTS#";
+
   public static final String DIST_NAME_SUF = "-dist";
 
   private final PackageMojo mojo;
@@ -208,8 +207,7 @@ public class DistPackager implements Packager {
                 ? getMojo().getAppArgs().isEmpty() ? getMojo().getAppArgs().concat("%1")
                     : getMojo().getAppArgs().concat(" %1")
                 : getMojo().getAppArgs())
-        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
-        .replaceAll(RUN_ADD_SYS_PROS, getMojo().getSysPros());
+        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs());
     return new ScriptEntry(RUN_BAT, usebat);
   }
 
@@ -221,8 +219,7 @@ public class DistPackager implements Packager {
         .replaceAll(RUN_USED_CONFIG_LOCATION, resolveRunshVar(getMojo().getUsedConfigLocation()))
         .replaceAll(RUN_USED_CONFIG_PROFILE, resolveRunshVar(getMojo().getUsedConfigProfile()))
         .replaceAll(RUN_APP_ARGS, resolveRunshVar(getMojo().getAppArgs()))
-        .replaceAll(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()))
-        .replaceAll(RUN_ADD_SYS_PROS, resolveRunshVar(getMojo().getSysPros()));
+        .replaceAll(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()));
     return new ScriptEntry(RUN_SH, usesh);
   }
 

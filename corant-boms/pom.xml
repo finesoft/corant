@@ -11,6 +11,8 @@
 	<artifactId>corant-boms</artifactId>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.java>1.8</version.java>
+
 		<version.agroal>1.8</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
@@ -62,7 +64,6 @@
 		<version.jackson>2.11.1</version.jackson>
 		<version.jandex>2.2.1.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
-		<version.java>1.8</version.java>
 		<version.javaee-api>8.0</version.javaee-api>
 		<version.javassist>3.12.1.GA</version.javassist>
 		<version.javax.activation>1.1.1</version.javax.activation>
@@ -126,6 +127,7 @@
 		<version.smallrye.opentracing>1.3.4</version.smallrye.opentracing>
 		<version.snakeyaml>1.26</version.snakeyaml>
 		<version.swagger>2.0.8</version.swagger>
+
 		<version.testng>6.9.9</version.testng>
 		<version.undertow>2.1.3.Final</version.undertow>
 		<version.vertx>3.8.5</version.vertx>
@@ -228,7 +230,6 @@
 				<artifactId>commons-math3</artifactId>
 				<version>${version.commons-math3}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.calcite</groupId>
 				<artifactId>calcite-core</artifactId>
@@ -1579,6 +1580,7 @@
 					<configuration>
 						<source>${version.java}</source>
 						<target>${version.java}</target>
+						<encoding>${project.build.sourceEncoding}</encoding>
 						<showWarnings>true</showWarnings>
 						<showDeprecation>true</showDeprecation>
 					</configuration>

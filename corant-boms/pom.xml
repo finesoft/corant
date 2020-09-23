@@ -10,6 +10,7 @@
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<properties>
+
 		<version.agroal>1.8</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
@@ -89,6 +90,7 @@
 		<version.maven-plugin-api>3.2.5</version.maven-plugin-api>
 		<version.maven-plugin-plugin>3.5.1</version.maven-plugin-plugin>
 		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
+		<version.maven-resources-plugin>3.1.0</version.maven-resources-plugin>
 		<version.maven-surefire-plugin>3.0.0-M2</version.maven-surefire-plugin>
 		<version.microprofile-config-api>1.4</version.microprofile-config-api>
 		<version.microprofile-fault-tolerance-api>2.1</version.microprofile-fault-tolerance-api>
@@ -143,308 +145,309 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-kernel</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-context</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-config</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-servlet</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-websocket-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-webserver-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-webserver-tomcat</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-webserver-undertow</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-datasource-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-datasource-hikari</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-datasource-agroal</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jndi</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jms-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jms-artemis</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jta-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jta-narayana</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jta-atomikos</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jpa-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jpa-hibernate</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jaxrs-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jaxrs-resteasy</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-sql</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-elastic</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-jpql</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-mongodb</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-query-cassandra</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-cloud</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-cloud-alibaba</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-cloud-tencent</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jcache-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jcache-caffeine</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-jcache-redisson</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-logging</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-redis</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-json</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-flyway</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-elastic</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-mongodb</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-bundle</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-beanvalidation</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-ddd</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-keycloak-authzclient</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-keycloak-adminclient</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-keycloak</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-web</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-healthcheck</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-faulttolerance</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-jwt</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-metrics</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-openapi</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-opentracking</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-restclient</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-microprofile-config</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-lang-javascript</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-lang-jsr223</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-lang-kotlin</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-mvc</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-dsa</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-security-shared</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
+
 			<!-- Third Party -->
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -1386,7 +1389,7 @@
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-devops-test-unit</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -1555,12 +1558,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
 					<version>${version.maven-plugin-plugin}</version>
-					<executions>
-						<execution>
-							<id>default-descriptor</id>
-							<phase>process-classes</phase>
-						</execution>
-					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1576,23 +1573,16 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${version.maven-compiler-plugin}</version>
-					<configuration>
-						<showWarnings>true</showWarnings>
-						<showDeprecation>true</showDeprecation>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>${version.maven-source-plugin}</version>
-					<executions>
-						<execution>
-							<id>attach-sources</id>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-						</execution>
-					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${version.maven-resources-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1608,11 +1598,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>${version.maven-enforcer-plugin}</version>
-					<configuration>
-						<rules>
-							<dependencyConvergence />
-						</rules>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1622,20 +1607,12 @@
 				<plugin>
 					<groupId>org.corant</groupId>
 					<artifactId>corant-devops-maven-jandex</artifactId>
-					<version>${project.version}</version>
-					<executions>
-						<execution>
-							<phase>prepare-package</phase>
-							<goals>
-								<goal>jandex</goal>
-							</goals>
-						</execution>
-					</executions>
+					<version>${revision}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.corant</groupId>
 					<artifactId>corant-devops-maven-plugin</artifactId>
-					<version>${project.version}</version>
+					<version>${revision}</version>
 				</plugin>
 				<plugin>
 					<groupId>com.spotify</groupId>
@@ -1646,46 +1623,30 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>${version.flatten-maven-plugin}</version>
-					<configuration>
-						<updatePomFile>true</updatePomFile>
-						<flattenMode>resolveCiFriendliesOnly</flattenMode>
-					</configuration>
-					<executions>
-						<execution>
-							<id>flatten</id>
-							<phase>process-resources</phase>
-							<goals>
-								<goal>flatten</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>flatten.clean</id>
-							<phase>clean</phase>
-							<goals>
-								<goal>clean</goal>
-							</goals>
-						</execution>
-					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
 				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<updatePomFile>true</updatePomFile>
 					<flattenMode>oss</flattenMode>

@@ -18,14 +18,32 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+
+    <!--<docker.dockerfile.skip>true</docker.dockerfile.skip>
+    <docker.image.prefix>192.168.100.200:8083</docker.image.prefix>
+    <docker.image.profile>unknow</docker.image.profile>
+    <runner-class></runner-class>-->
   </properties>
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>java</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <mainClass>${runner-class}</mainClass>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>${version.maven-plugin-plugin}</version>
           <executions>
             <execution>
               <id>default-descriptor</id>
@@ -35,18 +53,7 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>${version.maven-deploy-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${version.maven-javadoc-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${version.maven-compiler-plugin}</version>
           <configuration>
             <showWarnings>true</showWarnings>
             <showDeprecation>true</showDeprecation>
@@ -55,7 +62,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>${version.maven-source-plugin}</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -67,33 +73,26 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${version.maven-surefire-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${version.maven-failsafe-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>${version.maven-enforcer-plugin}</version>
           <configuration>
             <rules>
-              <dependencyConvergence />
+              <dependencyConvergence/>
             </rules>
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>${version.exec-maven-plugin}</version>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <configuration>
+            <delimiters>
+              <delimiter>${resource.delimiter}</delimiter>
+            </delimiters>
+            <useDefaultDelimiters>false</useDefaultDelimiters>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.corant</groupId>
           <artifactId>corant-devops-maven-jandex</artifactId>
-          <version>${project.version}</version>
           <executions>
             <execution>
               <phase>prepare-package</phase>
@@ -106,17 +105,40 @@
         <plugin>
           <groupId>org.corant</groupId>
           <artifactId>corant-devops-maven-plugin</artifactId>
-          <version>${project.version}</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>package</goal>
+              </goals>
+              <configuration>
+                <classifier>bin</classifier>
+                <distFormat>tar</distFormat>
+                <withDist>true</withDist>
+                <vmArgs>-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai -Duser.language=zh -Duser.region=CN</vmArgs>
+                <mainClass>${runner-class}</mainClass>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>com.spotify</groupId>
           <artifactId>dockerfile-maven-plugin</artifactId>
-          <version>${version.dockerfile-maven-plugin}</version>
+          <configuration>
+            <skipDockerInfo>true</skipDockerInfo>
+            <skip>${docker.dockerfile.skip}</skip>
+            <repository>${docker.image.prefix}/gsft/${project.artifactId}</repository>
+            <tag>${project.version}-${docker.image.profile}</tag>
+            <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+            <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
+            <buildArgs>
+              <BIN_DIST_FILE>./target/${project.artifactId}-${project.version}-bin-dist.tar</BIN_DIST_FILE>
+            </buildArgs>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>flatten-maven-plugin</artifactId>
-          <version>${version.flatten-maven-plugin}</version>
           <configuration>
             <updatePomFile>true</updatePomFile>
             <flattenMode>resolveCiFriendliesOnly</flattenMode>
@@ -144,8 +166,17 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>oss</flattenMode>
+          <pomElements>
+            <parent>expand</parent>
+            <properties>keep</properties>
+            <pluginManagement>keep</pluginManagement>
+            <scm>remove</scm>
+          </pomElements>
+        </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -153,10 +184,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

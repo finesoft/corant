@@ -10,9 +10,6 @@
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.java>1.8</version.java>
-
 		<version.agroal>1.8</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
@@ -1578,9 +1575,6 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${version.maven-compiler-plugin}</version>
 					<configuration>
-						<source>${version.java}</source>
-						<target>${version.java}</target>
-						<encoding>${project.build.sourceEncoding}</encoding>
 						<showWarnings>true</showWarnings>
 						<showDeprecation>true</showDeprecation>
 					</configuration>

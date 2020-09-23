@@ -4,18 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
   <packaging>pom</packaging>
   <parent>
-    <artifactId>corant-boms</artifactId>
+    <artifactId>corant-parent</artifactId>
     <groupId>org.corant</groupId>
     <version>${revision}</version>
-    <relativePath>../corant-boms</relativePath>
+    <relativePath>../corant-parent</relativePath>
   </parent>
   <artifactId>corant-suites</artifactId>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>flatten-maven-plugin</artifactId>
-      </plugin>
       <plugin>
         <groupId>org.corant</groupId>
         <artifactId>corant-devops-maven-jandex</artifactId>

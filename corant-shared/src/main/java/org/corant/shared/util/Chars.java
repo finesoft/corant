@@ -13,6 +13,10 @@
  */
 package org.corant.shared.util;
 
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * corant-shared
  *
@@ -20,6 +24,8 @@ package org.corant.shared.util;
  *
  */
 public class Chars {
+
+  static final Logger logger = Logger.getLogger(Chars.class.getName());
 
   /**
    * Converts alphabetic, numeric, and symbolic Unicode characters which are not in the first 127
@@ -81,7 +87,7 @@ public class Chars {
           case '\u1EB6': // Ặ [LATIN CAPITAL LETTER A WITH BREVE AND DOT BELOW]
           case '\u24B6': // Ⓐ [CIRCLED LATIN CAPITAL LETTER A]
           case '\uFF21': // Ａ [FULLWIDTH LATIN CAPITAL LETTER A]
-            output[outputPos++] = 'A';
+            output[ops++] = 'A';
             break;
           case '\u00E0': // à [LATIN SMALL LETTER A WITH GRAVE]
           case '\u00E1': // á [LATIN SMALL LETTER A WITH ACUTE]
@@ -124,68 +130,68 @@ public class Chars {
           case '\u2C65': // ⱥ [LATIN SMALL LETTER A WITH STROKE]
           case '\u2C6F': // Ɐ [LATIN CAPITAL LETTER TURNED A]
           case '\uFF41': // ａ [FULLWIDTH LATIN SMALL LETTER A]
-            output[outputPos++] = 'a';
+            output[ops++] = 'a';
             break;
           case '\uA732': // Ꜳ [LATIN CAPITAL LETTER AA]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'A';
+            output[ops++] = 'A';
+            output[ops++] = 'A';
             break;
           case '\u00C6': // Æ [LATIN CAPITAL LETTER AE]
           case '\u01E2': // Ǣ [LATIN CAPITAL LETTER AE WITH MACRON]
           case '\u01FC': // Ǽ [LATIN CAPITAL LETTER AE WITH ACUTE]
           case '\u1D01': // ᴁ [LATIN LETTER SMALL CAPITAL AE]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'E';
+            output[ops++] = 'A';
+            output[ops++] = 'E';
             break;
           case '\uA734': // Ꜵ [LATIN CAPITAL LETTER AO]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'O';
+            output[ops++] = 'A';
+            output[ops++] = 'O';
             break;
           case '\uA736': // Ꜷ [LATIN CAPITAL LETTER AU]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'U';
+            output[ops++] = 'A';
+            output[ops++] = 'U';
             break;
           case '\uA738': // Ꜹ [LATIN CAPITAL LETTER AV]
           case '\uA73A': // Ꜻ [LATIN CAPITAL LETTER AV WITH HORIZONTAL BAR]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'V';
+            output[ops++] = 'A';
+            output[ops++] = 'V';
             break;
           case '\uA73C': // Ꜽ [LATIN CAPITAL LETTER AY]
-            output[outputPos++] = 'A';
-            output[outputPos++] = 'Y';
+            output[ops++] = 'A';
+            output[ops++] = 'Y';
             break;
           case '\u249C': // ⒜ [PARENTHESIZED LATIN SMALL LETTER A]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'a';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'a';
+            output[ops++] = ')';
             break;
           case '\uA733': // ꜳ [LATIN SMALL LETTER AA]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'a';
+            output[ops++] = 'a';
+            output[ops++] = 'a';
             break;
           case '\u00E6': // æ [LATIN SMALL LETTER AE]
           case '\u01E3': // ǣ [LATIN SMALL LETTER AE WITH MACRON]
           case '\u01FD': // ǽ [LATIN SMALL LETTER AE WITH ACUTE]
           case '\u1D02': // ᴂ [LATIN SMALL LETTER TURNED AE]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'e';
+            output[ops++] = 'a';
+            output[ops++] = 'e';
             break;
           case '\uA735': // ꜵ [LATIN SMALL LETTER AO]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'o';
+            output[ops++] = 'a';
+            output[ops++] = 'o';
             break;
           case '\uA737': // ꜷ [LATIN SMALL LETTER AU]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'u';
+            output[ops++] = 'a';
+            output[ops++] = 'u';
             break;
           case '\uA739': // ꜹ [LATIN SMALL LETTER AV]
           case '\uA73B': // ꜻ [LATIN SMALL LETTER AV WITH HORIZONTAL BAR]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'v';
+            output[ops++] = 'a';
+            output[ops++] = 'v';
             break;
           case '\uA73D': // ꜽ [LATIN SMALL LETTER AY]
-            output[outputPos++] = 'a';
-            output[outputPos++] = 'y';
+            output[ops++] = 'a';
+            output[ops++] = 'y';
             break;
           case '\u0181': // Ɓ [LATIN CAPITAL LETTER B WITH HOOK]
           case '\u0182': // Ƃ [LATIN CAPITAL LETTER B WITH TOPBAR]
@@ -197,7 +203,7 @@ public class Chars {
           case '\u1E06': // Ḇ [LATIN CAPITAL LETTER B WITH LINE BELOW]
           case '\u24B7': // Ⓑ [CIRCLED LATIN CAPITAL LETTER B]
           case '\uFF22': // Ｂ [FULLWIDTH LATIN CAPITAL LETTER B]
-            output[outputPos++] = 'B';
+            output[ops++] = 'B';
             break;
           case '\u0180': // ƀ [LATIN SMALL LETTER B WITH STROKE]
           case '\u0183': // ƃ [LATIN SMALL LETTER B WITH TOPBAR]
@@ -209,12 +215,12 @@ public class Chars {
           case '\u1E07': // ḇ [LATIN SMALL LETTER B WITH LINE BELOW]
           case '\u24D1': // ⓑ [CIRCLED LATIN SMALL LETTER B]
           case '\uFF42': // ｂ [FULLWIDTH LATIN SMALL LETTER B]
-            output[outputPos++] = 'b';
+            output[ops++] = 'b';
             break;
           case '\u249D': // ⒝ [PARENTHESIZED LATIN SMALL LETTER B]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'b';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'b';
+            output[ops++] = ')';
             break;
           case '\u00C7': // Ç [LATIN CAPITAL LETTER C WITH CEDILLA]
           case '\u0106': // Ć [LATIN CAPITAL LETTER C WITH ACUTE]
@@ -228,7 +234,7 @@ public class Chars {
           case '\u1E08': // Ḉ [LATIN CAPITAL LETTER C WITH CEDILLA AND ACUTE]
           case '\u24B8': // Ⓒ [CIRCLED LATIN CAPITAL LETTER C]
           case '\uFF23': // Ｃ [FULLWIDTH LATIN CAPITAL LETTER C]
-            output[outputPos++] = 'C';
+            output[ops++] = 'C';
             break;
           case '\u00E7': // ç [LATIN SMALL LETTER C WITH CEDILLA]
           case '\u0107': // ć [LATIN SMALL LETTER C WITH ACUTE]
@@ -244,12 +250,12 @@ public class Chars {
           case '\uA73E': // Ꜿ [LATIN CAPITAL LETTER REVERSED C WITH DOT]
           case '\uA73F': // ꜿ [LATIN SMALL LETTER REVERSED C WITH DOT]
           case '\uFF43': // ｃ [FULLWIDTH LATIN SMALL LETTER C]
-            output[outputPos++] = 'c';
+            output[ops++] = 'c';
             break;
           case '\u249E': // ⒞ [PARENTHESIZED LATIN SMALL LETTER C]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'c';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'c';
+            output[ops++] = ')';
             break;
           case '\u00D0': // Ð [LATIN CAPITAL LETTER ETH]
           case '\u010E': // Ď [LATIN CAPITAL LETTER D WITH CARON]
@@ -267,7 +273,7 @@ public class Chars {
           case '\u24B9': // Ⓓ [CIRCLED LATIN CAPITAL LETTER D]
           case '\uA779': // Ꝺ [LATIN CAPITAL LETTER INSULAR D]
           case '\uFF24': // Ｄ [FULLWIDTH LATIN CAPITAL LETTER D]
-            output[outputPos++] = 'D';
+            output[ops++] = 'D';
             break;
           case '\u00F0': // ð [LATIN SMALL LETTER ETH]
           case '\u010F': // ď [LATIN SMALL LETTER D WITH CARON]
@@ -287,33 +293,33 @@ public class Chars {
           case '\u24D3': // ⓓ [CIRCLED LATIN SMALL LETTER D]
           case '\uA77A': // ꝺ [LATIN SMALL LETTER INSULAR D]
           case '\uFF44': // ｄ [FULLWIDTH LATIN SMALL LETTER D]
-            output[outputPos++] = 'd';
+            output[ops++] = 'd';
             break;
           case '\u01C4': // Ǆ [LATIN CAPITAL LETTER DZ WITH CARON]
           case '\u01F1': // Ǳ [LATIN CAPITAL LETTER DZ]
-            output[outputPos++] = 'D';
-            output[outputPos++] = 'Z';
+            output[ops++] = 'D';
+            output[ops++] = 'Z';
             break;
           case '\u01C5': // ǅ [LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON]
           case '\u01F2': // ǲ [LATIN CAPITAL LETTER D WITH SMALL LETTER Z]
-            output[outputPos++] = 'D';
-            output[outputPos++] = 'z';
+            output[ops++] = 'D';
+            output[ops++] = 'z';
             break;
           case '\u249F': // ⒟ [PARENTHESIZED LATIN SMALL LETTER D]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'd';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'd';
+            output[ops++] = ')';
             break;
           case '\u0238': // ȸ [LATIN SMALL LETTER DB DIGRAPH]
-            output[outputPos++] = 'd';
-            output[outputPos++] = 'b';
+            output[ops++] = 'd';
+            output[ops++] = 'b';
             break;
           case '\u01C6': // ǆ [LATIN SMALL LETTER DZ WITH CARON]
           case '\u01F3': // ǳ [LATIN SMALL LETTER DZ]
           case '\u02A3': // ʣ [LATIN SMALL LETTER DZ DIGRAPH]
           case '\u02A5': // ʥ [LATIN SMALL LETTER DZ DIGRAPH WITH CURL]
-            output[outputPos++] = 'd';
-            output[outputPos++] = 'z';
+            output[ops++] = 'd';
+            output[ops++] = 'z';
             break;
           case '\u00C8': // È [LATIN CAPITAL LETTER E WITH GRAVE]
           case '\u00C9': // É [LATIN CAPITAL LETTER E WITH ACUTE]
@@ -347,7 +353,7 @@ public class Chars {
           case '\u24BA': // Ⓔ [CIRCLED LATIN CAPITAL LETTER E]
           case '\u2C7B': // ⱻ [LATIN LETTER SMALL CAPITAL TURNED E]
           case '\uFF25': // Ｅ [FULLWIDTH LATIN CAPITAL LETTER E]
-            output[outputPos++] = 'E';
+            output[ops++] = 'E';
             break;
           case '\u00E8': // è [LATIN SMALL LETTER E WITH GRAVE]
           case '\u00E9': // é [LATIN SMALL LETTER E WITH ACUTE]
@@ -390,12 +396,12 @@ public class Chars {
           case '\u24D4': // ⓔ [CIRCLED LATIN SMALL LETTER E]
           case '\u2C78': // ⱸ [LATIN SMALL LETTER E WITH NOTCH]
           case '\uFF45': // ｅ [FULLWIDTH LATIN SMALL LETTER E]
-            output[outputPos++] = 'e';
+            output[ops++] = 'e';
             break;
           case '\u24A0': // ⒠ [PARENTHESIZED LATIN SMALL LETTER E]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'e';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'e';
+            output[ops++] = ')';
             break;
           case '\u0191': // Ƒ [LATIN CAPITAL LETTER F WITH HOOK]
           case '\u1E1E': // Ḟ [LATIN CAPITAL LETTER F WITH DOT ABOVE]
@@ -404,7 +410,7 @@ public class Chars {
           case '\uA77B': // Ꝼ [LATIN CAPITAL LETTER INSULAR F]
           case '\uA7FB': // ꟻ [LATIN EPIGRAPHIC LETTER REVERSED F]
           case '\uFF26': // Ｆ [FULLWIDTH LATIN CAPITAL LETTER F]
-            output[outputPos++] = 'F';
+            output[ops++] = 'F';
             break;
           case '\u0192': // ƒ [LATIN SMALL LETTER F WITH HOOK]
           case '\u1D6E': // ᵮ [LATIN SMALL LETTER F WITH MIDDLE TILDE]
@@ -414,34 +420,34 @@ public class Chars {
           case '\u24D5': // ⓕ [CIRCLED LATIN SMALL LETTER F]
           case '\uA77C': // ꝼ [LATIN SMALL LETTER INSULAR F]
           case '\uFF46': // ｆ [FULLWIDTH LATIN SMALL LETTER F]
-            output[outputPos++] = 'f';
+            output[ops++] = 'f';
             break;
           case '\u24A1': // ⒡ [PARENTHESIZED LATIN SMALL LETTER F]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'f';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'f';
+            output[ops++] = ')';
             break;
           case '\uFB00': // ﬀ [LATIN SMALL LIGATURE FF]
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'f';
+            output[ops++] = 'f';
+            output[ops++] = 'f';
             break;
           case '\uFB03': // ﬃ [LATIN SMALL LIGATURE FFI]
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'i';
+            output[ops++] = 'f';
+            output[ops++] = 'f';
+            output[ops++] = 'i';
             break;
           case '\uFB04': // ﬄ [LATIN SMALL LIGATURE FFL]
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'l';
+            output[ops++] = 'f';
+            output[ops++] = 'f';
+            output[ops++] = 'l';
             break;
           case '\uFB01': // ﬁ [LATIN SMALL LIGATURE FI]
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'i';
+            output[ops++] = 'f';
+            output[ops++] = 'i';
             break;
           case '\uFB02': // ﬂ [LATIN SMALL LIGATURE FL]
-            output[outputPos++] = 'f';
-            output[outputPos++] = 'l';
+            output[ops++] = 'f';
+            output[ops++] = 'l';
             break;
           case '\u011C': // Ĝ [LATIN CAPITAL LETTER G WITH CIRCUMFLEX]
           case '\u011E': // Ğ [LATIN CAPITAL LETTER G WITH BREVE]
@@ -460,7 +466,7 @@ public class Chars {
           case '\uA77D': // Ᵹ [LATIN CAPITAL LETTER INSULAR G]
           case '\uA77E': // Ꝿ [LATIN CAPITAL LETTER TURNED INSULAR G]
           case '\uFF27': // Ｇ [FULLWIDTH LATIN CAPITAL LETTER G]
-            output[outputPos++] = 'G';
+            output[ops++] = 'G';
             break;
           case '\u011D': // ĝ [LATIN SMALL LETTER G WITH CIRCUMFLEX]
           case '\u011F': // ğ [LATIN SMALL LETTER G WITH BREVE]
@@ -476,12 +482,12 @@ public class Chars {
           case '\u24D6': // ⓖ [CIRCLED LATIN SMALL LETTER G]
           case '\uA77F': // ꝿ [LATIN SMALL LETTER TURNED INSULAR G]
           case '\uFF47': // ｇ [FULLWIDTH LATIN SMALL LETTER G]
-            output[outputPos++] = 'g';
+            output[ops++] = 'g';
             break;
           case '\u24A2': // ⒢ [PARENTHESIZED LATIN SMALL LETTER G]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'g';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'g';
+            output[ops++] = ')';
             break;
           case '\u0124': // Ĥ [LATIN CAPITAL LETTER H WITH CIRCUMFLEX]
           case '\u0126': // Ħ [LATIN CAPITAL LETTER H WITH STROKE]
@@ -496,7 +502,7 @@ public class Chars {
           case '\u2C67': // Ⱨ [LATIN CAPITAL LETTER H WITH DESCENDER]
           case '\u2C75': // Ⱶ [LATIN CAPITAL LETTER HALF H]
           case '\uFF28': // Ｈ [FULLWIDTH LATIN CAPITAL LETTER H]
-            output[outputPos++] = 'H';
+            output[ops++] = 'H';
             break;
           case '\u0125': // ĥ [LATIN SMALL LETTER H WITH CIRCUMFLEX]
           case '\u0127': // ħ [LATIN SMALL LETTER H WITH STROKE]
@@ -515,20 +521,20 @@ public class Chars {
           case '\u2C68': // ⱨ [LATIN SMALL LETTER H WITH DESCENDER]
           case '\u2C76': // ⱶ [LATIN SMALL LETTER HALF H]
           case '\uFF48': // ｈ [FULLWIDTH LATIN SMALL LETTER H]
-            output[outputPos++] = 'h';
+            output[ops++] = 'h';
             break;
           case '\u01F6': // Ƕ http://en.wikipedia.org/wiki/Hwair [LATIN CAPITAL LETTER HWAIR]
-            output[outputPos++] = 'H';
-            output[outputPos++] = 'V';
+            output[ops++] = 'H';
+            output[ops++] = 'V';
             break;
           case '\u24A3': // ⒣ [PARENTHESIZED LATIN SMALL LETTER H]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'h';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'h';
+            output[ops++] = ')';
             break;
           case '\u0195': // ƕ [LATIN SMALL LETTER HV]
-            output[outputPos++] = 'h';
-            output[outputPos++] = 'v';
+            output[ops++] = 'h';
+            output[ops++] = 'v';
             break;
           case '\u00CC': // Ì [LATIN CAPITAL LETTER I WITH GRAVE]
           case '\u00CD': // Í [LATIN CAPITAL LETTER I WITH ACUTE]
@@ -553,7 +559,7 @@ public class Chars {
           case '\u24BE': // Ⓘ [CIRCLED LATIN CAPITAL LETTER I]
           case '\uA7FE': // ꟾ [LATIN EPIGRAPHIC LETTER I LONGA]
           case '\uFF29': // Ｉ [FULLWIDTH LATIN CAPITAL LETTER I]
-            output[outputPos++] = 'I';
+            output[ops++] = 'I';
             break;
           case '\u00EC': // ì [LATIN SMALL LETTER I WITH GRAVE]
           case '\u00ED': // í [LATIN SMALL LETTER I WITH ACUTE]
@@ -579,27 +585,27 @@ public class Chars {
           case '\u2071': // ⁱ [SUPERSCRIPT LATIN SMALL LETTER I]
           case '\u24D8': // ⓘ [CIRCLED LATIN SMALL LETTER I]
           case '\uFF49': // ｉ [FULLWIDTH LATIN SMALL LETTER I]
-            output[outputPos++] = 'i';
+            output[ops++] = 'i';
             break;
           case '\u0132': // Ĳ [LATIN CAPITAL LIGATURE IJ]
-            output[outputPos++] = 'I';
-            output[outputPos++] = 'J';
+            output[ops++] = 'I';
+            output[ops++] = 'J';
             break;
           case '\u24A4': // ⒤ [PARENTHESIZED LATIN SMALL LETTER I]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'i';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'i';
+            output[ops++] = ')';
             break;
           case '\u0133': // ĳ [LATIN SMALL LIGATURE IJ]
-            output[outputPos++] = 'i';
-            output[outputPos++] = 'j';
+            output[ops++] = 'i';
+            output[ops++] = 'j';
             break;
           case '\u0134': // Ĵ [LATIN CAPITAL LETTER J WITH CIRCUMFLEX]
           case '\u0248': // Ɉ [LATIN CAPITAL LETTER J WITH STROKE]
           case '\u1D0A': // ᴊ [LATIN LETTER SMALL CAPITAL J]
           case '\u24BF': // Ⓙ [CIRCLED LATIN CAPITAL LETTER J]
           case '\uFF2A': // Ｊ [FULLWIDTH LATIN CAPITAL LETTER J]
-            output[outputPos++] = 'J';
+            output[ops++] = 'J';
             break;
           case '\u0135': // ĵ [LATIN SMALL LETTER J WITH CIRCUMFLEX]
           case '\u01F0': // ǰ [LATIN SMALL LETTER J WITH CARON]
@@ -611,12 +617,12 @@ public class Chars {
           case '\u24D9': // ⓙ [CIRCLED LATIN SMALL LETTER J]
           case '\u2C7C': // ⱼ [LATIN SUBSCRIPT SMALL LETTER J]
           case '\uFF4A': // ｊ [FULLWIDTH LATIN SMALL LETTER J]
-            output[outputPos++] = 'j';
+            output[ops++] = 'j';
             break;
           case '\u24A5': // ⒥ [PARENTHESIZED LATIN SMALL LETTER J]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'j';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'j';
+            output[ops++] = ')';
             break;
           case '\u0136': // Ķ [LATIN CAPITAL LETTER K WITH CEDILLA]
           case '\u0198': // Ƙ [LATIN CAPITAL LETTER K WITH HOOK]
@@ -631,7 +637,7 @@ public class Chars {
           case '\uA742': // Ꝃ [LATIN CAPITAL LETTER K WITH DIAGONAL STROKE]
           case '\uA744': // Ꝅ [LATIN CAPITAL LETTER K WITH STROKE AND DIAGONAL STROKE]
           case '\uFF2B': // Ｋ [FULLWIDTH LATIN CAPITAL LETTER K]
-            output[outputPos++] = 'K';
+            output[ops++] = 'K';
             break;
           case '\u0137': // ķ [LATIN SMALL LETTER K WITH CEDILLA]
           case '\u0199': // ƙ [LATIN SMALL LETTER K WITH HOOK]
@@ -647,12 +653,12 @@ public class Chars {
           case '\uA743': // ꝃ [LATIN SMALL LETTER K WITH DIAGONAL STROKE]
           case '\uA745': // ꝅ [LATIN SMALL LETTER K WITH STROKE AND DIAGONAL STROKE]
           case '\uFF4B': // ｋ [FULLWIDTH LATIN SMALL LETTER K]
-            output[outputPos++] = 'k';
+            output[ops++] = 'k';
             break;
           case '\u24A6': // ⒦ [PARENTHESIZED LATIN SMALL LETTER K]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'k';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'k';
+            output[ops++] = ')';
             break;
           case '\u0139': // Ĺ [LATIN CAPITAL LETTER L WITH ACUTE]
           case '\u013B': // Ļ [LATIN CAPITAL LETTER L WITH CEDILLA]
@@ -673,7 +679,7 @@ public class Chars {
           case '\uA748': // Ꝉ [LATIN CAPITAL LETTER L WITH HIGH STROKE]
           case '\uA780': // Ꞁ [LATIN CAPITAL LETTER TURNED L]
           case '\uFF2C': // Ｌ [FULLWIDTH LATIN CAPITAL LETTER L]
-            output[outputPos++] = 'L';
+            output[ops++] = 'L';
             break;
           case '\u013A': // ĺ [LATIN SMALL LETTER L WITH ACUTE]
           case '\u013C': // ļ [LATIN SMALL LETTER L WITH CEDILLA]
@@ -696,40 +702,40 @@ public class Chars {
           case '\uA749': // ꝉ [LATIN SMALL LETTER L WITH HIGH STROKE]
           case '\uA781': // ꞁ [LATIN SMALL LETTER TURNED L]
           case '\uFF4C': // ｌ [FULLWIDTH LATIN SMALL LETTER L]
-            output[outputPos++] = 'l';
+            output[ops++] = 'l';
             break;
           case '\u01C7': // Ǉ [LATIN CAPITAL LETTER LJ]
-            output[outputPos++] = 'L';
-            output[outputPos++] = 'J';
+            output[ops++] = 'L';
+            output[ops++] = 'J';
             break;
           case '\u1EFA': // Ỻ [LATIN CAPITAL LETTER MIDDLE-WELSH LL]
-            output[outputPos++] = 'L';
-            output[outputPos++] = 'L';
+            output[ops++] = 'L';
+            output[ops++] = 'L';
             break;
           case '\u01C8': // ǈ [LATIN CAPITAL LETTER L WITH SMALL LETTER J]
-            output[outputPos++] = 'L';
-            output[outputPos++] = 'j';
+            output[ops++] = 'L';
+            output[ops++] = 'j';
             break;
           case '\u24A7': // ⒧ [PARENTHESIZED LATIN SMALL LETTER L]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'l';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'l';
+            output[ops++] = ')';
             break;
           case '\u01C9': // ǉ [LATIN SMALL LETTER LJ]
-            output[outputPos++] = 'l';
-            output[outputPos++] = 'j';
+            output[ops++] = 'l';
+            output[ops++] = 'j';
             break;
           case '\u1EFB': // ỻ [LATIN SMALL LETTER MIDDLE-WELSH LL]
-            output[outputPos++] = 'l';
-            output[outputPos++] = 'l';
+            output[ops++] = 'l';
+            output[ops++] = 'l';
             break;
           case '\u02AA': // ʪ [LATIN SMALL LETTER LS DIGRAPH]
-            output[outputPos++] = 'l';
-            output[outputPos++] = 's';
+            output[ops++] = 'l';
+            output[ops++] = 's';
             break;
           case '\u02AB': // ʫ [LATIN SMALL LETTER LZ DIGRAPH]
-            output[outputPos++] = 'l';
-            output[outputPos++] = 'z';
+            output[ops++] = 'l';
+            output[ops++] = 'z';
             break;
           case '\u019C': // Ɯ [LATIN CAPITAL LETTER TURNED M]
           case '\u1D0D': // ᴍ [LATIN LETTER SMALL CAPITAL M]
@@ -741,7 +747,7 @@ public class Chars {
           case '\uA7FD': // ꟽ [LATIN EPIGRAPHIC LETTER INVERTED M]
           case '\uA7FF': // ꟿ [LATIN EPIGRAPHIC LETTER ARCHAIC M]
           case '\uFF2D': // Ｍ [FULLWIDTH LATIN CAPITAL LETTER M]
-            output[outputPos++] = 'M';
+            output[ops++] = 'M';
             break;
           case '\u026F': // ɯ [LATIN SMALL LETTER TURNED M]
           case '\u0270': // ɰ [LATIN SMALL LETTER TURNED M WITH LONG LEG]
@@ -753,12 +759,12 @@ public class Chars {
           case '\u1E43': // ṃ [LATIN SMALL LETTER M WITH DOT BELOW]
           case '\u24DC': // ⓜ [CIRCLED LATIN SMALL LETTER M]
           case '\uFF4D': // ｍ [FULLWIDTH LATIN SMALL LETTER M]
-            output[outputPos++] = 'm';
+            output[ops++] = 'm';
             break;
           case '\u24A8': // ⒨ [PARENTHESIZED LATIN SMALL LETTER M]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'm';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'm';
+            output[ops++] = ')';
             break;
           case '\u00D1': // Ñ [LATIN CAPITAL LETTER N WITH TILDE]
           case '\u0143': // Ń [LATIN CAPITAL LETTER N WITH ACUTE]
@@ -776,7 +782,7 @@ public class Chars {
           case '\u1E4A': // Ṋ [LATIN CAPITAL LETTER N WITH CIRCUMFLEX BELOW]
           case '\u24C3': // Ⓝ [CIRCLED LATIN CAPITAL LETTER N]
           case '\uFF2E': // Ｎ [FULLWIDTH LATIN CAPITAL LETTER N]
-            output[outputPos++] = 'N';
+            output[ops++] = 'N';
             break;
           case '\u00F1': // ñ [LATIN SMALL LETTER N WITH TILDE]
           case '\u0144': // ń [LATIN SMALL LETTER N WITH ACUTE]
@@ -798,24 +804,24 @@ public class Chars {
           case '\u207F': // ⁿ [SUPERSCRIPT LATIN SMALL LETTER N]
           case '\u24DD': // ⓝ [CIRCLED LATIN SMALL LETTER N]
           case '\uFF4E': // ｎ [FULLWIDTH LATIN SMALL LETTER N]
-            output[outputPos++] = 'n';
+            output[ops++] = 'n';
             break;
           case '\u01CA': // Ǌ [LATIN CAPITAL LETTER NJ]
-            output[outputPos++] = 'N';
-            output[outputPos++] = 'J';
+            output[ops++] = 'N';
+            output[ops++] = 'J';
             break;
           case '\u01CB': // ǋ [LATIN CAPITAL LETTER N WITH SMALL LETTER J]
-            output[outputPos++] = 'N';
-            output[outputPos++] = 'j';
+            output[ops++] = 'N';
+            output[ops++] = 'j';
             break;
           case '\u24A9': // ⒩ [PARENTHESIZED LATIN SMALL LETTER N]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'n';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'n';
+            output[ops++] = ')';
             break;
           case '\u01CC': // ǌ [LATIN SMALL LETTER NJ]
-            output[outputPos++] = 'n';
-            output[outputPos++] = 'j';
+            output[ops++] = 'n';
+            output[ops++] = 'j';
             break;
           case '\u00D2': // Ò [LATIN CAPITAL LETTER O WITH GRAVE]
           case '\u00D3': // Ó [LATIN CAPITAL LETTER O WITH ACUTE]
@@ -861,7 +867,7 @@ public class Chars {
           case '\uA74A': // Ꝋ [LATIN CAPITAL LETTER O WITH LONG STROKE OVERLAY]
           case '\uA74C': // Ꝍ [LATIN CAPITAL LETTER O WITH LOOP]
           case '\uFF2F': // Ｏ [FULLWIDTH LATIN CAPITAL LETTER O]
-            output[outputPos++] = 'O';
+            output[ops++] = 'O';
             break;
           case '\u00F2': // ò [LATIN SMALL LETTER O WITH GRAVE]
           case '\u00F3': // ó [LATIN SMALL LETTER O WITH ACUTE]
@@ -910,39 +916,39 @@ public class Chars {
           case '\uA74B': // ꝋ [LATIN SMALL LETTER O WITH LONG STROKE OVERLAY]
           case '\uA74D': // ꝍ [LATIN SMALL LETTER O WITH LOOP]
           case '\uFF4F': // ｏ [FULLWIDTH LATIN SMALL LETTER O]
-            output[outputPos++] = 'o';
+            output[ops++] = 'o';
             break;
           case '\u0152': // Œ [LATIN CAPITAL LIGATURE OE]
           case '\u0276': // ɶ [LATIN LETTER SMALL CAPITAL OE]
-            output[outputPos++] = 'O';
-            output[outputPos++] = 'E';
+            output[ops++] = 'O';
+            output[ops++] = 'E';
             break;
           case '\uA74E': // Ꝏ [LATIN CAPITAL LETTER OO]
-            output[outputPos++] = 'O';
-            output[outputPos++] = 'O';
+            output[ops++] = 'O';
+            output[ops++] = 'O';
             break;
           case '\u0222': // Ȣ http://en.wikipedia.org/wiki/OU [LATIN CAPITAL LETTER OU]
           case '\u1D15': // ᴕ [LATIN LETTER SMALL CAPITAL OU]
-            output[outputPos++] = 'O';
-            output[outputPos++] = 'U';
+            output[ops++] = 'O';
+            output[ops++] = 'U';
             break;
           case '\u24AA': // ⒪ [PARENTHESIZED LATIN SMALL LETTER O]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'o';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'o';
+            output[ops++] = ')';
             break;
           case '\u0153': // œ [LATIN SMALL LIGATURE OE]
           case '\u1D14': // ᴔ [LATIN SMALL LETTER TURNED OE]
-            output[outputPos++] = 'o';
-            output[outputPos++] = 'e';
+            output[ops++] = 'o';
+            output[ops++] = 'e';
             break;
           case '\uA74F': // ꝏ [LATIN SMALL LETTER OO]
-            output[outputPos++] = 'o';
-            output[outputPos++] = 'o';
+            output[ops++] = 'o';
+            output[ops++] = 'o';
             break;
           case '\u0223': // ȣ http://en.wikipedia.org/wiki/OU [LATIN SMALL LETTER OU]
-            output[outputPos++] = 'o';
-            output[outputPos++] = 'u';
+            output[ops++] = 'o';
+            output[ops++] = 'u';
             break;
           case '\u01A4': // Ƥ [LATIN CAPITAL LETTER P WITH HOOK]
           case '\u1D18': // ᴘ [LATIN LETTER SMALL CAPITAL P]
@@ -954,7 +960,7 @@ public class Chars {
           case '\uA752': // Ꝓ [LATIN CAPITAL LETTER P WITH FLOURISH]
           case '\uA754': // Ꝕ [LATIN CAPITAL LETTER P WITH SQUIRREL TAIL]
           case '\uFF30': // Ｐ [FULLWIDTH LATIN CAPITAL LETTER P]
-            output[outputPos++] = 'P';
+            output[ops++] = 'P';
             break;
           case '\u01A5': // ƥ [LATIN SMALL LETTER P WITH HOOK]
           case '\u1D71': // ᵱ [LATIN SMALL LETTER P WITH MIDDLE TILDE]
@@ -968,19 +974,19 @@ public class Chars {
           case '\uA755': // ꝕ [LATIN SMALL LETTER P WITH SQUIRREL TAIL]
           case '\uA7FC': // ꟼ [LATIN EPIGRAPHIC LETTER REVERSED P]
           case '\uFF50': // ｐ [FULLWIDTH LATIN SMALL LETTER P]
-            output[outputPos++] = 'p';
+            output[ops++] = 'p';
             break;
           case '\u24AB': // ⒫ [PARENTHESIZED LATIN SMALL LETTER P]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'p';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'p';
+            output[ops++] = ')';
             break;
           case '\u024A': // Ɋ [LATIN CAPITAL LETTER SMALL Q WITH HOOK TAIL]
           case '\u24C6': // Ⓠ [CIRCLED LATIN CAPITAL LETTER Q]
           case '\uA756': // Ꝗ [LATIN CAPITAL LETTER Q WITH STROKE THROUGH DESCENDER]
           case '\uA758': // Ꝙ [LATIN CAPITAL LETTER Q WITH DIAGONAL STROKE]
           case '\uFF31': // Ｑ [FULLWIDTH LATIN CAPITAL LETTER Q]
-            output[outputPos++] = 'Q';
+            output[ops++] = 'Q';
             break;
           case '\u0138': // ĸ http://en.wikipedia.org/wiki/Kra_(letter) [LATIN SMALL LETTER KRA]
           case '\u024B': // ɋ [LATIN SMALL LETTER Q WITH HOOK TAIL]
@@ -989,16 +995,16 @@ public class Chars {
           case '\uA757': // ꝗ [LATIN SMALL LETTER Q WITH STROKE THROUGH DESCENDER]
           case '\uA759': // ꝙ [LATIN SMALL LETTER Q WITH DIAGONAL STROKE]
           case '\uFF51': // ｑ [FULLWIDTH LATIN SMALL LETTER Q]
-            output[outputPos++] = 'q';
+            output[ops++] = 'q';
             break;
           case '\u24AC': // ⒬ [PARENTHESIZED LATIN SMALL LETTER Q]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'q';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'q';
+            output[ops++] = ')';
             break;
           case '\u0239': // ȹ [LATIN SMALL LETTER QP DIGRAPH]
-            output[outputPos++] = 'q';
-            output[outputPos++] = 'p';
+            output[ops++] = 'q';
+            output[ops++] = 'p';
             break;
           case '\u0154': // Ŕ [LATIN CAPITAL LETTER R WITH ACUTE]
           case '\u0156': // Ŗ [LATIN CAPITAL LETTER R WITH CEDILLA]
@@ -1019,7 +1025,7 @@ public class Chars {
           case '\uA75A': // Ꝛ [LATIN CAPITAL LETTER R ROTUNDA]
           case '\uA782': // Ꞃ [LATIN CAPITAL LETTER INSULAR R]
           case '\uFF32': // Ｒ [FULLWIDTH LATIN CAPITAL LETTER R]
-            output[outputPos++] = 'R';
+            output[ops++] = 'R';
             break;
           case '\u0155': // ŕ [LATIN SMALL LETTER R WITH ACUTE]
           case '\u0157': // ŗ [LATIN SMALL LETTER R WITH CEDILLA]
@@ -1043,12 +1049,12 @@ public class Chars {
           case '\uA75B': // ꝛ [LATIN SMALL LETTER R ROTUNDA]
           case '\uA783': // ꞃ [LATIN SMALL LETTER INSULAR R]
           case '\uFF52': // ｒ [FULLWIDTH LATIN SMALL LETTER R]
-            output[outputPos++] = 'r';
+            output[ops++] = 'r';
             break;
           case '\u24AD': // ⒭ [PARENTHESIZED LATIN SMALL LETTER R]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'r';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'r';
+            output[ops++] = ')';
             break;
           case '\u015A': // Ś [LATIN CAPITAL LETTER S WITH ACUTE]
           case '\u015C': // Ŝ [LATIN CAPITAL LETTER S WITH CIRCUMFLEX]
@@ -1064,7 +1070,7 @@ public class Chars {
           case '\uA731': // ꜱ [LATIN LETTER SMALL CAPITAL S]
           case '\uA785': // ꞅ [LATIN SMALL LETTER INSULAR S]
           case '\uFF33': // Ｓ [FULLWIDTH LATIN CAPITAL LETTER S]
-            output[outputPos++] = 'S';
+            output[ops++] = 'S';
             break;
           case '\u015B': // ś [LATIN SMALL LETTER S WITH ACUTE]
           case '\u015D': // ŝ [LATIN SMALL LETTER S WITH CIRCUMFLEX]
@@ -1086,24 +1092,24 @@ public class Chars {
           case '\u24E2': // ⓢ [CIRCLED LATIN SMALL LETTER S]
           case '\uA784': // Ꞅ [LATIN CAPITAL LETTER INSULAR S]
           case '\uFF53': // ｓ [FULLWIDTH LATIN SMALL LETTER S]
-            output[outputPos++] = 's';
+            output[ops++] = 's';
             break;
           case '\u1E9E': // ẞ [LATIN CAPITAL LETTER SHARP S]
-            output[outputPos++] = 'S';
-            output[outputPos++] = 'S';
+            output[ops++] = 'S';
+            output[ops++] = 'S';
             break;
           case '\u24AE': // ⒮ [PARENTHESIZED LATIN SMALL LETTER S]
-            output[outputPos++] = '(';
-            output[outputPos++] = 's';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 's';
+            output[ops++] = ')';
             break;
           case '\u00DF': // ß [LATIN SMALL LETTER SHARP S]
-            output[outputPos++] = 's';
-            output[outputPos++] = 's';
+            output[ops++] = 's';
+            output[ops++] = 's';
             break;
           case '\uFB06': // ﬆ [LATIN SMALL LIGATURE ST]
-            output[outputPos++] = 's';
-            output[outputPos++] = 't';
+            output[ops++] = 's';
+            output[ops++] = 't';
             break;
           case '\u0162': // Ţ [LATIN CAPITAL LETTER T WITH CEDILLA]
           case '\u0164': // Ť [LATIN CAPITAL LETTER T WITH CARON]
@@ -1120,7 +1126,7 @@ public class Chars {
           case '\u24C9': // Ⓣ [CIRCLED LATIN CAPITAL LETTER T]
           case '\uA786': // Ꞇ [LATIN CAPITAL LETTER INSULAR T]
           case '\uFF34': // Ｔ [FULLWIDTH LATIN CAPITAL LETTER T]
-            output[outputPos++] = 'T';
+            output[ops++] = 'T';
             break;
           case '\u0163': // ţ [LATIN SMALL LETTER T WITH CEDILLA]
           case '\u0165': // ť [LATIN SMALL LETTER T WITH CARON]
@@ -1140,39 +1146,39 @@ public class Chars {
           case '\u24E3': // ⓣ [CIRCLED LATIN SMALL LETTER T]
           case '\u2C66': // ⱦ [LATIN SMALL LETTER T WITH DIAGONAL STROKE]
           case '\uFF54': // ｔ [FULLWIDTH LATIN SMALL LETTER T]
-            output[outputPos++] = 't';
+            output[ops++] = 't';
             break;
           case '\u00DE': // Þ [LATIN CAPITAL LETTER THORN]
           case '\uA766': // Ꝧ [LATIN CAPITAL LETTER THORN WITH STROKE THROUGH DESCENDER]
-            output[outputPos++] = 'T';
-            output[outputPos++] = 'H';
+            output[ops++] = 'T';
+            output[ops++] = 'H';
             break;
           case '\uA728': // Ꜩ [LATIN CAPITAL LETTER TZ]
-            output[outputPos++] = 'T';
-            output[outputPos++] = 'Z';
+            output[ops++] = 'T';
+            output[ops++] = 'Z';
             break;
           case '\u24AF': // ⒯ [PARENTHESIZED LATIN SMALL LETTER T]
-            output[outputPos++] = '(';
-            output[outputPos++] = 't';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 't';
+            output[ops++] = ')';
             break;
           case '\u02A8': // ʨ [LATIN SMALL LETTER TC DIGRAPH WITH CURL]
-            output[outputPos++] = 't';
-            output[outputPos++] = 'c';
+            output[ops++] = 't';
+            output[ops++] = 'c';
             break;
           case '\u00FE': // þ [LATIN SMALL LETTER THORN]
           case '\u1D7A': // ᵺ [LATIN SMALL LETTER TH WITH STRIKETHROUGH]
           case '\uA767': // ꝧ [LATIN SMALL LETTER THORN WITH STROKE THROUGH DESCENDER]
-            output[outputPos++] = 't';
-            output[outputPos++] = 'h';
+            output[ops++] = 't';
+            output[ops++] = 'h';
             break;
           case '\u02A6': // ʦ [LATIN SMALL LETTER TS DIGRAPH]
-            output[outputPos++] = 't';
-            output[outputPos++] = 's';
+            output[ops++] = 't';
+            output[ops++] = 's';
             break;
           case '\uA729': // ꜩ [LATIN SMALL LETTER TZ]
-            output[outputPos++] = 't';
-            output[outputPos++] = 'z';
+            output[ops++] = 't';
+            output[ops++] = 'z';
             break;
           case '\u00D9': // Ù [LATIN CAPITAL LETTER U WITH GRAVE]
           case '\u00DA': // Ú [LATIN CAPITAL LETTER U WITH ACUTE]
@@ -1209,7 +1215,7 @@ public class Chars {
           case '\u1EF0': // Ự [LATIN CAPITAL LETTER U WITH HORN AND DOT BELOW]
           case '\u24CA': // Ⓤ [CIRCLED LATIN CAPITAL LETTER U]
           case '\uFF35': // Ｕ [FULLWIDTH LATIN CAPITAL LETTER U]
-            output[outputPos++] = 'U';
+            output[ops++] = 'U';
             break;
           case '\u00F9': // ù [LATIN SMALL LETTER U WITH GRAVE]
           case '\u00FA': // ú [LATIN SMALL LETTER U WITH ACUTE]
@@ -1246,16 +1252,16 @@ public class Chars {
           case '\u1EF1': // ự [LATIN SMALL LETTER U WITH HORN AND DOT BELOW]
           case '\u24E4': // ⓤ [CIRCLED LATIN SMALL LETTER U]
           case '\uFF55': // ｕ [FULLWIDTH LATIN SMALL LETTER U]
-            output[outputPos++] = 'u';
+            output[ops++] = 'u';
             break;
           case '\u24B0': // ⒰ [PARENTHESIZED LATIN SMALL LETTER U]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'u';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'u';
+            output[ops++] = ')';
             break;
           case '\u1D6B': // ᵫ [LATIN SMALL LETTER UE]
-            output[outputPos++] = 'u';
-            output[outputPos++] = 'e';
+            output[ops++] = 'u';
+            output[ops++] = 'e';
             break;
           case '\u01B2': // Ʋ [LATIN CAPITAL LETTER V WITH HOOK]
           case '\u0245': // Ʌ [LATIN CAPITAL LETTER TURNED V]
@@ -1267,7 +1273,7 @@ public class Chars {
           case '\uA75E': // Ꝟ [LATIN CAPITAL LETTER V WITH DIAGONAL STROKE]
           case '\uA768': // Ꝩ [LATIN CAPITAL LETTER VEND]
           case '\uFF36': // Ｖ [FULLWIDTH LATIN CAPITAL LETTER V]
-            output[outputPos++] = 'V';
+            output[ops++] = 'V';
             break;
           case '\u028B': // ʋ [LATIN SMALL LETTER V WITH HOOK]
           case '\u028C': // ʌ [LATIN SMALL LETTER TURNED V]
@@ -1280,20 +1286,20 @@ public class Chars {
           case '\u2C74': // ⱴ [LATIN SMALL LETTER V WITH CURL]
           case '\uA75F': // ꝟ [LATIN SMALL LETTER V WITH DIAGONAL STROKE]
           case '\uFF56': // ｖ [FULLWIDTH LATIN SMALL LETTER V]
-            output[outputPos++] = 'v';
+            output[ops++] = 'v';
             break;
           case '\uA760': // Ꝡ [LATIN CAPITAL LETTER VY]
-            output[outputPos++] = 'V';
-            output[outputPos++] = 'Y';
+            output[ops++] = 'V';
+            output[ops++] = 'Y';
             break;
           case '\u24B1': // ⒱ [PARENTHESIZED LATIN SMALL LETTER V]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'v';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'v';
+            output[ops++] = ')';
             break;
           case '\uA761': // ꝡ [LATIN SMALL LETTER VY]
-            output[outputPos++] = 'v';
-            output[outputPos++] = 'y';
+            output[ops++] = 'v';
+            output[ops++] = 'y';
             break;
           case '\u0174': // Ŵ [LATIN CAPITAL LETTER W WITH CIRCUMFLEX]
           case '\u01F7': // Ƿ http://en.wikipedia.org/wiki/Wynn [LATIN CAPITAL LETTER WYNN]
@@ -1306,7 +1312,7 @@ public class Chars {
           case '\u24CC': // Ⓦ [CIRCLED LATIN CAPITAL LETTER W]
           case '\u2C72': // Ⱳ [LATIN CAPITAL LETTER W WITH HOOK]
           case '\uFF37': // Ｗ [FULLWIDTH LATIN CAPITAL LETTER W]
-            output[outputPos++] = 'W';
+            output[ops++] = 'W';
             break;
           case '\u0175': // ŵ [LATIN SMALL LETTER W WITH CIRCUMFLEX]
           case '\u01BF': // ƿ http://en.wikipedia.org/wiki/Wynn [LATIN LETTER WYNN]
@@ -1320,18 +1326,18 @@ public class Chars {
           case '\u24E6': // ⓦ [CIRCLED LATIN SMALL LETTER W]
           case '\u2C73': // ⱳ [LATIN SMALL LETTER W WITH HOOK]
           case '\uFF57': // ｗ [FULLWIDTH LATIN SMALL LETTER W]
-            output[outputPos++] = 'w';
+            output[ops++] = 'w';
             break;
           case '\u24B2': // ⒲ [PARENTHESIZED LATIN SMALL LETTER W]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'w';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'w';
+            output[ops++] = ')';
             break;
           case '\u1E8A': // Ẋ [LATIN CAPITAL LETTER X WITH DOT ABOVE]
           case '\u1E8C': // Ẍ [LATIN CAPITAL LETTER X WITH DIAERESIS]
           case '\u24CD': // Ⓧ [CIRCLED LATIN CAPITAL LETTER X]
           case '\uFF38': // Ｘ [FULLWIDTH LATIN CAPITAL LETTER X]
-            output[outputPos++] = 'X';
+            output[ops++] = 'X';
             break;
           case '\u1D8D': // ᶍ [LATIN SMALL LETTER X WITH PALATAL HOOK]
           case '\u1E8B': // ẋ [LATIN SMALL LETTER X WITH DOT ABOVE]
@@ -1339,12 +1345,12 @@ public class Chars {
           case '\u2093': // ₓ [LATIN SUBSCRIPT SMALL LETTER X]
           case '\u24E7': // ⓧ [CIRCLED LATIN SMALL LETTER X]
           case '\uFF58': // ｘ [FULLWIDTH LATIN SMALL LETTER X]
-            output[outputPos++] = 'x';
+            output[ops++] = 'x';
             break;
           case '\u24B3': // ⒳ [PARENTHESIZED LATIN SMALL LETTER X]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'x';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'x';
+            output[ops++] = ')';
             break;
           case '\u00DD': // Ý [LATIN CAPITAL LETTER Y WITH ACUTE]
           case '\u0176': // Ŷ [LATIN CAPITAL LETTER Y WITH CIRCUMFLEX]
@@ -1361,7 +1367,7 @@ public class Chars {
           case '\u1EFE': // Ỿ [LATIN CAPITAL LETTER Y WITH LOOP]
           case '\u24CE': // Ⓨ [CIRCLED LATIN CAPITAL LETTER Y]
           case '\uFF39': // Ｙ [FULLWIDTH LATIN CAPITAL LETTER Y]
-            output[outputPos++] = 'Y';
+            output[ops++] = 'Y';
             break;
           case '\u00FD': // ý [LATIN SMALL LETTER Y WITH ACUTE]
           case '\u00FF': // ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
@@ -1379,12 +1385,12 @@ public class Chars {
           case '\u1EFF': // ỿ [LATIN SMALL LETTER Y WITH LOOP]
           case '\u24E8': // ⓨ [CIRCLED LATIN SMALL LETTER Y]
           case '\uFF59': // ｙ [FULLWIDTH LATIN SMALL LETTER Y]
-            output[outputPos++] = 'y';
+            output[ops++] = 'y';
             break;
           case '\u24B4': // ⒴ [PARENTHESIZED LATIN SMALL LETTER Y]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'y';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'y';
+            output[ops++] = ')';
             break;
           case '\u0179': // Ź [LATIN CAPITAL LETTER Z WITH ACUTE]
           case '\u017B': // Ż [LATIN CAPITAL LETTER Z WITH DOT ABOVE]
@@ -1400,7 +1406,7 @@ public class Chars {
           case '\u2C6B': // Ⱬ [LATIN CAPITAL LETTER Z WITH DESCENDER]
           case '\uA762': // Ꝣ [LATIN CAPITAL LETTER VISIGOTHIC Z]
           case '\uFF3A': // Ｚ [FULLWIDTH LATIN CAPITAL LETTER Z]
-            output[outputPos++] = 'Z';
+            output[ops++] = 'Z';
             break;
           case '\u017A': // ź [LATIN SMALL LETTER Z WITH ACUTE]
           case '\u017C': // ż [LATIN SMALL LETTER Z WITH DOT ABOVE]
@@ -1420,19 +1426,19 @@ public class Chars {
           case '\u2C6C': // ⱬ [LATIN SMALL LETTER Z WITH DESCENDER]
           case '\uA763': // ꝣ [LATIN SMALL LETTER VISIGOTHIC Z]
           case '\uFF5A': // ｚ [FULLWIDTH LATIN SMALL LETTER Z]
-            output[outputPos++] = 'z';
+            output[ops++] = 'z';
             break;
           case '\u24B5': // ⒵ [PARENTHESIZED LATIN SMALL LETTER Z]
-            output[outputPos++] = '(';
-            output[outputPos++] = 'z';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = 'z';
+            output[ops++] = ')';
             break;
           case '\u2070': // ⁰ [SUPERSCRIPT ZERO]
           case '\u2080': // ₀ [SUBSCRIPT ZERO]
           case '\u24EA': // ⓪ [CIRCLED DIGIT ZERO]
           case '\u24FF': // ⓿ [NEGATIVE CIRCLED DIGIT ZERO]
           case '\uFF10': // ０ [FULLWIDTH DIGIT ZERO]
-            output[outputPos++] = '0';
+            output[ops++] = '0';
             break;
           case '\u00B9': // ¹ [SUPERSCRIPT ONE]
           case '\u2081': // ₁ [SUBSCRIPT ONE]
@@ -1442,16 +1448,16 @@ public class Chars {
           case '\u2780': // ➀ [DINGBAT CIRCLED SANS-SERIF DIGIT ONE]
           case '\u278A': // ➊ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT ONE]
           case '\uFF11': // １ [FULLWIDTH DIGIT ONE]
-            output[outputPos++] = '1';
+            output[ops++] = '1';
             break;
           case '\u2488': // ⒈ [DIGIT ONE FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '.';
             break;
           case '\u2474': // ⑴ [PARENTHESIZED DIGIT ONE]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = ')';
             break;
           case '\u00B2': // ² [SUPERSCRIPT TWO]
           case '\u2082': // ₂ [SUBSCRIPT TWO]
@@ -1461,16 +1467,16 @@ public class Chars {
           case '\u2781': // ➁ [DINGBAT CIRCLED SANS-SERIF DIGIT TWO]
           case '\u278B': // ➋ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT TWO]
           case '\uFF12': // ２ [FULLWIDTH DIGIT TWO]
-            output[outputPos++] = '2';
+            output[ops++] = '2';
             break;
           case '\u2489': // ⒉ [DIGIT TWO FULL STOP]
-            output[outputPos++] = '2';
-            output[outputPos++] = '.';
+            output[ops++] = '2';
+            output[ops++] = '.';
             break;
           case '\u2475': // ⑵ [PARENTHESIZED DIGIT TWO]
-            output[outputPos++] = '(';
-            output[outputPos++] = '2';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '2';
+            output[ops++] = ')';
             break;
           case '\u00B3': // ³ [SUPERSCRIPT THREE]
           case '\u2083': // ₃ [SUBSCRIPT THREE]
@@ -1480,16 +1486,16 @@ public class Chars {
           case '\u2782': // ➂ [DINGBAT CIRCLED SANS-SERIF DIGIT THREE]
           case '\u278C': // ➌ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT THREE]
           case '\uFF13': // ３ [FULLWIDTH DIGIT THREE]
-            output[outputPos++] = '3';
+            output[ops++] = '3';
             break;
           case '\u248A': // ⒊ [DIGIT THREE FULL STOP]
-            output[outputPos++] = '3';
-            output[outputPos++] = '.';
+            output[ops++] = '3';
+            output[ops++] = '.';
             break;
           case '\u2476': // ⑶ [PARENTHESIZED DIGIT THREE]
-            output[outputPos++] = '(';
-            output[outputPos++] = '3';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '3';
+            output[ops++] = ')';
             break;
           case '\u2074': // ⁴ [SUPERSCRIPT FOUR]
           case '\u2084': // ₄ [SUBSCRIPT FOUR]
@@ -1499,16 +1505,16 @@ public class Chars {
           case '\u2783': // ➃ [DINGBAT CIRCLED SANS-SERIF DIGIT FOUR]
           case '\u278D': // ➍ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT FOUR]
           case '\uFF14': // ４ [FULLWIDTH DIGIT FOUR]
-            output[outputPos++] = '4';
+            output[ops++] = '4';
             break;
           case '\u248B': // ⒋ [DIGIT FOUR FULL STOP]
-            output[outputPos++] = '4';
-            output[outputPos++] = '.';
+            output[ops++] = '4';
+            output[ops++] = '.';
             break;
           case '\u2477': // ⑷ [PARENTHESIZED DIGIT FOUR]
-            output[outputPos++] = '(';
-            output[outputPos++] = '4';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '4';
+            output[ops++] = ')';
             break;
           case '\u2075': // ⁵ [SUPERSCRIPT FIVE]
           case '\u2085': // ₅ [SUBSCRIPT FIVE]
@@ -1518,16 +1524,16 @@ public class Chars {
           case '\u2784': // ➄ [DINGBAT CIRCLED SANS-SERIF DIGIT FIVE]
           case '\u278E': // ➎ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT FIVE]
           case '\uFF15': // ５ [FULLWIDTH DIGIT FIVE]
-            output[outputPos++] = '5';
+            output[ops++] = '5';
             break;
           case '\u248C': // ⒌ [DIGIT FIVE FULL STOP]
-            output[outputPos++] = '5';
-            output[outputPos++] = '.';
+            output[ops++] = '5';
+            output[ops++] = '.';
             break;
           case '\u2478': // ⑸ [PARENTHESIZED DIGIT FIVE]
-            output[outputPos++] = '(';
-            output[outputPos++] = '5';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '5';
+            output[ops++] = ')';
             break;
           case '\u2076': // ⁶ [SUPERSCRIPT SIX]
           case '\u2086': // ₆ [SUBSCRIPT SIX]
@@ -1537,16 +1543,16 @@ public class Chars {
           case '\u2785': // ➅ [DINGBAT CIRCLED SANS-SERIF DIGIT SIX]
           case '\u278F': // ➏ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT SIX]
           case '\uFF16': // ６ [FULLWIDTH DIGIT SIX]
-            output[outputPos++] = '6';
+            output[ops++] = '6';
             break;
           case '\u248D': // ⒍ [DIGIT SIX FULL STOP]
-            output[outputPos++] = '6';
-            output[outputPos++] = '.';
+            output[ops++] = '6';
+            output[ops++] = '.';
             break;
           case '\u2479': // ⑹ [PARENTHESIZED DIGIT SIX]
-            output[outputPos++] = '(';
-            output[outputPos++] = '6';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '6';
+            output[ops++] = ')';
             break;
           case '\u2077': // ⁷ [SUPERSCRIPT SEVEN]
           case '\u2087': // ₇ [SUBSCRIPT SEVEN]
@@ -1556,16 +1562,16 @@ public class Chars {
           case '\u2786': // ➆ [DINGBAT CIRCLED SANS-SERIF DIGIT SEVEN]
           case '\u2790': // ➐ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT SEVEN]
           case '\uFF17': // ７ [FULLWIDTH DIGIT SEVEN]
-            output[outputPos++] = '7';
+            output[ops++] = '7';
             break;
           case '\u248E': // ⒎ [DIGIT SEVEN FULL STOP]
-            output[outputPos++] = '7';
-            output[outputPos++] = '.';
+            output[ops++] = '7';
+            output[ops++] = '.';
             break;
           case '\u247A': // ⑺ [PARENTHESIZED DIGIT SEVEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '7';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '7';
+            output[ops++] = ')';
             break;
           case '\u2078': // ⁸ [SUPERSCRIPT EIGHT]
           case '\u2088': // ₈ [SUBSCRIPT EIGHT]
@@ -1575,16 +1581,16 @@ public class Chars {
           case '\u2787': // ➇ [DINGBAT CIRCLED SANS-SERIF DIGIT EIGHT]
           case '\u2791': // ➑ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT EIGHT]
           case '\uFF18': // ８ [FULLWIDTH DIGIT EIGHT]
-            output[outputPos++] = '8';
+            output[ops++] = '8';
             break;
           case '\u248F': // ⒏ [DIGIT EIGHT FULL STOP]
-            output[outputPos++] = '8';
-            output[outputPos++] = '.';
+            output[ops++] = '8';
+            output[ops++] = '.';
             break;
           case '\u247B': // ⑻ [PARENTHESIZED DIGIT EIGHT]
-            output[outputPos++] = '(';
-            output[outputPos++] = '8';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '8';
+            output[ops++] = ')';
             break;
           case '\u2079': // ⁹ [SUPERSCRIPT NINE]
           case '\u2089': // ₉ [SUBSCRIPT NINE]
@@ -1594,195 +1600,195 @@ public class Chars {
           case '\u2788': // ➈ [DINGBAT CIRCLED SANS-SERIF DIGIT NINE]
           case '\u2792': // ➒ [DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT NINE]
           case '\uFF19': // ９ [FULLWIDTH DIGIT NINE]
-            output[outputPos++] = '9';
+            output[ops++] = '9';
             break;
           case '\u2490': // ⒐ [DIGIT NINE FULL STOP]
-            output[outputPos++] = '9';
-            output[outputPos++] = '.';
+            output[ops++] = '9';
+            output[ops++] = '.';
             break;
           case '\u247C': // ⑼ [PARENTHESIZED DIGIT NINE]
-            output[outputPos++] = '(';
-            output[outputPos++] = '9';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '9';
+            output[ops++] = ')';
             break;
           case '\u2469': // ⑩ [CIRCLED NUMBER TEN]
           case '\u24FE': // ⓾ [DOUBLE CIRCLED NUMBER TEN]
           case '\u277F': // ❿ [DINGBAT NEGATIVE CIRCLED NUMBER TEN]
           case '\u2789': // ➉ [DINGBAT CIRCLED SANS-SERIF NUMBER TEN]
           case '\u2793': // ➓ [DINGBAT NEGATIVE CIRCLED SANS-SERIF NUMBER TEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '0';
+            output[ops++] = '1';
+            output[ops++] = '0';
             break;
           case '\u2491': // ⒑ [NUMBER TEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '0';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '0';
+            output[ops++] = '.';
             break;
           case '\u247D': // ⑽ [PARENTHESIZED NUMBER TEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '0';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '0';
+            output[ops++] = ')';
             break;
           case '\u246A': // ⑪ [CIRCLED NUMBER ELEVEN]
           case '\u24EB': // ⓫ [NEGATIVE CIRCLED NUMBER ELEVEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '1';
+            output[ops++] = '1';
+            output[ops++] = '1';
             break;
           case '\u2492': // ⒒ [NUMBER ELEVEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '1';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '1';
+            output[ops++] = '.';
             break;
           case '\u247E': // ⑾ [PARENTHESIZED NUMBER ELEVEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '1';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '1';
+            output[ops++] = ')';
             break;
           case '\u246B': // ⑫ [CIRCLED NUMBER TWELVE]
           case '\u24EC': // ⓬ [NEGATIVE CIRCLED NUMBER TWELVE]
-            output[outputPos++] = '1';
-            output[outputPos++] = '2';
+            output[ops++] = '1';
+            output[ops++] = '2';
             break;
           case '\u2493': // ⒓ [NUMBER TWELVE FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '2';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '2';
+            output[ops++] = '.';
             break;
           case '\u247F': // ⑿ [PARENTHESIZED NUMBER TWELVE]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '2';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '2';
+            output[ops++] = ')';
             break;
           case '\u246C': // ⑬ [CIRCLED NUMBER THIRTEEN]
           case '\u24ED': // ⓭ [NEGATIVE CIRCLED NUMBER THIRTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '3';
+            output[ops++] = '1';
+            output[ops++] = '3';
             break;
           case '\u2494': // ⒔ [NUMBER THIRTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '3';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '3';
+            output[ops++] = '.';
             break;
           case '\u2480': // ⒀ [PARENTHESIZED NUMBER THIRTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '3';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '3';
+            output[ops++] = ')';
             break;
           case '\u246D': // ⑭ [CIRCLED NUMBER FOURTEEN]
           case '\u24EE': // ⓮ [NEGATIVE CIRCLED NUMBER FOURTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '4';
+            output[ops++] = '1';
+            output[ops++] = '4';
             break;
           case '\u2495': // ⒕ [NUMBER FOURTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '4';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '4';
+            output[ops++] = '.';
             break;
           case '\u2481': // ⒁ [PARENTHESIZED NUMBER FOURTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '4';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '4';
+            output[ops++] = ')';
             break;
           case '\u246E': // ⑮ [CIRCLED NUMBER FIFTEEN]
           case '\u24EF': // ⓯ [NEGATIVE CIRCLED NUMBER FIFTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '5';
+            output[ops++] = '1';
+            output[ops++] = '5';
             break;
           case '\u2496': // ⒖ [NUMBER FIFTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '5';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '5';
+            output[ops++] = '.';
             break;
           case '\u2482': // ⒂ [PARENTHESIZED NUMBER FIFTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '5';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '5';
+            output[ops++] = ')';
             break;
           case '\u246F': // ⑯ [CIRCLED NUMBER SIXTEEN]
           case '\u24F0': // ⓰ [NEGATIVE CIRCLED NUMBER SIXTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '6';
+            output[ops++] = '1';
+            output[ops++] = '6';
             break;
           case '\u2497': // ⒗ [NUMBER SIXTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '6';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '6';
+            output[ops++] = '.';
             break;
           case '\u2483': // ⒃ [PARENTHESIZED NUMBER SIXTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '6';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '6';
+            output[ops++] = ')';
             break;
           case '\u2470': // ⑰ [CIRCLED NUMBER SEVENTEEN]
           case '\u24F1': // ⓱ [NEGATIVE CIRCLED NUMBER SEVENTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '7';
+            output[ops++] = '1';
+            output[ops++] = '7';
             break;
           case '\u2498': // ⒘ [NUMBER SEVENTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '7';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '7';
+            output[ops++] = '.';
             break;
           case '\u2484': // ⒄ [PARENTHESIZED NUMBER SEVENTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '7';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '7';
+            output[ops++] = ')';
             break;
           case '\u2471': // ⑱ [CIRCLED NUMBER EIGHTEEN]
           case '\u24F2': // ⓲ [NEGATIVE CIRCLED NUMBER EIGHTEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '8';
+            output[ops++] = '1';
+            output[ops++] = '8';
             break;
           case '\u2499': // ⒙ [NUMBER EIGHTEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '8';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '8';
+            output[ops++] = '.';
             break;
           case '\u2485': // ⒅ [PARENTHESIZED NUMBER EIGHTEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '8';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '8';
+            output[ops++] = ')';
             break;
           case '\u2472': // ⑲ [CIRCLED NUMBER NINETEEN]
           case '\u24F3': // ⓳ [NEGATIVE CIRCLED NUMBER NINETEEN]
-            output[outputPos++] = '1';
-            output[outputPos++] = '9';
+            output[ops++] = '1';
+            output[ops++] = '9';
             break;
           case '\u249A': // ⒚ [NUMBER NINETEEN FULL STOP]
-            output[outputPos++] = '1';
-            output[outputPos++] = '9';
-            output[outputPos++] = '.';
+            output[ops++] = '1';
+            output[ops++] = '9';
+            output[ops++] = '.';
             break;
           case '\u2486': // ⒆ [PARENTHESIZED NUMBER NINETEEN]
-            output[outputPos++] = '(';
-            output[outputPos++] = '1';
-            output[outputPos++] = '9';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '1';
+            output[ops++] = '9';
+            output[ops++] = ')';
             break;
           case '\u2473': // ⑳ [CIRCLED NUMBER TWENTY]
           case '\u24F4': // ⓴ [NEGATIVE CIRCLED NUMBER TWENTY]
-            output[outputPos++] = '2';
-            output[outputPos++] = '0';
+            output[ops++] = '2';
+            output[ops++] = '0';
             break;
           case '\u249B': // ⒛ [NUMBER TWENTY FULL STOP]
-            output[outputPos++] = '2';
-            output[outputPos++] = '0';
-            output[outputPos++] = '.';
+            output[ops++] = '2';
+            output[ops++] = '0';
+            output[ops++] = '.';
             break;
           case '\u2487': // ⒇ [PARENTHESIZED NUMBER TWENTY]
-            output[outputPos++] = '(';
-            output[outputPos++] = '2';
-            output[outputPos++] = '0';
-            output[outputPos++] = ')';
+            output[ops++] = '(';
+            output[ops++] = '2';
+            output[ops++] = '0';
+            output[ops++] = ')';
             break;
           case '\u00AB': // « [LEFT-POINTING DOUBLE ANGLE QUOTATION MARK]
           case '\u00BB': // » [RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK]
@@ -1796,7 +1802,7 @@ public class Chars {
           case '\u276E': // ❮ [HEAVY LEFT-POINTING ANGLE QUOTATION MARK ORNAMENT]
           case '\u276F': // ❯ [HEAVY RIGHT-POINTING ANGLE QUOTATION MARK ORNAMENT]
           case '\uFF02': // ＂ [FULLWIDTH QUOTATION MARK]
-            output[outputPos++] = '"';
+            output[ops++] = '"';
             break;
           case '\u2018': // ‘ [LEFT SINGLE QUOTATION MARK]
           case '\u2019': // ’ [RIGHT SINGLE QUOTATION MARK]
@@ -1809,7 +1815,7 @@ public class Chars {
           case '\u275B': // ❛ [HEAVY SINGLE TURNED COMMA QUOTATION MARK ORNAMENT]
           case '\u275C': // ❜ [HEAVY SINGLE COMMA QUOTATION MARK ORNAMENT]
           case '\uFF07': // ＇ [FULLWIDTH APOSTROPHE]
-            output[outputPos++] = '\'';
+            output[ops++] = '\'';
             break;
           case '\u2010': // ‐ [HYPHEN]
           case '\u2011': // ‑ [NON-BREAKING HYPHEN]
@@ -1819,148 +1825,148 @@ public class Chars {
           case '\u207B': // ⁻ [SUPERSCRIPT MINUS]
           case '\u208B': // ₋ [SUBSCRIPT MINUS]
           case '\uFF0D': // － [FULLWIDTH HYPHEN-MINUS]
-            output[outputPos++] = '-';
+            output[ops++] = '-';
             break;
           case '\u2045': // ⁅ [LEFT SQUARE BRACKET WITH QUILL]
           case '\u2772': // ❲ [LIGHT LEFT TORTOISE SHELL BRACKET ORNAMENT]
           case '\uFF3B': // ［ [FULLWIDTH LEFT SQUARE BRACKET]
-            output[outputPos++] = '[';
+            output[ops++] = '[';
             break;
           case '\u2046': // ⁆ [RIGHT SQUARE BRACKET WITH QUILL]
           case '\u2773': // ❳ [LIGHT RIGHT TORTOISE SHELL BRACKET ORNAMENT]
           case '\uFF3D': // ］ [FULLWIDTH RIGHT SQUARE BRACKET]
-            output[outputPos++] = ']';
+            output[ops++] = ']';
             break;
           case '\u207D': // ⁽ [SUPERSCRIPT LEFT PARENTHESIS]
           case '\u208D': // ₍ [SUBSCRIPT LEFT PARENTHESIS]
           case '\u2768': // ❨ [MEDIUM LEFT PARENTHESIS ORNAMENT]
           case '\u276A': // ❪ [MEDIUM FLATTENED LEFT PARENTHESIS ORNAMENT]
           case '\uFF08': // （ [FULLWIDTH LEFT PARENTHESIS]
-            output[outputPos++] = '(';
+            output[ops++] = '(';
             break;
           case '\u2E28': // ⸨ [LEFT DOUBLE PARENTHESIS]
-            output[outputPos++] = '(';
-            output[outputPos++] = '(';
+            output[ops++] = '(';
+            output[ops++] = '(';
             break;
           case '\u207E': // ⁾ [SUPERSCRIPT RIGHT PARENTHESIS]
           case '\u208E': // ₎ [SUBSCRIPT RIGHT PARENTHESIS]
           case '\u2769': // ❩ [MEDIUM RIGHT PARENTHESIS ORNAMENT]
           case '\u276B': // ❫ [MEDIUM FLATTENED RIGHT PARENTHESIS ORNAMENT]
           case '\uFF09': // ） [FULLWIDTH RIGHT PARENTHESIS]
-            output[outputPos++] = ')';
+            output[ops++] = ')';
             break;
           case '\u2E29': // ⸩ [RIGHT DOUBLE PARENTHESIS]
-            output[outputPos++] = ')';
-            output[outputPos++] = ')';
+            output[ops++] = ')';
+            output[ops++] = ')';
             break;
           case '\u276C': // ❬ [MEDIUM LEFT-POINTING ANGLE BRACKET ORNAMENT]
           case '\u2770': // ❰ [HEAVY LEFT-POINTING ANGLE BRACKET ORNAMENT]
           case '\uFF1C': // ＜ [FULLWIDTH LESS-THAN SIGN]
-            output[outputPos++] = '<';
+            output[ops++] = '<';
             break;
           case '\u276D': // ❭ [MEDIUM RIGHT-POINTING ANGLE BRACKET ORNAMENT]
           case '\u2771': // ❱ [HEAVY RIGHT-POINTING ANGLE BRACKET ORNAMENT]
           case '\uFF1E': // ＞ [FULLWIDTH GREATER-THAN SIGN]
-            output[outputPos++] = '>';
+            output[ops++] = '>';
             break;
           case '\u2774': // ❴ [MEDIUM LEFT CURLY BRACKET ORNAMENT]
           case '\uFF5B': // ｛ [FULLWIDTH LEFT CURLY BRACKET]
-            output[outputPos++] = '{';
+            output[ops++] = '{';
             break;
           case '\u2775': // ❵ [MEDIUM RIGHT CURLY BRACKET ORNAMENT]
           case '\uFF5D': // ｝ [FULLWIDTH RIGHT CURLY BRACKET]
-            output[outputPos++] = '}';
+            output[ops++] = '}';
             break;
           case '\u207A': // ⁺ [SUPERSCRIPT PLUS SIGN]
           case '\u208A': // ₊ [SUBSCRIPT PLUS SIGN]
           case '\uFF0B': // ＋ [FULLWIDTH PLUS SIGN]
-            output[outputPos++] = '+';
+            output[ops++] = '+';
             break;
           case '\u207C': // ⁼ [SUPERSCRIPT EQUALS SIGN]
           case '\u208C': // ₌ [SUBSCRIPT EQUALS SIGN]
           case '\uFF1D': // ＝ [FULLWIDTH EQUALS SIGN]
-            output[outputPos++] = '=';
+            output[ops++] = '=';
             break;
           case '\uFF01': // ！ [FULLWIDTH EXCLAMATION MARK]
-            output[outputPos++] = '!';
+            output[ops++] = '!';
             break;
           case '\u203C': // ‼ [DOUBLE EXCLAMATION MARK]
-            output[outputPos++] = '!';
-            output[outputPos++] = '!';
+            output[ops++] = '!';
+            output[ops++] = '!';
             break;
           case '\u2049': // ⁉ [EXCLAMATION QUESTION MARK]
-            output[outputPos++] = '!';
-            output[outputPos++] = '?';
+            output[ops++] = '!';
+            output[ops++] = '?';
             break;
           case '\uFF03': // ＃ [FULLWIDTH NUMBER SIGN]
-            output[outputPos++] = '#';
+            output[ops++] = '#';
             break;
           case '\uFF04': // ＄ [FULLWIDTH DOLLAR SIGN]
-            output[outputPos++] = '$';
+            output[ops++] = '$';
             break;
           case '\u2052': // ⁒ [COMMERCIAL MINUS SIGN]
           case '\uFF05': // ％ [FULLWIDTH PERCENT SIGN]
-            output[outputPos++] = '%';
+            output[ops++] = '%';
             break;
           case '\uFF06': // ＆ [FULLWIDTH AMPERSAND]
-            output[outputPos++] = '&';
+            output[ops++] = '&';
             break;
           case '\u204E': // ⁎ [LOW ASTERISK]
           case '\uFF0A': // ＊ [FULLWIDTH ASTERISK]
-            output[outputPos++] = '*';
+            output[ops++] = '*';
             break;
           case '\uFF0C': // ， [FULLWIDTH COMMA]
-            output[outputPos++] = ',';
+            output[ops++] = ',';
             break;
           case '\uFF0E': // ． [FULLWIDTH FULL STOP]
-            output[outputPos++] = '.';
+            output[ops++] = '.';
             break;
           case '\u2044': // ⁄ [FRACTION SLASH]
           case '\uFF0F': // ／ [FULLWIDTH SOLIDUS]
-            output[outputPos++] = '/';
+            output[ops++] = '/';
             break;
           case '\uFF1A': // ： [FULLWIDTH COLON]
-            output[outputPos++] = ':';
+            output[ops++] = ':';
             break;
           case '\u204F': // ⁏ [REVERSED SEMICOLON]
           case '\uFF1B': // ； [FULLWIDTH SEMICOLON]
-            output[outputPos++] = ';';
+            output[ops++] = ';';
             break;
           case '\uFF1F': // ？ [FULLWIDTH QUESTION MARK]
-            output[outputPos++] = '?';
+            output[ops++] = '?';
             break;
           case '\u2047': // ⁇ [DOUBLE QUESTION MARK]
-            output[outputPos++] = '?';
-            output[outputPos++] = '?';
+            output[ops++] = '?';
+            output[ops++] = '?';
             break;
           case '\u2048': // ⁈ [QUESTION EXCLAMATION MARK]
-            output[outputPos++] = '?';
-            output[outputPos++] = '!';
+            output[ops++] = '?';
+            output[ops++] = '!';
             break;
           case '\uFF20': // ＠ [FULLWIDTH COMMERCIAL AT]
-            output[outputPos++] = '@';
+            output[ops++] = '@';
             break;
           case '\uFF3C': // ＼ [FULLWIDTH REVERSE SOLIDUS]
-            output[outputPos++] = '\\';
+            output[ops++] = '\\';
             break;
           case '\u2038': // ‸ [CARET]
           case '\uFF3E': // ＾ [FULLWIDTH CIRCUMFLEX ACCENT]
-            output[outputPos++] = '^';
+            output[ops++] = '^';
             break;
           case '\uFF3F': // ＿ [FULLWIDTH LOW LINE]
-            output[outputPos++] = '_';
+            output[ops++] = '_';
             break;
           case '\u2053': // ⁓ [SWUNG DASH]
           case '\uFF5E': // ～ [FULLWIDTH TILDE]
-            output[outputPos++] = '~';
+            output[ops++] = '~';
             break;
           default:
-            output[outputPos++] = c;
+            output[ops++] = c;
             break;
         }
       }
     }
-    return outputPos;
+    return ops;
   }
 
   /**
@@ -1972,9 +1978,15 @@ public class Chars {
     if (chars == null) {
       return chars;
     }
-    char[] output = new char[chars.length()];
-    foldToAscii(chars.toCharArray(), 0, output, 0, chars.length());
-    return String.valueOf(output);
+    try {
+      char[] input = chars.toCharArray();
+      char[] output = new char[input.length * 4];
+      int length = foldToAscii(input, 0, output, 0, input.length);
+      return String.valueOf(Arrays.copyOfRange(output, 0, length));
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e, () -> String.format("Can't fold %s to ascii!", chars));
+      return chars;
+    }
   }
 
   /**
@@ -2190,4 +2202,5 @@ public class Chars {
   public static boolean isZhNumeric(final int c) {
     return isZhNumeric((char) c);
   }
+
 }

@@ -67,15 +67,16 @@ public class MessageReceiverManager {
     while (it.hasNext()) {
       Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
       try {
-        entry.getValue().awaitTermination(
-            entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
-      } catch (InterruptedException e) {
-        logger.log(Level.WARNING, e, () -> String.format("Can not terminate [%s] executor service.",
-            entry.getKey().getConnectionFactoryId()));
-        Thread.currentThread().interrupt();
-      } finally {
-        it.remove();
-      }
+          entry.getValue().shutdown();
+          entry.getValue().awaitTermination(
+              entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
+        } catch (InterruptedException e) {
+          logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
+              entry.getKey().getConnectionFactoryId()));
+          Thread.currentThread().interrupt();
+        } finally {
+          it.remove();
+        }
     }
   }
 

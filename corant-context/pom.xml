@@ -3,12 +3,20 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>corant-boms</artifactId>
+		<artifactId>corant-parent</artifactId>
 		<groupId>org.corant</groupId>
 		<version>${revision}</version>
-		<relativePath>../corant-boms</relativePath>
+		<relativePath>../corant-parent</relativePath>
 	</parent>
 	<artifactId>corant-context</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-devops-maven-jandex</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.corant</groupId>
@@ -28,16 +36,4 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>flatten-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.corant</groupId>
-        <artifactId>corant-devops-maven-jandex</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

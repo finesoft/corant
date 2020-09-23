@@ -24,8 +24,8 @@ import java.util.logging.Logger;
  *
  */
 public class Chars {
-	
-  static final Logger logger = Logger.getLogger(Chars.class.getName());	
+
+  static final Logger logger = Logger.getLogger(Chars.class.getName());
 
   /**
    * Converts alphabetic, numeric, and symbolic Unicode characters which are not in the first 127
@@ -37,7 +37,7 @@ public class Chars {
    * @param input
    * @param inputPos
    * @param output
-   * @param ops
+   * @param outputPos
    * @param length
    * @return foldToAscii
    */
@@ -2202,5 +2202,5 @@ public class Chars {
   public static boolean isZhNumeric(final int c) {
     return isZhNumeric((char) c);
   }
-  
+
 }

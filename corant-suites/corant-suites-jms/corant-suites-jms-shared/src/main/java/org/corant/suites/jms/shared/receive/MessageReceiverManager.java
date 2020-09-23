@@ -65,8 +65,8 @@ public class MessageReceiverManager {
     Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
         executorServices.entrySet().iterator();
     while (it.hasNext()) {
-      Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
-      try {
+        Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
+        try {
           entry.getValue().shutdown();
           entry.getValue().awaitTermination(
               entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
@@ -77,7 +77,7 @@ public class MessageReceiverManager {
         } finally {
           it.remove();
         }
-    }
+     }
   }
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {

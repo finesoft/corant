@@ -9,13 +9,14 @@
   <name>corant root</name>
   <description>Microservice stack with CDI MicroProfile.</description>
   <properties>
-    <revision>1.3.1.RELEASE</revision>
+    <revision>1.3.2.RELEASE</revision>
   </properties>
   <modules>
     <module>corant-boms</module>
     <module>corant-config</module>
     <module>corant-devops</module>
     <module>corant-kernel</module>
+    <module>corant-parent</module>
     <module>corant-shared</module>
     <module>corant-suites</module>
     <module>corant-context</module>

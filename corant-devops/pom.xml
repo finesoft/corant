@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>corant-boms</artifactId>
+    <artifactId>corant-parent</artifactId>
     <groupId>org.corant</groupId>
     <version>${revision}</version>
-    <relativePath>../corant-boms</relativePath>
+    <relativePath>../corant-parent</relativePath>
   </parent>
   <artifactId>corant-devops</artifactId>
   <packaging>pom</packaging>

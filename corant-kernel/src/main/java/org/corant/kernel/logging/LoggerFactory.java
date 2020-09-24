@@ -14,6 +14,7 @@
 package org.corant.kernel.logging;
 
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Objects.tryNewInstance;
 import java.lang.reflect.Method;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
@@ -44,7 +45,7 @@ public class LoggerFactory {
         Method method = Methods.getMatchingMethod(loggerCfgCls, "initialize",
             tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
         method.invoke(null,
-            tryAsClass("org.apache.logging.log4j.core.config.NullConfiguration").newInstance());
+            tryNewInstance("org.apache.logging.log4j.core.config.NullConfiguration"));
       }
     } catch (Exception ignore) {
       // Noop

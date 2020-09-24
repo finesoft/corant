@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -73,7 +75,10 @@ public class ContextualMethodHandler {
         if (methodPredicate.test(m)) {
           if (!Modifier.isPublic(m.getModifiers())
               || !Modifier.isPublic(m.getDeclaringClass().getModifiers())) {
-            m.setAccessible(true);
+            AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
+              m.setAccessible(true);
+              return null;
+            });
           }
           annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
         }

@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.jms.ConnectionFactory;
-import org.corant.config.ConfigUtils;
+import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
@@ -65,11 +65,12 @@ public class MessageReceiverMetaData {
     this.method = method;
     final MessageReceive ann = method.getMethod().getAnnotation(MessageReceive.class);
     acknowledge = ann.acknowledge();
-    clientID = ann.clientId();
-    connectionFactoryId = defaultTrim(ann.connectionFactoryId());
-    destination = destinationName;
+    clientID = Configs.assemblyStringConfigProperty(ann.clientId());
+    connectionFactoryId =
+        defaultTrim(Configs.assemblyStringConfigProperty(ann.connectionFactoryId()));
+    destination = Configs.assemblyStringConfigProperty(destinationName);
     multicast = ann.multicast();
-    selector = ann.selector();
+    selector = Configs.assemblyStringConfigProperty(ann.selector());
     subscriptionDurable = ann.subscriptionDurable();
     type = defaultObject(ann.type(), String.class);
     cacheLevel = ann.cacheLevel();
@@ -78,22 +79,24 @@ public class MessageReceiverMetaData {
     failureThreshold = max(4, ann.failureThreshold());
     tryThreshold = max(2, ann.tryThreshold());
     loopIntervalMs = max(500L, ann.loopIntervalMs());
-    Duration breakedDuration = max(isBlank(ann.breakedDuration()) ? Duration.ofMinutes(15)
-        : Duration.parse(ann.breakedDuration()), Duration.ofSeconds(8L));
+    String bds = Configs.assemblyStringConfigProperty(ann.breakedDuration());
+    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBreakedDuration());
+    Duration breakedDuration =
+        max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(8L));
     if (ann.breakedBackoffAlgo() == BackoffAlgorithm.NONE) {
       breakedInterval = RetryInterval.noBackoff(breakedDuration);
     } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO) {
-      breakedInterval = RetryInterval.expoBackoff(breakedDuration,
-          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+      breakedInterval = RetryInterval.expoBackoff(breakedDuration, Duration.parse(maxBds),
+          ann.breakedBackoffFactor());
     } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
-      breakedInterval = RetryInterval.expoBackoffDecorr(breakedDuration,
-          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+      breakedInterval = RetryInterval.expoBackoffDecorr(breakedDuration, Duration.parse(maxBds),
+          ann.breakedBackoffFactor());
     } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
       breakedInterval = RetryInterval.expoBackoffEqualJitter(breakedDuration,
-          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+          Duration.parse(maxBds), ann.breakedBackoffFactor());
     } else {
-      breakedInterval = RetryInterval.expoBackoffFullJitter(breakedDuration,
-          Duration.parse(ann.maxBreakedDuration()), ann.breakedBackoffFactor());
+      breakedInterval = RetryInterval.expoBackoffFullJitter(breakedDuration, Duration.parse(maxBds),
+          ann.breakedBackoffFactor());
     }
     xa = ann.xa();
   }
@@ -104,7 +107,7 @@ public class MessageReceiverMetaData {
     shouldBeTrue(isNoneBlank(ann.destinations()));
     Set<String> dests = new LinkedHashSet<>();
     for (String dest : ann.destinations()) {
-      dests.addAll(ConfigUtils.assemblyStringConfigProperties(dest));
+      dests.addAll(Configs.assemblyStringConfigProperties(dest));
     }
     Set<MessageReceiverMetaData> beans = new LinkedHashSet<>(dests.size());
     dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),

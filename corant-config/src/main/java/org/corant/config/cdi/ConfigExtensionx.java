@@ -63,27 +63,7 @@ public class ConfigExtensionx implements Extension {
   static final Logger logger = Logger.getLogger(ConfigExtensionx.class.getName());
   static final Set<TypesAndQualifier> beanDefinitions = new HashSet<>();
 
-  private static Annotation resolveInjectQualifier(InjectionPoint ip) {
-    String className = ip.getMember().getDeclaringClass().getName().concat(".");
-    Annotated annotated = ip.getAnnotated();
-    if (annotated instanceof AnnotatedField) {
-      return NamedLiteral
-          .of(className.concat(((AnnotatedField<?>) annotated).getJavaMember().getName()));
-    }
-    if (annotated instanceof AnnotatedParameter) {
-      AnnotatedParameter<?> ap = (AnnotatedParameter<?>) annotated;
-      Member member = ip.getMember();
-      if (member instanceof Method) {
-        return NamedLiteral.of(className.concat(member.getName() + "_" + ap.getPosition()));
-      }
-      if (member instanceof Constructor) {
-        return NamedLiteral.of(className.concat("new_" + ap.getPosition()));
-      }
-    }
-    return NamedLiteral.of(className.concat(ip.getMember().getName()));
-  }
-
-  private static Set<Type> resolveInjectTypes(Type injectType) {
+  static Set<Type> resolveInjectTypes(Type injectType) {
     final HashSet<Type> resolvedTypes = new HashSet<>();
     Type type = injectType;
     if (type instanceof ParameterizedType) {
@@ -105,6 +85,26 @@ public class ConfigExtensionx implements Extension {
       resolvedTypes.add(array.getClass());
     }
     return resolvedTypes;
+  }
+
+  private static Annotation resolveInjectQualifier(InjectionPoint ip) {
+    String className = ip.getMember().getDeclaringClass().getName().concat(".");
+    Annotated annotated = ip.getAnnotated();
+    if (annotated instanceof AnnotatedField) {
+      return NamedLiteral
+          .of(className.concat(((AnnotatedField<?>) annotated).getJavaMember().getName()));
+    }
+    if (annotated instanceof AnnotatedParameter) {
+      AnnotatedParameter<?> ap = (AnnotatedParameter<?>) annotated;
+      Member member = ip.getMember();
+      if (member instanceof Method) {
+        return NamedLiteral.of(className.concat(member.getName() + "_" + ap.getPosition()));
+      }
+      if (member instanceof Constructor) {
+        return NamedLiteral.of(className.concat("new_" + ap.getPosition()));
+      }
+    }
+    return NamedLiteral.of(className.concat(ip.getMember().getName()));
   }
 
   void onAfterBeanDisconvery(@Observes AfterBeanDiscovery event, BeanManager beanManager) {

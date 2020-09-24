@@ -66,7 +66,7 @@ public class PropertiesConfigSource extends CorantConfigSource {
   }
 
   public static Properties getProperties(URL url) {
-    try (InputStream is = url.openStream()) {
+    try (InputStream is = shouldNotNull(url).openStream()) {
       return load(is);
     } catch (IOException e) {
       throw new CorantRuntimeException(e,

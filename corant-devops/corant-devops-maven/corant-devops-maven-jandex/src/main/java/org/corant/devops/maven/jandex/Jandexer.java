@@ -64,7 +64,7 @@ public class Jandexer extends AbstractMojo {
           getLog().debug("(corant) indexing file " + file);
           indexer.index(fis);
         } catch (IOException e) {
-          getLog().error(e.getMessage());
+          getLog().error(e);
         }
       }
     }
@@ -74,8 +74,8 @@ public class Jandexer extends AbstractMojo {
     try (FileOutputStream indexOut = new FileOutputStream(idxFile)) {
       IndexWriter writer = new IndexWriter(indexOut);
       writer.write(indexer.complete());
-    } catch (Exception e) {
-      getLog().warn(e.getMessage(), e);
+    } catch (IOException e) {
+      getLog().warn(e);
     }
   }
 

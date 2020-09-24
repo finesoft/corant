@@ -144,7 +144,8 @@ public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
     Map<String, String> dataSourceConfigs = resolveConfig(tokenizer.nextToken());
     try {
       driverClass = Class.forName(dataSourceConfigs.remove("ClassName"));
-      dataSource = (DataSource) driverClass.newInstance();
+      // dataSource = (DataSource) driverClass.newInstance();// JDK8
+      dataSource = (DataSource) driverClass.getDeclaredConstructor().newInstance();// JDK9+
       Iterator<String> iterator = dataSourceConfigs.keySet().iterator();
       while (iterator.hasNext()) {
         String key = iterator.next();

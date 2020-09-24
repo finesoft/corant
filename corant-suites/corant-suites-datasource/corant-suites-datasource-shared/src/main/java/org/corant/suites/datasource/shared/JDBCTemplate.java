@@ -22,6 +22,7 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
+import java.lang.ref.Cleaner;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -814,7 +815,8 @@ public class JDBCTemplate {
         g = new Gadget(conn, stmt, rs, closeConn);
         Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
         // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
-        sun.misc.Cleaner.create(s, g);
+        // sun.misc.Cleaner.create(s, g);//JDK8
+        Cleaner.create().register(s, g);// JDK9+
         return s;
       } catch (Exception e) {
         if (g != null) {

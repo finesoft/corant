@@ -19,6 +19,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -101,7 +102,7 @@ public class Conversions {
    * @see NumberBigDecimalConverter
    */
   public static BigDecimal toBigDecimal(Object obj, BigDecimal altVal, int scale,
-      int roundingMode) {
+      RoundingMode roundingMode) {
     BigDecimal d = defaultObject(Conversion.convert(obj, BigDecimal.class), altVal);
     return d == null ? null : d.setScale(scale, roundingMode);
   }
@@ -116,7 +117,7 @@ public class Conversions {
    */
   public static BigDecimal toBigDecimal(Object obj, int scale) {
     BigDecimal d = toBigDecimal(obj, null);
-    return d == null ? null : d.setScale(scale, BigDecimal.ROUND_HALF_UP);
+    return d == null ? null : d.setScale(scale, RoundingMode.HALF_UP);
   }
 
   /**

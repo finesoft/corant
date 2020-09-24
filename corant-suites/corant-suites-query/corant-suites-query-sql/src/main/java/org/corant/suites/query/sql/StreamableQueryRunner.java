@@ -16,6 +16,7 @@ package org.corant.suites.query.sql;
 import static org.corant.shared.util.Functions.emptyConsumer;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.max;
+import java.lang.ref.Cleaner;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -203,7 +204,8 @@ public class StreamableQueryRunner extends QueryRunner {
       g = new Gadget(conn, stmt, rs, closeConn);
       Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
       // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
-      sun.misc.Cleaner.create(s, g);
+      // sun.misc.Cleaner.create(s, g);//JDK8
+      Cleaner.create().register(s, g);// JDK9+
       return s;
     } catch (Exception e) {
       if (g != null) {

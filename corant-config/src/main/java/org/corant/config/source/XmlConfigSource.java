@@ -39,6 +39,17 @@ public class XmlConfigSource extends CorantConfigSource {
 
   final Map<String, String> properties;
 
+  XmlConfigSource(String name, int ordinal, InputStream is) {
+    Properties props = new Properties();
+    try {
+      props.loadFromXML(is);
+      props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));
+      properties = Collections.unmodifiableMap(toMap(props));
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   XmlConfigSource(URL resourceUrl, int ordinal) {
     super(shouldNotNull(resourceUrl).toExternalForm(), ordinal);
     Properties props = new Properties();

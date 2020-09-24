@@ -354,12 +354,12 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public boolean remove_state(Uid objUid, String typeName, int stateType)
       throws ObjectStoreException {
-    // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
-      typeName = typeName.substring(1);
-    }
     boolean result = false;
     if (typeName != null) {
+      // Taken this requirement from ObjStoreBrowser
+      if (typeName.startsWith("/")) {
+        typeName = typeName.substring(1);
+      }
       if (stateType == StateStatus.OS_COMMITTED || stateType == StateStatus.OS_UNCOMMITTED) {
         Connection connection = null;
         PreparedStatement pstmt = null;

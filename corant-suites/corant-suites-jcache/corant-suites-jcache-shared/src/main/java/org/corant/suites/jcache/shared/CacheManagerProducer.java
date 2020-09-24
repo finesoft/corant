@@ -1,15 +1,15 @@
 package org.corant.suites.jcache.shared;
 
-import org.corant.context.SURI;
-
+import java.lang.annotation.Annotation;
+import java.net.URI;
 import javax.cache.CacheManager;
 import javax.cache.spi.CachingProvider;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.net.URI;
+import org.corant.config.Configs;
+import org.corant.context.SURI;
 
 /**
  * corant <br>
@@ -20,7 +20,8 @@ import java.net.URI;
 @ApplicationScoped
 public class CacheManagerProducer {
 
-  @Inject CachingProvider cachingProvider;
+  @Inject
+  CachingProvider cachingProvider;
 
   @Produces
   @SURI
@@ -33,9 +34,9 @@ public class CacheManagerProducer {
       }
     }
     if (suri != null) {
-      cacheManager =
-          cachingProvider.getCacheManager(
-              URI.create(suri.value()), CacheManagerProducer.class.getClassLoader());
+      cacheManager = cachingProvider.getCacheManager(
+          URI.create(Configs.assemblyStringConfigProperty(suri.value())),
+          CacheManagerProducer.class.getClassLoader());
     } else {
       cacheManager = cachingProvider.getCacheManager();
     }

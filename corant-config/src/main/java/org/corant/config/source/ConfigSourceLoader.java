@@ -84,7 +84,7 @@ public class ConfigSourceLoader {
         } else if (location.endsWith(".json")) {
           return Optional.of(new JsonConfigSource(null, ordinal));
         } else if (location.endsWith(".xml")) {
-          return Optional.of(new XmlConfigSource(null, ordinal));
+          return Optional.of(new XmlConfigSource(location, ordinal, is));
         }
       } catch (IOException e) {
         throw new CorantRuntimeException(e);

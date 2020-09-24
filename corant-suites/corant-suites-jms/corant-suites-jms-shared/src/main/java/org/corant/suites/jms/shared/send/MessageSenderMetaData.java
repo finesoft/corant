@@ -14,7 +14,7 @@
 package org.corant.suites.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import org.corant.config.ConfigUtils;
+import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.jms.shared.annotation.MessageSend;
 import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
@@ -38,9 +38,8 @@ public class MessageSenderMetaData {
   private final SerializationSchema serialization;
 
   public MessageSenderMetaData(MessageSend annotation) {
-    this(shouldNotNull(annotation).connectionFactoryId(),
-        ConfigUtils.assemblyStringConfigProperty(annotation.destination()), annotation.multicast(),
-        annotation.sessionMode(), annotation.serialization());
+    this(shouldNotNull(annotation).connectionFactoryId(), annotation.destination(),
+        annotation.multicast(), annotation.sessionMode(), annotation.serialization());
   }
 
   /**
@@ -53,8 +52,8 @@ public class MessageSenderMetaData {
   public MessageSenderMetaData(String connectionFactoryId, String destination, boolean multicast,
       int sessionMode, SerializationSchema serialization) {
     super();
-    this.connectionFactoryId = connectionFactoryId;
-    this.destination = destination;
+    this.connectionFactoryId = Configs.assemblyStringConfigProperty(connectionFactoryId);
+    this.destination = Configs.assemblyStringConfigProperty(destination);
     this.multicast = multicast;
     this.sessionMode = sessionMode;
     this.serialization = serialization;

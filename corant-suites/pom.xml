@@ -54,6 +54,7 @@
     <module>corant-suites-dsa</module>
     <module>corant-suites-jcache</module>
     <module>corant-suites-cloud</module>
+    <module>corant-suites-quartz</module>
   </modules>
   <description>The Corant integration suite, which contains various components involved in enterprise development.</description>
 </project>

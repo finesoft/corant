@@ -13,7 +13,6 @@
  */
 package org.corant.suites.microprofile.restclient;
 
-import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -31,8 +30,6 @@ public class MpClientHeadersFactory implements ClientHeadersFactory {
 
   static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
       new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());// static?
-
-  protected Logger logger = Logger.getLogger(this.getClass().toString());
 
   @Override
   public MultivaluedMap<String, String> update(MultivaluedMap<String, String> incomingHeaders,

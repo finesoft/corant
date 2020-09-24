@@ -69,6 +69,10 @@ public class DeclarativeConfigResolver {
     return map.isEmpty() ? null : map.values().iterator().next();
   }
 
+  static Class<?> getFieldActualTypeArguments(Field field, int index) {
+    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
+  }
+
   static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
     ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
     if (ckr != null && isNotBlank(ckr.value())) {
@@ -90,7 +94,8 @@ public class DeclarativeConfigResolver {
     Map<String, T> configMaps = new HashMap<>();
     if (isNotEmpty(keys)) {
       for (String key : keys) {
-        T configObject = configClass.getClazz().newInstance();
+        // T configObject = configClass.getClazz().newInstance();// JDK8
+        T configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
         for (ConfigField cf : configClass.getFields()) {
           cf.getPattern().resolve(config, key, configObject, cf);
         }
@@ -129,10 +134,6 @@ public class DeclarativeConfigResolver {
           configClass.getKeyIndex()).keySet());
     }
     return keys;
-  }
-
-  static Class<?> getFieldActualTypeArguments(Field field, int index) {
-    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
   }
 
 }

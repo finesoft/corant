@@ -11,23 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.util;
-
 /**
- * corant-shared
- *
- * @author bingo 下午2:55:59
+ * corant-suites-quartz
+ * 
+ * @author bingo 上午10:19:40
  *
  */
-public class Threads {
-
-  public static void tryThreadSleep(Long ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      // Noop! just try...
-    }
-  }
-
-}
+package org.corant.suites.quartz;

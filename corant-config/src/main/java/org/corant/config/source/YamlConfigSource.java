@@ -19,6 +19,7 @@ import static org.corant.shared.util.Maps.flatStringMap;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,10 +45,12 @@ public class YamlConfigSource extends CorantConfigSource {
     if (yamlCls != null) {
       this.ordinal = ordinal;
       try {
-        Yaml yaml = forceCast(yamlCls.newInstance());
+        // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
+        Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
         properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
         name = null;
-      } catch (InstantiationException | IllegalAccessException e) {
+      } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+          | InvocationTargetException | NoSuchMethodException | SecurityException e) {
         throw new CorantRuntimeException(e);
       }
     } else {
@@ -68,10 +71,13 @@ public class YamlConfigSource extends CorantConfigSource {
     if (yamlCls != null) {
       this.ordinal = ordinal;
       try (InputStream in = resourceUrl.openStream()) {
-        Yaml yaml = forceCast(yamlCls.newInstance());
+        // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
+        Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
         properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
         name = shouldNotNull(resourceUrl).toExternalForm();
-      } catch (IOException | InstantiationException | IllegalAccessException e) {
+      } catch (IOException | InstantiationException | IllegalAccessException
+          | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+          | SecurityException e) {
         throw new CorantRuntimeException(e);
       }
     } else {

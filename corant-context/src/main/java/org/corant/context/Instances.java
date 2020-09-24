@@ -13,7 +13,7 @@
  */
 package org.corant.context;
 
-import static org.corant.context.Qualifiers.resolveNameds;
+import static org.corant.context.Qualifiers.resolveNamedQualifiers;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
@@ -73,7 +73,7 @@ public class Instances {
     String useName = defaultTrim(name);
     if (isBlank(useName) && inst.isResolvable()) {
       return Optional.of(inst.get());
-    } else if ((inst = inst.select(resolveNameds(useName))).isResolvable()) {
+    } else if ((inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
       return Optional.of(inst.get());
     } else {
       return Optional.empty();

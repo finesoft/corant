@@ -39,7 +39,7 @@ public class Qualifiers {
   public static final Map<String, Annotation[]> resolveNameds(Set<String> names) {
     Map<String, Annotation[]> nameds = new HashMap<>();
     if (isNotEmpty(names)) {
-      Set<String> tNames = names.stream().map(Strings::defaultTrim).collect(Collectors.toSet());
+      Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = defaultTrim(tNames.iterator().next());
         if (isBlank(name)) {
@@ -50,14 +50,19 @@ public class Qualifiers {
         }
       } else {
         for (String name : tNames) {
-          nameds.put(name, resolveNameds(name));
+          nameds.put(name, resolveNamedQualifiers(name));
         }
       }
     }
     return nameds;
   }
 
-  static final Annotation[] resolveNameds(String name) {
+  static final String resolveName(String named) {
+    // XXX Is it possible to use configuration?
+    return Strings.defaultTrim(named);
+  }
+
+  static final Annotation[] resolveNamedQualifiers(String name) {
     return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
         : new Annotation[] {NamedLiteral.of(trim(name)), Any.Literal.INSTANCE,
             Default.Literal.INSTANCE};

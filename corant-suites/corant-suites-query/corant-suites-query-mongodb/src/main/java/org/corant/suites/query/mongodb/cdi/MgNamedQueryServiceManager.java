@@ -30,6 +30,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.bson.Document;
+import org.corant.config.Configs;
 import org.corant.suites.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.suites.query.mongodb.Decimal128Utils;
 import org.corant.suites.query.mongodb.MgNamedQuerier;
@@ -115,9 +116,9 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected String resolveQualifier(Object qualifier) {
     if (qualifier instanceof MgQuery) {
-      return ((MgQuery) qualifier).value();
+      return Configs.assemblyStringConfigProperty(((MgQuery) qualifier).value());
     } else {
-      return asDefaultString(qualifier);
+      return Configs.assemblyStringConfigProperty(asDefaultString(qualifier));
     }
   }
 

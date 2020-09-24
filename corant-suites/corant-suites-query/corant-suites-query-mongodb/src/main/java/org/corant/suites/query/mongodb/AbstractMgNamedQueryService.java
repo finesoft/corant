@@ -21,6 +21,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -385,11 +386,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         return Forwarding.of(querier.resolveResult(list), it.hasNext());
       }
     }).onClose(cursor::close);
-    sun.misc.Cleaner.create(stream, () -> {
+    // sun.misc.Cleaner.create(stream, () -> {if (cursor != null) {cursor.close();}});//JDK8
+    Cleaner.create().register(stream, () -> {
       if (cursor != null) {
         cursor.close();
       }
-    });
+    });// JDK9+
     return stream;
   }
 }

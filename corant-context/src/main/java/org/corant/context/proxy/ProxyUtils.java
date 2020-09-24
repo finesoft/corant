@@ -14,7 +14,9 @@
 package org.corant.context.proxy;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,12 +28,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-context
@@ -40,6 +44,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 public class ProxyUtils {
+
+  static final Map<Method, MethodHandle> defaultMethodHandleCache = new ConcurrentHashMap<>();
 
   public static List<Annotation> getInterceptorBindings(Annotation[] annotations,
       BeanManager beanManager) {
@@ -97,12 +103,25 @@ public class ProxyUtils {
    */
   public static Object invokeDefaultMethod(Object o, Method method, Object[] args) {
     try {
-      Class<?> declaringClass = method.getDeclaringClass();
-      Constructor<MethodHandles.Lookup> constructor =
-          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-      constructor.setAccessible(true);
-      return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
-          .unreflectSpecial(method, declaringClass).bindTo(o).invokeWithArguments(args);
+      return defaultMethodHandleCache.computeIfAbsent(method, m -> {
+        try {
+          if (Classes.CLASS_VERSION <= 52) {
+            Class<?> declaringClass = method.getDeclaringClass();
+            Constructor<MethodHandles.Lookup> constructor =
+                MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
+                .in(declaringClass).unreflectSpecial(method, declaringClass);
+          } else {
+            MethodType methodType =
+                MethodType.methodType(method.getReturnType(), method.getParameterTypes());
+            return MethodHandles.lookup().findSpecial(method.getDeclaringClass(), method.getName(),
+                methodType, method.getDeclaringClass());
+          }
+        } catch (Throwable e) {
+          throw new CorantRuntimeException(e);
+        }
+      }).bindTo(o).invokeWithArguments(args);
     } catch (Throwable e) {
       throw new CorantRuntimeException(e);
     }

@@ -11,37 +11,37 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.ddd.annotation.qualifier;
+package org.corant.suites.quartz;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 
 /**
- * corant-suites-ddd
+ * corant-suites-quartz
  *
- * Mark the use of local resources,no XA
+ * @author bingo 上午10:19:58
  *
- * @author bingo 下午9:05:13
  */
-@Documented
+@Target({TYPE})
 @Retention(RUNTIME)
-@Target({TYPE, FIELD, METHOD, PARAMETER})
-@Qualifier
-public @interface JTARL {
+@Documented
+public @interface Scheduled {
 
-  public static final JTARLLiteral INSTANCE = new JTARLLiteral();
+  String cronExpression();
 
-  public static class JTARLLiteral extends AnnotationLiteral<JTARL> implements JTARL {
+  String description() default "";
 
-    private static final long serialVersionUID = -7148921525412293651L;
+  Class<?> group() default Scheduled.class;
 
-  }
+  boolean onStartup() default true;
+
+  boolean overrideOnStartup() default false;
+
+  Class<? extends Annotation>[] startScopes() default {SessionScoped.class, RequestScoped.class};
 }

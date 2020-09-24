@@ -48,6 +48,16 @@ public class ContextualInvocationHandler extends ProxyInvocationHandler {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    return super.equals(obj);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
   public Object invoke(Object o, Method method, Object[] args) throws Throwable {
     List<InterceptorInvocation> interceptorInvocations = interceptorChains.get(method);
     if (isNotEmpty(interceptorInvocations)) {

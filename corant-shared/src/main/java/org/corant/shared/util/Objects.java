@@ -13,7 +13,9 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Streams.streamOf;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
@@ -219,8 +221,10 @@ public class Objects {
 
   public static <T> T newInstance(Class<T> cls) {
     try {
-      return cls != null ? cls.newInstance() : null;
-    } catch (InstantiationException | IllegalAccessException e) {
+      // return cls != null ? cls.newInstance() : null;// JDK8
+      return cls != null ? cls.getDeclaredConstructor().newInstance() : null;
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -231,6 +235,15 @@ public class Objects {
 
   public static <T> T tryCast(Object o, Class<T> cls) {
     return o != null && cls.isInstance(o) ? cls.cast(o) : null;
+  }
+
+  public static <T> T tryNewInstance(String className) {
+    try {
+      return forceCast(newInstance(tryAsClass(className)));
+    } catch (Exception e) {
+      // Noop!
+    }
+    return null;
   }
 
 }

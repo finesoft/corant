@@ -31,7 +31,7 @@ import javax.jms.JMSSessionMode;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
-import org.corant.config.ConfigUtils;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.context.JMSContextProducer;
@@ -132,15 +132,15 @@ public interface MessageDispatcher {
 
     public MessageDispatcherImpl(JMSDestinationDefinition dann, JMSSessionMode sann) {
       multicast = Queue.class.isAssignableFrom(tryAsClass(dann.description()));
-      destination = shouldNotNull(dann.destinationName());
-      connectionFactoryId = shouldNotNull(dann.name());
+      destination = shouldNotNull(Configs.assemblyStringConfigProperty(dann.destinationName()));
+      connectionFactoryId = shouldNotNull(Configs.assemblyStringConfigProperty(dann.name()));
       sessionMode = sann == null ? Session.AUTO_ACKNOWLEDGE : sann.value();
     }
 
     public MessageDispatcherImpl(MessageDispatch mpl) {
       multicast = mpl.multicast();
-      destination = shouldNotNull(ConfigUtils.assemblyStringConfigProperty(mpl.destination()));
-      connectionFactoryId = mpl.connectionFactoryId();
+      destination = shouldNotNull(Configs.assemblyStringConfigProperty(mpl.destination()));
+      connectionFactoryId = Configs.assemblyStringConfigProperty(mpl.connectionFactoryId());
       sessionMode = mpl.sessionMode();
     }
 

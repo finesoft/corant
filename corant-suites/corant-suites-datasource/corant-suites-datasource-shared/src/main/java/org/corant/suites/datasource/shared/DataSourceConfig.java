@@ -20,8 +20,8 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.context.Unnamed;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.Unnamed;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
@@ -186,6 +186,12 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   protected boolean bindToJndi = false;
 
   /**
+   * Whether enable this data source config
+   */
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean enable = true;
+
+  /**
    *
    * @return the acquisitionTimeout
    */
@@ -347,7 +353,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   @Override
   public boolean isValid() {
-    return driver != null;
+    return driver != null && enable;
   }
 
   /**

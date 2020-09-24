@@ -5,25 +5,31 @@
 
 Microservice stack with CDI MicroProfile.
 
-Corant is a microservice development stack. Use Maven for builds, base on JDK 8 or above, use CDI as container.
+Corant is a microservice development stack. Use Maven for builds, base on JDK 11 or above
+(JDK 8 will no longer be supported, only supported for versions before 1.3), use CDI as container.
 The following projects are under the corant project.
 
 # 1. corant-boms 
     Maven dependence descriptions that are used in corant.
-# 2. corant-devops 
+# 2. corant-parent
+    Maven build descriptions
+# 3. corant-devops 
     Corant build and testing project. include maven build plugins and framework testing.
-# 3. corant-shared 
+# 4. corant-shared 
     The global shared project, contains utility classes for resource handling, 
     string handling, reflection, object conversion, assertion, etc. Most projects rely on this.    
-# 4. corant-config 
+# 5. corant-config 
     The application configuration processing that implemented the microprofile-config specification.
-# 5. corant-kernel 
-    Initialize the application and the container, provide related operations such as boot/startup/shutdown, and related pre-processing and post-processing.
-# 6. corant-context 
+# 6. corant-kernel 
+    Initialize the application and the container, 
+    provide related operations such as boot/startup/shutdown, and related pre-processing and post-processing.
+# 7. corant-context 
    Container and context processing module, providing some convenient context processing classes.   
-# 7. corant-suites 
+# 8. corant-suites 
     Integration project. This project includes many subprojects that integrate JEE or other open source components
-    to make integration and development easier. Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc., 
-    supported components or  frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc., and also provide some common development practices such as DDD, Dynamic SQL/NoSQL query framework, etc.
+    to make integration and development easier. 
+    Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc., 
+    supported components or frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc., 
+    and also provide some common development practices such as DDD, Dynamic SQL/NoSQL query framework, etc.
 
 

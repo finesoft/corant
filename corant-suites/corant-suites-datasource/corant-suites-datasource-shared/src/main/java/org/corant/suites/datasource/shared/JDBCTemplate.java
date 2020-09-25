@@ -798,7 +798,6 @@ public class JDBCTemplate {
       }
     }
 
-    @SuppressWarnings("restriction")
     <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
         ResultSetHandler<T> rsh, Object... params) throws SQLException {
       preCondition(conn, closeConn, sql);

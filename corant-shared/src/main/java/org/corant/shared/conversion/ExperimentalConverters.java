@@ -161,6 +161,7 @@ public class ExperimentalConverters {
   public static class ConverterPipe {
 
     private final Set<ConverterType<?, ?>> stack = new LinkedHashSet<>();
+
     private final List<Converter<?, ?>> converters = new LinkedList<>();
 
     private boolean match = false;
@@ -328,7 +329,6 @@ public class ExperimentalConverters {
       }
     }
 
-    @SuppressWarnings("rawtypes")
     static Stack<Converter> transformConverterStack(Stack<Class<?>> stack) {
       Stack<Converter> converters = new Stack<>();
       for (int i = 1; i <= stack.size() - 1; i++) {

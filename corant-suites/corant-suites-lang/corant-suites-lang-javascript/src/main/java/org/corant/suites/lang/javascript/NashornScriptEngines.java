@@ -42,7 +42,7 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 @SuppressWarnings({"removal"})
 public class NashornScriptEngines {
 
-  @SuppressWarnings({"removal", "deprecation"})
+  @SuppressWarnings("deprecation")
   public static final NashornScriptEngineFactory NASHORN_ENGINE_FACTORY =
       new NashornScriptEngineFactory();
 

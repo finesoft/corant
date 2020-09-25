@@ -176,7 +176,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     }
   }
 
-  @SuppressWarnings({"unchecked", "restriction"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
     JpqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);

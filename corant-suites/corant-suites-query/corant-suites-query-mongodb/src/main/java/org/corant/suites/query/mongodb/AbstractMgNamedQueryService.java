@@ -337,7 +337,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return Optional.empty();
   }
 
-  @SuppressWarnings("restriction")
   @Override
   protected <T> Stream<T> stream(String queryName, StreamQueryParameter parameter) {
     if (parameter.getEnhancer() != null) {

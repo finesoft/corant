@@ -18,6 +18,7 @@ import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.tryCast;
 import static org.corant.shared.util.Primitives.wrap;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -105,7 +106,7 @@ public class Conversion {
     if (value == null) {
       return null;
     }
-    return () -> new Iterator<T>() {
+    return () -> new Iterator<>() {
       Iterator<?> it = value.iterator();
       Converter converter = null;
       Class<?> sourceClass = null;
@@ -160,8 +161,9 @@ public class Conversion {
       Class<T> targetClass, Map<String, ?> hints) {
     return convert(value, targetClass, () -> {
       try {
-        return collectionClass.newInstance();
-      } catch (InstantiationException | IllegalAccessException e) {
+        return collectionClass.getDeclaredConstructor().newInstance();
+      } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+          | InvocationTargetException | NoSuchMethodException | SecurityException e) {
         throw new NotSupportedException();
       }
     }, hints);

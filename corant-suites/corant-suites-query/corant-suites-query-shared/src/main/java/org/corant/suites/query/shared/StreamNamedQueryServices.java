@@ -94,6 +94,10 @@ public class StreamNamedQueryServices {
     return Streams.batchStream(parameter.getLimit(), stream());
   }
 
+  public <T> Stream<List<T>> batchAs(Class<T> cls) {
+    return Streams.batchStream(parameter.getLimit(), streamAs(cls));
+  }
+
   public StreamNamedQueryServices context(Map<String, Object> context) {
     parameter.context(context);
     return this;
@@ -165,6 +169,11 @@ public class StreamNamedQueryServices {
       return namedQueryService.stream(queryName, parameter);
     }
     return resolve(NamedQueryService.class, qualifier).stream(queryName, parameter);
+  }
+
+  public <T> Stream<T> streamAs(Class<T> cls) {
+    final QueryObjectMapper objectMapper = resolve(QueryObjectMapper.class);
+    return stream().map(x -> objectMapper.toObject(x, cls));
   }
 
   public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminater) {

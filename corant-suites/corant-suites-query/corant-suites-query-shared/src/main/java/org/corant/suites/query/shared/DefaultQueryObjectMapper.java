@@ -13,12 +13,12 @@
  */
 package org.corant.suites.query.shared;
 
+import javax.enterprise.context.ApplicationScoped;
+import org.corant.suites.json.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import javax.enterprise.context.ApplicationScoped;
-import org.corant.suites.json.JsonUtils;
 
 /**
  * corant-suites-query-shared
@@ -28,7 +28,7 @@ import org.corant.suites.json.JsonUtils;
 @ApplicationScoped
 public class DefaultQueryObjectMapper implements QueryObjectMapper {
 
-  protected ObjectMapper OM =  JsonUtils.copyMapper();
+  protected ObjectMapper OM = JsonUtils.copyMapper();
 
   @Override
   public String toJsonString(Object object, boolean escape, boolean pretty) {
@@ -46,8 +46,17 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T> T toObject(Object from, Class<T> type) {
-    return from == null ? null : OM.convertValue(from, type);
+    if (from == null) {
+      return null;
+    } else {
+      if (type.isInstance(from)) {
+        return (T) from;
+      } else {
+        return OM.convertValue(from, type);
+      }
+    }
   }
 }

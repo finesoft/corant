@@ -153,6 +153,17 @@ public interface QueryService<Q, P> {
   /**
    * Query stream results, use for mass data query.
    *
+   * <p>
+   * NOTE: In order to release related resources, please remember to close after using the stream.
+   *
+   * <pre>
+   * Example: try(Stream stream = QueryService.stream(q,p)){
+   *    stream.forEach(row->{
+   *        //do somthing
+   *    })
+   * }
+   * </pre>
+   *
    * @param <T>
    * @param q
    * @param p

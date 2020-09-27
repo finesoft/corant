@@ -345,10 +345,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
+    final Forwarding<T> buffer = Forwarding.inst();
     Stream<T> stream = streamOf(new Iterator<T>() {
-      final Forwarding<T> buffer = doForward(cursor);
       int counter = 1;
       T next = null;
+      {
+        buffer.with(doForward(cursor));
+      }
 
       @Override
       public boolean hasNext() {
@@ -386,7 +389,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
     }).onClose(cursor::close);
     // sun.misc.Cleaner.create(stream, () -> {if (cursor != null) {cursor.close();}});//JDK8
-    Cleaner.create().register(stream, () -> {
+    Cleaner.create().register(buffer, () -> {
       if (cursor != null) {
         cursor.close();
       }

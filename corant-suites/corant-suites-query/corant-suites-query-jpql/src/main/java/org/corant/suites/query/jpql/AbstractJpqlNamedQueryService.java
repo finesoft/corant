@@ -18,7 +18,6 @@ import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.suites.query.jpql.JpqlHelper.getCountJpql;
-import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -188,9 +187,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     final EntityManager em = getEntityManager(); // FIXME close
     Stream<T> stream =
         createQuery(em, ql, properties, resultClass, scriptParameter).getResultStream();
-    // sun.misc.Cleaner.create(stream, em::close);//JDK8
-    Cleaner.create().register(stream, em::close);// JDK9+
-    return stream;
+    return stream.onClose(em::close);
   }
 
   protected Query createQuery(EntityManager em, String ql, Map<String, String> properties,

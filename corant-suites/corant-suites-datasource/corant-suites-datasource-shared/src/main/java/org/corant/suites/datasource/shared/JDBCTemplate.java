@@ -812,10 +812,11 @@ public class JDBCTemplate {
         PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
         ResultSet rs = wrap(stmt.executeQuery());
         g = new Gadget(conn, stmt, rs, closeConn);
-        Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
+        final ResultSetSpliterator<T> spliterator = new ResultSetSpliterator<>(g, rsh);
+        Stream<T> s = StreamSupport.stream(spliterator, false).onClose(g);
         // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
-        // sun.misc.Cleaner.create(s, g);//JDK8
-        Cleaner.create().register(s, g);// JDK9+
+        // sun.misc.Cleaner.create(spliterator, g);//JDK8
+        Cleaner.create().register(spliterator, g);// JDK9+
         return s;
       } catch (Exception e) {
         if (g != null) {

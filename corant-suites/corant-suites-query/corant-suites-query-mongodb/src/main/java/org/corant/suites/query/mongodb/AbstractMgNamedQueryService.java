@@ -355,17 +355,21 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
       @Override
       public boolean hasNext() {
+        boolean more = false;
         if (!parameter.terminateIf(counter, next)) {
           if (!buffer.hasResults()) {
             if (buffer.hasNext()) {
               buffer.with(doForward(cursor));
-              return buffer.hasResults();
+              more = buffer.hasResults();
             }
           } else {
-            return true;
+            more = true;
           }
         }
-        return false;
+        if (!more && cursor != null) {
+          cursor.close();
+        }
+        return more;
       }
 
       @Override
@@ -388,7 +392,6 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         return Forwarding.of(querier.resolveResult(list), it.hasNext());
       }
     }).onClose(cursor::close);
-    // sun.misc.Cleaner.create(stream, () -> {if (cursor != null) {cursor.close();}});//JDK8
     Cleaner.create().register(buffer, () -> {
       if (cursor != null) {
         cursor.close();

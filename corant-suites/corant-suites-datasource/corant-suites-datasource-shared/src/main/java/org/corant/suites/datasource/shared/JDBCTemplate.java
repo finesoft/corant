@@ -482,11 +482,53 @@ public class JDBCTemplate {
     return runner.query(processeds.getKey(), rsh, processeds.getValue());
   }
 
+  /**
+   * Query stream results, use for mass data query.
+   *
+   * <p>
+   * NOTE: In order to release related resources, please remember to close after using the stream.
+   *
+   * <pre>
+   * Example: try(Stream stream = stream(s,f,p)){
+   *    stream.forEach(row->{
+   *        //do somthing
+   *    })
+   * }
+   * </pre>
+   *
+   * @param sql
+   * @param fetchSize
+   * @param params
+   * @return
+   * @throws SQLException stream
+   */
   public Stream<Map<String, Object>> stream(String sql, int fetchSize, Object... params)
       throws SQLException {
     return stream(sql, fetchSize, MAP_HANDLER, params);
   }
 
+  /**
+   * Query stream results, use for mass data query.
+   *
+   * <p>
+   * NOTE: In order to release related resources, please remember to close after using the stream.
+   *
+   * <pre>
+   * Example: try(Stream stream = stream(s,f,r,p)){
+   *    stream.forEach(row->{
+   *        //do somthing
+   *    })
+   * }
+   * </pre>
+   *
+   * @param <T>
+   * @param sql
+   * @param fetchSize
+   * @param rsh
+   * @param params
+   * @return
+   * @throws SQLException stream
+   */
   public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return new StreamableQueryRunner(

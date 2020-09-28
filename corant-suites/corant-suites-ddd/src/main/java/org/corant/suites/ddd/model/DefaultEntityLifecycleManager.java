@@ -17,7 +17,6 @@ import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Objects.asString;
-import static org.corant.shared.util.Objects.forceCast;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +39,7 @@ import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
+import org.corant.suites.ddd.model.Aggregate.Lifecycle;
 import org.corant.suites.ddd.unitwork.AbstractJTAJPAUnitOfWork;
 import org.corant.suites.ddd.unitwork.UnitOfWorks;
 import org.corant.suites.jpa.shared.PersistenceService;
@@ -82,7 +82,7 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
   public void on(@Observes(during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION
       + 1000) AggregateLifecycleManageEvent e) {
     if (e.getSource() != null) {
-      Entity entity = forceCast(e.getSource());
+      Aggregate entity = e.getSource();
       boolean effectImmediately = e.isEffectImmediately();
       handle(entity, e.getAction(), effectImmediately);
       logger.fine(() -> String.format("Handle %s %s %s", entity.getClass().getName(),
@@ -90,10 +90,10 @@ public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
     }
   }
 
-  protected void handle(Entity entity, LifecycleAction action, boolean effectImmediately) {
+  protected void handle(Aggregate entity, LifecycleAction action, boolean effectImmediately) {
     EntityManager em = getEntityManager(entity.getClass());
     if (action == LifecycleAction.PERSIST) {
-      if (entity.getId() == null) {
+      if (entity.getLifecycle() == Lifecycle.INITIAL || entity.getId() == null) {
         em.persist(entity);
         if (effectImmediately) {
           em.flush();

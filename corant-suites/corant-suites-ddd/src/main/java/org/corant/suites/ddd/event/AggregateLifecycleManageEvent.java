@@ -16,7 +16,7 @@ package org.corant.suites.ddd.event;
 import static org.corant.shared.util.Objects.forceCast;
 import org.corant.suites.ddd.annotation.stereotype.Events;
 import org.corant.suites.ddd.model.Aggregate;
-import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
+import org.corant.suites.ddd.model.AggregateLifecycleManager.LifecycleAction;
 
 /**
  * corant-suites-ddd

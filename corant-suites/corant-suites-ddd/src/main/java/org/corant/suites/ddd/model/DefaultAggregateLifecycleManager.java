@@ -48,14 +48,14 @@ import org.corant.suites.jpa.shared.PersistenceService;
  * corant-suites-ddd
  *
  * <p>
- * The default entity life cycle manager, use EDA mechanism.
+ * The default aggregate life cycle manager, use EDA mechanism.
  *
  * @author bingo 上午10:44:19
  *
  */
 @ApplicationScoped
 @InfrastructureServices
-public class DefaultEntityLifecycleManager implements EntityLifecycleManager {
+public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
 
   protected final Map<Class<?>, PersistenceContext> clsUns = new ConcurrentHashMap<>();
 

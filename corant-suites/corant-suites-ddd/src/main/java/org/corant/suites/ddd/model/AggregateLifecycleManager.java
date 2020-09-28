@@ -21,12 +21,12 @@ import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
  * corant-suites-ddd
  *
  * <p>
- * Manages the life cycle of an entity, such as persistent state or deletion
+ * Manages the life cycle of an aggregate, such as persistent state or deletion
  *
  * @author bingo 上午10:33:56
  *
  */
-public interface EntityLifecycleManager {
+public interface AggregateLifecycleManager {
 
   EntityManager getEntityManager(Class<?> cls);
 

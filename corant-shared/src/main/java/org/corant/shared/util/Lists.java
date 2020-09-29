@@ -13,9 +13,12 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.Iterables.collectionOf;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -23,9 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -73,52 +74,26 @@ public class Lists {
   }
 
   /**
-   * Convert an array to a collection
+   * Returns the element at the specified position in the list. If the passing index is negative
+   * means that search element from last to first position.
+   *
+   * <pre>
+   * example:
+   * get(list,-1) equals list.get(list.size()-1)
+   * get(list,-2) equals list.get(list.size()-2)
+   * </pre>
    *
    * @param <T>
-   * @param <C>
-   * @param supplier the collection instance builder
-   * @param objects the array
-   * @return an collection that combined by the passed in array
+   * @param list
+   * @param index
+   * @return get
    */
-  @SafeVarargs
-  public static <T, C extends Collection<T>> C collectionOf(final IntFunction<C> supplier,
-      final T... objects) {
-    if (objects == null || objects.length == 0) {
-      return supplier.apply(0);
-    } else {
-      final C collection = supplier.apply(objects.length);
-      for (T object : objects) {
-        collection.add(object);
-      }
-      return collection;
-    }
+  public static <T> T get(List<? extends T> list, int index) {
+    return index < 0 ? list.get(sizeOf(list) + index) : list.get(index);
   }
 
   /**
-   * Convert an iterator to a collection
-   *
-   * @param <T>
-   * @param <C>
-   * @param supplier the collection instance builder
-   * @param it the iterator
-   * @return an collection that combined by the passed in iterator
-   */
-  public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
-      final Iterator<? extends T> it) {
-    if (it == null) {
-      return supplier.get();
-    } else {
-      final C collection = supplier.get();
-      while (it.hasNext()) {
-        collection.add(it.next());
-      }
-      return collection;
-    }
-  }
-
-  /**
-   * Convert an array to immutable list
+   * Convert an array to a non-null immutable list
    *
    * @param <T>
    * @param objects
@@ -133,7 +108,7 @@ public class Lists {
   }
 
   /**
-   * Convert an array to linked list
+   * Convert an array to a non-null linked list
    *
    * @param <T>
    * @param objects
@@ -151,7 +126,7 @@ public class Lists {
   }
 
   /**
-   * Convert an enumeration to list
+   * Convert an enumeration to a non-null list
    *
    * @param <T>
    * @param enumeration
@@ -168,7 +143,7 @@ public class Lists {
   }
 
   /**
-   * Convert an iterable to list
+   * Convert an iterable to a non-null list
    *
    * @param <T>
    * @param iterable
@@ -185,7 +160,7 @@ public class Lists {
   }
 
   /**
-   * Convert an iterator to list
+   * Convert an iterator to a non-null list
    *
    * @param <T>
    * @param iterator
@@ -202,7 +177,7 @@ public class Lists {
   }
 
   /**
-   * Convert an array to list
+   * Convert an array to non-null list
    *
    * @param <T>
    * @param objects
@@ -213,27 +188,8 @@ public class Lists {
     return collectionOf(ArrayList::new, objects);
   }
 
-  // /**
-  // * Merge a list and another list elements to a new list. Like SQL select join clause.
-  // *
-  // * @param <F> a list element type
-  // * @param <J> another list element type
-  // * @param <T> the return element type
-  // * @param from a list
-  // * @param join another list
-  // * @param combination the combination function that merge two element objects to a new object
-  // * @param condition the join conditions like SQL ON clause
-  // * @param type the join type INNER LEFT CARTESIAN(CROSS-JOIN)
-  // * @return the merged new list
-  // */
-  // public static <F, J, T> List<T> mergeList(final List<F> from, final List<J> join,
-  // final BiFunction<F, J, T> combination, final BiPredicate<F, J> condition, JoinType type) {
-  // return new ListJoins<F, J, T>().select(combination).from(from).join(type, join).on(condition)
-  // .execute();
-  // }
-
   /**
-   * Break a collection into smaller pieces
+   * Break a collection into smaller non-null pieces
    *
    * @param <T>
    * @param collection
@@ -259,15 +215,43 @@ public class Lists {
    * @param p
    * @return removeIf
    */
-  public static <C extends Collection<T>, T> C removeIf(final C collection, Predicate<T> p) {
-    if (collection == null) {
-      return null;
-    } else if (p == null) {
+  public static <C extends Collection<T>, T> C removeIf(final C collection,
+      Predicate<? super T> p) {
+    if (collection == null || p == null) {
       return collection;
     } else {
       collection.removeIf(p);
       return collection;
     }
+  }
+
+  /**
+   * Null safe removeIf, execution begins only if the parameters passed in are not null.
+   *
+   * <p>
+   * This method returns a new array with the same elements of the input array except the element
+   * that pass predicate tests. The component type of the returned array is always the same as that
+   * of the input array.
+   *
+   * @param <T>
+   * @param src
+   * @param predicate
+   * @return removeIf
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T[] removeIf(T[] src, Predicate<? super T> predicate) {
+    if (src == null || predicate == null) {
+      return src;
+    }
+    final Class<?> st = src.getClass().getComponentType();
+    final T[] removedArray = (T[]) Array.newInstance(st, src.length);
+    int j = 0;
+    for (T element : src) {
+      if (!predicate.test(element)) {
+        removedArray[j++] = element;
+      }
+    }
+    return Arrays.copyOf(removedArray, j);
   }
 
   /**
@@ -296,71 +280,4 @@ public class Lists {
     a[i] = a[j];
     a[j] = t;
   }
-
-  // /**
-  // * corant-shared
-  // *
-  // * @author bingo 下午2:36:15
-  // *
-  // */
-  // public static class ListJoins<F, J, T> {
-  //
-  // private List<F> from;
-  // private List<J> join;
-  // private BiPredicate<F, J> on;
-  // private BiFunction<F, J, T> select;
-  // private JoinType type = JoinType.LEFT;
-  //
-  // public static <F, J, T> ListJoins<F, J, T> start() {
-  // return new ListJoins<>();
-  // }
-  //
-  // public List<T> execute() {
-  // List<T> result = new ArrayList<>();
-  // if (type == JoinType.LEFT && isEmpty(join)) {
-  // from.stream().map(x -> select.apply(x, null)).forEachOrdered(result::add);
-  // } else if (type == JoinType.LEFT && !isEmpty(join)) {
-  // from.stream().forEachOrdered(f -> {
-  // List<J> ms = join.stream().filter(j -> on.test(f, j)).collect(Collectors.toList());
-  // if (isEmpty(ms)) {
-  // result.add(select.apply(f, null));
-  // } else {
-  // ms.stream().map(m -> select.apply(f, m)).forEach(result::add);
-  // }
-  // });
-  // } else if (type == JoinType.INNER && !isEmpty(join)) {
-  // from.stream().forEachOrdered(f -> this.join.stream().filter(j -> on.test(f, j))
-  // .forEachOrdered(j -> result.add(select.apply(f, j))));
-  // } else if (type == JoinType.CARTESIAN && !isEmpty(join)) {
-  // from.stream()
-  // .forEachOrdered(f -> join.stream().forEachOrdered(j -> result.add(select.apply(f, j))));
-  // }
-  // return result;
-  // }
-  //
-  // public ListJoins<F, J, T> from(List<F> from) {
-  // this.from = shouldNotNull(from);
-  // return this;
-  // }
-  //
-  // public ListJoins<F, J, T> on(BiPredicate<F, J> on) {
-  // this.on = on == null ? (f, j) -> false : on;
-  // return this;
-  // }
-  //
-  // public ListJoins<F, J, T> select(BiFunction<F, J, T> select) {
-  // this.select = select;
-  // return this;
-  // }
-  //
-  // ListJoins<F, J, T> join(JoinType joinType, List<J> joined) {
-  // this.type = joinType == null ? JoinType.LEFT : joinType;
-  // this.join = joined;
-  // return this;
-  // }
-  //
-  // enum JoinType {
-  // LEFT, INNER, CARTESIAN;
-  // }
-  // }
 }

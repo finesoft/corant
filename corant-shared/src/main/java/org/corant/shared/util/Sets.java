@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.collectionOf;
+import static org.corant.shared.util.Iterables.collectionOf;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,7 +56,7 @@ public class Sets {
   }
 
   /**
-   * Convert an array to immutable set
+   * Convert an array to a non-null immutable set
    *
    * @param <T>
    * @param objects the array
@@ -71,7 +71,7 @@ public class Sets {
   }
 
   /**
-   * Convert an array to linked hash set
+   * Convert an array to a non-null linked hash set
    *
    * @param <T>
    * @param objects
@@ -93,7 +93,7 @@ public class Sets {
   }
 
   /**
-   * Convert an iterable to linked hash set
+   * Convert an iterable to a non-null linked hash set
    *
    * @param <T>
    * @param iterable
@@ -110,7 +110,7 @@ public class Sets {
   }
 
   /**
-   * Convert an iterator to linked hash set
+   * Convert an iterator to a non-null linked hash set
    *
    * @param <T>
    * @param iterator
@@ -121,7 +121,7 @@ public class Sets {
   }
 
   /**
-   * Convert an array to set
+   * Convert an array to a non-null set
    *
    * @param <T>
    * @param objects
@@ -133,7 +133,7 @@ public class Sets {
   }
 
   /**
-   * Convert an array to tree set
+   * Convert an array to a non-null tree set
    *
    * @param <T>
    * @param objects

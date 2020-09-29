@@ -18,6 +18,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -27,6 +28,8 @@ import java.util.Queue;
 import java.util.Spliterator;
 import java.util.Stack;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -46,10 +49,55 @@ public class Iterables {
     return new BreadthIterable<>(obj).iterator();
   }
 
+  /**
+   * Convert an array to a non-null collection
+   *
+   * @param <T>
+   * @param <C>
+   * @param supplier the collection instance builder
+   * @param objects the array
+   * @return an collection that combined by the passed in array
+   */
+  @SafeVarargs
+  public static <T, C extends Collection<T>> C collectionOf(final IntFunction<C> supplier,
+      final T... objects) {
+    if (objects == null || objects.length == 0) {
+      return supplier.apply(0);
+    } else {
+      final C collection = supplier.apply(objects.length);
+      for (T object : objects) {
+        collection.add(object);
+      }
+      return collection;
+    }
+  }
+
+  /**
+   * Convert an iterator to a non-null collection
+   *
+   * @param <T>
+   * @param <C>
+   * @param supplier the collection instance builder
+   * @param it the iterator
+   * @return an collection that combined by the passed in iterator
+   */
+  public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
+      final Iterator<? extends T> it) {
+    if (it == null) {
+      return supplier.get();
+    } else {
+      final C collection = supplier.get();
+      while (it.hasNext()) {
+        collection.add(it.next());
+      }
+      return collection;
+    }
+  }
+
   public static <T> Iterable<T> concat(
       @SuppressWarnings("unchecked") final Iterable<? extends T>... inputs) {
     shouldNotNull(inputs);
-    return new Iterable<T>() {
+    return new Iterable<>() {
       final Iterable<? extends T>[] iterables = Arrays.copyOf(inputs, inputs.length);
 
       @SuppressWarnings("unchecked")
@@ -65,7 +113,7 @@ public class Iterables {
   public static <T> Iterator<T> concat(
       @SuppressWarnings("unchecked") final Iterator<? extends T>... inputs) {
     shouldNotNull(inputs);
-    return new Iterator<T>() {
+    return new Iterator<>() {
       @SuppressWarnings("unchecked")
       final Iterator<T>[] iterators =
           streamOf(inputs).filter(Objects::isNotNull).toArray(Iterator[]::new);
@@ -95,7 +143,7 @@ public class Iterables {
   }
 
   public static <T> Enumeration<T> emptyEnumeration() {
-    return new Enumeration<T>() {
+    return new Enumeration<>() {
 
       @Override
       public boolean hasMoreElements() {
@@ -114,7 +162,7 @@ public class Iterables {
   }
 
   public static <T> Iterator<T> emptyIterator() {
-    return new Iterator<T>() {
+    return new Iterator<>() {
       @Override
       public boolean hasNext() {
         return false;
@@ -129,7 +177,7 @@ public class Iterables {
 
   public static <T> Enumeration<T> enumerationOf(Iterator<? extends T> it) {
     final Iterator<? extends T> useIt = it == null ? emptyIterator() : it;
-    return new Enumeration<T>() {
+    return new Enumeration<>() {
 
       @Override
       public boolean hasMoreElements() {
@@ -186,7 +234,7 @@ public class Iterables {
   }
 
   public static <T> Iterable<T> iterableOf(final Enumeration<? extends T> enums) {
-    return enums == null ? emptyIterable() : () -> new Iterator<T>() {
+    return enums == null ? emptyIterable() : () -> new Iterator<>() {
       final Enumeration<? extends T> fromEnums = enums;
 
       @Override
@@ -203,13 +251,13 @@ public class Iterables {
 
   @SafeVarargs
   public static <T> Iterable<T> iterableOf(final T... objects) {
-    return new Iterable<T>() {
+    return new Iterable<>() {
       final T[] array = objects;
       final int size = array.length;
 
       @Override
       public Iterator<T> iterator() {
-        return new Iterator<T>() {
+        return new Iterator<>() {
           int i = 0;
 
           @Override
@@ -234,7 +282,7 @@ public class Iterables {
   }
 
   public static <T> Iterator<T> transform(final Iterator<?> it, final Function<Object, T> convert) {
-    return it == null ? emptyIterator() : new Iterator<T>() {
+    return it == null ? emptyIterator() : new Iterator<>() {
       final Iterator<?> fromIterator = it;
       final Function<Object, T> useConvert = defaultObject(convert, Objects::forceCast);
 
@@ -270,7 +318,7 @@ public class Iterables {
       if (node == null || node.iterator() == null) {
         return emptyIterator();
       }
-      return new Iterator<T>() {
+      return new Iterator<>() {
 
         private Queue<Iterator<T>> queue = new LinkedList<>();
         {
@@ -332,7 +380,7 @@ public class Iterables {
       if (node == null || node.iterator() == null) {
         return null;
       }
-      return new Iterator<T>() {
+      return new Iterator<>() {
         private Stack<Iterator<T>> stack = new Stack<>();
         {
           stack.push(node.iterator());

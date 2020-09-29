@@ -170,7 +170,8 @@ public class Preconditions {
    * @param code
    * @param parameters
    */
-  public static <T> T requireFalse(T obj, Predicate<T> p, Object code, Object... parameters) {
+  public static <T> T requireFalse(T obj, Predicate<? super T> p, Object code,
+      Object... parameters) {
     if (!p.test(obj)) {
       return obj;
     } else {
@@ -632,7 +633,7 @@ public class Preconditions {
     }
   }
 
-  public static <T> T requireTrue(T obj, Predicate<T> p, Object code) {
+  public static <T> T requireTrue(T obj, Predicate<? super T> p, Object code) {
     if (p.test(obj)) {
       return obj;
     } else {
@@ -648,7 +649,8 @@ public class Preconditions {
    * @param code
    * @param parameters
    */
-  public static <T> T requireTrue(T obj, Predicate<T> p, Object code, Object... parameters) {
+  public static <T> T requireTrue(T obj, Predicate<? super T> p, Object code,
+      Object... parameters) {
     if (p.test(obj)) {
       return obj;
     } else {
@@ -694,7 +696,7 @@ public class Preconditions {
 
   @FunctionalInterface
   public interface BoolPrecondition<T> {
-    T testAndReturn(T obj, Predicate<T> p, Object code, Object... variants);
+    T testAndReturn(T obj, Predicate<? super T> p, Object code, Object... variants);
   }
 
   @FunctionalInterface

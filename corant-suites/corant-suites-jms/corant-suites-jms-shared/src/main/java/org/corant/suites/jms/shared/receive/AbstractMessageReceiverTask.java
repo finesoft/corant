@@ -51,6 +51,8 @@ import org.corant.suites.jta.shared.TransactionService;
  * consumer usually requires a network round trip to set up. Producer is often more lightweight,
  * although there is often some overhead in creating it.
  *
+ * NOTE: This is not threadsafe.
+ *
  * Unfinish: use connection or session pool
  *
  * <p>

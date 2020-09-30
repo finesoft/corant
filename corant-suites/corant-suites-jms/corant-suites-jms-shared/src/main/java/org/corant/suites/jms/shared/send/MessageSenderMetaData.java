@@ -37,9 +37,12 @@ public class MessageSenderMetaData {
 
   private final SerializationSchema serialization;
 
+  private final int deliveryMode;
+
   public MessageSenderMetaData(MessageSend annotation) {
     this(shouldNotNull(annotation).connectionFactoryId(), annotation.destination(),
-        annotation.multicast(), annotation.sessionMode(), annotation.serialization());
+        annotation.multicast(), annotation.sessionMode(), annotation.serialization(),
+        annotation.deliveryMode());
   }
 
   /**
@@ -48,15 +51,17 @@ public class MessageSenderMetaData {
    * @param multicast
    * @param sessionMode
    * @param serialization
+   * @param deliveryMode
    */
   public MessageSenderMetaData(String connectionFactoryId, String destination, boolean multicast,
-      int sessionMode, SerializationSchema serialization) {
+      int sessionMode, SerializationSchema serialization, int deliveryMode) {
     super();
     this.connectionFactoryId = Configs.assemblyStringConfigProperty(connectionFactoryId);
     this.destination = Configs.assemblyStringConfigProperty(destination);
     this.multicast = multicast;
     this.sessionMode = sessionMode;
     this.serialization = serialization;
+    this.deliveryMode = deliveryMode;
   }
 
   @Override
@@ -97,6 +102,14 @@ public class MessageSenderMetaData {
    */
   public String getConnectionFactoryId() {
     return connectionFactoryId;
+  }
+
+  /**
+   *
+   * @return the deliveryMode
+   */
+  public int getDeliveryMode() {
+    return deliveryMode;
   }
 
   /**

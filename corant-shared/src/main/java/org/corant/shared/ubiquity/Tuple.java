@@ -44,6 +44,7 @@ public interface Tuple {
 
     private final L left;
     private final R right;
+    private transient int hash;// Default to 0
 
     protected Pair() {
       this(null, null);
@@ -106,8 +107,12 @@ public interface Tuple {
 
     @Override
     public int hashCode() {
-      return (getKey() == null ? 0 : getKey().hashCode())
-          ^ (getValue() == null ? 0 : getValue().hashCode());
+      int h = hash;
+      if (h == 0 && (getKey() != null || getValue() != null)) {
+        h = hash = (getKey() == null ? 0 : getKey().hashCode())
+            ^ (getValue() == null ? 0 : getValue().hashCode());
+      }
+      return h;
     }
 
     public boolean isEmpty() {
@@ -154,6 +159,7 @@ public interface Tuple {
 
     protected final T start;
     protected final T end;
+    private transient int hash;// Default to 0
 
     protected Range(T start, T end) {
       super();
@@ -233,11 +239,15 @@ public interface Tuple {
 
     @Override
     public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (end == null ? 0 : end.hashCode());
-      result = prime * result + (start == null ? 0 : start.hashCode());
-      return result;
+      int h = hash;
+      if (h == 0 && (end != null || start != null)) {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (end == null ? 0 : end.hashCode());
+        result = prime * result + (start == null ? 0 : start.hashCode());
+        h = hash = result;
+      }
+      return h;
     }
 
     public boolean intersect(Range<T> other) {
@@ -293,6 +303,7 @@ public interface Tuple {
     private final L left;
     private final M middle;
     private final R right;
+    private transient int hash;// Default to 0
 
     protected Triple() {
       this(null, null, null);
@@ -345,9 +356,13 @@ public interface Tuple {
 
     @Override
     public int hashCode() {
-      return (getLeft() == null ? 0 : getLeft().hashCode())
-          ^ (getMiddle() == null ? 0 : getMiddle().hashCode())
-          ^ (getRight() == null ? 0 : getRight().hashCode());
+      int h = hash;
+      if (h == 0 && (getLeft() != null || getMiddle() != null || getRight() != null)) {
+        h = hash = (getLeft() == null ? 0 : getLeft().hashCode())
+            ^ (getMiddle() == null ? 0 : getMiddle().hashCode())
+            ^ (getRight() == null ? 0 : getRight().hashCode());
+      }
+      return h;
     }
 
     public boolean isEmpty() {

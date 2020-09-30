@@ -224,7 +224,7 @@
             <xsd:annotation>
                 <xsd:documentation>
                     Specify whether the query result set is multi-record or single-record,
-                    similar to one to manager or one to one.
+                    similar to one to many or one to one.
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>

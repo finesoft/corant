@@ -19,8 +19,8 @@
 			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.enterprise.concurrent</groupId>
-			<artifactId>javax.enterprise.concurrent-api</artifactId>
+			<groupId>jakarta.enterprise.concurrent</groupId>
+			<artifactId>jakarta.enterprise.concurrent-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.microprofile.context-propagation</groupId>
@@ -28,11 +28,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.enterprise.concurrent</artifactId>
+			<artifactId>jakarta.enterprise.concurrent</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

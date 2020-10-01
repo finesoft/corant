@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-context</artifactId>
-		</dependency>			
+		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-bundle</artifactId>
@@ -46,8 +46,12 @@
 
 		<!-- Standard JEE -->
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.json</groupId>
+			<artifactId>jakarta.json-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

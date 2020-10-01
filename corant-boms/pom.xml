@@ -16,67 +16,75 @@
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
 		<version.apache-poi>4.1.2</version.apache-poi>
-		<version.apache.arrow>0.16.0</version.apache.arrow>
-		<version.apache.geronimo-json>1.3</version.apache.geronimo-json>
-		<version.apache.johnzon-core>1.1.13</version.apache.johnzon-core>
-		<version.arquillian-core>1.2.1.Final</version.arquillian-core>
-		<version.artemis>2.10.1</version.artemis>
+		<version.apache-bcel>6.5.0</version.apache-bcel>
+		<version.apache.arrow>1.0.1</version.apache.arrow>
+		<version.apache.geronimo-json>1.4</version.apache.geronimo-json>
+		<version.apache.johnzon-core>1.2.8</version.apache.johnzon-core>
+		<version.arquillian-core>1.6.0.Final</version.arquillian-core>
+		<version.artemis>2.15.0</version.artemis>
 		<version.asciidoctor-maven-plugin>1.5.6</version.asciidoctor-maven-plugin>
 		<version.asciidoctor-pdf>1.5.0-alpha.16</version.asciidoctor-pdf>
 		<version.assertj>3.10.0</version.assertj>
-		<version.atomikos>5.0.3</version.atomikos>
+		<version.atomikos>5.0.8</version.atomikos>
 		<version.bouncycastle>1.66</version.bouncycastle>
-		<version.calcite>1.17.0</version.calcite>
+		<version.calcite>1.25.0</version.calcite>
 		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
-		<version.commons-codec>1.13</version.commons-codec>
+		<version.commons-codec>1.15</version.commons-codec>
 		<version.commons-collections4>4.4</version.commons-collections4>
 		<version.commons-compress>1.20</version.commons-compress>
-		<version.commons-dbcp2>2.7.0</version.commons-dbcp2>
+		<version.commons-dbcp2>2.8.0</version.commons-dbcp2>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
-		<version.commons-io>2.6</version.commons-io>
-		<version.commons-lang3>3.10</version.commons-lang3>
+		<version.commons-io>2.8.0</version.commons-io>
+		<version.commons-lang3>3.11</version.commons-lang3>
 		<version.commons-math3>3.6.1</version.commons-math3>
-		<version.commons-net>3.6</version.commons-net>
-		<version.commons-pool2>2.8.1</version.commons-pool2>
+		<version.commons-net>3.7</version.commons-net>
+		<version.commons-pool2>2.9.0</version.commons-pool2>
 		<version.commons-vfs2>2.6.0</version.commons-vfs2>
 		<version.datastax.cassandra>3.7.1</version.datastax.cassandra>
 		<version.dockerfile-maven-plugin>1.4.10</version.dockerfile-maven-plugin>
-		<version.eclipse.yasson>1.0.5</version.eclipse.yasson>
-		<version.ehcache>3.8.1</version.ehcache>
+		<version.eclipse.yasson>1.0.8</version.eclipse.yasson>
+		<version.ehcache>3.9.0</version.ehcache>
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
 		<version.feign>11.0</version.feign>
 		<version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>
 		<version.flyway>6.0.6</version.flyway>
 		<version.freemarker>2.3.30</version.freemarker>
-		<version.glassfish.soteria>1.0</version.glassfish.soteria>
-		<version.groovy>3.0.3</version.groovy>
-		<version.grpc>1.31.0</version.grpc>
+		<version.groovy>3.0.6</version.groovy>
+		<version.grpc>1.32.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
-		<version.hikariCP>3.2.0</version.hikariCP>
-		<version.jackson>2.11.1</version.jackson>
+		<version.hikariCP>3.4.5</version.hikariCP>
+		<version.icu4j>67.1</version.icu4j>
+		<version.jackson>2.11.2</version.jackson>
 		<version.jandex>2.2.1.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
-		<version.javaee-api>8.0.1</version.javaee-api>
-		<version.javassist>3.12.1.GA</version.javassist>
-		<version.javax.activation>1.1.1</version.javax.activation>
-		<version.javax.cdi-api>2.0</version.javax.cdi-api>
-		<version.javax.enterprise.concurrent>1.1</version.javax.enterprise.concurrent>
-		<version.javax.jaxb-api>2.2.8</version.javax.jaxb-api>
-		<version.javax.jms-api>2.0.1</version.javax.jms-api>
-		<version.javax.json-api>1.1.4</version.javax.json-api>
-		<version.javax.json.bind-api>1.0</version.javax.json.bind-api>
-		<version.javax.servlet-api>3.1.0</version.javax.servlet-api>
-		<version.javax.validation-api>2.0.1.Final</version.javax.validation-api>
-		<version.javax.ws.rs-api>2.1</version.javax.ws.rs-api>
+		<version.javassist>3.27.0.GA</version.javassist>
+		<version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
+		<version.jakarta.annotation-api>1.3.5</version.jakarta.annotation-api>
+		<version.jakarta.authorization-api>1.5.0</version.jakarta.authorization-api>
+		<version.jakarta.batch-api>1.0.2</version.jakarta.batch-api>
+		<version.jakarta.enterprise.cdi-api>2.0.2</version.jakarta.enterprise.cdi-api>
+		<version.jakarta.enterprise.concurrent-api>1.1.1</version.jakarta.enterprise.concurrent-api>
+		<version.jakarta.jms-api>2.0.3</version.jakarta.jms-api>
+		<version.jakarta.json-api>1.1.6</version.jakarta.json-api>
+		<version.jakarta.json.bind-api>1.0.2</version.jakarta.json.bind-api>
+		<version.jakarta.mail-api>1.6.5</version.jakarta.mail-api>
+		<version.jakarta.persistence-api>2.2.3</version.jakarta.persistence-api>
+		<version.jakarta.security.enterprise-api>1.0.1</version.jakarta.security.enterprise-api>
+		<version.jakarta.servlet-api>4.0.4</version.jakarta.servlet-api>
+		<version.jakarta.transaction-api>1.3.3</version.jakarta.transaction-api>
+		<version.jakarta.validation-api>2.0.2</version.jakarta.validation-api>
+		<version.jakarta.websocket-api>1.1.2</version.jakarta.websocket-api>
+		<version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
+		<version.javax.jaxb-api>2.3.1</version.javax.jaxb-api>
 		<version.jcip-annotations>1.0-1</version.jcip-annotations>
 		<version.jose4j>0.7.2</version.jose4j>
-		<version.junit>4.12</version.junit>
+		<version.junit>4.13</version.junit>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
 		<version.keycloak>6.0.1</version.keycloak>
 		<version.kotlin>1.3.72</version.kotlin>
@@ -92,6 +100,7 @@
 		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
 		<version.maven-resources-plugin>3.1.0</version.maven-resources-plugin>
 		<version.maven-surefire-plugin>3.0.0-M2</version.maven-surefire-plugin>
+		<version.maven-project-info-reports-plugin>3.1.1</version.maven-project-info-reports-plugin>
 		<version.microprofile-config-api>1.4</version.microprofile-config-api>
 		<version.microprofile-fault-tolerance-api>2.1</version.microprofile-fault-tolerance-api>
 		<version.microprofile-health-api>2.2</version.microprofile-health-api>
@@ -105,8 +114,8 @@
 		<version.mongodb>3.9.1</version.mongodb>
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
-		<version.narayana>5.10.5.Final</version.narayana>
-		<version.netty>4.1.34.Final</version.netty>
+		<version.narayana>5.10.6.Final</version.narayana>
+		<version.netty>4.1.52.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
 		<version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>
 		<version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
@@ -115,8 +124,8 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.13.4</version.redisson>
 		<version.rest-assured>4.3.1</version.rest-assured>
-		<version.resteasy>4.5.6.Final</version.resteasy>
-		<version.rsocket>1.0.1</version.rsocket>
+		<version.resteasy>4.5.8.Final</version.resteasy>
+		<version.rsocket>1.0.2</version.rsocket>
 		<version.shiro-all>1.6.0</version.shiro-all>
 		<version.smallrye-config>1.7.0</version.smallrye-config>
 		<version.smallrye-fault-tolerance>4.2.0</version.smallrye-fault-tolerance>
@@ -125,18 +134,18 @@
 		<version.smallrye.jwt>2.1.1</version.smallrye.jwt>
 		<version.smallrye.metrics>2.4.1</version.smallrye.metrics>
 		<version.smallrye.opentracing>1.3.4</version.smallrye.opentracing>
-		<version.snakeyaml>1.26</version.snakeyaml>
+		<version.snakeyaml>1.27</version.snakeyaml>
 		<version.swagger>2.0.8</version.swagger>
 
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.1.3.Final</version.undertow>
-		<version.vertx>3.8.5</version.vertx>
+		<version.undertow>2.2.0.Final</version.undertow>
+		<version.vertx>3.9.3</version.vertx>
 		<version.weld-junit4>2.0.1.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.1.Final</version.weld-junit5>
-		<version.weld>3.1.5.Final</version.weld>
+		<version.weld>3.1.5.SP1</version.weld>
 		<version.xadisk>1.2.2</version.xadisk>
-		<version.xnio>3.8.0.Final</version.xnio>
-		<version.zxing>3.4.0</version.zxing>
+		<version.xnio>3.8.2.Final</version.xnio>
+		<version.zxing>3.4.1</version.zxing>
 		<version.caffeine>2.8.5</version.caffeine>
 	</properties>
 
@@ -1300,27 +1309,21 @@
 			</dependency>
 			<!-- Java & Javax -->
 			<dependency>
-				<groupId>javax.enterprise</groupId>
-				<artifactId>cdi-api</artifactId>
-				<version>${version.javax.cdi-api}</version>
+				<groupId>jakarta.enterprise</groupId>
+				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<version>${version.jakarta.enterprise.cdi-api}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-api</artifactId>
-				<version>${version.javaee-api}</version>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>${version.jakarta.servlet-api}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>${version.javax.servlet-api}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.jms</groupId>
-				<artifactId>javax.jms-api</artifactId>
-				<version>${version.javax.jms-api}</version>
+				<groupId>jakarta.jms</groupId>
+				<artifactId>jakarta.jms-api</artifactId>
+				<version>${version.jakarta.jms-api}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -1329,30 +1332,81 @@
 				<version>${version.javax.jaxb-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.json.bind</groupId>
-				<artifactId>javax.json.bind-api</artifactId>
-				<version>${version.javax.json.bind-api}</version>
+				<groupId>jakarta.json.bind</groupId>
+				<artifactId>jakarta.json.bind-api</artifactId>
+				<version>${version.jakarta.json.bind-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.json</groupId>
-				<artifactId>javax.json-api</artifactId>
-				<version>${version.javax.json-api}</version>
+				<groupId>jakarta.json</groupId>
+				<artifactId>jakarta.json-api</artifactId>
+				<version>${version.jakarta.json-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>${version.javax.ws.rs-api}</version>
+				<groupId>org.glassfish</groupId>
+				<artifactId>jakarta.json</artifactId>
+				<version>${version.jakarta.json-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>${version.javax.validation-api}</version>
+				<groupId>jakarta.ws.rs</groupId>
+				<artifactId>jakarta.ws.rs-api</artifactId>
+				<version>${version.jakarta.ws.rs-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.enterprise.concurrent</groupId>
-				<artifactId>javax.enterprise.concurrent-api</artifactId>
-				<version>${version.javax.enterprise.concurrent}</version>
+				<groupId>jakarta.validation</groupId>
+				<artifactId>jakarta.validation-api</artifactId>
+				<version>${version.jakarta.validation-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.authorization</groupId>
+				<artifactId>jakarta.authorization-api</artifactId>
+				<version>${version.jakarta.authorization-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-api</artifactId>
+				<version>${version.jakarta.websocket-api}</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.transaction</groupId>
+				<artifactId>jakarta.transaction-api</artifactId>
+				<version>${version.jakarta.transaction-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>${version.jakarta.mail-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.mail</groupId>
+				<artifactId>jakarta.mail-api</artifactId>
+				<version>${version.jakarta.mail-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.persistence</groupId>
+				<artifactId>jakarta.persistence-api</artifactId>
+				<version>${version.jakarta.persistence-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
+				<version>${version.jakarta.annotation-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.enterprise.concurrent</groupId>
+				<artifactId>jakarta.enterprise.concurrent-api</artifactId>
+				<version>${version.jakarta.enterprise.concurrent-api}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>${version.jakarta.activation-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.activation</groupId>
+				<artifactId>jakarta.activation-api</artifactId>
+				<version>${version.jakarta.activation-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -1368,18 +1422,11 @@
 				<version>${version.jcip-annotations}</version>
 			</dependency>
 
-			<!-- glass fish -->
-			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>javax.json</artifactId>
-				<version>${version.javax.json-api}</version>
-			</dependency>
-
 			<!-- Concurrent Job -->
 			<dependency>
 				<groupId>org.glassfish</groupId>
-				<artifactId>javax.enterprise.concurrent</artifactId>
-				<version>${version.javax.enterprise.concurrent}</version>
+				<artifactId>jakarta.enterprise.concurrent</artifactId>
+				<version>${version.jakarta.enterprise.concurrent-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1447,8 +1494,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.soteria</groupId>
-				<artifactId>javax.security.enterprise</artifactId>
-				<version>${version.glassfish.soteria}</version>
+				<artifactId>jakarta.security.enterprise</artifactId>
+				<version>${version.jakarta.security.enterprise-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.security.enterprise</groupId>
+				<artifactId>jakarta.security.enterprise-api</artifactId>
+				<version>${version.jakarta.security.enterprise-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.keycloak</groupId>
@@ -1606,6 +1658,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>${version.maven-enforcer-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>${version.maven-project-info-reports-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

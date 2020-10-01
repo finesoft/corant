@@ -10,22 +10,18 @@
 	<artifactId>corant-suites-jcache-caffeine</artifactId>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>jcache</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-jcache-shared</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 </project>

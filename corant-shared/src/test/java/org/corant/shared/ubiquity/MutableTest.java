@@ -29,9 +29,7 @@ import org.corant.shared.ubiquity.Mutable.MutableInteger;
 import org.corant.shared.ubiquity.Mutable.MutableNumber;
 import org.corant.shared.ubiquity.Mutable.MutableTemporal;
 import org.corant.shared.util.Threads;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import junit.framework.TestCase;
 
 /**
@@ -41,9 +39,6 @@ import junit.framework.TestCase;
  *
  */
 public class MutableTest extends TestCase {
-
-  @Rule
-  public ExpectedException exceptionRule = ExpectedException.none();
 
   @Test
   public void testMubtableNumber(MutableNumber<?> m, Number right) {

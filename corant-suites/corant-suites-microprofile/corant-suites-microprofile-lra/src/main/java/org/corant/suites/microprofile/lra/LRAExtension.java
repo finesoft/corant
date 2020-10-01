@@ -9,7 +9,6 @@ import javax.enterprise.inject.spi.Extension;
 import org.corant.config.declarative.DeclarativeConfigResolver;
 import io.narayana.lra.filter.ClientLRARequestFilter;
 import io.narayana.lra.filter.ClientLRAResponseFilter;
-import io.narayana.lra.filter.FilterRegistration;
 import io.narayana.lra.filter.ServerLRAFilter;
 import io.narayana.lra.provider.ParticipantStatusOctetStreamProvider;
 
@@ -43,8 +42,8 @@ public class LRAExtension implements Extension {
     event.addAnnotatedType(beanManager.createAnnotatedType(ServerLRAFilter.class),
         ServerLRAFilter.class.getSimpleName());
 
-    event.addAnnotatedType(beanManager.createAnnotatedType(FilterRegistration.class),
-        FilterRegistration.class.getSimpleName());
+    // event.addAnnotatedType(beanManager.createAnnotatedType(FilterRegistration.class),
+    // FilterRegistration.class.getSimpleName()); FIXME version upgrade
 
     event.addAnnotatedType(
         beanManager.createAnnotatedType(ParticipantStatusOctetStreamProvider.class),

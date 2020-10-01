@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-context</artifactId>
-		</dependency>			
+		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-suites-bundle</artifactId>
@@ -26,8 +26,12 @@
 			<artifactId>corant-suites-jpa-shared</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.jms</groupId>
+			<artifactId>jakarta.jms-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

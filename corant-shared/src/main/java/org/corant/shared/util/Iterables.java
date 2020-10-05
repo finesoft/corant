@@ -45,6 +45,14 @@ public class Iterables {
     super();
   }
 
+  /**
+   * Return a breadth-first iterator for an iterable object whose internal elements are also
+   * iterable, Mainly used for object traversal in tree structure.
+   *
+   * @param <T>
+   * @param obj
+   * @return breadthIterator
+   */
   public static <T extends Iterable<T>> Iterator<T> breadthIterator(T obj) {
     return new BreadthIterable<>(obj).iterator();
   }
@@ -94,6 +102,13 @@ public class Iterables {
     }
   }
 
+  /**
+   * Connect multiple iterables of matching types into one iterable.
+   *
+   * @param <T>
+   * @param inputs
+   * @return concat
+   */
   public static <T> Iterable<T> concat(
       @SuppressWarnings("unchecked") final Iterable<? extends T>... inputs) {
     shouldNotNull(inputs);
@@ -110,6 +125,13 @@ public class Iterables {
     };
   }
 
+  /**
+   * Connect multiple iterators of matching types into one iterator
+   *
+   * @param <T>
+   * @param inputs
+   * @return concat
+   */
   public static <T> Iterator<T> concat(
       @SuppressWarnings("unchecked") final Iterator<? extends T>... inputs) {
     shouldNotNull(inputs);
@@ -138,10 +160,24 @@ public class Iterables {
     };
   }
 
+  /**
+   * Return a depth-first iterator for an iterable object whose internal elements are also iterable,
+   * Mainly used for object traversal in tree structure.
+   *
+   * @param <T>
+   * @param obj
+   * @return depthIterator
+   */
   public static <T extends Iterable<T>> Iterator<T> depthIterator(T obj) {
     return new DepthIterable<>(obj).iterator();
   }
 
+  /**
+   * Returns an empty enumeration
+   *
+   * @param <T>
+   * @return emptyEnumeration
+   */
   public static <T> Enumeration<T> emptyEnumeration() {
     return new Enumeration<>() {
 
@@ -157,10 +193,22 @@ public class Iterables {
     };
   }
 
+  /**
+   * Returns an empty iterable
+   *
+   * @param <T>
+   * @return emptyIterable
+   */
   public static <T> Iterable<T> emptyIterable() {
     return Iterables::emptyIterator;
   }
 
+  /**
+   * Returns an enpty iterator
+   *
+   * @param <T>
+   * @return emptyIterator
+   */
   public static <T> Iterator<T> emptyIterator() {
     return new Iterator<>() {
       @Override
@@ -175,6 +223,13 @@ public class Iterables {
     };
   }
 
+  /**
+   * Converts an iterator to enumeration
+   *
+   * @param <T>
+   * @param it
+   * @return enumerationOf
+   */
   public static <T> Enumeration<T> enumerationOf(Iterator<? extends T> it) {
     final Iterator<? extends T> useIt = it == null ? emptyIterator() : it;
     return new Enumeration<>() {
@@ -191,6 +246,15 @@ public class Iterables {
     };
   }
 
+  /**
+   * Returns the index-th value in enumeration, throwing IndexOutOfBoundsException if there is no
+   * such element.
+   *
+   * @param <T>
+   * @param e
+   * @param index
+   * @return get
+   */
   public static <T> T get(final Enumeration<? extends T> e, final int index) {
     int i = index;
     if (i < 0) {
@@ -206,6 +270,15 @@ public class Iterables {
     throw new IndexOutOfBoundsException("Entry does not exist: " + i);
   }
 
+  /**
+   * Returns the index-th value in iterable, throwing IndexOutOfBoundsException if there is nosuch
+   * element.
+   *
+   * @param <E>
+   * @param iterable
+   * @param index
+   * @return get
+   */
   public static <E> E get(final Iterable<? extends E> iterable, final int index) {
     int i = index;
     if (i < 0) {
@@ -218,6 +291,15 @@ public class Iterables {
     return get(iterable.iterator(), index);
   }
 
+  /**
+   * Returns the index-th value in iterator, throwing IndexOutOfBoundsException if there is nosuch
+   * element.
+   *
+   * @param <E>
+   * @param iterator
+   * @param index
+   * @return get
+   */
   public static <E> E get(final Iterator<? extends E> iterator, final int index) {
     int i = index;
     if (i < 0) {
@@ -233,6 +315,13 @@ public class Iterables {
     throw new IndexOutOfBoundsException("Entry does not exist: " + i);
   }
 
+  /**
+   * Converts an enumeration to an non-null iterable
+   *
+   * @param <T>
+   * @param enums
+   * @return iterableOf
+   */
   public static <T> Iterable<T> iterableOf(final Enumeration<? extends T> enums) {
     return enums == null ? emptyIterable() : () -> new Iterator<>() {
       final Enumeration<? extends T> fromEnums = enums;
@@ -249,6 +338,13 @@ public class Iterables {
     };
   }
 
+  /**
+   * Converts an array to an non-null iterable
+   *
+   * @param <T>
+   * @param objects
+   * @return iterableOf
+   */
   @SafeVarargs
   public static <T> Iterable<T> iterableOf(final T... objects) {
     return new Iterable<>() {
@@ -277,10 +373,26 @@ public class Iterables {
     };
   }
 
+  /**
+   * Use the specified conversion function to convert the iterable element type
+   *
+   * @param <T>
+   * @param it
+   * @param convert
+   * @return transform
+   */
   public static <T> Iterable<T> transform(final Iterable<?> it, final Function<Object, T> convert) {
     return () -> transform(it == null ? (Iterator<?>) null : it.iterator(), convert);
   }
 
+  /**
+   * Use the specified conversion function to convert the iterator element type
+   *
+   * @param <T>
+   * @param it
+   * @param convert
+   * @return transform
+   */
   public static <T> Iterator<T> transform(final Iterator<?> it, final Function<Object, T> convert) {
     return it == null ? emptyIterator() : new Iterator<>() {
       final Iterator<?> fromIterator = it;
@@ -303,6 +415,12 @@ public class Iterables {
     };
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午11:19:28
+   *
+   */
   public static class BreadthIterable<T extends Iterable<T>> implements Iterable<T> {
 
     protected final Iterable<T> node;
@@ -368,6 +486,12 @@ public class Iterables {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午11:19:56
+   *
+   */
   public static class DepthIterable<T extends Iterable<T>> implements Iterable<T> {
     protected final Iterable<T> node;
 

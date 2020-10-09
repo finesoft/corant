@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +50,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
+import org.corant.suites.datasource.shared.DriverManagerDataSource;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -115,6 +117,40 @@ public class SqlQueryTemplate {
 
   public static SqlQueryTemplate of(DBMS dbms, String dataSourceName) {
     return new SqlQueryTemplate(dbms, dataSourceName);
+  }
+
+  public static SqlQueryTemplate of(String jdbcUrl) {
+    final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl);
+    final DBMS dbms = DBMS.of(jdbcUrl);
+    return new SqlQueryTemplate(ds, dbms);
+  }
+
+  public static SqlQueryTemplate of(String jdbcUrl, Properties properties) {
+    final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, properties);
+    final DBMS dbms = DBMS.of(jdbcUrl);
+    return new SqlQueryTemplate(ds, dbms);
+  }
+
+  public static SqlQueryTemplate of(String jdbcUrl, String driverClassName, Properties properties,
+      String username, String password) {
+    final DriverManagerDataSource ds =
+        new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password);
+    final DBMS dbms = DBMS.of(jdbcUrl);
+    return new SqlQueryTemplate(ds, dbms);
+  }
+
+  public static SqlQueryTemplate of(String jdbcUrl, String username, String password) {
+    final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, username, password);
+    final DBMS dbms = DBMS.of(jdbcUrl);
+    return new SqlQueryTemplate(ds, dbms);
+  }
+
+  public static SqlQueryTemplate of(String jdbcUrl, String driverClassName, String username,
+      String password) {
+    final DriverManagerDataSource ds =
+        new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
+    final DBMS dbms = DBMS.of(jdbcUrl);
+    return new SqlQueryTemplate(ds, dbms);
   }
 
   public static SqlQueryTemplate oracle(DataSource dataSource) {

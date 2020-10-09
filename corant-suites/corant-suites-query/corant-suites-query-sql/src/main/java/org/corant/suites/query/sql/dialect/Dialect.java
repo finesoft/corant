@@ -25,6 +25,22 @@ public interface Dialect {
 
   String COUNT_FIELD_NAME = "_total";
 
+  String H2_JDBC_URL_PREFIX = "jdbc:h2";
+  String HSQL_JDBC_URL_PREFIX = "jdbc:hsqldb";
+  String DB2_JDBC_URL_PREFIX = "jdbc:db2:";
+  String MARIADB_JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+  String MARIADB_JDBC_URL_PREFIX = "jdbc:mariadb:";
+  String MYSQL_JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+  String MYSQL_GOOGLE_JDBC_DRIVER = "com.mysql.jdbc.GoogleDriver";
+  String MYSQL_LEGACY_JDBC_DRIVER = "com.mysql.jdbc.Driver";
+  String MYSQL_JDBC_URL_PREFIX = "jdbc:mysql:";
+  String ORACLE_JDBC_URL_PREFIX = "jdbc:oracle:";
+  String POSTGRESQL_JDBC_URL_PREFIX = "jdbc:postgresql:";
+  String SQLSERVER_JDBC_URL_PREFIX = "jdbc:sqlserver:";
+  String SYBASE_JDBC_URL_PREFIX = "jdbc:sybase:";
+  String TEST_CONTAINERS_JDBC_DRIVER = "org.testcontainers.jdbc.ContainerDatabaseDriver";
+  String TEST_CONTAINERS_JDBC_URL_PREFIX = "jdbc:tc:";
+
   static String getNonOrderByPart(String sql) {
     return SqlHelper.removeOrderBy(sql);
   }
@@ -69,16 +85,29 @@ public interface Dialect {
   boolean supportsLimit();
 
   public enum DBMS {
+
     MYSQL() {
       @Override
       public Dialect instance() {
         return MySQLDialect.INSTANCE;
+      }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(MYSQL_JDBC_URL_PREFIX) || URL.startsWith(MYSQL_GOOGLE_JDBC_DRIVER)
+            || URL.startsWith(MYSQL_JDBC_DRIVER) || URL.startsWith(MYSQL_LEGACY_JDBC_DRIVER)
+            || URL.startsWith(MARIADB_JDBC_DRIVER) || URL.startsWith(MARIADB_JDBC_URL_PREFIX);
       }
     },
     ORACLE() {
       @Override
       public Dialect instance() {
         return OracleDialect.INSTANCE;
+      }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(ORACLE_JDBC_URL_PREFIX);
       }
     },
     DB2() {
@@ -87,12 +116,22 @@ public interface Dialect {
       public Dialect instance() {
         return DB2Dialect.INSTANCE;
       }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(DB2_JDBC_URL_PREFIX);
+      }
     },
     H2() {
 
       @Override
       public Dialect instance() {
         return H2Dialect.INSTANCE;
+      }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(H2_JDBC_URL_PREFIX);
       }
     },
     HSQL() {
@@ -101,12 +140,22 @@ public interface Dialect {
       public Dialect instance() {
         return HSQLDialect.INSTANCE;
       }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(HSQL_JDBC_URL_PREFIX);
+      }
     },
     POSTGRE() {
 
       @Override
       public Dialect instance() {
         return PostgreSQLDialect.INSTANCE;
+      }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(POSTGRESQL_JDBC_URL_PREFIX);
       }
     },
     SQLSERVER2005() {
@@ -115,12 +164,22 @@ public interface Dialect {
       public Dialect instance() {
         return SQLServer2005Dialect.INSTANCE;
       }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
+      }
     },
     SQLSERVER2008() {
 
       @Override
       public Dialect instance() {
         return SQLServer2008Dialect.INSTANCE;
+      }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
       }
     },
     SQLSERVER2012() {
@@ -129,6 +188,11 @@ public interface Dialect {
       public Dialect instance() {
         return SQLServer2012Dialect.INSTANCE;
       }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
+      }
     },
     SYBASE() {
 
@@ -136,10 +200,24 @@ public interface Dialect {
       public Dialect instance() {
         return SybaseDialect.INSTANCE;
       }
+
+      @Override
+      boolean matchURL(String URL) {
+        return URL.startsWith(SYBASE_JDBC_URL_PREFIX);
+      }
     };
 
-    public Dialect instance() {
+    public static DBMS of(String url) {
+      for (DBMS d : DBMS.values()) {
+        if (d.matchURL(url)) {
+          return d;
+        }
+      }
       return null;
     }
+
+    public abstract Dialect instance();
+
+    abstract boolean matchURL(String URL);
   }
 }

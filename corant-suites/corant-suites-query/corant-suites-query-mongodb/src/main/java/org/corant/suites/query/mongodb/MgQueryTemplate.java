@@ -71,20 +71,30 @@ public class MgQueryTemplate {
   protected int offset = 0;
   protected boolean autoSetIdField = true;
 
-  @SuppressWarnings("resource")
-  private MgQueryTemplate(String database) {
-    shouldNotBlank(database, () -> new QueryRuntimeException("Data base can't not empty"));
-    if (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://")) {
-      String db = database.substring(database.lastIndexOf('/'));
-      this.database = new MongoClient(new MongoClientURI(database)).getDatabase(db);
-    } else {
-      this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
-          .orElseThrow(QueryRuntimeException::new);
-    }
+  private MgQueryTemplate(MongoDatabase database) {
+    this.database = shouldNotNull(database);
+  }
+
+  private MgQueryTemplate(String namedDatabase) {
+    database = findNamed(MongoDatabase.class, shouldNotNull(namedDatabase))
+        .orElseThrow(QueryRuntimeException::new);
+  }
+
+  public static MgQueryTemplate database(MongoClient client, String database) {
+    return new MgQueryTemplate(shouldNotNull(client).getDatabase(database));
+  }
+
+  public static MgQueryTemplate database(MongoDatabase database) {
+    return new MgQueryTemplate(database);
   }
 
   public static MgQueryTemplate database(String database) {
     return new MgQueryTemplate(database);
+  }
+
+  public static MgQueryTemplate database(String mongoClientUri, String queryDatabase) {
+    MongoClient mc = new MongoClient(new MongoClientURI(shouldNotBlank(mongoClientUri)));
+    return new MgQueryTemplate(shouldNotNull(mc).getDatabase(shouldNotBlank(queryDatabase)));
   }
 
   public List<Map<?, ?>> aggregate() {

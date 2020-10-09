@@ -165,7 +165,7 @@ public class HibernateOrmDeveloperKits {
         shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource(dsn -> dataSourceService.get(dsn));
+    usePum.configDataSource(dsn -> dataSourceService.getManaged(dsn));
     props.putAll(usePum.getProperties());
     EntityManagerFactoryBuilderImpl emfb = EntityManagerFactoryBuilderImpl.class
         .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));

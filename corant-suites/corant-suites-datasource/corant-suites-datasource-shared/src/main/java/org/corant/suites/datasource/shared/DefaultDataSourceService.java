@@ -32,7 +32,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class DefaultDataSourceService implements DataSourceService {
 
   @Override
-  public DataSource get(String name) {
+  public DataSource getManaged(String name) {
     if (isNotBlank(name) && name.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
       try {
         return forceCast(new InitialContext().lookup(name));

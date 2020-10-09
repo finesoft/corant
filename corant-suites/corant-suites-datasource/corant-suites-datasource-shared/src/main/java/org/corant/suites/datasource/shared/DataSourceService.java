@@ -13,6 +13,7 @@
  */
 package org.corant.suites.datasource.shared;
 
+import java.util.Properties;
 import javax.sql.DataSource;
 
 /**
@@ -23,6 +24,32 @@ import javax.sql.DataSource;
  */
 public interface DataSourceService {
 
-  DataSource get(String name);
+  default DataSource get(String jdbcUrl) {
+    return new DriverManagerDataSource(jdbcUrl);
+  }
 
+  default DataSource get(String jdbcUrl, Properties properties) {
+    return new DriverManagerDataSource(jdbcUrl, properties);
+  }
+
+  default DataSource get(String jdbcUrl, String driverClassName, Properties properties,
+      String username, String password) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password);
+  }
+
+  default DataSource get(String jdbcUrl, String driverClassName, Properties properties,
+      String username, String password, String catalog, String schema) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password,
+        catalog, schema);
+  }
+
+  default DataSource get(String jdbcUrl, String username, String password) {
+    return new DriverManagerDataSource(jdbcUrl, username, password);
+  }
+
+  default DataSource get(String jdbcUrl, String driverClassName, String username, String password) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
+  }
+
+  DataSource getManaged(String name);
 }

@@ -38,8 +38,6 @@ public interface Dialect {
   String POSTGRESQL_JDBC_URL_PREFIX = "jdbc:postgresql:";
   String SQLSERVER_JDBC_URL_PREFIX = "jdbc:sqlserver:";
   String SYBASE_JDBC_URL_PREFIX = "jdbc:sybase:";
-  String TEST_CONTAINERS_JDBC_DRIVER = "org.testcontainers.jdbc.ContainerDatabaseDriver";
-  String TEST_CONTAINERS_JDBC_URL_PREFIX = "jdbc:tc:";
 
   static String getNonOrderByPart(String sql) {
     return SqlHelper.removeOrderBy(sql);

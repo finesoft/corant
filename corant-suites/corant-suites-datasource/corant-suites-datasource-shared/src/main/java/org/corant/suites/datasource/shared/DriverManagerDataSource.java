@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
@@ -63,7 +64,7 @@ public class DriverManagerDataSource implements DataSource {
 
   public DriverManagerDataSource(String jdbcUrl, String driverClassName, Properties properties,
       String username, String password, String catalog, String schema) {
-    this.jdbcUrl = trim(jdbcUrl);
+    this.jdbcUrl = Configs.assemblyStringConfigProperty(trim(jdbcUrl));
     this.catalog = catalog;
     this.schema = schema;
     driverProperties = new Properties();

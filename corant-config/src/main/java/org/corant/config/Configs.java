@@ -13,9 +13,9 @@
  */
 package org.corant.config;
 
-import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.isNotBlank;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +37,8 @@ public class Configs {
    * replace the name variables of the input value separately and then return the assembled values.
    * If there is no attribute name variable, the passed value is not changed and it is returned
    * directly. This is used to enhance some annotated configuration flexibility.
+   *
+   * NOTE: This function only supports at most one variable
    *
    * @param key
    * @return assemblyStringConfigProperties
@@ -73,16 +75,7 @@ public class Configs {
    */
   public static String assemblyStringConfigProperty(String value) {
     if (isNotBlank(value)) {
-      int s;
-      int e;
-      if ((s = value.indexOf("${")) != -1 && (e = value.indexOf('}')) != -1 && e - s > 2) {
-        String proKey = value.substring(s + 2, e);
-        if (proKey.length() > 0) {
-          String proVals = getConfig().getOptionalValue(proKey, String.class).get();
-          return new StringBuilder(value.substring(0, s)).append(proVals)
-              .append(value.substring(e + 1)).toString();
-        }
-      }
+      return resolveVariable(value);
     }
     return value;
   }
@@ -100,4 +93,24 @@ public class Configs {
     return op.orElseGet(null);
   }
 
+  public static String resolveVariable(String propertyName) {
+    int startVar = 0;
+    String resolvedValue = propertyName;
+    while ((startVar = resolvedValue.indexOf("${", startVar)) >= 0) {
+      int endVar = resolvedValue.indexOf('}', startVar);
+      if (endVar <= 0) {
+        break;
+      }
+      String varName = resolvedValue.substring(startVar + 2, endVar);
+      if (varName.isEmpty()) {
+        break;
+      }
+      Optional<String> varVal = getConfig().getOptionalValue(varName, String.class);
+      if (varVal.isPresent()) {
+        resolvedValue = resolveVariable(resolvedValue.replace("${" + varName + "}", varVal.get()));
+      }
+      startVar++;
+    }
+    return resolvedValue;
+  }
 }

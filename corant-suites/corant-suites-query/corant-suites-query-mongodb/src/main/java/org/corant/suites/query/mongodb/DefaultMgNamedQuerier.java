@@ -16,23 +16,18 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.asDefaultString;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.bson.conversions.Bson;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
+import org.corant.suites.query.mongodb.converter.Bsons;
 import org.corant.suites.query.shared.FetchQueryResolver;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.BasicDBObject;
 
 /**
  * corant-suites-query
@@ -66,27 +61,6 @@ public class DefaultMgNamedQuerier
     name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);
-  }
-
-  @SuppressWarnings("rawtypes")
-  static Object resolve(Object x) throws JsonProcessingException {
-    if (x instanceof Iterable) {
-      List<Bson> list = new ArrayList<>();
-      for (Object item : (Iterable) x) {
-        list.add(BasicDBObject
-            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
-      }
-      return list;
-    } else if (x instanceof Object[]) {
-      List<Bson> list = new ArrayList<>();
-      for (Object item : (Object[]) x) {
-        list.add(BasicDBObject
-            .parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(item)));
-      }
-      return list;
-    } else {
-      return BasicDBObject.parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x));
-    }
   }
 
   @Override
@@ -132,7 +106,7 @@ public class DefaultMgNamedQuerier
           Object x = queryScript.get(mgo.getOps());
           if (x != null) {
             try {
-              script.put(mgo, resolve(x));
+              script.put(mgo, Bsons.toBson(x));
             } catch (Exception e) {
               throw new QueryRuntimeException(e);
             }

@@ -21,7 +21,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +43,7 @@ public class DriverManagerDataSource implements DataSource {
   protected static final String USER = "user";
 
   protected final String jdbcUrl;
-  protected final Properties driverProperties;
+  protected final Properties properties;
   protected final String catalog;
   protected final String schema;
   protected Driver driver;
@@ -65,19 +64,17 @@ public class DriverManagerDataSource implements DataSource {
   public DriverManagerDataSource(String jdbcUrl, String driverClassName, Properties properties,
       String username, String password, String catalog, String schema) {
     this.jdbcUrl = Configs.assemblyStringConfigProperty(trim(jdbcUrl));
-    this.catalog = catalog;
-    this.schema = schema;
-    driverProperties = new Properties();
+    this.catalog = Configs.assemblyStringConfigProperty(catalog);
+    this.schema = Configs.assemblyStringConfigProperty(schema);
+    this.properties = new Properties();
     if (properties != null) {
-      for (Entry<Object, Object> entry : properties.entrySet()) {
-        driverProperties.setProperty(entry.getKey().toString(), entry.getValue().toString());
-      }
+      properties.forEach((k, v) -> this.properties.put(k.toString(), v.toString()));
     }
     if (username != null) {
-      driverProperties.put(USER, driverProperties.getProperty("user", username));
+      this.properties.put(USER, this.properties.getProperty("user", username));
     }
     if (password != null) {
-      driverProperties.put(PASSWORD, driverProperties.getProperty("password", password));
+      this.properties.put(PASSWORD, this.properties.getProperty("password", password));
     }
 
     if (driverClassName != null) {
@@ -161,13 +158,13 @@ public class DriverManagerDataSource implements DataSource {
 
   @Override
   public Connection getConnection() throws SQLException {
-    return getConnection(driver.connect(jdbcUrl, driverProperties));
+    return getConnection(driver.connect(jdbcUrl, properties));
   }
 
   @Override
   public Connection getConnection(final String username, final String password)
       throws SQLException {
-    final Properties cloned = (Properties) driverProperties.clone();
+    final Properties cloned = (Properties) properties.clone();
     if (username != null) {
       cloned.put("user", username);
       if (cloned.containsKey("username")) {

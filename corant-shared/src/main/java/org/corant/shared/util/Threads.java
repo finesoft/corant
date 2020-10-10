@@ -21,7 +21,7 @@ package org.corant.shared.util;
  */
 public class Threads {
 
-  public static void tryThreadSleep(Long ms) {
+  public static void tryThreadSleep(long ms) {
     try {
       Thread.sleep(ms);
     } catch (InterruptedException e) {

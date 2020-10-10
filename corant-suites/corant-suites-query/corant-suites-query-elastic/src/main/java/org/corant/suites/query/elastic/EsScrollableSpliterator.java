@@ -22,6 +22,7 @@ import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Streams.AbstractBatchHandlerSpliterator;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
@@ -47,21 +48,15 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
 
   public EsScrollableSpliterator(TransportClient client, QueryBuilder queryBuilder,
       String indexName, String typeName) {
-    this(client, queryBuilder, indexName, typeName, null, DFLT_BATCH_SIZE, seq -> {
-    });
+    this(client, queryBuilder, indexName, typeName, null, DFLT_BATCH_SIZE,
+        Functions.emptyConsumer());
   }
 
   public EsScrollableSpliterator(TransportClient client, QueryBuilder queryBuilder,
       String indexName, String typeName, TimeValue scrollKeepAlive, int batchSize,
       Consumer<Long> fn) {
-    super(Long.MAX_VALUE, Spliterator.IMMUTABLE, batchSize, fn);
-    this.client = client;
-    TimeValue _tv = scrollKeepAlive == null ? TimeValue.timeValueMinutes(1) : scrollKeepAlive;
-    this.scrollKeepAlive = _tv;
-    searchResponse = client.prepareSearch(indexName).setTypes(typeName)
-        .addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC).setScroll(_tv)
-        .setQuery(queryBuilder).setSize(batchSize).get();
-    batchHitCounts = searchResponse.getHits().getHits().length;
+    this(client, indexName, scrollKeepAlive, batchSize, fn, request -> request.setTypes(typeName)
+        .addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC).setQuery(queryBuilder));
   }
 
   public EsScrollableSpliterator(TransportClient client, String indexName, String script) {
@@ -70,13 +65,21 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
 
   public EsScrollableSpliterator(TransportClient client, String indexName, String script,
       TimeValue scrollKeepAlive, int batchSize, Consumer<Long> fn) {
+    this(client, indexName, scrollKeepAlive, batchSize, fn,
+        request -> request.setSource(EsQueryExecutor.buildSearchSourceBuilder(script)));
+  }
+
+  public EsScrollableSpliterator(TransportClient client, String indexName,
+      TimeValue scrollKeepAlive, int batchSize, Consumer<Long> fn,
+      Consumer<SearchRequestBuilder> callback) {
     super(Long.MAX_VALUE, Spliterator.IMMUTABLE, batchSize, fn);
     this.client = client;
-    this.scrollKeepAlive = defaultObject(scrollKeepAlive, TimeValue.timeValueMinutes(1));
-    searchResponse =
-        client.prepareSearch(indexName).setSource(EsQueryExecutor.buildSearchSourceBuilder(script))
-            .addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC).setScroll(this.scrollKeepAlive)
-            .setSize(batchSize).get();
+    this.scrollKeepAlive = defaultObject(scrollKeepAlive, () -> TimeValue.timeValueMinutes(1));
+    SearchRequestBuilder request = client.prepareSearch(indexName);
+    if (callback != null) {
+      callback.accept(request);
+    }
+    searchResponse = request.setScroll(this.scrollKeepAlive).setSize(batchSize).get();
     batchHitCounts = searchResponse.getHits().getHits().length;
   }
 

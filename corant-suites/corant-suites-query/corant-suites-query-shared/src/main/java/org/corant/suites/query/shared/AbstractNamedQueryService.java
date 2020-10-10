@@ -244,12 +244,13 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    */
   protected <T> Stream<T> stream(String queryName, StreamQueryParameter param) {
     return streamOf(new Iterator<T>() {
-      final Forwarding<T> buffer = doForward(queryName, param);
-      int counter = 1;
+      Forwarding<T> buffer = null;
+      int counter = 0;
       T next = null;
 
       @Override
       public boolean hasNext() {
+        initialize();
         if (!param.terminateIf(counter, next)) {
           if (!buffer.hasResults()) {
             if (buffer.hasNext()) {
@@ -265,6 +266,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       @Override
       public T next() {
+        initialize();
         if (!buffer.hasResults()) {
           throw new NoSuchElementException();
         }
@@ -273,7 +275,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         return next;
       }
 
-      Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
+      private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
           return Retry.retryer().times(parameter.getRetryTimes())
               .interval(parameter.getRetryInterval())
@@ -281,6 +283,13 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
               .execute(() -> forward(queryName, parameter));
         } else {
           return forward(queryName, parameter);
+        }
+      }
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = defaultObject(doForward(queryName, param), Forwarding::inst);
+          counter = buffer.hasResults() ? 1 : 0;
         }
       }
     });

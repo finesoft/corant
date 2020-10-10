@@ -318,10 +318,11 @@ public class SqlQueryTemplate {
   public Stream<Map<String, Object>> stream() {
     return streamOf(new Iterator<Map<String, Object>>() {
 
-      final Forwarding<Map<String, Object>> buffer = forward();
+      Forwarding<Map<String, Object>> buffer = null;
 
       @Override
       public boolean hasNext() {
+        initialize();
         if (!buffer.hasResults()) {
           if (buffer.hasNext()) {
             offset += limit;
@@ -336,10 +337,17 @@ public class SqlQueryTemplate {
 
       @Override
       public Map<String, Object> next() {
+        initialize();
         if (!buffer.hasResults()) {
           throw new NoSuchElementException();
         }
         return buffer.getResults().remove(0);
+      }
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = defaultObject(forward(), Forwarding::inst);
+        }
       }
     });
   }

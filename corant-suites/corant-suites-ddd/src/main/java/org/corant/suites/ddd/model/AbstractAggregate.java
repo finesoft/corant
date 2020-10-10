@@ -197,15 +197,15 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   /**
    * Set the aggregate lifecycle stage and raise lifecycle event.
    *
-   * Do not raise Lifecycle.LOAD event by default.
+   * Raise Lifecycle.POST_PERSISTED Lifecycle.POST_UPDATED Lifecycle.POST_REMOVED event by default.
    *
    * @param lifecycle
-   * @return lifecycle
    */
   protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
-      if (lifecycle != Lifecycle.LOADED) {
+      if (lifecycle == Lifecycle.POST_PERSISTED || lifecycle == Lifecycle.POST_UPDATED
+          || lifecycle == Lifecycle.POST_REMOVED) {
         this.raise(new AggregateLifecycleEvent(this), AggregateTypeLiteral.of(getClass()));
       }
     }

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Conversions.toEnum;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.Maps.getOptMapObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
@@ -345,16 +346,14 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
-    final Forwarding<T> buffer = Forwarding.inst();
-    Stream<T> stream = streamOf(new Iterator<T>() {
-      int counter = 1;
+    final Iterator<T> iterator = new Iterator<>() {
+      int counter = 0;
+      Forwarding<T> buffer = null;
       T next = null;
-      {
-        buffer.with(doForward(cursor));
-      }
 
       @Override
       public boolean hasNext() {
+        initialize();
         boolean more = false;
         if (!parameter.terminateIf(counter, next)) {
           if (!buffer.hasResults()) {
@@ -374,6 +373,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
       @Override
       public T next() {
+        initialize();
         if (!buffer.hasResults()) {
           throw new NoSuchElementException();
         }
@@ -382,7 +382,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         return next;
       }
 
-      Forwarding<T> doForward(MongoCursor<Document> it) {
+      private Forwarding<T> doForward(MongoCursor<Document> it) {
         int size = parameter.getLimit();
         List<Object> list = new ArrayList<>(size);
         while (it.hasNext() && --size >= 0) {
@@ -391,8 +391,16 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         fetch(list, querier);
         return Forwarding.of(querier.resolveResult(list), it.hasNext());
       }
-    }).onClose(cursor::close);
-    Cleaner.create().register(buffer, () -> {
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = defaultObject(doForward(cursor), Forwarding::inst);
+          counter = buffer.hasResults() ? 1 : 0;
+        }
+      }
+    };
+    Stream<T> stream = streamOf(iterator).onClose(cursor::close);
+    Cleaner.create().register(iterator, () -> {
       if (cursor != null) {
         cursor.close();
       }

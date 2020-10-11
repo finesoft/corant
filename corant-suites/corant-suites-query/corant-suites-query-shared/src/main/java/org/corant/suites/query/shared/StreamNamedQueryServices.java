@@ -128,11 +128,26 @@ public class StreamNamedQueryServices {
     return this;
   }
 
+  /**
+   * Used to improve the efficiency of query execution. The current implementation method of
+   * streaming query mainly uses the forward query ({@link QueryService#forward(Object, Object)}) to
+   * obtain query data in batches; this method can perform some intervention before each batch of
+   * forward to improve query efficiency.
+   *
+   * @param enhancer
+   * @return enhancer
+   */
   public StreamNamedQueryServices enhancer(BiConsumer<Object, StreamQueryParameter> enhancer) {
     parameter.enhancer(enhancer);
     return this;
   }
 
+  /**
+   * The expected size of the result set of each iteration of the streaming query
+   *
+   * @param limit
+   * @return limit
+   */
   public StreamNamedQueryServices limit(Integer limit) {
     parameter.limit(limit);
     return this;
@@ -176,14 +191,39 @@ public class StreamNamedQueryServices {
     return stream().map(x -> objectMapper.toObject(x, cls));
   }
 
+  /**
+   * Accept a Predicate&lt;Integer&gt; to interrupt the current stream. When Predicate test returns
+   * false, interrupt the current stream. The parameter accepted by Predicate.test is the number of
+   * query records that have been output.
+   *
+   * @param terminater
+   * @return terminateByCounter
+   */
   public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminater) {
     return terminater((c, o) -> terminater.test(c));
   }
 
+  /**
+   * Accept a Predicate&lt;Object&gt; to interrupt the current stream. When Predicate test returns
+   * false, interrupt the current stream. The parameter accepted by Predicate.test is the last
+   * record of the query records that have been output.
+   *
+   * @param terminater
+   * @return terminateByLastRecord
+   */
   public StreamNamedQueryServices terminateByLastRecord(Predicate<Object> terminater) {
     return terminater((c, o) -> terminater.test(o));
   }
 
+  /**
+   * Accept a Predicate&lt;Integer,Object&gt; to interrupt the current stream. When Predicate test
+   * returns false, interrupt the current stream. The parameters accepted by Predicate.test is the
+   * last record of the query records that have been output and he number of query records that have
+   * been output.
+   *
+   * @param terminater
+   * @return terminater
+   */
   public StreamNamedQueryServices terminater(BiPredicate<Integer, Object> terminater) {
     parameter.terminater(terminater);
     return this;

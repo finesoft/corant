@@ -20,6 +20,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,16 +51,16 @@ public class Resources {
   public static final Logger logger = Logger.getLogger(Resources.class.getName());
 
   /**
-   * Get URL resources from specified url path, support Glob / Regex Pattern.
+   * Get URL resources from specified URL path, support Glob / Regex Pattern.
    * <p>
    * <li>The incoming path start with 'filesystem:'({@link SourceType#FILE_SYSTEM}) means that get
-   * resouces from file system.</li>
+   * resources from file system.</li>
    *
    * <li>The incoming path start with 'classpath:' ({@link SourceType#CLASS_PATH}) means that get
-   * resouces from class path.</li>
+   * resources from class path.</li>
    *
-   * <li>The incoming path start with 'url:' ({@link SourceType#CLASS_PATH}) means that get resouces
-   * from url.</li>
+   * <li>The incoming path start with 'url:' ({@link SourceType#CLASS_PATH}) means that get
+   * resources from URL.</li>
    *
    * Note: If the incoming path non start with {@link SourceType} that means not specified schema
    * then use class path.
@@ -179,6 +180,17 @@ public class Resources {
   public static InputStreamResource fromInputStream(InputStream inputStream, String location)
       throws IOException {
     return new InputStreamResource(inputStream, location, null);
+  }
+
+  /**
+   * Get the resources of a relative path through a class and path
+   *
+   * @param relative
+   * @param path
+   * @return fromRelativeClass
+   */
+  public static URLResource fromRelativeClass(Class<?> relative, String path) {
+    return ClassPaths.fromRelative(relative, path);
   }
 
   /**
@@ -723,7 +735,22 @@ public class Resources {
   public interface Resource {
 
     /**
-     * Location of this resource, depends on original source. Depending on source type, this may be:
+     * Return a byte array for the content of this resource, please evaluate the size of the
+     * resource when using it to avoid OOM.
+     *
+     * @return
+     * @throws IOException getBytes
+     */
+    default byte[] getBytes() throws IOException {
+      try (ByteArrayOutputStream os = new ByteArrayOutputStream(); InputStream is = openStream()) {
+        Streams.copy(is, os);
+        return os.toByteArray();
+      }
+    }
+
+    /**
+     * Return the location of this resource, depends on original source. Depending on source type,
+     * this may be:
      * <ul>
      * <li>FILE_SYSTEM - absolute path to the file</li>
      * <li>CLASS_PATH - class resource path</li>
@@ -734,8 +761,8 @@ public class Resources {
     String getLocation();
 
     /**
-     * The informantions of this resource. For example, author, date created and date modified, size
-     * etc.
+     * Return the meta information of this resource. For example: author, date created and date
+     * modified,size etc.
      *
      * @return getMetadata
      */
@@ -760,14 +787,14 @@ public class Resources {
     }
 
     /**
-     * original source type
+     * Return the original source type
      *
      * @return getSourceType
      */
     SourceType getSourceType();
 
     /**
-     * Return an {@link InputStream} for the content of an resource
+     * Return an {@link InputStream} for the content of this resource
      *
      * @return
      * @throws IOException openStream
@@ -775,7 +802,7 @@ public class Resources {
     InputStream openStream() throws IOException;
 
     /**
-     * Return an {@link InputStream} for the content of an resource, throws RuntimeException.
+     * Return an {@link InputStream} for the content of the resource, do not throw any exceptions.
      *
      * @return tryOpenStream
      */

@@ -58,7 +58,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Resources.URLResource;
 
 /**
@@ -217,7 +216,7 @@ public class ClassPaths {
    * @param path
    * @return fromRelative
    */
-  public static Resource fromRelative(Class<?> relative, String path) {
+  public static URLResource fromRelative(Class<?> relative, String path) {
     URL url = null;
     if (path != null) {
       if (relative != null) {

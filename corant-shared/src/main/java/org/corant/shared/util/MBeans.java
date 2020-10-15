@@ -30,6 +30,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-shared
  *
+ * Simple tool classes are used for MBean-related registration and cancellation operations.
+ *
  * @author bingo 12:00:58
  *
  */
@@ -93,6 +95,16 @@ public class MBeans {
     return registerToMBean(objectNaming, object, true);
   }
 
+  /**
+   * Register to the MBean server, can re-register if necessary.
+   *
+   * @param objectNaming
+   * @param object
+   * @param reregister If the object has already registered with the object naming, if this
+   *        parameter is true then return the registered object instance else the object will be
+   *        unregistered and then re-register and return the object instance.
+   * @return registerToMBean
+   */
   public static ObjectInstance registerToMBean(String objectNaming, Object object,
       boolean reregister) {
     if (object == null || isBlank(objectNaming)) {

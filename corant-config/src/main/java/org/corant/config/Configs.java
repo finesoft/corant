@@ -64,11 +64,11 @@ public class Configs {
   }
 
   /**
-   * According to the input value, and analyze whether the value contains the configuration
-   * propertyname variable, for example:'${property.name}'. If the property name variable exists,
-   * replace the name variable with the relevant configuration property value, and then return the
-   * assembledvalue, If there is no property name variable, it doesn't change the passed value and
-   * directlyreturn it. This is use for enhance some annotated configuration flexibility.
+   * According to the input value, and analyze whether the value contains the configuration property
+   * name variable, for example:'${property.name}'. If the property name variable exists, replace
+   * the name variable with the relevant configuration property value, and then return the assembled
+   * value, If there is no property name variable, it doesn't change the passed value and directly
+   * return it. This is use for enhance some annotated configuration flexibility.
    *
    * @param value
    * @return assemblyStringConfigProperty

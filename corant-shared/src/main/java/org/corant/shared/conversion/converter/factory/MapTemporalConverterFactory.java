@@ -165,7 +165,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       if (obj instanceof Integer) {
         return (Integer) obj;
       } else if (obj.getClass().equals(Integer.TYPE)) {
-        return (Integer) obj;
+        return (int) obj;
       } else if (obj instanceof Number) {
         return ((Number) obj).intValue();
       } else if (obj instanceof String) {
@@ -182,7 +182,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       if (obj instanceof Long) {
         return (Long) obj;
       } else if (obj.getClass().equals(Long.TYPE)) {
-        return (Long) obj;
+        return (long) obj;
       } else if (obj instanceof Number) {
         return ((Number) obj).longValue();
       } else if (obj instanceof String) {

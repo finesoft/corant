@@ -167,6 +167,7 @@ public class Strings {
   /**
    * <pre>
    * Strings.isBlank(null)      = true
+   * Strings.isBlank("\t")      = true
    * Strings.isBlank("")        = true
    * Strings.isBlank(" ")       = true
    * Strings.isBlank("abc")     = false

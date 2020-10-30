@@ -15,8 +15,8 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
-import static org.corant.suites.ddd.repository.JPAQueryBuilder.namedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +28,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
 import org.corant.shared.util.Objects;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
+import org.corant.suites.ddd.repository.JPAQueies.JPAQuery;
+import org.corant.suites.ddd.repository.JPAQueies.TypedJPAQuery;
 
 /**
  * corant-suites-ddd
@@ -113,23 +116,7 @@ public interface JPARepository extends Repository<Query> {
   }
 
   default <T> T get(Query query) {
-    List<T> result = this.select(query);
-    if (!isEmpty(result)) {
-      if (result.size() > 1) {
-        logger.warning(() -> String.format(
-            "The query ['%s'] result set record number > 1, may be breach intentions.", query));
-      }
-      return result.get(0);
-    }
-    return null;
-  }
-
-  default <T> T get(String queryName, Map<?, ?> param) {
-    return this.get(namedQuery(queryName).parameters(param).build(getEntityManager()));
-  }
-
-  default <T> T get(String queryName, Object... param) {
-    return this.get(namedQuery(queryName).parameters(param).build(getEntityManager()));
+    return forceCast(query.getSingleResult());
   }
 
   EntityManager getEntityManager();
@@ -159,10 +146,38 @@ public interface JPARepository extends Repository<Query> {
     return getEntityManager().merge(entity);
   }
 
+  default JPAQuery namedQuery(final String name) {
+    return JPAQueies.namedQuery(name).entityManager(this::getEntityManager);
+  }
+
+  default <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
+    return JPAQueies.namedQuery(name, type).entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery namedStoredProcedureQuery(final String name) {
+    return JPAQueies.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery nativeQuery(final String sqlString) {
+    return JPAQueies.nativeQuery(sqlString).entityManager(this::getEntityManager);
+  }
+
   @Override
   default <T> boolean persist(T entity) {
     getEntityManager().persist(entity);
     return true;
+  }
+
+  default <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
+    return JPAQueies.query(criteriaQuery).entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery query(final String qlString) {
+    return JPAQueies.query(qlString).entityManager(this::getEntityManager);
+  }
+
+  default <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
+    return JPAQueies.query(qlString, type).entityManager(this::getEntityManager);
   }
 
   @Override
@@ -178,8 +193,8 @@ public interface JPARepository extends Repository<Query> {
     if (isEmpty(ids)) {
       return new ArrayList<>();
     } else {
-      return linkedHashSetOf(ids).stream().map(i -> get(entityClass, i))
-          .filter(Objects::isNotNull).collect(Collectors.toList());
+      return linkedHashSetOf(ids).stream().map(i -> get(entityClass, i)).filter(Objects::isNotNull)
+          .collect(Collectors.toList());
     }
   }
 
@@ -193,12 +208,7 @@ public interface JPARepository extends Repository<Query> {
     return resultList;
   }
 
-  default <T> List<T> select(String queryName, Map<?, ?> param) {
-    return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
+  default JPAQuery storedProcedureQuery(final String procedureName) {
+    return JPAQueies.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
   }
-
-  default <T> List<T> select(String queryName, Object... param) {
-    return this.select(namedQuery(queryName).parameters(param).build(getEntityManager()));
-  }
-
 }

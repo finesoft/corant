@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.repository;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Objects.asString;
@@ -21,18 +22,22 @@ import static org.corant.shared.util.Objects.forceCast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.ManagedType;
 
 /**
  * corant-suites-ddd
@@ -46,6 +51,9 @@ public class JPAQueries {
 
   final static TupleObjectConverter tupleObjectConverter =
       ServiceLoader.load(TupleObjectConverter.class, defaultClassLoader()).findFirst().orElse(null);
+
+  final static Set<Class<?>> persistenceClasses =
+      Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   public static JPAQuery namedQuery(final String name) {
     return new JPAQuery() {
@@ -104,18 +112,31 @@ public class JPAQueries {
   }
 
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
-    return new TypedJPAQuery<>(type) {
-      @Override
-      public String toString() {
-        return "Native query: " + sqlString + getParameterDescription();
-      }
+    if (isPersistenceClass(type) || tupleObjectConverter == null) {
+      return new TypedJPAQuery<>() {
+        @Override
+        public String toString() {
+          return "Native query: " + sqlString + getParameterDescription();
+        }
 
-      @Override
-      protected Query createQuery() {
-        return entityManagerSupplier.get().createNativeQuery(sqlString,
-            tupleObjectConverter == null ? type : Tuple.class);
-      }
-    };
+        @Override
+        protected Query createQuery() {
+          return entityManagerSupplier.get().createNativeQuery(sqlString, type);
+        }
+      };
+    } else {
+      return new TypedJPAQuery<>(type) {
+        @Override
+        public String toString() {
+          return "Native query: " + sqlString + getParameterDescription();
+        }
+
+        @Override
+        protected Query createQuery() {
+          return entityManagerSupplier.get().createNativeQuery(sqlString, Tuple.class);
+        }
+      };
+    }
   }
 
   public static JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
@@ -216,6 +237,20 @@ public class JPAQueries {
             resultSetMappings);
       }
     };
+  }
+
+  static boolean isPersistenceClass(Class<?> type) {
+    if (persistenceClasses.isEmpty()) {
+      synchronized (JPAQueries.class) {
+        if (persistenceClasses.isEmpty()) {
+          select(EntityManagerFactory.class).forEach(emf -> {
+            emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType)
+                .forEach(persistenceClasses::add);
+          });
+        }
+      }
+    }
+    return persistenceClasses.contains(type);
   }
 
   public static abstract class AbstractQuery {
@@ -384,8 +419,7 @@ public class JPAQueries {
         return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
       } else {
         List<Tuple> resultList = populateQuery(createQuery()).getResultList();
-        return resultList != null ? resultList.stream()
-            .map(r -> tupleObjectConverter.convert(r, resultType)).collect(Collectors.toList())
+        return resultList != null ? tupleObjectConverter.convert(resultList, resultType)
             : new ArrayList<>();
       }
     }

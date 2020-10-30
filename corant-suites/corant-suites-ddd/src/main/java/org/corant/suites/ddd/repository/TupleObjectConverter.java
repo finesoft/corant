@@ -13,10 +13,20 @@
  */
 package org.corant.suites.ddd.repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Tuple;
 
 public interface TupleObjectConverter {
 
   <T> T convert(Tuple tuple, Class<T> type);
+
+  default <T> List<T> convert(List<Tuple> tuples, Class<T> type) {
+    List<T> result = new ArrayList<>(tuples.size());
+    for (Tuple tuple : tuples) {
+      result.add(convert(tuple, type));
+    }
+    return result;
+  }
 
 }

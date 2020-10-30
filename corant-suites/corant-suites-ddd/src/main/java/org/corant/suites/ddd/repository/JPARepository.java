@@ -33,8 +33,8 @@ import org.corant.shared.util.Objects;
 import org.corant.suites.ddd.model.Aggregate;
 import org.corant.suites.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.suites.ddd.model.Entity;
-import org.corant.suites.ddd.repository.JPAQueies.JPAQuery;
-import org.corant.suites.ddd.repository.JPAQueies.TypedJPAQuery;
+import org.corant.suites.ddd.repository.JPAQueries.JPAQuery;
+import org.corant.suites.ddd.repository.JPAQueries.TypedJPAQuery;
 
 /**
  * corant-suites-ddd
@@ -147,19 +147,27 @@ public interface JPARepository extends Repository<Query> {
   }
 
   default JPAQuery namedQuery(final String name) {
-    return JPAQueies.namedQuery(name).entityManager(this::getEntityManager);
+    return JPAQueries.namedQuery(name).entityManager(this::getEntityManager);
   }
 
   default <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
-    return JPAQueies.namedQuery(name, type).entityManager(this::getEntityManager);
+    return JPAQueries.namedQuery(name, type).entityManager(this::getEntityManager);
   }
 
   default JPAQuery namedStoredProcedureQuery(final String name) {
-    return JPAQueies.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
+    return JPAQueries.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
   }
 
   default JPAQuery nativeQuery(final String sqlString) {
-    return JPAQueies.nativeQuery(sqlString).entityManager(this::getEntityManager);
+    return JPAQueries.nativeQuery(sqlString).entityManager(this::getEntityManager);
+  }
+
+  default <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
+    return JPAQueries.nativeQuery(sqlString, type).entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
+    return JPAQueries.nativeQuery(sqlString, resultSetMapping).entityManager(this::getEntityManager);
   }
 
   @Override
@@ -169,15 +177,15 @@ public interface JPARepository extends Repository<Query> {
   }
 
   default <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
-    return JPAQueies.query(criteriaQuery).entityManager(this::getEntityManager);
+    return JPAQueries.query(criteriaQuery).entityManager(this::getEntityManager);
   }
 
   default JPAQuery query(final String qlString) {
-    return JPAQueies.query(qlString).entityManager(this::getEntityManager);
+    return JPAQueries.query(qlString).entityManager(this::getEntityManager);
   }
 
   default <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
-    return JPAQueies.query(qlString, type).entityManager(this::getEntityManager);
+    return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
   }
 
   @Override
@@ -209,6 +217,17 @@ public interface JPARepository extends Repository<Query> {
   }
 
   default JPAQuery storedProcedureQuery(final String procedureName) {
-    return JPAQueies.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
+    return JPAQueries.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery storedProcedureQuery(final String procedureName, final Class<?>... type) {
+    return JPAQueries.storedProcedureQuery(procedureName, type)
+        .entityManager(this::getEntityManager);
+  }
+
+  default JPAQuery storedProcedureQuery(final String procedureName,
+      final String... resultSetMappings) {
+    return JPAQueries.storedProcedureQuery(procedureName, resultSetMappings)
+        .entityManager(this::getEntityManager);
   }
 }

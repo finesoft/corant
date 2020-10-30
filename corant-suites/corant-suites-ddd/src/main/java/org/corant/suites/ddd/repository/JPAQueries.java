@@ -14,7 +14,9 @@
 package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,10 +24,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 
@@ -35,9 +40,12 @@ import javax.persistence.criteria.CriteriaQuery;
  * @author bingo 下午4:07:53
  *
  */
-public class JPAQueies {
+public class JPAQueries {
 
-  static Logger logger = Logger.getLogger(JPAQueies.class.getName());
+  static Logger logger = Logger.getLogger(JPAQueries.class.getName());
+
+  final static TupleObjectConverter tupleObjectConverter =
+      ServiceLoader.load(TupleObjectConverter.class, defaultClassLoader()).findFirst().orElse(null);
 
   public static JPAQuery namedQuery(final String name) {
     return new JPAQuery() {
@@ -95,6 +103,35 @@ public class JPAQueies {
     };
   }
 
+  public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
+    return new TypedJPAQuery<>(type) {
+      @Override
+      public String toString() {
+        return "Native query: " + sqlString + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createNativeQuery(sqlString,
+            tupleObjectConverter == null ? type : Tuple.class);
+      }
+    };
+  }
+
+  public static JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
+    return new JPAQuery() {
+      @Override
+      public String toString() {
+        return "Native query: " + sqlString + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createNativeQuery(sqlString, resultSetMapping);
+      }
+    };
+  }
+
   public static <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
     return new TypedJPAQuery<>() {
       @Override
@@ -147,6 +184,36 @@ public class JPAQueies {
       @Override
       protected Query createQuery() {
         return entityManagerSupplier.get().createStoredProcedureQuery(procedureName);
+      }
+    };
+  }
+
+  public static JPAQuery storedProcedureQuery(final String procedureName, final Class<?>... type) {
+    return new JPAQuery() {
+      @Override
+      public String toString() {
+        return "Stored proceduce query: " + procedureName + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createStoredProcedureQuery(procedureName, type);
+      }
+    };
+  }
+
+  public static JPAQuery storedProcedureQuery(final String procedureName,
+      final String... resultSetMappings) {
+    return new JPAQuery() {
+      @Override
+      public String toString() {
+        return "Stored proceduce query: " + procedureName + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createStoredProcedureQuery(procedureName,
+            resultSetMappings);
       }
     };
   }
@@ -274,9 +341,26 @@ public class JPAQueies {
 
   public static abstract class TypedJPAQuery<T> extends AbstractQuery {
 
+    final Class<T> resultType;
+
+    protected TypedJPAQuery() {
+      resultType = null;
+    }
+
+    protected TypedJPAQuery(Class<T> resultType) {
+      this.resultType = resultType;
+    }
+
     public T get() {
-      TypedQuery<T> query = populateQuery(createQuery());
-      return query.getSingleResult();
+      Object result = populateQuery(createQuery()).getSingleResult();
+      if (result == null) {
+        return null;
+      } else if (resultType == null || tupleObjectConverter == null) {
+        return forceCast(result);
+      } else {
+        Tuple tuple = (Tuple) result;
+        return tupleObjectConverter.convert(tuple, resultType);
+      }
     }
 
     public TypedJPAQuery<T> parameters(Collection<?> parameters) {
@@ -294,16 +378,19 @@ public class JPAQueies {
       return this;
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> select() {
-      TypedQuery<T> query = populateQuery(createQuery());
-      List<T> resultList = query.getResultList();
-      if (resultList == null) {
-        resultList = new ArrayList<>();
+      if (resultType == null || tupleObjectConverter == null) {
+        return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
+      } else {
+        List<Tuple> resultList = populateQuery(createQuery()).getResultList();
+        return resultList != null ? resultList.stream()
+            .map(r -> tupleObjectConverter.convert(r, resultType)).collect(Collectors.toList())
+            : new ArrayList<>();
       }
-      return resultList;
     }
 
-    protected abstract TypedQuery<T> createQuery();
+    protected abstract Query createQuery();
 
     protected TypedJPAQuery<T> entityManager(final EntityManager entityManager) {
       setEntityManagerSupplier(

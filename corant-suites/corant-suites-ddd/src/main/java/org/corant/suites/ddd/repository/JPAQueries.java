@@ -15,18 +15,21 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -35,9 +38,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
+import javax.persistence.TupleElement;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.ManagedType;
+import org.corant.shared.conversion.Converters;
 
 /**
  * corant-suites-ddd
@@ -49,8 +54,8 @@ public class JPAQueries {
 
   static Logger logger = Logger.getLogger(JPAQueries.class.getName());
 
-  final static TupleObjectConverter tupleObjectConverter =
-      ServiceLoader.load(TupleObjectConverter.class, defaultClassLoader()).findFirst().orElse(null);
+  final static boolean hasTupleObjectConverter =
+      Converters.lookup(Map.class, Object.class).isPresent();
 
   final static Set<Class<?>> persistenceClasses =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -112,7 +117,7 @@ public class JPAQueries {
   }
 
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
-    if (isPersistenceClass(type) || tupleObjectConverter == null) {
+    if (isPersistenceClass(type) || !hasTupleObjectConverter) {
       return new TypedJPAQuery<>() {
         @Override
         public String toString() {
@@ -126,6 +131,7 @@ public class JPAQueries {
       };
     } else {
       return new TypedJPAQuery<>(type) {
+
         @Override
         public String toString() {
           return "Native query: " + sqlString + getParameterDescription();
@@ -135,6 +141,7 @@ public class JPAQueries {
         protected Query createQuery() {
           return entityManagerSupplier.get().createNativeQuery(sqlString, Tuple.class);
         }
+
       };
     }
   }
@@ -251,6 +258,46 @@ public class JPAQueries {
       }
     }
     return persistenceClasses.contains(type);
+  }
+
+  private static <T> T convertTuple(Tuple tuple, Class<T> type) {
+    List<TupleElement<?>> eles = tuple.getElements();
+    if (eles.size() == 1 && simpleClass(type)) {
+      return toObject(tuple.get(0), type);
+    }
+    Map<String, Object> tupleMap = new LinkedHashMap<>(eles.size());
+    for (TupleElement<?> e : eles) {
+      tupleMap.put(e.getAlias(), tuple.get(e));
+    }
+    return toObject(tupleMap, type);
+  }
+
+  private static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
+    List<T> results = new ArrayList<>();
+    if (tuples.size() > 0) {
+      List<TupleElement<?>> eles = tuples.get(0).getElements();
+      if (eles.size() == 1 && simpleClass(type)) {
+        for (Tuple tuple : tuples) {
+          results.add(toObject(tuple.get(0), type));
+        }
+      } else {
+        for (Tuple tuple : tuples) {
+          Map<String, Object> tupleMap = new LinkedHashMap<>(eles.size());
+          for (TupleElement<?> e : eles) {
+            tupleMap.put(e.getAlias(), tuple.get(e));
+          }
+          results.add(toObject(tupleMap, type));
+        }
+      }
+    }
+    return results;
+  }
+
+  private static boolean simpleClass(Class<?> type) {
+    return isPrimitiveOrWrapper(type) || String.class.equals(type)
+        || Number.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type)
+        || Temporal.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type)
+        || Enum.class.isAssignableFrom(type);
   }
 
   public static abstract class AbstractQuery {
@@ -390,11 +437,11 @@ public class JPAQueries {
       Object result = populateQuery(createQuery()).getSingleResult();
       if (result == null) {
         return null;
-      } else if (resultType == null || tupleObjectConverter == null) {
+      } else if (resultType == null || !hasTupleObjectConverter) {
         return forceCast(result);
       } else {
         Tuple tuple = (Tuple) result;
-        return tupleObjectConverter.convert(tuple, resultType);
+        return convertTuple(tuple, resultType);
       }
     }
 
@@ -415,12 +462,11 @@ public class JPAQueries {
 
     @SuppressWarnings("unchecked")
     public List<T> select() {
-      if (resultType == null || tupleObjectConverter == null) {
+      if (resultType == null || !hasTupleObjectConverter) {
         return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
       } else {
         List<Tuple> resultList = populateQuery(createQuery()).getResultList();
-        return resultList != null ? tupleObjectConverter.convert(resultList, resultType)
-            : new ArrayList<>();
+        return resultList != null ? convertTuples(resultList, resultType) : new ArrayList<>();
       }
     }
 

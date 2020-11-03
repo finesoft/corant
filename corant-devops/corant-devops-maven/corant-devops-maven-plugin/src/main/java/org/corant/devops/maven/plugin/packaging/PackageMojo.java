@@ -47,6 +47,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.finalName}", property = "corant.maven-mojo.final-name")
   protected String finalName;
 
+  @Parameter(defaultValue = "true", property = "corant.maven-mojo.group-app")
+  protected boolean groupApp;
+
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-attach")
   protected boolean withAttach;
 
@@ -138,7 +141,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public String getMainClass() {
-    return mainClass;
+    return mainClass == null ? "" : mainClass;
   }
 
   public MavenProject getProject() {
@@ -151,6 +154,10 @@ public class PackageMojo extends AbstractMojo {
 
   public String getVmArgs() {
     return vmArgs != null && !vmArgs.isEmpty() ? vmArgs.trim().replace('\n', ' ') : "";
+  }
+
+  public boolean isGroupApp() {
+    return groupApp;
   }
 
   public boolean isJar() {

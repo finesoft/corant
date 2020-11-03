@@ -125,6 +125,7 @@ public class DistPackager implements Packager {
       final String appGroupId = getMojo().getProject().getArtifact().getGroupId();
       List<Entry> libs = new ArrayList<>();
       List<Entry> apps = new ArrayList<>();
+      apps.add(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
       getMojo().getProject().getArtifacts().stream().forEach(a -> {
         if (Objects.equals(a.getGroupId(), appGroupId)) {
           apps.add(FileEntry.of(a.getFile()));

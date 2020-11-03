@@ -23,14 +23,19 @@ import javax.enterprise.context.ApplicationScoped;
  */
 public interface MessageReceiverTaskFactory {
 
-  Runnable create(MessageReceiverMetaData metaData);
+  CancellableTask create(MessageReceiverMetaData metaData);
+
+  interface CancellableTask extends Runnable {
+
+    boolean cancel();
+  }
 
   @ApplicationScoped
   public static class DefaultMessageReceiverTaskFactory implements MessageReceiverTaskFactory {
 
     @Override
-    public Runnable create(MessageReceiverMetaData metaData) {
-      return new MessageReceiverTask(metaData);
+    public CancellableTask create(MessageReceiverMetaData metaData) {
+      return new DefaultMessageReceiverTask(metaData);
     }
 
   }

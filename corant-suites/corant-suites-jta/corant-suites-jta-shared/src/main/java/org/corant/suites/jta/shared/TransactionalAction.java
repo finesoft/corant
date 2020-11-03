@@ -53,6 +53,7 @@ public abstract class TransactionalAction<T> {
   final Class<?>[] dontRollbackOn;
   final TxType type;
   final Synchronization synchronization;
+  final Integer timeout;
 
   /**
    * @param type
@@ -60,19 +61,24 @@ public abstract class TransactionalAction<T> {
    * @param synchronization
    * @param rollbackOn
    * @param dontRollbackOn
+   * @param timeout
    */
   protected TransactionalAction(TxType type, Supplier<T> supplier, Synchronization synchronization,
-      Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
+      Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
     super();
     this.type = type;
     this.supplier = shouldNotNull(supplier, "The supplier can't null");
     this.synchronization = synchronization;
     this.rollbackOn = defaultObject(rollbackOn, new Class[0]);
     this.dontRollbackOn = defaultObject(dontRollbackOn, new Class[0]);
+    this.timeout = timeout;
   }
 
   public T execute() throws Exception {
     final TransactionManager tm = TransactionService.transactionManager();
+    if (timeout != null && timeout > 0) {
+      tm.setTransactionTimeout(timeout.intValue());
+    }
     final Transaction tx = TransactionService.currentTransaction();
     final Optional<UserTransactionActionHandler> helper =
         Instances.find(UserTransactionActionHandler.class);
@@ -166,8 +172,8 @@ public abstract class TransactionalAction<T> {
   public static class MandatoryTransactionalAction<T> extends TransactionalAction<T> {
 
     protected MandatoryTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.MANDATORY, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.MANDATORY, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -189,8 +195,8 @@ public abstract class TransactionalAction<T> {
   public static class NeverTransactionalAction<T> extends TransactionalAction<T> {
 
     protected NeverTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.NEVER, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.NEVER, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -212,8 +218,8 @@ public abstract class TransactionalAction<T> {
   public static class NotSupportedTransactionalAction<T> extends TransactionalAction<T> {
 
     protected NotSupportedTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.NOT_SUPPORTED, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.NOT_SUPPORTED, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -240,8 +246,8 @@ public abstract class TransactionalAction<T> {
   public static class RequiredTransactionalAction<T> extends TransactionalAction<T> {
 
     protected RequiredTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.REQUIRED, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.REQUIRED, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -263,8 +269,8 @@ public abstract class TransactionalAction<T> {
   public static class RequiresNewTransactionalAction<T> extends TransactionalAction<T> {
 
     protected RequiresNewTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.REQUIRES_NEW, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.REQUIRES_NEW, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -291,8 +297,8 @@ public abstract class TransactionalAction<T> {
   public static class SupportsTransactionalAction<T> extends TransactionalAction<T> {
 
     protected SupportsTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
-        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn) {
-      super(TxType.SUPPORTS, supplier, synchronization, rollbackOn, dontRollbackOn);
+        Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
+      super(TxType.SUPPORTS, supplier, synchronization, rollbackOn, dontRollbackOn, timeout);
     }
 
     @Override
@@ -317,6 +323,7 @@ public abstract class TransactionalAction<T> {
     Class<?>[] dontRollbackOn = new Class[0];
     TxType txType = TxType.REQUIRED;
     Synchronization synchronization;
+    Integer timeout;
 
     public TransactionalActuator<T> dontRollbackOn(final Class<?>... dontRollbackOn) {
       this.dontRollbackOn = dontRollbackOn;
@@ -380,6 +387,11 @@ public abstract class TransactionalAction<T> {
       return this;
     }
 
+    public TransactionalActuator<T> timeout(final int timeout) {
+      this.timeout = timeout;
+      return this;
+    }
+
     public TransactionalActuator<T> txType(final TxType txType) {
       if (synchronization != null && (txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED)) {
         throw new NotSupportedException();
@@ -392,22 +404,22 @@ public abstract class TransactionalAction<T> {
       switch (txType) {
         case MANDATORY:
           return new MandatoryTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
         case REQUIRES_NEW:
           return new RequiresNewTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
         case NEVER:
           return new NeverTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
         case NOT_SUPPORTED:
           return new NotSupportedTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
         case SUPPORTS:
           return new SupportsTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
         default:
           return new RequiredTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn);
+              dontRollbackOn, timeout);
       }
     }
   }

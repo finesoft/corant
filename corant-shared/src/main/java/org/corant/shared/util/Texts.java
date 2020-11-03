@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Streams.streamOf;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,6 +49,14 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class Texts {
 
   private Texts() {}
+
+  public static InputStream asInputStream(String data) throws IOException {
+    return new ByteArrayInputStream(data.getBytes());
+  }
+
+  public static InputStream asInputStream(String data, Charset charset) throws IOException {
+    return new ByteArrayInputStream(data.getBytes(charset));
+  }
 
   /**
    * Convert input stream to string
@@ -233,11 +242,27 @@ public class Texts {
     }
   }
 
+  public static void tryWriteToFile(File file, boolean append, Charset charset, String data)
+      throws IOException {
+    try (OutputStream os = new FileOutputStream(file, append);
+        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
+      fileWritter.append(data);
+    }
+  }
+
+  public static void tryWriteToFile(File file, boolean append, String data) throws IOException {
+    try (OutputStream os = new FileOutputStream(file, append);
+        BufferedWriter fileWritter =
+            new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
+      fileWritter.append(data);
+    }
+  }
+
   public static void tryWriteToFile(File file, Iterable<String> data) {
     try {
       writeToFile(file, false, streamOf(data));
     } catch (IOException e) {
-
+      // Noop!
     }
   }
 

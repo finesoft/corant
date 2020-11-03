@@ -27,6 +27,8 @@ import javax.inject.Qualifier;
 /**
  * corant-suites-ddd
  *
+ * Mark the use of local resources,no XA
+ *
  * @author bingo 下午9:05:13
  */
 @Documented

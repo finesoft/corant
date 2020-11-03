@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
@@ -162,9 +163,10 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
       // } catch (URISyntaxException e) {
       // throw new CorantRuntimeException(e);
       // }
-      return q.value().concat(Names.DOMAIN_SPACE_SEPARATORS).concat(q.dialect());
+      return Configs.assemblyStringConfigProperty(
+          q.value().concat(Names.DOMAIN_SPACE_SEPARATORS).concat(q.dialect()));
     } else {
-      return asDefaultString(qualifier);
+      return Configs.assemblyStringConfigProperty(asDefaultString(qualifier));
     }
   }
 

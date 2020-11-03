@@ -14,7 +14,6 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
@@ -353,9 +352,6 @@ public class CorantConfigConversion implements Serializable {
    */
   protected Map<String, String> tryConvertStringMap(String rawValue) {
     String[] values = ConfigUtils.splitValue(rawValue);
-    if (isEmpty(values)) {
-      Collections.emptyMap();
-    }
     List<String> vals = new ArrayList<>();
     boolean useKvs = true;
     for (String val : values) {

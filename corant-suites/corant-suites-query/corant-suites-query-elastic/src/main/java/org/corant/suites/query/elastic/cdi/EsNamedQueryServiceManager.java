@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.corant.config.Configs;
 import org.corant.suites.query.elastic.AbstractEsNamedQueryService;
 import org.corant.suites.query.elastic.DefaultEsQueryExecutor;
 import org.corant.suites.query.elastic.EsNamedQuerier;
@@ -109,8 +110,8 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return qualifier instanceof EsQuery ? ((EsQuery) qualifier).value()
-        : asDefaultString(qualifier);
+    return Configs.assemblyStringConfigProperty(
+        qualifier instanceof EsQuery ? ((EsQuery) qualifier).value() : asDefaultString(qualifier));
   }
 
   /**

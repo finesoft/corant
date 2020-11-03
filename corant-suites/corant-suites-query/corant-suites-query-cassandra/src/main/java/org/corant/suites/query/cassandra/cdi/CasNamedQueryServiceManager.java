@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.cassandra.AbstractCasNamedQueryService;
 import org.corant.suites.query.cassandra.CasNamedQuerier;
@@ -106,8 +107,9 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
-        : asDefaultString(qualifier);
+    return Configs
+        .assemblyStringConfigProperty(qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
+            : asDefaultString(qualifier));
   }
 
   /**

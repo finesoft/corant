@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.Objects;
+import org.corant.suites.query.mongodb.converter.Bsons;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
@@ -71,20 +72,30 @@ public class MgQueryTemplate {
   protected int offset = 0;
   protected boolean autoSetIdField = true;
 
-  @SuppressWarnings("resource")
-  private MgQueryTemplate(String database) {
-    shouldNotBlank(database, () -> new QueryRuntimeException("Data base can't not empty"));
-    if (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://")) {
-      String db = database.substring(database.lastIndexOf('/'));
-      this.database = new MongoClient(new MongoClientURI(database)).getDatabase(db);
-    } else {
-      this.database = findNamed(MongoDatabase.class, shouldNotNull(database))
-          .orElseThrow(QueryRuntimeException::new);
-    }
+  private MgQueryTemplate(MongoDatabase database) {
+    this.database = shouldNotNull(database);
+  }
+
+  private MgQueryTemplate(String namedDatabase) {
+    database = findNamed(MongoDatabase.class, shouldNotNull(namedDatabase))
+        .orElseThrow(QueryRuntimeException::new);
+  }
+
+  public static MgQueryTemplate database(MongoClient client, String database) {
+    return new MgQueryTemplate(shouldNotNull(client).getDatabase(database));
+  }
+
+  public static MgQueryTemplate database(MongoDatabase database) {
+    return new MgQueryTemplate(database);
   }
 
   public static MgQueryTemplate database(String database) {
     return new MgQueryTemplate(database);
+  }
+
+  public static MgQueryTemplate database(String mongoClientUri, String queryDatabase) {
+    MongoClient mc = new MongoClient(new MongoClientURI(shouldNotBlank(mongoClientUri)));
+    return new MgQueryTemplate(shouldNotNull(mc).getDatabase(shouldNotBlank(queryDatabase)));
   }
 
   public List<Map<?, ?>> aggregate() {
@@ -97,13 +108,14 @@ public class MgQueryTemplate {
     return this;
   }
 
-  @SuppressWarnings("unchecked")
   public MgQueryTemplate aggregate(List<Map<?, ?>> aggregate) {
-    try {
-      this.aggregate = (List<Bson>) DefaultMgNamedQuerier.resolve(shouldNotEmpty(aggregate));
-    } catch (JsonProcessingException e) {
-      throw new QueryRuntimeException(e);
-    }
+    this.aggregate = shouldNotEmpty(aggregate).stream().map(a -> {
+      try {
+        return Bsons.toBson(a);
+      } catch (JsonProcessingException e) {
+        throw new QueryRuntimeException(e);
+      }
+    }).collect(Collectors.toList());
     return this;
   }
 
@@ -131,7 +143,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate filter(Map<?, ?> filter) {
-    return filter((Bson) parse(defaultObject(filter, HashMap::new)));
+    return filter(parse(defaultObject(filter, HashMap::new)));
   }
 
   public Forwarding<Map<?, ?>> forward() {
@@ -180,7 +192,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate hint(Map<?, ?> hint) {
-    return hint((Bson) parse(defaultObject(hint, HashMap::new)));
+    return hint(parse(defaultObject(hint, HashMap::new)));
   }
 
   /**
@@ -203,7 +215,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate max(Map<?, ?> max) {
-    return max((Bson) parse(defaultObject(max, HashMap::new)));
+    return max(parse(defaultObject(max, HashMap::new)));
   }
 
   public MgQueryTemplate min(Bson min) {
@@ -212,7 +224,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate min(Map<?, ?> min) {
-    return min((Bson) parse(defaultObject(min, HashMap::new)));
+    return min(parse(defaultObject(min, HashMap::new)));
   }
 
   public MgQueryTemplate offset(int offset) {
@@ -268,7 +280,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate projection(Map<?, ?> projection) {
-    return projection((Bson) parse(defaultObject(projection, HashMap::new)));
+    return projection(parse(defaultObject(projection, HashMap::new)));
   }
 
   public MgQueryTemplate projection(String[] includePropertyNames, String[] excludePropertyNames) {
@@ -323,7 +335,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate sort(Map<?, ?> sort) {
-    return sort((Bson) parse(defaultObject(sort, HashMap::new)));
+    return sort(parse(defaultObject(sort, HashMap::new)));
   }
 
   @SuppressWarnings("rawtypes")
@@ -348,9 +360,9 @@ public class MgQueryTemplate {
     return doc;
   }
 
-  protected Object parse(Object object) {
+  protected Bson parse(Object object) {
     try {
-      return DefaultMgNamedQuerier.resolve(object);
+      return Bsons.toBson(object);
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }

@@ -18,6 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSContext;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 
@@ -37,6 +38,8 @@ public @interface MessageSend {
    * configuration file.
    */
   String connectionFactoryId() default "";
+
+  int deliveryMode() default DeliveryMode.PERSISTENT;
 
   /**
    * The destination name, can use '${config property name}' to retrieve the destination name

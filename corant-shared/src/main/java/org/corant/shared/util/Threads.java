@@ -21,44 +21,7 @@ package org.corant.shared.util;
  */
 public class Threads {
 
-  public static void tryJoin(final Thread thread) {
-    try {
-      thread.join();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  public static void tryJoin(final Thread thread, final long millis) {
-    try {
-      thread.join(millis);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  public static void tryJoin(final Thread thread, final long millis, final int nanos) {
-    try {
-      thread.join(millis, nanos);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      // Noop! just try...
-    }
-  }
-
-  public static void tryNotify(final Object obj) {
-    synchronized (obj) {
-      obj.notify();
-    }
-  }
-
-  public static void tryNotifyAll(final Object obj) {
-    synchronized (obj) {
-      obj.notifyAll();
-    }
-  }
-
-  public static void tryThreadSleep(Long ms) {
+  public static void tryThreadSleep(long ms) {
     try {
       Thread.sleep(ms);
     } catch (InterruptedException e) {
@@ -67,25 +30,4 @@ public class Threads {
     }
   }
 
-  public static void tryWait(final Object obj) {
-    synchronized (obj) {
-      try {
-        obj.wait();
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        // Noop! just try...
-      }
-    }
-  }
-
-  public static void tryWait(final Object obj, final long timeout) {
-    synchronized (obj) {
-      try {
-        obj.wait(timeout);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        // Noop! just try...
-      }
-    }
-  }
 }

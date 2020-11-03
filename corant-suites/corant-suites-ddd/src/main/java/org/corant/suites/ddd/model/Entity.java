@@ -53,7 +53,7 @@ public interface Entity extends Serializable {
     }
 
     @SuppressWarnings("rawtypes")
-    static <T extends EntityReference> T validate(T obj, Predicate<T> p, Object code,
+    static <T extends EntityReference> T validate(T obj, Predicate<? super T> p, Object code,
         Object... parameters) {
       return requireTrue(obj, o -> o != null && o.getId() != null && p.test(o), code, parameters);
     }

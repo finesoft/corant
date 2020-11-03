@@ -121,10 +121,25 @@ public class DistPackager implements Packager {
     Archive root = DefaultArchive.root();
     // LICENE README NOTICE
     resolveRootResources().forEach(root::addEntry);
-    DefaultArchive.of(LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
-        .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
-    DefaultArchive.of(APP_DIR, root)
-        .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
+    if (getMojo().isGroupApp()) {
+      final String appGroupId = getMojo().getProject().getArtifact().getGroupId();
+      List<Entry> libs = new ArrayList<>();
+      List<Entry> apps = new ArrayList<>();
+      getMojo().getProject().getArtifacts().stream().forEach(a -> {
+        if (Objects.equals(a.getGroupId(), appGroupId)) {
+          apps.add(FileEntry.of(a.getFile()));
+        } else {
+          libs.add(FileEntry.of(a.getFile()));
+        }
+      });
+      DefaultArchive.of(APP_DIR, root).addEntries(apps);
+      DefaultArchive.of(LIB_DIR, root).addEntries(libs);
+    } else {
+      DefaultArchive.of(LIB_DIR, root).addEntries(getMojo().getProject().getArtifacts().stream()
+          .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
+      DefaultArchive.of(APP_DIR, root)
+          .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
+    }
     DefaultArchive.of(CFG_DIR, root).addEntries(resolveConfigFiles());
     DefaultArchive.of(BIN_DIR, root).addEntries(resolveBinFiles());
     log.debug(

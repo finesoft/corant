@@ -328,7 +328,6 @@ public class ExperimentalConverters {
       }
     }
 
-    @SuppressWarnings("rawtypes")
     static Stack<Converter> transformConverterStack(Stack<Class<?>> stack) {
       Stack<Converter> converters = new Stack<>();
       for (int i = 1; i <= stack.size() - 1; i++) {

@@ -23,6 +23,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.URLResource;
@@ -45,7 +46,7 @@ public class ResourceProvider {
     }
     if (suri != null) {
       try {
-        return Resources.from(suri.value());
+        return Resources.from(Configs.assemblyStringConfigProperty(suri.value()));
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }

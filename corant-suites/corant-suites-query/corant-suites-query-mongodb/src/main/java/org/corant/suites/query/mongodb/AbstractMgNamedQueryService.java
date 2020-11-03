@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Objects;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.AbstractNamedQuerierResolver;
 import org.corant.suites.query.shared.AbstractNamedQueryService;
@@ -345,28 +346,35 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
-    Stream<T> stream = streamOf(new Iterator<T>() {
-      final Forwarding<T> buffer = doForward(cursor);
-      int counter = 1;
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    final Iterator<T> iterator = new Iterator() {
+      int counter = 0;
+      Forwarding<T> buffer = null;
       T next = null;
 
       @Override
       public boolean hasNext() {
+        initialize();
+        boolean more = false;
         if (!parameter.terminateIf(counter, next)) {
           if (!buffer.hasResults()) {
             if (buffer.hasNext()) {
               buffer.with(doForward(cursor));
-              return buffer.hasResults();
+              more = buffer.hasResults();
             }
           } else {
-            return true;
+            more = true;
           }
         }
-        return false;
+        if (!more && cursor != null) {
+          cursor.close();
+        }
+        return more;
       }
 
       @Override
       public T next() {
+        initialize();
         if (!buffer.hasResults()) {
           throw new NoSuchElementException();
         }
@@ -375,7 +383,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         return next;
       }
 
-      Forwarding<T> doForward(MongoCursor<Document> it) {
+      private Forwarding<T> doForward(MongoCursor<Document> it) {
         int size = parameter.getLimit();
         List<Object> list = new ArrayList<>(size);
         while (it.hasNext() && --size >= 0) {
@@ -384,8 +392,16 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         fetch(list, querier);
         return Forwarding.of(querier.resolveResult(list), it.hasNext());
       }
-    }).onClose(cursor::close);
-    sun.misc.Cleaner.create(stream, () -> {
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = Objects.defaultObject(doForward(cursor), Forwarding::inst);
+          counter = buffer.hasResults() ? 1 : 0;
+        }
+      }
+    };
+    Stream<T> stream = streamOf(iterator).onClose(cursor::close);
+    sun.misc.Cleaner.create(iterator, () -> {
       if (cursor != null) {
         cursor.close();
       }

@@ -175,7 +175,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     }
   }
 
-  @SuppressWarnings({"unchecked", "restriction"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
     JpqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
@@ -187,8 +187,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     final EntityManager em = getEntityManager(); // FIXME close
     Stream<T> stream =
         createQuery(em, ql, properties, resultClass, scriptParameter).getResultStream();
-    sun.misc.Cleaner.create(stream, em::close);
-    return stream;
+    return stream.onClose(em::close);
   }
 
   protected Query createQuery(EntityManager em, String ql, Map<String, String> properties,

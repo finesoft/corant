@@ -481,11 +481,53 @@ public class JDBCTemplate {
     return runner.query(processeds.getKey(), rsh, processeds.getValue());
   }
 
+  /**
+   * Query stream results, use for mass data query.
+   *
+   * <p>
+   * NOTE: In order to release related resources, please remember to close after using the stream.
+   *
+   * <pre>
+   * Example: try(Stream stream = stream(s,f,p)){
+   *    stream.forEach(row->{
+   *        //do somthing
+   *    })
+   * }
+   * </pre>
+   *
+   * @param sql
+   * @param fetchSize
+   * @param params
+   * @return
+   * @throws SQLException stream
+   */
   public Stream<Map<String, Object>> stream(String sql, int fetchSize, Object... params)
       throws SQLException {
     return stream(sql, fetchSize, MAP_HANDLER, params);
   }
 
+  /**
+   * Query stream results, use for mass data query.
+   *
+   * <p>
+   * NOTE: In order to release related resources, please remember to close after using the stream.
+   *
+   * <pre>
+   * Example: try(Stream stream = stream(s,f,r,p)){
+   *    stream.forEach(row->{
+   *        //do somthing
+   *    })
+   * }
+   * </pre>
+   *
+   * @param <T>
+   * @param sql
+   * @param fetchSize
+   * @param rsh
+   * @param params
+   * @return
+   * @throws SQLException stream
+   */
   public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
     return new StreamableQueryRunner(
@@ -797,7 +839,6 @@ public class JDBCTemplate {
       }
     }
 
-    @SuppressWarnings("restriction")
     <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
         ResultSetHandler<T> rsh, Object... params) throws SQLException {
       preCondition(conn, closeConn, sql);
@@ -812,10 +853,8 @@ public class JDBCTemplate {
         PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
         ResultSet rs = wrap(stmt.executeQuery());
         g = new Gadget(conn, stmt, rs, closeConn);
-        Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
-        // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
-        sun.misc.Cleaner.create(s, g);
-        return s;
+        final ResultSetSpliterator<T> spliterator = new ResultSetSpliterator<>(g, rsh);
+        return StreamSupport.stream(spliterator, false).onClose(g);
       } catch (Exception e) {
         if (g != null) {
           g.run();

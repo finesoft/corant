@@ -186,7 +186,6 @@ public class StreamableQueryRunner extends QueryRunner {
     }
   }
 
-  @SuppressWarnings("restriction")
   <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql, ResultSetHandler<T> rsh,
       Object... params) throws SQLException {
     preCondition(conn, closeConn, sql);
@@ -201,10 +200,8 @@ public class StreamableQueryRunner extends QueryRunner {
       PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
       ResultSet rs = wrap(stmt.executeQuery());
       g = new Gadget(conn, stmt, rs, closeConn);
-      Stream<T> s = StreamSupport.stream(new ResultSetSpliterator<>(g, rsh), false).onClose(g);
-      // FIXME Last line of defense for release, use jdk.internal.ref.Cleaner when using JDK9
-      sun.misc.Cleaner.create(s, g);
-      return s;
+      final ResultSetSpliterator<T> spliterator = new ResultSetSpliterator<>(g, rsh);
+      return StreamSupport.stream(spliterator, false).onClose(g);
     } catch (Exception e) {
       if (g != null) {
         g.run();

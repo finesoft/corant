@@ -51,6 +51,8 @@ import org.corant.suites.jta.shared.TransactionService;
  * consumer usually requires a network round trip to set up. Producer is often more lightweight,
  * although there is often some overhead in creating it.
  *
+ * NOTE: This is not threadsafe.
+ *
  * Unfinish: use connection or session pool
  *
  * <p>
@@ -138,10 +140,10 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
 
   protected Message consume() throws JMSException {
     final Message message;
-    if (meta.getReceiveTimeout() <= 0) {
+    if (receiveTimeout <= 0) {
       message = messageConsumer.receiveNoWait();
     } else {
-      message = messageConsumer.receive(meta.getReceiveTimeout());
+      message = messageConsumer.receive(receiveTimeout);
     }
     if (message != null) {
       logger.log(Level.FINE, () -> String.format("Received message start handling, [%s]", meta));

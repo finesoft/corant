@@ -51,6 +51,7 @@ import org.bson.BsonInt64;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.corant.config.Configs;
 import org.corant.context.Naming;
 import org.corant.context.NamingReference;
 import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
@@ -255,7 +256,8 @@ public class MongoClientExtension implements Extension {
         }
       }
       if (naming != null) {
-        return MongoClientExtension.getGridFSBucket(naming.value());
+        return MongoClientExtension
+            .getGridFSBucket(Configs.assemblyStringConfigProperty(naming.value()));
       }
       return null;
     }

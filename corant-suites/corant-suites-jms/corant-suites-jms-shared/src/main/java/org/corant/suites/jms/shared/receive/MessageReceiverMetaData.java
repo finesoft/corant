@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.jms.ConnectionFactory;
-import org.corant.config.ConfigUtils;
+import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
@@ -104,7 +104,7 @@ public class MessageReceiverMetaData {
     shouldBeTrue(isNoneBlank(ann.destinations()));
     Set<String> dests = new LinkedHashSet<>();
     for (String dest : ann.destinations()) {
-      dests.addAll(ConfigUtils.assemblyStringConfigProperties(dest));
+      dests.addAll(Configs.assemblyStringConfigProperties(dest));
     }
     Set<MessageReceiverMetaData> beans = new LinkedHashSet<>(dests.size());
     dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),

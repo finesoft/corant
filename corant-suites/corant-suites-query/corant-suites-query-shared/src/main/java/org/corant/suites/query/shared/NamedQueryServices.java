@@ -106,8 +106,14 @@ public class NamedQueryServices {
     return this;
   }
 
-  public NamedQueryServices criteria(Map<String, Object> context) {
-    parameter.criteria(context);
+  /**
+   * Criteria map
+   *
+   * @param criteria
+   * @return criteria
+   */
+  public NamedQueryServices criteria(Map<String, Object> criteria) {
+    parameter.criteria(criteria);
     return this;
   }
 
@@ -149,6 +155,12 @@ public class NamedQueryServices {
 
   public <T> Stream<T> stream() {
     return resolveQueryService().stream(queryName, parameter);
+  }
+
+  public <T> Stream<T> streamAs(Class<T> cls) {
+    final QueryObjectMapper objectMapper = resolve(QueryObjectMapper.class);
+    return resolveQueryService().stream(queryName, parameter)
+        .map(x -> objectMapper.toObject(x, cls));
   }
 
   protected NamedQueryService resolveQueryService() {

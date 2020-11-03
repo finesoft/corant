@@ -38,7 +38,7 @@ import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.AggregateLifecycleMessage;
 import org.corant.suites.ddd.message.Message;
-import org.corant.suites.ddd.model.EntityLifecycleManager.LifecycleAction;
+import org.corant.suites.ddd.model.AggregateLifecycleManager.LifecycleAction;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
 
 /**
@@ -124,7 +124,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * destroyed, in JPA environment this method will invoke entity manager to remove the aggregate.
    *
    * @param immediately In JPA environment, if it true the entity manager will be flushed.
-   * @see EntityLifecycleManager
+   * @see AggregateLifecycleManager
    * @see EntityManager#remove(Object)
    */
   protected synchronized void destroy(boolean immediately) {
@@ -171,7 +171,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    *
    * @param immediately flush to storage immediately, in JPA environment, if it true the entity
    *        manager will be flushed.
-   * @see EntityLifecycleManager
+   * @see AggregateLifecycleManager
    * @see EntityManager#persist(Object)
    * @see EntityManager#merge(Object)
    */
@@ -185,7 +185,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Recover from persistence, in JPA environment this method will invoke entity manager to refresh
    * the aggregate.
    *
-   * @see EntityLifecycleManager
+   * @see AggregateLifecycleManager
    * @see EntityManager#refresh(Object)
    */
   protected synchronized AbstractAggregate recover() {
@@ -197,15 +197,14 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   /**
    * Set the aggregate lifecycle stage and raise lifecycle event.
    *
-   * Do not raise Lifecycle.LOAD event by default.
+   * Raise Lifecycle.POST_REMOVED event by default.
    *
    * @param lifecycle
-   * @return lifecycle
    */
   protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {
       this.lifecycle = lifecycle;
-      if (lifecycle != Lifecycle.LOADED) {
+      if (lifecycle == Lifecycle.POST_REMOVED) {
         this.raise(new AggregateLifecycleEvent(this), AggregateTypeLiteral.of(getClass()));
       }
     }

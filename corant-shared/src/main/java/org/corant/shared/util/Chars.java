@@ -2106,6 +2106,23 @@ public class Chars {
   }
 
   /**
+   * Check whether the character is a full-width character,
+   */
+  public static boolean isFullWidthChar(final char c) {
+    return c == 12288 || c > 65280 && c < 65375 || isZhChar(c) || c >= '\u3040' && c <= '\u30FF';
+  }
+
+  /**
+   * {@link #isFullWidthChar(char)}
+   *
+   * @param c
+   * @return isFullWidthChar
+   */
+  public static boolean isFullWidthChar(final int c) {
+    return isFullWidthChar((char) c);
+  }
+
+  /**
    * Indicates whether the given character is the hexadecimal digit.
    */
   public static boolean isHexDigit(final char c) {
@@ -2203,4 +2220,30 @@ public class Chars {
     return isZhNumeric((char) c);
   }
 
+  /**
+   * Returns if the parameter character is full-width, it will be converted to half-width and
+   * returned, otherwise it will be returned directly
+   *
+   * @param c
+   * @return toHalfWidthCharacter
+   */
+  public static char toHalfWidthCharacter(char c) {
+    if (c == 12288) {
+      // blank
+      return (char) 32;
+    } else if (c > 65280 && c < 65375) {
+      return (char) (c - 65248);
+    }
+    return c;
+  }
+
+  /**
+   * {@link #toHalfWidthCharacter(char)}
+   *
+   * @param c
+   * @return toHalfWidthCharacter
+   */
+  public static char toHalfWidthCharacter(int c) {
+    return toHalfWidthCharacter((char) c);
+  }
 }

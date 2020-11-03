@@ -27,6 +27,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
+import org.corant.config.Configs;
 import org.corant.suites.jpa.shared.PersistenceService;
 import org.corant.suites.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.suites.query.jpql.JpqlNamedQuerier;
@@ -106,8 +107,9 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return qualifier instanceof JpqlQuery ? ((JpqlQuery) qualifier).value()
-        : asDefaultString(qualifier);
+    return Configs.assemblyStringConfigProperty(
+        qualifier instanceof JpqlQuery ? ((JpqlQuery) qualifier).value()
+            : asDefaultString(qualifier));
   }
 
   /**

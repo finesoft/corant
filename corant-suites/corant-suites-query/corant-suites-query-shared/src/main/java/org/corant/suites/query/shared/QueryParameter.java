@@ -73,7 +73,7 @@ public interface QueryParameter extends Serializable {
 
   /**
    * Used for query result handling or specific database query instructions, means skips the offset
-   * rows before beginning to return the rows. Default return -1 means that not supply offset.
+   * rows before beginning to return the rows. Default return 0.
    *
    * @return getOffset
    */
@@ -350,6 +350,9 @@ public interface QueryParameter extends Serializable {
       return terminater;
     }
 
+    /**
+     * The expected size of the result set of each iteration of the streaming query
+     */
     @Override
     public StreamQueryParameter limit(Integer limit) {
       super.limit(limit);

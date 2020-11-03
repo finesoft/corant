@@ -16,12 +16,14 @@ package org.corant.suites.ddd.repository;
 import static org.corant.context.Instances.find;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.setOf;
+
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -32,10 +34,11 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
+
 import org.corant.context.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
-import org.corant.suites.ddd.model.EntityLifecycleManager;
+import org.corant.suites.ddd.model.AggregateLifecycleManager;
 import org.corant.suites.ddd.unitwork.AbstractJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.AbstractJTAJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.UnitOfWorks;
@@ -53,7 +56,7 @@ public class JPARepositoryExtension implements Extension {
   static final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
   public static Annotation[] resolveQualifiers(Class<?> cls) {
-    return qualifiers.get(find(EntityLifecycleManager.class)
+    return qualifiers.get(find(AggregateLifecycleManager.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find entity lifecycle manager!"))
         .getPersistenceContext(cls).unitName());
   }

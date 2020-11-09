@@ -16,6 +16,7 @@ package org.corant.suites.query.mongodb;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.asDefaultString;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,7 +107,13 @@ public class DefaultMgNamedQuerier
           Object x = queryScript.get(mgo.getOps());
           if (x != null) {
             try {
-              script.put(mgo, Bsons.toBson(x));
+              if (x instanceof Collection) {
+                script.put(mgo, Bsons.toBsons((Collection<?>) x));
+              } else if (x instanceof Object[]) {
+                script.put(mgo, Bsons.toBsons((Object[]) x));
+              } else {
+                script.put(mgo, Bsons.toBson(x));
+              }
             } catch (Exception e) {
               throw new QueryRuntimeException(e);
             }

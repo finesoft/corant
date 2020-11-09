@@ -13,6 +13,9 @@
  */
 package org.corant.suites.query.mongodb.converter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.bson.conversions.Bson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -32,5 +35,29 @@ public class Bsons {
   public static Bson toBson(Object x) throws JsonProcessingException {
     return x == null ? null
         : BasicDBObject.parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x));
+  }
+
+  public static List<Bson> toBsons(Collection<?> x) throws JsonProcessingException {
+    if (x == null) {
+      return null;
+    } else {
+      List<Bson> list = new ArrayList<>(x.size());
+      for (Object o : x) {
+        list.add(toBson(o));
+      }
+      return list;
+    }
+  }
+
+  public static List<Bson> toBsons(Object[] x) throws JsonProcessingException {
+    if (x == null) {
+      return null;
+    } else {
+      List<Bson> list = new ArrayList<>(x.length);
+      for (Object o : x) {
+        list.add(toBson(o));
+      }
+      return list;
+    }
   }
 }

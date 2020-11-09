@@ -28,7 +28,6 @@ import org.corant.suites.query.shared.QueryResolver;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-suites-query
@@ -39,8 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DefaultMgNamedQuerier
     extends AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Object>>
     implements MgNamedQuerier {
-
-  public static final ObjectMapper OM = new ObjectMapper();
 
   protected String collectionName;
   protected final String name;

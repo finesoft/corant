@@ -21,6 +21,8 @@ package org.corant.suites.query.shared;
  */
 public interface QueryObjectMapper {
 
+  <T> T fromJsonString(String jsonString, Class<T> type);
+
   String toJsonString(Object object, boolean Escape, boolean pretty);
 
   <T> T toObject(Object from, Class<T> type);

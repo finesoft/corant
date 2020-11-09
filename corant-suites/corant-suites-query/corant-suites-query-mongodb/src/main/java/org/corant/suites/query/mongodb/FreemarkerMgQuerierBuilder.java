@@ -13,10 +13,8 @@ package org.corant.suites.query.mongodb;
  * the License.
  */
 
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.shared.FetchQueryResolver;
@@ -51,15 +49,11 @@ public class FreemarkerMgQuerierBuilder extends
   @Override
   protected DefaultMgNamedQuerier build(
       Triple<QueryParameter, Map<String, Object>, String> processed) {
-    try {
-      @SuppressWarnings("rawtypes")
-      final Map mgQuery = DefaultMgNamedQuerier.OM.readValue(processed.getRight(), Map.class);
-      return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-          getFetchQueryResolver(), mgQuery, processed.getRight());
-    } catch (IOException e) {
-      logger.log(Level.SEVERE, e, () -> "Can't not build mongodb named querier");
-    }
-    return null;
+    @SuppressWarnings("rawtypes")
+    final Map mgQuery =
+        queryResolver.getObjectMapper().fromJsonString(processed.getRight(), Map.class);
+    return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
+        getFetchQueryResolver(), mgQuery, processed.getRight());
   }
 
   @Override

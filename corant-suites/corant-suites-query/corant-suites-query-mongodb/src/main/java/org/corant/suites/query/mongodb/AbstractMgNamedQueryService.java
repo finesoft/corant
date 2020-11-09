@@ -99,6 +99,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> List<T> aggregate(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
     AggregateIterable<Document> ai =
         getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);

@@ -30,7 +30,7 @@ import com.mongodb.BasicDBObject;
  */
 public class Bsons {
 
-  public static final ObjectMapper OM = new ObjectMapper();
+  public static final ObjectMapper OM = new ObjectMapper();// TODO FIXME
 
   public static Bson toBson(Object x) throws JsonProcessingException {
     return x == null ? null

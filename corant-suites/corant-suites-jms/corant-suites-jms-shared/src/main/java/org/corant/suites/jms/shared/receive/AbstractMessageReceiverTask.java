@@ -180,8 +180,8 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
         }
       }
     } catch (Exception e) {
-      onException(e);
       throwable = e;
+      onException(e);
     } finally {
       lastExecutionSuccessfully = throwable == null;
       logger.log(Level.FINE, () -> String.format("End receiving messages, %s", meta));

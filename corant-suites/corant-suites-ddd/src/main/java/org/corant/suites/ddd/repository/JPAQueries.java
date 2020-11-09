@@ -15,6 +15,7 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -54,8 +55,8 @@ public class JPAQueries {
 
   static Logger logger = Logger.getLogger(JPAQueries.class.getName());
 
-  final static boolean hasTupleObjectConverter =
-      Converters.lookup(Map.class, Object.class).isPresent();
+  final static boolean useTuple = Converters.lookup(Map.class, Object.class).isPresent()
+      && tryAsClass("org.hibernate.Hibernate") != null;// FIXME
 
   final static Set<Class<?>> persistenceClasses =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -117,7 +118,7 @@ public class JPAQueries {
   }
 
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
-    if (isPersistenceClass(type) || !hasTupleObjectConverter) {
+    if (isPersistenceClass(type) || !useTuple) {
       return new TypedJPAQuery<>() {
         @Override
         public String toString() {
@@ -400,11 +401,11 @@ public class JPAQueries {
 
     public <T> List<T> select() {
       @SuppressWarnings("unchecked")
-      List<T> resultList = populateQuery(createQuery()).getResultList();
-      if (resultList == null) {
-        resultList = new ArrayList<>();
+      List<T> results = populateQuery(createQuery()).getResultList();
+      if (results == null) {
+        results = new ArrayList<>();
       }
-      return resultList;
+      return results;
     }
 
     protected abstract Query createQuery();
@@ -437,7 +438,7 @@ public class JPAQueries {
       Object result = populateQuery(createQuery()).getSingleResult();
       if (result == null) {
         return null;
-      } else if (resultType == null || !hasTupleObjectConverter) {
+      } else if (resultType == null || !useTuple) {
         return forceCast(result);
       } else {
         Tuple tuple = (Tuple) result;
@@ -462,11 +463,11 @@ public class JPAQueries {
 
     @SuppressWarnings("unchecked")
     public List<T> select() {
-      if (resultType == null || !hasTupleObjectConverter) {
+      if (resultType == null || !useTuple) {
         return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
       } else {
-        List<Tuple> resultList = populateQuery(createQuery()).getResultList();
-        return resultList != null ? convertTuples(resultList, resultType) : new ArrayList<>();
+        List<Tuple> results = populateQuery(createQuery()).getResultList();
+        return results != null ? convertTuples(results, resultType) : new ArrayList<>();
       }
     }
 

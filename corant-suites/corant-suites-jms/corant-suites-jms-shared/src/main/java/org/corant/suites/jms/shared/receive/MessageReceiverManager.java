@@ -64,13 +64,13 @@ public class MessageReceiverManager {
 
   protected final Set<MessageReceiverMetaData> receiveMetaDatas = Sets.newConcurrentHashSet();
 
-  protected final List<MessageReceiverTaskExecution> receiveControllers = new ArrayList<>();
+  protected final List<MessageReceiverTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.fine(() -> "Stop the message receiver tasks.");
-    while (!receiveControllers.isEmpty()) {
+    while (!receiveExecutions.isEmpty()) {
       try {
-        receiveControllers.remove(0).cancel();
+        receiveExecutions.remove(0).cancel();
       } catch (Exception e) {
         logger.log(Level.WARNING, e, () -> "Stop message receiver task error!");
       }
@@ -118,7 +118,7 @@ public class MessageReceiverManager {
         ScheduledFuture<?> future =
             ses.scheduleWithFixedDelay(task, cfg.getReceiveTaskInitialDelay().toMillis(),
                 cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
-        receiveControllers.add(new MessageReceiverTaskExecution(future, task));
+        receiveExecutions.add(new MessageReceiverTaskExecution(future, task));
         logger.fine(() -> String.format(
             "Scheduled message receiver task, connection factory id [%s], destination [%s], initial delay [%s]Ms",
             metaData.getConnectionFactoryId(), metaData.getDestination(),

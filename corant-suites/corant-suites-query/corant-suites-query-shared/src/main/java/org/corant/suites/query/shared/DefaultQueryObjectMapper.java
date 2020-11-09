@@ -30,6 +30,14 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
 
   protected ObjectMapper OM = JsonUtils.copyMapper();
 
+  public <T> T fromJsonString(String jsonString, Class<T> type) {
+    try {
+      return OM.readValue(jsonString, type);
+    } catch (JsonProcessingException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
   @Override
   public String toJsonString(Object object, boolean escape, boolean pretty) {
     if (object == null) {

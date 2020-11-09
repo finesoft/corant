@@ -75,12 +75,25 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     logger.log(Level.FINE, () -> String.format("Create message receive task for %s", metaData));
   }
 
+  public boolean checkCancelled() {
+    if (cancellation.get()) {
+      resetMonitors();
+      release(true);
+      logger.log(Level.INFO, () -> String.format("Cancelled message receiving task, %s", meta));
+      return true;
+    }
+    return false;
+  }
+
   public boolean isInProgress() {
     return inProgress;
   }
 
   @Override
   public void run() {
+    if (checkCancelled()) {
+      return;
+    }
     if (preRun()) {
       execute();
       postRun();

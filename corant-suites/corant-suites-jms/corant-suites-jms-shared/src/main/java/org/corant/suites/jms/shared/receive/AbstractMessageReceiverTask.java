@@ -17,6 +17,7 @@ import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
@@ -40,6 +41,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.MessageSerializer;
+import org.corant.suites.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
 import org.corant.suites.jta.shared.TransactionService;
 
 /**
@@ -62,7 +64,7 @@ import org.corant.suites.jta.shared.TransactionService;
  * @author bingo 上午11:33:15
  *
  */
-public abstract class AbstractMessageReceiverTask implements Runnable {
+public abstract class AbstractMessageReceiverTask implements CancellableTask {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -81,6 +83,9 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
   protected volatile MessageConsumer messageConsumer;
   protected volatile boolean lastExecutionSuccessfully = false;
 
+  // executor controller
+  protected final AtomicBoolean cancellation = new AtomicBoolean();
+
   protected AbstractMessageReceiverTask(MessageReceiverMetaData metaData) {
     super();
     meta = metaData;
@@ -92,8 +97,13 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
     loopIntervalMillis = metaData.getLoopIntervalMs();
   }
 
+  @Override
+  public synchronized boolean cancel() {
+    return cancellation.compareAndSet(false, true);
+  }
+
   protected void closeConnectionIfNecessary(boolean forceClose) {
-    if ((meta.getCacheLevel() <= 0 || forceClose) && connection != null) {
+    if (connection != null && (forceClose || meta.getCacheLevel() <= 0)) {
       try {
         connection.stop();
         connection.close();
@@ -109,7 +119,7 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
   }
 
   protected void closeMessageConsumerIfNecessary(boolean forceClose) {
-    if ((meta.getCacheLevel() <= 2 || forceClose) && messageConsumer != null) {
+    if (messageConsumer != null && (forceClose || meta.getCacheLevel() <= 2)) {
       try {
         messageConsumer.close();
       } catch (JMSException e) {
@@ -122,7 +132,7 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
   }
 
   protected void closeSessionIfNecessary(boolean forceClose) {
-    if ((meta.getCacheLevel() <= 1 || forceClose) && session != null) {
+    if (session != null && (forceClose || meta.getCacheLevel() <= 1)) {
       try {
         session.close();
         if (connection != null) {
@@ -153,11 +163,11 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
     return message;
   }
 
-  protected void execute() {
-    logger.log(Level.FINE, () -> String.format("Start receiving messages, %s", meta));
+  protected synchronized void execute() {
+    logger.log(Level.FINE, () -> String.format("Begin receiving messages, %s", meta));
     Throwable throwable = null;
     try {
-      if (initialize()) {
+      if (!cancellation.get() && initialize()) {
         int rt = receiveThreshold;
         while (--rt >= 0) {
           preConsume();
@@ -170,11 +180,11 @@ public abstract class AbstractMessageReceiverTask implements Runnable {
         }
       }
     } catch (Exception e) {
-      onException(e);
       throwable = e;
+      onException(e);
     } finally {
       lastExecutionSuccessfully = throwable == null;
-      logger.log(Level.FINE, () -> String.format("Stop receiving messages, %s", meta));
+      logger.log(Level.FINE, () -> String.format("End receiving messages, %s", meta));
     }
   }
 

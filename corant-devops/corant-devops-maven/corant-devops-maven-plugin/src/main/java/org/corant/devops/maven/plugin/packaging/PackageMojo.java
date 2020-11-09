@@ -141,7 +141,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public String getMainClass() {
-    return mainClass;
+    return mainClass == null ? "" : mainClass;
   }
 
   public MavenProject getProject() {

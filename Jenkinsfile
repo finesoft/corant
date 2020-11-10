@@ -1,4 +1,3 @@
-def VERSION = 'none'
 pipeline {
   agent none
   stages {
@@ -12,8 +11,6 @@ pipeline {
       steps {
         script {
           sh "mvn clean deploy -Dmaven.test.skip=true"
-          def pom = readMavenPom file: 'corant-parent/flattened-pom.xml'
-          VERSION = "${pom.version}"
         }
       }
     }
@@ -22,7 +19,7 @@ pipeline {
     success {
       slackSend channel: '#jenkins',
         color: 'good',
-        message: "successfully\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}\n version: ${VERSION}\n${env.BUILD_URL}"
+        message: "successfully\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}\n ${env.BUILD_URL}"
     }
     failure {
       slackSend channel: '#jenkins',

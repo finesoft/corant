@@ -43,7 +43,6 @@
 		<version.commons-pool2>2.9.0</version.commons-pool2>
 		<version.commons-vfs2>2.6.0</version.commons-vfs2>
 		<version.datastax.cassandra>3.7.1</version.datastax.cassandra>
-		<version.dockerfile-maven-plugin>1.4.10</version.dockerfile-maven-plugin>
 		<version.eclipse.yasson>1.0.8</version.eclipse.yasson>
 		<version.ehcache>3.9.0</version.ehcache>
 		<version.elasticsearch>6.5.4</version.elasticsearch>
@@ -1683,11 +1682,6 @@
 					<groupId>org.corant</groupId>
 					<artifactId>corant-devops-maven-plugin</artifactId>
 					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>dockerfile-maven-plugin</artifactId>
-					<version>${version.dockerfile-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

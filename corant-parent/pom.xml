@@ -18,8 +18,6 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<!--<docker.dockerfile.skip>true</docker.dockerfile.skip> <docker.image.prefix>192.168.100.200:8083</docker.image.prefix> 
-			<docker.image.profile>unknow</docker.image.profile> <runner-class></runner-class> -->
 	</properties>
 	<build>
 		<pluginManagement>
@@ -117,8 +115,7 @@
 								<classifier>bin</classifier>
 								<distFormat>tar</distFormat>
 								<withDist>true</withDist>
-								<vmArgs>-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
-									-Duser.language=zh -Duser.region=CN</vmArgs>
+								<vmArgs>-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai -Duser.language=zh -Duser.region=CN</vmArgs>
 								<mainClass>${runner-class}</mainClass>
 							</configuration>
 						</execution>

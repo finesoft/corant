@@ -12,7 +12,7 @@ pipeline {
       steps {
         script {
           sh "mvn clean deploy -Dmaven.test.skip=true"
-          def pom = readMavenPom file: '.flattened-pom.xml'
+          def pom = readMavenPom file: 'corant-parent/flattened-pom.xml'
           VERSION = "${pom.version}"
         }
       }

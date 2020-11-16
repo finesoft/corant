@@ -114,6 +114,7 @@
 		<version.mongodb>3.9.1</version.mongodb>
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
+		<version.ojdbc8>19.8.0.0</version.ojdbc8>
 		<version.narayana>5.10.6.Final</version.narayana>
 		<version.netty>4.1.52.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
@@ -975,6 +976,11 @@
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<version>${version.mssql-jdbc}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.oracle.database.jdbc</groupId>
+			    <artifactId>ojdbc8</artifactId>
+			    <version>${version.ojdbc8}</version>
 			</dependency>
 
 			<dependency>

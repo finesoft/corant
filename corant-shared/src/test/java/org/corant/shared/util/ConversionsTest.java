@@ -16,14 +16,24 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Conversions.toBigDecimal;
 import static org.corant.shared.util.Conversions.toBigInteger;
 import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toDouble;
+import static org.corant.shared.util.Conversions.toEnum;
+import static org.corant.shared.util.Conversions.toFloat;
 import static org.corant.shared.util.Conversions.toInstant;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toLocalDate;
+import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Conversions.toShort;
+import static org.corant.shared.util.Conversions.toTimeZone;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,15 +42,19 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TimeZone;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -117,12 +131,26 @@ public class ConversionsTest extends TestCase {
     byte b = 10;
     long l = 12345678L;
 
+    double nd = -123.123d;
+    float nf = -234.12f;
+    short ns = -12;
+    int ni = -12345;
+    byte nb = -10;
+    long nl = -12345678L;
+
     assertTrue(toBigDecimal(d).compareTo(new BigDecimal("123.123")) == 0);
     assertTrue(toBigDecimal(f).compareTo(new BigDecimal("234.12")) == 0);
     assertTrue(toBigDecimal(s).compareTo(new BigDecimal("12")) == 0);
     assertTrue(toBigDecimal(i).compareTo(new BigDecimal("12345")) == 0);
     assertTrue(toBigDecimal(b).compareTo(new BigDecimal("10")) == 0);
     assertTrue(toBigDecimal(l).compareTo(new BigDecimal("12345678")) == 0);
+
+    assertTrue(toBigDecimal(nd).compareTo(new BigDecimal("-123.123")) == 0);
+    assertTrue(toBigDecimal(nf).compareTo(new BigDecimal("-234.12")) == 0);
+    assertTrue(toBigDecimal(ns).compareTo(new BigDecimal("-12")) == 0);
+    assertTrue(toBigDecimal(ni).compareTo(new BigDecimal("-12345")) == 0);
+    assertTrue(toBigDecimal(nb).compareTo(new BigDecimal("-10")) == 0);
+    assertTrue(toBigDecimal(nl).compareTo(new BigDecimal("-12345678")) == 0);
 
     assertTrue(toBigInteger(s).compareTo(new BigInteger("12")) == 0);
     assertTrue(toBigInteger(i).compareTo(new BigInteger("12345")) == 0);
@@ -214,14 +242,26 @@ public class ConversionsTest extends TestCase {
   }
 
   @Test
-  public void testStringObject() {
+  public void testStringObject() throws MalformedURLException {
     String s = "PT15M";
     assertEquals(Conversions.toDuration(s), Duration.ofMinutes(15));
+    // string to number
+    assertEquals(toTimeZone("Asia/Shanghai"), TimeZone.getTimeZone("Asia/Shanghai"));
+    assertEquals(Conversions.toObject("http://www.google.com", URL.class),
+        new URL("http://www.google.com"));
+    assertEquals(Conversions.toCurrency("CNY"), Currency.getInstance(Locale.CHINA));
+    assertEquals(Conversions.toObject("utf-8", Charset.class), StandardCharsets.UTF_8);
+    assertTrue(toBoolean("true"));
+    assertTrue(toBoolean("1"));
+    assertFalse(toBoolean("false"));
+    assertEquals(toEnum("expo_equal_jitter", BackoffAlgorithm.class),
+        BackoffAlgorithm.EXPO_EQUAL_JITTER);
   }
 
   @Test
   public void testStringToNumber() {
     assertEquals(toInteger("0xff"), toInteger("255"));
+    assertEquals(toInteger("-0xff"), toInteger("-255"));
     assertEquals(toObject("0xff", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 10)),
         toInteger("255"));
     assertEquals(toInteger("0377"), toInteger("0xff"));
@@ -243,5 +283,29 @@ public class ConversionsTest extends TestCase {
     assertEquals(
         toObject("1111111", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 2)),
         toBigInteger("127"));
+    String float_1 = "4531.1";
+    String float_2 = "+4531.1";
+    String float_3 = "-4531.1";
+    String int_1 = "12";
+    String int_2 = "+12";
+    String int_3 = "-12";
+    assertTrue(toBigDecimal(float_1).compareTo(new BigDecimal("4531.1")) == 0);
+    assertTrue(toBigDecimal(float_2).compareTo(new BigDecimal("4531.1")) == 0);
+    assertTrue(toBigDecimal(float_3).compareTo(new BigDecimal("-4531.1")) == 0);
+    assertTrue(toFloat(float_1).compareTo(4531.1f) == 0);
+    assertTrue(toFloat(float_2).compareTo(4531.1f) == 0);
+    assertTrue(toFloat(float_3).compareTo(-4531.1f) == 0);
+    assertTrue(toDouble(float_1).compareTo(4531.1d) == 0);
+    assertTrue(toDouble(float_2).compareTo(4531.1d) == 0);
+    assertTrue(toDouble(float_3).compareTo(-4531.1d) == 0);
+    assertTrue(toInteger(int_1).compareTo(12) == 0);
+    assertTrue(toInteger(int_2).compareTo(12) == 0);
+    assertTrue(toInteger(int_3).compareTo(-12) == 0);
+    assertTrue(toLong(int_1).compareTo(12L) == 0);
+    assertTrue(toLong(int_2).compareTo(12L) == 0);
+    assertTrue(toLong(int_3).compareTo(-12L) == 0);
+    assertTrue(toShort(int_1).compareTo((short) 12) == 0);
+    assertTrue(toShort(int_2).compareTo((short) 12) == 0);
+    assertTrue(toShort(int_3).compareTo((short) -12) == 0);
   }
 }

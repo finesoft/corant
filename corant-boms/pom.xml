@@ -11,7 +11,7 @@
 	<artifactId>corant-boms</artifactId>
 	<properties>
 
-		<version.agroal>1.8</version.agroal>
+		<version.agroal>1.9</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.ansj_seg>5.1.6</version.ansj_seg>

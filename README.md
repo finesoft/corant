@@ -41,10 +41,10 @@ Container and context processing module, providing some convenient context proce
 ```
 ### 8. corant-suites
 ```text
-Integration project. This project includes many subprojects that integrate JEE or other open source 
-components to make integration and development easier. 
-Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc., 
-supported components or frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc., 
+Integration project. This project includes many subprojects, integrate JEE or other open source
+ components to make integration and development easier.
+Currently we have supported specifications JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc.,
+supported components or frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc.,
 and also provide some common development practices such as DDD, Dynamic SQL/NoSQL query framework, etc.
 ``` 
 

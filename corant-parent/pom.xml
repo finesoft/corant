@@ -122,21 +122,6 @@
 					</executions>
 				</plugin>
 				<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>dockerfile-maven-plugin</artifactId>
-					<configuration>
-						<skipDockerInfo>true</skipDockerInfo>
-						<skip>${docker.dockerfile.skip}</skip>
-						<repository>${docker.image.prefix}/${project.artifactId}</repository>
-						<tag>${project.version}-${docker.image.profile}</tag>
-						<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-						<googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
-						<buildArgs>
-							<BIN_DIST_FILE>./target/${project.artifactId}-${project.version}-bin-dist.tar</BIN_DIST_FILE>
-						</buildArgs>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<configuration>

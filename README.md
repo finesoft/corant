@@ -41,8 +41,8 @@ Container and context processing module, providing some convenient context proce
 ```
 ### 8. corant-suites
 ```text
-Integration project. This project includes many subprojects that integrate JEE or other open source components
-to make integration and development easier. 
+Integration project. This project includes many subprojects that integrate JEE or other open source 
+components to make integration and development easier. 
 Currently we have supported specifications such as JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc., 
 supported components or frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc., 
 and also provide some common development practices such as DDD, Dynamic SQL/NoSQL query framework, etc.
@@ -69,7 +69,7 @@ Learn how to create a Hello World app quickly and efficiently.
     <version>${version.corant}</version>
  </dependency>
 ``` 
-* Add HTTP server.We prefer to use Undertow.
+* Add HTTP server. We prefer to use Undertow.
 ```
 <dependency>
     <groupId>org.corant</groupId>
@@ -82,7 +82,7 @@ This is the bare minimum required to run an app.We don't need to include a web.x
 @ApplicationScoped
 public class App  {
   public static void main(String[] args) {
-    Corant.startup();
+    Corant.startup(args);
   }
 }
 ```
@@ -95,13 +95,13 @@ public class App  {
     <version>${version.corant}</version>
 </dependency>
 ```
-* Extends the `Application`.
+* Extends the `javax.ws.rs.core.Application`.
 ```java
 @ApplicationScoped
 @ApplicationPath("/")
 public class App extends Application {
   public static void main(String[] args) {
-    Corant.startup();
+    Corant.startup(args);
   }
 }
 ```

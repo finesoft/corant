@@ -58,12 +58,8 @@ public class Identifiers {
     super();
   }
 
-  public static long calMaxSequence(long sequenceBits) {
-    return -1L ^ -1L << sequenceBits;
-  }
-
-  public static long calMaxWorkerId(long workerIdBits) {
-    return -1L ^ -1L << workerIdBits;
+  public static long calMask(long bits) {
+    return -1L ^ -1L << bits;
   }
 
   public static int handleSequence(AtomicLong sequence, Long mask, boolean current) {
@@ -196,7 +192,7 @@ public class Identifiers {
       }
       timestampLeftShift = sequenceBits + workersBits;
       timestampBits = 64 - timestampLeftShift;
-      sequenceMask = calMaxSequence(sequenceBits);
+      sequenceMask = calMask(sequenceBits);
       workerSize = workers.size();
       int i = workerSize;
       workerBits = new long[i];
@@ -207,7 +203,7 @@ public class Identifiers {
         Pair<Long, Long> worker = workers.get(i);
         workerBits[i] = worker.getLeft();
         workerIds[i] = worker.getRight();
-        long maxWorkerId = calMaxWorkerId(workerIds[i]);
+        long maxWorkerId = calMask(workerIds[i]);
         if (workerIds[i] > maxWorkerId) {
           throw new IllegalArgumentException(
               "Worker id is illegal: " + workerIds[i] + " [0," + maxWorkerId + "]");

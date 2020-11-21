@@ -60,12 +60,12 @@ public class Maps {
    * extract value from map object and remove the entry, use key path
    *
    * @param <T>
-   * @param value
+   * @param object
    * @param keyPath
    */
-  public static <T> T extractMapKeyPathValue(Object value, Object[] keyPath) {
+  public static <T> T extractMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, true, holder);
+    iterateMapValue(object, keyPath, 0, true, true, holder);
     return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
   }
 
@@ -73,24 +73,24 @@ public class Maps {
    * extract and convert value from map object and remove the entry, use key path
    *
    * @param <T>
-   * @param value
+   * @param object
    * @param keyPath
    * @param expectedType
    */
-  public static <T> T extractMapKeyPathValue(Object value, Object[] keyPath,
+  public static <T> T extractMapKeyPathValue(Object object, Object[] keyPath,
       Class<T> expectedType) {
-    return toObject(extractMapKeyPathValue(value, keyPath), expectedType);
+    return toObject(extractMapKeyPathValue(object, keyPath), expectedType);
   }
 
   /**
    * extract list value from map object and remove the entry, use key path
    *
-   * @param value
+   * @param object
    * @param keyPath
    */
-  public static List<Object> extractMapKeyPathValues(Object value, Object[] keyPath) {
+  public static List<Object> extractMapKeyPathValues(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, true, holder);
+    iterateMapValue(object, keyPath, 0, true, true, holder);
     return holder;
   }
 
@@ -98,14 +98,14 @@ public class Maps {
    * extract and convert list value from map object and remove the entry, use key path
    *
    * @param <T>
-   * @param value
+   * @param object
    * @param keyPath
    * @param expectedElementType
    * @return extractMapKeyPathValues
    */
-  public static <T> List<T> extractMapKeyPathValues(Object value, Object[] keyPath,
+  public static <T> List<T> extractMapKeyPathValues(Object object, Object[] keyPath,
       Class<T> expectedElementType) {
-    return toList(extractMapKeyPathValues(value, keyPath), t -> toObject(t, expectedElementType));
+    return toList(extractMapKeyPathValues(object, keyPath), t -> toObject(t, expectedElementType));
   }
 
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
@@ -144,26 +144,95 @@ public class Maps {
     return stringMap;
   }
 
+  /**
+   * Returns the BigDecimal value to which the specified key is mapped, or {@code null} if this map
+   * contains no mapping for the key, and converted value if the mapped value type is not
+   * BigDecimal.
+   *
+   * @see Conversions#toBigDecimal(Object)
+   *
+   * @param map
+   * @param key
+   * @return getMapBigDecimal
+   */
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBigDecimal, null);
   }
 
+  /**
+   * Returns the BigDecimal value to which the specified key is mapped, or alternative value
+   * {@code nvt} if this map contains no mapping for the key or the mapped value is {@code null},
+   * and converted value if the mapped value type is not BigDecimal.
+   *
+   * @see Conversions#toBigDecimal(Object)
+   *
+   * @param map
+   * @param key
+   * @param nvt The return alternative value when the key or map does not exist or the value
+   *        corresponding to the key is null
+   * @return getMapBigDecimal
+   */
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key, BigDecimal nvt) {
     return getMapObject(map, key, Conversions::toBigDecimal, nvt);
   }
 
+  /**
+   * Returns the BigInteger value to which the specified key is mapped, or {@code null} if this map
+   * contains no mapping for the key, and converted value if the mapped value type is not
+   * BigInteger.
+   *
+   * @see Conversions#toBigInteger(Object)
+   * @param map
+   * @param key
+   * @return getMapBigInteger
+   */
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBigInteger, null);
   }
 
+  /**
+   * Returns the BigInteger value to which the specified key is mapped, or alternative value
+   * {@code nvt} if this map contains no mapping for the key or the mapped value is {@code null},
+   * and converted value if the mapped value type is not BigInteger.
+   *
+   * @see Conversions#toBigInteger(Object)
+   *
+   * @param map
+   * @param key
+   * @param nvt The return alternative value when the key or map does not exist or the value
+   *        corresponding to the key is null
+   * @return getMapBigInteger
+   */
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key, BigInteger nvt) {
     return getMapObject(map, key, Conversions::toBigInteger, nvt);
   }
 
+  /**
+   * Returns the Boolean value to which the specified key is mapped, or {@code Boolean.FALSE} if
+   * this map contains no mapping for the key, and converted value if the mapped value type is not
+   * Boolean.
+   *
+   * @see Conversions#toBoolean(Object)
+   *
+   * @param map
+   * @param key
+   * @return getMapBoolean
+   */
   public static Boolean getMapBoolean(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBoolean, Boolean.FALSE);
   }
 
+  /**
+   * Returns the Boolean value to which the specified key is mapped, or alternative value
+   * {@code nvt} if this map contains no mapping for the key or the mapped value is {@code null},
+   * and converted value if the mapped value type is not Boolean.
+   *
+   * @param map
+   * @param key
+   * @param nvt The return alternative value when the key or map does not exist or the value
+   *        corresponding to the key is null
+   * @return getMapBoolean
+   */
   public static Boolean getMapBoolean(final Map<?, ?> map, final Object key, Boolean nvt) {
     return getMapObject(map, key, Conversions::toBoolean, nvt);
   }
@@ -258,53 +327,57 @@ public class Maps {
   }
 
   /**
-   * Get value from map object, use key path
+   * Get value from map object, use key path, only support extract value from map/iterable/array
+   * object
    *
    * @param <T>
-   * @param value
+   * @param object map/iterable/array
    * @param keyPath
    * @return
    */
-  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath) {
+  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, false, holder);
+    iterateMapValue(object, keyPath, 0, true, false, holder);
     return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
   }
 
   /**
-   * Get and convert value from map object, use key path
+   * Get and convert value from map object, use key path, only support extract value from
+   * map/iterable/array
    *
    * @param <T>
-   * @param value
+   * @param object
    * @param keyPath
    * @param expectedType
    */
-  public static <T> T getMapKeyPathValue(Object value, Object[] keyPath, Class<T> expectedType) {
-    return toObject(getMapKeyPathValue(value, keyPath), expectedType);
+  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, Class<T> expectedType) {
+    return toObject(getMapKeyPathValue(object, keyPath), expectedType);
   }
 
   /**
-   * Get list value from map object, use key path
+   * Get list value from map object, use key path, only support extract value from
+   * map/iterable/array
    *
-   * @param value
+   * @param object
    * @param keyPath
    */
-  public static List<Object> getMapKeyPathValues(Object value, Object[] keyPath) {
+  public static List<Object> getMapKeyPathValues(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(value, keyPath, 0, true, false, holder);
+    iterateMapValue(object, keyPath, 0, true, false, holder);
     return holder;
   }
 
   /**
-   * Get and convert list value from map object, use key path
+   * Get and convert list value from map object, use key path, only support extract value from
+   * map/iterable/array
    *
    * @param <T>
-   * @param value
+   * @param object
    * @param keyPath
    */
-  public static <T> List<T> getMapKeyPathValues(Object value, Object[] keyPath,
+  public static <T> List<T> getMapKeyPathValues(Object object, Object[] keyPath,
       Class<T> expectedElementType) {
-    return toList(getMapKeyPathValues(value, keyPath), t -> toObject(t, expectedElementType));
+    return toList(getMapKeyPathValues(object, keyPath), t -> toObject(t, expectedElementType));
   }
 
   /**

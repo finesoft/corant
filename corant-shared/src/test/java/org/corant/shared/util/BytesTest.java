@@ -20,6 +20,10 @@ import static org.corant.shared.util.Bytes.toFloat;
 import static org.corant.shared.util.Bytes.toInt;
 import static org.corant.shared.util.Bytes.toLong;
 import static org.corant.shared.util.Bytes.toShort;
+import static org.corant.shared.util.Conversions.toZonedDateTime;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import org.corant.shared.util.Bytes.BitArray;
 import org.junit.Test;
@@ -32,6 +36,53 @@ import junit.framework.TestCase;
  *
  */
 public class BytesTest extends TestCase {
+
+  public static void main(String... s) {
+    long epoSecs = Instant.ofEpochMilli(Identifiers.TIME_EPOCH_MILLS).getEpochSecond();
+    Instant now = Instant.now();
+    long nowSecs = now.getEpochSecond();
+    long nowMils = now.toEpochMilli();
+    System.out.println(nowMils);
+    System.out.println(nowSecs);
+    BitArray ba = Bytes.asBitArray(64, false);
+    for (int i = 0; i < 36; i++) {
+      ba.setBit(63 - i, true);
+    }
+    for (int i = 0; i < ba.getInitSize(); i++) {
+      System.out.print(ba.getBit(i) ? "1" : 0);
+    }
+    System.out.println();
+
+    long maxSecs = Bytes.toLong(ba.getBytes());
+    long usedSecs = maxSecs - epoSecs;
+    double years = usedSecs / (60 * 60 * 24 * 365);
+    System.out.println();
+    System.out.println(usedSecs);
+    System.out.println(years);
+    System.out.println("=============================");
+    ZonedDateTime zdt = toZonedDateTime("2080-11-20T15:34:32.000");
+    System.out.println(zdt);
+
+    Instant f = now.plus(365 * 32, ChronoUnit.DAYS);
+    System.out.println(f.getEpochSecond());
+    Bytes.toBytes(f.getEpochSecond());
+    ba = Bytes.asBitArray(Bytes.toBytes(f.getEpochSecond()));
+    for (int i = 0; i < ba.getInitSize(); i++) {
+      System.out.print(ba.getBit(i) ? "1" : 0);
+    }
+    System.out.println();
+    long _90 = zdt.toInstant().getEpochSecond();
+    System.out.println(_90);
+    _90 = _90 - epoSecs;
+    System.out.println(_90 + "\t" + Integer.MAX_VALUE);
+    System.out.println((int) _90);
+    System.out.println(Long.toBinaryString(_90));
+    // ba = Bytes.asBitArray(Bytes.toBytes(_90));
+    // for (int i = 0; i < ba.getInitSize(); i++) {
+    // System.out.print(ba.getBit(i) ? "1" : 0);
+    // }
+
+  }
 
   @Test
   public void testBitArray() {
@@ -47,6 +98,7 @@ public class BytesTest extends TestCase {
     }
     array.setBit(7, true);
     assertTrue(array.getBytes()[0] + 1 == 0);
+
   }
 
   @Test

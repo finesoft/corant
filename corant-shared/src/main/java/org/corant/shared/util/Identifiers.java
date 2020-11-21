@@ -13,10 +13,20 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Conversions.toLong;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
+import java.net.Inet4Address;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,13 +34,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * @author bingo 上午12:30:13
  */
 public class Identifiers {
 
-  public static final long TIME_EPOCH = 1_451_372_606_990L;
+  public static final long TIME_EPOCH_MILLS = 1_451_372_606_990L;
 
   static final Map<Integer, IdentifierGenerator> SNOWFLAKE_UUID_GENERATOR =
       new ConcurrentHashMap<>();
@@ -45,6 +56,24 @@ public class Identifiers {
 
   private Identifiers() {
     super();
+  }
+
+  public static long calMaxSequence(long sequenceBits) {
+    return -1L ^ -1L << sequenceBits;
+  }
+
+  public static long calMaxWorkerId(long workerIdBits) {
+    return -1L ^ -1L << workerIdBits;
+  }
+
+  public static int handleSequence(AtomicLong sequence, Long mask, boolean current) {
+    int seq = sequence.intValue();
+    long incredSeq = sequence.incrementAndGet();
+    incredSeq &= mask;
+    if (sequence.get() != incredSeq) {
+      sequence.set(incredSeq);
+    }
+    return current ? sequence.intValue() : seq;
   }
 
   public static String javaUUID() {
@@ -89,19 +118,11 @@ public class Identifiers {
     }
   }
 
-  public static String timeBaseUUID(Supplier<Long> timeSupplier) {
-    return (String) TIME_UUID_GENERATOR.generate(timeSupplier);
-  }
-
-  static Long getCurrentTimestamp(Supplier<?> timeGener) {
-    return timeGener == null ? Long.valueOf(System.currentTimeMillis()) : (Long) timeGener.get();
-  }
-
-  static long tilMillis(Supplier<?> timeGener, long lastTimestamp, boolean allowEq) {
-    long timestamp = getCurrentTimestamp(timeGener);
+  public static long tills(Supplier<?> timeGener, long lastTimestamp, boolean allowEq) {
+    long timestamp = (long) timeGener.get();
     if (timestamp <= lastTimestamp) {
       while (allowEq ? timestamp < lastTimestamp : timestamp <= lastTimestamp) {
-        timestamp = getCurrentTimestamp(timeGener);
+        timestamp = (long) timeGener.get();
       }
       return timestamp;
     } else {
@@ -109,92 +130,101 @@ public class Identifiers {
     }
   }
 
-  private static int handleSequence(AtomicLong sequence, Long mask, boolean current) {
-    int seq = sequence.intValue();
-    long incredSeq = sequence.incrementAndGet();
-    incredSeq &= mask;
-    if (sequence.get() != incredSeq) {
-      sequence.set(incredSeq);
-    }
-    return current ? sequence.intValue() : seq;
+  public static String timeBaseUUID(Supplier<Long> timeSupplier) {
+    return (String) TIME_UUID_GENERATOR.generate(timeSupplier);
   }
 
-  public interface IdentifierGenerator {
-    Serializable generate(Supplier<?> suppler);
-  }
+  /**
+   * The general snow flake UUID generator, Use time increment as a prefix, use numerical increment
+   * as a suffix, support multi-segment infix, return 64-bit unsigned long UUID.
+   *
+   *
+   * corant-shared
+   *
+   * @author bingo 下午8:31:09
+   *
+   */
+  public static class GeneralSnowflakeUUIDGenerator implements IdentifierGenerator {
 
-  public static class JavaUUIDGenerator implements IdentifierGenerator {
-    @Override
-    public Serializable generate(Supplier<?> suppler) {
-      return UUID.randomUUID().toString();
+    protected final long workersBits;
+    protected final long sequenceBits;
+    protected final long timestampBits;
+    protected final long timestampLeftShift;
+    protected final long sequenceMask;
+    protected final long cacheExpirationMills;
+    protected final long epoch;
+
+    protected final ChronoUnit unit;
+    protected final int workerSize;
+    protected final long[] workerIds;
+    protected final long[] workerBits;
+    protected final long[] workerSegms;
+
+    protected volatile long lastTimestamp = -1L;
+    protected volatile long localLastTimestamp = -1L;
+    protected AtomicLong sequence = new AtomicLong(0L);
+
+    /**
+     * @param unit The first segment time unit
+     * @param workers The middle segments
+     * @param sequenceBits The last segment
+     */
+    public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, List<Pair<Long, Long>> workers,
+        long sequenceBits) {
+      this(unit, -1, workers, sequenceBits);
     }
-  }
 
-  public static class SnowflakeBufferUUIDGenerator implements IdentifierGenerator {
-
-    public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
-    public static final long MAX_WORKER_ID = -1L ^ -1L << WORKER_ID_BITS;
-    public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
-    public static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
-    public static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
-    public static final long SEQUENCE_MASK = -1L ^ -1L << SEQUENCE_BITS;
-    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
-
-    private final long workerId;
-    private final long workerSegm;
-    private final boolean useTimeBuffer;
-
-    private volatile long lastTimestamp = -1L;
-    private volatile long localLastTimestamp = -1L;
-    private AtomicLong sequence = new AtomicLong(0L);
-
-    public SnowflakeBufferUUIDGenerator(long workerId) {
-      this(workerId, false);
-    }
-
-    public SnowflakeBufferUUIDGenerator(long workerId, boolean useTimeBuffer) {
-      if (workerId < 0 || workerId > MAX_WORKER_ID) {
+    /**
+     *
+     * @param unit The first segment time unit
+     * @param cacheExpiration less then 1 means not use cache
+     * @param workers The middle segments
+     * @param sequenceBits The last segment
+     */
+    public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, long cacheExpiration,
+        List<Pair<Long, Long>> workers, long sequenceBits) {
+      if (isEmpty(workers) || workers.stream().anyMatch(w -> w.getLeft() < 0 || w.getRight() < 0)
+          || sequenceBits < 0) {
         throw new IllegalArgumentException(
-            "Worker id is illegal: " + workerId + " [0," + MAX_WORKER_ID + "]");
+            "The workers id bits or sequence bits error, Both parameters must be greater than zero");
       }
-      this.workerId = workerId;
-      workerSegm = workerId << WORKER_ID_SHIFT;
-      this.useTimeBuffer = useTimeBuffer;
-    }
+      workersBits = workers.stream().map(Pair::getLeft).reduce(Long::sum).get();
+      this.sequenceBits = sequenceBits;
+      if (workersBits + sequenceBits > 62) {
+        throw new IllegalArgumentException(
+            "The workers bits and sequence bits can not greater then 62");
+      }
+      timestampLeftShift = sequenceBits + workersBits;
+      timestampBits = 64 - timestampLeftShift;
+      sequenceMask = calMaxSequence(sequenceBits);
+      workerSize = workers.size();
+      int i = workerSize;
+      workerBits = new long[i];
+      workerIds = new long[i];
+      workerSegms = new long[i];
+      long workerShift = this.sequenceBits;
+      while (i-- > 0) {
+        Pair<Long, Long> worker = workers.get(i);
+        workerBits[i] = worker.getLeft();
+        workerIds[i] = worker.getRight();
+        long maxWorkerId = calMaxWorkerId(workerIds[i]);
+        if (workerIds[i] > maxWorkerId) {
+          throw new IllegalArgumentException(
+              "Worker id is illegal: " + workerIds[i] + " [0," + maxWorkerId + "]");
+        }
+        workerSegms[i] = workerIds[i] << workerShift;
+        workerShift += workerBits[i];
+      }
 
-    /**
-     * 解析id获得时间戳
-     *
-     * @param id
-     * @return
-     */
-    public static Instant parseGeningInstant(long id) {
-      long timestamp = id >>> TIMESTAMP_LEFT_SHIFT;
-      return Instant.ofEpochMilli(timestamp + TIME_EPOCH);
-    }
-
-    /**
-     * 解析顺序号
-     *
-     * @param id
-     * @return
-     */
-    public static long parseGeningSequence(long id) {
-      long tmp = id << 64 - TIMESTAMP_LEFT_SHIFT + WORKER_ID_BITS;
-      tmp >>>= 64 - SEQUENCE_BITS;
-      return tmp;
-    }
-
-    /**
-     * 解析id获得工作进程id
-     *
-     * @param id
-     * @return
-     */
-    public static long parseGeningWorkerId(long id) {
-      long tmp = id << 64 - TIMESTAMP_LEFT_SHIFT;
-      tmp >>>= 64 - TIMESTAMP_LEFT_SHIFT + SEQUENCE_BITS;
-      return tmp;
+      if (unit != ChronoUnit.MILLIS && unit != ChronoUnit.SECONDS) {
+        throw new IllegalArgumentException("Only supports second/millis");
+      }
+      this.unit = defaultObject(unit, ChronoUnit.MILLIS);
+      cacheExpirationMills =
+          cacheExpiration > 0 ? Duration.of(cacheExpiration, unit).toMillis() : -1;
+      epoch = unit == ChronoUnit.SECONDS
+          ? Instant.ofEpochMilli(Identifiers.TIME_EPOCH_MILLS).getEpochSecond()
+          : Identifiers.TIME_EPOCH_MILLS;
     }
 
     @Override
@@ -205,50 +235,110 @@ public class Identifiers {
       if (obj == null) {
         return false;
       }
-      if (this.getClass() != obj.getClass()) {
+      if (getClass() != obj.getClass()) {
         return false;
       }
-      SnowflakeBufferUUIDGenerator other = (SnowflakeBufferUUIDGenerator) obj;
-      return workerId == other.workerId;
+      GeneralSnowflakeUUIDGenerator other = (GeneralSnowflakeUUIDGenerator) obj;
+      if (cacheExpirationMills != other.cacheExpirationMills) {
+        return false;
+      }
+      if (sequenceBits != other.sequenceBits) {
+        return false;
+      }
+      if (unit != other.unit) {
+        return false;
+      }
+      if (!Arrays.equals(workerIds, other.workerIds)) {
+        return false;
+      }
+      if (!Arrays.equals(workerSegms, other.workerSegms)) {
+        return false;
+      }
+      if (workersBits != other.workersBits) {
+        return false;
+      }
+      return true;
     }
 
     @Override
     public Long generate(Supplier<?> timeGener) {
-      if (useTimeBuffer) {
+      if (cacheExpirationMills > 0) {
         return doGenerateWithCache(timeGener);
       } else {
         return doGenerateWithoutCache(timeGener);
       }
     }
 
-    public long getWorkerId() {
-      return workerId;
+    public Instant getDeathTime() {
+      return unit == ChronoUnit.SECONDS
+          ? Instant.ofEpochSecond((Long.MAX_VALUE >>> timestampLeftShift) + epoch)
+          : Instant.ofEpochMilli((Long.MAX_VALUE >>> timestampLeftShift) + epoch);
+    }
+
+    public List<Pair<Long, Long>> getWorkers() {
+      List<Pair<Long, Long>> workers = new ArrayList<>();
+      for (int i = 0; i < workerSize; i++) {
+        workers.add(Pair.of(workerBits[i], workerIds[i]));
+      }
+      return workers;
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (int) (workerId ^ workerId >>> 32);
+      result = prime * result + (int) (cacheExpirationMills ^ cacheExpirationMills >>> 32);
+      result = prime * result + (int) (sequenceBits ^ sequenceBits >>> 32);
+      result = prime * result + (unit == null ? 0 : unit.hashCode());
+      result = prime * result + Arrays.hashCode(workerIds);
+      result = prime * result + Arrays.hashCode(workerSegms);
+      result = prime * result + (int) (workersBits ^ workersBits >>> 32);
       return result;
+    }
+
+    public Instant parseGeningInstant(long id) {
+      long timestamp = id >>> timestampLeftShift;
+      return unit == ChronoUnit.SECONDS ? Instant.ofEpochSecond(timestamp + epoch)
+          : Instant.ofEpochMilli(timestamp + epoch);
+    }
+
+    public long parseGeningSequence(long id) {
+      long tmp = id << 64 - timestampLeftShift + workersBits;
+      tmp >>>= 64 - sequenceBits;
+      return tmp;
+    }
+
+    public long parseGeningWorkerId(long id, int index) {
+      long ls = timestampBits;
+      long rs = sequenceBits;
+      for (int i = 0; i < workerSize; i++) {
+        if (i < index) {
+          ls += workerBits[i];
+        } else if (i > index) {
+          rs += workerBits[i];
+        }
+      }
+      long tmp = id << ls;
+      tmp >>>= ls + rs;
+      return tmp;
     }
 
     protected synchronized Long doGenerateWithCache(Supplier<?> timeGener) {
       resetSequenceIfNecessary();
-      int cursor = handleSequence(sequence, SEQUENCE_MASK, false);
+      int cursor = Identifiers.handleSequence(sequence, sequenceMask, false);
       if (cursor == 0) {
-        lastTimestamp = tilMillis(timeGener, lastTimestamp, false);
+        lastTimestamp = Identifiers.tills(timeGener, lastTimestamp, false);
         localLastTimestamp = System.currentTimeMillis();
       }
       return nextId(lastTimestamp, cursor);
     }
 
     protected synchronized Long doGenerateWithoutCache(Supplier<?> timeGener) {
-      long timestamp = tilMillis(timeGener, lastTimestamp, true);
+      long timestamp = Identifiers.tills(timeGener, lastTimestamp, true);
       if (lastTimestamp == timestamp) {
-        int currentSeq = handleSequence(sequence, SEQUENCE_MASK, true);
+        int currentSeq = Identifiers.handleSequence(sequence, sequenceMask, true);
         if (currentSeq == 0) {
-          timestamp = tilMillis(timeGener, lastTimestamp, false);
+          timestamp = Identifiers.tills(timeGener, lastTimestamp, false);
         }
       } else {
         sequence.set(0L);
@@ -259,117 +349,81 @@ public class Identifiers {
     }
 
     protected long nextId(long timestamp, long seq) {
-      return timestamp - TIME_EPOCH << TIMESTAMP_LEFT_SHIFT | workerSegm | seq;
+      long next = timestamp - epoch << timestampLeftShift;
+      for (long workerSegm : workerSegms) {
+        next |= workerSegm;
+      }
+      return next | seq;
     }
 
     private void resetSequenceIfNecessary() {
-      if (useTimeBuffer && localLastTimestamp != -1
-          && System.currentTimeMillis() - localLastTimestamp > FORCE_EXPEL_CACHE_PERIOD) {
+      if (cacheExpirationMills > 0 && localLastTimestamp != -1
+          && System.currentTimeMillis() - localLastTimestamp > cacheExpirationMills) {
         sequence.set(0);
       }
     }
   }
 
   /**
-   * 根据Twitter的算法实现的id生成器，同一个应用实例内只能单例使用。 当前的实现假设，所有进程依赖同一个数据库实例，因此依赖数据库授时；如果不是则需另外实现。 <br/>
-   * 1~41 为当前时间至1451372606990L（2015-12-29 15:15:???）的时间差（毫秒） <br/>
-   * 42~46为子系统或数据中心编号，2^5即从0~31 <br/>
-   * 47~51为进程编号，2^5即从0~31 <br/>
-   * 52~63为每个时间毫秒内的顺序号，2^12即从0~4095号，共12位 <br/>
-   * 整体表现：同一毫秒内允许1024个进程进行id生成，每个进程可生成4096个顺序id <br/>
-   * 注意不可用日期为 ：<b>2085-09-04T06:51:02.541+08:00[Asia/Shanghai]</b>
-   * 如果有人在那天遇到该问题，如果long还是只有64位的话，请换掉它！
+   * The corant-shared
    *
-   * @author bingo 2016年3月9日
-   * @since
+   * @author bingo 下午11:20:37
+   *
    */
-  public static class SnowflakeUUIDGenerator implements IdentifierGenerator {
+  public interface IdentifierGenerator {
+    Serializable generate(Supplier<?> suppler);
+  }
 
-    public static final long WORKER_ID_BITS = 5L; // Supports 32 workers
-    public static final long DATACENTER_ID_BITS = 5L;// Supports 32 data centers
-    public static final long MAX_WORKER_ID = -1L ^ -1L << WORKER_ID_BITS;
-    public static final long MAX_DATACENTER_ID = -1L ^ -1L << DATACENTER_ID_BITS;
+  /**
+   * UUID generator use {@link java.util.UUID.randomUUID()}
+   *
+   *
+   * corant-shared
+   *
+   * @author bingo 下午11:20:53
+   *
+   */
+  public static class JavaUUIDGenerator implements IdentifierGenerator {
+    @Override
+    public Serializable generate(Supplier<?> suppler) {
+      return UUID.randomUUID().toString();
+    }
+  }
 
+  /**
+   * The simple snow flake buffered UUID generator.
+   *
+   * <pre>
+   * Supports 10-bit work processes, 12-bit serial numbers, 42-bit time stamps,
+   * and milliseconds as the time difference unit;
+   * the overall coding is as follows:
+   * <b>[1...42] [1...10] [1...12]</b>
+   * The first segment is the time (millisecond) step,
+   * the second segment is the work process,
+   * and the third segment is the serial number.
+   * </pre>
+   *
+   *
+   * corant-shared
+   *
+   * @author bingo 下午11:22:34
+   *
+   */
+  public static class SnowflakeBufferUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+
+    public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
     public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
-    public static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
-    public static final long DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
-    public static final long TIMESTAMP_LEFT_SHIFT =
-        SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
-    public static final long SEQUENCE_MASK = -1L ^ -1L << SEQUENCE_BITS;
-
+    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
     private final long workerId;
-    private final long dataCenterId;
-    private final long dataCenterSegm;
-    private final long workerSegm;
 
-    private volatile long lastTimestamp = -1L;
-    private AtomicLong sequence = new AtomicLong(0L);
+    public SnowflakeBufferUUIDGenerator(long workerId) {
+      this(workerId, true);
+    }
 
-    public SnowflakeUUIDGenerator(long dataCenterId, long workerId) {
-      if (workerId < 0 || workerId > MAX_WORKER_ID) {
-        throw new IllegalArgumentException(
-            "Worker id is illegal: " + workerId + " [0," + MAX_WORKER_ID + "]");
-      }
-      if (dataCenterId < 0 || dataCenterId > MAX_DATACENTER_ID) {
-        throw new IllegalArgumentException(
-            "Data center id is illegal: " + dataCenterId + " [0," + MAX_DATACENTER_ID + "]");
-      }
-      if (TIME_EPOCH >= System.currentTimeMillis()) {
-        throw new IllegalArgumentException("Id epoch is illegal: " + TIME_EPOCH);
-      }
-      this.dataCenterId = dataCenterId;
+    public SnowflakeBufferUUIDGenerator(long workerId, boolean useTimeBuffer) {
+      super(ChronoUnit.MILLIS, useTimeBuffer ? FORCE_EXPEL_CACHE_PERIOD : -1,
+          listOf(Pair.of(WORKER_ID_BITS, workerId)), SEQUENCE_BITS);
       this.workerId = workerId;
-      dataCenterSegm = dataCenterId << DATACENTER_ID_SHIFT;
-      workerSegm = workerId << WORKER_ID_SHIFT;
-    }
-
-    /**
-     * 解析id获得数据中心或子系统id
-     *
-     * @param id
-     * @return
-     */
-    public static long parseGeningDataCenterId(long id) {
-      long tmp = id << 64 - TIMESTAMP_LEFT_SHIFT;
-      tmp >>>= 64 - TIMESTAMP_LEFT_SHIFT;
-      tmp >>>= DATACENTER_ID_SHIFT;
-      return tmp;
-    }
-
-    /**
-     * 解析id获得时间戳
-     *
-     * @param id
-     * @return
-     */
-    public static Instant parseGeningInstant(long id) {
-      long timestamp = id >>> TIMESTAMP_LEFT_SHIFT;
-      return Instant.ofEpochMilli(timestamp + TIME_EPOCH);
-    }
-
-    /**
-     * 解析顺序号
-     *
-     * @param id
-     * @return
-     */
-    public static long parseGeningSequence(long id) {
-      long tmp = id << 64 - TIMESTAMP_LEFT_SHIFT + DATACENTER_ID_BITS + WORKER_ID_BITS;
-      tmp >>>= 64 - SEQUENCE_BITS;
-      return tmp;
-    }
-
-    /**
-     * 解析id获得工作进程id
-     *
-     * @param id
-     * @return
-     */
-    public static long parseGeningWorkerId(long id) {
-      long tmp = id << 64 - TIMESTAMP_LEFT_SHIFT + DATACENTER_ID_BITS;
-      tmp >>>= 64 - TIMESTAMP_LEFT_SHIFT + DATACENTER_ID_BITS;
-      tmp >>>= SEQUENCE_BITS;
-      return tmp;
     }
 
     @Override
@@ -377,75 +431,106 @@ public class Identifiers {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
+      if (!super.equals(obj)) {
         return false;
       }
-      if (this.getClass() != obj.getClass()) {
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      SnowflakeBufferUUIDGenerator other = (SnowflakeBufferUUIDGenerator) obj;
+      if (workerId != other.workerId) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (int) (workerId ^ workerId >>> 32);
+      return result;
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午8:49:33
+   *
+   */
+  public static class SnowflakeIpv4HostUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+
+    public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip) {
+      this(ip, -1);
+    }
+
+    public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip, long cacheExpiration) {
+      super(ChronoUnit.SECONDS, cacheExpiration,
+          listOf(Pair.of(8L, toLong(ip.getAddress()[2])), Pair.of(8L, toLong(ip.getAddress()[3]))),
+          16);
+    }
+  }
+
+  /**
+   * <pre>
+   * 根据Twitter的算法实现的id生成器，同一个应用实例内只能单例使用。 当前的实现假设，
+   * 所有进程依赖同一个数据库实例，因此依赖数据库授时；如果不是则需另外实现。 <br/>
+   * 1~41 为当前时间至1451372606990L（2015-12-29 15:15:???）的时间差（毫秒） <br/>
+   * 42~46为子系统或数据中心编号，2^5即从0~31 <br/>
+   * 47~51为进程编号，2^5即从0~31 <br/>
+   * 52~63为每个时间毫秒内的顺序号，2^12即从0~4095号，共12位 <br/>
+   * 整体表现：同一毫秒内允许1024个进程进行id生成，每个进程可生成4096个顺序id <br/>
+   * 注意不可用日期为 ：<b>2085-09-04T06:51:02.541+08:00[Asia/Shanghai]</b>
+   * 如果有人在那天遇到该问题，如果long还是只有64位的话，请换掉它！
+   * </pre>
+   *
+   * @author bingo 2016年3月9日
+   * @since
+   */
+  public static class SnowflakeUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+
+    public static final long WORKER_ID_BITS = 5L; // Supports 32 workers
+    public static final long DATACENTER_ID_BITS = 5L;// Supports 32 data centers
+    public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
+
+    private final long dataCenterId;
+    private final long workerId;
+
+    public SnowflakeUUIDGenerator(long dataCenterId, long workerId) {
+      super(ChronoUnit.MILLIS,
+          listOf(Pair.of(DATACENTER_ID_BITS, dataCenterId), Pair.of(WORKER_ID_BITS, workerId)),
+          SEQUENCE_BITS);
+      this.dataCenterId = dataCenterId;
+      this.workerId = workerId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
         return false;
       }
       SnowflakeUUIDGenerator other = (SnowflakeUUIDGenerator) obj;
       if (dataCenterId != other.dataCenterId) {
         return false;
       }
-      return workerId == other.workerId;
-    }
-
-    @Override
-    public synchronized Long generate(Supplier<?> timeGener) {
-      long timestamp = tilMillis(timeGener, lastTimestamp, true);
-      if (lastTimestamp == timestamp) {
-        int currentSeq = handleSequence(sequence, SEQUENCE_MASK, true);
-        if (currentSeq == 0) {
-          timestamp = tilMillis(timeGener, lastTimestamp, false);
-        }
-      } else {
-        sequence.set(0L);
+      if (workerId != other.workerId) {
+        return false;
       }
-      lastTimestamp = timestamp;
-      return timestamp - TIME_EPOCH << TIMESTAMP_LEFT_SHIFT | dataCenterSegm | workerSegm
-          | sequence.get();
-    }
-
-    /**
-     * 子系统/数据中心id
-     *
-     * @return
-     */
-    public long getDataCenterId() {
-      return dataCenterId;
-    }
-
-    /**
-     * 死亡时间
-     *
-     * @return
-     */
-    public Instant getDeathTime() {
-      return Instant.ofEpochMilli((Long.MAX_VALUE >>> 22) + TIME_EPOCH);
-    }
-
-    /**
-     * 最后时间戳
-     *
-     * @return
-     */
-    public synchronized long getLastTimestamp() {
-      return lastTimestamp;
-    }
-
-    /**
-     * 进程Id
-     *
-     * @return
-     */
-    public long getWorkerId() {
-      return workerId;
+      return true;
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
-      int result = 1;
+      int result = super.hashCode();
       result = prime * result + (int) (dataCenterId ^ dataCenterId >>> 32);
       result = prime * result + (int) (workerId ^ workerId >>> 32);
       return result;
@@ -502,5 +587,4 @@ public class Identifiers {
       return Base64.getUrlEncoder().encodeToString(uuidBytes);
     }
   }
-
 }

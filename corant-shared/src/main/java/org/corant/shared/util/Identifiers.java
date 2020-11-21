@@ -470,7 +470,11 @@ public class Identifiers {
     protected final Inet4Address ip;
 
     public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip) {
-      super(ChronoUnit.SECONDS, -1,
+      this(ip, -1);
+    }
+
+    public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip, long cacheExpiration) {
+      super(ChronoUnit.SECONDS, cacheExpiration,
           listOf(Pair.of(8L, toLong(ip.getAddress()[2])), Pair.of(8L, toLong(ip.getAddress()[3]))),
           16);
       this.ip = ip;

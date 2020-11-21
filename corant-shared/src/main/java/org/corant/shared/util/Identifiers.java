@@ -455,12 +455,19 @@ public class Identifiers {
   }
 
   /**
+   * Use the host part of IPV4 as the work segment, the time increments in seconds as the prefix,
+   * and the suffix is a 16-digit increment; it is usually used for K8s cluster UUID generation.
+   * Note that since it is incremented by second, {@code timeGener} must also be seconds from the
+   * epoch of 1970-01-01T00:00:00Z.
+   *
    * corant-shared
    *
    * @author bingo 下午8:49:33
    *
    */
   public static class SnowflakeIpv4HostUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+
+    protected final Inet4Address ip;
 
     public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip) {
       this(ip, -1);
@@ -470,7 +477,39 @@ public class Identifiers {
       super(ChronoUnit.SECONDS, cacheExpiration,
           listOf(Pair.of(8L, toLong(ip.getAddress()[2])), Pair.of(8L, toLong(ip.getAddress()[3]))),
           16);
+      this.ip = ip;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      SnowflakeIpv4HostUUIDGenerator other = (SnowflakeIpv4HostUUIDGenerator) obj;
+      if (ip == null) {
+        if (other.ip != null) {
+          return false;
+        }
+      } else if (!ip.equals(other.ip)) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (ip == null ? 0 : ip.hashCode());
+      return result;
+    }
+
   }
 
   /**

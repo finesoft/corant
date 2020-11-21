@@ -55,7 +55,7 @@ public class IdentifiersTest extends TestCase {
         // generators[workerId] = new SnowflakeBufferUUIDGenerator(workerId, true);
         // generators[workerId] = new SnowflakeUUIDGenerator(workerId % 3, workerId);
         long h1 = workerId % 3 == 0 ? 0L : 255L;
-        generators[workerId] = new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60L,
+        generators[workerId] = new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, -1,
             listOf(Pair.of(8L, h1), Pair.of(8L, (long) workerId)), 16L);
         for (int i = 0; i < times; i++) {
           long s = System.currentTimeMillis() / 1000 + 1;

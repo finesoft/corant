@@ -471,7 +471,8 @@ public class Identifiers {
 
     public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip, long cacheExpiration) {
       super(ChronoUnit.SECONDS, cacheExpiration,
-          listOf(Pair.of(8L, toLong(ip.getAddress()[2])), Pair.of(8L, toLong(ip.getAddress()[3]))),
+          listOf(Pair.of(8L, toLong(ip.getAddress()[2] & 0xff)),
+              Pair.of(8L, toLong(ip.getAddress()[3] & 0xff))),
           16);
       this.ip = ip;
     }

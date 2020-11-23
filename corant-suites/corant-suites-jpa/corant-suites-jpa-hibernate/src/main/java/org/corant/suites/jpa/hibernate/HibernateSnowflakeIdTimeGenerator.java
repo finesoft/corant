@@ -23,5 +23,4 @@ package org.corant.suites.jpa.hibernate;
 public interface HibernateSnowflakeIdTimeGenerator {
 
   long fromEpoch(boolean useEpochSeconds);
-
 }

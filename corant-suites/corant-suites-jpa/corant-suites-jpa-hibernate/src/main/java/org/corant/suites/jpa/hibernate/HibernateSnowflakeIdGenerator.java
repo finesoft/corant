@@ -22,6 +22,7 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +52,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   public static final String IG_SF_WK_IP = "identifier.generator.snowflake.worker-ip";
   public static final String IG_SF_WK_ID = "identifier.generator.snowflake.worker-id";
   public static final String IG_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
-  public static final String IG_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
+  public static final String IG_SF_DL_TM = "identifier.generator.snowflake.delayed-timing";
+  public static final String IG_SF_UP_TM = "identifier.generator.snowflake.use-persistence-timer";
 
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
   static final Identifiers.IdentifierGenerator generator;
@@ -59,7 +61,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static final int dataCenterId;
   static final int workerId;
   static final String ip = Configs.getValue(IG_SF_WK_IP, String.class);
-  static final boolean usePst = Configs.getValue(IG_SF_TIME, Boolean.class, Boolean.TRUE);
+  static final boolean usePst = Configs.getValue(IG_SF_UP_TM, Boolean.class, Boolean.TRUE);
+  static final long delayedTiming = Configs.getValue(IG_SF_DL_TM, Long.class, 16000L);
   static final boolean useSec;
   static final HibernateSnowflakeIdTimeGenerator specTimeGenerator;
   static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();
@@ -69,32 +72,29 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     workerId = getConfig().getOptionalValue(IG_SF_WK_ID, Integer.class).orElse(-1);
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
-        generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId);
+        generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId, delayedTiming);
         logger.info(() -> String.format(
             "Use SnowflakeD5W5S12UUIDGenerator data center id is %s, worker id is %s.",
             dataCenterId, workerId));
       } else {
-        generator = new SnowflakeW10S12UUIDGenerator(workerId, true);
+        generator = new SnowflakeW10S12UUIDGenerator(workerId, delayedTiming);
         logger.info(
             () -> String.format("Use SnowflakeW10S12UUIDGenerator worker id is %s.", workerId));
       }
       useSec = false;
     } else if (isNotBlank(ip)) {
-      generator = new SnowflakeIpv4HostUUIDGenerator(ip, 16L);
+      generator = new SnowflakeIpv4HostUUIDGenerator(ip, delayedTiming);
       useSec = true;
       logger.info(() -> String.format("Use SnowflakeIpv4HostUUIDGenerator ip is %s.", ip));
     } else {
-      generator = new SnowflakeIpv4HostUUIDGenerator(16L);
+      generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
       useSec = true;
       logger.info(() -> "Use SnowflakeIpv4HostUUIDGenerator and localhost.");
     }
 
-    specTimeGenerator =
-        ServiceLoader.load(HibernateSnowflakeIdTimeGenerator.class, defaultClassLoader())
-            .findFirst().orElse(s -> {
-              long currentMills = System.currentTimeMillis();
-              return s ? currentMills / 1000L + 1 : currentMills;
-            });
+    specTimeGenerator = ServiceLoader
+        .load(HibernateSnowflakeIdTimeGenerator.class, defaultClassLoader()).findFirst()
+        .orElse(s -> (s ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
 
     enabled = true;
   }

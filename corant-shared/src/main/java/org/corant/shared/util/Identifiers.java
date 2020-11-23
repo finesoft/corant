@@ -23,7 +23,6 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -91,7 +90,7 @@ public class Identifiers {
     protected final long timestampBits;
     protected final long timestampLeftShift;
     protected final long sequenceMask;
-    protected final long cacheExpirationMills;
+    protected final long delayedTimingMs;
     protected final long epoch;
 
     protected final ChronoUnit unit;
@@ -117,11 +116,11 @@ public class Identifiers {
     /**
      *
      * @param unit The first segment time unit
-     * @param cacheExpiration less then 1 means not use cache
+     * @param delayedTimingMs less then 1 means not use cache
      * @param workers The middle segments
      * @param sequenceBits The last segment
      */
-    public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, long cacheExpiration,
+    public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, long delayedTimingMs,
         List<Pair<Long, Long>> workers, long sequenceBits) {
       if (isEmpty(workers) || workers.stream().anyMatch(w -> w.getLeft() < 0 || w.getRight() < 0)
           || sequenceBits < 0) {
@@ -160,8 +159,7 @@ public class Identifiers {
         throw new IllegalArgumentException("Only supports second/millis");
       }
       this.unit = defaultObject(unit, ChronoUnit.MILLIS);
-      cacheExpirationMills =
-          cacheExpiration > 0 ? Duration.of(cacheExpiration, unit).toMillis() : -1;
+      this.delayedTimingMs = delayedTimingMs > 0 ? delayedTimingMs : -1;
       epoch = unit == ChronoUnit.SECONDS
           ? Instant.ofEpochMilli(Identifiers.TIME_EPOCH_MILLS).getEpochSecond()
           : Identifiers.TIME_EPOCH_MILLS;
@@ -179,7 +177,7 @@ public class Identifiers {
         return false;
       }
       GeneralSnowflakeUUIDGenerator other = (GeneralSnowflakeUUIDGenerator) obj;
-      if (cacheExpirationMills != other.cacheExpirationMills) {
+      if (delayedTimingMs != other.delayedTimingMs) {
         return false;
       }
       if (sequenceBits != other.sequenceBits) {
@@ -202,7 +200,7 @@ public class Identifiers {
 
     @Override
     public Long generate(Supplier<?> timeGener) {
-      if (cacheExpirationMills > 0) {
+      if (delayedTimingMs > 0) {
         return doGenerateWithCache(timeGener);
       } else {
         return doGenerateWithoutCache(timeGener);
@@ -227,7 +225,7 @@ public class Identifiers {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (int) (cacheExpirationMills ^ cacheExpirationMills >>> 32);
+      result = prime * result + (int) (delayedTimingMs ^ delayedTimingMs >>> 32);
       result = prime * result + (int) (sequenceBits ^ sequenceBits >>> 32);
       result = prime * result + (unit == null ? 0 : unit.hashCode());
       result = prime * result + Arrays.hashCode(workerIds);
@@ -297,8 +295,8 @@ public class Identifiers {
     }
 
     private void resetSequenceIfNecessary() {
-      if (cacheExpirationMills > 0 && localLastTimestamp != -1
-          && System.currentTimeMillis() - localLastTimestamp > cacheExpirationMills) {
+      if (delayedTimingMs > 0 && localLastTimestamp != -1
+          && System.currentTimeMillis() - localLastTimestamp > delayedTimingMs) {
         sequence.set(0);
       }
     }
@@ -356,7 +354,11 @@ public class Identifiers {
     private final long workerId;
 
     public SnowflakeD5W5S12UUIDGenerator(long dataCenterId, long workerId) {
-      super(ChronoUnit.MILLIS,
+      this(dataCenterId, workerId, -1L);
+    }
+
+    public SnowflakeD5W5S12UUIDGenerator(long dataCenterId, long workerId, long delayedTimingMs) {
+      super(ChronoUnit.MILLIS, delayedTimingMs,
           listOf(Pair.of(DATACENTER_ID_BITS, dataCenterId), Pair.of(WORKER_ID_BITS, workerId)),
           SEQUENCE_BITS);
       this.dataCenterId = dataCenterId;
@@ -414,20 +416,20 @@ public class Identifiers {
       this(ip, -1);
     }
 
-    public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip, long cacheExpiration) {
-      super(ChronoUnit.SECONDS, cacheExpiration,
+    public SnowflakeIpv4HostUUIDGenerator(Inet4Address ip, long delayedTimingMs) {
+      super(ChronoUnit.SECONDS, delayedTimingMs,
           listOf(Pair.of(8L, toLong(ip.getAddress()[2] & 0xff)),
               Pair.of(8L, toLong(ip.getAddress()[3] & 0xff))),
           16);
       this.ip = ip;
     }
 
-    public SnowflakeIpv4HostUUIDGenerator(long cacheExpiration) {
-      this(resolveIpAddress(null), cacheExpiration);
+    public SnowflakeIpv4HostUUIDGenerator(long delayedTimingMs) {
+      this(resolveIpAddress(null), delayedTimingMs);
     }
 
-    public SnowflakeIpv4HostUUIDGenerator(String ip, long cacheExpiration) {
-      this(resolveIpAddress(ip), cacheExpiration);
+    public SnowflakeIpv4HostUUIDGenerator(String ip, long delayedTimingMs) {
+      this(resolveIpAddress(ip), delayedTimingMs);
     }
 
     static Inet4Address resolveIpAddress(String ip) {
@@ -498,16 +500,15 @@ public class Identifiers {
 
     public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
     public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
-    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
     private final long workerId;
 
     public SnowflakeW10S12UUIDGenerator(long workerId) {
-      this(workerId, true);
+      this(workerId, -1L);
     }
 
-    public SnowflakeW10S12UUIDGenerator(long workerId, boolean useTimeBuffer) {
-      super(ChronoUnit.MILLIS, useTimeBuffer ? FORCE_EXPEL_CACHE_PERIOD : -1,
-          listOf(Pair.of(WORKER_ID_BITS, workerId)), SEQUENCE_BITS);
+    public SnowflakeW10S12UUIDGenerator(long workerId, long cacheExpiration) {
+      super(ChronoUnit.MILLIS, cacheExpiration, listOf(Pair.of(WORKER_ID_BITS, workerId)),
+          SEQUENCE_BITS);
       this.workerId = workerId;
     }
 

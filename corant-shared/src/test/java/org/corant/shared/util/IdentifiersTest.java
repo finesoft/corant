@@ -46,7 +46,7 @@ public class IdentifiersTest extends TestCase {
 
   @Test
   public void test() throws InterruptedException {
-    int workers = 16, times = 65536, size = workers * times;
+    int workers = 4, times = 65536 * 2, size = workers * times;
     GeneralSnowflakeUUIDGenerator[] generators = new GeneralSnowflakeUUIDGenerator[workers];
     final long[][] arr = new long[workers][times];
     ExecutorService es = Executors.newFixedThreadPool(workers);
@@ -60,8 +60,8 @@ public class IdentifiersTest extends TestCase {
         generators[workerId] = new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60,
             listOf(Pair.of(8L, h1), Pair.of(8L, (long) workerId)), 16L);
         for (int i = 0; i < times; i++) {
-          long s = System.currentTimeMillis() / 1000 + 1;
-          arr[workerId][i] = generators[workerId].generate(() -> s);
+          arr[workerId][i] =
+              generators[workerId].generate(() -> System.currentTimeMillis() / 1000 + 1);
         }
         latch.countDown();
       });

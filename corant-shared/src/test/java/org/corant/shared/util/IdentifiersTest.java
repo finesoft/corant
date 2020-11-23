@@ -13,6 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Lists.listOf;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -22,7 +24,8 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.corant.shared.util.Identifiers.SnowflakeUUIDGenerator;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -34,18 +37,29 @@ import junit.framework.TestCase;
  */
 public class IdentifiersTest extends TestCase {
 
+  public static void main(String... k) {
+    System.out.println(new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60L,
+        listOf(Pair.of(8L, 255L), Pair.of(8L, 123L)), 16L).getDeathTime());
+  }
+
   @Test
   public void test() throws InterruptedException {
-    int workers = 2, times = 9876, size = workers * times;
+    int workers = 16, times = 65536, size = workers * times;
+    GeneralSnowflakeUUIDGenerator[] generators = new GeneralSnowflakeUUIDGenerator[workers];
     final long[][] arr = new long[workers][times];
     ExecutorService es = Executors.newFixedThreadPool(workers);
     final CountDownLatch latch = new CountDownLatch(workers);
     for (int worker = 0; worker < workers; worker++) {
       final int workerId = worker;
       es.submit(() -> {
+        // generators[workerId] = new SnowflakeBufferUUIDGenerator(workerId, true);
+        // generators[workerId] = new SnowflakeUUIDGenerator(workerId % 3, workerId);
+        long h1 = workerId % 3 == 0 ? 0L : 255L;
+        generators[workerId] = new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60,
+            listOf(Pair.of(8L, h1), Pair.of(8L, (long) workerId)), 16L);
         for (int i = 0; i < times; i++) {
-          arr[workerId][i] =
-              Identifiers.snowflakeBufferUUID(workerId, true, System::currentTimeMillis);
+          long s = System.currentTimeMillis() / 1000 + 1;
+          arr[workerId][i] = generators[workerId].generate(() -> s);
         }
         latch.countDown();
       });
@@ -54,28 +68,29 @@ public class IdentifiersTest extends TestCase {
     Set<Long> set = new HashSet<>();
     Set<Long> timestamps = new HashSet<>();
     Map<Long, List<Long>> tmp = new LinkedHashMap<>();
-    for (long[] ar : arr) {
-      for (long a : ar) {
+    for (int workerId = 0; workerId < arr.length; workerId++) {
+      for (long a : arr[workerId]) {
         set.add(a);
-        long time = SnowflakeUUIDGenerator.parseGeningInstant(a).toEpochMilli();
-        // long woid = SnowflakeUUIDGenerator.parseGeningWorkerId(a);
-        long seq = SnowflakeUUIDGenerator.parseGeningSequence(a);
-        // long dcid = SnowflakeUUIDGenerator.parseGeningDataCenterId(a);
+        long time = generators[workerId].parseGeningInstant(a).toEpochMilli();
+        long dcid = generators[workerId].parseGeningWorkerId(a, 0);
+        long woid = generators[workerId].parseGeningWorkerId(a, 1);
+        long seq = generators[workerId].parseGeningSequence(a);
         tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
         timestamps.add(time);
-        // System.out.println(
-        // String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
+        System.out.println(
+            String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
       }
     }
-    // System.out.println("--------------------------------------------------");
-    // tmp.forEach((k, v) -> {
-    // v.stream().sorted()
-    // .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
-    // });
+    System.out.println("--------------------------------------------------");
+    tmp.forEach((k, v) -> {
+      v.stream().sorted()
+          .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
+    });
 
-    // timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
+    timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
     es.shutdown();
     assertEquals(set.size(), size);
-    // System.out.println("FINISHED: " + set.size());
+    System.out.println("FINISHED: " + set.size());
+
   }
 }

@@ -39,6 +39,7 @@ import junit.framework.TestCase;
 public class IdentifiersTest extends TestCase {
 
   public static void main(String... k) {
+    System.out.println(Long.class.isAssignableFrom(Long.TYPE));
     System.out.println(new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60L,
         listOf(Pair.of(8L, 255L), Pair.of(8L, 123L)), 16L).description());
     System.out.println(new SnowflakeIpv4HostUUIDGenerator(16L).getDeathTime());

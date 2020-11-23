@@ -63,10 +63,10 @@ public class Identifiers {
   }
 
   public static long tills(Supplier<?> timeGener, long lastTimestamp, boolean allowEq) {
-    long timestamp = (long) timeGener.get();
+    long timestamp = toLong(timeGener.get());
     if (timestamp <= lastTimestamp) {
       while (allowEq ? timestamp < lastTimestamp : timestamp <= lastTimestamp) {
-        timestamp = (long) timeGener.get();
+        timestamp = toLong(timeGener.get());
       }
       return timestamp;
     } else {

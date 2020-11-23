@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -163,6 +164,23 @@ public class Identifiers {
       epoch = unit == ChronoUnit.SECONDS
           ? Instant.ofEpochMilli(Identifiers.TIME_EPOCH_MILLS).getEpochSecond()
           : Identifiers.TIME_EPOCH_MILLS;
+    }
+
+    public String description() {
+      StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+      sb.append(" increment ").append(unit.name().toLowerCase(Locale.ROOT)).append(" bits: ");
+      sb.append("[1...").append(timestampBits).append("], worker bits:");
+      long tmp = timestampBits;
+      for (int i = 0; i < workerSize; i++) {
+        sb.append(" [").append(tmp + 1).append("...").append(tmp += workerBits[i]).append("]")
+            .append(" id ").append(workerIds[i]).append(", ");
+      }
+      sb.append("sequence bits: [").append(tmp + 1).append("...").append(64).append("], ");
+      if (delayedTimingMs > 0) {
+        sb.append("delayed timing ").append(delayedTimingMs).append("ms, ");
+      }
+      sb.append("support up to ").append(getDeathTime());
+      return sb.toString();
     }
 
     @Override

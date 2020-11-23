@@ -20,7 +20,7 @@ package org.corant.suites.jpa.hibernate;
  *
  */
 @FunctionalInterface
-public interface HibernateSnowflakeIdTimeGenerator {
+public interface HibernateSnowflakeIdTimeService {
 
   long fromEpoch(boolean useEpochSeconds);
 }

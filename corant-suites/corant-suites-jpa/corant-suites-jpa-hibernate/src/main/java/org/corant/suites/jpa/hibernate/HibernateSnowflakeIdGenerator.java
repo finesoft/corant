@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Identifiers;
+import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
@@ -56,7 +56,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   public static final String IG_SF_UP_TM = "identifier.generator.snowflake.use-persistence-timer";
 
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
-  static final Identifiers.IdentifierGenerator generator;
+  static final GeneralSnowflakeUUIDGenerator generator;
   static final boolean enabled;
   static final int dataCenterId;
   static final int workerId;
@@ -64,7 +64,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static final boolean usePst = Configs.getValue(IG_SF_UP_TM, Boolean.class, Boolean.TRUE);
   static final long delayedTiming = Configs.getValue(IG_SF_DL_TM, Long.class, 16000L);
   static final boolean useSec;
-  static final HibernateSnowflakeIdTimeGenerator specTimeGenerator;
+  static final HibernateSnowflakeIdTimeService specTimeGenerator;
   static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();
 
   static {
@@ -73,28 +73,23 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
         generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId, delayedTiming);
-        logger.info(() -> String.format(
-            "Use SnowflakeD5W5S12UUIDGenerator data center id is %s, worker id is %s.",
-            dataCenterId, workerId));
       } else {
         generator = new SnowflakeW10S12UUIDGenerator(workerId, delayedTiming);
-        logger.info(
-            () -> String.format("Use SnowflakeW10S12UUIDGenerator worker id is %s.", workerId));
       }
       useSec = false;
     } else if (isNotBlank(ip)) {
       generator = new SnowflakeIpv4HostUUIDGenerator(ip, delayedTiming);
       useSec = true;
-      logger.info(() -> String.format("Use SnowflakeIpv4HostUUIDGenerator ip is %s.", ip));
     } else {
       generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
       useSec = true;
-      logger.info(() -> "Use SnowflakeIpv4HostUUIDGenerator and localhost.");
     }
 
-    specTimeGenerator = ServiceLoader
-        .load(HibernateSnowflakeIdTimeGenerator.class, defaultClassLoader()).findFirst()
-        .orElse(s -> (s ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+    specTimeGenerator =
+        ServiceLoader.load(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).findFirst()
+            .orElse(s -> (s ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+
+    logger.info(() -> String.format("Use %s.", generator.description()));
 
     enabled = true;
   }

@@ -17,8 +17,11 @@ import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -27,13 +30,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -42,17 +43,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 public class Identifiers {
 
   public static final long TIME_EPOCH_MILLS = 1_451_372_606_990L;
-
-  static final Map<Integer, IdentifierGenerator> SNOWFLAKE_UUID_GENERATOR =
-      new ConcurrentHashMap<>();
-  static final Map<Integer, IdentifierGenerator> SNOWFLAKE_BUFFRE_UUID_GENERATOR =
-      new ConcurrentHashMap<>();
-  static final IdentifierGenerator TIME_UUID_GENERATOR = new TimeBasedUUIDGenerator();
-  static final IdentifierGenerator JAVA_UUID_GENERATOR = new JavaUUIDGenerator();
-  static final AtomicReference<SnowflakeUUIDGenerator> lastSnowflakeUUIDGenerator =
-      new AtomicReference<>();
-  static final AtomicReference<SnowflakeBufferUUIDGenerator> lastSnowflakeBufferUUIDGenerator =
-      new AtomicReference<>();
 
   private Identifiers() {
     super();
@@ -72,48 +62,6 @@ public class Identifiers {
     return current ? sequence.intValue() : seq;
   }
 
-  public static String javaUUID() {
-    return JAVA_UUID_GENERATOR.generate(null).toString();
-  }
-
-  public static long snowflakeBufferUUID(final int workerId, final boolean useTimeBuff,
-      Supplier<Long> timeSupplier) {
-    return (long) snowflakeBufferUUIDGenerator(workerId, useTimeBuff).generate(timeSupplier);
-  }
-
-  public static IdentifierGenerator snowflakeBufferUUIDGenerator(final int workerId,
-      final boolean useTimeBuff) {
-    SnowflakeBufferUUIDGenerator inst = lastSnowflakeBufferUUIDGenerator.get();
-    if (inst != null && inst.workerId == workerId) {
-      return inst;
-    } else {
-      return SNOWFLAKE_BUFFRE_UUID_GENERATOR.computeIfAbsent(workerId, k -> {
-        SnowflakeBufferUUIDGenerator x = new SnowflakeBufferUUIDGenerator(k, useTimeBuff);
-        lastSnowflakeBufferUUIDGenerator.set(x);
-        return x;
-      });
-    }
-  }
-
-  public static long snowflakeUUID(int dataCenterId, int workerId, Supplier<Long> timeSupplier) {
-    return (long) snowflakeUUIDGenerator(dataCenterId, workerId).generate(timeSupplier);
-  }
-
-  public static IdentifierGenerator snowflakeUUIDGenerator(int dataCenterId, int workerId) {
-    SnowflakeUUIDGenerator inst = lastSnowflakeUUIDGenerator.get();
-    if (inst != null && inst.dataCenterId == dataCenterId && inst.workerId == workerId) {
-      return inst;
-    } else {
-      int key = dataCenterId << SnowflakeUUIDGenerator.DATACENTER_ID_BITS | workerId;
-      return SNOWFLAKE_UUID_GENERATOR.computeIfAbsent(key, k -> {
-        SnowflakeUUIDGenerator x = new SnowflakeUUIDGenerator(dataCenterId, workerId);
-        lastSnowflakeUUIDGenerator.set(x);
-        return x;
-      });
-
-    }
-  }
-
   public static long tills(Supplier<?> timeGener, long lastTimestamp, boolean allowEq) {
     long timestamp = (long) timeGener.get();
     if (timestamp <= lastTimestamp) {
@@ -124,10 +72,6 @@ public class Identifiers {
     } else {
       return timestamp;
     }
-  }
-
-  public static String timeBaseUUID(Supplier<Long> timeSupplier) {
-    return (String) TIME_UUID_GENERATOR.generate(timeSupplier);
   }
 
   /**
@@ -387,38 +331,35 @@ public class Identifiers {
   }
 
   /**
-   * The simple snow flake buffered UUID generator.
-   *
    * <pre>
-   * Supports 10-bit work processes, 12-bit serial numbers, 42-bit time stamps,
-   * and milliseconds as the time difference unit;
-   * the overall coding is as follows:
-   * <b>[1...42] [1...10] [1...12]</b>
-   * The first segment is the time (millisecond) step,
-   * the second segment is the work process,
-   * and the third segment is the serial number.
+   * 根据Twitter的算法实现的id生成器，同一个应用实例内只能单例使用。 当前的实现假设，
+   * 所有进程依赖同一个数据库实例，因此依赖数据库授时；如果不是则需另外实现。 <br/>
+   * 1~41 为当前时间至1451372606990L（2015-12-29 15:15:???）的时间差（毫秒） <br/>
+   * 42~46为子系统或数据中心编号，2^5即从0~31 <br/>
+   * 47~51为进程编号，2^5即从0~31 <br/>
+   * 52~63为每个时间毫秒内的顺序号，2^12即从0~4095号，共12位 <br/>
+   * 整体表现：同一毫秒内允许1024个进程进行id生成，每个进程可生成4096个顺序id <br/>
+   * 注意不可用日期为 ：<b>2085-09-04T06:51:02.541+08:00[Asia/Shanghai]</b>
+   * 如果有人在那天遇到该问题，如果long还是只有64位的话，请换掉它！
    * </pre>
    *
-   *
-   * corant-shared
-   *
-   * @author bingo 下午11:22:34
-   *
+   * @author bingo 2016年3月9日
+   * @since
    */
-  public static class SnowflakeBufferUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+  public static class SnowflakeD5W5S12UUIDGenerator extends GeneralSnowflakeUUIDGenerator {
 
-    public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
+    public static final long WORKER_ID_BITS = 5L; // Supports 32 workers
+    public static final long DATACENTER_ID_BITS = 5L;// Supports 32 data centers
     public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
-    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
+
+    private final long dataCenterId;
     private final long workerId;
 
-    public SnowflakeBufferUUIDGenerator(long workerId) {
-      this(workerId, true);
-    }
-
-    public SnowflakeBufferUUIDGenerator(long workerId, boolean useTimeBuffer) {
-      super(ChronoUnit.MILLIS, useTimeBuffer ? FORCE_EXPEL_CACHE_PERIOD : -1,
-          listOf(Pair.of(WORKER_ID_BITS, workerId)), SEQUENCE_BITS);
+    public SnowflakeD5W5S12UUIDGenerator(long dataCenterId, long workerId) {
+      super(ChronoUnit.MILLIS,
+          listOf(Pair.of(DATACENTER_ID_BITS, dataCenterId), Pair.of(WORKER_ID_BITS, workerId)),
+          SEQUENCE_BITS);
+      this.dataCenterId = dataCenterId;
       this.workerId = workerId;
     }
 
@@ -433,7 +374,10 @@ public class Identifiers {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      SnowflakeBufferUUIDGenerator other = (SnowflakeBufferUUIDGenerator) obj;
+      SnowflakeD5W5S12UUIDGenerator other = (SnowflakeD5W5S12UUIDGenerator) obj;
+      if (dataCenterId != other.dataCenterId) {
+        return false;
+      }
       if (workerId != other.workerId) {
         return false;
       }
@@ -444,6 +388,7 @@ public class Identifiers {
     public int hashCode() {
       final int prime = 31;
       int result = super.hashCode();
+      result = prime * result + (int) (dataCenterId ^ dataCenterId >>> 32);
       result = prime * result + (int) (workerId ^ workerId >>> 32);
       return result;
     }
@@ -477,6 +422,23 @@ public class Identifiers {
       this.ip = ip;
     }
 
+    public SnowflakeIpv4HostUUIDGenerator(long cacheExpiration) {
+      this(resolveIpAddress(null), cacheExpiration);
+    }
+
+    public SnowflakeIpv4HostUUIDGenerator(String ip, long cacheExpiration) {
+      this(resolveIpAddress(ip), cacheExpiration);
+    }
+
+    static Inet4Address resolveIpAddress(String ip) {
+      try {
+        return isNotBlank(ip) ? (Inet4Address) InetAddress.getByName(ip)
+            : (Inet4Address) InetAddress.getLocalHost();
+      } catch (UnknownHostException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {
@@ -499,6 +461,10 @@ public class Identifiers {
       return true;
     }
 
+    public Inet4Address getIp() {
+      return ip;
+    }
+
     @Override
     public int hashCode() {
       final int prime = 31;
@@ -510,35 +476,38 @@ public class Identifiers {
   }
 
   /**
+   * The simple snow flake buffered UUID generator.
+   *
    * <pre>
-   * 根据Twitter的算法实现的id生成器，同一个应用实例内只能单例使用。 当前的实现假设，
-   * 所有进程依赖同一个数据库实例，因此依赖数据库授时；如果不是则需另外实现。 <br/>
-   * 1~41 为当前时间至1451372606990L（2015-12-29 15:15:???）的时间差（毫秒） <br/>
-   * 42~46为子系统或数据中心编号，2^5即从0~31 <br/>
-   * 47~51为进程编号，2^5即从0~31 <br/>
-   * 52~63为每个时间毫秒内的顺序号，2^12即从0~4095号，共12位 <br/>
-   * 整体表现：同一毫秒内允许1024个进程进行id生成，每个进程可生成4096个顺序id <br/>
-   * 注意不可用日期为 ：<b>2085-09-04T06:51:02.541+08:00[Asia/Shanghai]</b>
-   * 如果有人在那天遇到该问题，如果long还是只有64位的话，请换掉它！
+   * Supports 10-bit work processes, 12-bit serial numbers, 42-bit time stamps,
+   * and milliseconds as the time difference unit;
+   * the overall coding is as follows:
+   * <b>[1...42] [1...10] [1...12]</b>
+   * The first segment is the time (millisecond) step,
+   * the second segment is the work process,
+   * and the third segment is the serial number.
    * </pre>
    *
-   * @author bingo 2016年3月9日
-   * @since
+   *
+   * corant-shared
+   *
+   * @author bingo 下午11:22:34
+   *
    */
-  public static class SnowflakeUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
+  public static class SnowflakeW10S12UUIDGenerator extends GeneralSnowflakeUUIDGenerator {
 
-    public static final long WORKER_ID_BITS = 5L; // Supports 32 workers
-    public static final long DATACENTER_ID_BITS = 5L;// Supports 32 data centers
+    public static final long WORKER_ID_BITS = 10;// Supports 1024 workers
     public static final long SEQUENCE_BITS = 12L;// Supports 4096 serial numbers very millisecond
-
-    private final long dataCenterId;
+    public static final long FORCE_EXPEL_CACHE_PERIOD = 10 * 60 * 1000L; // Use for time buffer
     private final long workerId;
 
-    public SnowflakeUUIDGenerator(long dataCenterId, long workerId) {
-      super(ChronoUnit.MILLIS,
-          listOf(Pair.of(DATACENTER_ID_BITS, dataCenterId), Pair.of(WORKER_ID_BITS, workerId)),
-          SEQUENCE_BITS);
-      this.dataCenterId = dataCenterId;
+    public SnowflakeW10S12UUIDGenerator(long workerId) {
+      this(workerId, true);
+    }
+
+    public SnowflakeW10S12UUIDGenerator(long workerId, boolean useTimeBuffer) {
+      super(ChronoUnit.MILLIS, useTimeBuffer ? FORCE_EXPEL_CACHE_PERIOD : -1,
+          listOf(Pair.of(WORKER_ID_BITS, workerId)), SEQUENCE_BITS);
       this.workerId = workerId;
     }
 
@@ -553,10 +522,7 @@ public class Identifiers {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      SnowflakeUUIDGenerator other = (SnowflakeUUIDGenerator) obj;
-      if (dataCenterId != other.dataCenterId) {
-        return false;
-      }
+      SnowflakeW10S12UUIDGenerator other = (SnowflakeW10S12UUIDGenerator) obj;
       if (workerId != other.workerId) {
         return false;
       }
@@ -567,7 +533,6 @@ public class Identifiers {
     public int hashCode() {
       final int prime = 31;
       int result = super.hashCode();
-      result = prime * result + (int) (dataCenterId ^ dataCenterId >>> 32);
       result = prime * result + (int) (workerId ^ workerId >>> 32);
       return result;
     }

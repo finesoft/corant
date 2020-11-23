@@ -89,8 +89,21 @@ public class Configs {
    * @return getValue
    */
   public static <T> T getValue(String propertyName, Class<T> propertyType) {
+    return getValue(propertyName, propertyType, null);
+  }
+
+  /**
+   * Get the config property, if the property doesn't exist return nvl.
+   *
+   * @param <T>
+   * @param propertyName
+   * @param propertyType
+   * @param nvl
+   * @return getValue
+   */
+  public static <T> T getValue(String propertyName, Class<T> propertyType, T nvl) {
     Optional<T> op = ConfigProvider.getConfig().getOptionalValue(propertyName, propertyType);
-    return op.orElseGet(null);
+    return op.orElse(nvl);
   }
 
   public static String resolveVariable(String propertyName) {

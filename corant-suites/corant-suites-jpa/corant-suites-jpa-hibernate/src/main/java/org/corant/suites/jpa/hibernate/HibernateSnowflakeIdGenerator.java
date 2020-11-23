@@ -13,23 +13,26 @@
  */
 package org.corant.suites.jpa.hibernate;
 
-import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
-import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.right;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import org.bson.Document;
+import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
 import org.corant.shared.util.Identifiers;
+import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
+import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
+import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
@@ -44,75 +47,95 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
  *
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
-  public static final String IDGEN_SF_WK_ID = "identifier.generator.snowflake.worker-id";
-  public static final String IDGEN_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
-  public static final String IDGEN_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
+
+  public static final String IG_SF_WK_IP = "identifier.generator.snowflake.worker-ip";
+  public static final String IG_SF_WK_ID = "identifier.generator.snowflake.worker-id";
+  public static final String IG_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
+  public static final String IG_SF_TIME = "identifier.generator.snowflake.use-persistence-timer";
+
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
-  static Identifiers.IdentifierGenerator GENERATOR;
-  static volatile boolean ENABLED = false;
-  static volatile int DATA_CENTER_ID;
-  static volatile int WORKER_ID;
-  static volatile boolean usePersistenceTime =
-      getConfig().getOptionalValue(IDGEN_SF_TIME, Boolean.class).orElse(true);
-  static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();// static?
-  static String IP = getConfig().getOptionalValue(Names.CORANT_SYS_IP, String.class).orElse(null);
+  static final Identifiers.IdentifierGenerator generator;
+  static final boolean enabled;
+  static final int dataCenterId;
+  static final int workerId;
+  static final String ip = Configs.getValue(IG_SF_WK_IP, String.class);
+  static final boolean usePst = Configs.getValue(IG_SF_TIME, Boolean.class, Boolean.TRUE);
+  static final boolean useSec;
+  static final HibernateSnowflakeIdTimeGenerator specTimeGenerator;
+  static Map<Class<?>, TimerResolver> timeResolvers = new ConcurrentHashMap<>();
 
   static {
-    DATA_CENTER_ID = getConfig().getOptionalValue(IDGEN_SF_DC_ID, Integer.class).orElse(-1);
-    WORKER_ID = getConfig().getOptionalValue(IDGEN_SF_WK_ID, Integer.class)
-        .orElseGet(() -> isNotBlank(IP) && IP.indexOf('.') != -1
-            ? toInteger(right(IP, IP.length() - IP.lastIndexOf('.') - 1))
-            : 0);
-    logger.info(() -> String.format(
-        "Use snowflake id generator for hibernate data center id is %s, worker id is %s.",
-        DATA_CENTER_ID, WORKER_ID));
-    if (DATA_CENTER_ID >= 0) {
-      GENERATOR = Identifiers.snowflakeUUIDGenerator(DATA_CENTER_ID, WORKER_ID);
+    dataCenterId = getConfig().getOptionalValue(IG_SF_DC_ID, Integer.class).orElse(-1);
+    workerId = getConfig().getOptionalValue(IG_SF_WK_ID, Integer.class).orElse(-1);
+    if (workerId >= 0) {
+      if (dataCenterId >= 0) {
+        generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId);
+        logger.info(() -> String.format(
+            "Use SnowflakeD5W5S12UUIDGenerator data center id is %s, worker id is %s.",
+            dataCenterId, workerId));
+      } else {
+        generator = new SnowflakeW10S12UUIDGenerator(workerId, true);
+        logger.info(
+            () -> String.format("Use SnowflakeW10S12UUIDGenerator worker id is %s.", workerId));
+      }
+      useSec = false;
+    } else if (isNotBlank(ip)) {
+      generator = new SnowflakeIpv4HostUUIDGenerator(ip, 16L);
+      useSec = true;
+      logger.info(() -> String.format("Use SnowflakeIpv4HostUUIDGenerator ip is %s.", ip));
     } else {
-      GENERATOR = Identifiers.snowflakeBufferUUIDGenerator(WORKER_ID, true);
+      generator = new SnowflakeIpv4HostUUIDGenerator(ip, 16L);
+      useSec = true;
+      logger.info(() -> "Use SnowflakeIpv4HostUUIDGenerator and localhost.");
     }
-    ENABLED = true;
+
+    specTimeGenerator =
+        ServiceLoader.load(HibernateSnowflakeIdTimeGenerator.class, defaultClassLoader())
+            .findFirst().orElse(s -> {
+              long currentMills = System.currentTimeMillis();
+              return s ? currentMills / 1000L + 1 : currentMills;
+            });
+
+    enabled = true;
   }
 
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
-    return GENERATOR.generate(() -> getTimeSeq(session, object));
+    return generator.generate(() -> getTimeSeq(session, object));
   }
 
   long getTimeSeq(SharedSessionContractImplementor session, Object object) {
-    if (!usePersistenceTime) {
-      return System.currentTimeMillis();
+    if (!usePst) {
+      return specTimeGenerator.fromEpoch(useSec);
     }
     return resolveTime(session, object);
   }
 
   long resolveTime(final SharedSessionContractImplementor session, final Object object) {
-    return timeResolvers.computeIfAbsent(getUserClass(object.getClass()), cls -> {
-      return (s, o) -> {
-        MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(s);
-        if (mp != null) {
-          final Document timeBson =
-              new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
-          return getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
-        } else {
-          final String timeSql = s.getFactory().getServiceRegistry().getService(JdbcServices.class)
-              .getDialect().getCurrentTimestampSelectString();
-          // return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
-          // .getTime();
-          // FIXME whether it is necessary? 2020-01-01
-          final FlushMode hfm = s.getHibernateFlushMode();
-          try {
-            s.setHibernateFlushMode(FlushMode.MANUAL);
-            return toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
-                .getTime();
-          } catch (Exception e) {
-            throw new CorantRuntimeException(e);
-          } finally {
-            s.setHibernateFlushMode(hfm);
-          }
+    return timeResolvers.computeIfAbsent(getUserClass(object.getClass()), cls -> (s, o) -> {
+      MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(s);
+      if (mp != null) {
+        final Document timeBson =
+            new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
+        final long epochMillis =
+            getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
+        return useSec ? epochMillis / 1000L + 1 : epochMillis;
+      } else {
+        final String timeSql = s.getFactory().getServiceRegistry().getService(JdbcServices.class)
+            .getDialect().getCurrentTimestampSelectString();
+        final FlushMode hfm = s.getHibernateFlushMode();
+        try {
+          s.setHibernateFlushMode(FlushMode.MANUAL);
+          final long epochMillis =
+              toObject(s.createNativeQuery(timeSql).getSingleResult(), Timestamp.class).getTime();
+          return useSec ? epochMillis / 1000L + 1 : epochMillis;
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        } finally {
+          s.setHibernateFlushMode(hfm);
         }
-      };
+      }
     }).resolve(session, object);
   }
 

@@ -84,7 +84,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
       useSec = true;
       logger.info(() -> String.format("Use SnowflakeIpv4HostUUIDGenerator ip is %s.", ip));
     } else {
-      generator = new SnowflakeIpv4HostUUIDGenerator(ip, 16L);
+      generator = new SnowflakeIpv4HostUUIDGenerator(16L);
       useSec = true;
       logger.info(() -> "Use SnowflakeIpv4HostUUIDGenerator and localhost.");
     }

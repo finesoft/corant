@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
+import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -40,6 +41,7 @@ public class IdentifiersTest extends TestCase {
   public static void main(String... k) {
     System.out.println(new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60L,
         listOf(Pair.of(8L, 255L), Pair.of(8L, 123L)), 16L).getDeathTime());
+    System.out.println(new SnowflakeIpv4HostUUIDGenerator(16L).getDeathTime());
   }
 
   @Test

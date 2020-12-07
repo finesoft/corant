@@ -42,7 +42,7 @@ public class IdentifiersTest extends TestCase {
     System.out.println(Long.class.isAssignableFrom(Long.TYPE));
     System.out.println(new GeneralSnowflakeUUIDGenerator(ChronoUnit.SECONDS, 60L,
         listOf(Pair.of(8L, 255L), Pair.of(8L, 123L)), 16L).description());
-    System.out.println(new SnowflakeIpv4HostUUIDGenerator(16L).getDeathTime());
+    System.out.println(new SnowflakeIpv4HostUUIDGenerator(16L).getExpirationTime());
   }
 
   @Test
@@ -74,10 +74,10 @@ public class IdentifiersTest extends TestCase {
     for (int workerId = 0; workerId < arr.length; workerId++) {
       for (long a : arr[workerId]) {
         set.add(a);
-        long time = generators[workerId].parseGeningInstant(a).toEpochMilli();
-        long dcid = generators[workerId].parseGeningWorkerId(a, 0);
-        long woid = generators[workerId].parseGeningWorkerId(a, 1);
-        long seq = generators[workerId].parseGeningSequence(a);
+        long time = generators[workerId].parseGeneratedInstant(a).toEpochMilli();
+        long dcid = generators[workerId].parseGeneratedWorkerId(a, 0);
+        long woid = generators[workerId].parseGeneratedWorkerId(a, 1);
+        long seq = generators[workerId].parseGeneratedSequence(a);
         tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
         timestamps.add(time);
         System.out.println(

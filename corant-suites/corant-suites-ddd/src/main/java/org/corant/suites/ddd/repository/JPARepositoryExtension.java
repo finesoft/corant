@@ -50,19 +50,16 @@ import org.corant.suites.jpa.shared.PersistenceService.PersistenceContextLiteral
  */
 public class JPARepositoryExtension implements Extension {
 
-  static final Map<String, Annotation[]> qualifiers = new HashMap<>();
+  final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
-  public static Annotation[] resolveQualifiers(Class<?> cls) {
+  public Annotation[] resolveQualifiers(Class<?> cls) {
     return qualifiers.get(find(AggregateLifecycleManager.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find entity lifecycle manager!"))
         .getPersistenceContext(cls).unitName());
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
-    qualifiers.clear();
-  }
-
-  void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager beanManager) {
+  protected synchronized void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery abd,
+      final BeanManager beanManager) {
     Set<String> names =
         beanManager.getExtension(JPAExtension.class).getPersistenceUnitInfoMetaDatas().keySet()
             .stream().map(PersistenceUnit::unitName).collect(Collectors.toSet());
@@ -75,7 +72,11 @@ public class JPARepositoryExtension implements Extension {
         }));
   }
 
-  JPARepository produce(Instance<Object> instances, String unitName) {
+  protected synchronized void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+    qualifiers.clear();
+  }
+
+  protected JPARepository produce(Instance<Object> instances, String unitName) {
     Optional<AbstractJTAJPAUnitOfWorksManager> uowm =
         instances.select(UnitOfWorks.class).get().currentDefaultUnitOfWorksManager();
     shouldBeTrue(uowm.isPresent());

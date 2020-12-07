@@ -5,6 +5,7 @@ import java.net.URI;
 import javax.cache.CacheManager;
 import javax.cache.spi.CachingProvider;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ public class CacheManagerProducer {
 
   @Produces
   @SURI
+  @Dependent
   CacheManager produce(InjectionPoint injectionPoint) {
     CacheManager cacheManager;
     SURI suri = null;

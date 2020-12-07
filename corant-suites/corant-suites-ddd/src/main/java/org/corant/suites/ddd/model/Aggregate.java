@@ -13,20 +13,37 @@
  */
 package org.corant.suites.ddd.model;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.suites.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
+import static org.corant.suites.bundle.GlobalMessageCodes.ERR_PARAM;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
+import org.corant.context.Instances;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.suites.bundle.exception.GeneralRuntimeException;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
+import org.corant.suites.ddd.repository.JPARepository;
+import org.corant.suites.ddd.repository.JPARepositoryExtension;
 import org.corant.suites.ddd.unitwork.JTARLJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.JTAXAJPAUnitOfWorksManager;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
@@ -144,7 +161,7 @@ public interface Aggregate extends Entity {
    * @author bingo 下午9:04:52
    *
    */
-  interface AggregateIdentifier extends EntityIdentifier {
+  public interface AggregateIdentifier extends EntityIdentifier {
 
     @Override
     Serializable getId();
@@ -154,6 +171,129 @@ public interface Aggregate extends Entity {
 
     default Class<? extends Aggregate> getTypeCls() {
       return forceCast(tryAsClass(getType()));
+    }
+  }
+
+  /**
+   *
+   * corant-suites-ddd
+   *
+   * @author bingo 下午5:53:48
+   *
+   */
+  public interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
+
+    Map<Pair<Class<?>, Class<?>>, Constructor<?>> constructors = new ConcurrentHashMap<>();
+
+    static <X> X invokeExactConstructor(Class<X> cls, Class<?> paramClasses, Object paramValue)
+        throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+        InvocationTargetException {
+      return forceCast(constructors.computeIfAbsent(Pair.of(cls, paramClasses), cp -> {
+        Constructor<?> candidate = null;
+        for (Constructor<?> ct : cp.getKey().getDeclaredConstructors()) {
+          if (ct.getParameterCount() == 1 && ct.getParameterTypes().length == 1) {
+            if (ct.getParameterTypes()[0].isAssignableFrom(paramClasses)) {
+              candidate = ct;
+              break;
+            }
+          }
+        }
+        return shouldNotNull(candidate);
+      }).newInstance(paramValue));
+    }
+
+    static <A extends Aggregate, T extends AggregateReference<A>> T of(Object param, Class<T> cls) {
+      if (param == null) {
+        // FIXME like c++ reference
+        return null;
+      }
+      try {
+        if (cls != null) {
+          if (cls.isAssignableFrom(param.getClass())) {
+            return forceCast(param);
+          } else if (param instanceof Aggregate || param != null) {
+            return invokeExactConstructor(cls, param.getClass(), param);
+          }
+        }
+      } catch (Exception e) {
+        throw new GeneralRuntimeException(e, ERR_OBJ_NON_FUD,
+            asString(cls).concat(":").concat(asString(param)));
+      }
+      throw new GeneralRuntimeException(ERR_OBJ_NON_FUD,
+          asString(cls).concat(":").concat(asString(param)));
+    }
+
+    static <X extends Entity> X resolve(Class<X> cls, Serializable id) {
+      if (id != null && cls != null) {
+        return shouldNotNull(resolveRepository(cls).get(cls, id),
+            () -> new GeneralRuntimeException(ERR_PARAM));
+      }
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
+
+    static <X extends Entity> X resolve(Class<X> cls, String namedQuery,
+        Map<Object, Object> params) {
+      if (isNotBlank(namedQuery)) {
+        List<X> list = resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
+        if (!isEmpty(list)) {
+          if (list.size() > 1) {
+            throw new GeneralRuntimeException(ERR_OBJ_NON_FUD);
+          }
+          return list.get(0);
+        }
+      }
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
+
+    static <X> X resolve(Class<X> cls, String namedQuery, Object... params) {
+      if (isNotBlank(namedQuery)) {
+        List<X> list = resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
+        if (!isEmpty(list)) {
+          if (list.size() > 1) {
+            throw new GeneralRuntimeException(ERR_OBJ_NON_FUD);
+          }
+          return list.get(0);
+        }
+      }
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
+
+    static <X> List<X> resolveList(Class<X> cls, String namedQuery, Object... params) {
+      return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
+    }
+
+    static JPARepository resolveRepository(Class<?> cls) {
+      return Instances.resolve(JPARepository.class,
+          Instances.resolve(JPARepositoryExtension.class).resolveQualifiers(cls));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default T retrieve() {
+      Class<T> resolveClass = null;
+      Class<?> t = getClass();
+      do {
+        if (t.getGenericSuperclass() instanceof ParameterizedType) {
+          resolveClass =
+              (Class<T>) ((ParameterizedType) t.getGenericSuperclass()).getActualTypeArguments()[0];
+          break;
+        } else {
+          Type[] genericInterfaces = t.getGenericInterfaces();
+          if (genericInterfaces != null) {
+            for (Type type : genericInterfaces) {
+              if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                if (AggregateReference.class
+                    .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+                  resolveClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                  break;
+                }
+              }
+            }
+          }
+        }
+      } while (resolveClass == null && (t = t.getSuperclass()) != null);
+      return resolve(resolveClass, getId());
     }
   }
 
@@ -262,5 +402,4 @@ public interface Aggregate extends Entity {
       return (sign & 30) != 0 || (sign & 192) != 0;
     }
   }
-
 }

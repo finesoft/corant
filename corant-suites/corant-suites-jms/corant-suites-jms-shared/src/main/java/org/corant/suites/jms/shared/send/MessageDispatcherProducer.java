@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.JMSDestinationDefinition;
@@ -37,6 +38,7 @@ import org.corant.suites.jms.shared.send.MessageDispatcher.MessageDispatcherImpl
 public class MessageDispatcherProducer {
 
   @Produces
+  @Dependent
   public MessageDispatcher produce(final InjectionPoint ip) {
     List<MessageDispatcher> dispatchers = new ArrayList<>();
     final MessageDispatch at = CDIs.getAnnotation(ip, MessageDispatch.class);

@@ -115,7 +115,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   }
 
   @PostConstruct
-  protected void onPostConstruct() {
+  protected synchronized void onPostConstruct() {
     final PersistenceService persistenceService = find(PersistenceService.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find Persistence service!"));
     select(EntityManagerFactory.class).forEach(emf -> {

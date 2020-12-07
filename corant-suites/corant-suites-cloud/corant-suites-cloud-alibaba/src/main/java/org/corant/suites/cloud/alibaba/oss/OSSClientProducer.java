@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
@@ -57,6 +58,7 @@ public class OSSClientProducer {
 
   @Produces
   @Naming
+  @Dependent
   OSS produce(InjectionPoint ip) {
     Naming naming = null;
     for (Annotation a : ip.getQualifiers()) {

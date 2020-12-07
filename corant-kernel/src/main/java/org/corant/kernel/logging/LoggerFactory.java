@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.shared.util.Methods;
@@ -28,7 +28,7 @@ import org.corant.shared.util.Methods;
  * @author bingo 下午7:37:00
  *
  */
-@ApplicationScoped
+// @ApplicationScoped
 public class LoggerFactory {
 
   public static void disableLogger() {
@@ -53,6 +53,7 @@ public class LoggerFactory {
   }
 
   @Produces
+  @Dependent
   protected Logger createLogger(InjectionPoint injectionPoint) {
     return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
   }

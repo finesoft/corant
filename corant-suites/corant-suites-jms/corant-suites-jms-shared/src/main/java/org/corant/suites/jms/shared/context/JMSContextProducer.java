@@ -14,6 +14,7 @@
 package org.corant.suites.jms.shared.context;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -61,6 +62,7 @@ public class JMSContextProducer {
   }
 
   @Produces
+  @Dependent
   protected JMSContext produce(final InjectionPoint ip) {
     return new ExtendedJMSContext(JMSContextKey.of(ip), getRsJMSContextManager(),
         getTsJMSContextManager());

@@ -31,6 +31,10 @@
 			<artifactId>weld-se-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.jboss</groupId>
 			<artifactId>jandex</artifactId>
 		</dependency>

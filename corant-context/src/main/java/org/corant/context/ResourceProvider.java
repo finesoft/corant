@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -34,7 +33,7 @@ import org.corant.shared.util.Resources.URLResource;
  * @author bingo 16:26:34
  *
  */
-@ApplicationScoped
+// @ApplicationScoped
 public class ResourceProvider {
 
   Stream<URLResource> find(InjectionPoint injectionPoint) {

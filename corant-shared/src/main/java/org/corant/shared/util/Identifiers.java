@@ -105,9 +105,13 @@ public class Identifiers {
     protected AtomicLong sequence = new AtomicLong(0L);
 
     /**
-     * @param unit The first segment time unit
-     * @param workers The middle segments
-     * @param sequenceBits The last segment
+     * Construct a generator with no delay
+     *
+     * @param unit The prefix time unit, current we only support MILLIS and SECOND
+     * @param workers The infix segments, use an ordered pairs, every pair contains two values, one
+     *        is the worker bits the other is the worker id
+     * @param sequenceBits The last suffix bits
+     * @see
      */
     public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, List<Pair<Long, Long>> workers,
         long sequenceBits) {
@@ -115,11 +119,17 @@ public class Identifiers {
     }
 
     /**
+     * Construct a generator
      *
-     * @param unit The first segment time unit
-     * @param delayedTimingMs less then 1 means not use cache
-     * @param workers The middle segments
-     * @param sequenceBits The last segment
+     * @param unit The prefix time unit, current we only support MILLIS and SECOND
+     * @param delayedTimingMs less then 1 means no delay. no delay means that the time will be
+     *        retrieved each time the ID is generated; delay means that the time will be compared
+     *        each time the ID is generated, and the time will be retrieved when the serial number
+     *        overflows or the time exceeds the delay; using delay will reduce the pressure of time
+     *        service, but the time of the generated id will be a bit delayed.
+     * @param workers The infix segments, use an ordered pairs, every pair contains two values, one
+     *        is the worker bits the other is the worker id
+     * @param sequenceBits The last suffix bits
      */
     public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, long delayedTimingMs,
         List<Pair<Long, Long>> workers, long sequenceBits) {
@@ -179,7 +189,7 @@ public class Identifiers {
       if (delayedTimingMs > 0) {
         sb.append("delayed timing ").append(delayedTimingMs).append("ms, ");
       }
-      sb.append("support up to ").append(getDeathTime());
+      sb.append("support up to ").append(getExpirationTime());
       return sb.toString();
     }
 
@@ -225,12 +235,24 @@ public class Identifiers {
       }
     }
 
-    public Instant getDeathTime() {
+    /**
+     * Returns the expiration time of the generator, we use time increment as the prefix, and return
+     * an unsigned long integer (64 bits), so there is a time point of failure.
+     *
+     * @return getExpirationTime
+     */
+    public Instant getExpirationTime() {
       return unit == ChronoUnit.SECONDS
           ? Instant.ofEpochSecond((Long.MAX_VALUE >>> timestampLeftShift) + epoch)
           : Instant.ofEpochMilli((Long.MAX_VALUE >>> timestampLeftShift) + epoch);
     }
 
+    /**
+     * Returns the ordered workers pairs, every pair contains two values, one is the worker bits the
+     * other is the worker id.
+     *
+     * @return getWorkers
+     */
     public List<Pair<Long, Long>> getWorkers() {
       List<Pair<Long, Long>> workers = new ArrayList<>();
       for (int i = 0; i < workerSize; i++) {
@@ -252,19 +274,40 @@ public class Identifiers {
       return result;
     }
 
-    public Instant parseGeningInstant(long id) {
+    /**
+     * Reverse analysis, returning the instant when it was generated from the incoming id parameter.
+     *
+     * @param id
+     * @return parseGeneratedInstant
+     */
+    public Instant parseGeneratedInstant(long id) {
       long timestamp = id >>> timestampLeftShift;
       return unit == ChronoUnit.SECONDS ? Instant.ofEpochSecond(timestamp + epoch)
           : Instant.ofEpochMilli(timestamp + epoch);
     }
 
-    public long parseGeningSequence(long id) {
+    /**
+     * Reverse analysis, returning the sequence when it was generated from the incoming id
+     * parameter.
+     *
+     * @param id
+     * @return parseGeneratedSequence
+     */
+    public long parseGeneratedSequence(long id) {
       long tmp = id << 64 - timestampLeftShift + workersBits;
       tmp >>>= 64 - sequenceBits;
       return tmp;
     }
 
-    public long parseGeningWorkerId(long id, int index) {
+    /**
+     * Reverse analysis, returning the worker id when it was generated from the incoming id and
+     * index parameters.
+     *
+     * @param id
+     * @param index
+     * @return parseGeneratedWorkerId
+     */
+    public long parseGeneratedWorkerId(long id, int index) {
       long ls = timestampBits;
       long rs = sequenceBits;
       for (int i = 0; i < workerSize; i++) {

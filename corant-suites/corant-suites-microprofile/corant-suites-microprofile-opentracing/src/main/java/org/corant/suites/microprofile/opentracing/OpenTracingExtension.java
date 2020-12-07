@@ -7,7 +7,7 @@ import javax.enterprise.inject.spi.Extension;
 import io.opentracing.contrib.interceptors.OpenTracingInterceptor;
 
 /**
- * @auther sushuaihao 2020/1/2
+ * @author sushuaihao 2020/1/2
  * @since
  */
 public class OpenTracingExtension implements Extension {

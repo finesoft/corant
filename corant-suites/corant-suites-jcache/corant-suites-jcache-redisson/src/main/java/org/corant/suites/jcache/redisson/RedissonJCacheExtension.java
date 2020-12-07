@@ -25,7 +25,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 /**
  * corant <br>
  *
- * @auther sushuaihao 2020/8/25
+ * @author sushuaihao 2020/8/25
  * @since
  */
 public class RedissonJCacheExtension implements Extension {

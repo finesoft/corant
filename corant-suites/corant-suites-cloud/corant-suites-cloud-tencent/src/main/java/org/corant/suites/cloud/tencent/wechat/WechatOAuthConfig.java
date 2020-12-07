@@ -7,7 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 /**
  * corant <br>
  *
- * @auther sushuaihao 2020/9/11
+ * @author sushuaihao 2020/9/11
  * @since
  */
 @ApplicationScoped

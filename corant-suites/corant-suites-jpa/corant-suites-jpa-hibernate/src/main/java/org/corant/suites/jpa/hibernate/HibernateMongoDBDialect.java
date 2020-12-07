@@ -13,7 +13,7 @@ import org.hibernate.type.Type;
 /**
  * corant-suites-jpa-hibernate <br>
  *
- * @auther sushuaihao 2019/6/12
+ * @author sushuaihao 2019/6/12
  * @since
  */
 public class HibernateMongoDBDialect extends MongoDBDialect {

@@ -9,7 +9,7 @@ import io.narayana.lra.filter.ClientLRAResponseFilter;
 /**
  * tom-jerry <br>
  *
- * @auther sushuaihao 2019/11/22
+ * @author sushuaihao 2019/11/22
  * @since
  */
 @Provider

@@ -10,7 +10,7 @@ import org.hibernate.type.descriptor.java.BigDecimalTypeDescriptor;
 /**
  * cps-m2b <br>
  *
- * @auther sushuaihao 2019/8/14
+ * @author sushuaihao 2019/8/14
  * @since
  */
 public class BigDecimalType extends AbstractGenericBasicType<BigDecimal> {

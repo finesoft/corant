@@ -13,7 +13,7 @@ import io.smallrye.opentracing.SmallRyeTracingDynamicFeature;
 
 /**
  *
- * @auther sushuaihao 2019/12/31
+ * @author sushuaihao 2019/12/31
  * @since
  */
 @ApplicationScoped

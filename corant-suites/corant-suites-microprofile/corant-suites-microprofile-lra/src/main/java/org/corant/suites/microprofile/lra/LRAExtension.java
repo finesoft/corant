@@ -13,7 +13,7 @@ import io.narayana.lra.filter.ServerLRAFilter;
 import io.narayana.lra.provider.ParticipantStatusOctetStreamProvider;
 
 /**
- * @auther sushuaihao 2019/11/21
+ * @author sushuaihao 2019/11/21
  * @since
  */
 public class LRAExtension implements Extension {

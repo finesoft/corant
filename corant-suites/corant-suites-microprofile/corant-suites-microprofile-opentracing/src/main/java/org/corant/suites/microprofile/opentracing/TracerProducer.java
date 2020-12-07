@@ -10,7 +10,7 @@ import io.opentracing.util.GlobalTracer;
 
 /**
  *
- * @auther sushuaihao 2020/1/2
+ * @author sushuaihao 2020/1/2
  * @since
  */
 @ApplicationScoped

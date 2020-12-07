@@ -10,7 +10,7 @@ import org.hibernate.type.descriptor.java.InstantJavaDescriptor;
 /**
  * corant-suites-jpa-hibernate <br>
  *
- * @auther sushuaihao 2019/6/12
+ * @author sushuaihao 2019/6/12
  * @since
  */
 public class InstantType extends AbstractGenericBasicType<Instant> {

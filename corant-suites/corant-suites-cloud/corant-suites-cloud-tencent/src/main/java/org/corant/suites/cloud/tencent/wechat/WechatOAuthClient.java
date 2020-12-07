@@ -11,7 +11,7 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
  *
  * @see <a href=
  *     "https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html">微信登录功能</a>
- * @auther sushuaihao 2020/9/11
+ * @author sushuaihao 2020/9/11
  * @since
  */
 @Path("/sns")

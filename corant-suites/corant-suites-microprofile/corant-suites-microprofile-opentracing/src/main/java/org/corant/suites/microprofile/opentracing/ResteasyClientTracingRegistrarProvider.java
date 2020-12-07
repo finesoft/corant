@@ -10,7 +10,7 @@ import io.opentracing.contrib.concurrent.TracedExecutorService;
 import io.smallrye.opentracing.SmallRyeClientTracingFeature;
 
 /**
- * @auther sushuaihao 2020/1/2
+ * @author sushuaihao 2020/1/2
  * @since
  */
 public class ResteasyClientTracingRegistrarProvider implements ClientTracingRegistrarProvider {

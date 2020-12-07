@@ -33,7 +33,7 @@ import com.aliyun.oss.OSSClientBuilder;
 /**
  * corant <br>
  *
- * @auther sushuaihao 2020/8/31
+ * @author sushuaihao 2020/8/31
  * @since
  */
 @ApplicationScoped

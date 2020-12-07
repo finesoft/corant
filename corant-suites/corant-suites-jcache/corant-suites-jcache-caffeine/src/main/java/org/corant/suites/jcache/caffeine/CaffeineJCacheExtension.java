@@ -25,7 +25,7 @@ import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
 /**
  * corant <br>
  *
- * @auther sushuaihao 2020/8/25
+ * @author sushuaihao 2020/8/25
  * @since
  */
 public class CaffeineJCacheExtension implements Extension {

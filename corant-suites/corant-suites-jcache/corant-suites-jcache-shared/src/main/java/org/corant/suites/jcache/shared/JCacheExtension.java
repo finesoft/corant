@@ -17,7 +17,7 @@ import javax.enterprise.inject.spi.Extension;
 /**
  * corant <br>
  *
- * @auther sushuaihao 2020/8/25
+ * @author sushuaihao 2020/8/25
  * @since
  */
 public class JCacheExtension implements Extension {

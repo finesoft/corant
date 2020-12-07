@@ -4,7 +4,7 @@ import java.util.List;
 import org.corant.suites.query.shared.NamedQueryService;
 
 /**
- * @auther sushuaihao 2020/4/22
+ * @author sushuaihao 2020/4/22
  * @since
  */
 public interface MgNamedQueryService extends NamedQueryService {

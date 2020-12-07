@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.context.ConversionService;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
@@ -44,14 +44,14 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  * corant-suites-query
  *
  * <p>
- * The result field conversion hints.
- * <li>The key is 'result-field-convert'</li>
- * <li>The value of the parameter that named 'field-name' is the field name that will be
- * convert.</li>
- * <li>The value of the parameter that named 'target-type' is the target class name that the field
- * value will be convert to.</li>
- * <li>The values of the parameter that named 'convert-hint-key' and 'convert-hint-value' are the
- * conversion service hints, use for intervene conversion process.</li>
+ * The simple result aggregation hints.
+ * <li>The key is 'result-aggregation'</li>
+ * <li>The value of the parameter that named 'aggs-field-names' are the reserved field names during
+ * aggregation; if the first character of this parameter is'!', it means the names of the fields
+ * that will be aggregated during aggregation.</li>
+ * <li>The value of the parameter that named 'aggs-name' is the name of the field that stores the
+ * aggregation result. The aggregated objects are generally placed in a container object (usually a
+ * List).</li>
  * </p>
  * <p>
  * Use case:
@@ -69,10 +69,25 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  *       &lt;/hint&gt;
  * &lt;/query&gt;
  * </pre>
+ *
+ * <pre>
+ * Use case explain:
+ *
+ *      the query results before aggregation like below:
+ *
+ *          record1: {"id":1, "name":"a", "f1":"1", "f2":"1"}
+ *          record2: {"id":1, "name":"a", "f1":"2", "f2":"2"}
+ *          record3: {"id":2, "name":"b", "f1":"3", "f2":"3"}
+ *          record4: {"id":2, "name":"b", "f1":"4", "f2":"4"}
+ *
+ *      the query results after aggregation like below:
+ *
+ *          record1: {"id":1, "name":"a", list:[{"f1":"1", "f2":"1"},{"f1":"2", "f2":"2"}]}
+ *          record2: {"id":2, "name":"b", list:[{"f1":"3", "f2":"3"},{"f1":"4", "f2":"4"}]}
+ *
+ * </pre>
  * </p>
  *
- * @see ConversionService
- * @see org.corant.shared.conversion.Conversion
  * @author bingo 下午12:02:08
  *
  */
@@ -177,7 +192,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     if (isEmpty(aggFieldNames)) {
       return Pair.empty();
     } else {
-      String names = aggFieldNames.get(0).getValue();
+      String names = defaultTrim(aggFieldNames.get(0).getValue());
       boolean exclude = names.startsWith("!");
       if (exclude) {
         names = names.substring(1);

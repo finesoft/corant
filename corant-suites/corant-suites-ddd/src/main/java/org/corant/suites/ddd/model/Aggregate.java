@@ -30,6 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -267,33 +268,41 @@ public interface Aggregate extends Entity {
           Instances.resolve(JPARepositoryExtension.class).resolveQualifiers(cls));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     default T retrieve() {
-      Class<T> resolveClass = null;
-      Class<?> t = getClass();
+      return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default Optional<T> tryRetrieve() {
+      Class<T> resolvedClass = null;
+      Class<?> referenceClass = getClass();
       do {
-        if (t.getGenericSuperclass() instanceof ParameterizedType) {
-          resolveClass =
-              (Class<T>) ((ParameterizedType) t.getGenericSuperclass()).getActualTypeArguments()[0];
+        if (referenceClass.getGenericSuperclass() instanceof ParameterizedType) {
+          resolvedClass = (Class<T>) ((ParameterizedType) referenceClass.getGenericSuperclass())
+              .getActualTypeArguments()[0];
           break;
         } else {
-          Type[] genericInterfaces = t.getGenericInterfaces();
+          Type[] genericInterfaces = referenceClass.getGenericInterfaces();
           if (genericInterfaces != null) {
             for (Type type : genericInterfaces) {
               if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 if (AggregateReference.class
                     .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                  resolveClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                  resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
                   break;
                 }
               }
             }
           }
         }
-      } while (resolveClass == null && (t = t.getSuperclass()) != null);
-      return resolve(resolveClass, getId());
+      } while (resolvedClass == null && (referenceClass = referenceClass.getSuperclass()) != null);
+      if (resolvedClass != null && getId() != null) {
+        return Optional.ofNullable(resolveRepository(resolvedClass).get(resolvedClass, getId()));
+      }
+      return Optional.empty();
     }
   }
 

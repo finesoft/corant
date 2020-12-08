@@ -201,18 +201,14 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
   protected boolean initialize() throws JMSException {
     // initialize connection
     if (connection == null) {
-      try {
-        if (xa) {
-          connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
-        } else {
-          connection = connectionFactory.createConnection();
-        }
-        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
-            .forEach(c -> c.configConnection(connection, meta));
-        meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
-      } catch (JMSException je) {
-        throw je;
+      if (xa) {
+        connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
+      } else {
+        connection = connectionFactory.createConnection();
       }
+      select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
+          .forEach(c -> c.configConnection(connection, meta));
+      meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
     }
     // initialize session
     if (session == null) {

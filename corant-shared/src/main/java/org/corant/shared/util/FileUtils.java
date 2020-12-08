@@ -46,6 +46,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.Resources.SourceType;
 
 /**

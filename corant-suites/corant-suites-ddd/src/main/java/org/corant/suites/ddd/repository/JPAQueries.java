@@ -16,6 +16,8 @@ package org.corant.suites.ddd.repository;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -60,6 +62,33 @@ public class JPAQueries {
 
   static final Set<Class<?>> persistenceClasses =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+  private JPAQueries() {}
+
+  public static <T> T convertTuple(Tuple tuple, Class<T> type) {
+    List<TupleElement<?>> eles = tuple.getElements();
+    if (sizeOf(eles) == 1 && simpleClass(type)) {
+      return toObject(tuple.get(0), type);
+    }
+    return toObject(tuple, type);
+  }
+
+  public static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
+    List<T> results = new ArrayList<>();
+    if (isNotEmpty(tuples)) {
+      List<TupleElement<?>> eles = tuples.get(0).getElements();
+      if (eles.size() == 1 && simpleClass(type)) {
+        for (Tuple tuple : tuples) {
+          results.add(toObject(tuple.get(0), type));
+        }
+      } else {
+        for (Tuple tuple : tuples) {
+          results.add(toObject(tuple, type));
+        }
+      }
+    }
+    return results;
+  }
 
   /**
    * Create an instance of JPAQuery for executing a named query(in the Jakarta Persistence query
@@ -358,31 +387,6 @@ public class JPAQueries {
       }
     }
     return persistenceClasses.contains(type);
-  }
-
-  private static <T> T convertTuple(Tuple tuple, Class<T> type) {
-    List<TupleElement<?>> eles = tuple.getElements();
-    if (eles.size() == 1 && simpleClass(type)) {
-      return toObject(tuple.get(0), type);
-    }
-    return toObject(tuple, type);
-  }
-
-  private static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
-    List<T> results = new ArrayList<>();
-    if (tuples.size() > 0) {
-      List<TupleElement<?>> eles = tuples.get(0).getElements();
-      if (eles.size() == 1 && simpleClass(type)) {
-        for (Tuple tuple : tuples) {
-          results.add(toObject(tuple.get(0), type));
-        }
-      } else {
-        for (Tuple tuple : tuples) {
-          results.add(toObject(tuple, type));
-        }
-      }
-    }
-    return results;
   }
 
   private static boolean simpleClass(Class<?> type) {

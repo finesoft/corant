@@ -18,7 +18,3 @@
  *
  */
 package org.corant.shared.util;
-
-class Defaults {
-  public static int ONE_MB = 1024 * 1024;
-}

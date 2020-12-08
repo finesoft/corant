@@ -111,8 +111,7 @@ public class Keys {
   public static X509Certificate decodeX509Certificate(InputStream is)
       throws GeneralSecurityException {
     CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
-    X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
-    return cert;
+    return (X509Certificate) cf.generateCertificate(is);
   }
 
   public static KeyPair generateKeyPair(int keySize, String algo) throws GeneralSecurityException {

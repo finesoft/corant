@@ -13,6 +13,7 @@
  */
 package org.corant.suites.query.shared.mapping;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toEnum;
@@ -309,7 +310,7 @@ public class QueryParseHandler extends DefaultHandler {
       nameStack.push(qName);
     } else {
       Object obj = valueStack.pop();
-      Properties ps = this.currentObject();
+      Properties ps = shouldNotNull(this.currentObject());
       ps.add((Property) obj);
       nameStack.pop();
     }

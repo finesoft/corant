@@ -69,7 +69,6 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.setMaximumPoolSize(cfg.getMaxSize());
     cfgs.setPoolName(cfg.getName());
     cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
-    HikariDataSource datasource = new HikariDataSource(cfgs);
-    return datasource;
+    return new HikariDataSource(cfgs);
   }
 }

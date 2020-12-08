@@ -94,7 +94,7 @@ public class ConverterRegistry {
   public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory) {
     CONVERTER_FACTORIES.remove(converterFactory);
     SUPPORT_CONVERTER_FACTORIES.entrySet().stream()
-        .filter(e -> areEqual(e.getValue(), converterFactory)).map(e -> e.getKey())
+        .filter(e -> areEqual(e.getValue(), converterFactory)).map(Entry::getKey)
         .forEach(ConverterRegistry::deregister);
   }
 
@@ -144,7 +144,7 @@ public class ConverterRegistry {
     if (converterFactory != null && !CONVERTER_FACTORIES.contains(converterFactory)) {
       CONVERTER_FACTORIES.add(converterFactory);
       Collections.sort(CONVERTER_FACTORIES,
-          (f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()));
+          (f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()) * -1);
     }
   }
 

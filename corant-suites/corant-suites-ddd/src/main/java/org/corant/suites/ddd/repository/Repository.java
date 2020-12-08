@@ -24,14 +24,50 @@ import java.util.List;
  */
 public interface Repository<Q> {
 
+  /**
+   * Retrieve object from repository by id and object class
+   *
+   * @param <T>
+   * @param cls
+   * @param id
+   * @return get
+   */
   <T> T get(Class<T> cls, Serializable id);
 
+  /**
+   * Merge the state of the given object into repository.
+   *
+   * @param <T>
+   * @param obj
+   * @return merge
+   */
   <T> T merge(T obj);
 
+  /**
+   * Save the state of the given object into repository
+   *
+   * @param <T>
+   * @param obj
+   * @return persist
+   */
   <T> boolean persist(T obj);
 
+  /**
+   * Remove the object from repository
+   *
+   * @param <T>
+   * @param obj
+   * @return true means successfully
+   */
   <T> boolean remove(T obj);
 
+  /**
+   * Retrieve objects from repository by query object
+   *
+   * @param <T>
+   * @param q
+   * @return object list
+   */
   <T> List<T> select(Q q);
 
 }

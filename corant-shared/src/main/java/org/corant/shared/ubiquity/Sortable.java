@@ -21,8 +21,15 @@ package org.corant.shared.ubiquity;
  */
 public interface Sortable {
 
+  /**
+   * Reverse the order of numbers, the bigger is the front
+   *
+   * @param ccf1
+   * @param ccf2
+   * @return compare
+   */
   static int compare(Sortable ccf1, Sortable ccf2) {
-    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal());
+    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal()) * -1;
   }
 
   default int getOrdinal() {

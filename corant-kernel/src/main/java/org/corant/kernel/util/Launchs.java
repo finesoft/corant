@@ -35,7 +35,7 @@ import org.corant.shared.util.Strings;
  */
 public class Launchs {
 
-  private final static Pattern debugPattern = Pattern.compile("-Xdebug|jdwp");
+  private static final Pattern debugPattern = Pattern.compile("-Xdebug|jdwp");
 
   private Launchs() {
     super();

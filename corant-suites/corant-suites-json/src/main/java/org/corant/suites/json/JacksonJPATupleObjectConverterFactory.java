@@ -13,8 +13,11 @@
  */
 package org.corant.suites.json;
 
-import java.time.temporal.Temporal;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import javax.persistence.Tuple;
+import javax.persistence.TupleElement;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 
@@ -24,18 +27,27 @@ import org.corant.shared.conversion.ConverterFactory;
  * @author bingo 上午12:06:55
  *
  */
-@SuppressWarnings("rawtypes")
-public class JacksonMapObjectConverterFactory implements ConverterFactory<Map, Object> {
+public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 
   @Override
-  public Converter<Map, Object> create(Class<Object> targetClass, Object defaultValue,
+  public Converter<Tuple, Object> create(Class<Object> targetClass, Object defaultValue,
       boolean throwException) {
-    return (t, h) -> JsonUtils.objectMapper.convertValue(t, targetClass);
+    return (t, h) -> {
+      List<TupleElement<?>> eles = t.getElements();
+      Map<String, Object> tupleMap = new LinkedHashMap<>(eles.size());
+      for (TupleElement<?> e : eles) {
+        tupleMap.put(e.getAlias(), t.get(e));
+      }
+      if (Map.class.isAssignableFrom(targetClass)) {
+        return tupleMap;
+      }
+      return JsonUtils.objectMapper.convertValue(tupleMap, targetClass);
+    };
   }
 
   @Override
   public boolean isSupportTargetClass(Class<?> targetClass) {
-    return !Temporal.class.isAssignableFrom(targetClass);
+    return true;
   }
 
 }

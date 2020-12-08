@@ -1,18 +1,18 @@
 package org.corant.suites.jcache.shared;
 
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.jsr107.ri.annotations.cdi.CachePutInterceptor;
-import org.jsr107.ri.annotations.cdi.CacheRemoveAllInterceptor;
-import org.jsr107.ri.annotations.cdi.CacheRemoveEntryInterceptor;
-import org.jsr107.ri.annotations.cdi.CacheResultInterceptor;
-
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterTypeDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.jsr107.ri.annotations.cdi.CachePutInterceptor;
+import org.jsr107.ri.annotations.cdi.CacheRemoveAllInterceptor;
+import org.jsr107.ri.annotations.cdi.CacheRemoveEntryInterceptor;
+import org.jsr107.ri.annotations.cdi.CacheResultInterceptor;
 
 /**
  * corant <br>
@@ -22,12 +22,10 @@ import javax.enterprise.inject.spi.Extension;
  */
 public class JCacheExtension implements Extension {
 
-  private boolean enableGlobalAnnotation =
-      ConfigProvider.getConfig()
-          .getOptionalValue("jcache.enable_global_annotation", Boolean.class)
-          .orElse(Boolean.TRUE);
+  private boolean enableGlobalAnnotation = ConfigProvider.getConfig()
+      .getOptionalValue("jcache.enable_global_annotation", Boolean.class).orElse(Boolean.TRUE);
 
-  private CachingProvider cachingProvider;
+  protected CachingProvider cachingProvider;
 
   public void observeAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, final BeanManager bm) {
     cachingProvider = Caching.getCachingProvider();
@@ -40,6 +38,12 @@ public class JCacheExtension implements Extension {
       afterTypeDiscovery.getInterceptors().add(CacheRemoveEntryInterceptor.class);
       afterTypeDiscovery.getInterceptors().add(CacheRemoveAllInterceptor.class);
       afterTypeDiscovery.getInterceptors().add(CachePutInterceptor.class);
+    }
+  }
+
+  protected void beforeShutdown(@Observes BeforeShutdown beforeShutdown) {
+    if (cachingProvider != null) {
+      cachingProvider.close();
     }
   }
 }

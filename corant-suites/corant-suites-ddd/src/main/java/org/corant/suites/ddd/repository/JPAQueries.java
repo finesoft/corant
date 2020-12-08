@@ -15,8 +15,8 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +36,8 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TupleElement;
@@ -55,12 +56,19 @@ public class JPAQueries {
 
   static Logger logger = Logger.getLogger(JPAQueries.class.getName());
 
-  final static boolean useTuple = Converters.lookup(Map.class, Object.class).isPresent()
-      && tryAsClass("org.hibernate.Hibernate") != null;// FIXME
+  static final boolean useTuple = Converters.lookup(Tuple.class, Object.class).isPresent();// FIXME
 
-  final static Set<Class<?>> persistenceClasses =
+  static final Set<Class<?>> persistenceClasses =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+  /**
+   * Create an instance of JPAQuery for executing a named query(in the Jakarta Persistence query
+   * language or in native SQL).
+   *
+   * @param name the name of a query defined in metadata
+   * @return JPAQuery
+   * @see EntityManager#createNamedQuery(String)
+   */
   public static JPAQuery namedQuery(final String name) {
     return new JPAQuery() {
       @Override
@@ -75,6 +83,17 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of TypedJPAQuery for executing aJakarta Persistence query language named
+   * query.The select list of the query must contain only a single item, which must be assignable to
+   * the type specified by the resultClass argument.
+   *
+   *
+   * @param name the name of a query defined in metadata
+   * @param type the type of the query result
+   * @return TypedJPAQuery
+   * @see EntityManager#createNamedQuery(String,Class)
+   */
   public static <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
     return new TypedJPAQuery<>() {
       @Override
@@ -89,6 +108,19 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of JPAQuery for executing a stored procedure in the database.
+   *
+   * Parameters must be registered before the stored procedure can be executed.
+   *
+   * If the stored procedure returns one or more result sets,any result set will be returned as a
+   * list of type Object[].
+   *
+   *
+   * @param name name assigned to the stored procedure query in metadata
+   * @return JPAQuery
+   * @see EntityManager#createNamedStoredProcedureQuery(String)
+   */
   public static JPAQuery namedStoredProcedureQuery(final String name) {
     return new JPAQuery() {
       @Override
@@ -103,6 +135,17 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of JPAQuery for executing a native SQL statement, e.g., query execution will
+   * result in each row of the SQL result being returned as a result of type Object[] (or a result
+   * of type Object if there is only one column in the select list.) Column values are returned in
+   * the order of their appearance in the select list and default JDBC type mappings are applied.
+   *
+   *
+   * @param sqlString a native SQL query string
+   * @return nativeQuery
+   * @see EntityManager#createNativeQuery(String)
+   */
   public static JPAQuery nativeQuery(final String sqlString) {
     return new JPAQuery() {
       @Override
@@ -117,6 +160,22 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of TypedJPAQuery for executing a native SQL query.
+   * <p>
+   * Note: If the given type is JPA Entity Class or there is no converter which implements convert
+   * javax.persistence.Tuple To Object, call {@link EntityManager#createNativeQuery(String, Class)}
+   * directly; otherwise, first call {@link EntityManager#createNativeQuery(String, Class)} and pass
+   * javax.persistence.Tuple.class as the result type, and then convert the result to the given type
+   * before the result is returned.
+   *
+   * @param <T>
+   * @param sqlString a native SQL query string
+   * @param type the class of the resulting instance(s)
+   * @return nativeQuery
+   *
+   * @see EntityManager#createNativeQuery(String, Class)
+   */
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
     if (isPersistenceClass(type) || !useTuple) {
       return new TypedJPAQuery<>() {
@@ -147,6 +206,15 @@ public class JPAQueries {
     }
   }
 
+  /**
+   * Create an instance of JPAQuery for executing a native SQL query.
+   *
+   * @param sqlString a native SQL query string
+   * @param resultSetMapping the name of the result set mapping
+   * @return
+   *
+   * @see EntityManager#createNativeQuery(String, String)
+   */
   public static JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
     return new JPAQuery() {
       @Override
@@ -161,6 +229,14 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of TypedJPAQuery for executing a criteria query.
+   *
+   * @param <T>
+   * @param criteriaQuery a criteria query object
+   * @return
+   * @see EntityManager#createQuery(CriteriaQuery)
+   */
   public static <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
     return new TypedJPAQuery<>() {
       @Override
@@ -175,6 +251,13 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of JPAQuery for executing a Jakarta Persistence query language statement.
+   *
+   * @param qlString
+   * @return query
+   * @see EntityManager#createQuery(String)
+   */
   public static JPAQuery query(final String qlString) {
     return new JPAQuery() {
       @Override
@@ -189,6 +272,17 @@ public class JPAQueries {
     };
   }
 
+  /**
+   * Create an instance of TypedJPAQuery for executing aJakarta Persistence query language
+   * statement.The select list of the query must contain only a single item, which must be
+   * assignable to the type specified by the resultClass argument.
+   *
+   * @param <T>
+   * @param qlString a Jakarta Persistence query string
+   * @param type the type of the query result
+   * @return
+   * @see EntityManager#createQuery(String, Class)
+   */
   public static <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
     return new TypedJPAQuery<>() {
       @Override
@@ -266,11 +360,7 @@ public class JPAQueries {
     if (eles.size() == 1 && simpleClass(type)) {
       return toObject(tuple.get(0), type);
     }
-    Map<String, Object> tupleMap = new LinkedHashMap<>(eles.size());
-    for (TupleElement<?> e : eles) {
-      tupleMap.put(e.getAlias(), tuple.get(e));
-    }
-    return toObject(tupleMap, type);
+    return toObject(tuple, type);
   }
 
   private static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
@@ -283,11 +373,7 @@ public class JPAQueries {
         }
       } else {
         for (Tuple tuple : tuples) {
-          Map<String, Object> tupleMap = new LinkedHashMap<>(eles.size());
-          for (TupleElement<?> e : eles) {
-            tupleMap.put(e.getAlias(), tuple.get(e));
-          }
-          results.add(toObject(tupleMap, type));
+          results.add(toObject(tuple, type));
         }
       }
     }
@@ -305,6 +391,10 @@ public class JPAQueries {
 
     protected ParameterBuilder parameterBuilder;
     protected Supplier<EntityManager> entityManagerSupplier;
+    protected Map<Object, Object> hints;
+    protected int maxResults = -1;
+    protected FlushModeType flushMode;
+    protected LockModeType lockMode;
 
     protected void checkNoParametersConfigured() {
       if (parameterBuilder != null) {
@@ -325,12 +415,42 @@ public class JPAQueries {
       if (parameterBuilder != null) {
         parameterBuilder.populateQuery(entityManagerSupplier.get(), query);
       }
+      if (hints != null) {
+        hints.forEach((k, v) -> {
+          query.setHint(k.toString(), v);
+        });
+      }
+      if (maxResults > 0) {
+        query.setMaxResults(maxResults);
+      }
+      if (flushMode != null) {
+        query.setFlushMode(flushMode);
+      }
+      if (lockMode != null) {
+        query.setLockMode(lockMode);
+      }
       return query;
     }
 
     void setEntityManagerSupplier(final Supplier<EntityManager> entityManagerSupplier) {
       this.entityManagerSupplier =
           shouldNotNull(entityManagerSupplier, "The entity manager cannot null!");
+    }
+
+    void setFlushMode(FlushModeType flushMode) {
+      this.flushMode = flushMode;
+    }
+
+    void setHints(Object... hints) {
+      this.hints = mapOf(hints);
+    }
+
+    void setLockMode(LockModeType lockMode) {
+      this.lockMode = lockMode;
+    }
+
+    void setMaxResults(int maxResults) {
+      this.maxResults = maxResults;
     }
 
     void setParameters(Collection<?> parameters) {
@@ -380,25 +500,93 @@ public class JPAQueries {
 
   public static abstract class JPAQuery extends AbstractQuery {
 
+    /**
+     * {@link Query#setFlushMode(FlushModeType)}
+     */
+    public JPAQuery flushMode(FlushModeType flushMode) {
+      setFlushMode(flushMode);
+      return this;
+    }
+
+    /**
+     * Execute a SELECT query that returns a single result.
+     *
+     * @param <T>
+     * @return get
+     */
     public <T> T get() {
       return forceCast(populateQuery(createQuery()).getSingleResult());
     }
 
-    public JPAQuery parameters(Collection<?> parameters) {
+    /**
+     * Set the query hint pairs.
+     *
+     * {@link Query#setHint(String, Object)}
+     */
+    public JPAQuery hints(Object... hints) {
+      setHints(hints);
+      return this;
+    }
+
+    /**
+     * {@link Query#setLockMode(LockModeType)}
+     */
+    public JPAQuery lockMode(LockModeType lockMode) {
+      setLockMode(lockMode);
+      return this;
+    }
+
+    /**
+     * {@link Query#setMaxResults(int)}
+     */
+    public JPAQuery maxResults(int maxResults) {
+      setMaxResults(maxResults);
+      return this;
+    }
+
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
+    public JPAQuery parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
     }
 
-    public JPAQuery parameters(final Map<?, ?> parameterMap) {
-      setParameters(parameterMap);
+    /**
+     * Bind named query parameters, the query parameter name same as the key of the given
+     * parameters.
+     *
+     * @param parameters named parameters
+     * @return parameters
+     * @see Query#setParameter(String, Object)
+     */
+    public JPAQuery parameters(final Map<?, ?> parameters) {
+      setParameters(parameters);
       return this;
     }
 
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * array index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
     public JPAQuery parameters(final Object... parameters) {
       setParameters(parameters);
       return this;
     }
 
+    /**
+     * Execute a SELECT query and return the query results as List.
+     *
+     * @param <T>
+     * @return select
+     */
     public <T> List<T> select() {
       @SuppressWarnings("unchecked")
       List<T> results = populateQuery(createQuery()).getResultList();
@@ -434,6 +622,20 @@ public class JPAQueries {
       this.resultType = resultType;
     }
 
+    /**
+     * {@link Query#setFlushMode(FlushModeType)}
+     */
+    public TypedJPAQuery<T> flushMode(FlushModeType flushMode) {
+      setFlushMode(flushMode);
+      return this;
+    }
+
+    /**
+     * Execute a SELECT query that returns a single typed result.
+     *
+     * @param <T>
+     * @return get
+     */
     public T get() {
       Object result = populateQuery(createQuery()).getSingleResult();
       if (result == null) {
@@ -446,21 +648,75 @@ public class JPAQueries {
       }
     }
 
-    public TypedJPAQuery<T> parameters(Collection<?> parameters) {
+    /**
+     * Set the query hint pairs.
+     *
+     * {@link Query#setHint(String, Object)}
+     */
+    public TypedJPAQuery<T> hints(Object... hints) {
+      setHints(hints);
+      return this;
+    }
+
+    /**
+     * {@link Query#setLockMode(LockModeType)}
+     */
+    public TypedJPAQuery<T> lockMode(LockModeType lockMode) {
+      setLockMode(lockMode);
+      return this;
+    }
+
+    /**
+     * {@link Query#setMaxResults(int)}
+     */
+    public TypedJPAQuery<T> maxResults(int maxResults) {
+      setMaxResults(maxResults);
+      return this;
+    }
+
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
+    public TypedJPAQuery<T> parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
     }
 
-    public TypedJPAQuery<T> parameters(final Map<?, ?> parameterMap) {
-      setParameters(parameterMap);
+    /**
+     * Bind named query parameters, the query parameter name same as the key of the given
+     * parameters.
+     *
+     * @param parameters named parameters
+     * @return parameters
+     * @see Query#setParameter(String, Object)
+     */
+    public TypedJPAQuery<T> parameters(final Map<?, ?> parameters) {
+      setParameters(parameters);
       return this;
     }
 
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * array index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
     public TypedJPAQuery<T> parameters(final Object... parameters) {
       setParameters(parameters);
       return this;
     }
 
+    /**
+     * Execute a SELECT query and return the query results as an typed List.
+     *
+     *
+     * @return select
+     */
     @SuppressWarnings("unchecked")
     public List<T> select() {
       if (resultType == null || !useTuple) {

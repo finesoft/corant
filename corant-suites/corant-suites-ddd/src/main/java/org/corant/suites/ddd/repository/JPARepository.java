@@ -46,14 +46,28 @@ public interface JPARepository extends Repository<Query> {
 
   Logger logger = Logger.getLogger(JPARepository.class.getName());
 
+  /**
+   * {@link EntityManager#clear()}
+   */
   default void clear() {
     getEntityManager().clear();
   }
 
+  /**
+   * {@link EntityManager#detach(Object)}
+   *
+   * @param entity detach
+   */
   default void detach(Object entity) {
     getEntityManager().detach(entity);
   }
 
+  /**
+   * Remove the data for entities of the specified class (and its subclasses) from the cache.
+   * {@link Cache#evict(Class)}
+   *
+   * @param entityClass evictCache
+   */
   default void evictCache(Class<?> entityClass) {
     Cache cache = getEntityManagerFactory().getCache();
     if (cache != null) {
@@ -63,6 +77,12 @@ public interface JPARepository extends Repository<Query> {
     }
   }
 
+  /**
+   * Remove the data for the given entity from the cache. {@link Cache#evict(Class, Object)}
+   *
+   * @param entityClass
+   * @param id evictCache
+   */
   default void evictCache(Class<?> entityClass, Serializable id) {
     Cache cache = getEntityManagerFactory().getCache();
     if (cache != null) {
@@ -72,6 +92,11 @@ public interface JPARepository extends Repository<Query> {
     }
   }
 
+  /**
+   * Remove the data for the given entity from the cache.
+   *
+   * @param entity evictCache
+   */
   default void evictCache(Entity entity) {
     if (entity == null || entity.getId() == null) {
       return;
@@ -79,10 +104,22 @@ public interface JPARepository extends Repository<Query> {
     this.evictCache(entity.getClass(), entity.getId());
   }
 
+  /**
+   * {@link EntityManager#flush()}
+   */
   default void flush() {
     getEntityManager().flush();
   }
 
+  /**
+   * Retrieves entity by the given identifier. Search for an entity by the type of the given
+   * identifier and the id of the given identifier .If the entity instance is contained in the
+   * persistence context,it is returned from there.
+   *
+   * @param <T>
+   * @param identifier
+   * @return get
+   */
   @SuppressWarnings("unchecked")
   default <T> T get(AggregateIdentifier identifier) {
     if (identifier != null) {
@@ -92,49 +129,97 @@ public interface JPARepository extends Repository<Query> {
     return null;
   }
 
+  /**
+   * {@link EntityManager#find(Class, Object)}
+   */
   @Override
   default <T> T get(Class<T> entityClass, Serializable id) {
     return id != null ? getEntityManager().find(entityClass, id) : null;
   }
 
+  /**
+   * {@link EntityManager#find(Class, Object, LockModeType)}
+   */
   default <T> T get(Class<T> entityClass, Serializable id, LockModeType lockMode) {
     return getEntityManager().find(entityClass, id, lockMode);
   }
 
+  /**
+   * {@link EntityManager#find(Class, Object, LockModeType, Map)}
+   */
   default <T> T get(Class<T> entityClass, Serializable id, LockModeType lockMode,
       Map<String, Object> properties) {
     return getEntityManager().find(entityClass, id, lockMode, properties);
   }
 
+  /**
+   * Retrieves the aggregate by primary key and version number.Search for an aggregate of the
+   * specified class and primary key and version number. If the aggregate instance is contained in
+   * the persistence context,it is returned from there.
+   *
+   * @param <T>
+   * @param entityClass the aggregate class
+   * @param id the aggregate id
+   * @param vn the aggregate version
+   */
   default <T extends Aggregate> T get(Class<T> entityClass, Serializable id, long vn) {
     T entity = this.get(entityClass, id);
     return entity != null && entity.getVn().longValue() == vn ? entity : null;
   }
 
+  /**
+   * {@link EntityManager#find(Class, Object, Map)}
+   */
   default <T> T get(Class<T> entityClass, Serializable id, Map<String, Object> properties) {
     return getEntityManager().find(entityClass, id, properties);
   }
 
+  /**
+   * Retrieves and object by query
+   *
+   * @param <T>
+   * @param query
+   * @return get
+   */
   default <T> T get(Query query) {
     return forceCast(query.getSingleResult());
   }
 
+  /**
+   * Returns the JPA entity manager used for this repository
+   *
+   * @return getEntityManager
+   */
   EntityManager getEntityManager();
 
+  /**
+   * Returns the JPA entity manager factory used for this repository
+   *
+   * @return getEntityManagerFactory
+   */
   default EntityManagerFactory getEntityManagerFactory() {
     return getEntityManager().getEntityManagerFactory();
   }
 
+  /**
+   * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}
+   */
   default boolean isLoaded(Object object) {
     return object != null && getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(object);
   }
 
+  /**
+   * {@link EntityManager#lock(Object, LockModeType)}
+   */
   default void lock(Object object, LockModeType lockModeType) {
     if (getEntityManager().contains(object)) {
       getEntityManager().lock(object, lockModeType);
     }
   }
 
+  /**
+   * {@link EntityManager#lock(Object, LockModeType, Map)}
+   */
   default void lock(Object object, LockModeType lockModeType, Map<String, Object> properties) {
     if (getEntityManager().contains(object)) {
       getEntityManager().lock(object, lockModeType, properties);
@@ -146,28 +231,70 @@ public interface JPARepository extends Repository<Query> {
     return getEntityManager().merge(entity);
   }
 
+  /**
+   * Create name query
+   *
+   * @param name
+   * @return namedQuery
+   */
   default JPAQuery namedQuery(final String name) {
     return JPAQueries.namedQuery(name).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#namedQuery(String, Class)}
+   *
+   * @param <T>
+   * @param name the name of a query defined in metadata
+   * @param type the type of the query result
+   * @return namedQuery
+   */
   default <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
     return JPAQueries.namedQuery(name, type).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#namedStoredProcedureQuery(String)}
+   *
+   * @param name name assigned to the stored procedure query in metadata
+   * @return JPAQuery
+   */
   default JPAQuery namedStoredProcedureQuery(final String name) {
     return JPAQueries.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#nativeQuery(String)}
+   *
+   * @param sqlString a native SQL query string
+   * @return JPAQuery
+   */
   default JPAQuery nativeQuery(final String sqlString) {
     return JPAQueries.nativeQuery(sqlString).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#nativeQuery(String, Class)}
+   *
+   * @param <T>
+   * @param sqlString a native SQL query string
+   * @param type the class of the resulting instance(s)
+   * @return TypedJPAQuery
+   */
   default <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
     return JPAQueries.nativeQuery(sqlString, type).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#nativeQuery(String, String)}
+   *
+   * @param sqlString a native SQL query string
+   * @param resultSetMapping the name of the result set mapping
+   * @return JPAQuery
+   */
   default JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
-    return JPAQueries.nativeQuery(sqlString, resultSetMapping).entityManager(this::getEntityManager);
+    return JPAQueries.nativeQuery(sqlString, resultSetMapping)
+        .entityManager(this::getEntityManager);
   }
 
   @Override
@@ -176,14 +303,36 @@ public interface JPARepository extends Repository<Query> {
     return true;
   }
 
+  /**
+   * {@link JPAQueries#query(CriteriaQuery)}
+   *
+   * @param <T>
+   * @param criteriaQuery a criteria query object
+   * @return TypedJPAQuery
+   */
   default <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
     return JPAQueries.query(criteriaQuery).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#query(String)}
+   *
+   * @param <T>
+   * @param qlString a Jakarta Persistence query string
+   * @return JPAQuery
+   */
   default JPAQuery query(final String qlString) {
     return JPAQueries.query(qlString).entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@link JPAQueries#query(String, Class)}
+   *
+   * @param <T>
+   * @param qlString a Jakarta Persistence query string
+   * @param type the type of the query result
+   * @return TypedJPAQuery
+   */
   default <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
     return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
   }
@@ -197,6 +346,14 @@ public interface JPARepository extends Repository<Query> {
     return false;
   }
 
+  /**
+   * Retrieves the entities by primary keys
+   *
+   * @param <T>
+   * @param entityClass the entity class
+   * @param ids the entity primary keys
+   * @return entity list
+   */
   default <T> List<T> select(Class<T> entityClass, Serializable... ids) {
     if (isEmpty(ids)) {
       return new ArrayList<>();

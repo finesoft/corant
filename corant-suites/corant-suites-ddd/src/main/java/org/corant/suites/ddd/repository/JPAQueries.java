@@ -84,7 +84,7 @@ public class JPAQueries {
   }
 
   /**
-   * Create an instance of TypedJPAQuery for executing aJakarta Persistence query language named
+   * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language named
    * query.The select list of the query must contain only a single item, which must be assignable to
    * the type specified by the resultClass argument.
    *
@@ -163,11 +163,16 @@ public class JPAQueries {
   /**
    * Create an instance of TypedJPAQuery for executing a native SQL query.
    * <p>
-   * Note: If the given type is JPA Entity Class or there is no converter which implements convert
-   * javax.persistence.Tuple To Object, call {@link EntityManager#createNativeQuery(String, Class)}
-   * directly; otherwise, first call {@link EntityManager#createNativeQuery(String, Class)} and pass
-   * javax.persistence.Tuple.class as the result type, and then convert the result to the given type
-   * before the result is returned.
+   * Note:
+   *
+   * If the given type is JPA entity class or there is no converter which implements
+   * javax.persistence.Tuple To Object conversion, call
+   * {@link EntityManager#createNativeQuery(String, Class)} directly. <br/>
+   *
+   * If the given is not JPA entity class (etc., SomeDTO) and there is a converter which implements
+   * javax.persistence.Tuple To Object conversion then use javax.persistence.Tuple.class as the
+   * result type and call {@link EntityManager#createNativeQuery(String, Class)} , and then convert
+   * the result to the given type before the result is returned.
    *
    * @param <T>
    * @param sqlString a native SQL query string

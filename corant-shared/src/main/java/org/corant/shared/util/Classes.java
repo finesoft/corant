@@ -38,6 +38,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Classes {
 
+  public static final Class<?>[] EMPTY_ARRAY = new Class[0];
   public static final String CGLIB_CLASS_SEPARATOR = "$$";
   public static final char PACKAGE_SEPARATOR_CHAR = '.';
   public static final String PACKAGE_SEPARATOR = String.valueOf(PACKAGE_SEPARATOR_CHAR);

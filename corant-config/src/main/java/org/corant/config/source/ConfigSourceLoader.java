@@ -66,8 +66,8 @@ public class ConfigSourceLoader {
       throws IOException {
     List<ConfigSource> sources = new ArrayList<>();
     for (String path : setOf(locations)) {
-      Resources.from(path).findFirst()
-          .ifPresent(r -> load(filter, r, ordinal).ifPresent(sources::add));
+      Resources.from(path).findFirst().flatMap(r -> load(filter, r, ordinal))
+          .ifPresent(sources::add);
     }
     return sources;
   }

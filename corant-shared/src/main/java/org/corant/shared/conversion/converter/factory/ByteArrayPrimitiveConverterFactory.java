@@ -40,21 +40,20 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
 
     return (t, h) -> {
       Object result = null;
-      byte[] bytes = t;
       final boolean strict = isStrict(h);
       try {
         if (targetClass.equals(Long.class) || targetClass.equals(Long.TYPE)) {
-          result = Bytes.toLong(bytes, strict);
+          result = Bytes.toLong(t, strict);
         } else if (targetClass.equals(Integer.class) || targetClass.equals(Integer.TYPE)) {
-          result = Bytes.toInt(bytes, strict);
+          result = Bytes.toInt(t, strict);
         } else if (targetClass.equals(Short.class) || targetClass.equals(Short.TYPE)) {
-          result = Bytes.toShort(bytes, strict);
+          result = Bytes.toShort(t, strict);
         } else if (targetClass.equals(Character.class) || targetClass.equals(Character.TYPE)) {
-          result = Bytes.toChar(bytes, strict);
+          result = Bytes.toChar(t, strict);
         } else if (targetClass.equals(Float.class) || targetClass.equals(Float.TYPE)) {
-          result = Bytes.toFloat(bytes, strict);
+          result = Bytes.toFloat(t, strict);
         } else {
-          result = Bytes.toDouble(bytes, strict);
+          result = Bytes.toDouble(t, strict);
         }
       } catch (Exception e) {
         if (throwException) {

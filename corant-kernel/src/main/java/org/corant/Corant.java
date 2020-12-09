@@ -47,7 +47,10 @@ import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Annotations;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-kernel
@@ -151,7 +154,7 @@ public class Corant implements AutoCloseable {
    * loader.
    */
   public Corant() {
-    this(null, null, new String[0]);
+    this(null, null, Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -183,13 +186,14 @@ public class Corant implements AutoCloseable {
    */
   public Corant(Class<?>[] beanClasses, ClassLoader classLoader, String... arguments) {
     this.beanClasses =
-        beanClasses == null ? new Class[0] : Arrays.copyOf(beanClasses, beanClasses.length);
+        beanClasses == null ? Classes.EMPTY_ARRAY : Arrays.copyOf(beanClasses, beanClasses.length);
     if (classLoader != null) {
       this.classLoader = classLoader;
     } else {
       this.classLoader = Corant.class.getClassLoader();
     }
-    this.arguments = arguments == null ? new String[0] : Arrays.copyOf(arguments, arguments.length);
+    this.arguments =
+        arguments == null ? Strings.EMPTY_ARRAY : Arrays.copyOf(arguments, arguments.length);
     setMe(this);
   }
 
@@ -234,7 +238,7 @@ public class Corant implements AutoCloseable {
       if (synthetic) {
         startup(beanClass, arguments);
       } else {
-        startup(new Class[0], arguments);
+        startup(Classes.EMPTY_ARRAY, arguments);
       }
     } else if (!current().isRunning()) {
       current().start(null);
@@ -253,7 +257,7 @@ public class Corant implements AutoCloseable {
    * @return The managed bean instance
    */
   public static synchronized <T> T call(Class<T> beanClass, Annotation... annotations) {
-    return call(false, beanClass, annotations, new String[0]);
+    return call(false, beanClass, annotations, Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -267,7 +271,7 @@ public class Corant implements AutoCloseable {
    * @return callSynthetic
    */
   public static synchronized <T> T callSynthetic(Class<T> beanClass, String... arguments) {
-    return call(true, beanClass, new Annotation[0], arguments);
+    return call(true, beanClass, Annotations.EMPTY_ARRAY, arguments);
   }
 
   /**
@@ -289,7 +293,7 @@ public class Corant implements AutoCloseable {
   public static synchronized void run(Runnable runnable, String... arguments) {
     try {
       if (current() == null) {
-        startup(new Class[0], arguments);
+        startup(Classes.EMPTY_ARRAY, arguments);
       } else if (!current().isRunning()) {
         current().start(null);
       }
@@ -326,7 +330,7 @@ public class Corant implements AutoCloseable {
    * @return The Coarnt instance
    */
   public static synchronized Corant startup() {
-    return startup(new Class[0], null, null);
+    return startup(Classes.EMPTY_ARRAY, null, null);
   }
 
   /**
@@ -407,7 +411,7 @@ public class Corant implements AutoCloseable {
    * @return The Corant instance
    */
   public static synchronized Corant startup(String... arguments) {
-    return startup(new Class[0], null, null, arguments);
+    return startup(Classes.EMPTY_ARRAY, null, null, arguments);
   }
 
   /**
@@ -422,7 +426,7 @@ public class Corant implements AutoCloseable {
   public static synchronized <T> T supplier(Supplier<T> supplier, String... arguments) {
     try {
       if (current() == null) {
-        startup(new Class[0], arguments);
+        startup(Classes.EMPTY_ARRAY, arguments);
       } else if (!current().isRunning()) {
         current().start(null);
       }

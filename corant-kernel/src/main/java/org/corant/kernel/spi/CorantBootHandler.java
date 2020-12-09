@@ -24,7 +24,7 @@ import org.corant.Corant;
 public interface CorantBootHandler extends AutoCloseable {
 
   static int compare(CorantBootHandler h1, CorantBootHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
+    return Integer.compare(h1.getOrdinal(), h2.getOrdinal()) * -1;
   }
 
   @Override

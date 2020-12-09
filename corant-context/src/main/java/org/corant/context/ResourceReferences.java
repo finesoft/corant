@@ -33,7 +33,7 @@ public class ResourceReferences {
   public static <T> ResourceReference<T> ref(final Supplier<T> supplier,
       final Consumer<T> releaser) {
 
-    return new ResourceReference<T>() {
+    return new ResourceReference<>() {
 
       volatile T instance;
 

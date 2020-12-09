@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.BeanManager;
 
 /**
@@ -31,18 +30,15 @@ import javax.enterprise.inject.spi.BeanManager;
  */
 public class ContextualInvocationHandler extends ProxyInvocationHandler {
 
-  private final CreationalContext<?> creationalContext;
   private final Map<Method, List<InterceptorInvocation>> interceptorChains;
 
   public ContextualInvocationHandler(final BeanManager beanManager, final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerHandler) {
     super(clazz, invokerHandler);
     if (beanManager != null) {
-      creationalContext = beanManager.createCreationalContext(null);
-      interceptorChains = Collections
-          .unmodifiableMap(ProxyUtils.getInterceptorChains(beanManager, creationalContext, clazz));
+      interceptorChains = Collections.unmodifiableMap(ProxyUtils.getInterceptorChains(beanManager,
+          beanManager.createCreationalContext(null), clazz));
     } else {
-      creationalContext = null;
       interceptorChains = Collections.emptyMap();
     }
   }

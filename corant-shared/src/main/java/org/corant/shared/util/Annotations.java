@@ -36,6 +36,8 @@ import java.util.Set;
  */
 public class Annotations {
 
+  public static final Annotation[] EMPTY_ARRAY = new Annotation[0];
+
   /**
    * Find the annotation object from given annotated element with given annotation type class, this
    * is base method. NOTE: Starting with Java8, we recommend using
@@ -89,7 +91,7 @@ public class Annotations {
     if (annotation == null && searchSupers && clazz != null && annotationType != null) {
       Class<?> superClazz = clazz.getSuperclass();
       if (superClazz != null && Object.class != superClazz) {
-        annotation = findAnnotation(superClazz, annotationType, searchSupers);
+        annotation = findAnnotation(superClazz, annotationType, true);
       }
     }
     return annotation;

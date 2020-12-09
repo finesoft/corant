@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
+import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Strings;
 
 /**
@@ -36,7 +37,7 @@ import org.corant.shared.util.Strings;
  */
 public class Qualifiers {
 
-  public static final Map<String, Annotation[]> resolveNameds(Set<String> names) {
+  public static Map<String, Annotation[]> resolveNameds(Set<String> names) {
     Map<String, Annotation[]> nameds = new HashMap<>();
     if (isNotEmpty(names)) {
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
@@ -57,12 +58,12 @@ public class Qualifiers {
     return nameds;
   }
 
-  static final String resolveName(String named) {
+  static String resolveName(String named) {
     // XXX Is it possible to use configuration?
     return Strings.defaultTrim(named);
   }
 
-  static final Annotation[] resolveNamedQualifiers(String name) {
+  static Annotation[] resolveNamedQualifiers(String name) {
     return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
         : new Annotation[] {NamedLiteral.of(trim(name)), Any.Literal.INSTANCE,
             Default.Literal.INSTANCE};
@@ -130,7 +131,7 @@ public class Qualifiers {
 
     @Override
     public Annotation[] getQualifiers(String name) {
-      return nameAndQualifiers.getOrDefault(defaultTrim(name), new Annotation[0]);
+      return nameAndQualifiers.getOrDefault(defaultTrim(name), Annotations.EMPTY_ARRAY);
     }
 
     @Override
@@ -181,7 +182,7 @@ public class Qualifiers {
     }
 
     default Annotation[] getQualifiers(String name) {
-      return new Annotation[0];
+      return Annotations.EMPTY_ARRAY;
     }
 
     default boolean isEmpty() {
@@ -192,7 +193,7 @@ public class Qualifiers {
       return 0;
     }
 
-    public abstract static class AbstractNamedObject implements NamedObject {
+    abstract class AbstractNamedObject implements NamedObject {
 
       private String name;
 

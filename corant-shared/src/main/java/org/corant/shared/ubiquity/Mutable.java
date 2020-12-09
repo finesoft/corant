@@ -46,8 +46,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 上午1:00:35
    *
    */
-  public static class MutableBoolean extends MutableObject<Boolean>
-      implements Comparable<MutableBoolean> {
+  class MutableBoolean extends MutableObject<Boolean> implements Comparable<MutableBoolean> {
 
     protected MutableBoolean(final boolean value) {
       super(value);
@@ -79,7 +78,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableByte extends MutableNumber<Byte> {
+  class MutableByte extends MutableNumber<Byte> {
 
     private static final long serialVersionUID = 7448907394279327148L;
 
@@ -154,7 +153,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableDouble extends MutableNumber<Double> {
+  class MutableDouble extends MutableNumber<Double> {
 
     private static final long serialVersionUID = -8025777846150268416L;
 
@@ -229,7 +228,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableFloat extends MutableNumber<Float> {
+  class MutableFloat extends MutableNumber<Float> {
 
     private static final long serialVersionUID = 8230534097662673489L;
 
@@ -304,7 +303,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableInteger extends MutableNumber<Integer> {
+  class MutableInteger extends MutableNumber<Integer> {
 
     private static final long serialVersionUID = -5952332917787746814L;
 
@@ -379,7 +378,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableLong extends MutableNumber<Long> {
+  class MutableLong extends MutableNumber<Long> {
 
     private static final long serialVersionUID = -8400347013924878207L;
 
@@ -455,7 +454,7 @@ public interface Mutable<T> extends Supplier<T> {
    *
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static class MutableNumber<T extends Number> extends Number
+  class MutableNumber<T extends Number> extends Number
       implements Mutable<T>, Comparable<MutableNumber<T>>, Serializable {
 
     private static final long serialVersionUID = -6244772495084570391L;
@@ -681,7 +680,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 下午5:23:01
    *
    */
-  public static class MutableObject<T> implements Mutable<T> {
+  class MutableObject<T> implements Mutable<T> {
 
     T value;
 
@@ -737,7 +736,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 14:12:27
    *
    */
-  public static class MutableShort extends MutableNumber<Short> {
+  class MutableShort extends MutableNumber<Short> {
     private static final long serialVersionUID = -6018676211622288641L;
 
     public MutableShort(Number object) {
@@ -811,8 +810,7 @@ public interface Mutable<T> extends Supplier<T> {
    * @author bingo 上午1:00:35
    *
    */
-  public static class MutableString extends MutableObject<String>
-      implements Comparable<MutableString> {
+  class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
     protected MutableString() {
       super();
@@ -850,8 +848,7 @@ public interface Mutable<T> extends Supplier<T> {
    *
    */
   @SuppressWarnings("unchecked")
-  public static class MutableTemporal<T extends Temporal> extends MutableObject<T>
-      implements Temporal {
+  class MutableTemporal<T extends Temporal> extends MutableObject<T> implements Temporal {
 
     protected MutableTemporal(final T value) {
       super(value);

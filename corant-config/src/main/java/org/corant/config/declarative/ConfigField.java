@@ -51,7 +51,7 @@ public class ConfigField {
     keyItem = isBlank(configKeyItem.value()) ? dashify(field.getName()) : configKeyItem.value();
     pattern = defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
     defaultValue = configKeyItem.defaultValue();
-    defaultKey = concatKey(configClass.getKeyRoot(), getKeyItem());
+    defaultKey = concatKey(configClass.getKeyRoot(), keyItem);
 
     if (pattern == DeclarativePattern.PREFIX) {
       Type fieldType = field.getGenericType();
@@ -86,9 +86,9 @@ public class ConfigField {
 
   public String getKey(String infix) {
     if (isBlank(infix)) {
-      return getDefaultKey();
+      return defaultKey;
     } else {
-      return concatKey(configClass.getKeyRoot(), infix, getKeyItem());
+      return concatKey(configClass.getKeyRoot(), infix, keyItem);
     }
   }
 

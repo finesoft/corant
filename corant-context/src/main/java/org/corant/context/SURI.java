@@ -32,12 +32,12 @@ import javax.inject.Qualifier;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface SURI {
 
-  public static final SURILiteral INSTANCE = new SURILiteral("");
+  SURILiteral INSTANCE = new SURILiteral("");
 
   @Nonbinding
   String value() default "";
 
-  public static class SURILiteral extends AnnotationLiteral<SURI> implements SURI {
+  class SURILiteral extends AnnotationLiteral<SURI> implements SURI {
 
     private static final long serialVersionUID = 4186590008857391708L;
 

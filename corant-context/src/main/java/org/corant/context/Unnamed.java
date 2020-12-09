@@ -34,9 +34,9 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface Unnamed {
 
-  static final UnnamedLiteral INST = new UnnamedLiteral();
+  UnnamedLiteral INST = new UnnamedLiteral();
 
-  public static class UnnamedLiteral extends AnnotationLiteral<Unnamed> {
+  class UnnamedLiteral extends AnnotationLiteral<Unnamed> {
 
     private static final long serialVersionUID = 1401984266283097479L;
 

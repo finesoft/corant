@@ -91,9 +91,9 @@ public class StopWatch {
   }
 
   public void destroy(PrintStream ps) {
-    destroy(sw -> ps.println(String.format("Task %s take %s.",
+    destroy(sw -> ps.printf("Task %s take %s.%n",
         String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
-        sw.getTotalDuration())));
+        sw.getTotalDuration()));
   }
 
   public String getCurrentTaskName() {

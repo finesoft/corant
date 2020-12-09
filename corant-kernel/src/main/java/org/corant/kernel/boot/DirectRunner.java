@@ -31,6 +31,7 @@ import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.Functions;
+import org.corant.shared.util.Strings;
 import org.corant.shared.util.UnsafeAccessors;
 
 /**
@@ -119,7 +120,7 @@ public class DirectRunner {
     }
   }
 
-  protected String[] arguments = new String[0];
+  protected String[] arguments = Strings.EMPTY_ARRAY;
 
   protected DirectRunner(String[] arguments) {
     if (arguments != null) {
@@ -140,7 +141,7 @@ public class DirectRunner {
 
   protected synchronized void await() throws IOException {
     try (RandomAccessFile raf = new RandomAccessFile(currentCtrlPath().toFile(), "rw");
-        FileChannel fc = raf.getChannel();) {
+        FileChannel fc = raf.getChannel()) {
       final MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, 8);
       byte lastState = SIGNAL_START;
       for (;;) {
@@ -203,7 +204,7 @@ public class DirectRunner {
 
   protected synchronized void perform(String cmd, File file) {
     try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        FileChannel fc = raf.getChannel();) {
+        FileChannel fc = raf.getChannel()) {
       MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 8);
       mbb.clear();
       if (COMMAND_RESTART.equalsIgnoreCase(cmd)) {
@@ -215,7 +216,7 @@ public class DirectRunner {
       } else if (COMMAND_START.equalsIgnoreCase(cmd)) {
         mbb.put(SIGNAL_START);
       } else {
-        System.err.println(String.format("Command [%s] illegality!", cmd));
+        System.err.printf("Command [%s] illegality!%n", cmd);
       }
       UnsafeAccessors.free(mbb);
     } catch (Exception e) {
@@ -264,7 +265,8 @@ public class DirectRunner {
   }
 
   Path currentCtrlPath() {
-    return MMF_DIR.resolve(MMF_IPCF_PREFIX.concat(COMMAND_SPLITOR).concat(Launchs.getPid()));
+    return MMF_DIR.resolve(
+        MMF_IPCF_PREFIX.concat(COMMAND_SPLITOR).concat(defaultString(Launchs.getPid(), "unknown")));
   }
 
 }

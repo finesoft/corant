@@ -1976,11 +1976,11 @@ public class Chars {
    */
   public static String foldToAscii(String chars) {
     if (chars == null) {
-      return chars;
+      return null;
     }
     try {
       char[] input = chars.toCharArray();
-      char[] output = new char[input.length * 4];
+      char[] output = new char[input.length << 2];
       int length = foldToAscii(input, 0, output, 0, input.length);
       return String.valueOf(Arrays.copyOfRange(output, 0, length));
     } catch (Exception e) {

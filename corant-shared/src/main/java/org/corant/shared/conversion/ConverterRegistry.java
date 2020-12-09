@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -143,8 +144,8 @@ public class ConverterRegistry {
   public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
     if (converterFactory != null && !CONVERTER_FACTORIES.contains(converterFactory)) {
       CONVERTER_FACTORIES.add(converterFactory);
-      Collections.sort(CONVERTER_FACTORIES,
-          (f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()) * -1);
+      CONVERTER_FACTORIES
+          .sort((f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()) * -1);
     }
   }
 
@@ -230,16 +231,16 @@ public class ConverterRegistry {
 
   static synchronized void load() {
     streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
-        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
+        .sorted(Comparator.comparingInt(Converter::getPriority))
         .forEach(ConverterRegistry::register);
     streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
-        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
+        .sorted(Comparator.comparingInt(ConverterFactory::getPriority))
         .forEach(ConverterRegistry::register);
   }
 
   static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
       Converter<S, T> converter, ConverterFactory<?, ?> converterFactory) {
-    ConverterType<S, T> ct = ConverterType.<S, T>of(sourceClass, targetClass);
+    ConverterType<S, T> ct = ConverterType.of(sourceClass, targetClass);
     if (SUPPORT_CONVERTERS.put(ct, converter) != null) {
       SUPPORT_CONVERTER_FACTORIES.put(ct, converterFactory);
       // has been register, check pipe or not
@@ -250,7 +251,7 @@ public class ConverterRegistry {
 
   static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,
       Converter<S, T> converter, ConverterType<?, ?>... pipeTypes) {
-    ConverterType<S, T> ct = ConverterType.<S, T>of(sourceClass, targetClass);
+    ConverterType<S, T> ct = ConverterType.of(sourceClass, targetClass);
     if (SUPPORT_CONVERTERS.put(ct, converter) != null) {
       // has been register, check pipe or not
       removeNotSupportType(ct);
@@ -280,7 +281,7 @@ public class ConverterRegistry {
   private static void removeConverterPipeTypes(ConverterType<?, ?> pipe) {
     Set<ConverterType<?, ?>> pipeKeys = streamOf(SUPPORT_CONVERTER_PIPE_TYPES)
         .filter(e -> e.getValue().contains(pipe)).map(Entry::getKey).collect(Collectors.toSet());
-    pipeKeys.stream().forEach(r -> {
+    pipeKeys.forEach(r -> {
       deregister(r);
       SUPPORT_CONVERTER_PIPE_TYPES.remove(r);
     });

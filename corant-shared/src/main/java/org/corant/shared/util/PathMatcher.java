@@ -152,7 +152,7 @@ public interface PathMatcher extends Predicate<String> {
    * @author bingo 下午3:48:58
    *
    */
-  public static class CaseInsensitiveMatcher implements PathMatcher {
+  class CaseInsensitiveMatcher implements PathMatcher {
 
     private final String express;
 
@@ -188,7 +188,7 @@ public interface PathMatcher extends Predicate<String> {
    * @author bingo 下午8:32:50
    *
    */
-  public static class GlobMatcher implements PathMatcher {
+  class GlobMatcher implements PathMatcher {
 
     private final boolean isDos;
     private final boolean ignoreCase;
@@ -399,7 +399,7 @@ public interface PathMatcher extends Predicate<String> {
    *
    * @author bingo 下午4:30:24
    */
-  public static class GlobPatterns {
+  class GlobPatterns {
 
     public static final String REG_META_CHARS = ".^$+{[]|()";
     public static final String GLO_META_CHARS = "\\*?[{";
@@ -616,7 +616,7 @@ public interface PathMatcher extends Predicate<String> {
    * @author bingo 下午2:28:39
    *
    */
-  public static class RegexMatcher implements PathMatcher {
+  class RegexMatcher implements PathMatcher {
 
     public static final String REG_CHARS = ".+*?^$()[]{}|";
 

@@ -86,7 +86,7 @@ public class CorantConfigConversion implements Serializable {
    * @param converters
    */
   CorantConfigConversion(List<OrdinalConverter> converters) {
-    Collections.sort(converters, Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
+    converters.sort(Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
     Map<Type, Converter<?>> useConverters = new HashMap<>();
     for (OrdinalConverter oc : converters) {
       useConverters.computeIfAbsent(oc.type, t -> oc.converter);
@@ -133,30 +133,29 @@ public class CorantConfigConversion implements Serializable {
 
   public Object convert(String rawValue, Type type) {
     Object result = null;
-    String value = rawValue;
-    if (value != null) {
+    if (rawValue != null) {
       try {
         if (type instanceof Class) {
           Class<?> typeClass = forceCast(type);
           if (typeClass.isArray()) {
-            result = convertArray(value, typeClass.getComponentType());
+            result = convertArray(rawValue, typeClass.getComponentType());
           } else {
             if (Class.class.isAssignableFrom(typeClass)) {
-              result = convertSingle(value, Class.class);
+              result = convertSingle(rawValue, Class.class);
             } else if (List.class.isAssignableFrom(typeClass)) {
-              result = convertCollection(value, String.class, ArrayList::new);
+              result = convertCollection(rawValue, String.class, ArrayList::new);
             } else if (Set.class.isAssignableFrom(typeClass)) {
-              result = convertCollection(value, String.class, HashSet::new);
+              result = convertCollection(rawValue, String.class, HashSet::new);
             } else if (Optional.class.isAssignableFrom(typeClass)) {
-              result = Optional.ofNullable(convert(value, String.class));
+              result = Optional.ofNullable(convert(rawValue, String.class));
             } else if (Supplier.class.isAssignableFrom(typeClass)) {
-              result = (Supplier<?>) () -> convert(value, String.class);
+              result = (Supplier<?>) () -> convert(rawValue, String.class);
             } else if (Provider.class.isAssignableFrom(typeClass)) {
-              result = (Provider<?>) () -> convert(value, String.class);
+              result = (Provider<?>) () -> convert(rawValue, String.class);
             } else if (Map.class.isAssignableFrom(typeClass)) {
-              result = convertMap(value, String.class, String.class);
+              result = convertMap(rawValue, String.class, String.class);
             } else {
-              result = convertSingle(value, typeClass);
+              result = convertSingle(rawValue, typeClass);
             }
           }
         } else if (type instanceof ParameterizedType) {
@@ -164,19 +163,19 @@ public class CorantConfigConversion implements Serializable {
           Class<?> rtype = forceCast(ptype.getRawType());
           Type argType = ptype.getActualTypeArguments()[0];
           if (Class.class.isAssignableFrom(rtype)) {
-            result = convertSingle(value, Class.class);
+            result = convertSingle(rawValue, Class.class);
           } else if (List.class.isAssignableFrom(rtype)) {
-            result = convertCollection(value, argType, ArrayList::new);
+            result = convertCollection(rawValue, argType, ArrayList::new);
           } else if (Set.class.isAssignableFrom(rtype)) {
-            result = convertCollection(value, argType, HashSet::new);
+            result = convertCollection(rawValue, argType, HashSet::new);
           } else if (Optional.class.isAssignableFrom(rtype)) {
-            result = Optional.ofNullable(convert(value, argType));
+            result = Optional.ofNullable(convert(rawValue, argType));
           } else if (Supplier.class.isAssignableFrom(rtype)) {
-            result = (Supplier<?>) () -> convert(value, argType);
+            result = (Supplier<?>) () -> convert(rawValue, argType);
           } else if (Provider.class.isAssignableFrom(rtype)) {
-            result = (Provider<?>) () -> convert(value, argType);
+            result = (Provider<?>) () -> convert(rawValue, argType);
           } else if (Map.class.isAssignableFrom(rtype)) {
-            result = convertMap(value, ptype);
+            result = convertMap(rawValue, ptype);
           } else {
             throw new IllegalStateException(
                 "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
@@ -261,7 +260,7 @@ public class CorantConfigConversion implements Serializable {
     Map map = factory.get();
     rawMap.forEach((rk, rv) -> {
       Object key = convert(rk, keyType);
-      Object value = rv.isPresent() ? convert(rv.get(), valueType) : null;
+      Object value = rv.map(s -> convert(s, valueType)).orElse(null);
       map.put(key, value);
     });
     return map;
@@ -289,7 +288,7 @@ public class CorantConfigConversion implements Serializable {
    * Map&lt;String,String&gt; and then convert Map&lt;String,String&gt; value to the specified
    * ParameterizedType type.
    *
-   * @see tryConvertStringMap
+   * @see #tryConvertStringMap(String)
    *
    * @param rawValue
    * @param properyType
@@ -362,7 +361,6 @@ public class CorantConfigConversion implements Serializable {
         if (isNotBlank(kvKey)) {
           vals.add(kvKey);// key
           vals.add(kvVal);// value
-          useKvs &= true;
         }
       } else {
         useKvs = false;

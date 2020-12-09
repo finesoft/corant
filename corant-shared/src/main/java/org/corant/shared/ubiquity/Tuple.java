@@ -35,7 +35,7 @@ public interface Tuple {
    * @author bingo 上午10:37:41
    *
    */
-  public static class Pair<L, R> implements Map.Entry<L, R>, Serializable {
+  class Pair<L, R> implements Map.Entry<L, R>, Serializable {
 
     private static final long serialVersionUID = -474294448204498274L;
 
@@ -68,7 +68,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, getLeft(), getRight());
+      return String.format(format, left, right);
     }
 
     @Override
@@ -78,8 +78,7 @@ public interface Tuple {
       }
       if (obj instanceof Map.Entry<?, ?>) {
         final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
-        return Objects.areEqual(getKey(), other.getKey())
-            && Objects.areEqual(getValue(), other.getValue());
+        return Objects.areEqual(left, other.getKey()) && Objects.areEqual(right, other.getValue());
       }
       return false;
     }
@@ -87,7 +86,7 @@ public interface Tuple {
     @Override
     @Transient
     public L getKey() {
-      return getLeft();
+      return left;
     }
 
     public L getLeft() {
@@ -101,7 +100,7 @@ public interface Tuple {
     @Override
     @Transient
     public R getValue() {
-      return getRight();
+      return right;
     }
 
     @Override
@@ -128,19 +127,19 @@ public interface Tuple {
     }
 
     public Pair<L, R> withKey(final L key) {
-      return new Pair<>(key, getValue());
+      return new Pair<>(key, right);
     }
 
     public Pair<L, R> withLeft(final L left) {
-      return new Pair<>(left, getRight());
+      return new Pair<>(left, right);
     }
 
     public Pair<L, R> withRight(final R right) {
-      return new Pair<>(getLeft(), right);
+      return new Pair<>(left, right);
     }
 
     public Pair<L, R> withValue(final R value) {
-      return new Pair<>(getKey(), value);
+      return new Pair<>(left, value);
     }
   }
 
@@ -150,7 +149,7 @@ public interface Tuple {
    * @author bingo 20:26:59
    *
    */
-  public static class Range<T extends Comparable<T>> {
+  class Range<T extends Comparable<T>> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     static final Range emptyInstance = new Range(null, null);
@@ -175,7 +174,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, getStart(), getEnd());
+      return String.format(format, start, end);
     }
 
     public boolean coincide(Range<T> other) {
@@ -189,7 +188,7 @@ public interface Tuple {
     }
 
     public boolean cover(Range<T> other) {
-      return lae(start, other.getStart()) && gae(end, other.getEnd());
+      return lae(start, other.start) && gae(end, other.end);
     }
 
     public boolean cover(T value) {
@@ -244,9 +243,9 @@ public interface Tuple {
     }
 
     public boolean intersect(Range<T> other) {
-      return gae(start, other.getStart()) && lae(start, other.getEnd())
-          || lae(start, other.getStart()) && gae(end, other.getEnd())
-          || gae(end, other.getStart()) && lae(end, other.getEnd());
+      return gae(start, other.start) && lae(start, other.end)
+          || lae(start, other.start) && gae(end, other.end)
+          || gae(end, other.start) && lae(end, other.end);
     }
 
     public boolean isEmpty() {
@@ -254,7 +253,7 @@ public interface Tuple {
     }
 
     public Pair<T, T> toPair() {
-      return Pair.of(getStart(), getEnd());
+      return Pair.of(start, end);
     }
 
     @Override
@@ -286,7 +285,7 @@ public interface Tuple {
    * @author bingo 上午10:37:46
    *
    */
-  public static class Triple<L, M, R> implements Serializable {
+  class Triple<L, M, R> implements Serializable {
 
     private static final long serialVersionUID = 6441751980847755625L;
 
@@ -317,7 +316,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, getLeft(), getMiddle(), getRight());
+      return String.format(format, left, middle, right);
     }
 
     @Override
@@ -327,9 +326,8 @@ public interface Tuple {
       }
       if (obj instanceof Triple<?, ?, ?>) {
         final Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
-        return Objects.areEqual(getLeft(), other.getLeft())
-            && Objects.areEqual(getMiddle(), other.getMiddle())
-            && Objects.areEqual(getRight(), other.getRight());
+        return Objects.areEqual(left, other.left) && Objects.areEqual(middle, other.middle)
+            && Objects.areEqual(right, other.right);
       }
       return false;
     }
@@ -366,15 +364,15 @@ public interface Tuple {
     }
 
     public Triple<L, M, R> withLeft(final L left) {
-      return new Triple<>(left, getMiddle(), getRight());
+      return new Triple<>(left, middle, right);
     }
 
     public Triple<L, M, R> withMiddle(final M middle) {
-      return new Triple<>(getLeft(), middle, getRight());
+      return new Triple<>(left, middle, right);
     }
 
     public Triple<L, M, R> withRight(final R right) {
-      return new Triple<>(getLeft(), getMiddle(), right);
+      return new Triple<>(left, middle, right);
     }
   }
 }

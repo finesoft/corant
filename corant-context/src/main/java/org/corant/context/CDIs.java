@@ -68,6 +68,15 @@ public abstract class CDIs {
     return getAnnotated(injectionPoint).getAnnotations(annotationType);
   }
 
+  public static MethodSignature getMethodSignature(AnnotatedMethod<?> method) {
+    String methodName = method.getJavaMember().getName();
+    String[] parameterTypes = new String[method.getParameters().size()];
+    for (int i = 0; i < method.getParameters().size(); i++) {
+      parameterTypes[i] = Types.getRawType(method.getParameters().get(i).getBaseType()).getName();
+    }
+    return MethodSignature.of(methodName, parameterTypes);
+  }
+
   public static boolean isEnabled() {
     try {
       return CDI.current() != null;
@@ -75,14 +84,5 @@ public abstract class CDIs {
       // Noop!
     }
     return false;
-  }
-
-  public MethodSignature getMethodSignature(AnnotatedMethod<?> method) {
-    String methodName = method.getJavaMember().getName();
-    String[] parameterTypes = new String[method.getParameters().size()];
-    for (int i = 0; i < method.getParameters().size(); i++) {
-      parameterTypes[i] = Types.getRawType(method.getParameters().get(i).getBaseType()).getName();
-    }
-    return MethodSignature.of(methodName, parameterTypes);
   }
 }

@@ -129,8 +129,7 @@ public class DeclarativeConfigResolver {
     itemKeys.removeAll(dfltKeys);
     if (isNotEmpty(itemKeys)) {
       keys.addAll(getGroupConfigKeys(config,
-          s -> defaultString(s).startsWith(prefix)
-              && dfltKeys.stream().noneMatch(dk -> s.startsWith(dk)),
+          s -> defaultString(s).startsWith(prefix) && dfltKeys.stream().noneMatch(s::startsWith),
           configClass.getKeyIndex()).keySet());
     }
     return keys;

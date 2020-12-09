@@ -107,7 +107,7 @@ public class Conversion {
       return null;
     }
     return () -> new Iterator<>() {
-      Iterator<?> it = value.iterator();
+      final Iterator<?> it = value.iterator();
       Converter converter = null;
       Class<?> sourceClass = null;
       boolean tryStringConverter = false;

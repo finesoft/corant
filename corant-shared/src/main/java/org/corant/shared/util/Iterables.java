@@ -280,13 +280,12 @@ public class Iterables {
    * @return get
    */
   public static <E> E get(final Iterable<? extends E> iterable, final int index) {
-    int i = index;
-    if (i < 0) {
-      throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
+    if (index < 0) {
+      throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
     }
     if (iterable instanceof List) {
       List<E> list = forceCast(iterable);
-      return list.get(i);
+      return list.get(index);
     }
     return get(iterable.iterator(), index);
   }
@@ -433,12 +432,12 @@ public class Iterables {
 
     @Override
     public Iterator<T> iterator() {
-      if (node == null || node.iterator() == null) {
+      if (node == null) {
         return emptyIterator();
       }
       return new Iterator<>() {
 
-        private Queue<Iterator<T>> queue = new LinkedList<>();
+        private final Queue<Iterator<T>> queue = new LinkedList<>();
         {
           queue.add(node.iterator());
         }
@@ -501,11 +500,11 @@ public class Iterables {
 
     @Override
     public Iterator<T> iterator() {
-      if (node == null || node.iterator() == null) {
+      if (node == null) {
         return null;
       }
       return new Iterator<>() {
-        private Stack<Iterator<T>> stack = new Stack<>();
+        private final Stack<Iterator<T>> stack = new Stack<>();
         {
           stack.push(node.iterator());
         }

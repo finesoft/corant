@@ -91,7 +91,7 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
       if (size == 3) {
         return LocalTime.of(value[0], value[1], value[2]);
       } else if (size == 4) {
-        return LocalTime.of(value[0], value[1], value[2], value[4]);
+        return LocalTime.of(value[0], value[1], value[2], value[3]);
       }
       throw new ConversionException("Can't convert value to LocalTime from int array.");
     }

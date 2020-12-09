@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -48,7 +49,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
 
   static String[] resolveProfileLocations(String[] profiles) {
     String locationDir = getLocation();
-    return isBlank(locationDir) ? new String[0]
+    return isBlank(locationDir) ? Strings.EMPTY_ARRAY
         : Arrays.stream(profiles)
             .flatMap(p -> Arrays.stream(appExtName).map(e -> locationDir
                 + SourceType.decideSeparator(locationDir) + appBaseName + "-" + p + e))

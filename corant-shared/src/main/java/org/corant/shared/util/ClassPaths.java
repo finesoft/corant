@@ -557,7 +557,7 @@ public class ClassPaths {
 
     String appendPathSeparatorIfNecessarily(String path) {
       if (path == null) {
-        return path;
+        return null;
       } else {
         return !path.endsWith(PATH_SEPARATOR_STRING) ? path + PATH_SEPARATOR_STRING : path;
       }

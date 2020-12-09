@@ -34,9 +34,9 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface AutoCreated {
 
-  static final AutoCreatedLiteral INST = new AutoCreatedLiteral();
+  AutoCreatedLiteral INST = new AutoCreatedLiteral();
 
-  public static class AutoCreatedLiteral extends AnnotationLiteral<AutoCreated> {
+  class AutoCreatedLiteral extends AnnotationLiteral<AutoCreated> {
 
     private static final long serialVersionUID = 1401984266283097479L;
 

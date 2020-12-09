@@ -86,17 +86,17 @@ public interface ComponentManager<N, C> extends Serializable {
   }
 
   @RequestScoped
-  public abstract static class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  abstract class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2588026760995417834L;
   }
 
   @SessionScoped
-  public abstract static class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  abstract class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = 7462742316873226368L;
   }
 
   @TransactionScoped
-  public abstract static class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  abstract class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2804585149568989342L;
   }
 }

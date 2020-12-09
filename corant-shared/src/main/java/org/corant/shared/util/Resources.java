@@ -626,14 +626,14 @@ public class Resources {
 
     @Override
     public String getLocation() {
-      return getFile().getAbsolutePath();
+      return file.getAbsolutePath();
     }
 
     @Override
     public Map<String, Object> getMetadata() {
       return immutableMapOf("location", getLocation(), "sourceType", SourceType.FILE_SYSTEM.name(),
-          "path", getFile().getPath(), "fileName", getName(), "lastModified",
-          getFile().lastModified(), "length", getFile().length());
+          "path", file.getPath(), "fileName", getName(), "lastModified", file.lastModified(),
+          "length", file.length());
     }
 
     @Override
@@ -900,15 +900,15 @@ public class Resources {
     }
 
     public String regulate(String path) {
-      if (path != null && !path.startsWith(getPrefix())) {
-        return getPrefix() + path;
+      if (path != null && !path.startsWith(prefix)) {
+        return prefix + path;
       }
       return path;
     }
 
     public String resolve(String path) {
-      if (path != null && path.startsWith(getPrefix())) {
-        return path.substring(getPrefixLength());
+      if (path != null && path.startsWith(prefix)) {
+        return path.substring(prefixLength);
       }
       return path;
     }
@@ -956,18 +956,18 @@ public class Resources {
 
     @Override
     public String getLocation() {
-      return getURL().toExternalForm();
+      return url.toExternalForm();
     }
 
     @Override
     public Map<String, Object> getMetadata() {
       return immutableMapOf("location", getLocation(), "sourceType",
-          getSourceType() == null ? null : getSourceType().name(), "url", url.toExternalForm());
+          sourceType == null ? null : sourceType.name(), "url", url.toExternalForm());
     }
 
     @Override
     public String getName() {
-      return FileUtils.getFileName(getURL().getPath());
+      return FileUtils.getFileName(url.getPath());
     }
 
     @Override
@@ -977,7 +977,7 @@ public class Resources {
 
     public URI getURI() {
       try {
-        return getURL().toURI();
+        return url.toURI();
       } catch (URISyntaxException e) {
         throw new CorantRuntimeException(e);
       }
@@ -997,7 +997,7 @@ public class Resources {
 
     @Override
     public InputStream openStream() throws IOException {
-      return getURL().openStream();
+      return url.openStream();
     }
   }
 }

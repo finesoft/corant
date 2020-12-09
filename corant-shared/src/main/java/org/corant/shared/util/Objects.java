@@ -119,7 +119,7 @@ public class Objects {
     return java.util.Objects.compare(a, b, c);
   }
 
-  public static <T> T defaultObject(T obj, Supplier<T> supplier) {
+  public static <T> T defaultObject(T obj, Supplier<? extends T> supplier) {
     return obj != null ? obj : supplier.get();
   }
 

@@ -15,8 +15,8 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,12 +25,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * @author bingo 下午10:08:22
  *
  */
 public class Methods {
+
+  private static final Pattern SETTER_PTN = Pattern.compile("^set[A-Z].*");
+  private static final Pattern GETTER_PTN = Pattern.compile("^get[A-Z].*");
+  private static final Pattern IS_PTN = Pattern.compile("^is[A-Z].*");
 
   private Methods() {
     super();
@@ -41,8 +46,8 @@ public class Methods {
     shouldNotNull(cls, "Null class not allowed.");
     shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
     List<Method> methods = listOf(cls.getDeclaredMethods());
-    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
-        .map(Lists::listOf).forEach(methods::addAll);
+    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods).map(Lists::listOf)
+        .forEach(methods::addAll);
     Method inexactMatch = null;
     for (final Method method : methods) {
       if (methodName.equals(method.getName())
@@ -50,10 +55,9 @@ public class Methods {
         return method;
       } else if (methodName.equals(method.getName())
           && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)) {
-        if (inexactMatch == null) {
-          inexactMatch = method;
-        } else if (distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
-            inexactMatch.getParameterTypes())) {
+        if (inexactMatch == null
+            || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
+                inexactMatch.getParameterTypes())) {
           inexactMatch = method;
         }
       }
@@ -63,10 +67,12 @@ public class Methods {
 
   public static boolean isGetter(Method method) {
     if (Modifier.isPublic(method.getModifiers()) && method.getParameterTypes().length == 0) {
-      if (method.getName().matches("^get[A-Z].*") && !method.getReturnType().equals(void.class)) {
+      if (GETTER_PTN.matcher(method.getName()).matches()
+          && !method.getReturnType().equals(void.class)) {
         return true;
       }
-      if (method.getName().matches("^is[A-Z].*") && method.getReturnType().equals(boolean.class)) {
+      if (IS_PTN.matcher(method.getName()).matches()
+          && method.getReturnType().equals(boolean.class)) {
         return true;
       }
     }
@@ -75,8 +81,8 @@ public class Methods {
 
   public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
       final boolean autoboxing) {
-    Class<?>[] useClsArr = classArray == null ? new Class<?>[0] : classArray;
-    Class<?>[] useToClsArr = toClassArray == null ? new Class<?>[0] : toClassArray;
+    Class<?>[] useClsArr = classArray == null ? Classes.EMPTY_ARRAY : classArray;
+    Class<?>[] useToClsArr = toClassArray == null ? Classes.EMPTY_ARRAY : toClassArray;
     if (useClsArr.length != useToClsArr.length) {
       return false;
     }
@@ -90,7 +96,7 @@ public class Methods {
 
   public static boolean isSetter(Method method) {
     return Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(void.class)
-        && method.getParameterTypes().length == 1 && method.getName().matches("^set[A-Z].*");
+        && method.getParameterTypes().length == 1 && SETTER_PTN.matcher(method.getName()).matches();
   }
 
   public static MethodSignature signature(Method method) {

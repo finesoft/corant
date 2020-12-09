@@ -31,9 +31,9 @@ import javax.enterprise.util.AnnotationLiteral;
  */
 public @interface ConfigKeyItem {
 
-  public static final String NO_DFLT_VALUE = "$no_default_value$";
+  String NO_DFLT_VALUE = "$no_default_value$";
 
-  public static final ConfigKeyItem EMPTY = new ConfigKeyItemLiteral();
+  ConfigKeyItem EMPTY = new ConfigKeyItemLiteral();
 
   String defaultValue() default NO_DFLT_VALUE;
 
@@ -41,8 +41,7 @@ public @interface ConfigKeyItem {
 
   String value() default "";
 
-  public static class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem>
-      implements ConfigKeyItem {
+  class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem> implements ConfigKeyItem {
 
     private static final long serialVersionUID = -6856666130654737130L;
 

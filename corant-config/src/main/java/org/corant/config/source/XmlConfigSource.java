@@ -40,6 +40,8 @@ public class XmlConfigSource extends CorantConfigSource {
   final Map<String, String> properties;
 
   XmlConfigSource(String name, int ordinal, InputStream is) {
+    this.name = name;
+    this.ordinal = ordinal;
     Properties props = new Properties();
     try {
       props.loadFromXML(is);

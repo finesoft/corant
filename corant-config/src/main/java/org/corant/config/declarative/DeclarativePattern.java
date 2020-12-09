@@ -70,18 +70,18 @@ public enum DeclarativePattern {
       if (isNotEmpty(rawMap)) {
         Field field = configField.getField();
         Type fieldType = field.getGenericType();
-        Supplier<Map<?, ?>> factory = null;
+        Supplier<Map<?, ?>> factory;
         Object defaultFieldValue = field.get(configObject);
         if (defaultFieldValue instanceof LinkedHashMap) {
-          factory = () -> new LinkedHashMap<>();
+          factory = LinkedHashMap::new;
         } else if (defaultFieldValue instanceof TreeMap) {
-          factory = () -> new TreeMap<>();
+          factory = TreeMap::new;
         } else {
-          factory = () -> new HashMap<>();
+          factory = HashMap::new;
         }
         CorantConfig corantConfig = forceCast(config);
         CorantConfigConversion conversion = corantConfig.getConversion();
-        Map valueMap = null;
+        Map valueMap;
         Type keyType = Object.class;
         Type valueType = Object.class;
         if (fieldType instanceof ParameterizedType) {

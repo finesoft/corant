@@ -16,6 +16,7 @@ package org.corant.context;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import javax.naming.Reference;
+import org.corant.shared.util.Annotations;
 
 /**
  * corant-context
@@ -30,7 +31,7 @@ public class NamingReference extends Reference {
 
   private static final long serialVersionUID = -7231737490239227558L;
 
-  protected Annotation[] qualifiers = new Annotation[0];
+  protected Annotation[] qualifiers = Annotations.EMPTY_ARRAY;
 
   /**
    * @param objectClass

@@ -48,7 +48,7 @@ public class Serializations {
 
   public static byte[] serialize(Object object) {
     if (object == null) {
-      return new byte[0];
+      return Bytes.EMPTY_ARRAY;
     }
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
         ObjectOutputStream oos = new ObjectOutputStream(baos)) {

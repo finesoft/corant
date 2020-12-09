@@ -32,6 +32,7 @@ import org.corant.config.ConfigUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
@@ -69,7 +70,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
 
   static String[] resolveLocations() {
     final String locDir = getLocation();
-    return isBlank(locDir) ? new String[0]
+    return isBlank(locDir) ? Strings.EMPTY_ARRAY
         : Arrays.stream(appExtName)
             .map(e -> locDir + SourceType.decideSeparator(locDir) + appBaseName + e)
             .toArray(String[]::new);

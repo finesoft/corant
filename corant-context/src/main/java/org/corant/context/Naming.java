@@ -32,12 +32,12 @@ import javax.inject.Qualifier;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface Naming {
 
-  public static final NamingLiteral INSTANCE = new NamingLiteral("");
+  NamingLiteral INSTANCE = new NamingLiteral("");
 
   @Nonbinding
   String value() default "";
 
-  public static class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
+  class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
 
     private static final long serialVersionUID = 2627528079165566439L;
 

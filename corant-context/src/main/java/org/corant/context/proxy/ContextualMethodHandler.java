@@ -161,7 +161,7 @@ public class ContextualMethodHandler {
         if (instance == null) {
           final BeanManager bm = CDI.current().getBeanManager();
           final Set<Bean<?>> beans = bm.getBeans(clazz, qualifiers);
-          Bean<?> resolvedBean = null;
+          Bean<?> resolvedBean;
           if (sizeOf(beans) > 1) {
             resolvedBean =
                 beans.stream().filter(b -> b.getBeanClass().equals(clazz)).findFirst().orElseThrow(

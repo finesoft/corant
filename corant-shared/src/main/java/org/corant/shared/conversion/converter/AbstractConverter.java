@@ -30,8 +30,8 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
-  private T defaultValue = null;
-  private boolean throwException = true;
+  protected T defaultValue = null;
+  protected boolean throwException = true;
   protected Logger logger = Logger.getLogger(this.getClass().getName());
 
   public AbstractConverter() {
@@ -43,14 +43,14 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    */
   public AbstractConverter(boolean throwException) {
     super();
-    this.setThrowException(throwException);
+    this.throwException = throwException;
   }
 
   /**
    * @param defaultValue
    */
   public AbstractConverter(T defaultValue) {
-    this.setDefaultValue(defaultValue);
+    this.defaultValue = defaultValue;
   }
 
   /**
@@ -59,8 +59,8 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    */
   public AbstractConverter(T defaultValue, boolean throwException) {
     super();
-    this.setDefaultValue(defaultValue);
-    this.setThrowException(throwException);
+    this.defaultValue = defaultValue;
+    this.throwException = throwException;
   }
 
   @Override
@@ -103,22 +103,6 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
       return ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY);
     }
     return false;
-  }
-
-  /**
-   *
-   * @param defaultValue the defaultValue to set
-   */
-  protected void setDefaultValue(T defaultValue) {
-    this.defaultValue = defaultValue;
-  }
-
-  /**
-   *
-   * @param throwException the throwException to set
-   */
-  protected void setThrowException(boolean throwException) {
-    this.throwException = throwException;
   }
 
   protected void warn(Class<?> target, Object object) {

@@ -45,7 +45,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   final List<ConfigSource> sources = new ArrayList<>();
   final List<OrdinalConverter> converters =
       new LinkedList<>(CorantConfigConversion.BUILT_IN_CONVERTERS);
-  ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+  protected ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
   CorantConfigBuilder() {}
 
@@ -53,27 +53,27 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public ConfigBuilder addDefaultSources() {
     addSource(new SystemPropertiesConfigSource());
     addSource(new SystemEnvironmentConfigSource());
-    MicroprofileConfigSources.get(getClassLoader()).forEach(this::addSource);
+    MicroprofileConfigSources.get(classLoader).forEach(this::addSource);
     return this;
   }
 
   @Override
   public ConfigBuilder addDiscoveredConverters() {
-    ServiceLoader.load(Converter.class, getClassLoader()).forEach(this::addConverter);
+    ServiceLoader.load(Converter.class, classLoader).forEach(this::addConverter);
     return this;
   }
 
   @Override
   public ConfigBuilder addDiscoveredSources() {
-    ServiceLoader.load(ConfigSource.class, getClassLoader()).forEach(this::addSource);
-    ServiceLoader.load(ConfigSourceProvider.class, getClassLoader())
-        .forEach(csp -> csp.getConfigSources(getClassLoader()).forEach(this::addSource));
+    ServiceLoader.load(ConfigSource.class, classLoader).forEach(this::addSource);
+    ServiceLoader.load(ConfigSourceProvider.class, classLoader)
+        .forEach(csp -> csp.getConfigSources(classLoader).forEach(this::addSource));
     return this;
   }
 
   @Override
   public Config build() {
-    List<ConfigSource> resolvedSources = CorantConfigSource.resolve(sources, getClassLoader());
+    List<ConfigSource> resolvedSources = CorantConfigSource.resolve(sources, classLoader);
     CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
     debugOutputSource(resolvedSources, config);
     return config;
@@ -114,7 +114,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
     logger.fine(
         () -> String.format("Add config converter, name:[%s], target type:[%s], class loader:[%s].",
-            cls.getName(), type.getName(), getClassLoader()));
+            cls.getName(), type.getName(), classLoader));
   }
 
   void addSource(ConfigSource source) {
@@ -122,7 +122,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     logger.fine(() -> String.format(
         "Add config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
-        getClassLoader().getClass().getName(), source.getClass().getName()));
+        classLoader.getClass().getName(), source.getClass().getName()));
   }
 
   void debugOutputSource(List<ConfigSource> resolvedSources, CorantConfig config) {
@@ -137,10 +137,6 @@ public class CorantConfigBuilder implements ConfigBuilder {
       sb.append("}\n\n");
       return sb.toString();
     });
-  }
-
-  ClassLoader getClassLoader() {
-    return classLoader;
   }
 
 }

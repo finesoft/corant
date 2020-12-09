@@ -35,6 +35,8 @@ public class Strings {
 
   public static final String EMPTY = "";
 
+  public static final String[] EMPTY_ARRAY = new String[0];
+
   private Strings() {
     super();
   }
@@ -528,7 +530,7 @@ public class Strings {
   public static String[] segment(final String str, final Predicate<Character> predicate) {
     int len;
     if (str == null || (len = str.length()) == 0) {
-      return new String[0];
+      return EMPTY_ARRAY;
     }
     if (predicate == null) {
       return new String[] {str};
@@ -603,7 +605,7 @@ public class Strings {
   public static String[] split(final String str, final Predicate<Character> splitor) {
     int len;
     if (str == null || (len = str.length()) == 0) {
-      return new String[0];
+      return EMPTY_ARRAY;
     }
     if (splitor == null) {
       return new String[] {str};
@@ -649,7 +651,7 @@ public class Strings {
     int len;
     int slen;
     if (str == null || (len = str.length()) == 0) {
-      return new String[0];
+      return EMPTY_ARRAY;
     }
     if (wholeSpreator == null || (slen = wholeSpreator.length()) == 0) {
       return new String[] {str};

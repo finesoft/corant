@@ -97,7 +97,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
         if (o == args[0]) {
           return true;
         }
-        return ProxyUtils.isProxyOfSameInterfaces(args[0], getClazz())
+        return ProxyUtils.isProxyOfSameInterfaces(args[0], clazz)
             && equals(Proxy.getInvocationHandler(args[0]));
       } else if (method.getName().equals("hashCode") && (args == null || args.length == 0)) {
         return hashCode();

@@ -17,15 +17,16 @@ import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.aggregate;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.aggregate;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -50,7 +51,7 @@ public class ConfigUtils {
     for (String key : keys) {
       String useKey = defaultString(key);
       if (isNotBlank(useKey)) {
-        concats = concats.append(removeSplitor(key)).append(NAME_SPACE_SEPARATORS);
+        concats.append(removeSplitor(key)).append(NAME_SPACE_SEPARATORS);
       }
     }
     return removeSplitor(concats.toString());
@@ -102,12 +103,12 @@ public class ConfigUtils {
   public static Map<String, List<String>> getGroupConfigKeys(Iterable<String> configs,
       Predicate<String> filter, int keyIndex) {
     shouldBeTrue(keyIndex >= 0);
-    return aggregate(configs, filter::test, s -> {
+    return aggregate(configs, filter, s -> {
       String[] arr = splitKey(s);
       if (arr.length > keyIndex) {
         return new String[] {arr[keyIndex], s};
       }
-      return new String[0];
+      return Strings.EMPTY_ARRAY;
     });
   }
 
@@ -148,7 +149,7 @@ public class ConfigUtils {
 
   static String[] splitProperties(String text, String regex, boolean trim) {
     if (text == null) {
-      return new String[0];
+      return Strings.EMPTY_ARRAY;
     }
     String splitor = regex.substring(regex.length() - 1);
     String[] split = text.split(regex);

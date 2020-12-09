@@ -15,7 +15,9 @@ package org.corant.kernel.boot;
 
 import java.util.Arrays;
 import org.corant.Corant;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Functions;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-kernel
@@ -25,8 +27,8 @@ import org.corant.shared.util.Functions;
  */
 public class Power implements PowerMBean {
 
-  private Class<?>[] beanClasses = new Class[0];
-  private String[] arguments = new String[0];
+  private Class<?>[] beanClasses = Classes.EMPTY_ARRAY;
+  private String[] arguments = Strings.EMPTY_ARRAY;
 
   public Power(Class<?>[] beanClasses, String[] arguments) {
     if (beanClasses != null) {

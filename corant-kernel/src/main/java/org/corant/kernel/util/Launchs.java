@@ -58,7 +58,7 @@ public class Launchs {
   public static List<String> getClassPathArgs(Predicate<String> filter) {
     List<String> args = new ArrayList<>();
     args.add("-classpath");
-    args.add(getClassPaths().stream().filter(cp -> filter == null ? true : filter.test(cp))
+    args.add(getClassPaths().stream().filter(cp -> filter == null || filter.test(cp))
         .collect(Collectors.joining(File.pathSeparator)));
     return args;
   }

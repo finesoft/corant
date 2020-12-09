@@ -57,7 +57,7 @@ public class ConfigExtension implements Extension {
 
   private static final Logger logger = Logger.getLogger(ConfigExtension.class.getName());
 
-  private Set<InjectionPoint> injectionPoints = new HashSet<>();
+  private final Set<InjectionPoint> injectionPoints = new HashSet<>();
 
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     Set<Type> types = injectionPoints.stream().map(ip -> {

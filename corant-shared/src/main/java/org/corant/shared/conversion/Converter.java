@@ -60,7 +60,7 @@ public interface Converter<S, T> {
       final Map<String, ?> hints) {
     shouldNotNull(fromIterable);
     return () -> new Iterator<>() {
-      private Iterator<? extends S> fromIterator = fromIterable.iterator();
+      private final Iterator<? extends S> fromIterator = fromIterable.iterator();
 
       @Override
       public boolean hasNext() {

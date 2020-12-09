@@ -203,9 +203,8 @@ public interface Aggregate extends Entity {
       }).newInstance(paramValue));
     }
 
-    static <A extends Aggregate, T extends AggregateReference<A>> T of(Object param, Class<T> cls) {
+    static <A extends Aggregate, T extends AggregateReference<A>> T of(Class<T> cls, Object param) {
       if (param == null) {
-        // FIXME like c++ reference
         return null;
       }
       try {

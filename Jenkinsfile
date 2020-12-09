@@ -1,3 +1,4 @@
+def REVISION = 'none'
 pipeline {
   agent none
   stages {
@@ -21,7 +22,7 @@ pipeline {
     success {
       slackSend channel: '#jenkins',
         color: 'good',
-        message: "successfully\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}\n ${env.BUILD_URL}"
+        message: "successfully\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n revision: ${revision} \n ${env.BUILD_URL}"
     }
     failure {
       slackSend channel: '#jenkins',

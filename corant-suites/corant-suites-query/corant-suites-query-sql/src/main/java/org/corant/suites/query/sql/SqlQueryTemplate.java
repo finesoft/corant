@@ -80,7 +80,7 @@ public class SqlQueryTemplate {
 
   protected final QueryRunner runner;
   protected String sql;
-  protected Object[] parameters = new Object[0];
+  protected Object[] parameters = Objects.EMPTY_ARRAY;
   protected int limit = 16;
   protected int offset = 0;
   protected final Dialect dialect;

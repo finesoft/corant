@@ -29,6 +29,7 @@ import javax.transaction.TransactionalException;
 import org.corant.context.Instances;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-suites-jta-shared
@@ -69,15 +70,15 @@ public abstract class TransactionalAction<T> {
     this.type = type;
     this.supplier = shouldNotNull(supplier, "The supplier can't null");
     this.synchronization = synchronization;
-    this.rollbackOn = defaultObject(rollbackOn, new Class[0]);
-    this.dontRollbackOn = defaultObject(dontRollbackOn, new Class[0]);
+    this.rollbackOn = defaultObject(rollbackOn, Classes.EMPTY_ARRAY);
+    this.dontRollbackOn = defaultObject(dontRollbackOn, Classes.EMPTY_ARRAY);
     this.timeout = timeout;
   }
 
   public T execute() throws Exception {
     final TransactionManager tm = TransactionService.transactionManager();
     if (timeout != null && timeout > 0) {
-      tm.setTransactionTimeout(timeout.intValue());
+      tm.setTransactionTimeout(timeout);
     }
     final Transaction tx = TransactionService.currentTransaction();
     final Optional<UserTransactionActionHandler> helper =
@@ -319,8 +320,8 @@ public abstract class TransactionalAction<T> {
    */
   public static class TransactionalActuator<T> {
 
-    Class<?>[] rollbackOn = new Class[0];
-    Class<?>[] dontRollbackOn = new Class[0];
+    Class<?>[] rollbackOn = Classes.EMPTY_ARRAY;
+    Class<?>[] dontRollbackOn = Classes.EMPTY_ARRAY;
     TxType txType = TxType.REQUIRED;
     Synchronization synchronization;
     Integer timeout;

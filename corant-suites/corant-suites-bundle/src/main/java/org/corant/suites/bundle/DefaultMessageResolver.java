@@ -31,6 +31,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-suites-bundle
@@ -40,7 +41,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class DefaultMessageResolver implements MessageResolver {
 
-  static final Object[] EMPTY_ARGS = new Object[0];
+  static final Object[] EMPTY_ARGS = Objects.EMPTY_ARRAY;
 
   static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")
       .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
@@ -55,7 +56,7 @@ public class DefaultMessageResolver implements MessageResolver {
     if (parameters.length > 0) {
       return Arrays.stream(parameters).map(p -> handleParameter(locale, p)).toArray();
     }
-    return new Object[0];
+    return Objects.EMPTY_ARRAY;
   }
 
   @Override

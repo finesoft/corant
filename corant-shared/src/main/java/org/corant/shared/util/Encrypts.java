@@ -72,7 +72,7 @@ public class Encrypts {
    */
   public static byte[] binaryStringToBytes(String s) {
     if (s == null) {
-      return new byte[0];
+      return Bytes.EMPTY_ARRAY;
     }
     int length = s.length();
     if ((length & 7) != 0) {
@@ -376,7 +376,7 @@ public class Encrypts {
    */
   public static byte[] hexStringToBytes(String hs) {
     if (hs.length() < 1) {
-      return new byte[0];
+      return Bytes.EMPTY_ARRAY;
     }
     byte[] result = new byte[hs.length() / 2];
     for (int i = 0; i < hs.length() / 2; i++) {
@@ -567,7 +567,7 @@ public class Encrypts {
    */
   public static byte[] toMD5Bytes(byte[] b) throws NoSuchAlgorithmException {
     if (b == null) {
-      return new byte[0];
+      return Bytes.EMPTY_ARRAY;
     }
     MessageDigest md = MessageDigest.getInstance("MD5");
     md.update(b);

@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import org.corant.shared.util.Objects;
 
 /**
  * @author bingo 上午10:24:46
@@ -43,7 +44,7 @@ public class GeneralRuntimeExceptionWrapper {
   }
 
   public static class Builder {
-    protected Object[] parameters = new Object[0];
+    protected Object[] parameters = Objects.EMPTY_ARRAY;
     protected Object subCode;
     protected final Object code;
     protected final GeneralRuntimeExceptionWrapper wrapper;
@@ -125,7 +126,7 @@ public class GeneralRuntimeExceptionWrapper {
     }
 
     void setParameters(Object[] parameters) {
-      this.parameters = parameters == null ? new Object[0] : parameters;
+      this.parameters = parameters == null ? Objects.EMPTY_ARRAY : parameters;
     }
 
   }

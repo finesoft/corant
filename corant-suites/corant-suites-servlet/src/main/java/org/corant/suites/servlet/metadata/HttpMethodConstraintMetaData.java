@@ -17,6 +17,7 @@ import java.util.Arrays;
 import javax.servlet.annotation.HttpMethodConstraint;
 import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-suites-servlet
@@ -30,7 +31,7 @@ public class HttpMethodConstraintMetaData {
 
   private EmptyRoleSemantic emptyRoleSemantic = EmptyRoleSemantic.PERMIT;
   private TransportGuarantee transportGuarantee = TransportGuarantee.NONE;
-  private String[] rolesAllowed = new String[0];
+  private String[] rolesAllowed = Strings.EMPTY_ARRAY;
 
   public HttpMethodConstraintMetaData(HttpMethodConstraint anno) {
     if (anno != null) {

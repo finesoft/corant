@@ -50,7 +50,7 @@ public class ListsTest extends TestCase {
   @Test
   public void testArrayRemove() {
     String[] array = new String[] {"a"};
-    String[] removedArray = new String[0];
+    String[] removedArray = Strings.EMPTY_ARRAY;
     assertArrayEquals(removeIf(array, x -> x.equals("a")), removedArray);
     assertArrayEquals(removeIf(array, x -> x.equals("x")), array);
   }

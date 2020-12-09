@@ -16,6 +16,7 @@ package org.corant.suites.bundle;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Locale;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-kernel
@@ -25,7 +26,7 @@ import org.corant.shared.normal.Names;
  */
 public interface MessageResolver {
 
-  Object[] EMPTY_PARAM = new Object[0];
+  Object[] EMPTY_PARAM = Objects.EMPTY_ARRAY;
 
   static String genMessageCode(MessageSeverity severity, Object... codes) {
     StringBuilder sb = new StringBuilder(severity.name());

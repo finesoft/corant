@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Strings;
 import org.corant.suites.elastic.Elastic6Constants;
 import org.corant.suites.elastic.metadata.ElasticIndexing;
 import org.corant.suites.elastic.metadata.ElasticMapping;
@@ -94,7 +95,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
           return 0;
         }
         return 1;
-      }).reduce(Integer.valueOf(0), Integer::sum);
+      }).reduce(0, Integer::sum);
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
@@ -120,7 +121,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
           return 0;
         }
         return 1;
-      }).reduce(Integer.valueOf(0), Integer::sum);
+      }).reduce(0, Integer::sum);
     } catch (ElasticsearchException e) {
       throw new CorantRuntimeException(e);
     }
@@ -173,7 +174,7 @@ public abstract class AbstractElasticDocumentService implements ElasticDocumentS
         srb.addSort(sb);
       }
       if (pops.length > 0) {
-        srb.setFetchSource(pops, new String[0]);
+        srb.setFetchSource(pops, Strings.EMPTY_ARRAY);
       }
       return Arrays.stream(srb.get().getHits().getHits()).map(SearchHit::getSourceAsMap)
           .collect(Collectors.toList());

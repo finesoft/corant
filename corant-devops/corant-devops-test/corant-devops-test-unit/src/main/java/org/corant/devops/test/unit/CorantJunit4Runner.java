@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.Corant;
 import org.corant.context.Instances;
+import org.corant.shared.util.Strings;
 import org.junit.runners.model.Statement;
 
 /**
@@ -37,7 +38,7 @@ public interface CorantJunit4Runner {
   ThreadLocal<Corant> CORANTS = new ThreadLocal<>();
   ThreadLocal<Boolean> ENA_RDM_WEB_PORTS = ThreadLocal.withInitial(() -> Boolean.FALSE);
   ThreadLocal<String> PROFILES = new ThreadLocal<>();
-  ThreadLocal<String[]> ARGS = ThreadLocal.withInitial(() -> new String[0]);
+  ThreadLocal<String[]> ARGS = ThreadLocal.withInitial(() -> Strings.EMPTY_ARRAY);
   ThreadLocal<Class<?>[]> BEAN_CLASSES = new ThreadLocal<>();
   ThreadLocal<Boolean> AUTO_DISPOSES = ThreadLocal.withInitial(() -> Boolean.TRUE);
   ThreadLocal<Map<String, String>> ADDI_CFG_PROS = ThreadLocal.withInitial(HashMap::new);
@@ -61,7 +62,7 @@ public interface CorantJunit4Runner {
               System.clearProperty(CFG_PROFILE_KEY);
             }
             System.clearProperty(CFG_LOCATION_EXCLUDE_PATTERN);
-            if (AUTO_DISPOSES.get().booleanValue()) {
+            if (AUTO_DISPOSES.get()) {
               if (TEST_OBJECTS.get() != null) {
                 // TEST_OBJECTS.get().values().forEach(umi -> umi.preDestroy().dispose());
                 TEST_OBJECTS.get().clear();
@@ -127,7 +128,7 @@ public interface CorantJunit4Runner {
     if (TEST_OBJECTS.get() == null) {
       TEST_OBJECTS.set(new HashMap<>());
     }
-    return TEST_OBJECTS.get().computeIfAbsent(clazz, cls -> Instances.resolve(cls));
+    return TEST_OBJECTS.get().computeIfAbsent(clazz, Instances::resolve);
     /* cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct() ).get(); */
   }
 

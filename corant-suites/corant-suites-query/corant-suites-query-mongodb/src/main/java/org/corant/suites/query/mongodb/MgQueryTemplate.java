@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings;
 import org.corant.suites.query.mongodb.converter.Bsons;
 import org.corant.suites.query.shared.QueryObjectMapper;
 import org.corant.suites.query.shared.QueryParameter;
@@ -268,9 +269,9 @@ public class MgQueryTemplate {
 
   public MgQueryTemplate projection(boolean include, String... propertyNames) {
     if (include) {
-      return projection(propertyNames, new String[0]);
+      return projection(propertyNames, Strings.EMPTY_ARRAY);
     } else {
-      return projection(new String[0], propertyNames);
+      return projection(Strings.EMPTY_ARRAY, propertyNames);
     }
   }
 

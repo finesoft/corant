@@ -56,7 +56,7 @@ public class MacAddrs {
       }
     }
     // Could not find a mac address
-    return new byte[0];
+    return Bytes.EMPTY_ARRAY;
   }
 
   public static byte[] getSecureMungedAddress(Random rd) {

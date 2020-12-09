@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-suites-servlet
@@ -35,9 +36,9 @@ public class WebFilterMetaData {
   private String filterName;
   private String smallIcon;
   private String largeIcon;
-  private String[] servletNames = new String[0];
-  private String[] value = new String[0];
-  private String[] urlPatterns = new String[0];
+  private String[] servletNames = Strings.EMPTY_ARRAY;
+  private String[] value = Strings.EMPTY_ARRAY;
+  private String[] urlPatterns = Strings.EMPTY_ARRAY;
   private DispatcherType[] dispatcherTypes = new DispatcherType[] {DispatcherType.REQUEST};
   private boolean asyncSupported;
   private String description;
@@ -258,7 +259,7 @@ public class WebFilterMetaData {
    * @param servletNames the servletNames to set
    */
   protected void setServletNames(String[] servletNames) {
-    this.servletNames = defaultObject(servletNames, () -> new String[0]);
+    this.servletNames = defaultObject(servletNames, () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -274,7 +275,7 @@ public class WebFilterMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, () -> new String[0]);
+    this.urlPatterns = defaultObject(urlPatterns, () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -282,7 +283,7 @@ public class WebFilterMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, () -> new String[0]);
+    this.value = defaultObject(value, () -> Strings.EMPTY_ARRAY);
   }
 
 }

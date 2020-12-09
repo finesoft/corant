@@ -31,6 +31,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Objects {
 
+  public static final Object[] EMPTY_ARRAY = new Object[0];
+
   protected Objects() {}
 
   public static boolean areDeepEqual(Object a, Object b) {

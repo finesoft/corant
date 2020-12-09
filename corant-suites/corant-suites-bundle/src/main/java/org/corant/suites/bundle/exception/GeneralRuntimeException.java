@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Objects;
 import org.corant.suites.bundle.MessageResolver;
 import org.corant.suites.bundle.MessageResolver.MessageSeverity;
 import org.corant.suites.bundle.MessageResolver.MessageSource;
@@ -44,12 +45,12 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
 
   private GeneralExceptionSeverity serverity = GeneralExceptionSeverity.ERROR;
 
-  private Object[] parameters = new Object[0];
+  private Object[] parameters = Objects.EMPTY_ARRAY;
 
   private Map<Object, Object> attributes = new HashMap<>();
 
   public GeneralRuntimeException(Object code) {
-    this(code, null, new HashMap<>(), new Object[0]);
+    this(code, null, new HashMap<>(), Objects.EMPTY_ARRAY);
   }
 
   public GeneralRuntimeException(Object code, Object... variants) {
@@ -168,7 +169,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   public GeneralRuntimeException parameters(UnaryOperator<List<Object>> func) {
     if (func != null) {
       List<Object> updated = func.apply(listOf(parameters));
-      setParameters(updated == null ? new Object[0] : updated.toArray());
+      setParameters(updated == null ? Objects.EMPTY_ARRAY : updated.toArray());
     }
     return this;
   }
@@ -215,7 +216,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
 
   protected void setParameters(Object[] parameters) {
     this.parameters =
-        parameters == null ? new Object[0] : Arrays.copyOf(parameters, parameters.length);
+        parameters == null ? Objects.EMPTY_ARRAY : Arrays.copyOf(parameters, parameters.length);
   }
 
   protected void setServerity(GeneralExceptionSeverity serverity) {

@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Validates;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 
@@ -43,14 +44,14 @@ public class Preconditions {
 
   @SafeVarargs
   public static <T> T requireAllMatch(T obj, Object code, SinglePrecondition<T>... asts) {
-    return requireAllMatch(obj, code, () -> new Object[0], asts);
+    return requireAllMatch(obj, code, () -> Objects.EMPTY_ARRAY, asts);
   }
 
   @SafeVarargs
   public static <T> T requireAllMatch(T obj, Object code, Supplier<Object[]> mps,
       SinglePrecondition<T>... asts) {
     T r = obj;
-    Object[] pms = mps == null ? new Object[0] : mps.get();
+    Object[] pms = mps == null ? Objects.EMPTY_ARRAY : mps.get();
     for (SinglePrecondition<T> ast : asts) {
       r = ast.testAndReturn(r, code, pms);
     }
@@ -411,7 +412,7 @@ public class Preconditions {
    * @return
    */
   public static String[] requireNoneBlank(String code, String... objects) {
-    return requireNoneBlank(code, new Object[0], objects);
+    return requireNoneBlank(code, Objects.EMPTY_ARRAY, objects);
   }
 
   /**
@@ -422,7 +423,7 @@ public class Preconditions {
    * @return
    */
   public static Object[] requireNoneNull(String code, Object... objects) {
-    return requireNoneNull(code, new Object[0], objects);
+    return requireNoneNull(code, Objects.EMPTY_ARRAY, objects);
   }
 
   /**

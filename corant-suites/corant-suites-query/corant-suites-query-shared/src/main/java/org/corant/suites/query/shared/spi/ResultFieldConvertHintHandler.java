@@ -37,6 +37,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.context.ConversionService;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryService.Forwarding;
 import org.corant.suites.query.shared.QueryService.Paging;
 import org.corant.suites.query.shared.mapping.QueryHint;
@@ -240,7 +241,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
       Class<?> targetClass, List<QueryHintParameter> pthk, List<QueryHintParameter> pthv) {
     final Object[] convertHints = isNotEmpty(pthk) && isNotEmpty(pthv)
         ? new Object[] {pthk.get(0).getValue(), pthv.get(0).getValue()}
-        : new Object[0];
+        : Objects.EMPTY_ARRAY;
     List<Pair<String[], Pair<Class<?>, Object[]>>> list = new ArrayList<>();
     linkedHashSetOf(split(propertyName, ",", true, true)).forEach(
         p -> list.add(Pair.of(split(p, ".", true, true), Pair.of(targetClass, convertHints))));

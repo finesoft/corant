@@ -22,6 +22,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.util.Bytes;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.bundle.exception.GeneralRuntimeException;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -182,7 +183,7 @@ public class JsonUtils {
    */
   public static byte[] toBytes(Object obj) {
     if (obj == null) {
-      return new byte[0];
+      return Bytes.EMPTY_ARRAY;
     } else {
       try {
         return objectMapper.writeValueAsBytes(obj);

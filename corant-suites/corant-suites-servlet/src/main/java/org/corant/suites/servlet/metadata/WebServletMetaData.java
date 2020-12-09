@@ -22,6 +22,7 @@ import javax.servlet.Servlet;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-suites-servlet
@@ -32,8 +33,8 @@ import javax.servlet.annotation.WebServlet;
 public class WebServletMetaData {
 
   private String name;
-  private String[] value = new String[0];
-  private String[] urlPatterns = new String[0];
+  private String[] value = Strings.EMPTY_ARRAY;
+  private String[] urlPatterns = Strings.EMPTY_ARRAY;
   private int loadOnStartup = -1;
   private WebInitParamMetaData[] initParams = new WebInitParamMetaData[0];
   private boolean asyncSupported;
@@ -288,7 +289,7 @@ public class WebServletMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, () -> new String[0]);
+    this.urlPatterns = defaultObject(urlPatterns, () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -296,7 +297,7 @@ public class WebServletMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, () -> new String[0]);
+    this.value = defaultObject(value, () -> Strings.EMPTY_ARRAY);
   }
 
 }

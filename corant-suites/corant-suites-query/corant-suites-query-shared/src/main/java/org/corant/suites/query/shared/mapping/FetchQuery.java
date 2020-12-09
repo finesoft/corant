@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Strings;
 import org.corant.suites.query.shared.mapping.Query.QueryType;
 
 /**
@@ -35,7 +36,7 @@ public class FetchQuery implements Serializable {
   private static final long serialVersionUID = 449192431797295206L;
   private QueryReference referenceQuery = new QueryReference();
   private String injectPropertyName;
-  private String[] injectPropertyNamePath = new String[0];
+  private String[] injectPropertyNamePath = Strings.EMPTY_ARRAY;
   private Class<?> resultClass = Map.class;
   private int maxSize = 1024;
   private List<FetchQueryParameter> parameters = new ArrayList<>();
@@ -243,7 +244,7 @@ public class FetchQuery implements Serializable {
 
     private String name;
     private String sourceName;
-    private String[] sourceNamePath = new String[0];
+    private String[] sourceNamePath = Strings.EMPTY_ARRAY;
     private FetchQueryParameterSource source;
     private String value;
     private Class<?> type;

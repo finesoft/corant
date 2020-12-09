@@ -51,7 +51,7 @@
 		<version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>
 		<version.flyway>6.0.6</version.flyway>
 		<version.freemarker>2.3.30</version.freemarker>
-		<version.groovy>3.0.6</version.groovy>
+		<version.groovy>3.0.7</version.groovy>
 		<version.grpc>1.32.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>

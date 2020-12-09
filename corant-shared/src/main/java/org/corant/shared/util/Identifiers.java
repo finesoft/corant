@@ -147,7 +147,7 @@ public class Identifiers {
         Pair<Long, Long> worker = workers.get(i);
         workerBits[i] = worker.getLeft();
         workerIds[i] = worker.getRight();
-        long maxWorkerId = calMask(workerIds[i]);
+        long maxWorkerId = calMask(workerBits[i]);
         if (workerIds[i] > maxWorkerId) {
           throw new IllegalArgumentException(
               "Worker id is illegal: " + workerIds[i] + " [0," + maxWorkerId + "]");

@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class LocalDateTimeTimestampConverter extends AbstractConverter<LocalDateTime, Timestamp> {
 
-  private static final long serialVersionUID = -8041574104603644871L;
-
   public LocalDateTimeTimestampConverter() {
     super();
   }

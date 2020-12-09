@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class StringCurrencyConverter extends AbstractConverter<String, Currency> {
 
-  private static final long serialVersionUID = -9080434655450039399L;
-
   public StringCurrencyConverter() {
     super();
   }

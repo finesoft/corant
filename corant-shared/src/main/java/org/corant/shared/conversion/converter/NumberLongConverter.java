@@ -23,8 +23,6 @@ import java.util.Map;
  */
 public class NumberLongConverter extends AbstractConverter<Number, Long> {
 
-  private static final long serialVersionUID = 1890230341337567700L;
-
   public NumberLongConverter() {
     super();
   }
@@ -58,7 +56,7 @@ public class NumberLongConverter extends AbstractConverter<Number, Long> {
     } else if (value == null) {
       return getDefaultValue();
     }
-    return Long.valueOf(value.longValue());
+    return value.longValue();
   }
 
 }

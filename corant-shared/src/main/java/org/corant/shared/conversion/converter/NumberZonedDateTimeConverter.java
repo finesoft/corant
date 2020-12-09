@@ -31,8 +31,6 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Number, ZonedDateTime> {
 
-  private static final long serialVersionUID = 7155121548134208922L;
-
   public NumberZonedDateTimeConverter() {
     super();
   }

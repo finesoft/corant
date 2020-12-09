@@ -25,8 +25,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class StringCharacterConveter extends AbstractConverter<String, Character> {
 
-  private static final long serialVersionUID = 3960608981229517111L;
-
   public StringCharacterConveter() {
     super();
   }
@@ -59,7 +57,7 @@ public class StringCharacterConveter extends AbstractConverter<String, Character
       return getDefaultValue();
     }
     if (value.length() == 1) {
-      return Character.valueOf(value.charAt(0));
+      return value.charAt(0);
     }
     throw new ConversionException("Can not convert from '%s' to Character", value);
   }

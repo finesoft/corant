@@ -75,11 +75,10 @@ public interface PathMatcher extends Predicate<String> {
     if (path.startsWith(SYNTAX_REGEX)) {
       matcher = new RegexMatcher(ignoreCase, shouldNotBlank(path.substring(SYNTAX_REGEX_LEN)));
     } else {
-      boolean glob = false;
       if (isBlank(path) || path.endsWith(dos ? "\\" : "/")) {
         path += "**";
-        glob = true;
       }
+      boolean glob = false;
       if (path.startsWith(SYNTAX_GLOB)) {
         path = shouldNotBlank(path.substring(SYNTAX_GLOB_LEN));
         glob = true;

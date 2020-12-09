@@ -28,8 +28,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Instant> {
 
-  private static final long serialVersionUID = 5714969977056601989L;
-
   public SqlDateInstantConverter() {
     super();
   }

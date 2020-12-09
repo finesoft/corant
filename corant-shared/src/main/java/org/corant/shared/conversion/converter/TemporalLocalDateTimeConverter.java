@@ -31,8 +31,6 @@ import java.util.Optional;
 public class TemporalLocalDateTimeConverter
     extends AbstractTemporalConverter<Temporal, LocalDateTime> {
 
-  private static final long serialVersionUID = 8151283749391653936L;
-
   public TemporalLocalDateTimeConverter() {
     super();
   }

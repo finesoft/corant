@@ -24,8 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberFloatConverter extends AbstractConverter<Number, Float> {
 
-  private static final long serialVersionUID = -3388447641785445918L;
-
   public NumberFloatConverter() {
     super();
   }
@@ -62,7 +60,7 @@ public class NumberFloatConverter extends AbstractConverter<Number, Float> {
     if (value.doubleValue() > Float.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is too big for float!");
     }
-    return Float.valueOf(value.floatValue());
+    return value.floatValue();
   }
 
 }

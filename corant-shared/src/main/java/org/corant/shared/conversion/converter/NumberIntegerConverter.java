@@ -24,8 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
 
-  private static final long serialVersionUID = 7896620625712851734L;
-
   public NumberIntegerConverter() {
     super();
   }
@@ -66,7 +64,7 @@ public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
     if (longValue < Integer.MIN_VALUE) {
       throw new ConversionException("Can not convert, the source value is too small for integer!");
     }
-    return Integer.valueOf(value.intValue());
+    return value.intValue();
   }
 
 }

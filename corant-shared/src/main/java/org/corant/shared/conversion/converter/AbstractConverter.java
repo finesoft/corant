@@ -30,8 +30,6 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
-  private static final long serialVersionUID = 4977422757480762417L;
-
   private T defaultValue = null;
   private boolean throwException = true;
   protected Logger logger = Logger.getLogger(this.getClass().getName());

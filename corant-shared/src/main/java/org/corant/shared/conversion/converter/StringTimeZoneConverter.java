@@ -25,8 +25,6 @@ import java.util.TimeZone;
  */
 public class StringTimeZoneConverter extends AbstractConverter<String, TimeZone> {
 
-  private static final long serialVersionUID = 8746260743946834677L;
-
   public StringTimeZoneConverter() {
     super();
   }

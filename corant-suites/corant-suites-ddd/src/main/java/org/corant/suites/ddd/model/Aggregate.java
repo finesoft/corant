@@ -212,7 +212,7 @@ public interface Aggregate extends Entity {
         if (cls != null) {
           if (cls.isAssignableFrom(param.getClass())) {
             return forceCast(param);
-          } else if (param instanceof Aggregate || param != null) {
+          } else {
             return invokeExactConstructor(cls, param.getClass(), param);
           }
         }
@@ -220,8 +220,7 @@ public interface Aggregate extends Entity {
         throw new GeneralRuntimeException(e, ERR_OBJ_NON_FUD,
             asString(cls).concat(":").concat(asString(param)));
       }
-      throw new GeneralRuntimeException(ERR_OBJ_NON_FUD,
-          asString(cls).concat(":").concat(asString(param)));
+      throw new GeneralRuntimeException(ERR_PARAM);
     }
 
     static <X extends Entity> X resolve(Class<X> cls, Serializable id) {

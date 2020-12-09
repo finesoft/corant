@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class NumberBigDecimalConverter extends AbstractConverter<Number, BigDecimal> {
 
-  private static final long serialVersionUID = -9097226157742483966L;
-
   public NumberBigDecimalConverter() {
     super();
   }

@@ -32,8 +32,6 @@ import java.util.Optional;
 public class TemporalZonedDateTimeConverter
     extends AbstractTemporalConverter<Temporal, ZonedDateTime> {
 
-  private static final long serialVersionUID = 6714177107475182955L;
-
   public TemporalZonedDateTimeConverter() {
     super();
   }

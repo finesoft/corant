@@ -39,9 +39,11 @@ import javax.persistence.PersistenceUnit;
 import javax.transaction.TransactionScoped;
 import org.corant.context.ComponentManager.AbstractComponentManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.suites.jta.shared.TransactionService;
+import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-suites-jpa-shared
@@ -63,6 +65,9 @@ public class JPAService implements PersistenceService {
   @Any
   protected TsEntityManagerManager tsEmManager;
 
+  @Inject
+  WeldManager weldManager;
+
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
     if (pc.type() == PersistenceContextType.TRANSACTION) {
@@ -76,7 +81,8 @@ public class JPAService implements PersistenceService {
           "Get transactional scope entity manager [%s] for persistence unit [%s].", em,
           pc.unitName()));
       return em;
-    } else {
+    } else if (weldManager.getActiveContexts().stream()
+        .anyMatch(c -> c.getScope().equals(RequestScoped.class))) {
       final EntityManager em =
           rsEmManager.computeIfAbsent(pc,
               p -> getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
@@ -85,6 +91,8 @@ public class JPAService implements PersistenceService {
       logger.fine(() -> String.format(
           "Get request scope entity manager [%s] for persistence unit [%s].", em, pc.unitName()));
       return em;
+    } else {
+      throw new NotSupportedException("Only support request and transaction scope entity manager.");
     }
   }
 

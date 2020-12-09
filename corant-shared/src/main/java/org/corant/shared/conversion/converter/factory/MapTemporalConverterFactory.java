@@ -160,7 +160,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     }
   }
 
-  Integer resolveInteger(Object obj) {
+  int resolveInteger(Object obj) {
     if (obj != null) {
       if (obj instanceof Integer) {
         return (Integer) obj;
@@ -169,15 +169,13 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       } else if (obj instanceof Number) {
         return ((Number) obj).intValue();
       } else if (obj instanceof String) {
-        return Integer.valueOf(obj.toString());
+        return Integer.parseInt(obj.toString());
       }
-    } else {
-      return null;
     }
     throw new ConversionException("Can't convert %s to integer!", obj);
   }
 
-  Long resolveLong(Object obj) {
+  long resolveLong(Object obj) {
     if (obj != null) {
       if (obj instanceof Long) {
         return (Long) obj;
@@ -186,10 +184,8 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       } else if (obj instanceof Number) {
         return ((Number) obj).longValue();
       } else if (obj instanceof String) {
-        return Long.valueOf(obj.toString());
+        return Long.parseLong(obj.toString());
       }
-    } else {
-      return null;
     }
     throw new ConversionException("Can't convert %s to long!", obj);
   }

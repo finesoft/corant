@@ -24,8 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
 
-  private static final long serialVersionUID = -317077150965646237L;
-
   @Override
   protected Boolean convert(Number value, Map<String, ?> hints) throws Exception {
     if (value == null) {

@@ -24,8 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberByteConverter extends AbstractConverter<Number, Byte> {
 
-  private static final long serialVersionUID = -2907903153705190681L;
-
   public NumberByteConverter() {
     super();
   }
@@ -66,7 +64,7 @@ public class NumberByteConverter extends AbstractConverter<Number, Byte> {
     if (longValue < Byte.MIN_VALUE) {
       throw new ConversionException("Can not convert, the source value is to small for byte!");
     }
-    return Byte.valueOf(value.byteValue());
+    return value.byteValue();
   }
 
 }

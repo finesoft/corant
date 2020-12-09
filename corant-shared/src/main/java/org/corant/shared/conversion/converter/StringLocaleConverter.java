@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class StringLocaleConverter extends AbstractConverter<String, Locale> {
 
-  private static final long serialVersionUID = 3936089658605787L;
   public static final char IETF_SEPARATOR = '-';
   public static final String EMPTY_STRING = "";
   public static final Locale DEFAULT_LOCALE = Locale.getDefault();
@@ -61,7 +60,7 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    String language = EMPTY_STRING;
+    String language;
     String country = EMPTY_STRING;
     String variant = EMPTY_STRING;
     int i1 = value.indexOf(IETF_SEPARATOR);

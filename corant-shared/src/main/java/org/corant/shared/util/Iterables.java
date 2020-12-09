@@ -450,7 +450,7 @@ public class Iterables {
           } else {
             while (current == null) {
               current = queue.poll();
-              if (queue.size() == 0) {
+              if (queue.isEmpty()) {
                 break;
               }
             }

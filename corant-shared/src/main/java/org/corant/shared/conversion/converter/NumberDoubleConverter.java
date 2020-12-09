@@ -23,8 +23,6 @@ import java.util.Map;
  */
 public class NumberDoubleConverter extends AbstractConverter<Number, Double> {
 
-  private static final long serialVersionUID = 5173854467544466427L;
-
   public NumberDoubleConverter() {
     super();
   }
@@ -58,7 +56,7 @@ public class NumberDoubleConverter extends AbstractConverter<Number, Double> {
     } else if (value == null) {
       return getDefaultValue();
     }
-    return Double.valueOf(value.doubleValue());
+    return value.doubleValue();
   }
 
 }

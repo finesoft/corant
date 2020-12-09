@@ -14,6 +14,7 @@
 package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -32,7 +33,7 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 下午4:10:40
  *
  */
-public interface Mutable<T> extends Serializable, Supplier<T> {
+public interface Mutable<T> extends Supplier<T> {
 
   @Override
   T get();
@@ -48,8 +49,6 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
   public static class MutableBoolean extends MutableObject<Boolean>
       implements Comparable<MutableBoolean> {
 
-    private static final long serialVersionUID = -8744451088815002675L;
-
     protected MutableBoolean(final boolean value) {
       super(value);
     }
@@ -60,7 +59,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
 
     @Override
     public int compareTo(final MutableBoolean o) {
-      return value == o.value ? 0 : !value ? -1 : 1;
+      return areEqual(value, o.value) ? 0 : !value ? -1 : 1;
     }
 
     public Boolean getAndSet(boolean other) {
@@ -113,7 +112,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Byte addAndGet(Number operand) {
       final Byte current = value;
-      value = Byte.valueOf((byte) (current.byteValue() + shouldNotNull(operand).byteValue()));
+      value = (byte) (current.byteValue() + shouldNotNull(operand).byteValue());
       return value;
     }
 
@@ -144,7 +143,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Byte subtractAndGet(final Number operand) {
       final Byte current = value;
-      value = Byte.valueOf((byte) (current.byteValue() - shouldNotNull(operand).byteValue()));
+      value = (byte) (current.byteValue() - shouldNotNull(operand).byteValue());
       return value;
     }
   }
@@ -188,7 +187,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Double addAndGet(Number operand) {
       final Double current = value;
-      value = Double.valueOf(current.doubleValue() + shouldNotNull(operand).doubleValue());
+      value = current.doubleValue() + shouldNotNull(operand).doubleValue();
       return value;
     }
 
@@ -219,7 +218,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Double subtractAndGet(Number operand) {
       final Double current = value;
-      value = Double.valueOf(current.doubleValue() - shouldNotNull(operand).doubleValue());
+      value = current.doubleValue() - shouldNotNull(operand).doubleValue();
       return value;
     }
   }
@@ -263,7 +262,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Float addAndGet(Number operand) {
       final Float current = value;
-      value = Float.valueOf(current.floatValue() + shouldNotNull(operand).floatValue());
+      value = current.floatValue() + shouldNotNull(operand).floatValue();
       return value;
     }
 
@@ -294,7 +293,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Float subtractAndGet(Number operand) {
       final Float current = value;
-      value = Float.valueOf(current.floatValue() - shouldNotNull(operand).floatValue());
+      value = current.floatValue() - shouldNotNull(operand).floatValue();
       return value;
     }
   }
@@ -338,7 +337,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Integer addAndGet(Number operand) {
       final Integer current = value;
-      value = Integer.valueOf(current.intValue() + shouldNotNull(operand).intValue());
+      value = current.intValue() + shouldNotNull(operand).intValue();
       return value;
     }
 
@@ -369,7 +368,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Integer subtractAndGet(Number operand) {
       final Integer current = value;
-      value = Integer.valueOf(current.intValue() - shouldNotNull(operand).intValue());
+      value = current.intValue() - shouldNotNull(operand).intValue();
       return value;
     }
   }
@@ -413,7 +412,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Long addAndGet(Number operand) {
       final Long current = value;
-      value = Long.valueOf(current.longValue() + shouldNotNull(operand).longValue());
+      value = current.longValue() + shouldNotNull(operand).longValue();
       return value;
     }
 
@@ -444,7 +443,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Long subtractAndGet(Number operand) {
       final Long current = value;
-      value = Long.valueOf(current.longValue() - shouldNotNull(operand).longValue());
+      value = current.longValue() - shouldNotNull(operand).longValue();
       return value;
     }
   }
@@ -684,8 +683,6 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    */
   public static class MutableObject<T> implements Mutable<T> {
 
-    private static final long serialVersionUID = 6276199153168086544L;
-
     T value;
 
     public MutableObject() {
@@ -772,7 +769,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Short addAndGet(Number operand) {
       final Short current = value;
-      value = Short.valueOf((short) (current.shortValue() + shouldNotNull(operand).shortValue()));
+      value = (short) (current.shortValue() + shouldNotNull(operand).shortValue());
       return value;
     }
 
@@ -803,7 +800,7 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
     @Override
     public Short subtractAndGet(Number operand) {
       final Short current = value;
-      value = Short.valueOf((short) (current.shortValue() - shouldNotNull(operand).shortValue()));
+      value = (short) (current.shortValue() - shouldNotNull(operand).shortValue());
       return value;
     }
   }
@@ -816,8 +813,6 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
    */
   public static class MutableString extends MutableObject<String>
       implements Comparable<MutableString> {
-
-    private static final long serialVersionUID = 4187776698909971470L;
 
     protected MutableString() {
       super();
@@ -857,8 +852,6 @@ public interface Mutable<T> extends Serializable, Supplier<T> {
   @SuppressWarnings("unchecked")
   public static class MutableTemporal<T extends Temporal> extends MutableObject<T>
       implements Temporal {
-
-    private static final long serialVersionUID = -5181139992639806156L;
 
     protected MutableTemporal(final T value) {
       super(value);

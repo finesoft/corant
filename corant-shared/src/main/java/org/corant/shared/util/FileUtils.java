@@ -249,8 +249,10 @@ public class FileUtils {
         || !file2.canRead()) {
       return false;
     }
-    try (BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream(file1));
-        BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(file2))) {
+    try (FileInputStream fis1 = new FileInputStream(file1);
+        BufferedInputStream bis1 = new BufferedInputStream(fis1);
+        FileInputStream fis2 = new FileInputStream(file2);
+        BufferedInputStream bis2 = new BufferedInputStream(fis2)) {
       int b1 = 0;
       int b2 = 0;
       while (b1 != -1 && b2 != -1) {

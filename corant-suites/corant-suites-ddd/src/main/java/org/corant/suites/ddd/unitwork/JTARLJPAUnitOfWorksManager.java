@@ -73,11 +73,8 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
 
   @Override
   public MessageDispatcher getMessageDispatcher() {
-    return (msgs) -> {
-      dispatcher.submit(() -> {
-        find(MessageDispatcher.class).orElse(MessageDispatcher.empty()).accept(msgs);
-      });
-    };
+    return msgs -> dispatcher
+        .submit(() -> find(MessageDispatcher.class).orElse(MessageDispatcher.empty()).accept(msgs));
   }
 
   public MessageStorage getMessageStorage() {
@@ -98,10 +95,8 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
     if (lastUndispatchMessages.isResolvable()) {
       List<Message> messages = lastUndispatchMessages.get().get();
       if (isNotEmpty(messages)) {
-        dispatcher.submit(() -> {
-          find(MessageDispatcher.class).orElse(MessageDispatcher.empty())
-              .accept(messages.toArray(new Message[messages.size()]));
-        });
+        dispatcher.submit(() -> find(MessageDispatcher.class).orElse(MessageDispatcher.empty())
+            .accept(messages.toArray(new Message[messages.size()])));
       }
     }
   }

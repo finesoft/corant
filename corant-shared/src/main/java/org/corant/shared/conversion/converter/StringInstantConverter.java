@@ -35,8 +35,6 @@ import java.util.Optional;
  */
 public class StringInstantConverter extends AbstractTemporalConverter<String, Instant> {
 
-  private static final long serialVersionUID = 3807860890556013991L;
-
   public StringInstantConverter() {
     super();
   }

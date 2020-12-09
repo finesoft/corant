@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class StringCharsetConveter extends AbstractConverter<String, Charset> {
 
-  private static final long serialVersionUID = -4067695373663099256L;
-
   public StringCharsetConveter() {
     super();
   }

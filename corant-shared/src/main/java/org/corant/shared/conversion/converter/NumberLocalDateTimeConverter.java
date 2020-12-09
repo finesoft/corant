@@ -30,8 +30,6 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Number, LocalDateTime> {
 
-  private static final long serialVersionUID = -3310277927671474533L;
-
   public NumberLocalDateTimeConverter() {
     super();
   }

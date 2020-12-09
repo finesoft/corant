@@ -27,8 +27,6 @@ import org.corant.shared.conversion.ConverterHints;
 @SuppressWarnings("rawtypes")
 public class ObjectClassConveter extends AbstractConverter<Object, Class> {
 
-  private static final long serialVersionUID = 4360362883464294574L;
-
   public ObjectClassConveter() {
     super();
   }

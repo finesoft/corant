@@ -31,7 +31,6 @@ import org.corant.shared.normal.Names;
  */
 public class StringBsonDbPointerConverter extends AbstractConverter<String, BsonDbPointer> {
 
-  private static final long serialVersionUID = 5215417036439883810L;
   public static final String SEPARATOR_KEY = "namespace.separator";
 
   @Override

@@ -26,8 +26,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class StringBsonSymbolConverter extends AbstractConverter<String, BsonSymbol> {
 
-  private static final long serialVersionUID = 3834184614234949318L;
-
   @Override
   protected BsonSymbol convert(String value, Map<String, ?> hints) throws Exception {
     if (isBlank(value)) {

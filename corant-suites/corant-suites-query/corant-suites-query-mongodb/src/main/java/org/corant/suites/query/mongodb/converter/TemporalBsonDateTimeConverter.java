@@ -33,8 +33,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, BsonDateTime> {
 
-  private static final long serialVersionUID = -6124627719565524097L;
-
   public TemporalBsonDateTimeConverter() {
     super();
   }

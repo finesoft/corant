@@ -27,8 +27,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonObjectId> {
 
-  private static final long serialVersionUID = -1782172875158946373L;
-
   /**
    *
    */

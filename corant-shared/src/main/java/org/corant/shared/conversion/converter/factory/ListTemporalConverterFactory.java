@@ -98,7 +98,7 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
         return LocalTime.of((Integer) value.get(0), (Integer) value.get(1), (Integer) value.get(2));
       } else if (size == 4) {
         return LocalTime.of((Integer) value.get(0), (Integer) value.get(1), (Integer) value.get(2),
-            (Integer) value.get(4));
+            (Integer) value.get(3));
       }
       throw new ConversionException("Can't convert value to LocalTime from List object.");
     }

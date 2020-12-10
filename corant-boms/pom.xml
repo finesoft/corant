@@ -966,6 +966,17 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>artemis-commons</artifactId>
+				<version>${version.artemis}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-json_1.0_spec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
 			<!-- DataBase -->
 			<dependency>

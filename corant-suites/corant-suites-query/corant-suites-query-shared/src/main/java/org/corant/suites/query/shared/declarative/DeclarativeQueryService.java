@@ -105,8 +105,8 @@ public @interface DeclarativeQueryService {
    * @author bingo 下午7:20:19
    *
    */
-  public static class DeclarativeQueryServiceLiteral
-      extends AnnotationLiteral<DeclarativeQueryService> implements DeclarativeQueryService {
+  class DeclarativeQueryServiceLiteral extends AnnotationLiteral<DeclarativeQueryService>
+      implements DeclarativeQueryService {
 
     private static final long serialVersionUID = 8160691461505134491L;
 

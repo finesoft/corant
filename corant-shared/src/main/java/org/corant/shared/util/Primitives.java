@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Maps.immutableMapOf;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,6 +84,14 @@ public class Primitives {
       return (Class<T>) PRIMITIVE_WRAPPER_MAP.get(clazz);
     } else {
       return clazz;
+    }
+  }
+
+  public static Type wrap(final Type type) {
+    if (type instanceof Class) {
+      return wrap((Class<?>) type);
+    } else {
+      return type;
     }
   }
 

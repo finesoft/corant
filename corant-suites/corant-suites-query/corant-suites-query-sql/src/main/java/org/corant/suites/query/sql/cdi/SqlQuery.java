@@ -69,8 +69,7 @@ public @interface SqlQuery {
    * @author bingo 上午11:42:04
    *
    */
-  public static final class SqlQueryLiteral extends AnnotationLiteral<SqlQuery>
-      implements SqlQuery {
+  final class SqlQueryLiteral extends AnnotationLiteral<SqlQuery> implements SqlQuery {
 
     public static final SqlQuery INSTANCE = of(DBMS.MYSQL, "");
 

@@ -68,7 +68,7 @@ public interface MessageDispatcher {
    * @author bingo 下午7:45:18
    *
    */
-  public static class GroupMessageDispatcherImpl implements MessageDispatcher {
+  class GroupMessageDispatcherImpl implements MessageDispatcher {
 
     final List<MessageDispatcher> dispatchers;
 
@@ -123,7 +123,7 @@ public interface MessageDispatcher {
    * @author bingo 下午4:29:24
    *
    */
-  public static class MessageDispatcherImpl implements MessageDispatcher {
+  class MessageDispatcherImpl implements MessageDispatcher {
 
     protected final boolean multicast;
     protected final String destination;

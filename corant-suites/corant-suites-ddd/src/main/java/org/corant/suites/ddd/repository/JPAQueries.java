@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
@@ -55,8 +54,6 @@ import org.corant.shared.conversion.Converters;
  *
  */
 public class JPAQueries {
-
-  static Logger logger = Logger.getLogger(JPAQueries.class.getName());
 
   static final boolean useTuple = Converters.lookup(Tuple.class, Object.class).isPresent();// FIXME
 
@@ -307,7 +304,7 @@ public class JPAQueries {
   }
 
   /**
-   * Create an instance of TypedJPAQuery for executing aJakarta Persistence query language
+   * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language
    * statement.The select list of the query must contain only a single item, which must be
    * assignable to the type specified by the resultClass argument.
    *
@@ -379,10 +376,8 @@ public class JPAQueries {
     if (persistenceClasses.isEmpty()) {
       synchronized (JPAQueries.class) {
         if (persistenceClasses.isEmpty()) {
-          select(EntityManagerFactory.class).forEach(emf -> {
-            emf.getMetamodel().getEntities().stream().map(ManagedType::getJavaType)
-                .forEach(persistenceClasses::add);
-          });
+          select(EntityManagerFactory.class).forEach(emf -> emf.getMetamodel().getEntities()
+              .stream().map(ManagedType::getJavaType).forEach(persistenceClasses::add));
         }
       }
     }
@@ -425,9 +420,7 @@ public class JPAQueries {
         parameterBuilder.populateQuery(entityManagerSupplier.get(), query);
       }
       if (hints != null) {
-        hints.forEach((k, v) -> {
-          query.setHint(k.toString(), v);
-        });
+        hints.forEach((k, v) -> query.setHint(k.toString(), v));
       }
       if (maxResults > 0) {
         query.setMaxResults(maxResults);

@@ -47,7 +47,7 @@ public interface Value extends Serializable {
    * @author bingo 下午2:59:24
    *
    */
-  public static final class SimpleValueMap implements Value {
+  final class SimpleValueMap implements Value {
 
     private static final long serialVersionUID = -3001346370986339895L;
 
@@ -123,7 +123,7 @@ public interface Value extends Serializable {
    * @author bingo 下午2:59:29
    *
    */
-  public static final class SimpleValueMapBuilder {
+  final class SimpleValueMapBuilder {
 
     final Map<String, Object> contents = new HashMap<>();
 

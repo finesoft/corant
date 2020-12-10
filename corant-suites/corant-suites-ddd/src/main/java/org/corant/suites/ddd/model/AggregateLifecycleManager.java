@@ -34,7 +34,7 @@ public interface AggregateLifecycleManager {
 
   void on(AggregateLifecycleManageEvent e);
 
-  public enum LifecycleAction {
+  enum LifecycleAction {
     PERSIST, RECOVER, REMOVE
   }
 }

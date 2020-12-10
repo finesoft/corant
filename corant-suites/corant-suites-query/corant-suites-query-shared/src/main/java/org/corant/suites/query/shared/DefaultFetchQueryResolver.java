@@ -64,8 +64,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
     Function<Object[], Object> fun = QueryScriptEngines.resolveFetchPredicates(fetchQuery);
-    return fun == null
-        || toBoolean(fun.apply(new Object[] {queryParameter, result})).booleanValue();
+    return fun == null || toBoolean(fun.apply(new Object[] {queryParameter, result}));
   }
 
   @Override

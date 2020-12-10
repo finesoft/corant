@@ -37,10 +37,9 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface InfrastructureServices {
 
-  static final InfrastructureServicesLiteral INST = new InfrastructureServicesLiteral();
+  InfrastructureServicesLiteral INST = new InfrastructureServicesLiteral();
 
-  public static class InfrastructureServicesLiteral
-      extends AnnotationLiteral<InfrastructureServices> {
+  class InfrastructureServicesLiteral extends AnnotationLiteral<InfrastructureServices> {
 
     private static final long serialVersionUID = -2729159220699119193L;
   }

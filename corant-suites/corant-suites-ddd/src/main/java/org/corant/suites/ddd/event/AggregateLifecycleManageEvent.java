@@ -62,9 +62,9 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "AggregateLifecycleManageEvent [getAction()=" + getAction() + ", getSource()="
+    return "AggregateLifecycleManageEvent [getAction()=" + action + ", getSource()="
         + (getSource() == null ? null : getSource().getId()) + ", isEffectImmediately()="
-        + isEffectImmediately() + "]";
+        + effectImmediately + "]";
   }
 
 }

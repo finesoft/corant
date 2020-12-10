@@ -31,7 +31,7 @@ public abstract class AbstractEvent implements Event {
 
   private transient Object source;
 
-  private Instant occurredTime = Instant.now();
+  private final Instant occurredTime = Instant.now();
 
   public AbstractEvent(Object source) {
     this.source = source;

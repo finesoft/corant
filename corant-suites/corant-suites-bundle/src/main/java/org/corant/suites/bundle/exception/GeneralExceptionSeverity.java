@@ -20,7 +20,7 @@ package org.corant.suites.bundle.exception;
 public enum GeneralExceptionSeverity {
   ERROR(2), WARN(1), CRITICAL(0);
 
-  private int id;
+  private final int id;
 
   private GeneralExceptionSeverity(int id) {
     this.id = id;

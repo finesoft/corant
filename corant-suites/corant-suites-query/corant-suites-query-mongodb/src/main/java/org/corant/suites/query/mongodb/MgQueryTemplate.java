@@ -170,7 +170,7 @@ public class MgQueryTemplate {
       list.remove(limit);
       result.withHasNext(true);
     }
-    return result.withResults(list.stream().map(converter::apply).collect(Collectors.toList()));
+    return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
   }
 
   public Map<?, ?> get() {
@@ -264,7 +264,7 @@ public class MgQueryTemplate {
         result.withTotal((int) count());
       }
     }
-    return result.withResults(list.stream().map(converter::apply).collect(Collectors.toList()));
+    return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
   }
 
   public MgQueryTemplate projection(boolean include, String... propertyNames) {
@@ -315,7 +315,7 @@ public class MgQueryTemplate {
   }
 
   public <T> List<T> selectAs(final Function<Object, T> converter) {
-    return streamOf(query()).map(this::convert).map(converter::apply).collect(Collectors.toList());
+    return streamOf(query()).map(this::convert).map(converter).collect(Collectors.toList());
   }
 
   public <T> T single(final Class<T> clazz) {
@@ -351,7 +351,7 @@ public class MgQueryTemplate {
 
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
     limit = 0;// NO LIMIT
-    return streamOf(query()).map(this::convert).map(converter::apply);
+    return streamOf(query()).map(this::convert).map(converter);
   }
 
   protected Map<?, ?> convert(Document doc) {

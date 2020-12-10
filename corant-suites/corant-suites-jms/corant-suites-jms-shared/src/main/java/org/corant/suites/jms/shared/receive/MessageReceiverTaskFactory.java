@@ -31,7 +31,7 @@ public interface MessageReceiverTaskFactory {
   }
 
   @ApplicationScoped
-  public static class DefaultMessageReceiverTaskFactory implements MessageReceiverTaskFactory {
+  class DefaultMessageReceiverTaskFactory implements MessageReceiverTaskFactory {
 
     @Override
     public CancellableTask create(MessageReceiverMetaData metaData) {

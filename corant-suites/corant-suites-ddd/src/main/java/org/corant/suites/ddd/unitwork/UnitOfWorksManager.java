@@ -60,7 +60,7 @@ public interface UnitOfWorksManager {
    *
    */
   @FunctionalInterface
-  public interface UnitOfWorksHandler {
+  interface UnitOfWorksHandler {
 
     static int compare(UnitOfWorksHandler h1, UnitOfWorksHandler h2) {
       return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
@@ -91,7 +91,7 @@ public interface UnitOfWorksManager {
    *
    */
   @FunctionalInterface
-  public interface UnitOfWorksListener {
+  interface UnitOfWorksListener {
 
     /**
      * Callback notified after the unit of work is completed.

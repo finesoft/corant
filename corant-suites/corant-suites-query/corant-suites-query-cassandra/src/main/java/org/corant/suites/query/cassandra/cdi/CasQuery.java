@@ -59,8 +59,7 @@ public @interface CasQuery {
    * @author bingo 上午11:43:39
    *
    */
-  public static final class CasQueryLiteral extends AnnotationLiteral<CasQuery>
-      implements CasQuery {
+  final class CasQueryLiteral extends AnnotationLiteral<CasQuery> implements CasQuery {
 
     public static final CasQuery INSTANCE = of("");
 

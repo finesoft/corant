@@ -33,7 +33,7 @@ public interface Entity extends Serializable {
 
   Serializable getId();
 
-  public interface EntityIdentifier extends Value {
+  interface EntityIdentifier extends Value {
 
     Serializable getId();
 
@@ -41,11 +41,11 @@ public interface Entity extends Serializable {
   }
 
   @FunctionalInterface
-  public interface EntityManagerProvider {
+  interface EntityManagerProvider {
     EntityManager getEntityManager(PersistenceContext qualifier);
   }
 
-  public interface EntityReference<T extends Entity> extends Reference<T> {
+  interface EntityReference<T extends Entity> extends Reference<T> {
 
     @SuppressWarnings("rawtypes")
     static <T extends EntityReference> T validate(T obj, Object code, Object... parameters) {

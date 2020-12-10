@@ -42,7 +42,7 @@ public class JpqlHelper {
    *
    * @return Position of the first match, or {@literal -1} if not found.
    */
-  static final int shallowIndexOf(String sb, String search, int fromIndex) {
+  static int shallowIndexOf(String sb, String search, int fromIndex) {
     final String lowercase = sb.toLowerCase(Locale.ROOT); // case-insensitive match
     final int len = lowercase.length();
     final int searchlen = search.length();
@@ -76,7 +76,7 @@ public class JpqlHelper {
    *
    * @return Position of the first match, or {@literal -1} if not found.
    */
-  static final int shallowIndexOfWord(final String sb, final String search, int fromIndex) {
+  static int shallowIndexOfWord(final String sb, final String search, int fromIndex) {
     final int index = shallowIndexOf(sb, ' ' + search + ' ', fromIndex);
     return index != -1 ? index + 1 : -1; // In case of match adding one
     // because of space placed in

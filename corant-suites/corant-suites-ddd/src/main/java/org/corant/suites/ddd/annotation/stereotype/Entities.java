@@ -37,9 +37,9 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface Entities {
 
-  static final EntitiesLiteral INST = new EntitiesLiteral();
+  EntitiesLiteral INST = new EntitiesLiteral();
 
-  public static class EntitiesLiteral extends AnnotationLiteral<Entities> {
+  class EntitiesLiteral extends AnnotationLiteral<Entities> {
     private static final long serialVersionUID = -7622269300418055785L;
   }
 }

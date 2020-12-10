@@ -35,7 +35,7 @@ public @interface MessageConfigProperty {
   /** The value of the property */
   String value();
 
-  public static class MessageConfigPropertyLiteral extends AnnotationLiteral<MessageConfigProperty>
+  class MessageConfigPropertyLiteral extends AnnotationLiteral<MessageConfigProperty>
       implements MessageConfigProperty {
 
     private static final long serialVersionUID = 7660764550683179095L;

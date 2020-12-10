@@ -34,7 +34,7 @@ public class AggregateMessageMetadata implements MessageMetadata {
   protected Map<String, Serializable> attributes = new HashMap<>();
   protected long versionNumber;
   private AggregateIdentifier source;
-  private Instant occurredTime = Instant.now();
+  private final Instant occurredTime = Instant.now();
 
   public AggregateMessageMetadata(Aggregate aggregate) {
     source = new DefaultAggregateIdentifier(aggregate);

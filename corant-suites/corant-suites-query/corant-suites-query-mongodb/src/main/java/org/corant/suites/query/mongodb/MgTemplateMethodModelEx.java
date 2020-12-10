@@ -188,13 +188,13 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
 
   protected Object toBsonValue(Object args) {
     if (args == null) {
-      return args;
+      return null;
     }
     Class<?> cls = wrap(getComponentClass(args));
     if (!converters.containsKey(cls)) {
       return args;
     } else if (args.getClass().isArray() || args instanceof Iterable) {
-      return toList(args, converters.get(cls)::apply);
+      return toList(args, converters.get(cls));
     } else {
       return converters.get(cls).apply(args);
     }

@@ -121,13 +121,13 @@ public class SqlQueryTemplate {
 
   public static SqlQueryTemplate of(String jdbcUrl) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl);
-    final DBMS dbms = DBMS.of(jdbcUrl);
+    final DBMS dbms = DBMS.url(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
   public static SqlQueryTemplate of(String jdbcUrl, Properties properties) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, properties);
-    final DBMS dbms = DBMS.of(jdbcUrl);
+    final DBMS dbms = DBMS.url(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
@@ -135,13 +135,13 @@ public class SqlQueryTemplate {
       String username, String password) {
     final DriverManagerDataSource ds =
         new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password);
-    final DBMS dbms = DBMS.of(jdbcUrl);
+    final DBMS dbms = DBMS.url(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
   public static SqlQueryTemplate of(String jdbcUrl, String username, String password) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, username, password);
-    final DBMS dbms = DBMS.of(jdbcUrl);
+    final DBMS dbms = DBMS.url(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
@@ -149,7 +149,7 @@ public class SqlQueryTemplate {
       String password) {
     final DriverManagerDataSource ds =
         new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
-    final DBMS dbms = DBMS.of(jdbcUrl);
+    final DBMS dbms = DBMS.url(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
@@ -197,8 +197,8 @@ public class SqlQueryTemplate {
   public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<Map<String, Object>> forwarding = forward();
     Forwarding<T> result = Forwarding.inst();
-    return result.withHasNext(forwarding.hasNext()).withResults(
-        forwarding.getResults().stream().map(converter::apply).collect(Collectors.toList()));
+    return result.withHasNext(forwarding.hasNext())
+        .withResults(forwarding.getResults().stream().map(converter).collect(Collectors.toList()));
   }
 
   public Map<?, ?> get() {
@@ -270,8 +270,7 @@ public class SqlQueryTemplate {
     Paging<Map<String, Object>> paging = page();
     Paging<T> result = Paging.of(paging.getOffset(), limit);
     result.withTotal(paging.getTotal());
-    result.withResults(
-        paging.getResults().stream().map(converter::apply).collect(Collectors.toList()));
+    result.withResults(paging.getResults().stream().map(converter).collect(Collectors.toList()));
     return result;
   }
 
@@ -295,7 +294,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> List<T> selectAs(final Function<Object, T> converter) {
-    return select().stream().map(converter::apply).collect(Collectors.toList());
+    return select().stream().map(converter).collect(Collectors.toList());
   }
 
   public <T> T single(final Class<T> clazz) {
@@ -357,7 +356,7 @@ public class SqlQueryTemplate {
   }
 
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
-    return stream().map(converter::apply);
+    return stream().map(converter);
   }
 
   protected Map<String, Object> get(String sql, Object... parameter) {

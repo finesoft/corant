@@ -43,7 +43,7 @@ public interface MessageResolver {
 
   String getMessage(Locale locale, Object codes, Object... params);
 
-  public enum MessageSeverity {
+  enum MessageSeverity {
     INF, ERR;
 
     public String genMessageCode(Object... codes) {
@@ -51,7 +51,7 @@ public interface MessageResolver {
     }
   }
 
-  public interface MessageSource {
+  interface MessageSource {
 
     String UNKNOW_INF_CODE = "INF.message.unknow";
     String UNKNOW_ERR_CODE = "ERR.message.unknow";

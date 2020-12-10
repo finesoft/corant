@@ -47,7 +47,7 @@ public interface Evolvable<P, T> {
    * @author bingo 下午9:04:45
    *
    */
-  public abstract static class AggregateHandlerAdapter<P, T extends Aggregate>
+  abstract class AggregateHandlerAdapter<P, T extends Aggregate>
       extends PreservingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
 
     @Override
@@ -76,7 +76,7 @@ public interface Evolvable<P, T> {
    * @author bingo 下午9:05:19
    *
    */
-  public abstract static class DestroyingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
+  abstract class DestroyingHandlerAdapter<P, T> implements DestroyingHandler<P, T> {
     @Override
     public void preDestroy(P param, T enabling) {}
   }
@@ -102,7 +102,7 @@ public interface Evolvable<P, T> {
    * @author bingo 下午9:05:19
    *
    */
-  public abstract static class PreservingHandlerAdapter<P, T> implements PreservingHandler<P, T> {
+  abstract class PreservingHandlerAdapter<P, T> implements PreservingHandler<P, T> {
     @Override
     public void prePreserve(P param, T enabling) {}
   }

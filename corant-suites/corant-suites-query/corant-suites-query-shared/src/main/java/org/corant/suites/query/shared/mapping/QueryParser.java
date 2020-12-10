@@ -80,7 +80,7 @@ public class QueryParser {
   Map<String, Resource> getQueryMappingFiles(String... pathExpresses) {
     Map<String, Resource> map = new ConcurrentHashMap<>();
     for (String pathExpress : pathExpresses) {
-      setOf(split(pathExpress, ",", true, true)).stream().forEach(path -> {
+      setOf(split(pathExpress, ",", true, true)).forEach(path -> {
         try {
           Resources.from(path).forEach(f -> map.put(f.getURL().getPath(), f));
         } catch (Exception e) {

@@ -82,7 +82,7 @@ public interface Dialect {
    */
   boolean supportsLimit();
 
-  public enum DBMS {
+  enum DBMS {
 
     MYSQL() {
       @Override
@@ -205,7 +205,7 @@ public interface Dialect {
       }
     };
 
-    public static DBMS of(String url) {
+    public static DBMS url(String url) {
       for (DBMS d : DBMS.values()) {
         if (d.matchURL(url)) {
           return d;

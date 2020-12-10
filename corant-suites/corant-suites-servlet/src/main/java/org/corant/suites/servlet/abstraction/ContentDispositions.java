@@ -65,7 +65,7 @@ public class ContentDispositions {
             "Invalid header field parameter format (as defined in RFC 5987)");
       }
     }
-    return new String(bos.toByteArray(), charset);
+    return bos.toString(charset);
   }
 
   public static String encodeHeaderFieldParam(String input, Charset charset) {

@@ -59,8 +59,7 @@ public @interface JpqlQuery {
    * @author bingo 上午11:41:54
    *
    */
-  public static final class JpqlQueryLiteral extends AnnotationLiteral<JpqlQuery>
-      implements JpqlQuery {
+  final class JpqlQueryLiteral extends AnnotationLiteral<JpqlQuery> implements JpqlQuery {
 
     public static final JpqlQuery INSTANCE = of("");
 

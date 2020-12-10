@@ -179,7 +179,7 @@ public interface QueryService<Q, P> {
    * @author bingo 下午5:51:56
    *
    */
-  public static class Forwarding<T> {
+  class Forwarding<T> {
 
     private boolean hasNext;
     private final List<T> results = new ArrayList<>();
@@ -256,7 +256,7 @@ public interface QueryService<Q, P> {
    * @author bingo 下午6:11:55
    *
    */
-  public static class Paging<T> {
+  class Paging<T> {
 
     private int total;
     private int pageSize;
@@ -357,7 +357,7 @@ public interface QueryService<Q, P> {
 
   }
 
-  public enum QueryWay {
+  enum QueryWay {
 
     /**
      * @see QueryService#forward(Object, Object)

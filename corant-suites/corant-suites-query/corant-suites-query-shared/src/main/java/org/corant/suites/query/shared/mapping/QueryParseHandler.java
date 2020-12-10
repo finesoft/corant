@@ -433,7 +433,7 @@ public class QueryParseHandler extends DefaultHandler {
         throw new QueryRuntimeException("Parse %s error the fetch query must be in query element!",
             url);
       }
-      ((Properties) obj).toMap().forEach((k, v) -> q.addProperty(k, v));
+      ((Properties) obj).toMap().forEach(q::addProperty);
       nameStack.pop();
     }
   }

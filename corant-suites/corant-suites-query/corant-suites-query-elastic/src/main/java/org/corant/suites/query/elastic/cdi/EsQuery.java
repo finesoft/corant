@@ -59,7 +59,7 @@ public @interface EsQuery {
    * @author bingo 上午11:42:58
    *
    */
-  public static final class EsQueryLiteral extends AnnotationLiteral<EsQuery> implements EsQuery {
+  final class EsQueryLiteral extends AnnotationLiteral<EsQuery> implements EsQuery {
 
     public static final EsQuery INSTANCE = of("");
 

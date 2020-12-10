@@ -22,7 +22,7 @@ package org.corant.suites.webserver.shared;
 public interface WebServerHandlers {
 
   @FunctionalInterface
-  public interface PostStartedHandler {
+  interface PostStartedHandler {
 
     static int compare(PostStartedHandler h1, PostStartedHandler h2) {
       return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
@@ -36,7 +36,7 @@ public interface WebServerHandlers {
   }
 
   @FunctionalInterface
-  public interface PostStoppedHandler {
+  interface PostStoppedHandler {
 
     static int compare(PostStoppedHandler h1, PostStoppedHandler h2) {
       return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
@@ -50,7 +50,7 @@ public interface WebServerHandlers {
   }
 
   @FunctionalInterface
-  public interface PreStartHandler {
+  interface PreStartHandler {
 
     static int compare(PreStartHandler h1, PreStartHandler h2) {
       return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
@@ -64,7 +64,7 @@ public interface WebServerHandlers {
   }
 
   @FunctionalInterface
-  public interface PreStopHandler {
+  interface PreStopHandler {
 
     static int compare(PreStopHandler h1, PreStopHandler h2) {
       return Integer.compare(h1.getOrdinal(), h2.getOrdinal());

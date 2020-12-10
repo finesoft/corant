@@ -17,6 +17,7 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.trim;
 import java.io.Closeable;
@@ -315,7 +316,7 @@ public class CorantConfigConversion implements Serializable {
     if (propertyType == String.class || propertyType == Object.class) {
       return forceCast(value);
     } else {
-      final Converter<?> converter = converters.get().get(propertyType);
+      final Converter<?> converter = converters.get().get(wrap(propertyType));
       if (null != converter) {
         return forceCast(converter.convert(value));
       } else {
@@ -482,7 +483,7 @@ public class CorantConfigConversion implements Serializable {
     final int ordinal;
 
     OrdinalConverter(Class<?> type, Converter<?> converter, int ordinal) {
-      this.type = type;
+      this.type = wrap(type);
       this.converter = converter;
       this.ordinal = ordinal;
     }

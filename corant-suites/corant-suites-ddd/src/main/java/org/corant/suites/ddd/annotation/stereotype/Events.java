@@ -34,9 +34,10 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 @Inherited
 public @interface Events {
-  static final EventsLiteral INST = new EventsLiteral();
 
-  public static class EventsLiteral extends AnnotationLiteral<Events> {
+  EventsLiteral INST = new EventsLiteral();
+
+  class EventsLiteral extends AnnotationLiteral<Events> {
     private static final long serialVersionUID = -7622269300418055785L;
   }
 }

@@ -80,7 +80,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
                   .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
           XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
           if (xaRecoveryModule != null && isNotEmpty(helpers)) {
-            helpers.stream().forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
+            helpers.forEach(xaRecoveryModule::addXAResourceRecoveryHelper);
           }
           if (extension.getConfig().isAutoRecovery()) {
             start();
@@ -107,7 +107,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
   void unInitialize() throws Exception {
     if (ready) {
       stop();
-      helpers.stream().forEach(helper -> {
+      helpers.forEach(helper -> {
         XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
         helper.destory();
       });

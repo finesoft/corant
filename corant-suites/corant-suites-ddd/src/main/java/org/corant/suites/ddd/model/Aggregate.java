@@ -162,7 +162,7 @@ public interface Aggregate extends Entity {
    * @author bingo 下午9:04:52
    *
    */
-  public interface AggregateIdentifier extends EntityIdentifier {
+  interface AggregateIdentifier extends EntityIdentifier {
 
     @Override
     Serializable getId();
@@ -182,7 +182,7 @@ public interface Aggregate extends Entity {
    * @author bingo 下午5:53:48
    *
    */
-  public interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
+  interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
 
     Map<Pair<Class<?>, Class<?>>, Constructor<?>> constructors = new ConcurrentHashMap<>();
 
@@ -311,7 +311,7 @@ public interface Aggregate extends Entity {
    * @author bingo 下午9:05:24
    *
    */
-  public enum Lifecycle {
+  enum Lifecycle {
     /**
      * Aggregate has just been created.
      */

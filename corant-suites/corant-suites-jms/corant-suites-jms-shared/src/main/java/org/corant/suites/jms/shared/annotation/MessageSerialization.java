@@ -44,7 +44,7 @@ public @interface MessageSerialization {
    * @author bingo 下午5:29:27
    *
    */
-  public static class MessageSerializationLiteral extends AnnotationLiteral<MessageSerialization>
+  class MessageSerializationLiteral extends AnnotationLiteral<MessageSerialization>
       implements MessageSerialization {
     private static final long serialVersionUID = -4241417907420530257L;
 

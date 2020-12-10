@@ -87,7 +87,7 @@ public interface QueryParameter extends Serializable {
    * @author bingo 下午4:09:56
    *
    */
-  public static class DefaultQueryParameter implements QueryParameter {
+  class DefaultQueryParameter implements QueryParameter {
 
     private static final long serialVersionUID = 6618232487063961660L;
 
@@ -199,7 +199,7 @@ public interface QueryParameter extends Serializable {
    * @author bingo 下午6:56:58
    *
    */
-  public static class GenericQueryParameter<T> implements QueryParameter {
+  class GenericQueryParameter<T> implements QueryParameter {
     private static final long serialVersionUID = 7809436027996029494L;
     protected T criteria;
     protected Integer limit;
@@ -258,7 +258,7 @@ public interface QueryParameter extends Serializable {
    * @author bingo 下午3:14:48
    *
    */
-  public static class StreamQueryParameter extends DefaultQueryParameter {
+  class StreamQueryParameter extends DefaultQueryParameter {
 
     private static final long serialVersionUID = -2111105679283097964L;
 
@@ -283,7 +283,7 @@ public interface QueryParameter extends Serializable {
     public StreamQueryParameter(StreamQueryParameter other) {
       super(other);
       enhancer(other.enhancer).retryInterval(other.retryInterval).retryTimes(other.retryTimes)
-          .terminater(other.terminater);
+          .retryInterval(other.retryInterval).terminater(other.terminater);
     }
 
     @Override

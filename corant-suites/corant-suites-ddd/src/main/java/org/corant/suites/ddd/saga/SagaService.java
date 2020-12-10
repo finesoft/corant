@@ -40,7 +40,7 @@ public interface SagaService {
 
   void trigger(Message message);
 
-  static class EmptySagaService implements SagaService {
+  class EmptySagaService implements SagaService {
 
     public static final SagaService INSTANCE = new EmptySagaService();
 
@@ -66,7 +66,7 @@ public interface SagaService {
     }
   }
 
-  public interface SagaManager {
+  interface SagaManager {
 
     Saga begin(Message message);
 

@@ -97,7 +97,7 @@ public class QueryMapping {
     }
     Set<String> queryNames = new HashSet<>();
     // validate query elements
-    getQueries().stream().forEach(q -> {
+    getQueries().forEach(q -> {
       if (isBlank(q.getName())) {
         brokens.add(String.format("The query file [%s] has noname 'query' element!", getUrl()));
       }
@@ -131,12 +131,10 @@ public class QueryMapping {
               "The 'fetch-query' [%s] must contain either 'inject-property-name' attribute or 'injection-script' element in query element [%s] in query file [%s].",
               fq.getReferenceQuery(), q.getName(), getUrl()));
         } else if (isNotBlank(fq.getInjectPropertyName())) {
-          if (injectProNames.contains(fq.getInjectPropertyName())) {
+          if (!injectProNames.add(fq.getInjectPropertyName())) {
             brokens.add(String.format(
                 "The 'fetch-query' [%s] with 'inject-property-name' [%s] in query element [%s] in query file [%s] can not repeat!",
                 fq.getReferenceQuery(), fq.getInjectPropertyName(), q.getName(), getUrl()));
-          } else {
-            injectProNames.add(fq.getInjectPropertyName());
           }
         }
 

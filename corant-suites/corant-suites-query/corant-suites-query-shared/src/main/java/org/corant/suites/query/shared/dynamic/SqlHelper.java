@@ -138,17 +138,16 @@ public class SqlHelper {
    */
   public static int shallowIndexOfPattern(final String sb, final Pattern pattern, int fromIndex) {
     int index = -1;
-    final String matchString = sb;
 
     // quick exit, save performance and avoid exceptions
-    if (matchString.length() < fromIndex || fromIndex < 0) {
+    if (sb.length() < fromIndex || fromIndex < 0) {
       return -1;
     }
 
-    List<IgnoreRange> ignoreRangeList = generateIgnoreRanges(matchString);
+    List<IgnoreRange> ignoreRangeList = generateIgnoreRanges(sb);
 
-    Matcher matcher = pattern.matcher(matchString);
-    matcher.region(fromIndex, matchString.length());
+    Matcher matcher = pattern.matcher(sb);
+    matcher.region(fromIndex, sb.length());
 
     if (ignoreRangeList.isEmpty()) {
       // old behavior where the first match is used if no ignorable ranges
@@ -255,7 +254,7 @@ public class SqlHelper {
     return false;
   }
 
-  static final int shallowIndexOf(String sb, String search, int fromIndex) {
+  static int shallowIndexOf(String sb, String search, int fromIndex) {
     final String lowercase = sb.toLowerCase(Locale.getDefault()); // case-insensitive match
     final int len = lowercase.length();
     final int searchlen = search.length();
@@ -280,8 +279,8 @@ public class SqlHelper {
   }
 
   static class IgnoreRange {
-    private int start;
-    private int end;
+    private final int start;
+    private final int end;
 
     IgnoreRange(int start, int end) {
       this.start = start;

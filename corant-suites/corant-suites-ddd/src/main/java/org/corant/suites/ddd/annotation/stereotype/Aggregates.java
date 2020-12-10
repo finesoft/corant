@@ -36,9 +36,9 @@ import javax.enterprise.util.AnnotationLiteral;
 @Stereotype
 public @interface Aggregates {
 
-  static final AggregatesLiteral INST = new AggregatesLiteral();
+  AggregatesLiteral INST = new AggregatesLiteral();
 
-  public static class AggregatesLiteral extends AnnotationLiteral<Aggregates> {
+  class AggregatesLiteral extends AnnotationLiteral<Aggregates> {
     private static final long serialVersionUID = -6257574375065504422L;
   }
 }

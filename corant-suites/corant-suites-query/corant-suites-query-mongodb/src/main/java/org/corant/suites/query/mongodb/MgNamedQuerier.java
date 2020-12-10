@@ -26,7 +26,7 @@ public interface MgNamedQuerier
 
   String getOriginalScript();
 
-  public enum MgOperator {
+  enum MgOperator {
     AGGREGATE("aggregate"), FILTER("filter"), PROJECTION("projection"), MIN("min"), MAX(
         "max"), HINT("hint"), SORT("sort");
 

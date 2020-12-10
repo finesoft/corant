@@ -44,7 +44,7 @@ public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map
   private SearchResponse searchResponse;
   private long batchHitCounts = 0;
 
-  private AtomicInteger seq = new AtomicInteger(0);
+  private final AtomicInteger seq = new AtomicInteger(0);
 
   public EsScrollableSpliterator(TransportClient client, QueryBuilder queryBuilder,
       String indexName, String typeName) {

@@ -37,9 +37,9 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface JTARL {
 
-  public static final JTARLLiteral INSTANCE = new JTARLLiteral();
+  JTARLLiteral INSTANCE = new JTARLLiteral();
 
-  public static class JTARLLiteral extends AnnotationLiteral<JTARL> implements JTARL {
+  class JTARLLiteral extends AnnotationLiteral<JTARL> implements JTARL {
 
     private static final long serialVersionUID = -7148921525412293651L;
 

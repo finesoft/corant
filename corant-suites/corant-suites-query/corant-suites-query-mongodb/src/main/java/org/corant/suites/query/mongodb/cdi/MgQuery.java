@@ -59,7 +59,7 @@ public @interface MgQuery {
    * @author bingo 上午11:41:59
    *
    */
-  public static final class MgQueryLiteral extends AnnotationLiteral<MgQuery> implements MgQuery {
+  final class MgQueryLiteral extends AnnotationLiteral<MgQuery> implements MgQuery {
 
     public static final MgQuery INSTANCE = of("");
 

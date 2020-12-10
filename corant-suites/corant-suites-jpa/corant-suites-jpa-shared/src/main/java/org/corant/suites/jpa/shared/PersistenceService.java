@@ -75,7 +75,7 @@ public interface PersistenceService {
    * @author bingo 下午12:01:07
    *
    */
-  public static class PersistenceContextLiteral extends AnnotationLiteral<PersistenceContext>
+  class PersistenceContextLiteral extends AnnotationLiteral<PersistenceContext>
       implements PersistenceContext {
 
     private static final long serialVersionUID = -6911793060874174440L;
@@ -179,7 +179,7 @@ public interface PersistenceService {
     }
   }
 
-  public static class PersistencePropertyLiteral extends AnnotationLiteral<PersistenceProperty>
+  class PersistencePropertyLiteral extends AnnotationLiteral<PersistenceProperty>
       implements PersistenceProperty {
     private static final long serialVersionUID = -5166046527595649735L;
 
@@ -209,7 +209,7 @@ public interface PersistenceService {
    * @author bingo 下午12:04:52
    *
    */
-  public static class PersistenceUnitLiteral extends AnnotationLiteral<PersistenceUnit>
+  class PersistenceUnitLiteral extends AnnotationLiteral<PersistenceUnit>
       implements PersistenceUnit {
     private static final long serialVersionUID = -2508891695595998643L;
     private final String name;

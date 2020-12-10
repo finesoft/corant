@@ -47,6 +47,7 @@ import org.corant.suites.jta.shared.TransactionIntegration;
  */
 public class JDBCTransactionIntegration implements TransactionIntegration {
 
+  public static final XAResource[] EMPTY_XA_RESOURCES = new XAResource[0];
   static Map<DataSourceConfig, JDBCRecoveryXAResource> recoveryXAResources =
       new ConcurrentHashMap<>();// static
 
@@ -72,7 +73,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     if (!CDIs.isEnabled()) {
       LOGGER.warning(
           () -> "Current CDI container can't access, so can't find any XAResource for JTA recovery processes.");
-      return new XAResource[0];
+      return EMPTY_XA_RESOURCES;
     }
     List<XAResource> resources = new ArrayList<>();
     Instance<AbstractDataSourceExtension> extensions =

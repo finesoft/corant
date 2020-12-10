@@ -35,9 +35,9 @@ import javax.enterprise.util.AnnotationLiteral;
 @Inherited
 public @interface Sagas {
 
-  static final SagasLiteral INST = new SagasLiteral();
+  SagasLiteral INST = new SagasLiteral();
 
-  public static class SagasLiteral extends AnnotationLiteral<Sagas> {
+  class SagasLiteral extends AnnotationLiteral<Sagas> {
     private static final long serialVersionUID = -7622269300418055785L;
   }
 }

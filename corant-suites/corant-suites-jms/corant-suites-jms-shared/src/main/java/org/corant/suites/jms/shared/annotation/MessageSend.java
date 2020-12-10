@@ -55,7 +55,7 @@ public @interface MessageSend {
 
   int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
 
-  public static enum SerializationSchema {
+  enum SerializationSchema {
     JSON_STRING, BINARY, JAVA_SERIAL, MAP;
 
     private final MessageSerialization qualifier;

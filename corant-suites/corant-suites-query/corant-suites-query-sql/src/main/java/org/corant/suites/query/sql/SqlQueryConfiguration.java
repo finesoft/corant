@@ -75,7 +75,7 @@ public interface SqlQueryConfiguration {
     return 0;
   }
 
-  static class Builder {
+  class Builder {
 
     final DefaultSqlQueryConfiguration cfg = new DefaultSqlQueryConfiguration();
 
@@ -122,7 +122,7 @@ public interface SqlQueryConfiguration {
     }
   }
 
-  static class DefaultSqlQueryConfiguration implements SqlQueryConfiguration {
+  class DefaultSqlQueryConfiguration implements SqlQueryConfiguration {
 
     protected DataSource dataSource;
     protected Dialect dialect;

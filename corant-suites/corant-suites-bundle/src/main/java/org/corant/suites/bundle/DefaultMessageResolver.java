@@ -43,7 +43,7 @@ public class DefaultMessageResolver implements MessageResolver {
 
   static final Object[] EMPTY_ARGS = Objects.EMPTY_ARRAY;
 
-  static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")
+  static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
       .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 
   @Inject

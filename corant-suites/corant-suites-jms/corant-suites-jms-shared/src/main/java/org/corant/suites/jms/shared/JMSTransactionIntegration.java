@@ -46,6 +46,8 @@ import org.corant.suites.jta.shared.TransactionIntegration;
  */
 public class JMSTransactionIntegration implements TransactionIntegration {
 
+  public static final XAResource[] EMPTY_XA_RESOURCES = new XAResource[0];
+  public static final Xid[] EMPTY_XIDS = new Xid[0];
   static Map<AbstractJMSConfig, JMSRecoveryXAResource> recoveryXAResources =
       new ConcurrentHashMap<>();// static?
 
@@ -60,7 +62,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     if (!CDIs.isEnabled()) {
       LOGGER.warning(
           () -> "Current CDI container can't access, so can't find any XAResource for JTA recovery processes.");
-      return new XAResource[0];
+      return EMPTY_XA_RESOURCES;
     }
     List<XAResource> resources = new ArrayList<>();
     Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
@@ -75,7 +77,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       LOGGER.fine(() -> "JMS XAResources for JTA recovery processes not found.");
     }
     return isNotEmpty(resources) ? resources.toArray(new XAResource[resources.size()])
-        : new XAResource[0];
+        : EMPTY_XA_RESOURCES;
 
   }
 
@@ -214,7 +216,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     @Override
     public Xid[] recover(int flag) throws XAException {
-      Xid[] xids = new Xid[0];
+      Xid[] xids = EMPTY_XIDS;
       try {
         if (isConnected()) {
           xids = session.get().getXAResource().recover(flag);

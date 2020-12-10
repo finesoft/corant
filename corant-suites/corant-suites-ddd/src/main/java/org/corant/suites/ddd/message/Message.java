@@ -42,13 +42,13 @@ public interface Message extends Serializable {
 
   MessageMetadata getMetadata();
 
-  public interface ExchangedMessage extends Message {
+  interface ExchangedMessage extends Message {
 
     MessageIdentifier getOriginalMessage();
 
   }
 
-  public interface MessageHandling extends Serializable {
+  interface MessageHandling extends Serializable {
 
     Object getDestination(); // Should we have this property?
 
@@ -61,7 +61,7 @@ public interface Message extends Serializable {
     boolean isSuccess();
   }
 
-  public interface MessageIdentifier {
+  interface MessageIdentifier {
 
     Serializable getId();
 
@@ -71,7 +71,7 @@ public interface Message extends Serializable {
 
   }
 
-  public interface MessageMetadata extends Serializable {
+  interface MessageMetadata extends Serializable {
 
     Instant getOccurredTime();
 
@@ -79,7 +79,7 @@ public interface Message extends Serializable {
 
   }
 
-  public interface MessageQueues {
+  interface MessageQueues {
 
     String DFLT = "default";
 

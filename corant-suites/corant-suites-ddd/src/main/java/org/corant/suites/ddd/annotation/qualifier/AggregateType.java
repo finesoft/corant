@@ -39,8 +39,7 @@ public @interface AggregateType {
 
   Class<? extends Aggregate> value();
 
-  public static class AggregateTypeLiteral extends AnnotationLiteral<AggregateType>
-      implements AggregateType {
+  class AggregateTypeLiteral extends AnnotationLiteral<AggregateType> implements AggregateType {
 
     private static final long serialVersionUID = -5552841006073177750L;
 

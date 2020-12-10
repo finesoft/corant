@@ -34,9 +34,9 @@ import javax.enterprise.util.AnnotationLiteral;
 @Inherited
 public @interface Commands {
 
-  static final CommandsLiteral INST = new CommandsLiteral();
+  CommandsLiteral INST = new CommandsLiteral();
 
-  public static class CommandsLiteral extends AnnotationLiteral<Commands> {
+  class CommandsLiteral extends AnnotationLiteral<Commands> {
     private static final long serialVersionUID = -7622269300418055785L;
   }
 }

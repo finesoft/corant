@@ -71,14 +71,14 @@ public class Mongos {
     if (useFilter == null) {
       batchStream(batchSize, srcCollection.find().batchSize(batchSize)).forEach(b -> {
         if (consumer != null) {
-          b.forEach(consumer::accept);
+          b.forEach(consumer);
         }
         destCollection.insertMany(b);
       });
     } else {
       batchStream(batchSize, srcCollection.find(useFilter).batchSize(batchSize)).forEach(b -> {
         if (consumer != null) {
-          b.forEach(consumer::accept);
+          b.forEach(consumer);
         }
         destCollection.insertMany(b);
       });
@@ -123,14 +123,12 @@ public class Mongos {
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     GridFSBucket sg = GridFSBuckets.create(s, srcGridFSBucketName);
     GridFSBucket dg = GridFSBuckets.create(d, destGridFSBucketName);
-    batchStream(batchSize, sg.find()).forEach(gfses -> {
-      gfses.forEach(gf -> {
-        try (GridFSDownloadStream gfos = sg.openDownloadStream(gf.getId())) {
-          dg.uploadFromStream(gf.getId(), gf.getFilename(), gfos, new GridFSUploadOptions()
-              .metadata(new Document(defaultObject(gf.getMetadata(), Collections::emptyMap))));
-        }
-      });
-    });
+    batchStream(batchSize, sg.find()).forEach(gfses -> gfses.forEach(gf -> {
+      try (GridFSDownloadStream gfos = sg.openDownloadStream(gf.getId())) {
+        dg.uploadFromStream(gf.getId(), gf.getFilename(), gfos, new GridFSUploadOptions()
+            .metadata(new Document(defaultObject(gf.getMetadata(), Collections::emptyMap))));
+      }
+    }));
   }
 
 }

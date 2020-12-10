@@ -37,9 +37,9 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface JTAXA {
 
-  public static final JTAXALiteral INSTANCE = new JTAXALiteral();
+  JTAXALiteral INSTANCE = new JTAXALiteral();
 
-  public static class JTAXALiteral extends AnnotationLiteral<JTAXA> implements JTAXA {
+  class JTAXALiteral extends AnnotationLiteral<JTAXA> implements JTAXA {
 
     private static final long serialVersionUID = -5552841006073177750L;
 

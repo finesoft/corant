@@ -13,6 +13,8 @@
  */
 package org.corant.suites.jms.shared.context;
 
+import static org.corant.context.Instances.findNamed;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
@@ -31,6 +33,7 @@ import javax.jms.XAJMSContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Objects;
 import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jta.shared.TransactionService;
 
@@ -45,6 +48,7 @@ public class JMSContextKey implements Serializable {
   private static final long serialVersionUID = -9143619854361396089L;
 
   private static final Logger logger = Logger.getLogger(JMSContextKey.class.getName());
+  private final boolean xa;
   private final String connectionFactoryId;
   private final Integer sessionMode;
   private final int hash;
@@ -53,27 +57,22 @@ public class JMSContextKey implements Serializable {
   public JMSContextKey(final String connectionFactoryId, final Integer sessionMode) {
     this.connectionFactoryId = defaultTrim(connectionFactoryId);
     this.sessionMode = sessionMode;
-    hash = calHash(connectionFactoryId, sessionMode);
+    xa = shouldNotNull(AbstractJMSExtension.getConfig(connectionFactoryId),
+        "Can not find connection factory config by id [%s]", this.connectionFactoryId).isXa();
+    hash = Objects.hash(connectionFactoryId, sessionMode);
   }
 
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
     final JMSSessionMode sessionMode = annotated.getAnnotation(JMSSessionMode.class);
-    final String facId = factory == null ? null : factory.value();
-    final int sesMod = sessionMode == null ? JMSContext.AUTO_ACKNOWLEDGE : sessionMode.value();
-    return new JMSContextKey(facId, sesMod);
-  }
-
-  static int calHash(final String facId, final Integer sesMod) {
-    int result = facId != null ? facId.hashCode() : 0;
-    result = 31 * result + (sesMod != null ? sesMod.hashCode() : 0);
-    return result;
+    return new JMSContextKey(factory == null ? null : factory.value(),
+        sessionMode == null ? JMSContext.AUTO_ACKNOWLEDGE : sessionMode.value());
   }
 
   public JMSContext create() {
     try {
-      if (isXa() && TransactionService.isCurrentTransactionActive()) {
+      if (xa && TransactionService.isCurrentTransactionActive()) {
         XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
         TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
         logger.fine(() -> "Create new XAJMSContext and register it to current transaction!");
@@ -87,8 +86,6 @@ public class JMSContextKey implements Serializable {
         return connectionFactory().createContext();
       }
     } catch (Exception ex) {
-      // JMSException je = new JMSException(ex.getMessage());
-      // je.setLinkedException(ex);
       throw new CorantRuntimeException(ex);
     }
   }
@@ -120,6 +117,10 @@ public class JMSContextKey implements Serializable {
     return hash;
   }
 
+  public boolean isXa() {
+    return xa;
+  }
+
   @Override
   public String toString() {
     return "JMSContextKey [connectionFactoryId=" + connectionFactoryId + ", sessionMode="
@@ -134,12 +135,11 @@ public class JMSContextKey implements Serializable {
       if (connectionFactory != null) {
         return connectionFactory;
       }
-      return connectionFactory = AbstractJMSExtension.getConnectionFactory(connectionFactoryId);
+      return connectionFactory =
+          findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
+              () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
+                  connectionFactoryId));
     }
-  }
-
-  boolean isXa() {
-    return AbstractJMSExtension.getConfig(connectionFactoryId).isXa();
   }
 
   // TODO In NO XA

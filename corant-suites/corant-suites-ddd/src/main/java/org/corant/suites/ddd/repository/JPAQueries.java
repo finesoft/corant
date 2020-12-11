@@ -16,12 +16,13 @@ package org.corant.suites.ddd.repository;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
@@ -55,6 +58,7 @@ import org.corant.shared.conversion.Converters;
  */
 public class JPAQueries {
 
+  static final Logger logger = Logger.getLogger(JPAQueries.class.getName());
   static final boolean useTuple = Converters.lookup(Tuple.class, Object.class).isPresent();// FIXME
 
   static final Set<Class<?>> persistenceClasses =
@@ -397,6 +401,7 @@ public class JPAQueries {
     protected Supplier<EntityManager> entityManagerSupplier;
     protected Map<Object, Object> hints;
     protected int maxResults = -1;
+    protected int firstResult = -1;
     protected FlushModeType flushMode;
     protected LockModeType lockMode;
 
@@ -422,6 +427,9 @@ public class JPAQueries {
       if (hints != null) {
         hints.forEach((k, v) -> query.setHint(k.toString(), v));
       }
+      if (firstResult > 0) {
+        query.setFirstResult(firstResult);
+      }
       if (maxResults > 0) {
         query.setMaxResults(maxResults);
       }
@@ -437,6 +445,10 @@ public class JPAQueries {
     void setEntityManagerSupplier(final Supplier<EntityManager> entityManagerSupplier) {
       this.entityManagerSupplier =
           shouldNotNull(entityManagerSupplier, "The entity manager cannot null!");
+    }
+
+    void setFirstResult(int firstResult) {
+      this.firstResult = max(firstResult, 0);
     }
 
     void setFlushMode(FlushModeType flushMode) {
@@ -503,6 +515,14 @@ public class JPAQueries {
   public static abstract class JPAQuery extends AbstractQuery {
 
     /**
+     * {@link Query#setFirstResult(int)}
+     */
+    public JPAQuery firstResult(int firstResult) {
+      setFirstResult(firstResult);
+      return this;
+    }
+
+    /**
      * {@link Query#setFlushMode(FlushModeType)}
      */
     public JPAQuery flushMode(FlushModeType flushMode) {
@@ -517,7 +537,12 @@ public class JPAQueries {
      * @return get
      */
     public <T> T get() {
-      return forceCast(populateQuery(createQuery()).getSingleResult());
+      setMaxResults(1);
+      List<T> result = this.select();
+      if (!isEmpty(result)) {
+        return result.get(0);
+      }
+      return null;
     }
 
     /**
@@ -598,6 +623,19 @@ public class JPAQueries {
       return results;
     }
 
+    /**
+     * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
+     * default this method delegates to getResultList().stream(),however persistence provider may
+     * choose to override this method to provide additional capabilities.
+     *
+     * @param <T>
+     * @return stream
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Stream<T> stream() {
+      return populateQuery(createQuery()).getResultStream();
+    }
+
     protected abstract Query createQuery();
 
     protected JPAQuery entityManager(final EntityManager entityManager) {
@@ -625,6 +663,14 @@ public class JPAQueries {
     }
 
     /**
+     * {@link Query#setFirstResult(int)}
+     */
+    public TypedJPAQuery<T> firstResult(int firstResult) {
+      setFirstResult(firstResult);
+      return this;
+    }
+
+    /**
      * {@link Query#setFlushMode(FlushModeType)}
      */
     public TypedJPAQuery<T> flushMode(FlushModeType flushMode) {
@@ -639,15 +685,12 @@ public class JPAQueries {
      * @return get
      */
     public T get() {
-      Object result = populateQuery(createQuery()).getSingleResult();
-      if (result == null) {
-        return null;
-      } else if (resultType == null || !useTuple) {
-        return forceCast(result);
-      } else {
-        Tuple tuple = (Tuple) result;
-        return convertTuple(tuple, resultType);
+      setMaxResults(1);
+      List<T> results = this.select();
+      if (!isEmpty(results)) {
+        return results.get(0);
       }
+      return null;
     }
 
     /**
@@ -726,6 +769,24 @@ public class JPAQueries {
       } else {
         List<Tuple> results = populateQuery(createQuery()).getResultList();
         return results != null ? convertTuples(results, resultType) : new ArrayList<>();
+      }
+    }
+
+    /**
+     * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
+     * default this method delegates to getResultList().stream(),however persistence provider may
+     * choose to override this method to provide additional capabilities.
+     *
+     * @return stream
+     */
+    @SuppressWarnings("unchecked")
+    public Stream<T> stream() {
+      if (resultType == null || !useTuple) {
+        return populateQuery(createQuery()).getResultStream();
+      } else {
+        Stream<Tuple> results = populateQuery(createQuery()).getResultStream();
+        return results != null ? results.map(result -> convertTuple(result, resultType))
+            : Stream.empty();
       }
     }
 

@@ -84,7 +84,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
           && (value.containsKey("day") || value.containsKey("dayOfMonth"))) {
         return LocalDate.of(resolveInteger(value.get("year")), resolveInteger(value.get("month")),
             defaultObject(resolveInteger(value.get("dayOfMonth")),
-                resolveInteger(value.get("day"))));
+                () -> resolveInteger(value.get("day"))));
       } else if (value.containsKey("year") && value.containsKey("dayOfYear")) {
         return LocalDate.ofYearDay(resolveInteger(value.get("year")),
             resolveInteger(value.get("dayOfYear")));
@@ -106,24 +106,25 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
           if (value.containsKey("nanoOfSecond") || value.containsKey("nano")) {
             return LocalDateTime.of(resolveInteger(value.get("year")),
                 resolveInteger(value.get("month")),
-                defaultObject(resolveInteger(value.get("dayOfMonth")),
-                    resolveInteger(value.get("day"))),
+                value.get("dayOfMonth") != null ? resolveInteger(value.get("dayOfMonth"))
+                    : resolveInteger(value.get("day")),
                 resolveInteger(value.get("hour")), resolveInteger(value.get("minute")),
-                resolveInteger(value.get("second")), defaultObject(
-                    resolveInteger(value.get("nanoOfSecond")), resolveInteger(value.get("nano"))));
+                resolveInteger(value.get("second")),
+                value.get("nanoOfSecond") != null ? resolveInteger(value.get("nanoOfSecond"))
+                    : resolveInteger(value.get("nano")));
           } else {
             return LocalDateTime.of(resolveInteger(value.get("year")),
                 resolveInteger(value.get("month")),
-                defaultObject(resolveInteger(value.get("dayOfMonth")),
-                    resolveInteger(value.get("day"))),
+                value.get("dayOfMonth") != null ? resolveInteger(value.get("dayOfMonth"))
+                    : resolveInteger(value.get("day")),
                 resolveInteger(value.get("hour")), resolveInteger(value.get("minute")),
                 resolveInteger(value.get("second")));
           }
         } else {
           return LocalDateTime.of(resolveInteger(value.get("year")),
               resolveInteger(value.get("month")),
-              defaultObject(resolveInteger(value.get("dayOfMonth")),
-                  resolveInteger(value.get("day"))),
+              value.get("dayOfMonth") != null ? resolveInteger(value.get("dayOfMonth"))
+                  : resolveInteger(value.get("day")),
               resolveInteger(value.get("hour")), resolveInteger(value.get("minute")));
         }
       } else if (value.containsKey("epochSecond") && value.containsKey("nanoOfSecond")
@@ -145,8 +146,8 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
           if (value.containsKey("nanoOfSecond") || value.containsKey("nano")) {
             return LocalTime.of(resolveInteger(value.get("hour")),
                 resolveInteger(value.get("minute")), resolveInteger(value.get("second")),
-                defaultObject(resolveInteger(value.get("nanoOfSecond")),
-                    resolveInteger(value.get("nano"))));
+                value.get("nanoOfSecond") != null ? resolveInteger(value.get("nanoOfSecond"))
+                    : resolveInteger(value.get("nano")));
           } else {
             return LocalTime.of(resolveInteger(value.get("hour")),
                 resolveInteger(value.get("minute")), resolveInteger(value.get("second")));

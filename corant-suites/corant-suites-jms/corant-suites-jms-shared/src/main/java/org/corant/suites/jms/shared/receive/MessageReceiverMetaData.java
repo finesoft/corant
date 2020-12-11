@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jms.shared.receive;
 
-import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -23,17 +22,12 @@ import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.time.Duration;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
-import javax.jms.ConnectionFactory;
 import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
-import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.corant.shared.util.Retry.RetryInterval;
-import org.corant.suites.jms.shared.AbstractJMSExtension;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
-import org.corant.suites.jms.shared.context.JMSExceptionListener;
 
 /**
  * corant-suites-jms-shared
@@ -234,15 +228,6 @@ public class MessageReceiverMetaData {
     return "MessageReceiverMetaData [method=" + method.getMethod().toGenericString() + ", clientID="
         + clientID + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination
         + "]";
-  }
-
-  ConnectionFactory connectionFactory() {
-    return AbstractJMSExtension.getConnectionFactory(connectionFactoryId);
-
-  }
-
-  Optional<JMSExceptionListener> exceptionListener() {
-    return select(JMSExceptionListener.class).stream().sorted(Sortable::compare).findFirst();
   }
 
   boolean xa() {

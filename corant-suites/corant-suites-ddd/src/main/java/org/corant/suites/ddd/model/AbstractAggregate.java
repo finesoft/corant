@@ -31,6 +31,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
+import org.corant.shared.util.Objects;
 import org.corant.suites.bundle.GlobalMessageCodes;
 import org.corant.suites.ddd.annotation.qualifier.AggregateType.AggregateTypeLiteral;
 import org.corant.suites.ddd.event.AggregateLifecycleEvent;
@@ -248,7 +249,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
       id = requireNotNull(requireNotNull(aggregate, GlobalMessageCodes.ERR_OBJ_NON_FUD).getId(),
           GlobalMessageCodes.ERR_SYS);
       typeCls = requireNotNull(aggregate.getClass(), GlobalMessageCodes.ERR_SYS);
-      hash = calHash(id, typeCls);
+      hash = Objects.hash(id, typeCls);
     }
 
     @Override
@@ -306,12 +307,5 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
       return "{\"typeCls\":\"" + typeCls + "\",\"id\":" + id + "}";
     }
 
-    int calHash(Serializable id, Class<?> typeCls) {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (id == null ? 0 : id.hashCode());
-      result = prime * result + (typeCls == null ? 0 : typeCls.hashCode());
-      return result;
-    }
   }
 }

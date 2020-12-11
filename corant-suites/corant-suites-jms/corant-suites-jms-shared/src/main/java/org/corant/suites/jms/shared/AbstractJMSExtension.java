@@ -14,7 +14,6 @@
 package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
-import static org.corant.context.Instances.findNamed;
 import static org.corant.context.Instances.select;
 import java.util.Collections;
 import java.util.Set;
@@ -28,10 +27,8 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import javax.jms.ConnectionFactory;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.proxy.ContextualMethodHandler;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
@@ -56,12 +53,6 @@ public abstract class AbstractJMSExtension implements Extension {
       return select(AbstractJMSExtension.class).get().getConfigManager().get(connectionFactoryId);
     }
     return null;
-  }
-
-  public static ConnectionFactory getConnectionFactory(String connectionFactoryId) {
-    return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
-        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
-            connectionFactoryId));
   }
 
   public NamedQualifierObjectManager<? extends AbstractJMSConfig> getConfigManager() {

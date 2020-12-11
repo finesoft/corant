@@ -46,7 +46,7 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
 
   @Override
   public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return int[].class.isAssignableFrom(sourceClass);
+    return int[].class.isAssignableFrom(sourceClass) || Integer[].class.equals(sourceClass);
   }
 
   @Override

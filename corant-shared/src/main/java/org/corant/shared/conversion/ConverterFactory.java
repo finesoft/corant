@@ -32,7 +32,7 @@ public interface ConverterFactory<S, T> {
   }
 
   default boolean isSupportSourceClass(Class<?> sourceClass) {
-    return true;
+    return false;
   }
 
   boolean isSupportTargetClass(Class<?> targetClass);

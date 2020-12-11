@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.context.Instances.findNamed;
 import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -40,6 +41,7 @@ import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
+import org.corant.suites.jms.shared.context.JMSExceptionListener;
 import org.corant.suites.jms.shared.context.MessageSerializer;
 import org.corant.suites.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
 import org.corant.suites.jta.shared.TransactionService;
@@ -90,7 +92,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     super();
     meta = metaData;
     xa = metaData.xa();
-    connectionFactory = metaData.connectionFactory();
+    connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
     messageListener = new MessageHandler(metaData.getMethod());
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
@@ -163,6 +165,12 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     return message;
   }
 
+  protected ConnectionFactory createConnectionFactory(String connectionFactoryId) {
+    return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
+        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
+            connectionFactoryId));
+  }
+
   protected synchronized void execute() {
     logger.log(Level.FINE, () -> String.format("Begin receiving messages, %s", meta));
     Throwable throwable = null;
@@ -208,7 +216,8 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
       }
       select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
           .forEach(c -> c.configConnection(connection, meta));
-      meta.exceptionListener().ifPresent(listener -> listener.tryConfig(connection));
+      select(JMSExceptionListener.class).stream().max(Sortable::compare)
+          .ifPresent(listener -> listener.tryConfig(connection));
     }
     // initialize session
     if (session == null) {

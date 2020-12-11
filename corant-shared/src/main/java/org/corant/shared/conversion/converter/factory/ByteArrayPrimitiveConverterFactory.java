@@ -69,7 +69,7 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
 
   @Override
   public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return byte[].class.equals(sourceClass);
+    return byte[].class.equals(sourceClass) || Byte[].class.equals(sourceClass);
   }
 
   @Override

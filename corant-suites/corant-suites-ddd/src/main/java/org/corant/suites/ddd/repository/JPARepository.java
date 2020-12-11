@@ -182,6 +182,7 @@ public interface JPARepository extends Repository<Query> {
    * @return get
    */
   default <T> T get(Query query) {
+    query.setMaxResults(1);
     return forceCast(query.getSingleResult());
   }
 

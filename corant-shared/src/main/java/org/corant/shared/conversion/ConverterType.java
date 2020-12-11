@@ -15,6 +15,7 @@ package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.Serializable;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-shared
@@ -37,7 +38,7 @@ public class ConverterType<S, T> implements Serializable {
     super();
     this.sourceClass = shouldNotNull(sourceClass);
     this.targetClass = shouldNotNull(targetClass);
-    this.hash = calHash(sourceClass, targetClass);
+    this.hash = Objects.hash(sourceClass, targetClass);
   }
 
   public static <S, T> ConverterType<S, T> of(Class<S> sourceClass, Class<T> targetClass) {
@@ -98,11 +99,4 @@ public class ConverterType<S, T> implements Serializable {
     return "ConverterType [sourceClass=" + sourceClass + ", targetClass=" + targetClass + "]";
   }
 
-  int calHash(Class<S> sourceClass, Class<T> targetClass) {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (sourceClass == null ? 0 : sourceClass.hashCode());
-    result = prime * result + (targetClass == null ? 0 : targetClass.hashCode());
-    return result;
-  }
 }

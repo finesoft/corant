@@ -47,7 +47,7 @@ public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<T
 
   @Override
   public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return Tuple.class.equals(sourceClass);
+    return Tuple.class.isAssignableFrom(sourceClass);
   }
 
   @Override

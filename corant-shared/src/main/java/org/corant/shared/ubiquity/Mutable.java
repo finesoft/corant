@@ -82,6 +82,10 @@ public interface Mutable<T> extends Supplier<T> {
 
     private static final long serialVersionUID = 7448907394279327148L;
 
+    public MutableByte() {
+      this(0);
+    }
+
     public MutableByte(final byte object) {
       super(object);
     }
@@ -156,6 +160,10 @@ public interface Mutable<T> extends Supplier<T> {
   class MutableDouble extends MutableNumber<Double> {
 
     private static final long serialVersionUID = -8025777846150268416L;
+
+    public MutableDouble() {
+      this(0.0d);
+    }
 
     public MutableDouble(double object) {
       super(object);
@@ -232,6 +240,10 @@ public interface Mutable<T> extends Supplier<T> {
 
     private static final long serialVersionUID = 8230534097662673489L;
 
+    public MutableFloat() {
+      this(0.0f);
+    }
+
     public MutableFloat(float object) {
       super(object);
     }
@@ -307,6 +319,10 @@ public interface Mutable<T> extends Supplier<T> {
 
     private static final long serialVersionUID = -5952332917787746814L;
 
+    public MutableInteger() {
+      this(0);
+    }
+
     public MutableInteger(int object) {
       super(object);
     }
@@ -381,6 +397,10 @@ public interface Mutable<T> extends Supplier<T> {
   class MutableLong extends MutableNumber<Long> {
 
     private static final long serialVersionUID = -8400347013924878207L;
+
+    public MutableLong() {
+      this(0L);
+    }
 
     public MutableLong(long object) {
       super(object);
@@ -738,6 +758,10 @@ public interface Mutable<T> extends Supplier<T> {
    */
   class MutableShort extends MutableNumber<Short> {
     private static final long serialVersionUID = -6018676211622288641L;
+
+    public MutableShort() {
+      this(0);
+    }
 
     public MutableShort(Number object) {
       super(object.shortValue());

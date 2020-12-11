@@ -98,7 +98,7 @@ public class Atomics {
     }
 
     public final double incrementAndGet() {
-      return addAndGet(1.0f);
+      return addAndGet(1.0d);
     }
 
     @Override
@@ -204,8 +204,8 @@ public class Atomics {
         return "[]";
       } else {
         return "["
-            .concat(String.join(",", IntStream.of(length).mapToObj(bitsArray::get)
-                .map(Double::longBitsToDouble).map(d -> d.toString()).collect(Collectors.toList())))
+            .concat(IntStream.of(length).mapToObj(bitsArray::get).map(Double::longBitsToDouble)
+                .map(d -> Double.toString(d)).collect(Collectors.joining(",")))
             .concat("]");
       }
     }
@@ -394,10 +394,8 @@ public class Atomics {
       if (length == 0) {
         return "[]";
       } else {
-        return "["
-            .concat(String.join(",", IntStream.of(length).mapToObj(bitsArray::get)
-                .map(Float::intBitsToFloat).map(d -> d.toString()).collect(Collectors.toList())))
-            .concat("]");
+        return "[".concat(IntStream.of(length).mapToObj(bitsArray::get).map(Float::intBitsToFloat)
+            .map(f -> Float.toString(f)).collect(Collectors.joining(","))).concat("]");
       }
     }
 

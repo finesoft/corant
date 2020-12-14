@@ -105,7 +105,7 @@ public class Qualifiers {
 
     @Override
     public T get(String name) {
-      return objects.get(name);
+      return objects.get(defaultTrim(name));
     }
 
     @Override

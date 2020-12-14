@@ -163,7 +163,7 @@ public class Corant implements AutoCloseable {
    * container will be set with the given config class class loader. The given arguments will be
    * propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
    *
-   * @see #Corant(Class, ClassLoader, String...)
+   * @see #Corant(Class, String...)
    * @param configClass
    * @param arguments
    */

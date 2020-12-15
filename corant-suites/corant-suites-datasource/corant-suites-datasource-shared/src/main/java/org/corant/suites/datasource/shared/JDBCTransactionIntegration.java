@@ -80,7 +80,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
         CDI.current().select(AbstractDataSourceExtension.class);
     if (!extensions.isUnsatisfied()) {
       extensions.forEach(et -> et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
-        if (cfg.isJta() && cfg.isXa()) {
+        if (cfg.isJta() && cfg.isXa() && cfg.isValid()) {
           if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
             LOGGER.warning(() -> String.format(
                 "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",

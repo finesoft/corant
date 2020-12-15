@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
@@ -108,5 +109,9 @@ public class JPAExtension implements Extension {
         throw new CorantRuntimeException(e);
       }
     }
+  }
+
+  void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    // TODO FIXME validate config check data source etc
   }
 }

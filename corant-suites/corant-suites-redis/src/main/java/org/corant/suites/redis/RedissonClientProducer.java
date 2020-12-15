@@ -18,19 +18,19 @@ public class RedissonClientProducer {
 
   @Inject
   @ConfigProperty(name = "redis.database")
-  private Optional<Integer> database;
+  protected Optional<Integer> database;
 
   @Inject
   @ConfigProperty(name = "redis.address")
-  private String address;
+  protected String address;
 
   @Inject
   @ConfigProperty(name = "redis.password")
-  private Optional<String> password;
+  protected Optional<String> password;
 
   @Inject
   @ConfigProperty(name = "redis.timeout")
-  private Optional<Integer> timeout;
+  protected Optional<Integer> timeout;
 
   public String getAddress() {
     return address;

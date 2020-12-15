@@ -14,7 +14,6 @@
 package org.corant.config.spi;
 
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -36,9 +35,10 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       final Collection<ConfigSource> originalSources) {
     Map<String, String> adjustered = new HashMap<>(properties);
     final Set<String> stack = new LinkedHashSet<>();
+    final ConfigVariableProcessor processor = new ConfigVariableProcessor(originalSources);
     properties.forEach((k, v) -> {
-      if (hasVariable(v) && areEqual(v, resolveValue(k, originalSources))) {
-        String av = resolveVariables(k, v, originalSources, stack);
+      if (hasVariable(v) && areEqual(v, processor.resolveValue(k))) {
+        String av = resolveVariables(k, v, processor, stack);
         stack.clear();
         adjustered.put(k, av);
       }
@@ -50,17 +50,7 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
     return v != null && v.indexOf("${") != -1 && v.indexOf('}') != -1;
   }
 
-  String resolveValue(final String propertyName, final Collection<ConfigSource> originalSources) {
-    for (ConfigSource cs : originalSources) {
-      String value = cs.getValue(propertyName);
-      if (isNotBlank(value)) {
-        return value;
-      }
-    }
-    return null;
-  }
-
-  String resolveVariables(String key, String value, final Collection<ConfigSource> originalSources,
+  String resolveVariables(String key, String value, final ConfigVariableProcessor processor,
       final Set<String> stack) {
     int startVar = 0;
     String resolvedValue = value;
@@ -79,10 +69,10 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       } else {
         stack.add(varName);
       }
-      String varVal = resolveValue(varName, originalSources);
+      String varVal = processor.resolveValue(varName);
       if (varVal != null) {
         resolvedValue = resolveVariables(key, resolvedValue.replace("${" + varName + "}", varVal),
-            originalSources, stack);
+            processor, stack);
       }
       startVar++;
     }

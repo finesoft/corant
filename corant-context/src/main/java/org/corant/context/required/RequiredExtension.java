@@ -31,7 +31,7 @@ import org.corant.config.Configs;
 import org.corant.context.required.RequiredConfiguration.ValuePredicate;
 
 /**
- * corant-kernel
+ * corant-context
  *
  * @author bingo 下午5:08:08
  *

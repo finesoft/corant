@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * corant-kernel
+ * corant-context
  *
  * @author bingo 下午3:08:47
  *

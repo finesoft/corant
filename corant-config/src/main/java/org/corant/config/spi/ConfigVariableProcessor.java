@@ -56,10 +56,6 @@ class ConfigVariableProcessor {
     }
   }
 
-  void setExpressionFactory(ExpressionFactory expressionFactory) {
-    this.expressionFactory = expressionFactory;
-  }
-
   public static class ConfigSourceBean {
 
     protected final Collection<ConfigSource> configSources;

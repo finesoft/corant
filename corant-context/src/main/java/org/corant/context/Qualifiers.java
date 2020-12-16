@@ -14,9 +14,7 @@
 package org.corant.context;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.trim;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,12 +35,17 @@ import org.corant.shared.util.Strings;
  */
 public class Qualifiers {
 
+  public static String resolveName(String named) {
+    // XXX Is it possible to use configuration?
+    return Strings.defaultTrim(named);
+  }
+
   public static Map<String, Annotation[]> resolveNameds(Set<String> names) {
     Map<String, Annotation[]> nameds = new HashMap<>();
     if (isNotEmpty(names)) {
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
-        String name = defaultTrim(tNames.iterator().next());
+        String name = tNames.iterator().next();
         if (isBlank(name)) {
           nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
         } else {
@@ -58,15 +61,9 @@ public class Qualifiers {
     return nameds;
   }
 
-  static String resolveName(String named) {
-    // XXX Is it possible to use configuration?
-    return Strings.defaultTrim(named);
-  }
-
   static Annotation[] resolveNamedQualifiers(String name) {
     return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
-        : new Annotation[] {NamedLiteral.of(trim(name)), Any.Literal.INSTANCE,
-            Default.Literal.INSTANCE};
+        : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
   }
 
   public static class DefaultNamedQualifierObjectManager<T extends NamedObject>
@@ -81,17 +78,14 @@ public class Qualifiers {
       if (isNotEmpty(configs)) {
         for (T t : configs) {
           if (t != null) {
-            tmpObjects.put(defaultTrim(t.getName()), t);
+            tmpObjects.put(resolveName(t.getName()), t);
           }
         }
       }
-      // this.objects = Collections.unmodifiableMap(tmpObjects);
       this.objects = tmpObjects;
-      // this.nameAndQualifiers = Collections.unmodifiableMap(resolveNameds(tmpObjects.keySet()));
       this.nameAndQualifiers = resolveNameds(tmpObjects.keySet());
       Map<T, Annotation[]> tmpObjectAndQualifiers = new HashMap<>();
       nameAndQualifiers.forEach((k, v) -> tmpObjectAndQualifiers.put(this.objects.get(k), v));
-      // this.objectAndQualifiers = Collections.unmodifiableMap(tmpObjectAndQualifiers);
       this.objectAndQualifiers = tmpObjectAndQualifiers;
 
     }
@@ -105,7 +99,7 @@ public class Qualifiers {
 
     @Override
     public T get(String name) {
-      return objects.get(defaultTrim(name));
+      return objects.get(resolveName(name));
     }
 
     @Override
@@ -131,7 +125,7 @@ public class Qualifiers {
 
     @Override
     public Annotation[] getQualifiers(String name) {
-      return nameAndQualifiers.getOrDefault(defaultTrim(name), Annotations.EMPTY_ARRAY);
+      return nameAndQualifiers.getOrDefault(resolveName(name), Annotations.EMPTY_ARRAY);
     }
 
     @Override
@@ -231,7 +225,7 @@ public class Qualifiers {
       }
 
       protected void setName(String name) {
-        this.name = defaultTrim(name);
+        this.name = resolveName(name);
       }
 
     }

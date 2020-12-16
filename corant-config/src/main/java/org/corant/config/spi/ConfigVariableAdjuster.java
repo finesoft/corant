@@ -30,32 +30,48 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  */
 public class ConfigVariableAdjuster implements ConfigAdjuster {
 
+  public static final String REP = "${";
+  public static final String EXP = "#{";
+  public static final String END = "}";
+
   @Override
   public Map<String, String> apply(final Map<String, String> properties,
       final Collection<ConfigSource> originalSources) {
-    Map<String, String> adjustered = new HashMap<>(properties);
+    final Map<String, String> adjustered = new HashMap<>(properties);
     final Set<String> stack = new LinkedHashSet<>();
     final ConfigVariableProcessor processor = new ConfigVariableProcessor(originalSources);
     properties.forEach((k, v) -> {
-      if (hasVariable(v) && areEqual(v, processor.resolveValue(k))) {
-        String av = resolveVariables(k, v, processor, stack);
-        stack.clear();
-        adjustered.put(k, av);
+      String value = v;
+      if (areEqual(value, processor.getValue(k))) {
+        if (hasExpression(value)) {
+          value = resolveVariables(true, k, value, processor, stack);
+          stack.clear();
+        }
+        if (hasVariable(value)) {
+          value = resolveVariables(false, k, value, processor, stack);
+          stack.clear();
+        }
       }
+      adjustered.put(k, value);
     });
     return adjustered;
   }
 
-  boolean hasVariable(String v) {
-    return v != null && v.indexOf("${") != -1 && v.indexOf('}') != -1;
+  boolean hasExpression(String v) {
+    return v != null && v.indexOf(EXP) != -1 && v.indexOf(END) != -1;
   }
 
-  String resolveVariables(String key, String value, final ConfigVariableProcessor processor,
-      final Set<String> stack) {
+  boolean hasVariable(String v) {
+    return v != null && v.indexOf(REP) != -1 && v.indexOf(END) != -1;
+  }
+
+  String resolveVariables(boolean expression, String key, String value,
+      final ConfigVariableProcessor processor, final Set<String> stack) {
     int startVar = 0;
+    String begin = expression ? EXP : REP;
     String resolvedValue = value;
-    while ((startVar = resolvedValue.indexOf("${", startVar)) >= 0) {
-      int endVar = resolvedValue.indexOf('}', startVar);
+    while ((startVar = resolvedValue.indexOf(begin, startVar)) >= 0) {
+      int endVar = resolvedValue.indexOf(END, startVar);
       if (endVar <= 0) {
         break;
       }
@@ -69,13 +85,14 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       } else {
         stack.add(varName);
       }
-      String varVal = processor.resolveValue(varName);
+      String varVal = expression ? processor.evalValue(varName) : processor.getValue(varName);
       if (varVal != null) {
-        resolvedValue = resolveVariables(key, resolvedValue.replace("${" + varName + "}", varVal),
-            processor, stack);
+        resolvedValue = resolveVariables(expression, key,
+            resolvedValue.replace(begin + varName + END, varVal), processor, stack);
       }
       startVar++;
     }
     return resolvedValue;
   }
+
 }

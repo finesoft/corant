@@ -15,11 +15,11 @@ package org.corant.config.spi;
 
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.split;
 import java.util.Collection;
 import javax.el.ExpressionFactory;
 import javax.el.StandardELContext;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Randoms;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import com.sun.el.ExpressionFactoryImpl;
 
@@ -34,26 +34,32 @@ import com.sun.el.ExpressionFactoryImpl;
 class ConfigVariableProcessor {
 
   ExpressionFactory expressionFactory;
-  ConfigSourceBean bean;
+  ConfigSourceBean source;
   StandardELContext context;
 
   ConfigVariableProcessor(Collection<ConfigSource> configSources) {
-    bean = new ConfigSourceBean(configSources);
+    source = new ConfigSourceBean(configSources);
     expressionFactory = new ExpressionFactoryImpl();
     context = new StandardELContext(expressionFactory);
     context.getVariableMapper().setVariable("source",
-        expressionFactory.createValueExpression(bean, ConfigSourceBean.class));
+        expressionFactory.createValueExpression(source, ConfigSourceBean.class));
 
   }
 
-  String resolveValue(final String key) {
-    if (key.startsWith("#") && key.length() > 1) {
+  String evalValue(final String key) {
+    if (key.startsWith("fn:")) {
       return asString(expressionFactory.createMethodExpression(context,
-          "${".concat(key.substring(1)).concat("}"), String.class, new Class[] {String.class})
+          "${".concat(key.substring(3)).concat("}"), String.class, new Class[] {String.class})
           .invoke(context, Objects.EMPTY_ARRAY), null);
     } else {
-      return bean.getValue(key);
+      return asString(expressionFactory
+          .createValueExpression(context, "${".concat(key).concat("}"), String.class)
+          .getValue(context), null);
     }
+  }
+
+  String getValue(final String key) {
+    return source.get(key);
   }
 
   public static class ConfigSourceBean {
@@ -65,7 +71,7 @@ class ConfigVariableProcessor {
       this.configSources = configSources;
     }
 
-    public String getValue(String propertyName) {
+    public String get(String propertyName) {
       for (ConfigSource cs : configSources) {
         String value = cs.getValue(propertyName);
         if (isNotBlank(value)) {
@@ -75,9 +81,66 @@ class ConfigVariableProcessor {
       return null;
     }
 
-    public String splitValue(String propertyName, String spreator, int index) {
-      return split(getValue(propertyName), spreator)[index];
+    public String randomDouble(double max) {
+      return Double.toString(Randoms.randomDouble(max));
     }
+
+    public String randomDouble(double min, double max) {
+      return Double.toString(Randoms.randomDouble(min, max));
+    }
+
+    public String randomFloat(float max) {
+      return Float.toString(Randoms.randomFloat(max));
+    }
+
+    public String randomFloat(float min, float max) {
+      return Float.toString(Randoms.randomFloat(min, max));
+    }
+
+    public String randomInt(int max) {
+      return Integer.toString(Randoms.randomInt(max));
+    }
+
+    public String randomInt(int min, int max) {
+      return Integer.toString(Randoms.randomInt(min, max));
+    }
+
+    public String randomLetters(int length) {
+      return Randoms.randomLetters(length);
+    }
+
+    public String randomLetters(int length, boolean upperCase) {
+      if (upperCase) {
+        return Randoms.randomUpperCaseLetters(length);
+      } else {
+        return Randoms.randomLowerCaseLetters(length);
+      }
+    }
+
+    public String randomLong(long max) {
+      return Long.toString(Randoms.randomLong(max));
+    }
+
+    public String randomLong(long min, long max) {
+      return Long.toString(Randoms.randomLong(min, max));
+    }
+
+    public String randomNumAndLetter(int length) {
+      return Randoms.randomNumbersAndLetters(length);
+    }
+
+    public String randomNumAndLetter(int length, boolean upperCase) {
+      if (upperCase) {
+        return Randoms.randomNumbersAndUcLetters(length);
+      } else {
+        return Randoms.randomNumbersAndLcLetters(length);
+      }
+    }
+
+    public String randomNumbers(int length) {
+      return Randoms.randomNumbers(length);
+    }
+
   }
 
 }

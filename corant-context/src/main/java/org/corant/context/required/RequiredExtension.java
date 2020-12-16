@@ -28,7 +28,6 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.config.Configs;
-import org.corant.context.required.RequiredConfiguration.ValuePredicate;
 
 /**
  * corant-context
@@ -49,6 +48,7 @@ public class RequiredExtension implements Extension {
     }
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   boolean checkVeto(Set<RequiredClassPresent> requiredClassNames,
       Set<RequiredClassNotPresent> requiredNotClassNames,
       Set<RequiredConfiguration> requireConfigs) {
@@ -69,12 +69,23 @@ public class RequiredExtension implements Extension {
         if (isBlank(key)) {
           return true;
         }
-        if (c.predicate() == ValuePredicate.NO_BLANK) {
-          return isNotBlank(Configs.getValue(key, String.class));
-        } else if (c.predicate() == ValuePredicate.NO_NULL) {
-          return isNotNull(Configs.getValue(key, String.class));
-        } else {
-          return areEqual(c.value(), Configs.getValue(key, String.class));
+        Object configValue = Configs.getValue(key, c.type());
+        Object value = c.value();
+        switch (c.predicate()) {
+          case NO_BLANK:
+            return isNotBlank((String) configValue);
+          case NO_NULL:
+            return isNotNull(configValue);
+          case GTE:
+            return ((Comparable) configValue).compareTo(value) >= 0;
+          case GT:
+            return ((Comparable) configValue).compareTo(value) > 0;
+          case LT:
+            return ((Comparable) configValue).compareTo(value) < 0;
+          case LTE:
+            return ((Comparable) configValue).compareTo(value) <= 0;
+          default:
+            return areEqual(c.value(), Configs.getValue(key, c.type()));
         }
       });
     }

@@ -35,9 +35,11 @@ public @interface RequiredConfiguration {
 
   ValuePredicate predicate() default ValuePredicate.NO_NULL;
 
+  Class<?> type() default String.class;
+
   String value() default "";
 
   enum ValuePredicate {
-    NO_NULL, NO_BLANK, EQUALS
+    NO_NULL, NO_BLANK, EQ, GTE, GT, LT, LTE,
   }
 }

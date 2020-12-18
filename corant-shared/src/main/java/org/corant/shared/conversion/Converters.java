@@ -89,8 +89,7 @@ public class Converters {
       Class<?> targetClass) {
     ConverterFactory factory = ConverterRegistry.getConverterFactories().stream()
         .filter(f -> f.isSupports(sourceClass, targetClass))
-        .sorted((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()) * -1).findFirst()
-        .orElse(null);
+        .max((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority())).orElse(null);
     if (factory != null) {
       // FIXME initialize parameter
       return Pair.of(factory.create(targetClass, null, true), factory);

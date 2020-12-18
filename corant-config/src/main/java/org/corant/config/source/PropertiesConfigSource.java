@@ -70,7 +70,7 @@ public class PropertiesConfigSource extends CorantConfigSource {
       return load(is);
     } catch (IOException e) {
       throw new CorantRuntimeException(e,
-          "Load properties config source from '%s' occured an error!", url);
+          "Load properties config source from '%s' occurred an error!", url);
     }
   }
 

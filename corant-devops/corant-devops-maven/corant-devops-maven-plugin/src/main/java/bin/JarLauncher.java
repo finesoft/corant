@@ -65,8 +65,8 @@ public class JarLauncher {
   private Manifest manifest;
 
   JarLauncher(String... args) throws IOException {
-    this.args = Arrays.stream(args).filter(arg -> arg.startsWith("-")).toArray(String[]::new);
-    Arrays.stream(args).filter(arg -> arg.startsWith("+")).map(arg -> Paths.get(arg.substring(1)))
+    this.args = Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '-').toArray(String[]::new);
+    Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '+').map(arg -> Paths.get(arg.substring(1)))
         .forEach(classpaths::add);
     initialize();
   }

@@ -106,7 +106,7 @@ public class Classes {
     SecurityManager s = System.getSecurityManager();
     if (s != null) {
       String cname = name.replace('/', '.');
-      if (cname.startsWith("[")) {
+      if (!cname.isEmpty() && cname.charAt(0) == '[') {
         int b = cname.lastIndexOf('[') + 2;
         if (b > 1 && b < cname.length()) {
           cname = cname.substring(b);
@@ -290,7 +290,7 @@ public class Classes {
       return Strings.EMPTY;
     }
     final StringBuilder arrayPrefix = new StringBuilder();
-    if (shortClassName.startsWith("[")) {
+    if (!shortClassName.isEmpty() && shortClassName.charAt(0) == '[') {
       while (shortClassName.charAt(0) == '[') {
         shortClassName = shortClassName.substring(1);
         arrayPrefix.append("[]");
@@ -427,11 +427,7 @@ public class Classes {
       if (Float.TYPE.equals(useCls)) {
         return Double.TYPE.equals(toClass);
       }
-      if (Character.TYPE.equals(useCls)) {
-        return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
-            || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
-      }
-      if (Short.TYPE.equals(useCls)) {
+      if (Character.TYPE.equals(useCls) || Short.TYPE.equals(useCls)) {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }

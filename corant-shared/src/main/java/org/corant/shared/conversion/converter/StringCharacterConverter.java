@@ -15,6 +15,7 @@ package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
+import org.corant.shared.conversion.ConversionException;
 
 /**
  * corant-shared
@@ -22,23 +23,23 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringFloatConveter extends AbstractNumberConverter<String, Float> {
+public class StringCharacterConverter extends AbstractConverter<String, Character> {
 
-  public StringFloatConveter() {
+  public StringCharacterConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringFloatConveter(boolean throwException) {
+  public StringCharacterConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringFloatConveter(Float defaultValue) {
+  public StringCharacterConverter(Character defaultValue) {
     super(defaultValue);
   }
 
@@ -46,15 +47,19 @@ public class StringFloatConveter extends AbstractNumberConverter<String, Float> 
    * @param defaultValue
    * @param throwException
    */
-  public StringFloatConveter(Float defaultValue, boolean throwException) {
+  public StringCharacterConverter(Character defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected Float convert(String value, Map<String, ?> hints) throws Exception {
+  protected Character convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Float.valueOf(value.trim());
+    if (value.length() == 1) {
+      return value.charAt(0);
+    }
+    throw new ConversionException("Can not convert from '%s' to Character", value);
   }
+
 }

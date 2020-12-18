@@ -193,7 +193,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
       return Pair.empty();
     } else {
       String names = defaultTrim(aggFieldNames.get(0).getValue());
-      boolean exclude = names.startsWith("!");
+      boolean exclude = !names.isEmpty() && names.charAt(0) == '!';
       if (exclude) {
         names = names.substring(1);
       }

@@ -233,7 +233,7 @@ public class Methods {
 
     @Override
     public String toString() {
-      return new StringBuffer().append("method ").append(getMethodName())
+      return new StringBuilder().append("method ").append(getMethodName())
           .append(Arrays.toString(parameterTypes).replace('[', '(').replace(']', ')')).toString();
     }
 

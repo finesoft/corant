@@ -185,6 +185,17 @@ public class Assertions {
   }
 
   /**
+   * Throw CorantRuntimeException if argument is null
+   *
+   * @param args shouldNoneNull
+   */
+  public static void shouldNoneNull(Object... args) {
+    for (Object obj : args) {
+      shouldNotNull(obj);
+    }
+  }
+
+  /**
    * Throw CorantRuntimeException if argument is blank.
    *
    * @param obj
@@ -308,16 +319,5 @@ public class Assertions {
       throw ex.get();
     }
     return obj;
-  }
-
-  /**
-   * Throw CorantRuntimeException if argument is null
-   *
-   * @param args shouldNoneNull
-   */
-  public void shouldNoneNull(Object... args) {
-    for (Object obj : args) {
-      shouldNotNull(obj);
-    }
   }
 }

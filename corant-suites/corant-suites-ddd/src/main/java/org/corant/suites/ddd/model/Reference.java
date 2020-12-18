@@ -37,7 +37,7 @@ public interface Reference<T> extends Serializable {
   T retrieve();
 
   /**
-   * Try to retrive the object
+   * Try to retrieve the object
    *
    * @return tryRetrieve
    */

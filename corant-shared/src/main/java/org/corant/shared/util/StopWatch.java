@@ -167,8 +167,7 @@ public class StopWatch {
   }
 
   public StopWatch stop(PrintStream ps) throws IllegalStateException {
-    return stop(t -> ps
-        .println(String.format("Task %s take %s.", defaultString(t.getName()), t.getDuration())));
+    return stop(t -> ps.printf("Task %s take %s.", defaultString(t.getName()), t.getDuration()));
   }
 
   public static final class TaskInfo {

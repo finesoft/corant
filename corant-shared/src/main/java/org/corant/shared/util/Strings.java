@@ -87,7 +87,7 @@ public class Strings {
    * @return contains
    */
   public static boolean contains(String str, String searchStr) {
-    return str == null || searchStr == null ? false : str.contains(searchStr);
+    return str != null && searchStr != null && str.contains(searchStr);
   }
 
   /**
@@ -658,7 +658,7 @@ public class Strings {
     }
     if (slen == 1) {
       char wholeChar = wholeSpreator.charAt(0);
-      return split(str, c -> c.charValue() == wholeChar);
+      return split(str, c -> c == wholeChar);
     }
     int s = 0;
     int e = 0;

@@ -310,7 +310,7 @@ public class Streams {
   public abstract static class AbstractBatchHandlerSpliterator<T> extends AbstractSpliterator<T> {
 
     private final int batchSize;
-    private Consumer<Long> handler;
+    private final Consumer<Long> handler;
 
     protected AbstractBatchHandlerSpliterator(long est, int additionalCharacteristics,
         int forEachBathSize, Consumer<Long> handler) {

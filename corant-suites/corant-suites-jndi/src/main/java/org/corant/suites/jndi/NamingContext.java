@@ -466,7 +466,7 @@ public class NamingContext implements Context {
       } else {
         if (resolveLinks && entry.type == NamingContextEntry.LINK_REF) {
           String link = ((LinkRef) entry.value).getLinkName();
-          if (link.startsWith(".")) {
+          if (!link.isEmpty() && link.charAt(0) == '.') {
             return lookup(link.substring(1));// Link relative to this context
           } else {
             return new InitialContext(getEnvironment()).lookup(link);

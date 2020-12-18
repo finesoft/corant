@@ -14,7 +14,6 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -23,23 +22,23 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringDurationConveter extends AbstractConverter<String, Duration> {
+public class StringDoubleConverter extends AbstractNumberConverter<String, Double> {
 
-  public StringDurationConveter() {
+  public StringDoubleConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringDurationConveter(boolean throwException) {
+  public StringDoubleConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringDurationConveter(Duration defaultValue) {
+  public StringDoubleConverter(Double defaultValue) {
     super(defaultValue);
   }
 
@@ -47,16 +46,16 @@ public class StringDurationConveter extends AbstractConverter<String, Duration> 
    * @param defaultValue
    * @param throwException
    */
-  public StringDurationConveter(Duration defaultValue, boolean throwException) {
+  public StringDoubleConverter(Double defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected Duration convert(String value, Map<String, ?> hints) throws Exception {
+  protected Double convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Duration.parse(value.trim());
+    return Double.valueOf(value.trim());
   }
 
 }

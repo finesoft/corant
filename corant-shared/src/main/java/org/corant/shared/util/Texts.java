@@ -50,11 +50,11 @@ public class Texts {
 
   private Texts() {}
 
-  public static InputStream asInputStream(String data) throws IOException {
+  public static InputStream asInputStream(String data) {
     return new ByteArrayInputStream(data.getBytes());
   }
 
-  public static InputStream asInputStream(String data, Charset charset) throws IOException {
+  public static InputStream asInputStream(String data, Charset charset) {
     return new ByteArrayInputStream(data.getBytes(charset));
   }
 

@@ -37,7 +37,7 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
   @Override
   public Map<String, String> apply(final Map<String, String> properties,
       final Collection<ConfigSource> originalSources) {
-    final Map<String, String> adjustered = new HashMap<>(properties);
+    final Map<String, String> adjusted = new HashMap<>(properties);
     final Set<String> stack = new LinkedHashSet<>();
     final ConfigVariableProcessor processor = new ConfigVariableProcessor(originalSources);
     properties.forEach((k, v) -> {
@@ -52,9 +52,9 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
           stack.clear();
         }
       }
-      adjustered.put(k, value);
+      adjusted.put(k, value);
     });
-    return adjustered;
+    return adjusted;
   }
 
   boolean hasExpression(String v) {

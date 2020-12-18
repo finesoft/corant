@@ -14,7 +14,7 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -23,23 +23,23 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringCharsetConveter extends AbstractConverter<String, Charset> {
+public class StringDurationConverter extends AbstractConverter<String, Duration> {
 
-  public StringCharsetConveter() {
+  public StringDurationConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringCharsetConveter(boolean throwException) {
+  public StringDurationConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringCharsetConveter(Charset defaultValue) {
+  public StringDurationConverter(Duration defaultValue) {
     super(defaultValue);
   }
 
@@ -47,16 +47,16 @@ public class StringCharsetConveter extends AbstractConverter<String, Charset> {
    * @param defaultValue
    * @param throwException
    */
-  public StringCharsetConveter(Charset defaultValue, boolean throwException) {
+  public StringDurationConverter(Duration defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected Charset convert(String value, Map<String, ?> hints) throws Exception {
+  protected Duration convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Charset.forName(value);
+    return Duration.parse(value.trim());
   }
 
 }

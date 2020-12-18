@@ -14,8 +14,8 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import java.nio.charset.Charset;
 import java.util.Map;
-import org.corant.shared.conversion.ConversionException;
 
 /**
  * corant-shared
@@ -23,23 +23,23 @@ import org.corant.shared.conversion.ConversionException;
  * @author bingo 下午6:21:39
  *
  */
-public class StringCharacterConveter extends AbstractConverter<String, Character> {
+public class StringCharsetConverter extends AbstractConverter<String, Charset> {
 
-  public StringCharacterConveter() {
+  public StringCharsetConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringCharacterConveter(boolean throwException) {
+  public StringCharsetConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringCharacterConveter(Character defaultValue) {
+  public StringCharsetConverter(Charset defaultValue) {
     super(defaultValue);
   }
 
@@ -47,19 +47,16 @@ public class StringCharacterConveter extends AbstractConverter<String, Character
    * @param defaultValue
    * @param throwException
    */
-  public StringCharacterConveter(Character defaultValue, boolean throwException) {
+  public StringCharsetConverter(Charset defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected Character convert(String value, Map<String, ?> hints) throws Exception {
+  protected Charset convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    if (value.length() == 1) {
-      return value.charAt(0);
-    }
-    throw new ConversionException("Can not convert from '%s' to Character", value);
+    return Charset.forName(value);
   }
 
 }

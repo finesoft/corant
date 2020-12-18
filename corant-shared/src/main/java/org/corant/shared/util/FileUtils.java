@@ -25,7 +25,6 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -180,7 +179,7 @@ public class FileUtils {
         try {
           return new URL(jarFile);
         } catch (MalformedURLException ex) {
-          if (!jarFile.startsWith("/")) {
+          if (!jarFile.isEmpty() && jarFile.charAt(0) != '/') {
             jarFile = "/" + jarFile;
           }
           return new URL(FILE_URL_PREFIX + jarFile);
@@ -243,8 +242,7 @@ public class FileUtils {
     }
   }
 
-  public static boolean isSameContent(final File file1, final File file2)
-      throws FileNotFoundException, IOException {
+  public static boolean isSameContent(final File file1, final File file2) throws IOException {
     if (file1 == null || file2 == null || !file1.isFile() || !file2.isFile() || !file1.canRead()
         || !file2.canRead()) {
       return false;

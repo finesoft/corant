@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 
@@ -40,6 +41,7 @@ public class ConfigUtils {
   public static final int SEPARATOR_LEN = NAME_SPACE_SEPARATORS.length();
   public static final String VALUE_DELIMITER = "(?<!\\\\),";
   public static final String KEY_DELIMITER = "(?<!\\\\)\\.";
+  private static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
@@ -82,7 +84,7 @@ public class ConfigUtils {
     if (value != null) {
       return value;
     }
-    String sanitizedName = propertyName.replaceAll("[^a-zA-Z0-9_]", "_");
+    String sanitizedName = ENV_KEY_PATTERN.matcher(propertyName).replaceAll("_");
     value = sysEnv.get(sanitizedName);
     if (value != null) {
       return value;

@@ -358,13 +358,13 @@ public class Corant implements AutoCloseable {
 
   /**
    * The complete startup method, this method will use incoming bean classes(synthetic) and
-   * classloader and arguments to construct Corant instance and start it, before start this method
+   * class loader and arguments to construct Corant instance and start it, before start this method
    * also provide a pre-initializer callback to handle before the CDI container initialize. The
-   * pre-initializer can use for configurate the CDI container before initialize it.
+   * pre-initializer can use for configure the CDI container before initialize it.
    *
    * @param beanClasses The synthetic bean class
    * @param classLoader The class loader use for the current thread context and the CDI container
-   * @param preInitializer The pre-initializer callback use for configurate the CDI container
+   * @param preInitializer The pre-initializer callback use for configure the CDI container
    * @param arguments The application arguments can be propagated to related processors
    * @return The Corant instance
    */
@@ -391,10 +391,10 @@ public class Corant implements AutoCloseable {
 
   /**
    * Use the specified arguments to construct Corant instance and start it, the incoming arguments
-   * will be propagate to all CorantBootHandler andallCorantLifecycleEvent listeners, The incoming
-   * pre-initializer can use for configurate the CDI container before initialize it.
+   * will be propagate to all CorantBootHandler and all CorantLifecycle Event listeners, The
+   * incoming pre-initializer can use for configure the CDI container before initialize it.
    *
-   * @param preInitializer The pre-initializer callback use for configurate CDI container
+   * @param preInitializer The pre-initializer callback use for configure CDI container
    * @param arguments The application arguments can be propagated to related processors
    * @return The Corant instance
    */
@@ -622,7 +622,7 @@ public class Corant implements AutoCloseable {
         Runtime.getRuntime()
             .addShutdownHook(new Thread(() -> deregisterFromMBean(POWER_MBEAN_NAME)));
       }
-      log("Registered %s to MBean server, one can use it for shutdown or restartup the application.",
+      log("Registered %s to MBean server, one can use it for shutdown or re-startup the application.",
           applicationName(), Instant.now());
       return true;
     }

@@ -111,7 +111,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
    */
   protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
     select(ParameterReviser.class).stream().filter(r -> r.canHandle(getQuery()))
-        .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority())).forEach(r -> {
+        .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority()) * -1).forEach(r -> {
           Map<String, Object> vars = r.get();
           if (vars != null) {
             for (Entry<String, Object> entry : vars.entrySet()) {

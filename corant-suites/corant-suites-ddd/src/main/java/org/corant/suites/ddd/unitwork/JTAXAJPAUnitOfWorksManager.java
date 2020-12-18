@@ -22,8 +22,8 @@ import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
  * corant-suites-ddd
  *
  * <p>
- * The JTA JPA unit of works manager, use for create and destroy the JTAXAJPAUnitOfWork provide
- * thenecessary message dispatch service for the unit of work.
+ * The JTA JPA unit of works manager, use for create and destroy the JTAXAJPAUnitOfWork provide the
+ * necessary message dispatch service for the unit of work.
  * </p>
  *
  * @author bingo 下午2:14:21

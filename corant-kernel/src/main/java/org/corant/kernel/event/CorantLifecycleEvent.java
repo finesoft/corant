@@ -26,7 +26,7 @@ import javax.inject.Inject;
 public interface CorantLifecycleEvent {
 
   @ApplicationScoped
-  public static class LifecycleEventEmitter {
+  class LifecycleEventEmitter {
     @Inject
     protected Event<CorantLifecycleEvent> events;
 

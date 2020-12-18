@@ -38,7 +38,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
   private final CreationalContext<T> creationalContext;
   private final WeldInjectionTarget<T> injectionTarget;
   private final AnnotatedType<T> annotatedType;
-  private final T orginalInstance;
+  private final T originalInstance;
   private final WeldManager bm;
   private boolean disposed = false;
 
@@ -47,7 +47,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
     creationalContext = bm.createCreationalContext(null);
     annotatedType = bm.createAnnotatedType(clazz);
     injectionTarget = bm.getInjectionTargetFactory(annotatedType).createInjectionTarget(null);
-    orginalInstance = null;
+    originalInstance = null;
   }
 
   public UnmanageableInstance(T object) {
@@ -57,7 +57,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
     annotatedType = bm.createAnnotatedType(forceCast(object.getClass()));
     injectionTarget =
         bm.getInjectionTargetFactory(annotatedType).createNonProducibleInjectionTarget();
-    orginalInstance = object;
+    originalInstance = object;
   }
 
   public static <T> UnmanageableInstance<T> of(Class<T> clazz) {
@@ -178,12 +178,12 @@ public class UnmanageableInstance<T> implements AutoCloseable {
       throw new IllegalStateException("Trying to call produce() on an already disposed instance");
     }
     instance =
-        // orginalInstance == null ? injectionTarget.produce(creationalContext) : orginalInstance;
+        // originalInstance == null ? injectionTarget.produce(creationalContext) : originalInstance;
 
         InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
             .createInterceptedInstance(
-                orginalInstance == null ? injectionTarget.produce(creationalContext)
-                    : orginalInstance);
+                originalInstance == null ? injectionTarget.produce(creationalContext)
+                    : originalInstance);
     return this;
   }
 

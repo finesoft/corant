@@ -302,7 +302,7 @@ public class Bytes {
 
   public static class BitArray {
 
-    private byte[] array = new byte[0];
+    private byte[] array = EMPTY_ARRAY;
 
     private int size = 0;
 

@@ -75,10 +75,10 @@ public class ResteasyProvider implements WebMetaDataProvider {
       servletMetaDatas.add(appInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
           appInfo.toResteasyDeployment(d -> {
-            d.setScannedResourceClasses(extension.getResources().stream()
-                .map(Classes::getUserClass).map(Class::getName).collect(Collectors.toList()));
-            d.setScannedProviderClasses(extension.getProviders().stream()
-                .map(Classes::getUserClass).map(Class::getName).collect(Collectors.toList()));
+            d.setScannedResourceClasses(extension.getResources().stream().map(Classes::getUserClass)
+                .map(Class::getName).collect(Collectors.toList()));
+            d.setScannedProviderClasses(extension.getProviders().stream().map(Classes::getUserClass)
+                .map(Class::getName).collect(Collectors.toList()));
           }));
     }
   }
@@ -106,7 +106,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
       applicationClass = getUserClass(application.getClass());
       ApplicationPath ap = findAnnotation(applicationClass, ApplicationPath.class, true);
       String cp = ap == null ? "/" : ap.value();
-      if (!cp.startsWith("/")) {
+      if (cp.charAt(0) != '/') {
         cp = "/" + cp;
       }
       contextPath = cp;

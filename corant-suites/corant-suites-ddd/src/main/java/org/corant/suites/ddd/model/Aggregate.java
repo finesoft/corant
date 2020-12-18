@@ -283,15 +283,13 @@ public interface Aggregate extends Entity {
           break;
         } else {
           Type[] genericInterfaces = referenceClass.getGenericInterfaces();
-          if (genericInterfaces != null) {
-            for (Type type : genericInterfaces) {
-              if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                if (AggregateReference.class
-                    .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                  resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
-                  break;
-                }
+          for (Type type : genericInterfaces) {
+            if (type instanceof ParameterizedType) {
+              ParameterizedType parameterizedType = (ParameterizedType) type;
+              if (AggregateReference.class
+                  .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+                resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                break;
               }
             }
           }

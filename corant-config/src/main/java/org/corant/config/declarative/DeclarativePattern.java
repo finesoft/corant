@@ -62,10 +62,8 @@ public enum DeclarativePattern {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();
       String key = configField.getKey(infix);
-      streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> {
-        rawMap.put(removeSplitor(k.substring(key.length())),
-            config.getOptionalValue(k, String.class));
-      });
+      streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> rawMap
+          .put(removeSplitor(k.substring(key.length())), config.getOptionalValue(k, String.class)));
 
       if (isNotEmpty(rawMap)) {
         Field field = configField.getField();

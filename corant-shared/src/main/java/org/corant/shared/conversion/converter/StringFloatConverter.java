@@ -22,23 +22,23 @@ import java.util.Map;
  * @author bingo 下午6:21:39
  *
  */
-public class StringDoubleConveter extends AbstractNumberConverter<String, Double> {
+public class StringFloatConverter extends AbstractNumberConverter<String, Float> {
 
-  public StringDoubleConveter() {
+  public StringFloatConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public StringDoubleConveter(boolean throwException) {
+  public StringFloatConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public StringDoubleConveter(Double defaultValue) {
+  public StringFloatConverter(Float defaultValue) {
     super(defaultValue);
   }
 
@@ -46,16 +46,15 @@ public class StringDoubleConveter extends AbstractNumberConverter<String, Double
    * @param defaultValue
    * @param throwException
    */
-  public StringDoubleConveter(Double defaultValue, boolean throwException) {
+  public StringFloatConverter(Float defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   @Override
-  protected Double convert(String value, Map<String, ?> hints) throws Exception {
+  protected Float convert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }
-    return Double.valueOf(value.trim());
+    return Float.valueOf(value.trim());
   }
-
 }

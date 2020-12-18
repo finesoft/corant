@@ -25,23 +25,23 @@ import org.corant.shared.conversion.ConverterHints;
  *
  */
 @SuppressWarnings("rawtypes")
-public class ObjectClassConveter extends AbstractConverter<Object, Class> {
+public class ObjectClassConverter extends AbstractConverter<Object, Class> {
 
-  public ObjectClassConveter() {
+  public ObjectClassConverter() {
     super();
   }
 
   /**
    * @param throwException
    */
-  public ObjectClassConveter(boolean throwException) {
+  public ObjectClassConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public ObjectClassConveter(Class defaultValue) {
+  public ObjectClassConverter(Class defaultValue) {
     super(defaultValue);
   }
 
@@ -49,7 +49,7 @@ public class ObjectClassConveter extends AbstractConverter<Object, Class> {
    * @param defaultValue
    * @param throwException
    */
-  public ObjectClassConveter(Class defaultValue, boolean throwException) {
+  public ObjectClassConverter(Class defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 

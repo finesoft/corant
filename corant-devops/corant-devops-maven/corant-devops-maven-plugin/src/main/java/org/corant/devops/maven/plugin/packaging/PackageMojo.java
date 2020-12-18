@@ -126,7 +126,7 @@ public class PackageMojo extends AbstractMojo {
 
   public String getDistFormat() {
     String df = distFormat != null && !distFormat.isEmpty() ? distFormat.trim() : "";
-    if (df.startsWith(".")) {
+    if (!df.isEmpty() && df.charAt(0) == '.') {
       return df.substring(1);
     }
     return df.isEmpty() ? "zip" : df;

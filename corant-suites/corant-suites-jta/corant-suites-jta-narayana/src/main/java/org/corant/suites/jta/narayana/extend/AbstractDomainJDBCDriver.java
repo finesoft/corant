@@ -56,7 +56,7 @@ public abstract class AbstractDomainJDBCDriver
   public boolean allObjUids(String typeName, InputObjectState state, int match)
       throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     try {
@@ -133,7 +133,7 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public boolean commit_state(Uid objUid, String typeName) throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     boolean result = false;
@@ -186,7 +186,7 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public int currentState(Uid objUid, String typeName) throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     int theState = StateStatus.OS_UNKNOWN;
@@ -262,7 +262,7 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public boolean hide_state(Uid objUid, String typeName) throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     boolean result = false;
@@ -311,7 +311,7 @@ public abstract class AbstractDomainJDBCDriver
       throws ObjectStoreException {
     InputObjectState result = null;
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
 
@@ -357,7 +357,7 @@ public abstract class AbstractDomainJDBCDriver
     boolean result = false;
     if (typeName != null) {
       // Taken this requirement from ObjStoreBrowser
-      if (typeName.startsWith("/")) {
+      if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
         typeName = typeName.substring(1);
       }
       if (stateType == StateStatus.OS_COMMITTED || stateType == StateStatus.OS_UNCOMMITTED) {
@@ -395,7 +395,7 @@ public abstract class AbstractDomainJDBCDriver
   @Override
   public boolean reveal_state(Uid objUid, String typeName) throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     boolean result = false;
@@ -426,7 +426,7 @@ public abstract class AbstractDomainJDBCDriver
   public boolean write_state(Uid objUid, String typeName, OutputObjectState state, int stateType)
       throws ObjectStoreException {
     // Taken this requirement from ObjStoreBrowser
-    if (typeName.startsWith("/")) {
+    if (!typeName.isEmpty() && typeName.charAt(0) == '/') {
       typeName = typeName.substring(1);
     }
     boolean result = false;

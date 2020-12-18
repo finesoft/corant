@@ -32,7 +32,7 @@ public interface MessageStorage extends UnaryOperator<Message> {
     @Override
     public Message apply(Message t) {
       logger.fine(
-          () -> "The message stroage is an empty implementation that does not really implement apply");
+          () -> "The message storage is an empty implementation that does not really implement apply");
       return t;
     }
   };

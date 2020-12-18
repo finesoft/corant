@@ -236,7 +236,7 @@ public class Objects {
   }
 
   public static <T> T tryCast(Object o, Class<T> cls) {
-    return o != null && cls.isInstance(o) ? cls.cast(o) : null;
+    return cls.isInstance(o) ? cls.cast(o) : null;
   }
 
   public static <T> T tryNewInstance(String className) {

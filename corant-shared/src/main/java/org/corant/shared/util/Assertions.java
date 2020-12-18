@@ -80,7 +80,7 @@ public class Assertions {
    * @param condition shouldBeFalse
    */
   public static void shouldBeFalse(boolean condition) {
-    shouldBeFalse(condition, "This shoud be false");
+    shouldBeFalse(condition, "This should be false");
   }
 
   /**
@@ -155,7 +155,7 @@ public class Assertions {
    * @param condition shouldBeTrue
    */
   public static void shouldBeTrue(boolean condition) {
-    shouldBeTrue(condition, "This shoud be true");
+    shouldBeTrue(condition, "This should be true");
   }
 
   /**
@@ -246,7 +246,7 @@ public class Assertions {
    * @return shouldNotEmpty
    */
   public static <T> T shouldNotEmpty(T obj) {
-    return shouldNotEmpty(obj, "This shoud be true");
+    return shouldNotEmpty(obj, "This should be true");
   }
 
   /**

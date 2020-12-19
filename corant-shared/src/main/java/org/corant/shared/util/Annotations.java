@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -119,7 +118,7 @@ public class Annotations {
     A annotation = method.getAnnotation(annotationType);
     if (annotation == null && searchSupers) {
       final Class<?> declaringClazz = method.getDeclaringClass();
-      final List<Class<?>> classes = Classes.getAllSuperclassesAndInterfaces(declaringClazz);
+      final Set<Class<?>> classes = Classes.getAllSuperclassesAndInterfaces(declaringClazz);
       for (final Class<?> cls : classes) {
         Method equivalentMethod;
         try {

@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Conversions.toSet;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -66,7 +67,13 @@ public class Maps {
   public static <T> T extractMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
     iterateMapValue(object, keyPath, 0, true, true, holder);
-    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
+    if (holder.isEmpty()) {
+      return null;
+    } else {
+      T value = forceCast(holder.get(0));
+      holder.clear();
+      return value;
+    }
   }
 
   /**
@@ -338,7 +345,13 @@ public class Maps {
   public static <T> T getMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
     iterateMapValue(object, keyPath, 0, true, false, holder);
-    return !holder.isEmpty() ? forceCast(holder.get(0)) : null;
+    if (holder.isEmpty()) {
+      return null;
+    } else {
+      T value = forceCast(holder.get(0));
+      holder.clear();
+      return value;
+    }
   }
 
   /**
@@ -527,6 +540,21 @@ public class Maps {
   }
 
   /**
+   * Retrieve and convert the value of the specified type with key from map, use specified set
+   * extractor.
+   *
+   * @param <T> the expected value type
+   * @param map
+   * @param key
+   * @param extractor the value extractor that extract map value.
+   * @return getMapObjectSet
+   */
+  public static <T> Set<T> getMapObjectSet(final Map<?, ?> map, final Object key,
+      final Function<Object, Set<T>> extractor) {
+    return map != null ? extractor.apply(map.get(key)) : null;
+  }
+
+  /**
    * Retrieve and convert the set value with the key from a map, use force cast convert.
    *
    * @param <T>
@@ -535,8 +563,7 @@ public class Maps {
    * @return getMapList
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
-    List<T> list = getMapList(map, key, Objects::forceCast);
-    return list != null ? new HashSet<>(list) : null;
+    return getMapSet(map, key, Objects::forceCast);
   }
 
   /**
@@ -558,13 +585,12 @@ public class Maps {
    * @param <T>
    * @param map
    * @param key
-   * @param objFunc
+   * @param singleElementExtractor
    * @return getMapSet
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
-      final Function<Object, T> objFunc) {
-    List<T> list = getMapObjectList(map, key, v -> toList(v, objFunc));
-    return list != null ? new HashSet<>(list) : null;
+      final Function<Object, T> singleElementExtractor) {
+    return getMapObjectSet(map, key, v -> toSet(v, singleElementExtractor));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {
@@ -614,7 +640,7 @@ public class Maps {
   }
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
-    Map<V, K> result = new HashMap<>();
+    Map<V, K> result = new HashMap<>(shouldNotNull(map, "The map can't null").size());
     if (map != null) {
       map.forEach((k, v) -> result.put(v, k));
     }
@@ -680,7 +706,7 @@ public class Maps {
   }
 
   public static Map<String, String> toMap(final Properties properties) {
-    Map<String, String> map = new HashMap<>();
+    Map<String, String> map = new HashMap<>(shouldNotNull(properties).size());
     if (properties != null) {
       properties.stringPropertyNames().forEach(name -> map.put(name, properties.getProperty(name)));
     }

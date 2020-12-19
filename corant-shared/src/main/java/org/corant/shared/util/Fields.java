@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,14 +28,12 @@ import java.util.function.Function;
 public class Fields {
 
   public static List<Field> getAllFields(final Class<?> cls) {
+    Class<?> currentClass = shouldNotNull(cls);
     final List<Field> allFields = new ArrayList<>();
-    if (cls != null) {
-      Class<?> currentClass = cls;
-      while (currentClass != null) {
-        final Field[] declaredFields = currentClass.getDeclaredFields();
-        Collections.addAll(allFields, declaredFields);
-        currentClass = currentClass.getSuperclass();
-      }
+    while (currentClass != null) {
+      final Field[] declaredFields = currentClass.getDeclaredFields();
+      Collections.addAll(allFields, declaredFields);
+      currentClass = currentClass.getSuperclass();
     }
     return allFields;
   }

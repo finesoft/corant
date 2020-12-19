@@ -64,10 +64,10 @@ public class Strings {
 
   /**
    * <pre>
-   * Strings.defaultString(null)  = ""
-   * Strings.defaultString("")    = ""
-   * Strings.defaultString("abc") = "abc"
-   * Strings.defaultString(NonNull) = NonNull.toString()
+   * Strings.asDefaultString(null)  = ""
+   * Strings.asDefaultString("")    = ""
+   * Strings.asDefaultString("abc") = "abc"
+   * Strings.asDefaultString(NonNull) = NonNull.toString()
    * </pre>
    */
   public static String asDefaultString(final Object obj) {
@@ -92,16 +92,16 @@ public class Strings {
 
   /**
    * <pre>
-   * Strings.ifBlank(null, ()->"DFLT")  = "DFLT"
-   * Strings.ifBlank("", ()->"DFLT")    = "DFLT"
-   * Strings.ifBlank(" ", ()->"DFLT")   = "DFLT"
-   * Strings.ifBlank("abc", ()->"DFLT") = "abc"
-   * Strings.ifBlank("", null)      = null
+   * Strings.defaultBlank(null, ()->"DFLT")  = "DFLT"
+   * Strings.defaultBlank("", ()->"DFLT")    = "DFLT"
+   * Strings.defaultBlank(" ", ()->"DFLT")   = "DFLT"
+   * Strings.defaultBlank("abc", ()->"DFLT") = "abc"
+   * Strings.defaultBlank("", null)      = null
    * </pre>
    *
    * @param str
    * @param supplier
-   * @return ifBlank
+   * @return defaultBlank
    */
   public static <T extends CharSequence> T defaultBlank(final T str, final Supplier<T> supplier) {
     return isBlank(str) ? supplier == null ? null : supplier.get() : str;
@@ -109,16 +109,16 @@ public class Strings {
 
   /**
    * <pre>
-   * Strings.ifBlank(null, "DFLT")  = "DFLT"
-   * Strings.ifBlank("", "DFLT")    = "DFLT"
-   * Strings.ifBlank(" ", "DFLT")   = "DFLT"
-   * Strings.ifBlank("abc", "DFLT") = "abc"
-   * Strings.ifBlank("", null)      = null
+   * Strings.defaultBlank(null, "DFLT")  = "DFLT"
+   * Strings.defaultBlank("", "DFLT")    = "DFLT"
+   * Strings.defaultBlank(" ", "DFLT")   = "DFLT"
+   * Strings.defaultBlank("abc", "DFLT") = "abc"
+   * Strings.defaultBlank("", null)      = null
    * </pre>
    *
    * @param str
    * @param dfltStr
-   * @return ifBlank
+   * @return defaultBlank
    */
   public static <T extends CharSequence> T defaultBlank(final T str, final T dfltStr) {
     return isBlank(str) ? dfltStr : str;
@@ -152,11 +152,11 @@ public class Strings {
 
   /**
    * <pre>
-   * Strings.trimToEmpty(null)          = ""
-   * Strings.trimToEmpty("")            = ""
-   * Strings.trimToEmpty("     ")       = ""
-   * Strings.trimToEmpty("abc")         = "abc"
-   * Strings.trimToEmpty("    abc    ") = "abc"
+   * Strings.defaultTrim(null)          = ""
+   * Strings.defaultTrim("")            = ""
+   * Strings.defaultTrim("     ")       = ""
+   * Strings.defaultTrim("abc")         = "abc"
+   * Strings.defaultTrim("    abc    ") = "abc"
    * </pre>
    *
    * @param str
@@ -514,13 +514,13 @@ public class Strings {
    * {@link #split(String, Predicate)} is that this method does not delete any characters.
    *
    * <pre>
-   * Strings.group("abc123efg456", Character::isDigit)        =       ["abc","123","efg","456"]
-   * Strings.group("abc,efg", c -> c==',')                    =       ["abc",",","efg"]
-   * Strings.group("123", Character::isDigit)                 =       ["123"]
-   * Strings.group(null, Character::isDigit)                  =       []
-   * Strings.group("abc", Character::isDigit)                 =       ["abc"]
-   * Strings.group("abc", null)                               =       ["abc"]
-   * Strings.group(null, null)                                =       []
+   * Strings.segment("abc123efg456", Character::isDigit)        =       ["abc","123","efg","456"]
+   * Strings.segment("abc,efg", c -> c==',')                    =       ["abc",",","efg"]
+   * Strings.segment("123", Character::isDigit)                 =       ["123"]
+   * Strings.segment(null, Character::isDigit)                  =       []
+   * Strings.segment("abc", Character::isDigit)                 =       ["abc"]
+   * Strings.segment("abc", null)                               =       ["abc"]
+   * Strings.segment(null, null)                                =       []
    * </pre>
    *
    * @param str

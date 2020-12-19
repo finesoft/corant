@@ -254,7 +254,7 @@ public class Identifiers {
      * @return getWorkers
      */
     public List<Pair<Long, Long>> getWorkers() {
-      List<Pair<Long, Long>> workers = new ArrayList<>();
+      List<Pair<Long, Long>> workers = new ArrayList<>(workerSize);
       for (int i = 0; i < workerSize; i++) {
         workers.add(Pair.of(workerBits[i], workerIds[i]));
       }

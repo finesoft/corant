@@ -13,17 +13,16 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -153,23 +152,22 @@ public class Classes {
    * @param clazz
    * @return getAllInterfaces
    */
-  public static List<Class<?>> getAllInterfaces(final Class<?> clazz) {
+  public static Set<Class<?>> getAllInterfaces(final Class<?> clazz) {
+    shouldNotNull(clazz, "Can't get interfaces from null class!");
     Set<Class<?>> interfaces = new LinkedHashSet<>();
-    if (clazz != null) {
-      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
-      if (usedClazz.isInterface()) {
-        interfaces.add(usedClazz);
-      }
-      Class<?> current = usedClazz;
-      while (current != null) {
-        Class<?>[] ifcs = current.getInterfaces();
-        for (Class<?> ifc : ifcs) {
-          interfaces.addAll(getAllInterfaces(ifc));
-        }
-        current = current.getSuperclass();
-      }
+    Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
+    if (usedClazz.isInterface()) {
+      interfaces.add(usedClazz);
     }
-    return new ArrayList<>(interfaces);
+    Class<?> current = usedClazz;
+    while (current != null) {
+      Class<?>[] ifcs = current.getInterfaces();
+      for (Class<?> ifc : ifcs) {
+        interfaces.addAll(getAllInterfaces(ifc));
+      }
+      current = current.getSuperclass();
+    }
+    return interfaces;
   }
 
   /**
@@ -178,8 +176,9 @@ public class Classes {
    * @param object
    * @return getAllInterfaces
    */
-  public static List<Class<?>> getAllInterfaces(final Object object) {
-    return object == null ? new ArrayList<>() : getAllInterfaces(object.getClass());
+  public static Set<Class<?>> getAllInterfaces(final Object object) {
+    return getAllInterfaces(
+        shouldNotNull(object, "Can't get interfaces from null object!").getClass());
   }
 
   /**
@@ -188,16 +187,15 @@ public class Classes {
    * @param clazz
    * @return getAllSuperClasses
    */
-  public static List<Class<?>> getAllSuperClasses(final Class<?> clazz) {
-    List<Class<?>> superClasses = new ArrayList<>();
-    if (clazz != null) {
-      Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
-      if (!usedClazz.isInterface() && usedClazz != Object.class) {
-        Class<?> current = usedClazz;
-        while (current.getSuperclass() != null) {
-          superClasses.add(current.getSuperclass());
-          current = current.getSuperclass();
-        }
+  public static Set<Class<?>> getAllSuperClasses(final Class<?> clazz) {
+    shouldNotNull(clazz, "Can't get super classes from null class!");
+    Set<Class<?>> superClasses = new LinkedHashSet<>();
+    Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
+    if (!usedClazz.isInterface() && usedClazz != Object.class) {
+      Class<?> current = usedClazz;
+      while (current.getSuperclass() != null) {
+        superClasses.add(current.getSuperclass());
+        current = current.getSuperclass();
       }
     }
     return superClasses;
@@ -209,15 +207,16 @@ public class Classes {
    * @param object
    * @return getAllSuperClasses
    */
-  public static List<Class<?>> getAllSuperClasses(final Object object) {
-    return object == null ? new ArrayList<>() : getAllSuperClasses(object.getClass());
+  public static Set<Class<?>> getAllSuperClasses(final Object object) {
+    return getAllSuperClasses(
+        shouldNotNull(object, "Can't get super classes from null object!").getClass());
   }
 
-  public static List<Class<?>> getAllSuperclassesAndInterfaces(final Class<?> clazz) {
-    List<Class<?>> list = new ArrayList<>();
-    list.addAll(getAllInterfaces(clazz));
-    list.addAll(getAllSuperClasses(clazz));
-    return list;
+  public static Set<Class<?>> getAllSuperclassesAndInterfaces(final Class<?> clazz) {
+    Set<Class<?>> set = new LinkedHashSet<>();
+    set.addAll(getAllSuperClasses(clazz));
+    set.addAll(getAllInterfaces(clazz));
+    return set;
   }
 
   /**

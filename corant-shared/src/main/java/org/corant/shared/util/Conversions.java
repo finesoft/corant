@@ -44,6 +44,7 @@ import org.corant.shared.conversion.converter.NumberBigDecimalConverter;
 import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
 import org.corant.shared.conversion.converter.StringBigDecimalConverter;
 import org.corant.shared.conversion.converter.StringBigIntegerConverter;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-shared
@@ -362,13 +363,12 @@ public class Conversions {
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
-    List<T> values = new ArrayList<>();
     if (obj instanceof Iterable<?>) {
-      values = streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toList());
+      return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toList());
     } else if (obj instanceof Object[]) {
-      values = streamOf((Object[]) obj).map(convert).collect(Collectors.toList());
+      return streamOf((Object[]) obj).map(convert).collect(Collectors.toList());
     }
-    return values;
+    throw new NotSupportedException("Only support Iterable and Array");
   }
 
   public static LocalDate toLocalDate(Object obj) {
@@ -493,6 +493,15 @@ public class Conversions {
       return Conversion.convert((Object[]) obj, HashSet::new, clazz, hints);
     }
     return Conversion.convert(obj, clazz, HashSet::new, hints);
+  }
+
+  public static <T> Set<T> toSet(Object obj, Function<Object, T> convert) {
+    if (obj instanceof Iterable<?>) {
+      return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toSet());
+    } else if (obj instanceof Object[]) {
+      return streamOf((Object[]) obj).map(convert).collect(Collectors.toSet());
+    }
+    throw new NotSupportedException("Only support Iterable and Array");
   }
 
   public static Short toShort(Object obj) {

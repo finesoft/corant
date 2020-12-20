@@ -15,7 +15,9 @@ package org.corant.config;
 
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,6 +29,7 @@ import org.corant.config.spi.ConfigAdjuster;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.config.spi.Converter;
 
 /**
  * corant-config
@@ -52,6 +55,11 @@ public class CorantConfig implements Config, Serializable {
     return sources.get();
   }
 
+  public CorantConfigValue getConfigValue(String propertyName) {
+    // TODO MP 2.0
+    return null;
+  }
+
   public CorantConfigConversion getConversion() {
     return conversion;
   }
@@ -65,12 +73,24 @@ public class CorantConfig implements Config, Serializable {
     return conversion.convertIfNecessary(result, type);
   }
 
+  public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
+    //TODO MP 2.0
+    return conversion.getConverter(forType);
+  }
+
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
     logger.finer(() -> String.format("Retrieve optional config property key [%s] type [%s]",
         propertyName, propertyType.getName()));
     return Optional
         .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));
+  }
+
+  public <T> Optional<List<T>> getOptionalValues(String propertyName, Class<T> propertyType) {
+    //TODO MP 2.0
+    @SuppressWarnings("unchecked")
+    Class<T[]> arrayType = (Class<T[]>) Array.newInstance(propertyType, 0).getClass();
+    return getOptionalValue(propertyName, arrayType).map(Arrays::asList);
   }
 
   @Override
@@ -105,6 +125,13 @@ public class CorantConfig implements Config, Serializable {
     return value;
   }
 
+  public <T> List<T> getValues(String propertyName, Class<T> propertyType) {
+    //TODO MP 2.0
+    @SuppressWarnings("unchecked")
+    Class<T[]> arrayType = (Class<T[]>) Array.newInstance(propertyType, 0).getClass();
+    return Arrays.asList(getValue(propertyName, arrayType));
+  }
+
   public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {
     List<ConfigSource> newSources = CorantConfigSource.resolve(sources, adjuster);
     for (;;) {
@@ -113,5 +140,14 @@ public class CorantConfig implements Config, Serializable {
         return;
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T unwrap(Class<T> type) {
+    //TODO MP 2.0
+    if (CorantConfig.class.isAssignableFrom(type)) {
+      return (T) this;
+    }
+    throw new IllegalArgumentException("Can't unwrap CorantConfig to " + type);
   }
 }

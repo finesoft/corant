@@ -254,7 +254,7 @@ public class JsonUtils {
     @Override
     public void serialize(Pair pair, JsonGenerator gen, SerializerProvider serializerProvider)
         throws IOException {
-      gen.writeStartArray(2);
+      gen.writeStartArray(pair, 2);
       gen.writeObject(pair.getLeft());
       gen.writeObject(pair.getRight());
       gen.writeEndArray();
@@ -289,7 +289,7 @@ public class JsonUtils {
     @Override
     public void serialize(Range range, JsonGenerator gen, SerializerProvider serializerProvider)
         throws IOException {
-      gen.writeStartArray(2);
+      gen.writeStartArray(range, 2);
       gen.writeObject(range.getStart());
       gen.writeObject(range.getEnd());
       gen.writeEndArray();
@@ -339,7 +339,7 @@ public class JsonUtils {
     @Override
     public void serialize(Triple triple, JsonGenerator gen, SerializerProvider serializerProvider)
         throws IOException {
-      gen.writeStartArray(3);
+      gen.writeStartArray(triple, 3);
       gen.writeObject(triple.getLeft());
       gen.writeObject(triple.getMiddle());
       gen.writeObject(triple.getRight());

@@ -53,6 +53,7 @@ import javax.annotation.Priority;
 import javax.inject.Provider;
 import org.corant.shared.conversion.ConverterRegistry;
 import org.corant.shared.conversion.ConverterType;
+import org.corant.shared.conversion.Converters;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 import org.eclipse.microprofile.config.spi.Converter;
@@ -324,6 +325,28 @@ public class CorantConfigConversion implements Serializable {
             .convert(value));
       }
     }
+  }
+
+  public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
+    //TODO MP 2.0
+    Converter<?> converter = null;
+    if (forType == String.class || forType == Object.class) {
+      converter = s -> s;
+    }
+    if (null == converter) {
+      converter = converters.get().get(wrap(forType));
+    }
+    if (null == converter) {
+      converter = ImplicitConverters.of(forType).orElse(null);
+    }
+    if (null == converter) {
+      Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
+          Converters.lookup(String.class, forType);
+      if (corantConverter.isPresent()) {
+        converter = s -> corantConverter.get().apply(s, null);
+      }
+    }
+    return Optional.ofNullable(forceCast(converter));
   }
 
   /**

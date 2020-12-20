@@ -29,7 +29,7 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     implements DynamicQuerierBuilder<P, S, Q> {
 
-  protected final long cachedTimestemp;
+  protected final long cachedTimestamp;
   protected final Query query;
   protected final QueryResolver queryResolver;
   protected final FetchQueryResolver fetchQueryResolver;
@@ -40,15 +40,15 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
       throw new QueryRuntimeException(
           "Can not initialize dynamic querier builder from null query param!");
     }
-    this.cachedTimestemp = Instant.now().toEpochMilli();
+    this.cachedTimestamp = Instant.now().toEpochMilli();
     this.query = query;
     this.queryResolver = queryResolver;
     this.fetchQueryResolver = fetchQueryResolver;
   }
 
   @Override
-  public Long getCachedTimestemp() {
-    return cachedTimestemp;
+  public Long getCachedTimestamp() {
+    return cachedTimestamp;
   }
 
   @Override

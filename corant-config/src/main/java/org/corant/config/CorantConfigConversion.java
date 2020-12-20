@@ -279,7 +279,7 @@ public class CorantConfigConversion implements Serializable {
    */
   public Map<Object, Object> convertMap(String rawValue, Class<?> keyType, Class<?> valueType) {
     Map<String, String> temp = tryConvertStringMap(rawValue);
-    Map<Object, Object> result = new HashMap<>();
+    Map<Object, Object> result = new HashMap<>(temp.size());
     temp.forEach((k, v) -> result.put(convert(k, keyType), convert(v, valueType)));
     return result;
   }

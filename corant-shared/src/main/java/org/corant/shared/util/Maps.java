@@ -641,9 +641,7 @@ public class Maps {
 
   public static <K, V> Map<V, K> invertMap(final Map<K, V> map) {
     Map<V, K> result = new HashMap<>(shouldNotNull(map, "The map can't null").size());
-    if (map != null) {
-      map.forEach((k, v) -> result.put(v, k));
-    }
+    map.forEach((k, v) -> result.put(v, k));
     return result;
   }
 

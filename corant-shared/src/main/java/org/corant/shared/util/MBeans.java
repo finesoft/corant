@@ -79,7 +79,7 @@ public class MBeans {
     }
   }
 
-  public static boolean isRegistered(String objectNaming) throws MBeanRegistrationException {
+  public static boolean isRegistered(String objectNaming) {
     if (isBlank(objectNaming)) {
       return false;
     }

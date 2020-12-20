@@ -108,7 +108,7 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
       dispatcher.awaitTermination(ms, TimeUnit.MICROSECONDS);
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not terminate JTA RL JPA unit of work manager dispatcher."));
+          () -> "Can not terminate JTA RL JPA unit of work manager dispatcher.");
       Thread.currentThread().interrupt();
     }
   }

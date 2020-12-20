@@ -109,8 +109,8 @@ public class Iterables {
    * @param inputs
    * @return concat
    */
-  public static <T> Iterable<T> concat(
-      @SuppressWarnings("unchecked") final Iterable<? extends T>... inputs) {
+  @SafeVarargs
+  public static <T> Iterable<T> concat(final Iterable<? extends T>... inputs) {
     shouldNotNull(inputs);
     return new Iterable<>() {
       final Iterable<? extends T>[] iterables = Arrays.copyOf(inputs, inputs.length);
@@ -132,8 +132,8 @@ public class Iterables {
    * @param inputs
    * @return concat
    */
-  public static <T> Iterator<T> concat(
-      @SuppressWarnings("unchecked") final Iterator<? extends T>... inputs) {
+  @SafeVarargs
+  public static <T> Iterator<T> concat(final Iterator<? extends T>... inputs) {
     shouldNotNull(inputs);
     return new Iterator<>() {
       @SuppressWarnings("unchecked")

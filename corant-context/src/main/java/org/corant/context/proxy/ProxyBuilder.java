@@ -81,11 +81,11 @@ public class ProxyBuilder {
    *
    * @param clazz
    * @param methodPredicate
-   * @param appendQualifierss
+   * @param appendQualifiers
    * @return buildMethods
    */
   public static Set<ContextualMethodHandler> buildMethods(final Class<?> clazz,
-      Predicate<Method> methodPredicate, Annotation... appendQualifierss) {
-    return ContextualMethodHandler.from(clazz, methodPredicate, appendQualifierss);
+      Predicate<Method> methodPredicate, Annotation... appendQualifiers) {
+    return ContextualMethodHandler.from(clazz, methodPredicate, appendQualifiers);
   }
 }

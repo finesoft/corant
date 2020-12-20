@@ -141,7 +141,7 @@ public class Resources {
    * @return
    * @throws IOException fromFileSystem
    */
-  public static FileSystemResource fromFileSystem(File file) throws IOException {
+  public static FileSystemResource fromFileSystem(File file) {
     return new FileSystemResource(shouldNotNull(file));
   }
 
@@ -693,7 +693,7 @@ public class Resources {
      * @throws MalformedURLException
      * @throws IOException
      */
-    public InputStreamResource(URL url) throws MalformedURLException, IOException {
+    public InputStreamResource(URL url) throws IOException {
       location = url.toExternalForm();
       inputStream = url.openStream();
       name = url.getFile();
@@ -861,7 +861,7 @@ public class Resources {
       SourceType ps = null;
       if (isNotBlank(path)) {
         for (SourceType p : SourceType.values()) {
-          if (p.match(path) && path.length() > p.getPrefixLength()) {
+          if (p.match(path) && path.length() > p.prefixLength) {
             ps = p;
             break;
           }

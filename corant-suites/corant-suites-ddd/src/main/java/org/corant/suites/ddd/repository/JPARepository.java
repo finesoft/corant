@@ -15,6 +15,7 @@ package org.corant.suites.ddd.repository;
 
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import java.io.Serializable;
@@ -367,11 +368,7 @@ public interface JPARepository extends Repository<Query> {
   @SuppressWarnings("unchecked")
   @Override
   default <T> List<T> select(Query query) {
-    List<T> resultList = query.getResultList();
-    if (resultList == null) {
-      resultList = new ArrayList<>();
-    }
-    return resultList;
+    return defaultObject(query.getResultList(), ArrayList::new);
   }
 
   default JPAQuery storedProcedureQuery(final String procedureName) {

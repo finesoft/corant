@@ -88,8 +88,8 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     LinkedList<Message> messages = new LinkedList<>();
     extractMessages(messages);
     int cycles = 128;
-    while (!messages.isEmpty()) {
-      Message msg = messages.pop();
+    Message msg = null;
+    while ((msg = messages.poll()) != null) {
       stroagedMessages.add(messageStorage.apply(msg));
       sagaService.trigger(msg);// FIXME Is it right to do so?
       if (extractMessages(messages) && --cycles < 0) {

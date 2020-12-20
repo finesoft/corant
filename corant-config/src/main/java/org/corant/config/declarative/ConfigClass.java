@@ -56,7 +56,7 @@ public class ConfigClass<T extends DeclarativeConfig> {
   }
 
   public Set<String> getDefaultItemKeys() {
-    return getFields().stream().map(ConfigField::getDefaultKey).collect(Collectors.toSet());
+    return fields.stream().map(ConfigField::getDefaultKey).collect(Collectors.toSet());
   }
 
   public List<ConfigField> getFields() {

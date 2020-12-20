@@ -192,10 +192,10 @@ public class Classes {
     Set<Class<?>> superClasses = new LinkedHashSet<>();
     Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
     if (!usedClazz.isInterface() && usedClazz != Object.class) {
-      Class<?> current = usedClazz;
-      while (current.getSuperclass() != null) {
-        superClasses.add(current.getSuperclass());
-        current = current.getSuperclass();
+      Class<?> superClass = usedClazz.getSuperclass();
+      while (superClass != null) {
+        superClasses.add(superClass);
+        superClass = superClass.getSuperclass();
       }
     }
     return superClasses;
@@ -359,12 +359,12 @@ public class Classes {
     if (clazz != null) {
       Class<?> usedClazz = clazz.isArray() ? clazz.getComponentType() : clazz;
       if (!usedClazz.isInterface() && usedClazz != Object.class) {
-        Class<?> current = usedClazz;
-        while (current.getSuperclass() != null) {
-          if (!visitor.apply(current.getSuperclass())) {
+        Class<?> superClass = usedClazz.getSuperclass();
+        while (superClass != null) {
+          if (!visitor.apply(superClass)) {
             break;
           }
-          current = current.getSuperclass();
+          superClass = superClass.getSuperclass();
         }
       }
     }

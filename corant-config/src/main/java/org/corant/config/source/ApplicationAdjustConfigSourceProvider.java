@@ -17,11 +17,10 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
 import static org.corant.shared.util.Maps.toMap;
 import static org.corant.shared.util.Strings.asDefaultString;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.corant.shared.util.Iterables;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -46,9 +45,7 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
       }
     });
     if (!props.isEmpty()) {
-      List<ConfigSource> list = new ArrayList<>();
-      list.add(new AdjustConfigSource(props));
-      return list;
+      return Iterables.iterableOf(new AdjustConfigSource(props));
     }
     return Collections.emptyList();
   }

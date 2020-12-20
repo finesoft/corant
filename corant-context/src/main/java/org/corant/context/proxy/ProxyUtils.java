@@ -52,7 +52,7 @@ public class ProxyUtils {
     if (annotations.length == 0) {
       return Collections.emptyList();
     }
-    List<Annotation> bindings = new ArrayList<>();
+    List<Annotation> bindings = new ArrayList<>(annotations.length);
     for (Annotation annotation : annotations) {
       if (beanManager.isInterceptorBinding(annotation.annotationType())) {
         bindings.add(annotation);

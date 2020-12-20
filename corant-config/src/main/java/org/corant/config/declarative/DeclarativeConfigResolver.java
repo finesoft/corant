@@ -16,7 +16,9 @@ package org.corant.config.declarative;
 import static org.corant.config.ConfigUtils.getGroupConfigKeys;
 import static org.corant.config.ConfigUtils.regulerKeyPrefix;
 import static org.corant.shared.util.Annotations.findAnnotation;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
@@ -41,22 +43,22 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class DeclarativeConfigResolver {
 
   public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
-    Map<String, T> configMaps = new HashMap<>();
+    Map<String, T> configMaps = null;
     ConfigClass<T> configClass = resolveConfigClass(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       Set<String> keys = resolveKeys(configClass, config);
       try {
-        configMaps.putAll(resolveConfigInstances(config, keys, configClass));
+        configMaps = resolveConfigInstances(config, keys, configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
     }
-    return configMaps;
+    return defaultObject(configMaps, HashMap::new);
   }
 
   public static <T extends DeclarativeConfig> T resolveSingle(Class<T> cls) {
-    Map<String, T> map = new HashMap<>();
+    Map<String, T> map = new HashMap<>(1);
     ConfigClass<T> configClass = resolveConfigClass(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
@@ -66,7 +68,7 @@ public class DeclarativeConfigResolver {
         throw new CorantRuntimeException(e);
       }
     }
-    return map.isEmpty() ? null : map.values().iterator().next();
+    return isEmpty(map) ? null : map.values().iterator().next();
   }
 
   static Class<?> getFieldActualTypeArguments(Field field, int index) {
@@ -91,8 +93,8 @@ public class DeclarativeConfigResolver {
 
   static <T extends DeclarativeConfig> Map<String, T> resolveConfigInstances(Config config,
       Set<String> keys, ConfigClass<T> configClass) throws Exception {
-    Map<String, T> configMaps = new HashMap<>();
     if (isNotEmpty(keys)) {
+      Map<String, T> configMaps = new HashMap<>(keys.size());
       for (String key : keys) {
         // T configObject = configClass.getClazz().newInstance();// JDK8
         T configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
@@ -104,8 +106,9 @@ public class DeclarativeConfigResolver {
           configMaps.put(key, configObject);
         }
       }
+      return configMaps;
     }
-    return configMaps;
+    return null;
   }
 
   static Set<String> resolveKeys(ConfigClass<?> configClass, Config config) {

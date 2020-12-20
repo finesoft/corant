@@ -200,8 +200,8 @@ public class Lists {
     List<List<T>> result = new ArrayList<>();
     if (collection != null) {
       final AtomicInteger counter = new AtomicInteger(0);
-      collection.stream().collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size))
-          .values().forEach(result::add);
+      result.addAll(collection.stream()
+          .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size)).values());
     }
     return result;
   }
@@ -217,12 +217,10 @@ public class Lists {
    */
   public static <C extends Collection<T>, T> C removeIf(final C collection,
       Predicate<? super T> p) {
-    if (collection == null || p == null) {
-      return collection;
-    } else {
+    if (collection != null && p != null) {
       collection.removeIf(p);
-      return collection;
     }
+    return collection;
   }
 
   /**

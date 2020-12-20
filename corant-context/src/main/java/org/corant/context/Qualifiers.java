@@ -41,8 +41,8 @@ public class Qualifiers {
   }
 
   public static Map<String, Annotation[]> resolveNameds(Set<String> names) {
-    Map<String, Annotation[]> nameds = new HashMap<>();
     if (isNotEmpty(names)) {
+      Map<String, Annotation[]> nameds = new HashMap<>(names.size());
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = tNames.iterator().next();
@@ -57,8 +57,9 @@ public class Qualifiers {
           nameds.put(name, resolveNamedQualifiers(name));
         }
       }
+      return nameds;
     }
-    return nameds;
+    return new HashMap<>(0);
   }
 
   static Annotation[] resolveNamedQualifiers(String name) {
@@ -84,10 +85,8 @@ public class Qualifiers {
       }
       this.objects = tmpObjects;
       this.nameAndQualifiers = resolveNameds(tmpObjects.keySet());
-      Map<T, Annotation[]> tmpObjectAndQualifiers = new HashMap<>();
-      nameAndQualifiers.forEach((k, v) -> tmpObjectAndQualifiers.put(this.objects.get(k), v));
-      this.objectAndQualifiers = tmpObjectAndQualifiers;
-
+      this.objectAndQualifiers = new HashMap<>(nameAndQualifiers.size());
+      nameAndQualifiers.forEach((k, v) -> this.objectAndQualifiers.put(this.objects.get(k), v));
     }
 
     @Override

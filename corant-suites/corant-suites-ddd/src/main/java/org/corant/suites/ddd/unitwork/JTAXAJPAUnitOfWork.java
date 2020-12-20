@@ -52,8 +52,8 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     LinkedList<Message> messages = new LinkedList<>();
     extractMessages(messages);
     int cycles = 128;
-    while (!messages.isEmpty()) {
-      Message msg = messages.pop();
+    Message msg = null;
+    while ((msg = messages.poll()) != null) {
       messageDispatcher.accept(new Message[] {msg});
       if (extractMessages(messages) && --cycles < 0) {
         throw new CorantRuntimeException("Can not handle messages!");

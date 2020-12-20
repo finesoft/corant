@@ -75,8 +75,9 @@ public class JPAQueries {
   }
 
   public static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
-    List<T> results = new ArrayList<>();
+    List<T> results = null;
     if (isNotEmpty(tuples)) {
+      results = new ArrayList<>(tuples.size());
       List<TupleElement<?>> eles = tuples.get(0).getElements();
       if (eles.size() == 1 && simpleClass(type)) {
         for (Tuple tuple : tuples) {
@@ -88,7 +89,7 @@ public class JPAQueries {
         }
       }
     }
-    return results;
+    return defaultObject(results, ArrayList::new);
   }
 
   /**
@@ -614,13 +615,9 @@ public class JPAQueries {
      * @param <T>
      * @return select
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> select() {
-      @SuppressWarnings("unchecked")
-      List<T> results = populateQuery(createQuery()).getResultList();
-      if (results == null) {
-        results = new ArrayList<>();
-      }
-      return results;
+      return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
     }
 
     /**
@@ -767,8 +764,7 @@ public class JPAQueries {
       if (resultType == null || !useTuple) {
         return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
       } else {
-        List<Tuple> results = populateQuery(createQuery()).getResultList();
-        return results != null ? convertTuples(results, resultType) : new ArrayList<>();
+        return convertTuples(populateQuery(createQuery()).getResultList(), resultType);
       }
     }
 

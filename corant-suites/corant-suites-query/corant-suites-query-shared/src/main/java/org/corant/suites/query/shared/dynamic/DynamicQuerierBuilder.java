@@ -26,7 +26,7 @@ public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 
   Q build(Object originalParameter);
 
-  Long getCachedTimestemp();
+  Long getCachedTimestamp();
 
   Query getQuery();
 

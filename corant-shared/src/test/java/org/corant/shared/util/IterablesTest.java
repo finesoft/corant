@@ -26,7 +26,6 @@ import junit.framework.TestCase;
  */
 public class IterablesTest extends TestCase {
 
-  @SuppressWarnings("unchecked")
   @Test
   public void test() {
     Iterable<String> it1 = listOf("1", "2");
@@ -39,15 +38,15 @@ public class IterablesTest extends TestCase {
     assertEquals(Iterables.get(it1, 1), "2");
     assertEquals(Iterables.get(it1AndIt2or, 2), "3");
     Iterable<Integer> tranItAll = Iterables.transform(itAll, Conversions::toInteger);
-    assertEquals(Iterables.get(tranItAll, 0).intValue(), 1);
-    assertEquals(Iterables.get(tranItAll, 1).intValue(), 2);
-    assertEquals(Iterables.get(tranItAll, 2).intValue(), 3);
-    assertEquals(Iterables.get(tranItAll, 3).intValue(), 4);
+    assertEquals(Iterables.get(tranItAll, 0), Integer.valueOf(1));
+    assertEquals(Iterables.get(tranItAll, 1), Integer.valueOf(2));
+    assertEquals(Iterables.get(tranItAll, 2), Integer.valueOf(3));
+    assertEquals(Iterables.get(tranItAll, 3), Integer.valueOf(4));
     Iterator<Integer> tranItorAll = Iterables.transform(itAll.iterator(), Conversions::toInteger);
     int i = 0;
     while (tranItorAll.hasNext()) {
       i++;
-      assertEquals(i, tranItorAll.next().intValue());
+      assertEquals(Integer.valueOf(i), tranItorAll.next());
     }
   }
 }

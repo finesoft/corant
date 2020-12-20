@@ -16,6 +16,7 @@ package org.corant.suites.jaxrs.resteasy;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +107,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
       applicationClass = getUserClass(application.getClass());
       ApplicationPath ap = findAnnotation(applicationClass, ApplicationPath.class, true);
       String cp = ap == null ? "/" : ap.value();
-      if (cp.charAt(0) != '/') {
+      if (isNotEmpty(cp) && cp.charAt(0) != '/') {
         cp = "/" + cp;
       }
       contextPath = cp;

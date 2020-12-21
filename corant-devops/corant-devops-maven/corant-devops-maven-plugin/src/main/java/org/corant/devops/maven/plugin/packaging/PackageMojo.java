@@ -74,7 +74,7 @@ public class PackageMojo extends AbstractMojo {
   @Parameter
   protected String appArgs;
 
-  @Parameter(defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,**log*.*",
+  @Parameter(defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,log4j.*,log4j2.*",
       property = "corant.maven-mojo.dist-config-paths")
   protected String distConfigPaths;
 

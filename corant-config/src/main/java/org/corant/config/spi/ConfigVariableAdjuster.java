@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -66,10 +67,10 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
 
   String resolveVariables(boolean expression, String key, String value,
       final ConfigVariableProcessor processor, final Set<String> stack) {
-    int startVar = value.length();
+    int startVar = 0;
     String begin = expression ? EXP : REP;
     String resolvedValue = value;
-    while ((startVar = resolvedValue.lastIndexOf(begin, startVar)) >= 0) {
+    while ((startVar = resolvedValue.indexOf(begin, startVar)) >= 0) {
       int endVar = resolvedValue.indexOf(END, startVar);
       if (endVar <= 0) {
         break;
@@ -78,9 +79,9 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       if (varName.isEmpty()) {
         break;
       } else if (varName.equals(key)) {
-        throw new IllegalArgumentException(
-            String.format("A recursive error occurred in the configuration entry [%s].",
-                String.join(" -> ", stack)));
+        throw new CorantRuntimeException(
+            "A recursive error occurred in the configuration entry [%s].",
+            String.join(" -> ", stack));
       } else {
         stack.add(varName);
       }

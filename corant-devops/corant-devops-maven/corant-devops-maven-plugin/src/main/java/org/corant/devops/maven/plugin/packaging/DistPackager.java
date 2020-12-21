@@ -168,6 +168,7 @@ public class DistPackager implements Packager {
     scanner.scan();
     for (final String file : scanner.getIncludedFiles()) {
       if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+        log.debug(String.format("(corant) resolve configuration file %s.", file));
         entries.add(FileEntry.of(new File(artDir, file)));
       }
     }
@@ -183,6 +184,7 @@ public class DistPackager implements Packager {
       for (String bat : bats) {
         String runbat = IOUtils.toString(ClassPathEntry.of(bat, bat).getInputStream(), CHARSET);
         final String usebat = runbat.replaceAll(RUN_APP_NAME_PH, applicationName);
+        log.debug(String.format("(corant) resolve launch file %s.", bat));
         entries.add(new ScriptEntry(bat, usebat));
       }
     }
@@ -206,6 +208,7 @@ public class DistPackager implements Packager {
     scanner.scan();
     for (final String file : scanner.getIncludedFiles()) {
       if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+        log.debug(String.format("(corant) resolve resource file %s.", file));
         entries.add(FileEntry.of(new File(artDir, file)));
       }
     }
@@ -225,6 +228,7 @@ public class DistPackager implements Packager {
                     : getMojo().getAppArgs().concat(" %1")
                 : getMojo().getAppArgs())
         .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs());
+    log.debug(String.format("(corant) resolve run command file %s.", RUN_BAT));
     return new ScriptEntry(RUN_BAT, usebat);
   }
 
@@ -237,6 +241,7 @@ public class DistPackager implements Packager {
         .replaceAll(RUN_USED_CONFIG_PROFILE, resolveRunshVar(getMojo().getUsedConfigProfile()))
         .replaceAll(RUN_APP_ARGS, resolveRunshVar(getMojo().getAppArgs()))
         .replaceAll(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()));
+    log.debug(String.format("(corant) resolve run command file %s.", RUN_SH));
     return new ScriptEntry(RUN_SH, usesh);
   }
 

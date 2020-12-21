@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -65,12 +64,22 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
     return v != null && v.indexOf(REP) != -1 && v.indexOf(END) != -1;
   }
 
+  /**
+   * TODO: escape character
+   *
+   * @param expression
+   * @param key
+   * @param value
+   * @param processor
+   * @param stack
+   * @return resolveVariables
+   */
   String resolveVariables(boolean expression, String key, String value,
       final ConfigVariableProcessor processor, final Set<String> stack) {
-    int startVar = 0;
+    int startVar = value.length();
     String begin = expression ? EXP : REP;
     String resolvedValue = value;
-    while ((startVar = resolvedValue.indexOf(begin, startVar)) >= 0) {
+    while ((startVar = resolvedValue.lastIndexOf(begin, startVar)) >= 0) {
       int endVar = resolvedValue.indexOf(END, startVar);
       if (endVar <= 0) {
         break;
@@ -78,10 +87,10 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       String varName = resolvedValue.substring(startVar + 2, endVar);
       if (varName.isEmpty()) {
         break;
-      } else if (varName.equals(key)) {
-        throw new CorantRuntimeException(
-            "A recursive error occurred in the configuration entry [%s].",
-            String.join(" -> ", stack));
+      } else if (varName.equals(key) || stack.contains(varName)) {
+        throw new IllegalArgumentException(
+            String.format("A recursive error occurred in the configuration entry [%s].",
+                String.join(" -> ", stack)));
       } else {
         stack.add(varName);
       }
@@ -89,8 +98,9 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
       if (varVal != null) {
         resolvedValue = resolveVariables(expression, key,
             resolvedValue.replace(begin + varName + END, varVal), processor, stack);
+      } else {
+        break;
       }
-      startVar++;
     }
     return resolvedValue;
   }

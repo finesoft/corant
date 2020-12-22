@@ -16,9 +16,13 @@ package org.corant.suites.webserver.undertow;
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -30,6 +34,8 @@ import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.StopWatch;
 import org.corant.suites.servlet.metadata.HttpConstraintMetaData;
@@ -46,6 +52,8 @@ import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.builder.PredicatedHandler;
+import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.handlers.resource.PathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
@@ -71,6 +79,8 @@ import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
  */
 @ApplicationScoped
 public class UndertowWebServer extends AbstractWebServer {
+
+  public static final String HANDLERS_CONF = "META-INF/undertow-handlers.conf";
 
   @Inject
   Logger logger;
@@ -198,9 +208,20 @@ public class UndertowWebServer extends AbstractWebServer {
       deploymentManager.getDeployment().getSessionManager()
           .setDefaultSessionTimeout(config.getSessionTimeout());
       HttpHandler servletHandler = deploymentManager.start();
-      PathHandler handler =
+      PathHandler pathHandler =
           Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
-      resolveStaticContent(handler);
+      resolveStaticContent(pathHandler);
+      HttpHandler handler = pathHandler;
+      Optional<ClassPathResource> predicateHandlersConfig =
+          Resources.fromClassPath(this.getClass().getClassLoader(), HANDLERS_CONF).findAny();
+      if (predicateHandlersConfig.isPresent()) {
+        List<PredicatedHandler> predicateHandlers = PredicatedHandlersParser.parse(
+            new String(predicateHandlersConfig.get().getBytes(), StandardCharsets.UTF_8),
+            this.getClass().getClassLoader());
+        if (isNotEmpty(predicateHandlers)) {
+          handler = Handlers.predicates(predicateHandlers, handler);
+        }
+      }
       builder.setHandler(handler);
       return builder.build();
     } catch (Exception e) {

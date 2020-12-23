@@ -18,11 +18,6 @@
 			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>jakarta.enterprise</groupId>
-			<artifactId>jakarta.enterprise.cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 	<description>The Corant resource bundle, which contains enum literal and message content involved in enterprise development.</description>

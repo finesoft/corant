@@ -35,6 +35,7 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
 import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.context.Qualifiers;
 import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.kernel.event.PreContainerStopEvent;
@@ -54,7 +55,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 /**
  * corant-suites-elastic
  *
- * TODO Support unnamed elastic config
+ * TODO Support unnamed elastic configuration
  *
  * @author bingo 上午11:56:19
  *
@@ -70,23 +71,37 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   private volatile NamedQualifierObjectManager<ElasticConfig> configManager =
       NamedQualifierObjectManager.empty();
 
+  /**
+   * Retrieve the transport client by configuration qualifier name, Note: the name may not same as
+   * the cluster name.
+   *
+   * @see #getTransportClient(String)
+   */
   @Override
   public TransportClient apply(String t) {
-    return getTransportClient(t);
+    return getTransportClient(Qualifiers.resolveName(t));
   }
 
   public NamedQualifierObjectManager<ElasticConfig> getConfigManager() {
     return configManager;
   }
 
-  public PreBuiltTransportClient getTransportClient(String clusterName) {
-    if (isBlank(clusterName) && sizeOf(configManager.getAllWithQualifiers()) == 1) {
+  /**
+   * Returns the transport client by configuration qualifier name, Note: the name may not same as
+   * the cluster name.
+   *
+   * @param name
+   * @return getTransportClient
+   */
+  public PreBuiltTransportClient getTransportClient(String name) {
+    final String useName = Qualifiers.resolveName(name);
+    if (isBlank(useName) && sizeOf(configManager.getAllWithQualifiers()) == 1) {
       if (sizeOf(clients) == 0) {
-        configManager.getAllNames().forEach(name -> clients.computeIfAbsent(name, this::produce));
+        configManager.getAllNames().forEach(n -> clients.computeIfAbsent(n, this::produce));
       }
       return clients.values().iterator().next();
     }
-    return clients.computeIfAbsent(clusterName, this::produce);
+    return clients.computeIfAbsent(useName, this::produce);
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
@@ -116,7 +131,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
         event.<PreBuiltTransportClient>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(TransportClient.class)
             .beanClass(PreBuiltTransportClient.class).scope(ApplicationScoped.class)
-            .produceWith(beans -> getTransportClient(c.getClusterName()))
+            .produceWith(beans -> getTransportClient(c.getName()))
             .disposeWith((tc, beans) -> tc.close());// FIXME proxy error on TransportClient
         event.<ElasticDocumentService>addBean().addQualifiers(q)
             .addTransitiveTypeClosure(DefaultElasticDocumentService.class)
@@ -140,15 +155,15 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     }
   }
 
-  PreBuiltTransportClient produce(String clusterName) {
-    ElasticConfig cfg = shouldNotNull(configManager.get(clusterName));
+  PreBuiltTransportClient produce(String name) {
+    ElasticConfig cfg = shouldNotNull(configManager.get(name));
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());
     PreBuiltTransportClient tc = new PreBuiltTransportClient(builder.build());
     for (String clusterNode : split(cfg.getClusterNodes(), ",", true, true)) {
       final String[] hostPort = split(clusterNode, ":", true, true);
-      shouldBeTrue(hostPort.length == 2, "Cluster %s node property error", clusterName);
+      shouldBeTrue(hostPort.length == 2, "Cluster %s node property error", cfg.getClusterName());
       try {
         tc.addTransportAddress(new TransportAddress(InetAddress.getByName(hostPort[0]),
             Integer.parseInt(hostPort[1])));
@@ -159,7 +174,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
       }
     }
     logger.fine(() -> String.format("Built elastic transport client with cluster name is %s.",
-        clusterName));
+        cfg.getClusterName()));
     return tc;
   }
 
@@ -179,8 +194,8 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
      */
     public DefaultElasticDocumentService(Instance<Object> instance, ElasticConfig ec) {
       transportClient =
-          instance.select(ElasticExtension.class).get().getTransportClient(ec.getClusterName());
-      indexingResolver = findNamed(ElasticIndexingResolver.class, ec.getClusterName()).get();
+          instance.select(ElasticExtension.class).get().getTransportClient(ec.getName());
+      indexingResolver = findNamed(ElasticIndexingResolver.class, ec.getName()).get();
     }
 
     @Override
@@ -204,7 +219,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
      */
     public DefaultElasticIndexingResolver(ElasticConfig ec) {
       config = ec;
-      indicesService = findNamed(ElasticIndicesService.class, ec.getClusterName()).get();
+      indicesService = findNamed(ElasticIndicesService.class, ec.getName()).get();
       logger = Logger.getLogger(DefaultElasticIndexingResolver.class.getName());
       onPostConstruct();
     }
@@ -235,7 +250,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
      */
     public DefaultElasticIndicesService(Instance<Object> instance, ElasticConfig ec) {
       transportClient =
-          instance.select(ElasticExtension.class).get().getTransportClient(ec.getClusterName());
+          instance.select(ElasticExtension.class).get().getTransportClient(ec.getName());
     }
 
     @Override

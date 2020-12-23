@@ -37,6 +37,7 @@ import org.corant.config.ConfigUtils;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativePattern;
+import org.corant.context.Qualifiers;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Methods;
 import org.corant.suites.jms.shared.AbstractJMSConfig;
@@ -126,7 +127,7 @@ public class ArtemisConfig extends AbstractJMSConfig {
   @Override
   public void onPostConstruct(Config config, String key) {
     if (isBlank(connectionFactoryId)) {
-      connectionFactoryId = key;
+      connectionFactoryId = Qualifiers.resolveName(key);
     }
     if (isNotEmpty(getHostPorts())) {
       for (String x : getHostPorts()) {

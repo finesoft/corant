@@ -27,7 +27,7 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.context.Qualifiers.NamedObject;
+import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -44,7 +44,7 @@ import org.elasticsearch.common.xcontent.XContentType;
  *
  */
 @ConfigKeyRoot("elastic")
-public class ElasticConfig implements NamedObject, DeclarativeConfig {
+public class ElasticConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = 6721730236951712908L;
 
@@ -70,28 +70,6 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
   protected Map<String, String> properties = new HashMap<>();
 
   protected final Map<String, Object> setting = new LinkedHashMap<>();
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ElasticConfig other = (ElasticConfig) obj;
-    if (clusterName == null) {
-      if (other.clusterName != null) {
-        return false;
-      }
-    } else if (!clusterName.equals(other.clusterName)) {
-      return false;
-    }
-    return true;
-  }
 
   /**
    *
@@ -125,11 +103,6 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
     return indexVersion;
   }
 
-  @Override
-  public String getName() {
-    return clusterName;
-  }
-
   /**
    *
    * @return the properties
@@ -154,14 +127,6 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
     return settingPath;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (clusterName == null ? 0 : clusterName.hashCode());
-    return result;
-  }
-
   /**
    *
    * @return the autoUpdateSchema
@@ -177,8 +142,9 @@ public class ElasticConfig implements NamedObject, DeclarativeConfig {
 
   @Override
   public void onPostConstruct(Config config, String key) {
+    setName(key);
     if (isBlank(clusterName)) {
-      clusterName = key;
+      clusterName = getName();
     }
     getSettingPath().ifPresent(path -> {
       ClassPathResource setting = Resources.tryFromClassPath(path).findFirst().orElse(null);

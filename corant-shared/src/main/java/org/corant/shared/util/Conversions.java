@@ -354,7 +354,9 @@ public class Conversions {
   }
 
   public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (obj instanceof Collection) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
     } else if (obj instanceof Object[]) {
       return Conversion.convert((Object[]) obj, ArrayList::new, clazz, hints);
@@ -363,7 +365,9 @@ public class Conversions {
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
-    if (obj instanceof Iterable<?>) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Iterable<?>) {
       return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toList());
     } else if (obj instanceof Object[]) {
       return streamOf((Object[]) obj).map(convert).collect(Collectors.toList());
@@ -487,7 +491,9 @@ public class Conversions {
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (obj instanceof Collection) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, HashSet::new, clazz, hints);
     } else if (obj instanceof Object[]) {
       return Conversion.convert((Object[]) obj, HashSet::new, clazz, hints);
@@ -496,7 +502,9 @@ public class Conversions {
   }
 
   public static <T> Set<T> toSet(Object obj, Function<Object, T> convert) {
-    if (obj instanceof Iterable<?>) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Iterable<?>) {
       return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toSet());
     } else if (obj instanceof Object[]) {
       return streamOf((Object[]) obj).map(convert).collect(Collectors.toSet());

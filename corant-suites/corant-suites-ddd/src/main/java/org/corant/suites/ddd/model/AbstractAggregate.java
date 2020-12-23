@@ -129,7 +129,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @see EntityManager#remove(Object)
    */
   protected synchronized void destroy(boolean immediately) {
-    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
+    requireFalse(lifecycle.getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
     setLifecycle(Lifecycle.DESTROYED);
   }
@@ -177,7 +177,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @see EntityManager#merge(Object)
    */
   protected synchronized AbstractAggregate preserve(boolean immediately) {
-    requireFalse(getLifecycle().getSign() < 0, PkgMsgCds.ERR_AGG_LC);
+    requireFalse(lifecycle.getSign() < 0, PkgMsgCds.ERR_AGG_LC);
     this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
     return setLifecycle(Lifecycle.PRESERVED);
   }
@@ -272,13 +272,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
         return false;
       }
       if (typeCls == null) {
-        if (other.typeCls != null) {
-          return false;
-        }
-      } else if (!typeCls.equals(other.typeCls)) {
-        return false;
+        return other.typeCls == null;
+      } else {
+        return typeCls.equals(other.typeCls);
       }
-      return true;
     }
 
     @Override

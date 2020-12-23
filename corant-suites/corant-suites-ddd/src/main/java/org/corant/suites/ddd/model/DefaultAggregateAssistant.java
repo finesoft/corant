@@ -109,13 +109,10 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
     }
     DefaultAggregateAssistant other = (DefaultAggregateAssistant) obj;
     if (aggregate == null) {
-      if (other.aggregate != null) {
-        return false;
-      }
-    } else if (!aggregate.equals(other.aggregate)) {
-      return false;
+      return other.aggregate == null;
+    } else {
+      return aggregate.equals(other.aggregate);
     }
-    return true;
   }
 
   @Override

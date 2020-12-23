@@ -17,7 +17,7 @@ import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
-import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -357,9 +357,9 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * The complete startup method, this method will use incoming bean classes(synthetic) and
-   * class loader and arguments to construct Corant instance and start it, before start this method
-   * also provide a pre-initializer callback to handle before the CDI container initialize. The
+   * The complete startup method, this method will use incoming bean classes(synthetic) and class
+   * loader and arguments to construct Corant instance and start it, before start this method also
+   * provide a pre-initializer callback to handle before the CDI container initialize. The
    * pre-initializer can use for configure the CDI container before initialize it.
    *
    * @param beanClasses The synthetic bean class
@@ -553,7 +553,7 @@ public class Corant implements AutoCloseable {
   void doAfterStarted(ClassLoader classLoader, StopWatch stopWatch) {
     stopWatch.start("The post-started SPI processing is completed");
 
-    if (setOf(arguments).contains(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
+    if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
@@ -580,7 +580,7 @@ public class Corant implements AutoCloseable {
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
     stopWatch
         .start("Starting " + applicationName() + ", the pre-start SPI processing is completed");
-    if (setOf(arguments).contains(DISABLE_BEFORE_START_HANDLER_CMD)) {
+    if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }
     streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
@@ -612,7 +612,7 @@ public class Corant implements AutoCloseable {
   }
 
   boolean registerMBean() {
-    if (!setOf(arguments).contains(REGISTER_TO_MBEAN_CMD)) {
+    if (!hasCommandArgument(REGISTER_TO_MBEAN_CMD)) {
       return false;
     }
     synchronized (this) {
@@ -630,11 +630,20 @@ public class Corant implements AutoCloseable {
   }
 
   private String boostLine() {
-    if (!setOf(arguments).contains(DISABLE_BOOST_LINE_CMD)) {
+    if (!hasCommandArgument(DISABLE_BOOST_LINE_CMD)) {
       String spLine = "--------------------------------------------------";
       return "\n".concat(spLine).concat(spLine);
     }
     return "";
+  }
+
+  private boolean hasCommandArgument(String cmd) {
+    for (String argument : arguments) {
+      if (areEqual(argument, cmd)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void log(String msgOrFmt, Object... arguments) {

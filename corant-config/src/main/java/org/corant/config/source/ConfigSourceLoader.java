@@ -13,7 +13,6 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
@@ -51,7 +50,7 @@ public class ConfigSourceLoader {
       String... classPaths) throws IOException {
     Set<URI> loadedUrls = new LinkedHashSet<>();
     for (String path : classPaths) {
-      listOf(classLoader.getResources(path)).stream().filter(filter).map(ConfigSourceLoader::toURI)
+      streamOf(classLoader.getResources(path)).filter(filter).map(ConfigSourceLoader::toURI)
           .forEach(loadedUrls::add);
       if (Thread.currentThread().getContextClassLoader() != classLoader) {
         streamOf(Thread.currentThread().getContextClassLoader().getResources(path))

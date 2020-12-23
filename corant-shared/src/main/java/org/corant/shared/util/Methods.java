@@ -62,6 +62,7 @@ public class Methods {
         }
       }
     }
+    methods.clear();
     return inexactMatch;
   }
 

@@ -35,6 +35,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -296,7 +297,7 @@ public class FileUtils {
     List<File> tmp = new LinkedList<>();
     File[] dirFiles = directory.listFiles();
     if (dirFiles != null) {
-      tmp.addAll(listOf(dirFiles));
+      Collections.addAll(tmp, dirFiles);
       while (!tmp.isEmpty()) {
         File f = tmp.remove(0);
         if (f.isFile() && up.test(f)) {

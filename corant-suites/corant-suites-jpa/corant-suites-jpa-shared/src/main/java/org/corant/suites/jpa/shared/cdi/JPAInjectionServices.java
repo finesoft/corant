@@ -27,7 +27,7 @@ import org.jboss.weld.injection.spi.JpaInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
- * The JPAInjectionServices implemention
+ * The JPAInjectionServices implementation
  *
  * @see JPAProvider
  * @author bingo 下午4:18:45

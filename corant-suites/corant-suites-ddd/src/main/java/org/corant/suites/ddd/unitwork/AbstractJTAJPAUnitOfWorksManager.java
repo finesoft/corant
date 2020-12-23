@@ -114,7 +114,7 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   @Override
   public AbstractJTAJPAUnitOfWork getCurrentUnitOfWork() {
     try {
-      final Transaction curTx = shouldNotNull(getTransactionManager().getTransaction(),
+      final Transaction curTx = shouldNotNull(transactionManager.getTransaction(),
           "For now we only support transactional unit of work.");
       return uows.computeIfAbsent(wrapUintOfWorksKey(curTx), key -> {
         try {

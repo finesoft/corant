@@ -88,13 +88,10 @@ public interface Value extends Serializable {
       }
       SimpleValueMap other = (SimpleValueMap) obj;
       if (contents == null) {
-        if (other.contents != null) {
-          return false;
-        }
-      } else if (!contents.equals(other.contents)) {
-        return false;
+        return other.contents == null;
+      } else {
+        return contents.equals(other.contents);
       }
-      return true;
     }
 
     public <T> T get(String key) {

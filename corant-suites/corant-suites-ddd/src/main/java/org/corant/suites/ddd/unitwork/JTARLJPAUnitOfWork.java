@@ -45,7 +45,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
 
   protected final MessageStorage messageStorage;
   protected final SagaService sagaService; // FIXME Is it right to do so?
-  protected final LinkedList<Message> stroagedMessages = new LinkedList<>();
+  protected final LinkedList<Message> storedMessages = new LinkedList<>();
 
   protected JTARLJPAUnitOfWork(JTARLJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager, transaction);
@@ -60,8 +60,8 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   @Override
   public void complete(boolean success) {
     if (success) {
-      int messageSize = sizeOf(stroagedMessages);
-      messageDispatcher.accept(stroagedMessages.toArray(new Message[messageSize]));
+      int messageSize = sizeOf(storedMessages);
+      messageDispatcher.accept(storedMessages.toArray(new Message[messageSize]));
     }
     super.complete(success);
   }
@@ -69,7 +69,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   @Override
   protected void clear() {
     try {
-      stroagedMessages.clear();
+      storedMessages.clear();
     } finally {
       super.clear();
     }
@@ -90,7 +90,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     int cycles = 128;
     Message msg = null;
     while ((msg = messages.poll()) != null) {
-      stroagedMessages.add(messageStorage.apply(msg));
+      storedMessages.add(messageStorage.apply(msg));
       sagaService.trigger(msg);// FIXME Is it right to do so?
       if (extractMessages(messages) && --cycles < 0) {
         throw new CorantRuntimeException("Can not handle messages!");

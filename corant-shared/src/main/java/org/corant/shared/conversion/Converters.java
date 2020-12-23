@@ -16,6 +16,7 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Functions.optional;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
+import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import org.corant.shared.conversion.converter.IdentityConverter;
@@ -89,7 +90,7 @@ public class Converters {
       Class<?> targetClass) {
     ConverterFactory factory = ConverterRegistry.getConverterFactories().stream()
         .filter(f -> f.isSupports(sourceClass, targetClass))
-        .max((c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority())).orElse(null);
+        .max(Comparator.comparingInt(ConverterFactory::getPriority)).orElse(null);
     if (factory != null) {
       // FIXME initialize parameter
       return Pair.of(factory.create(targetClass, null, true), factory);

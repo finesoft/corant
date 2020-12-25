@@ -16,6 +16,7 @@ package org.corant.suites.jaxrs.shared;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class StreamOutputBuilder {
   }
 
   public Response build() {
-    if (contentType == null) {
+    if (isBlank(contentType)) {
       if (isNotBlank(fileName)) {
         contentType = FileUtils.getContentType(fileName);
       }

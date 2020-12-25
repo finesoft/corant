@@ -15,7 +15,6 @@ package org.corant.config.source;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.toMap;
-import static org.corant.shared.util.Strings.asDefaultString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -77,8 +76,6 @@ public class PropertiesConfigSource extends CorantConfigSource {
   static Properties load(InputStream is) throws IOException {
     Properties props = new Properties();
     props.load(new InputStreamReader(is, StandardCharsets.UTF_8));
-    props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));// TCK 2020-04-14
-                                                                         // ArrayConverter
     return props;
   }
 

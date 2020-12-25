@@ -13,13 +13,15 @@
  */
 package org.corant.config;
 
+import org.eclipse.microprofile.config.ConfigValue;
+
 /**
  * corant-config
  *
  * @author bingo 下午5:40:21
  *
  */
-public class CorantConfigValue {
+public class CorantConfigValue implements ConfigValue {
 
   /**
    * The name of the property.

@@ -16,6 +16,7 @@ package org.corant.devops.test.unit.web;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.corant.devops.test.unit.CorantJunit4Runner;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
@@ -54,7 +55,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
     @Override
     public int getOrdinal() {
-      if (CorantJunit4Runner.ENA_RDM_WEB_PORTS.get().booleanValue()) {
+      if (CorantJunit4Runner.ENA_RDM_WEB_PORTS.get()) {
         return Integer.MAX_VALUE;
       } else {
         return Integer.MIN_VALUE;
@@ -64,6 +65,11 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
     @Override
     public Map<String, String> getProperties() {
       return properties;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+      return properties.keySet();
     }
 
     @Override

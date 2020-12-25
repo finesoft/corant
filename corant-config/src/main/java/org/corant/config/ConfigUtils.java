@@ -37,11 +37,17 @@ import org.eclipse.microprofile.config.Config;
  *
  */
 public class ConfigUtils {
-
-  public static final int SEPARATOR_LEN = NAME_SPACE_SEPARATORS.length();
-  public static final String VALUE_DELIMITER = "(?<!\\\\),";
-  public static final String KEY_DELIMITER = "(?<!\\\\)\\.";
-  private static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
+  public static final String ESCAPE = "\\";
+  public static final String KEY_DELIMITER = NAME_SPACE_SEPARATORS;
+  public static final int KEY_DELIMITER_LEN = KEY_DELIMITER.length();
+  public static final String VAL_DELIMITER = ",";
+  public static final String KEY_DELIMITER_PATTERN = ESCAPE + KEY_DELIMITER;
+  public static final String VAL_DELIMITER_PATTERN = ESCAPE + VAL_DELIMITER;
+  public static final String VAL_SPLITTER =
+      "(?<!" + Pattern.quote(ESCAPE) + ")" + Pattern.quote(VAL_DELIMITER);
+  public static final String KEY_SPLITTER =
+      "(?<!" + Pattern.quote(ESCAPE) + ")" + Pattern.quote(KEY_DELIMITER);
+  public static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
@@ -53,7 +59,7 @@ public class ConfigUtils {
     for (String key : keys) {
       String useKey = defaultString(key);
       if (isNotBlank(useKey)) {
-        concats.append(removeSplitor(key)).append(NAME_SPACE_SEPARATORS);
+        concats.append(removeSplitor(key)).append(KEY_DELIMITER);
       }
     }
     return removeSplitor(concats.toString());
@@ -124,7 +130,7 @@ public class ConfigUtils {
     if (rs.length() == 0) {
       return rs;
     }
-    return removeSplitor(prefix).concat(NAME_SPACE_SEPARATORS);
+    return removeSplitor(prefix).concat(KEY_DELIMITER);
   }
 
   public static String removeSplitor(final String str) {
@@ -132,36 +138,38 @@ public class ConfigUtils {
     if (rs.length() == 0) {
       return rs;
     }
-    while (rs.endsWith(NAME_SPACE_SEPARATORS) && !rs.endsWith("\\\\.")) {
-      rs = defaultTrim(rs.substring(0, rs.length() - SEPARATOR_LEN));
+    while (rs.endsWith(KEY_DELIMITER) && !rs.endsWith(KEY_DELIMITER_PATTERN)) {
+      rs = defaultTrim(rs.substring(0, rs.length() - KEY_DELIMITER_LEN));
     }
-    while (rs.startsWith(NAME_SPACE_SEPARATORS)) {
-      rs = defaultTrim(rs.substring(SEPARATOR_LEN));
+    while (rs.startsWith(KEY_DELIMITER)) {
+      rs = defaultTrim(rs.substring(KEY_DELIMITER_LEN));
     }
     return rs;
   }
 
   public static String[] splitKey(String text) {
-    return splitProperties(text, KEY_DELIMITER, true);
+    return splitProperties(text, KEY_SPLITTER, true);
   }
 
   public static String[] splitValue(String text) {
-    return splitProperties(text, VALUE_DELIMITER, false);
+    return splitProperties(text, VAL_SPLITTER, false);
   }
 
   static String[] splitProperties(String text, String regex, boolean trim) {
     if (text == null) {
       return Strings.EMPTY_ARRAY;
     }
-    String splitor = regex.substring(regex.length() - 1);
     String[] split = text.split(regex);
     int spLen = split.length;
     String[] result = new String[spLen];
     int reLen = 0;
     for (int i = 0; i < spLen; i++) {
-      split[i] = split[i].replace("\\\\" + splitor, splitor);
-      if (isNotBlank(split[i])) {
-        result[reLen] = trim ? split[i].trim() : split[i];
+      split[i] = split[i].replace(VAL_DELIMITER_PATTERN, VAL_DELIMITER);
+      if (trim && isNotBlank(split[i])) {
+        result[reLen] = split[i].trim();
+        reLen++;
+      } else if (!split[i].isEmpty()) {
+        result[reLen] = split[i];
         reLen++;
       }
     }

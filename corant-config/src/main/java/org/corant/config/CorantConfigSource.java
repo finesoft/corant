@@ -127,6 +127,11 @@ public abstract class CorantConfigSource implements ConfigSource, Serializable {
   }
 
   @Override
+  public Set<String> getPropertyNames() {
+    return getProperties().keySet();
+  }
+
+  @Override
   public String getValue(String propertyName) {
     return getProperties().get(propertyName);
   }

@@ -14,6 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
@@ -40,6 +41,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -97,7 +99,7 @@ public class CorantConfigConversion implements Serializable {
   }
 
   /**
-   * Find the custome priority if not found then return CUSTOMER_CONVERTER_ORDINAL
+   * Find the customer priority if not found then return CUSTOMER_CONVERTER_ORDINAL
    *
    * @param clazz
    * @return findPriority
@@ -135,56 +137,63 @@ public class CorantConfigConversion implements Serializable {
 
   public Object convert(String rawValue, Type type) {
     Object result = null;
-    if (rawValue != null) {
+    if (isNotEmpty(rawValue)) {
+      final Class<?> typeClass;
+      final Type argType;
+      final boolean parameterized;
+      if (type instanceof Class) {
+        parameterized = false;
+        typeClass = forceCast(type);
+        argType = Object.class;
+      } else if (type instanceof ParameterizedType) {
+        parameterized = true;
+        typeClass = forceCast(((ParameterizedType) type).getRawType());
+        argType = ((ParameterizedType) type).getActualTypeArguments()[0];
+      } else {
+        throw new IllegalArgumentException("Cannot support config property for " + type);
+      }
+
       try {
-        if (type instanceof Class) {
-          Class<?> typeClass = forceCast(type);
-          if (typeClass.isArray()) {
+        if (typeClass.isArray()) {
+          if (!parameterized) {
             result = convertArray(rawValue, typeClass.getComponentType());
           } else {
-            if (Class.class.isAssignableFrom(typeClass)) {
-              result = convertSingle(rawValue, Class.class);
-            } else if (List.class.isAssignableFrom(typeClass)) {
-              result = convertCollection(rawValue, String.class, ArrayList::new);
-            } else if (Set.class.isAssignableFrom(typeClass)) {
-              result = convertCollection(rawValue, String.class, HashSet::new);
-            } else if (Optional.class.isAssignableFrom(typeClass)) {
-              result = Optional.ofNullable(convert(rawValue, String.class));
-            } else if (Supplier.class.isAssignableFrom(typeClass)) {
-              result = (Supplier<?>) () -> convert(rawValue, String.class);
-            } else if (Provider.class.isAssignableFrom(typeClass)) {
-              result = (Provider<?>) () -> convert(rawValue, String.class);
-            } else if (Map.class.isAssignableFrom(typeClass)) {
-              result = convertMap(rawValue, String.class, String.class);
-            } else {
-              result = convertSingle(rawValue, typeClass);
-            }
-          }
-        } else if (type instanceof ParameterizedType) {
-          ParameterizedType ptype = (ParameterizedType) type;
-          Class<?> rtype = forceCast(ptype.getRawType());
-          Type argType = ptype.getActualTypeArguments()[0];
-          if (Class.class.isAssignableFrom(rtype)) {
-            result = convertSingle(rawValue, Class.class);
-          } else if (List.class.isAssignableFrom(rtype)) {
-            result = convertCollection(rawValue, argType, ArrayList::new);
-          } else if (Set.class.isAssignableFrom(rtype)) {
-            result = convertCollection(rawValue, argType, HashSet::new);
-          } else if (Optional.class.isAssignableFrom(rtype)) {
-            result = Optional.ofNullable(convert(rawValue, argType));
-          } else if (Supplier.class.isAssignableFrom(rtype)) {
-            result = (Supplier<?>) () -> convert(rawValue, argType);
-          } else if (Provider.class.isAssignableFrom(rtype)) {
-            result = (Provider<?>) () -> convert(rawValue, argType);
-          } else if (Map.class.isAssignableFrom(rtype)) {
-            result = convertMap(rawValue, ptype);
-          } else {
-            throw new IllegalStateException(
-                "Cannot create config property for " + ptype.getRawType() + "<" + argType + ">");
+            throw new IllegalArgumentException(
+                "Cannot convert config property for type " + typeClass + "<" + argType + "[]>");
           }
         } else {
-          throw new IllegalStateException("Cannot support config property for " + type);
+          if (Class.class.isAssignableFrom(typeClass)) {
+            result = convertSingle(rawValue, Class.class);
+          } else if (List.class.isAssignableFrom(typeClass)) {
+            result = convertCollection(rawValue, argType, ArrayList::new);
+          } else if (Set.class.isAssignableFrom(typeClass)) {
+            result = convertCollection(rawValue, argType, HashSet::new);
+          } else if (Optional.class.isAssignableFrom(typeClass)) {
+            result = Optional.ofNullable(convert(rawValue, argType));
+          } else if (OptionalInt.class.isAssignableFrom(typeClass)) {
+            result = OptionalInt.of(convertSingle(rawValue, Integer.class));
+          } else if (OptionalLong.class.isAssignableFrom(typeClass)) {
+            result = OptionalLong.of(convertSingle(rawValue, Long.class));
+          } else if (OptionalDouble.class.isAssignableFrom(typeClass)) {
+            result = OptionalDouble.of(convertSingle(rawValue, Double.class));
+          } else if (Supplier.class.isAssignableFrom(typeClass)) {
+            result = (Supplier<?>) () -> convert(rawValue, argType);
+          } else if (Provider.class.isAssignableFrom(typeClass)) {
+            result = (Provider<?>) () -> convert(rawValue, argType);
+          } else if (Map.class.isAssignableFrom(typeClass)) {
+            result = parameterized ? convertMap(rawValue, (ParameterizedType) type)
+                : convertMap(rawValue, (Class<?>) argType, (Class<?>) argType);
+          } else {
+            if (!parameterized) {
+              result = convertSingle(rawValue, typeClass);
+            } else {
+              throw new IllegalArgumentException(
+                  "Cannot convert config property for type " + typeClass + "<" + argType + ">");
+            }
+          }
         }
+      } catch (IllegalArgumentException e) {
+        throw e;
       } catch (RuntimeException e) {
         throw new IllegalArgumentException(
             String.format("Cannot convert config property value %s with type %s", rawValue, type),
@@ -204,8 +213,12 @@ public class CorantConfigConversion implements Serializable {
    */
   public <T> T convertArray(String rawValue, Class<T> propertyComponentType) {
     String[] values = ConfigUtils.splitValue(rawValue);
-    Object array = Array.newInstance(propertyComponentType, values.length);
-    for (int i = 0; i < values.length; i++) {
+    int length = values.length;
+    if (length == 0) {
+      return null;
+    }
+    Object array = Array.newInstance(propertyComponentType, length);
+    for (int i = 0; i < length; i++) {
       Array.set(array, i, forceCast(convert(values[i], propertyComponentType)));
     }
     return forceCast(array);
@@ -251,7 +264,7 @@ public class CorantConfigConversion implements Serializable {
         result = Optional.empty();
       }
     } else {
-      throw new IllegalStateException("Can not create config property for " + type);
+      throw new NoSuchElementException("Can not create config property for " + type);
     }
     return result;
   }
@@ -328,7 +341,7 @@ public class CorantConfigConversion implements Serializable {
   }
 
   public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
-    //TODO MP 2.0
+    // TODO MP 2.0
     Converter<?> converter = null;
     if (forType == String.class || forType == Object.class) {
       converter = s -> s;

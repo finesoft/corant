@@ -102,7 +102,7 @@
 		<version.maven-resources-plugin>3.1.0</version.maven-resources-plugin>
 		<version.maven-surefire-plugin>3.0.0-M2</version.maven-surefire-plugin>
 		<version.maven-project-info-reports-plugin>3.1.1</version.maven-project-info-reports-plugin>
-		<version.microprofile-config-api>1.4</version.microprofile-config-api>
+		<version.microprofile-config-api>2.0</version.microprofile-config-api>
 		<version.microprofile-fault-tolerance-api>2.1</version.microprofile-fault-tolerance-api>
 		<version.microprofile-health-api>2.2</version.microprofile-health-api>
 		<version.microprofile-jwt-auth-api>1.1.1</version.microprofile-jwt-auth-api>

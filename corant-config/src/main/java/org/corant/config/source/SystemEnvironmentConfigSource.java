@@ -20,6 +20,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -46,6 +47,11 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
   public Map<String, String> getProperties() {
     return Collections.unmodifiableMap(
         AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv));
+  }
+
+  @Override
+  public Set<String> getPropertyNames() {
+    return getProperties().keySet();
   }
 
   @Override

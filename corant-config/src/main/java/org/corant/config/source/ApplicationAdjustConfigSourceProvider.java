@@ -16,10 +16,13 @@ package org.corant.config.source;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ADJUST_ORDINAL;
 import static org.corant.shared.util.Maps.toMap;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.corant.shared.util.Iterables;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -79,6 +82,11 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
     @Override
     public Map<String, String> getProperties() {
       return toMap(props);
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+      return defaultObject(props.stringPropertyNames(), HashSet::new);
     }
 
     @Override

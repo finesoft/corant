@@ -17,9 +17,11 @@ import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPER
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -47,7 +49,12 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
   public Map<String, String> getProperties() {
     Properties properties =
         AccessController.doPrivileged((PrivilegedAction<Properties>) System::getProperties);
-    return new HashMap(properties);
+    return Collections.unmodifiableMap(new HashMap(properties));
+  }
+
+  @Override
+  public Set<String> getPropertyNames() {
+    return getProperties().keySet();
   }
 
   @Override

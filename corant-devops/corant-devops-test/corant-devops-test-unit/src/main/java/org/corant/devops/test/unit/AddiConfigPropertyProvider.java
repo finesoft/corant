@@ -16,6 +16,7 @@ package org.corant.devops.test.unit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.corant.shared.normal.Priorities;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
@@ -55,6 +56,11 @@ public class AddiConfigPropertyProvider implements ConfigSourceProvider {
     @Override
     public Map<String, String> getProperties() {
       return map;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+      return map.keySet();
     }
 
     @Override

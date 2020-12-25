@@ -15,7 +15,6 @@ package org.corant.config.source;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.toMap;
-import static org.corant.shared.util.Strings.asDefaultString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -45,7 +44,6 @@ public class XmlConfigSource extends CorantConfigSource {
     Properties props = new Properties();
     try {
       props.loadFromXML(is);
-      props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));
       properties = Collections.unmodifiableMap(toMap(props));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
@@ -57,7 +55,6 @@ public class XmlConfigSource extends CorantConfigSource {
     Properties props = new Properties();
     try (InputStream is = resourceUrl.openStream()) {
       props.loadFromXML(is);
-      props.replaceAll((k, v) -> asDefaultString(v).replace("\\", "\\\\"));
       properties = Collections.unmodifiableMap(toMap(props));
     } catch (IOException e) {
       throw new CorantRuntimeException(e);

@@ -92,7 +92,7 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
   @Override
   public void releaseConfig(final Config config) {
-    Lock lock = rwl.readLock();
+    Lock lock = rwl.writeLock();
     try {
       lock.lock();
       Iterator<Map.Entry<ClassLoader, Config>> iterator = configs.entrySet().iterator();

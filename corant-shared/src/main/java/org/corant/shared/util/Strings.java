@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,6 +165,38 @@ public class Strings {
    */
   public static String defaultTrim(String str) {
     return str == null ? EMPTY : str.trim();
+  }
+
+  /**
+   * Split string supports escape characters
+   *
+   * @param str
+   * @param escapes
+   * @param separator
+   * @return String[]
+   */
+  public static String[] escapedSplit(final String str, final String escapes,
+      final String separator) {
+    return escapedSplit(str, escapes, separator, 0);
+  }
+
+  /**
+   * Split string supports escape characters
+   *
+   * @param str
+   * @param escapes
+   * @param separator
+   * @return String[]
+   */
+  public static String[] escapedSplit(final String str, final String escapes,
+      final String separator, final int limit) {
+    if (isEmpty(str)) {
+      return EMPTY_ARRAY;
+    }
+    if (isEmpty(separator)) {
+      return new String[] {str};
+    }
+    return str.split("(?<!" + Pattern.quote(escapes) + ")" + Pattern.quote(separator), limit);
   }
 
   /**
@@ -641,23 +674,23 @@ public class Strings {
   }
 
   /**
-   * Split the string into a string array with whole spreator string, not regex.
+   * Split the string into a string array with whole separator string, not regex.
    *
    * @param str
-   * @param wholeSpreator
+   * @param wholeSeparator
    * @return
    */
-  public static String[] split(final String str, final String wholeSpreator) {
+  public static String[] split(final String str, final String wholeSeparator) {
     int len;
     int slen;
     if (str == null || (len = str.length()) == 0) {
       return EMPTY_ARRAY;
     }
-    if (wholeSpreator == null || (slen = wholeSpreator.length()) == 0) {
+    if (wholeSeparator == null || (slen = wholeSeparator.length()) == 0) {
       return new String[] {str};
     }
     if (slen == 1) {
-      char wholeChar = wholeSpreator.charAt(0);
+      char wholeChar = wholeSeparator.charAt(0);
       return split(str, c -> c == wholeChar);
     }
     int s = 0;
@@ -666,7 +699,7 @@ public class Strings {
     int g = len > 16 ? 16 : (len >> 1) + 1;
     String[] array = new String[g];
     while (e < len) {
-      e = str.indexOf(wholeSpreator, s);
+      e = str.indexOf(wholeSeparator, s);
       if (e > -1) {
         if (e > s) {
           if (i == g) {

@@ -168,6 +168,20 @@ public class Strings {
   }
 
   /**
+   * Returns the escaped string pattern.
+   *
+   * @param escapes
+   * @param quote
+   * @return escapedPattern
+   */
+  public static Pattern escapedPattern(final String escapes, final String quote) {
+    if (escapes == null || quote == null) {
+      return null;
+    }
+    return Pattern.compile("(?<!" + Pattern.quote(escapes) + ")" + Pattern.quote(quote));
+  }
+
+  /**
    * Split string supports escape characters
    *
    * @param str
@@ -196,7 +210,7 @@ public class Strings {
     if (isEmpty(separator)) {
       return new String[] {str};
     }
-    return str.split("(?<!" + Pattern.quote(escapes) + ")" + Pattern.quote(separator), limit);
+    return escapedPattern(escapes, separator).split(str, limit);
   }
 
   /**

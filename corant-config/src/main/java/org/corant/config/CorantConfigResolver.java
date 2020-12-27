@@ -186,13 +186,12 @@ public class CorantConfigResolver {
       if (value.contains(EXP_PREFIX)) {
         value = expandValue(true, value, provider, stacks);
         value = replace(value, EXP_REP, EXP_PREFIX);
-        stacks.clear();
       }
       if (value.contains(VAR_PREFIX)) {
         value = expandValue(false, value, provider, stacks);
         value = replace(value, VAR_REP, VAR_PREFIX);
-        stacks.clear();
       }
+      stacks.clear();
     }
     return value;
   }
@@ -218,7 +217,7 @@ public class CorantConfigResolver {
         // TODO replace \\} to }
         int end = contents.get().start();
         String extracted = content.substring(0, end);
-        // System.out.printf("stack%d -> %s \n", stacks.size(), extracted);
+        System.out.printf("stack%d -> %s \n", stacks.size(), extracted);
         if (isNotBlank(extracted)) {
           if (!eval && extracted.contains(VAR_DEFAULT)) {
             Optional<MatchResult> defaults = VAR_DPTN.matcher(extracted).results().findFirst();

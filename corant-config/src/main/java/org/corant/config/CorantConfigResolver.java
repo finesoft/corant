@@ -180,7 +180,7 @@ public class CorantConfigResolver {
       return key;
     }
     String value = provider.get(false, key);
-    if (toBoolean(provider.get(false, Config.PROPERTY_EXPRESSIONS_ENABLED))) {
+    if (toBoolean(provider.get(false, "Config.PROPERTY_EXPRESSIONS_ENABLED"))) {// TODO
       List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
       stacks.add(key);
       if (value.contains(EXP_PREFIX)) {

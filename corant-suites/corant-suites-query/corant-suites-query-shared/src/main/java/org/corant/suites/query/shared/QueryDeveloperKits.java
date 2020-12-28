@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.corant.Corant;
-import org.corant.config.ConfigUtils;
+import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.lang.javascript.NashornScriptEngines;
@@ -80,7 +80,7 @@ public class QueryDeveloperKits {
 
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
-    ConfigUtils.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
+    CorantConfigResolver.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
     return Corant.startup(QueryDeveloperKits.class, new String[] {Corant.DISABLE_BOOST_LINE_CMD});
   }
 

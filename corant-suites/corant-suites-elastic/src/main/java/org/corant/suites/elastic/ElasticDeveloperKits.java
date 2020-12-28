@@ -18,7 +18,7 @@ import static org.corant.shared.util.Maps.mapOf;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.corant.Corant;
-import org.corant.config.ConfigUtils;
+import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
@@ -45,7 +45,7 @@ public class ElasticDeveloperKits {
 
   static Corant prepare(String clusterName) {
     LoggerFactory.disableLogger();
-    ConfigUtils.adjust("webserver.auto-start", "false",
+    CorantConfigResolver.adjust("webserver.auto-start", "false",
         "elastic." + clusterName + ".auto-update-schame", "false");
     return Corant.startup(ElasticDeveloperKits.class, new String[] {Corant.DISABLE_BOOST_LINE_CMD});
   }

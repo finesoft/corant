@@ -13,8 +13,8 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.config.ConfigUtils.getGroupConfigKeys;
-import static org.corant.config.ConfigUtils.regulerKeyPrefix;
+import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
+import static org.corant.config.CorantConfigResolver.regulateKeyPrefix;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -112,7 +112,7 @@ public class DeclarativeConfigResolver {
   }
 
   static Set<String> resolveKeys(ConfigClass<?> configClass, Config config) {
-    final String prefix = regulerKeyPrefix(configClass.getKeyRoot());
+    final String prefix = regulateKeyPrefix(configClass.getKeyRoot());
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();
     for (String itemKey : config.getPropertyNames()) {

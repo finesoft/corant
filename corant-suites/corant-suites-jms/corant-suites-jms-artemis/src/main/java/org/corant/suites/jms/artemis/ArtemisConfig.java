@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.corant.config.ConfigUtils;
+import org.corant.config.CorantConfigResolver;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativePattern;
@@ -86,9 +86,10 @@ public class ArtemisConfig extends AbstractJMSConfig {
         if (String.class.equals(parameterType) || int.class.equals(parameterType)
             || long.class.equals(parameterType) || double.class.equals(parameterType)
             || boolean.class.equals(parameterType)) {
-          settingsMap
-              .put(ConfigUtils.dashify(method.getName().substring(3, 4).toLowerCase(Locale.ENGLISH)
-                  + method.getName().substring(4)), method);
+          settingsMap.put(CorantConfigResolver
+              .dashify(method.getName().substring(3, 4).toLowerCase(Locale.ENGLISH)
+                  + method.getName().substring(4)),
+              method);
         }
       }
     }

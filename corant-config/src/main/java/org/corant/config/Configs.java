@@ -52,7 +52,7 @@ public class Configs {
         if (proKey.length() > 0) {
           Set<String> set = new LinkedHashSet<>();
           String proVals = getConfig().getOptionalValue(proKey, String.class).orElse(null);
-          for (String proVal : ConfigUtils.splitValue(proVals)) {
+          for (String proVal : CorantConfigResolver.splitValue(proVals)) {
             set.add(new StringBuilder(key.substring(0, s)).append(proVal)
                 .append(key.substring(e + 1)).toString());
           }

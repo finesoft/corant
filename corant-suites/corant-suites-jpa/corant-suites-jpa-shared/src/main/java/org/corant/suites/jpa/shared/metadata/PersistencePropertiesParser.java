@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared.metadata;
 
-import static org.corant.config.ConfigUtils.getGroupConfigKeys;
+import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isNotEmpty;

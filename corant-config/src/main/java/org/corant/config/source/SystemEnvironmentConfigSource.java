@@ -13,7 +13,7 @@
  */
 package org.corant.config.source;
 
-import static org.corant.config.ConfigUtils.extractSysEnv;
+import static org.corant.config.CorantConfigResolver.resolveSysEnvValue;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
 import java.io.Serializable;
 import java.security.AccessController;
@@ -56,7 +56,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
   @Override
   public String getValue(String propertyName) {
-    return extractSysEnv(
+    return resolveSysEnvValue(
         AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
         propertyName);
   }

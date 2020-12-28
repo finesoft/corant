@@ -212,7 +212,7 @@ public class CorantConfigConversion implements Serializable {
    * @return convert
    */
   public <T> T convertArray(String rawValue, Class<T> propertyComponentType) {
-    String[] values = ConfigUtils.splitValue(rawValue);
+    String[] values = CorantConfigResolver.splitValue(rawValue);
     int length = values.length;
     if (length == 0) {
       return null;
@@ -236,7 +236,7 @@ public class CorantConfigConversion implements Serializable {
    */
   public <T, C extends Collection<T>> C convertCollection(String rawValue, Type propertyItemType,
       IntFunction<C> collectionFactory) {
-    String[] values = ConfigUtils.splitValue(rawValue);
+    String[] values = CorantConfigResolver.splitValue(rawValue);
     int length = values.length;
     final C collection = collectionFactory.apply(length);
     for (String value : values) {
@@ -387,7 +387,7 @@ public class CorantConfigConversion implements Serializable {
    * @return tryConvertStringMap
    */
   protected Map<String, String> tryConvertStringMap(String rawValue) {
-    String[] values = ConfigUtils.splitValue(rawValue);
+    String[] values = CorantConfigResolver.splitValue(rawValue);
     List<String> vals = new ArrayList<>();
     boolean useKvs = true;
     for (String val : values) {

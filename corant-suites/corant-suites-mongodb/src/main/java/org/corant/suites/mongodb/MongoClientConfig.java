@@ -13,7 +13,7 @@
  */
 package org.corant.suites.mongodb;
 
-import static org.corant.config.ConfigUtils.getGroupConfigKeys;
+import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;

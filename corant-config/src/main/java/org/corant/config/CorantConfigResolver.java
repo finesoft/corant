@@ -61,7 +61,6 @@ public class CorantConfigResolver {
   public static final Pattern KEY_SPLITTER = escapedPattern(ESCAPE, KEY_DELIMITER);
   public static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
 
-  public static final String EXPAND_ENABLED_KEY = "mp.config.property.expressions.enabled";
   public static final String VAR_PREFIX = "${";
   public static final String EXP_PREFIX = "#{";
   public static final String VNE_SUFFIX = "}";
@@ -181,8 +180,9 @@ public class CorantConfigResolver {
       return key;
     }
     String value = provider.get(false, key);
-    if (toBoolean(provider.get(false, EXPAND_ENABLED_KEY))) {
+    if (toBoolean(provider.get(false, Config.PROPERTY_EXPRESSIONS_ENABLED))) {
       List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
+      stacks.add(key);
       if (value.contains(EXP_PREFIX)) {
         value = expandValue(true, value, provider, stacks);
         value = replace(value, EXP_REP, EXP_PREFIX);

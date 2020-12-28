@@ -13,7 +13,7 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.config.ConfigUtils.removeSplitor;
+import static org.corant.config.CorantConfigResolver.removeSplitor;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;

@@ -13,8 +13,8 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.config.ConfigUtils.concatKey;
-import static org.corant.config.ConfigUtils.dashify;
+import static org.corant.config.CorantConfigResolver.concatKey;
+import static org.corant.config.CorantConfigResolver.dashify;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;

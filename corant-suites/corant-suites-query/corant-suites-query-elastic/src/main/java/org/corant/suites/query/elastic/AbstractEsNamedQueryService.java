@@ -26,6 +26,7 @@ import org.corant.suites.query.shared.Querier;
 import org.corant.suites.query.shared.QueryParameter;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.mapping.FetchQuery;
+import org.elasticsearch.common.unit.TimeValue;
 
 /**
  * corant-suites-query
@@ -110,6 +111,24 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
+  public <T> Stream<T> scrolledSearch(String q, Object param, TimeValue scrollKeepAlive,
+      int batchSize) {
+    EsNamedQuerier querier = getQuerierResolver().resolve(q, param);
+    String script = resolveScript(querier.getScript(), null, null);
+    log("scrolled search-> " + q, querier.getQueryParameter(), script);
+    try {
+      return getExecutor()
+          .scrolledSearch(resolveIndexName(querier), script, scrollKeepAlive, batchSize)
+          .map(result -> {
+            this.fetch(result, querier);
+            return querier.resolveResult(result);
+          });
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
   public Map<String, Object> search(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     String script = resolveScript(querier.getScript(), null, null);
@@ -129,21 +148,6 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, null, resolveMaxSelectSize(querier));
     return hits.getValue();
-  }
-
-  @Override
-  public <T> Stream<T> stream(String q, Object param) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(q, param);
-    String script = resolveScript(querier.getScript(), null, null);
-    log("stream-> " + q, querier.getQueryParameter(), script);
-    try {
-      return getExecutor().stream(resolveIndexName(querier), script).map(result -> {
-        this.fetch(result, querier);
-        return querier.resolveResult(result);
-      });
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e);
-    }
   }
 
   protected abstract EsQueryExecutor getExecutor();

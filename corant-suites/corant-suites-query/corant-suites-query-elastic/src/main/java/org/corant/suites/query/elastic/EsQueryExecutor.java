@@ -29,6 +29,7 @@ import org.corant.shared.util.Conversions;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -144,6 +145,7 @@ public interface EsQueryExecutor {
     return Pair.of(total, list);
   }
 
-  Stream<Map<String, Object>> stream(String indexName, String script) throws Exception;
+  Stream<Map<String, Object>> scrolledSearch(String indexName, String script,
+      TimeValue scrollKeepAlive, int batchSize) throws Exception;
 
 }

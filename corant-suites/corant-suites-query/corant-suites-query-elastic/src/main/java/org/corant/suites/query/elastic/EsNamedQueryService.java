@@ -14,7 +14,9 @@
 package org.corant.suites.query.elastic;
 
 import java.util.Map;
+import java.util.stream.Stream;
 import org.corant.suites.query.shared.NamedQueryService;
+import org.elasticsearch.common.unit.TimeValue;
 
 /**
  * corant-suites-query
@@ -27,5 +29,7 @@ public interface EsNamedQueryService extends NamedQueryService {
   Map<String, Object> aggregate(String q, Object param);
 
   Map<String, Object> search(String q, Object param);
+
+  <T> Stream<T> scrolledSearch(String q, Object param, TimeValue scrollKeepAlive, int batchSize);
 
 }

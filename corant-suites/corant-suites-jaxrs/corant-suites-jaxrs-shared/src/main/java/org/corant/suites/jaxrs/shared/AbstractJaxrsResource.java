@@ -13,7 +13,6 @@
  */
 package org.corant.suites.jaxrs.shared;
 
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.Map;
@@ -110,9 +109,5 @@ public abstract class AbstractJaxrsResource {
       }
       return "";
     });
-  }
-
-  protected StreamOutputBuilder stream(InputStream is) {
-    return StreamOutputBuilder.of(is);
   }
 }

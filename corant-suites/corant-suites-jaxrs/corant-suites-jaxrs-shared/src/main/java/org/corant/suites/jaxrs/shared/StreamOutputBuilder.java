@@ -42,7 +42,7 @@ import org.corant.suites.servlet.abstraction.ContentDispositions.ContentDisposit
  */
 public class StreamOutputBuilder {
 
-  private final InputStream is;
+  private Resource resource;
   private boolean inline;
   private String name;
   private String fileName;
@@ -54,20 +54,12 @@ public class StreamOutputBuilder {
   private String contentType;
   private Map<String, Object> additionalHeaders = new HashMap<>();
 
-  public static StreamOutputBuilder of(InputStream is) {
-    return new StreamOutputBuilder(is);
-  }
-
   public static StreamOutputBuilder of(Resource resources) {
-    try {
-      return new StreamOutputBuilder(resources.openStream()).fileName(resources.getName());
-    } catch (IOException e) {
-      throw new CorantRuntimeException(e);
-    }
+    return new StreamOutputBuilder(resources).fileName(resources.getName());
   }
 
-  protected StreamOutputBuilder(InputStream is) {
-    this.is = shouldNotNull(is, "The input stream can not null!");
+  protected StreamOutputBuilder(Resource resource) {
+    this.resource = shouldNotNull(resource, "The resource can not null!");
   }
 
   public StreamOutputBuilder additionalHeaders(Map<String, Object> additionalHeaders) {
@@ -83,7 +75,14 @@ public class StreamOutputBuilder {
       }
       contentType = defaultObject(contentType, MediaType.APPLICATION_OCTET_STREAM);
     }
-    ResponseBuilder rb = Response.ok((StreamingOutput) output -> Streams.copy(is, output), contentType);
+    StreamingOutput stm = output -> {
+      try (InputStream input = resource.openStream()) {
+        Streams.copy(input, output);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    };
+    ResponseBuilder rb = Response.ok(stm, contentType);
     if (inline) {
       rb.header(HttpHeaders.CONTENT_TYPE, contentType);
     } else {

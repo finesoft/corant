@@ -15,7 +15,11 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.NEWLINE;
+import static org.corant.shared.util.Strings.RETURN;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -32,6 +36,7 @@ import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -48,6 +53,13 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Texts {
 
+  protected static final char CSV_FIELD_SEPARATOR = ',';
+  protected static final char CSV_FIELD_QUOTE = '"';
+  protected static final String CSV_FIELD_SEPARATOR_STRING = String.valueOf(CSV_FIELD_SEPARATOR);
+  protected static final char CSV_FIELD_QUOTES = '"';
+  protected static final String CSV_FIELD_QUOTES_STRING = "\"";
+  protected static final String CSV_DOUBLE_QUOTE = "\"\"";
+
   private Texts() {}
 
   public static InputStream asInputStream(String data) {
@@ -56,6 +68,74 @@ public class Texts {
 
   public static InputStream asInputStream(String data, Charset charset) {
     return new ByteArrayInputStream(data.getBytes(charset));
+  }
+
+  /**
+   * Parse CSV line to list
+   *
+   * NOTE: Some code come from com.sun.tools.jdeprscan.CSV
+   *
+   * @param line
+   * @return fromCSVLine
+   */
+  public static List<String> fromCSVLine(String line) {
+    List<String> result = new ArrayList<>();
+    StringBuilder buf = new StringBuilder();
+    byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
+    for (int i = 0; i < line.length(); i++) {
+      char c = line.charAt(i);
+      switch (c) {
+        case CSV_FIELD_SEPARATOR:
+          switch (state) {
+            case 2:
+              buf.append(CSV_FIELD_SEPARATOR);
+              break;
+            default:
+              result.add(buf.toString());
+              buf.setLength(0);
+              state = 0;
+              break;
+          }
+          break;
+        case CSV_FIELD_QUOTE:
+          switch (state) {
+            case 0:
+              state = 2;
+              break;
+            case 2:
+              state = 3;
+              break;
+            case 1:
+              throw new IllegalArgumentException(
+                  String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
+            case 3:
+              buf.append(CSV_FIELD_QUOTE);
+              state = 2;
+              break;
+          }
+          break;
+        default:
+          switch (state) {
+            case 0:
+              state = 1;
+              break;
+            case 1:
+            case 2:
+              break;
+            case 3:
+              throw new IllegalArgumentException(String.format(
+                  "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
+          }
+          buf.append(c);
+          break;
+      }
+    }
+    if (state == 2) {
+      throw new IllegalArgumentException(
+          String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
+    }
+    result.add(buf.toString());
+    return result;
   }
 
   /**
@@ -157,7 +237,7 @@ public class Texts {
   }
 
   /**
-   * String lines from input stream reader, use for read txt file line by line.
+   * String lines from input stream reader, use for read text file line by line.
    *
    * @param isr the input stream reader
    * @param offset the offset start from 0
@@ -226,6 +306,39 @@ public class Texts {
 
   public static List<String> readFromFile(String path) {
     return Texts.lines(new File(path)).collect(Collectors.toList());
+  }
+
+  /**
+   * Format objects to CSV line string.
+   *
+   * @param objects
+   * @return toCSVLine
+   */
+  public static String toCSVLine(Iterable<?> objects) {
+    String line = streamOf(objects).map(o -> Objects.asString(o, EMPTY)).map(s -> {
+      boolean quo =
+          s.contains(CSV_FIELD_SEPARATOR_STRING) || s.contains(RETURN) || s.contains(NEWLINE);
+      String r;
+      if (s.contains(CSV_FIELD_QUOTES_STRING)) {
+        quo = true;
+        r = s.replace(CSV_FIELD_QUOTES_STRING, CSV_DOUBLE_QUOTE);
+      } else {
+        r = s;
+      }
+      return quo ? CSV_FIELD_QUOTES_STRING + r + CSV_FIELD_QUOTES_STRING : r;
+    }).collect(Collectors.joining(CSV_FIELD_SEPARATOR_STRING));
+    return line.endsWith(String.valueOf(CSV_FIELD_SEPARATOR)) ? line.substring(0, line.length() - 1)
+        : line;
+  }
+
+  /**
+   * Format objects to CSV line string.
+   *
+   * @param objects
+   * @return toCSVLine
+   */
+  public static String toCSVLine(Object... objects) {
+    return toCSVLine(listOf(objects));
   }
 
   /**
@@ -300,4 +413,5 @@ public class Texts {
   public static void writeToFile(File file, Iterable<String> data) throws IOException {
     writeToFile(file, false, streamOf(data));
   }
+
 }

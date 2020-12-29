@@ -42,7 +42,7 @@ import java.util.stream.StreamSupport;
  */
 public class Streams {
 
-  public static final int DFLE_BATCH_SIZE = 64;
+  public static final int DFLT_BATCH_SIZE = 64;
 
   private Streams() {}
 
@@ -55,7 +55,7 @@ public class Streams {
    * @return batchCollectStream
    */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
-    final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
+    final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
     final AtomicInteger counter = new AtomicInteger();
     return shouldNotNull(source)
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
@@ -90,7 +90,7 @@ public class Streams {
 
     return streamOf(new Iterator<List<T>>() {
 
-      final int useBatchSize = batchSize < 0 ? DFLE_BATCH_SIZE : batchSize;
+      final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
       final Iterator<? extends T> useIt = shouldNotNull(it);
       final List<T> buffer = new ArrayList<>(useBatchSize);
       boolean end = false;

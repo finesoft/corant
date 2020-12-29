@@ -37,7 +37,7 @@ import org.corant.suites.query.shared.mapping.Query.QueryType;
  *
  * 1. The interface method with default static modifier will not be dynamic implemented.
  *
- * 2. If use Java8 then default method will avaliable, this may be changed in the future.
+ * 2. If use Java8 then default method will available, this may be changed in the future.
  *
  * 3. For now If the method without default and static modifier and has more than one parameter,
  * the second parameter will not be use, we only use first parameter as query parameter,

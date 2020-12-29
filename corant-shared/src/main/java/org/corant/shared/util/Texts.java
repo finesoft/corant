@@ -80,61 +80,63 @@ public class Texts {
    */
   public static List<String> fromCSVLine(String line) {
     List<String> result = new ArrayList<>();
-    StringBuilder buf = new StringBuilder();
-    byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
-    for (int i = 0; i < line.length(); i++) {
-      char c = line.charAt(i);
-      switch (c) {
-        case CSV_FIELD_SEPARATOR:
-          switch (state) {
-            case 2:
-              buf.append(CSV_FIELD_SEPARATOR);
-              break;
-            default:
-              result.add(buf.toString());
-              buf.setLength(0);
-              state = 0;
-              break;
-          }
-          break;
-        case CSV_FIELD_QUOTE:
-          switch (state) {
-            case 0:
-              state = 2;
-              break;
-            case 2:
-              state = 3;
-              break;
-            case 1:
-              throw new IllegalArgumentException(
-                  String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
-            case 3:
-              buf.append(CSV_FIELD_QUOTE);
-              state = 2;
-              break;
-          }
-          break;
-        default:
-          switch (state) {
-            case 0:
-              state = 1;
-              break;
-            case 1:
-            case 2:
-              break;
-            case 3:
-              throw new IllegalArgumentException(String.format(
-                  "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
-          }
-          buf.append(c);
-          break;
+    if (line != null) {
+      StringBuilder buf = new StringBuilder();
+      byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
+      for (int i = 0; i < line.length(); i++) {
+        char c = line.charAt(i);
+        switch (c) {
+          case CSV_FIELD_SEPARATOR:
+            switch (state) {
+              case 2:
+                buf.append(CSV_FIELD_SEPARATOR);
+                break;
+              default:
+                result.add(buf.toString());
+                buf.setLength(0);
+                state = 0;
+                break;
+            }
+            break;
+          case CSV_FIELD_QUOTE:
+            switch (state) {
+              case 0:
+                state = 2;
+                break;
+              case 2:
+                state = 3;
+                break;
+              case 1:
+                throw new IllegalArgumentException(
+                    String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
+              case 3:
+                buf.append(CSV_FIELD_QUOTE);
+                state = 2;
+                break;
+            }
+            break;
+          default:
+            switch (state) {
+              case 0:
+                state = 1;
+                break;
+              case 1:
+              case 2:
+                break;
+              case 3:
+                throw new IllegalArgumentException(String.format(
+                    "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
+            }
+            buf.append(c);
+            break;
+        }
       }
+      if (state == 2) {
+        throw new IllegalArgumentException(
+            String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
+      }
+      result.add(buf.toString());
     }
-    if (state == 2) {
-      throw new IllegalArgumentException(
-          String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
-    }
-    result.add(buf.toString());
     return result;
   }
 

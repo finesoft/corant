@@ -180,8 +180,8 @@ public class FileUtils {
         try {
           return new URL(jarFile);
         } catch (MalformedURLException ex) {
-          if (!jarFile.isEmpty() && jarFile.charAt(0) != '/') {
-            jarFile = "/" + jarFile;
+          if (!jarFile.isEmpty() && jarFile.charAt(0) != UNIX_SEPARATOR) {
+            jarFile = UNIX_SEPARATOR + jarFile;
           }
           return new URL(FILE_URL_PREFIX + jarFile);
         }

@@ -27,6 +27,48 @@ public class Chars {
 
   static final Logger logger = Logger.getLogger(Chars.class.getName());
 
+  //@formatter:off
+  public static final char[] EMPTY_ARRAY    = new char[0];
+  public static final char AMPERSAND        = '&';
+  public static final char AT               = '@';
+  public static final char ASTERISK         = '*';
+  public static final char BACK_SLASH       = '\\';
+  public static final char COLON            = ':';
+  public static final char COMMA            = ',';
+  public static final char DASH             = '-';
+  public static final char DOLLAR           = '$';
+  public static final char DOT              = '.';
+  public static final char EQUALS           = '=';
+  public static final char SLASH            = '/';
+  public static final char HASH             = '#';
+  public static final char HAT              = '^';
+  public static final char LEFT_BRACE       = '{';
+  public static final char LEFT_BRACKET     = '(';
+  public static final char LEFT_CHEV        = '<';
+  public static final char NEWLINE          = '\n';
+  public static final char PERCENT          = '%';
+  public static final char PIPE             = '|';
+  public static final char PLUS             = '+';
+  public static final char QUESTION_MARK    = '?';
+  public static final char EXCLAMATION_MARK = '!';
+  public static final char QUOTE            = '\'';
+  public static final char RETURN           = '\r';
+  public static final char TAB              = '\t';
+  public static final char RIGHT_BRACE      = '}';
+  public static final char RIGHT_BRACKET    = ')';
+  public static final char RIGHT_CHEV       = '>';
+  public static final char SEMICOLON        = ';';
+  public static final char SINGLE_QUOTE     = '\'';
+  public static final char BACKTICK         = '`';
+  public static final char SPACE            = ' ';
+  public static final char TILDA            = '~';
+  public static final char LEFT_SQ_BRACKET  = '[';
+  public static final char RIGHT_SQ_BRACKET = ']';
+  public static final char UNDERSCORE       = '_';
+  public static final char ONE              = '1';
+  public static final char ZERO             = '0';
+  //@formatter:on
+
   /**
    * Converts alphabetic, numeric, and symbolic Unicode characters which are not in the first 127
    * ASCII characters (the "Basic Latin" Unicode block) into their ASCII equivalents, if one exists.
@@ -2080,11 +2122,11 @@ public class Chars {
     if (obj == null || (len = obj.length()) == 0) {
       return false;
     }
-    if (obj.charAt(len - 1) == '.') {
+    if (obj.charAt(len - 1) == DOT) {
       return false;
     }
     int idx = 0;
-    if (obj.charAt(0) == '-' || obj.charAt(0) == '+') {
+    if (obj.charAt(0) == DASH || obj.charAt(0) == PLUS) {
       if (len == 1) {
         return false;
       }
@@ -2092,7 +2134,7 @@ public class Chars {
     }
     int point = 0;
     for (int i = idx; i < len; i++) {
-      if (obj.charAt(i) == '.') {
+      if (obj.charAt(i) == DOT) {
         if (++point > 1) {
           return false;
         }

@@ -104,14 +104,14 @@ public class Classes {
   public static void checkPackageAccess(String name) {
     SecurityManager s = System.getSecurityManager();
     if (s != null) {
-      String cname = name.replace('/', '.');
+      String cname = name.replace('/', PACKAGE_SEPARATOR_CHAR);
       if (!cname.isEmpty() && cname.charAt(0) == '[') {
         int b = cname.lastIndexOf('[') + 2;
         if (b > 1 && b < cname.length()) {
           cname = cname.substring(b);
         }
       }
-      int i = cname.lastIndexOf('.');
+      int i = cname.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
       if (i != -1) {
         s.checkPackageAccess(cname.substring(0, i));
       }
@@ -279,8 +279,8 @@ public class Classes {
     if (isEmpty(fullClassName)) {
       return Strings.EMPTY;
     }
-    int lastDot = fullClassName.lastIndexOf('.');
-    return lastDot < 0 ? "" : fullClassName.substring(0, lastDot);
+    int lastDot = fullClassName.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
+    return lastDot < 0 ? Strings.EMPTY : fullClassName.substring(0, lastDot);
   }
 
   public static String getShortClassName(String className) {

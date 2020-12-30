@@ -55,13 +55,22 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Texts {
 
-  protected static final char CSV_FIELD_DELIMITER = ',';
-  protected static final char CSV_FIELD_QUOTES = '"';
-  protected static final String CSV_FIELD_DELIMITER_STRING = ",";
-  protected static final String CSV_FIELD_QUOTES_STRING = "\"";
-  protected static final String CSV_DOUBLE_QUOTES = "\"\"";
+  public static final char CSV_FIELD_DELIMITER = ',';
+  public static final char CSV_FIELD_QUOTES = '"';
+  public static final String CSV_FIELD_DELIMITER_STRING = ",";
+  public static final String CSV_FIELD_QUOTES_STRING = "\"";
+  public static final String CSV_DOUBLE_QUOTES = "\"\"";
 
   private Texts() {}
+
+  /**
+   * CSV rows from file input stream, use for read CSV file line by line.
+   *
+   * @param file the CSV file
+   */
+  public static Stream<List<String>> asCSVLines(final File file) {
+    return asCSVLines(file, -1, -1);
+  }
 
   /**
    * CSV rows from file input stream, use for read text file line by line.
@@ -71,19 +80,20 @@ public class Texts {
    * @param limit the number of rows returned streamCSVRows
    */
   public static Stream<List<String>> asCSVLines(final File file, int offset, int limit) {
-    FileInputStream fis;
+    final FileInputStream fis;
     try {
       fis = new FileInputStream(shouldNotNull(file));
     } catch (FileNotFoundException e1) {
       throw new CorantRuntimeException(e1);
     }
-    return asCSVLines(fis, offset, (i, t) -> limit >= 1 && i > limit).onClose(() -> {
-      try {
-        fis.close();
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
+    return asCSVLines(fis, StandardCharsets.UTF_8, offset, (i, t) -> limit >= 1 && i > limit)
+        .onClose(() -> {
+          try {
+            fis.close();
+          } catch (IOException e) {
+            throw new CorantRuntimeException(e);
+          }
+        });
   }
 
   /**
@@ -95,7 +105,7 @@ public class Texts {
    * @return streamCSVRows
    */
   public static Stream<List<String>> asCSVLines(final InputStream is) {
-    return asCSVLines(is, 0, null);
+    return asCSVLines(is, StandardCharsets.UTF_8, 0, null);
   }
 
   /**
@@ -104,13 +114,14 @@ public class Texts {
    * Note: The caller must maintain resource release by himself
    *
    * @param is the CSV format input stream
+   * @param charset
    * @param offset the offset start from 0
    * @param terminator use to brake out the stream, terminator return true means need to brake out
    */
-  public static Stream<List<String>> asCSVLines(final InputStream is, int offset,
+  public static Stream<List<String>> asCSVLines(final InputStream is, Charset charset, int offset,
       BiPredicate<Integer, String> terminator) {
-    final BufferedReader reader = new CSVBufferedReader(new InputStreamReader(is));
-    return lines(reader, offset, terminator, Texts::fromCSVLine);
+    final BufferedReader reader = new CSVBufferedReader(new InputStreamReader(is, charset));
+    return lines(reader, offset, terminator, Texts::readCSVFields);
   }
 
   /**
@@ -132,77 +143,6 @@ public class Texts {
    */
   public static InputStream asInputStream(String data, Charset charset) {
     return new ByteArrayInputStream(shouldNotNull(data).getBytes(charset));
-  }
-
-  /**
-   * Parse CSV line to list
-   *
-   * NOTE: Some code come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform
-   * me(finesoft@gmail.com).
-   *
-   * @param line the CSV format line
-   * @return the CSV fields
-   */
-  public static List<String> fromCSVLine(String line) {
-    List<String> result = new ArrayList<>();
-    if (line != null) {
-      StringBuilder buf = new StringBuilder();
-      byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
-      for (int i = 0; i < line.length(); i++) {
-        char c = line.charAt(i);
-        switch (c) {
-          case CSV_FIELD_DELIMITER:
-            switch (state) {
-              case 2:
-                buf.append(CSV_FIELD_DELIMITER);
-                break;
-              default:
-                result.add(buf.toString());
-                buf.setLength(0);
-                state = 0;
-                break;
-            }
-            break;
-          case CSV_FIELD_QUOTES:
-            switch (state) {
-              case 0:
-                state = 2;
-                break;
-              case 2:
-                state = 3;
-                break;
-              case 1:
-                throw new IllegalArgumentException(
-                    String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
-              case 3:
-                buf.append(CSV_FIELD_QUOTES);
-                state = 2;
-                break;
-            }
-            break;
-          default:
-            switch (state) {
-              case 0:
-                state = 1;
-                break;
-              case 1:
-              case 2:
-                break;
-              case 3:
-                throw new IllegalArgumentException(String.format(
-                    "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
-            }
-            buf.append(c);
-            break;
-        }
-      }
-      if (state == 2) {
-        throw new IllegalArgumentException(
-            String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
-      }
-      result.add(buf.toString());
-    }
-    return result;
   }
 
   /**
@@ -300,7 +240,7 @@ public class Texts {
    * @return lines
    */
   public static Stream<String> lines(final File file) {
-    FileInputStream fis;
+    final FileInputStream fis;
     try {
       fis = new FileInputStream(shouldNotNull(file));
     } catch (FileNotFoundException e1) {
@@ -395,12 +335,83 @@ public class Texts {
   }
 
   /**
+   * Parse CSV line to fields list
+   *
+   * NOTE: Some code come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform
+   * me(finesoft@gmail.com).
+   *
+   * @param line the CSV format line
+   * @return the CSV fields
+   */
+  public static List<String> readCSVFields(String line) {
+    List<String> result = new ArrayList<>();
+    if (line != null) {
+      StringBuilder buf = new StringBuilder();
+      byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
+      for (int i = 0; i < line.length(); i++) {
+        char c = line.charAt(i);
+        switch (c) {
+          case CSV_FIELD_DELIMITER:
+            switch (state) {
+              case 2:
+                buf.append(CSV_FIELD_DELIMITER);
+                break;
+              default:
+                result.add(buf.toString());
+                buf.setLength(0);
+                state = 0;
+                break;
+            }
+            break;
+          case CSV_FIELD_QUOTES:
+            switch (state) {
+              case 0:
+                state = 2;
+                break;
+              case 2:
+                state = 3;
+                break;
+              case 1:
+                throw new IllegalArgumentException(
+                    String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
+              case 3:
+                buf.append(CSV_FIELD_QUOTES);
+                state = 2;
+                break;
+            }
+            break;
+          default:
+            switch (state) {
+              case 0:
+                state = 1;
+                break;
+              case 1:
+              case 2:
+                break;
+              case 3:
+                throw new IllegalArgumentException(String.format(
+                    "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
+            }
+            buf.append(c);
+            break;
+        }
+      }
+      if (state == 2) {
+        throw new IllegalArgumentException(
+            String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
+      }
+      result.add(buf.toString());
+    }
+    return result;
+  }
+
+  /**
    * Return string lines from file path.
    *
    * @param path
    * @return readFromFile
    */
-  public static List<String> readFromFilePath(String path) {
+  public static List<String> readLines(String path) {
     return Texts.lines(new File(path)).collect(Collectors.toList());
   }
 
@@ -543,8 +554,16 @@ public class Texts {
         if (c == CSV_FIELD_QUOTES) {
           inquotes = !inquotes;
         }
-        if ((c == Chars.NEWLINE || c == Chars.RETURN) && !inquotes) {
-          break;
+        if (!inquotes) {
+          if (c == Chars.NEWLINE) {
+            break;
+          } else if (c == Chars.RETURN) {
+            mark(1);// for windows '\r\n' check if next is '\n' then skip it
+            if ((c = (char) read()) != Chars.NEWLINE) {
+              reset();
+            }
+            break;
+          }
         }
         result.append(c);
       }

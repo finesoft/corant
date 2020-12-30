@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.listOf;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,16 +30,22 @@ import junit.framework.TestCase;
 public class TextsTest extends TestCase {
 
   @Test
+  public void testAsCSVLines() {
+    Texts.asCSVLines(new File("d:/test.csv"), 0, 0).map(s -> String.join("\t", s))
+        .forEach(System.out::println);
+  }
+
+  @Test
   public void testCSVLine() {
     List<String> datLine = listOf("1", "", "2", "3", "\"", "4", "\r", "\n", "5");
     String csvLine = Texts.toCSVLine(datLine);
-    assertEquals(datLine, Texts.fromCSVLine(csvLine));
+    assertEquals(datLine, Texts.readCSVFields(csvLine));
   }
 
   @Test
   public void testStreamCSVRows() {
-    List<String> datLine =
-        listOf("1", "", "2", "3", "\"", ",", "\r\n", "\r\r\r\r", "\n\n\r", "4", "\r", "\n", "5");
+    List<String> datLine = listOf("1", "", "2", "3", "\"", ",", "厦门China", "\r\n", "\r\r\r\r",
+        "\n\n\r", "4", "\r", "\n", "5");
     String csvLine = Texts.toCSVLine(datLine);
     int size = 100;
     List<List<String>> datLines = new ArrayList<>(size);

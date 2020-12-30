@@ -64,6 +64,56 @@ public class Texts {
   private Texts() {}
 
   /**
+   * CSV rows from file input stream, use for read text file line by line.
+   *
+   * @param file the CSV file
+   * @param offset the offset start from 0
+   * @param limit the number of rows returned streamCSVRows
+   */
+  public static Stream<List<String>> asCSVLines(final File file, int offset, int limit) {
+    FileInputStream fis;
+    try {
+      fis = new FileInputStream(shouldNotNull(file));
+    } catch (FileNotFoundException e1) {
+      throw new CorantRuntimeException(e1);
+    }
+    return asCSVLines(fis, offset, (i, t) -> limit >= 1 && i > limit).onClose(() -> {
+      try {
+        fis.close();
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+  }
+
+  /**
+   * CSV rows from input stream, use for read CSV file line by line.
+   *
+   * Note: The caller must maintain resource release by himself
+   *
+   * @param is the CSV format input stream
+   * @return streamCSVRows
+   */
+  public static Stream<List<String>> asCSVLines(final InputStream is) {
+    return asCSVLines(is, 0, null);
+  }
+
+  /**
+   * CSV rows from input stream, use for read CSV file line by line.
+   *
+   * Note: The caller must maintain resource release by himself
+   *
+   * @param is the CSV format input stream
+   * @param offset the offset start from 0
+   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   */
+  public static Stream<List<String>> asCSVLines(final InputStream is, int offset,
+      BiPredicate<Integer, String> terminator) {
+    final BufferedReader reader = new CSVBufferedReader(new InputStreamReader(is));
+    return lines(reader, offset, terminator, Texts::fromCSVLine);
+  }
+
+  /**
    * Convert string to byte array input stream.
    *
    * @param data
@@ -189,6 +239,60 @@ public class Texts {
     return sb.toString();
   }
 
+  public static <T> Stream<T> lines(final BufferedReader reader, int offset,
+      BiPredicate<Integer, String> terminator, Function<String, T> converter) {
+    return streamOf(new Iterator<>() {
+      final BiPredicate<Integer, String> useTerminator =
+          terminator == null ? (i, t) -> false : terminator;
+      String nextLine = null;
+      int readLines = 0;
+      boolean valid = true;
+      // skip lines if necessary
+      {
+        try {
+          if (offset > 0) {
+            for (int i = 0; i < offset; i++) {
+              if (reader.readLine() == null) {
+                valid = false;
+                break;
+              }
+            }
+          }
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        }
+      }
+
+      @Override
+      public boolean hasNext() {
+        if (!valid) {
+          return false;
+        }
+        if (nextLine != null) {
+          return true;
+        } else {
+          try {
+            nextLine = reader.readLine();
+            return nextLine != null && !useTerminator.test(++readLines, nextLine);
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+        }
+      }
+
+      @Override
+      public T next() {
+        if (nextLine != null || hasNext()) {
+          String line = nextLine;
+          nextLine = null;
+          return converter.apply(line);
+        } else {
+          throw new NoSuchElementException();
+        }
+      }
+    });
+  }
+
   /**
    * String lines from file, use for read text file line by line.
    *
@@ -277,7 +381,7 @@ public class Texts {
   public static Stream<String> lines(final InputStreamReader isr, int offset,
       BiPredicate<Integer, String> terminator) {
     final BufferedReader reader = new BufferedReader(isr);
-    return streamline(reader, offset, terminator, UnaryOperator.identity());
+    return lines(reader, offset, terminator, UnaryOperator.identity());
   }
 
   /**
@@ -298,110 +402,6 @@ public class Texts {
    */
   public static List<String> readFromFilePath(String path) {
     return Texts.lines(new File(path)).collect(Collectors.toList());
-  }
-
-  /**
-   * CSV rows from file input stream, use for read text file line by line.
-   *
-   * @param file the CSV file
-   * @param offset the offset start from 0
-   * @param limit the number of rows returned streamCSVRows
-   */
-  public static Stream<List<String>> streamCSVRows(final File file, int offset, int limit) {
-    FileInputStream fis;
-    try {
-      fis = new FileInputStream(shouldNotNull(file));
-    } catch (FileNotFoundException e1) {
-      throw new CorantRuntimeException(e1);
-    }
-    return streamCSVRows(fis, -1, (i, t) -> limit >= 1 && i > limit).onClose(() -> {
-      try {
-        fis.close();
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
-  }
-
-  /**
-   * CSV rows from input stream, use for read CSV file line by line.
-   *
-   * Note: The caller must maintain resource release by himself
-   *
-   * @param is the CSV format input stream
-   * @return streamCSVRows
-   */
-  public static Stream<List<String>> streamCSVRows(final InputStream is) {
-    return streamCSVRows(is, 0, null);
-  }
-
-  /**
-   * CSV rows from input stream, use for read CSV file line by line.
-   *
-   * Note: The caller must maintain resource release by himself
-   *
-   * @param is the CSV format input stream
-   * @param offset the offset start from 0
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
-   */
-  public static Stream<List<String>> streamCSVRows(final InputStream is, int offset,
-      BiPredicate<Integer, String> terminator) {
-    final BufferedReader reader = new CSVBufferedReader(new InputStreamReader(is));
-    return streamline(reader, offset, terminator, Texts::fromCSVLine);
-  }
-
-  public static <T> Stream<T> streamline(final BufferedReader reader, int offset,
-      BiPredicate<Integer, String> terminator, Function<String, T> converter) {
-    return streamOf(new Iterator<T>() {
-      final BiPredicate<Integer, String> useTerminator =
-          terminator == null ? (i, t) -> false : terminator;
-      String nextLine = null;
-      int readLines = 0;
-      boolean valid = true;
-      // skip lines if necessary
-      {
-        try {
-          if (offset > 0) {
-            for (int i = 0; i < offset; i++) {
-              if (reader.readLine() == null) {
-                valid = false;
-                break;
-              }
-            }
-          }
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
-        }
-      }
-
-      @Override
-      public boolean hasNext() {
-        if (!valid) {
-          return false;
-        }
-        if (nextLine != null) {
-          return true;
-        } else {
-          try {
-            nextLine = reader.readLine();
-            return nextLine != null && !useTerminator.test(++readLines, nextLine);
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
-        }
-      }
-
-      @Override
-      public T next() {
-        if (nextLine != null || hasNext()) {
-          String line = nextLine;
-          nextLine = null;
-          return converter.apply(line);
-        } else {
-          throw new NoSuchElementException();
-        }
-      }
-    });
   }
 
   /**

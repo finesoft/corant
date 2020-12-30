@@ -15,7 +15,6 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.function.Supplier;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -43,7 +42,7 @@ public class Assertions {
    * @param b shouldBeEquals
    */
   public static void shouldBeEquals(Object a, Object b) {
-    shouldBeEquals(a, b, "The objects %s %s should be equal!", asString(a), asString(b));
+    shouldBeEquals(a, b, "Objects should be equal!");
   }
 
   /**
@@ -80,7 +79,7 @@ public class Assertions {
    * @param condition shouldBeFalse
    */
   public static void shouldBeFalse(boolean condition) {
-    shouldBeFalse(condition, "This should be false");
+    shouldBeFalse(condition, "Condition or expression should be false!");
   }
 
   /**
@@ -116,7 +115,7 @@ public class Assertions {
    * @return shouldBeNull
    */
   public static <T> T shouldBeNull(T obj) {
-    return shouldBeNull(obj, "The object should be null!");
+    return shouldBeNull(obj, "Object should be null!");
   }
 
   /**
@@ -155,7 +154,7 @@ public class Assertions {
    * @param condition shouldBeTrue
    */
   public static void shouldBeTrue(boolean condition) {
-    shouldBeTrue(condition, "This should be true");
+    shouldBeTrue(condition, "Condition or expression should be true!");
   }
 
   /**
@@ -203,7 +202,7 @@ public class Assertions {
    * @return shouldNotBlank
    */
   public static <T extends CharSequence> T shouldNotBlank(T obj) {
-    return shouldNotBlank(obj, "The object should not blank!");
+    return shouldNotBlank(obj, "Object should not blank!");
   }
 
   /**
@@ -246,7 +245,7 @@ public class Assertions {
    * @return shouldNotEmpty
    */
   public static <T> T shouldNotEmpty(T obj) {
-    return shouldNotEmpty(obj, "This should be true");
+    return shouldNotEmpty(obj, "Object should not empty!");
   }
 
   /**
@@ -288,7 +287,7 @@ public class Assertions {
    * @return shouldNotNull
    */
   public static <T> T shouldNotNull(T obj) {
-    return shouldNotNull(obj, "The object should not null!");
+    return shouldNotNull(obj, "Object should not null!");
   }
 
   /**

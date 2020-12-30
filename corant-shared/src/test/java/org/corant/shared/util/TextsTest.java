@@ -48,7 +48,7 @@ public class TextsTest extends TestCase {
       datLines.add(datLine);
     }
     List<List<String>> results =
-        Texts.streamCSVRows(Texts.asInputStream(context.toString())).collect(Collectors.toList());
+        Texts.asCSVLines(Texts.asInputStream(context.toString())).collect(Collectors.toList());
     assertEquals(results, datLines);
   }
 }

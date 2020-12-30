@@ -138,6 +138,24 @@ public class Strings {
 
   /**
    * <pre>
+   * Strings.containsAnyChars(null, *)      = false
+   * Strings.containsAnyChars("", *)        = false
+   * Strings.containsAnyChars(" ", "a b")   = true
+   * Strings.containsAnyChars("abc", "ab")  = true
+   * Strings.containsAnyChars("abc", "z")   = false
+   * </pre>
+   *
+   * @param str
+   * @param searchStr
+   * @return containsAnyChars
+   */
+  public static boolean containsAnyChars(String str, String searchStr) {
+    return str != null && searchStr != null
+        && str.chars().anyMatch(c -> searchStr.indexOf(c) != -1);
+  }
+
+  /**
+   * <pre>
    * Strings.defaultBlank(null, ()->"DFLT")  = "DFLT"
    * Strings.defaultBlank("", ()->"DFLT")    = "DFLT"
    * Strings.defaultBlank(" ", ()->"DFLT")   = "DFLT"

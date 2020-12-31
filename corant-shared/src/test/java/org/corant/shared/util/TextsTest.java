@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.listOf;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class TextsTest extends TestCase {
   }
 
   @Test
-  public void testStreamCSVRows() {
+  public void testStreamCSVRows() throws IOException {
     List<String> datLine = listOf("1", "", "2", "3", "\"", ",", "厦门China", "\r\n", "\r\r\r\r",
         "\n\n\r", "4", "\r", "\n", "5");
     String csvLine = Texts.toCSVLine(datLine);
@@ -63,5 +64,9 @@ public class TextsTest extends TestCase {
     List<List<String>> results =
         Texts.asCSVLines(Texts.asInputStream(context.toString())).collect(Collectors.toList());
     assertEquals(results, datLines);
+    Texts.writeCSVFile(new File("d:/yyy.csv"), results);
+    List<List<String>> reads = new ArrayList<>();
+    Texts.asCSVLines(new File("d:/yyy.csv")).forEach(reads::add);
+    assertEquals(results, reads);
   }
 }

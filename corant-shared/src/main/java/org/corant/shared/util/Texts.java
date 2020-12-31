@@ -603,11 +603,11 @@ public class Texts {
   }
 
   public static void writeCSVFile(File file, boolean append, Charset charset,
-      Stream<List<?>> stream) throws IOException {
+      Stream<List<String>> stream) throws IOException {
     writeToFile(file, append, charset, shouldNotNull(stream).map(Texts::toCSVLine));
   }
 
-  public static void writeCSVFile(File file, Iterable<List<?>> data) throws IOException {
+  public static void writeCSVFile(File file, List<List<String>> data) throws IOException {
     writeToFile(file, false, shouldNotNull(streamOf(data)).map(Texts::toCSVLine));
   }
 

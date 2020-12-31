@@ -575,19 +575,22 @@ public class Texts {
     }
   }
 
-  public static void tryWriteToFile(File file, boolean append, Charset charset, String data)
-      throws IOException {
+  public static void tryWriteToFile(File file, boolean append, Charset charset, String data) {
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
-      fileWritter.append(data);
+        BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
+      fileWriter.append(data);
+    } catch (IOException e) {
+      // Noop!
     }
   }
 
-  public static void tryWriteToFile(File file, boolean append, String data) throws IOException {
+  public static void tryWriteToFile(File file, boolean append, String data) {
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWritter =
+        BufferedWriter fileWriter =
             new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
-      fileWritter.append(data);
+      fileWriter.append(data);
+    } catch (IOException e) {
+      // Noop!
     }
   }
 
@@ -599,18 +602,28 @@ public class Texts {
     }
   }
 
+  public static void writeCSVFile(File file, boolean append, Charset charset,
+      Stream<List<?>> stream) throws IOException {
+    writeToFile(file, append, charset, shouldNotNull(stream).map(Texts::toCSVLine));
+  }
+
+  public static void writeCSVFile(File file, Iterable<List<?>> data) throws IOException {
+    writeToFile(file, false, shouldNotNull(streamOf(data)).map(Texts::toCSVLine));
+  }
+
   public static void writeToFile(File file, boolean append, Charset charset, Stream<String> lines)
       throws IOException {
+    shouldNotNull(lines);
     if (!file.exists()) {
       shouldBeTrue(file.createNewFile());
     }
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWritter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
+        BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
       lines.forEach(line -> {
         try {
-          fileWritter.append(line);
-          fileWritter.newLine();
-          fileWritter.flush();
+          fileWriter.append(line);
+          fileWriter.newLine();
+          fileWriter.flush();
         } catch (Exception e) {
           throw new CorantRuntimeException(e);
         }

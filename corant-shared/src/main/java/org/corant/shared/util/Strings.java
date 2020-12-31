@@ -270,11 +270,11 @@ public class Strings {
     if (isEmpty(str)) {
       return EMPTY_ARRAY;
     }
-    if (isEmpty(escapes)) {
-      return str.split(separator, limit);
-    }
     if (isEmpty(separator)) {
       return new String[] {str};
+    }
+    if (isEmpty(escapes)) {
+      return str.split(separator, limit);
     }
     final String target = escapes.concat(separator);
     final String[] result = escapedPattern(escapes, separator).split(str, limit);

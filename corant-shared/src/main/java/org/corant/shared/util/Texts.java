@@ -153,6 +153,8 @@ public class Texts {
    * Read text file by line and use any character string as a delimiter to split the line into a
    * field list, support delimiter escape line offset and limit.
    *
+   * NOTE: This method do not support line breaks in field
+   *
    * @param file the file
    * @param offset the offset start from 0, use for skip lines
    * @param limit the max lines to read
@@ -181,6 +183,8 @@ public class Texts {
   /**
    * Read text file by line and use any character string as a delimiter to split the line into a
    * field list, support delimiter escape.
+   *
+   * NOTE: This method do not support line breaks in field
    *
    * @param file the file
    * @param delimiter the field delimiter

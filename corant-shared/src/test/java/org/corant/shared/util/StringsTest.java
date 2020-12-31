@@ -44,4 +44,14 @@ public class StringsTest extends TestCase {
     str = "a1ssssb\\ssss2ssssc3";
     assertArrayEquals(escapedSplit(str, "\\", "ssss"), new String[] {"a1", "bssss2", "c3"});
   }
+
+  @Test
+  public void testEscapeSplitx() {
+    String str = "a1\tb\\t2\tc3";
+    assertArrayEquals(escapedSplit(str, "\\", "\t"), new String[] {"a1", "b\\t2", "c3"});
+    str = "a1|b\\|2|c3";
+    assertArrayEquals(escapedSplit(str, "\\", "|"), new String[] {"a1", "b|2", "c3"});
+    str = "a1hhhhb\\hhhh2hhhhc3";
+    assertArrayEquals(escapedSplit(str, "\\", "hhhh"), new String[] {"a1", "bhhhh2", "c3"});
+  }
 }

@@ -15,13 +15,13 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.RETURN;
-import static org.corant.shared.util.Strings.escapedSplit;
+import static org.corant.shared.util.Strings.escapedPattern;
+import static org.corant.shared.util.Strings.replace;
 import static org.corant.shared.util.Strings.split;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -40,12 +40,14 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -216,9 +218,14 @@ public class Texts {
       final String escape) {
     shouldNotNull(delimiter);
     final BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
+    final Pattern pattern = escapedPattern(escape, delimiter);
+    final String target = escape + delimiter;
     final Function<String, List<String>> converter =
-        isEmpty(escape) ? line -> listOf(split(line, delimiter))
-            : line -> listOf(escapedSplit(line, escape, delimiter));
+        pattern == null ? line -> listOf(split(line, delimiter)) : line -> {
+          String[] array = pattern.split(line);
+          Arrays.setAll(array, i -> replace(array[i], target, delimiter));
+          return listOf(array);
+        };
     return lines(reader, offset, terminator, converter);
   }
 

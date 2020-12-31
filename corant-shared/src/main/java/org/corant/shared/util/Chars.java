@@ -2288,4 +2288,30 @@ public class Chars {
   public static char toHalfWidthCharacter(int c) {
     return toHalfWidthCharacter((char) c);
   }
+
+  /**
+   * Convert ASCII alpha char to lower case
+   *
+   * @param c
+   * @return toLowerAsciiAlpha
+   */
+  public static char toLowerAsciiAlpha(char c) {
+    if (isUpperAsciiAlpha(c)) {
+      c += (char) 0x20;
+    }
+    return c;
+  }
+
+  /**
+   * Convert ASCII alpha char to upper case
+   *
+   * @param c
+   * @return toUpperAsciiAlpha
+   */
+  public static char toUpperAsciiAlpha(char c) {
+    if (isLowerAsciiAlpha(c)) {
+      c -= (char) 0x20;
+    }
+    return c;
+  }
 }

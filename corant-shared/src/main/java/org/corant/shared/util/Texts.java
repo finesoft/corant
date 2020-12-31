@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -22,7 +23,6 @@ import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.RETURN;
 import static org.corant.shared.util.Strings.escapedPattern;
 import static org.corant.shared.util.Strings.replace;
-import static org.corant.shared.util.Strings.split;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -218,10 +218,17 @@ public class Texts {
       final String escape) {
     shouldNotNull(delimiter);
     final BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-    final Pattern pattern = escapedPattern(escape, delimiter);
-    final String target = escape + delimiter;
+    final Pattern pattern;
+    final String target;
+    if (isEmpty(escape)) {
+      pattern = Pattern.compile(Pattern.quote(delimiter));
+      target = null;
+    } else {
+      pattern = escapedPattern(escape, delimiter);
+      target = escape + delimiter;
+    }
     final Function<String, List<String>> converter =
-        pattern == null ? line -> listOf(split(line, delimiter)) : line -> {
+        target == null ? line -> listOf(pattern.split(line)) : line -> {
           String[] array = pattern.split(line);
           Arrays.setAll(array, i -> replace(array[i], target, delimiter));
           return listOf(array);
@@ -664,7 +671,7 @@ public class Texts {
           } else if (c == Chars.RETURN) {
             if (markSupported()) {
               mark(1);// for windows excel '\r\n' check if next is '\n' then skip it
-              if ((c = (char) read()) != Chars.NEWLINE) {
+              if ((char) read() != Chars.NEWLINE) {
                 reset();
               }
             }

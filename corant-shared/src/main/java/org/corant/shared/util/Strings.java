@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,10 +239,12 @@ public class Strings {
    * @return escapedPattern
    */
   public static Pattern escapedPattern(final String escapes, final String quote) {
-    if (escapes == null || quote == null) {
-      return null;
+    if (isNotEmpty(escapes) && isNotEmpty(quote)) {
+      return Pattern.compile("(?<!" + Pattern.quote(escapes) + ")" + Pattern.quote(quote));
+    } else if (isNotEmpty(quote)) {
+      return Pattern.compile(Pattern.quote(quote));
     }
-    return Pattern.compile("(?<!" + Pattern.quote(escapes) + ")" + Pattern.quote(quote));
+    return null;
   }
 
   /**

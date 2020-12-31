@@ -277,8 +277,9 @@ public class Strings {
       return new String[] {str};
     }
     final String target = escapes.concat(separator);
-    return Arrays.stream(escapedPattern(escapes, separator).split(str, limit))
-        .map(a -> replace(a, target, separator)).toArray(String[]::new);
+    final String[] result = escapedPattern(escapes, separator).split(str, limit);
+    Arrays.setAll(result, i -> replace(result[i], target, separator));
+    return result;
   }
 
   /**

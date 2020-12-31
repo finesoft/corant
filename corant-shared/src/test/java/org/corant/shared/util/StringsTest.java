@@ -13,6 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Strings.escapedSplit;
+import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -31,5 +33,15 @@ public class StringsTest extends TestCase {
     assertTrue(Strings.containsAnyChars(" ", "a b"));
     assertTrue(Strings.containsAnyChars("abc", "ab"));
     assertFalse(Strings.containsAnyChars("abc", "z"));
+  }
+
+  @Test
+  public void testEscapeSplit() {
+    String str = "a1\tb\\t2\tc3";
+    assertArrayEquals(escapedSplit(str, "\\", "\t"), new String[] {"a1", "b\\t2", "c3"});
+    str = "a1|b\\|2|c3";
+    assertArrayEquals(escapedSplit(str, "\\", "|"), new String[] {"a1", "b|2", "c3"});
+    str = "a1ssssb\\ssss2ssssc3";
+    assertArrayEquals(escapedSplit(str, "\\", "ssss"), new String[] {"a1", "bssss2", "c3"});
   }
 }

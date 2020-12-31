@@ -270,10 +270,15 @@ public class Strings {
     if (isEmpty(str)) {
       return EMPTY_ARRAY;
     }
+    if (isEmpty(escapes)) {
+      return str.split(separator, limit);
+    }
     if (isEmpty(separator)) {
       return new String[] {str};
     }
-    return escapedPattern(escapes, separator).split(str, limit);
+    final String target = escapes.concat(separator);
+    return Arrays.stream(escapedPattern(escapes, separator).split(str, limit))
+        .map(a -> replace(a, target, separator)).toArray(String[]::new);
   }
 
   /**

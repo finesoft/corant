@@ -36,6 +36,12 @@ public class TextsTest extends TestCase {
   }
 
   @Test
+  public void testAsXSVLines() {
+    Texts.asXSVLines(new File("d:/test.txt"), "oooo", "\\").map(s -> String.join("\t", s))
+        .forEach(System.out::println);
+  }
+
+  @Test
   public void testCSVLine() {
     List<String> datLine = listOf("1", "", "2", "3", "\"", "4", "\r", "\n", "5");
     String csvLine = Texts.toCSVLine(datLine);

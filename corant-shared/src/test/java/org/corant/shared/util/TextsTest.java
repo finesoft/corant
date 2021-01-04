@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Lists.listOf;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,13 +33,13 @@ public class TextsTest extends TestCase {
 
   @Test
   public void testAsCSVLines() {
-    Texts.asCSVLines(new File("d:/test.csv"), 0, 0).map(s -> String.join("\t", s))
+    Texts.asCSVLines(new File("d:/test.csv"), null, 0, 0).map(s -> String.join("\t", s))
         .forEach(System.out::println);
   }
 
   @Test
   public void testAsXSVLines() {
-    Texts.asXSVLines(new File("d:/test.txt"), "oooo", "\\").map(s -> String.join("\t", s))
+    Texts.asXSVLines(new File("d:/test.txt"), "oooo").map(s -> String.join("\t", s))
         .forEach(System.out::println);
   }
 
@@ -64,9 +65,32 @@ public class TextsTest extends TestCase {
     List<List<String>> results =
         Texts.asCSVLines(Texts.asInputStream(context.toString())).collect(Collectors.toList());
     assertEquals(results, datLines);
-    Texts.writeCSVFile(new File("d:/yyy.csv"), results);
+    Texts.writeCSVFile(new File("d:/yyy.csv"), false, Charset.forName("GB2312"), results.stream());
     List<List<String>> reads = new ArrayList<>();
-    Texts.asCSVLines(new File("d:/yyy.csv")).forEach(reads::add);
+    Texts.asCSVLines(new File("d:/yyy.csv"), Charset.forName("GB2312")).forEach(reads::add);
+    assertEquals(results, reads);
+  }
+
+  @Test
+  public void testStreamXSVRows() throws IOException {
+    List<String> datLine = listOf("1", "", "\\t2", "3", "\"", ",", "厦门\tChina", "\r\n", "\r\r\r\r",
+        "\n\n\r", "4", "\r", "\n", "5");
+    String delimiter = "\t";
+    String xsvLine = Texts.toXSVLine(datLine, delimiter);
+    int size = 2;
+    List<List<String>> datLines = new ArrayList<>(size);
+    StringBuilder context = new StringBuilder(xsvLine.length() * size + size);
+    for (int i = 0; i < size; i++) {
+      context.append(xsvLine).append(Chars.NEWLINE);
+      datLines.add(datLine);
+    }
+    List<List<String>> results =
+        Texts.asXSVLines(Texts.asInputStream(context.toString()), delimiter)
+            .collect(Collectors.toList());
+    assertEquals(results, datLines);
+    Texts.writeXSVFile(new File("d:/yyyx.csv"), false, null, delimiter, results.stream());
+    List<List<String>> reads = new ArrayList<>();
+    Texts.asXSVLines(new File("d:/yyyx.csv"), delimiter).forEach(reads::add);
     assertEquals(results, reads);
   }
 }

@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.PathMatcher.GlobPatterns;
 
 /**
@@ -833,6 +835,38 @@ public class Strings {
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();
+  }
+
+  static List<Pair<Boolean, String>> segment(final String str, final String wholeSeparator) {
+    int len;
+    int slen;
+    if (str == null || (len = str.length()) == 0) {
+      return listOf(Pair.of(false, EMPTY));
+    }
+    if (wholeSeparator == null || (slen = wholeSeparator.length()) == 0) {
+      return listOf(Pair.of(false, str));
+    }
+    int s = 0;
+    int e = 0;
+    List<Pair<Boolean, String>> list = new ArrayList<>();
+    while (e < len) {
+      e = str.indexOf(wholeSeparator, s);
+      if (e > -1) {
+        if (e > s) {
+          list.add(Pair.of(false, str.substring(s, e)));
+          list.add(Pair.of(true, wholeSeparator));
+        } else {
+          list.add(Pair.of(true, wholeSeparator));
+        }
+        s = e + slen;
+      } else {
+        if (s < len) {
+          list.add(Pair.of(false, str.substring(s)));
+        }
+        e = len;
+      }
+    }
+    return list;
   }
 
   private static String[] regulateSplits(String[] splits, final boolean removeBlank,

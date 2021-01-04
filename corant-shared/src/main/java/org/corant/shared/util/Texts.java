@@ -14,9 +14,10 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.NEWLINE;
@@ -40,7 +41,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -65,6 +65,9 @@ public class Texts {
   public static final String CSV_FIELD_DELIMITER_STRING = ",";
   public static final String CSV_FIELD_QUOTES_STRING = "\"";
   public static final String CSV_DOUBLE_QUOTES = "\"\"";
+  public static final String XSV_CR_REP = "\\r";
+  public static final String XSV_LF_REP = "\\n";
+  public static final String XSV_DOUBLE_BACK_SLASH = "\\\\";
 
   private Texts() {}
 
@@ -74,26 +77,37 @@ public class Texts {
    * @param file the CSV file
    */
   public static Stream<List<String>> asCSVLines(final File file) {
-    return asCSVLines(file, -1, -1);
+    return asCSVLines(file, null, -1, -1);
   }
 
   /**
    * CSV rows from file input stream, use for read CSV file line by line.
    *
    * @param file the CSV file
+   * @param charset the CSV file charset
+   */
+  public static Stream<List<String>> asCSVLines(final File file, final Charset charset) {
+    return asCSVLines(file, charset, -1, -1);
+  }
+
+  /**
+   * CSV rows from file input stream, use for read CSV file line by line.
+   *
+   * @param file the CSV file
+   * @param charset the CSV file charset
    * @param offset the offset start from 0
    * @param limit the number of rows returned streamCSVRows
    */
-  public static Stream<List<String>> asCSVLines(final File file, final int offset,
-      final int limit) {
+  public static Stream<List<String>> asCSVLines(final File file, final Charset charset,
+      final int offset, final int limit) {
     final FileInputStream fis;
     try {
       fis = new FileInputStream(shouldNotNull(file));
     } catch (FileNotFoundException e1) {
       throw new CorantRuntimeException(e1);
     }
-    return asCSVLines(fis, StandardCharsets.UTF_8, offset, (i, t) -> limit >= 1 && i > limit)
-        .onClose(() -> {
+    return asCSVLines(fis, defaultObject(charset, StandardCharsets.UTF_8), offset,
+        (i, t) -> limit >= 1 && i > limit).onClose(() -> {
           try {
             fis.close();
           } catch (IOException e) {
@@ -155,17 +169,15 @@ public class Texts {
    * Read text file by line and use any character string as a delimiter to split the line into a
    * field list, support delimiter escape line offset and limit.
    *
-   * NOTE: This method do not support line breaks in field
-   *
+   * @see #asXSVLines(InputStream, Charset, int, BiPredicate, String)
    * @param file the file
    * @param offset the offset start from 0, use for skip lines
    * @param limit the max lines to read
    * @param delimiter the field delimiter
-   * @param escape the field delimiter escape
    * @return asXSVLines
    */
   public static Stream<List<String>> asXSVLines(final File file, final int offset, final int limit,
-      final String delimiter, final String escape) {
+      final String delimiter) {
     final FileInputStream fis;
     try {
       fis = new FileInputStream(shouldNotNull(file));
@@ -173,7 +185,7 @@ public class Texts {
       throw new CorantRuntimeException(e1);
     }
     return asXSVLines(fis, StandardCharsets.UTF_8, offset, (i, t) -> limit >= 1 && i > limit,
-        delimiter, escape).onClose(() -> {
+        delimiter).onClose(() -> {
           try {
             fis.close();
           } catch (IOException e) {
@@ -186,53 +198,44 @@ public class Texts {
    * Read text file by line and use any character string as a delimiter to split the line into a
    * field list, support delimiter escape.
    *
-   * NOTE: This method do not support line breaks in field
-   *
+   * @see #asXSVLines(File, int, int, String)
    * @param file the file
    * @param delimiter the field delimiter
-   * @param escape the field delimiter escape
    * @return asXSVLines
    */
-  public static Stream<List<String>> asXSVLines(final File file, final String delimiter,
-      final String escape) {
-    return asXSVLines(file, -1, -1, delimiter, escape);
+  public static Stream<List<String>> asXSVLines(final File file, final String delimiter) {
+    return asXSVLines(file, -1, -1, delimiter);
   }
 
   /**
-   * Read by line and use any character string as a delimiter to split the line into a field list,
-   * support delimiter escape, support line offset and termination.
+   * Read the text field by line, and use the delimiter for field splitting; if the field value
+   * contains the delimiter, the delimiter in field value must be escaped with a backslash ('\'); if
+   * field value contains carriage return ('\r') or newline character ('\n'), also those characters
+   * must be escaped with a backslash.
    *
-   * NOTE: This method do not support line breaks in field, and the caller must maintain resource
-   * release by himself.
+   * NOTE: The caller must maintain resource release by himself.
    *
    * @param is the input stream
    * @param charset
    * @param offset the offset start from 0, use for skip lines
    * @param terminator use to brake out the stream, terminator return true means need to brake out
    * @param delimiter the field delimiter
-   * @param escape the field delimiter escape
-   * @return asXSVLines
    */
   public static Stream<List<String>> asXSVLines(final InputStream is, final Charset charset,
-      final int offset, final BiPredicate<Integer, String> terminator, final String delimiter,
-      final String escape) {
+      final int offset, final BiPredicate<Integer, String> terminator, final String delimiter) {
     shouldNotNull(delimiter);
     final BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-    final Pattern pattern;
-    final String target;
-    if (isEmpty(escape)) {
-      pattern = Pattern.compile(Pattern.quote(delimiter));
-      target = null;
-    } else {
-      pattern = escapedPattern(escape, delimiter);
-      target = escape + delimiter;
-    }
-    final Function<String, List<String>> converter =
-        target == null ? line -> listOf(pattern.split(line)) : line -> {
-          String[] array = pattern.split(line);
-          Arrays.setAll(array, i -> replace(array[i], target, delimiter));
-          return listOf(array);
-        };
+    final Pattern pattern = escapedPattern(Strings.BACK_SLASH, delimiter);
+    final String esacpedDelimiter = Strings.BACK_SLASH.concat(delimiter);
+    final Function<String, List<String>> converter = line -> {
+      ArrayList<String> list = new ArrayList<>(10);
+      for (String a : pattern.split(line)) {
+        list.add(
+            replace(replace(replace(a, esacpedDelimiter, delimiter), XSV_CR_REP, Strings.RETURN),
+                XSV_LF_REP, Strings.NEWLINE));
+      }
+      return list;
+    };
     return lines(reader, offset, terminator, converter);
   }
 
@@ -240,19 +243,16 @@ public class Texts {
    * Read by line and use any character string as a delimiter to split the line into a field list,
    * support delimiter escape.
    *
-   * NOTE: This method do not support line breaks in field, and the caller must maintain resource
-   * release by himself.
+   * NOTE: The caller must maintain resource release by himself.
    *
    * @see #asXSVLines(InputStream, Charset, int, BiPredicate, String, String)
    *
    * @param is the input stream
    * @param delimiter the field delimiter
-   * @param escape the field delimiter escape
    * @return asXSVLines
    */
-  public static Stream<List<String>> asXSVLines(final InputStream is, final String delimiter,
-      final String escape) {
-    return asXSVLines(is, StandardCharsets.UTF_8, 0, null, delimiter, escape);
+  public static Stream<List<String>> asXSVLines(final InputStream is, final String delimiter) {
+    return asXSVLines(is, StandardCharsets.UTF_8, 0, null, delimiter);
   }
 
   /**
@@ -560,6 +560,22 @@ public class Texts {
   }
 
   /**
+   * Format objects to XSV line string.
+   *
+   * @param objects
+   * @param delimiter
+   * @return toXSVLine
+   */
+  public static String toXSVLine(final Iterable<?> objects, String delimiter) {
+    final String re = Strings.BACK_SLASH.concat(shouldNotEmpty(delimiter));
+    return streamOf(objects).map(o -> Objects.asString(o, EMPTY))
+        .map(o -> replace(
+            replace(replace(o, Strings.NEWLINE, XSV_LF_REP), Strings.RETURN, XSV_CR_REP), delimiter,
+            re))
+        .collect(Collectors.joining(delimiter));
+  }
+
+  /**
    * Convert input stream to String
    *
    * Note: The caller must maintain resource release by himself
@@ -618,7 +634,8 @@ public class Texts {
       shouldBeTrue(file.createNewFile());
     }
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(os, charset))) {
+        BufferedWriter fileWriter = new BufferedWriter(
+            new OutputStreamWriter(os, defaultObject(charset, StandardCharsets.UTF_8)))) {
       lines.forEach(line -> {
         try {
           fileWriter.append(line);
@@ -645,6 +662,11 @@ public class Texts {
    */
   public static void writeToFile(File file, Iterable<String> data) throws IOException {
     writeToFile(file, false, streamOf(data));
+  }
+
+  public static void writeXSVFile(File file, boolean append, Charset charset, String delimiter,
+      Stream<List<String>> stream) throws IOException {
+    writeToFile(file, append, charset, shouldNotNull(stream).map(s -> toXSVLine(s, delimiter)));
   }
 
   /**

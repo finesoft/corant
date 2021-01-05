@@ -13,19 +13,10 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
-import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Conversions.toBoolean;
-import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Strings.aggregate;
-import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.escapedPattern;
-import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.left;
-import static org.corant.shared.util.Strings.replace;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
+import org.corant.shared.util.Strings;
+import org.eclipse.microprofile.config.Config;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,9 +29,20 @@ import java.util.function.Predicate;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.corant.shared.ubiquity.Mutable.MutableInteger;
-import org.corant.shared.util.Strings;
-import org.eclipse.microprofile.config.Config;
+
+import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.aggregate;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.escapedPattern;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.left;
+import static org.corant.shared.util.Strings.replace;
 
 /**
  * corant-config
@@ -180,7 +182,7 @@ public class CorantConfigResolver {
       return key;
     }
     String value = provider.get(false, key);
-    if (toBoolean(provider.get(false, "Config.PROPERTY_EXPRESSIONS_ENABLED"))) {// TODO
+    if (value!=null && toBoolean(provider.get(false, "Config.PROPERTY_EXPRESSIONS_ENABLED"))) {// TODO
       List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
       stacks.add(key);
       if (value.contains(EXP_PREFIX)) {

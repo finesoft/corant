@@ -13,10 +13,19 @@
  */
 package org.corant.config;
 
-import org.corant.shared.ubiquity.Mutable.MutableInteger;
-import org.corant.shared.util.Strings;
-import org.eclipse.microprofile.config.Config;
-
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
+import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.aggregate;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.escapedPattern;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.left;
+import static org.corant.shared.util.Strings.replace;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,20 +38,9 @@ import java.util.function.Predicate;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
-import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Conversions.toBoolean;
-import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Strings.aggregate;
-import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.escapedPattern;
-import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.left;
-import static org.corant.shared.util.Strings.replace;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
+import org.corant.shared.util.Strings;
+import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-config
@@ -182,7 +180,7 @@ public class CorantConfigResolver {
       return key;
     }
     String value = provider.get(false, key);
-    if (value!=null && toBoolean(provider.get(false, "Config.PROPERTY_EXPRESSIONS_ENABLED"))) {// TODO
+    if (value != null && toBoolean(provider.get(false, Config.PROPERTY_EXPRESSIONS_ENABLED))) {// TODO
       List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
       stacks.add(key);
       if (value.contains(EXP_PREFIX)) {
@@ -206,6 +204,7 @@ public class CorantConfigResolver {
     return split(text, VAL_SPLITTER, false);
   }
 
+  // TODO Use AST?
   static String expandValue(boolean eval, String value, CorantConfigRawValueProvider provider,
       Collection<String> stacks) {
     Pattern pattern = eval ? EXP_SPTN : VAR_SPTN;
@@ -219,7 +218,8 @@ public class CorantConfigResolver {
         // TODO replace \\} to }
         int end = contents.get().start();
         String extracted = content.substring(0, end);
-        System.out.printf("stack%d -> %s \n", stacks.size(), extracted);
+        System.out.printf("%s stack%d -> %s \n", "-".repeat(stacks.size()), stacks.size(),
+            extracted);
         if (isNotBlank(extracted)) {
           if (!eval && extracted.contains(VAR_DEFAULT)) {
             Optional<MatchResult> defaults = VAR_DPTN.matcher(extracted).results().findFirst();

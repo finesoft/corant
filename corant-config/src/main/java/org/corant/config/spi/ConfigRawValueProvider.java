@@ -1,10 +1,9 @@
-package org.corant.config;
-
-import org.corant.config.spi.ConfigVariableProcessor;
-import org.corant.shared.util.Streams;
-import org.eclipse.microprofile.config.Config;
+package org.corant.config.spi;
 
 import java.util.stream.Collectors;
+import org.corant.config.CorantConfigResolver;
+import org.corant.shared.util.Streams;
+import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-root <br>
@@ -12,19 +11,18 @@ import java.util.stream.Collectors;
  * @author sushuaihao 2020/12/30
  * @since
  */
-public class DefaultCorantConfigRawValueProviderImpl
+public class ConfigRawValueProvider
     implements CorantConfigResolver.CorantConfigRawValueProvider {
   Config config;
 
-  public DefaultCorantConfigRawValueProviderImpl(Config config) {
+  public ConfigRawValueProvider(Config config) {
     this.config = config;
   }
 
   @Override
   public String get(boolean eval, String key) {
-    ConfigVariableProcessor processor =
-        new ConfigVariableProcessor(
-            Streams.streamOf(config.getConfigSources()).collect(Collectors.toList()));
+    ConfigVariableProcessor processor = new ConfigVariableProcessor(
+        Streams.streamOf(config.getConfigSources()).collect(Collectors.toList()));
     if (eval) {
       return processor.evalValue(key);
     } else {

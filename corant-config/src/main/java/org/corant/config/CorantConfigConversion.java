@@ -73,6 +73,7 @@ public class CorantConfigConversion implements Serializable {
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
   private static final long serialVersionUID = -2708805756022227289L;
   static {
+    // FIXME 6.1. Built-in Converters
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
     ConverterRegistry.getSupportConverters().keySet().stream()
         .filter(ct -> ct.getSourceClass().isAssignableFrom(String.class))

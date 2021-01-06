@@ -55,7 +55,7 @@ public class CorantConfig implements Config, Serializable {
     return sources.get();
   }
 
-  // @Override
+  @Override
   public CorantConfigValue getConfigValue(String propertyName) {
     // TODO MP 2.0
     return null;
@@ -74,7 +74,7 @@ public class CorantConfig implements Config, Serializable {
     return conversion.convertIfNecessary(result, type);
   }
 
-  // @Override
+  @Override
   public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
     // TODO MP 2.0
     return conversion.getConverter(forType);
@@ -88,7 +88,7 @@ public class CorantConfig implements Config, Serializable {
         .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));
   }
 
-  // @Override
+  @Override
   public <T> Optional<List<T>> getOptionalValues(String propertyName, Class<T> propertyType) {
     // TODO MP 2.0
     @SuppressWarnings("unchecked")
@@ -100,7 +100,8 @@ public class CorantConfig implements Config, Serializable {
   public Iterable<String> getPropertyNames() {
     Set<String> names = new HashSet<>();
     for (ConfigSource configSource : sources.get()) {
-      names.addAll(configSource.getPropertyNames());
+      // names.addAll(configSource.getPropertyNames()); // from MP2.0
+      names.addAll(configSource.getProperties().keySet());
     }
     return names;
   }
@@ -128,7 +129,7 @@ public class CorantConfig implements Config, Serializable {
     return value;
   }
 
-  // @Override
+  @Override
   public <T> List<T> getValues(String propertyName, Class<T> propertyType) {
     // TODO MP 2.0
     @SuppressWarnings("unchecked")
@@ -146,7 +147,7 @@ public class CorantConfig implements Config, Serializable {
     }
   }
 
-  // @Override
+  @Override
   @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> type) {
     // TODO MP 2.0

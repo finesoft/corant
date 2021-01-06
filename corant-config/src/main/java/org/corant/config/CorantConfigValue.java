@@ -13,22 +13,48 @@
  */
 package org.corant.config;
 
+import org.eclipse.microprofile.config.ConfigValue;
+
 /**
  * corant-config
  *
  * @author bingo 下午5:40:21
  *
  */
-public class CorantConfigValue /* implements ConfigValue */ {
+public class CorantConfigValue implements ConfigValue {
+
+  private final String name;
+  private final String rawValue;
+  private final String value;
+  private final String sourceName;
+  private final int sourceOrdinal;
+
+  /**
+   * @param name
+   * @param rawValue
+   * @param value
+   * @param sourceName
+   * @param sourceOrdinal
+   */
+  public CorantConfigValue(String name, String rawValue, String value, String sourceName,
+      int sourceOrdinal) {
+    super();
+    this.name = name;
+    this.rawValue = rawValue;
+    this.value = value;
+    this.sourceName = sourceName;
+    this.sourceOrdinal = sourceOrdinal;
+  }
 
   /**
    * The name of the property.
    *
    * @return the name of the property.
    */
+  @Override
   public String getName() {
     // TODO MP 2.0
-    return null;
+    return name;
   }
 
   /**
@@ -37,9 +63,10 @@ public class CorantConfigValue /* implements ConfigValue */ {
    * @return the raw value of the property lookup or {@code null} if the property could not be
    *         found.
    */
+  @Override
   public String getRawValue() {
     // TODO MP 2.0
-    return null;
+    return rawValue;
   }
 
   /**
@@ -49,9 +76,10 @@ public class CorantConfigValue /* implements ConfigValue */ {
    * @return the ConfigSource name that loaded the property lookup or {@code null} if the property
    *         could not be found
    */
+  @Override
   public String getSourceName() {
     // TODO MP 2.0
-    return null;
+    return sourceName;
   }
 
   /**
@@ -61,9 +89,10 @@ public class CorantConfigValue /* implements ConfigValue */ {
    * @return the ConfigSource ordinal that loaded the property lookup or {@code 0} if the property
    *         could not be found
    */
+  @Override
   public int getSourceOrdinal() {
     // TODO MP 2.0
-    return 0;
+    return sourceOrdinal;
   }
 
   /**
@@ -71,8 +100,9 @@ public class CorantConfigValue /* implements ConfigValue */ {
    *
    * @return the value of the property lookup or {@code null} if the property could not be found
    */
+  @Override
   public String getValue() {
     // TODO MP 2.0
-    return null;
+    return value;
   }
 }

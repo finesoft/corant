@@ -114,8 +114,8 @@ public class Assertions {
    * @param obj
    * @return shouldBeNull
    */
-  public static <T> T shouldBeNull(T obj) {
-    return shouldBeNull(obj, "Object should be null!");
+  public static void shouldBeNull(Object obj) {
+    shouldBeNull(obj, "Object should be null!");
   }
 
   /**
@@ -126,11 +126,10 @@ public class Assertions {
    * @param args the exception message parameter
    * @return shouldBeNull
    */
-  public static <T> T shouldBeNull(T obj, String messageOrFormat, Object... args) {
+  public static void shouldBeNull(Object obj, String messageOrFormat, Object... args) {
     if (obj != null) {
       throw new CorantRuntimeException(messageOrFormat, args);
     }
-    return null;
   }
 
   /**

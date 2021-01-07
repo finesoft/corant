@@ -73,9 +73,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
-    List<ConfigSource> resolvedSources = CorantConfigSource.resolve(sources, classLoader);
-    CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), resolvedSources);
-    debugOutputSource(resolvedSources, config);
+    CorantConfigSources configSources = CorantConfigSources.of(sources, classLoader);
+    CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), configSources);
+    debugOutputSource(configSources, config);
     return config;
   }
 
@@ -125,12 +125,15 @@ public class CorantConfigBuilder implements ConfigBuilder {
         classLoader.getClass().getName(), source.getClass().getName()));
   }
 
-  void debugOutputSource(List<ConfigSource> resolvedSources, CorantConfig config) {
-    logger.fine(() -> String.format("Resolved %s config sources.", resolvedSources.size()));
+  void debugOutputSource(CorantConfigSources sources, CorantConfig config) {
+    if (sources.getProfile() != null) {
+      logger.fine(() -> String.format("The activated profile is %s.", sources.getProfile()));
+    }
+    logger.fine(() -> String.format("Resolved %s config sources.", sources.getSources().size()));
     logger.fine(() -> {
       SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);
       for (String name : config.getPropertyNames()) {
-        sortMap.put(name, defaultString(config.getRawValue(name)));
+        sortMap.put(name, defaultString(sources.getValue(name)));
       }
       StringBuilder sb = new StringBuilder("Resolved config properties:\n\n{\n");
       sortMap.forEach((k, v) -> sb.append("  ").append(k).append(" : ").append(v).append("\n"));

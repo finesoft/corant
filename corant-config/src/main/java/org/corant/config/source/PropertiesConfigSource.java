@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
-import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -32,7 +31,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午5:19:11
  *
  */
-public class PropertiesConfigSource extends CorantConfigSource {
+public class PropertiesConfigSource extends AbstractCorantConfigSource {
 
   private static final long serialVersionUID = -9141492489031571885L;
 

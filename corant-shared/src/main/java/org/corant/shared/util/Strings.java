@@ -860,10 +860,8 @@ public class Strings {
       if (e > -1) {
         if (e > s) {
           list.add(Pair.of(false, str.substring(s, e)));
-          list.add(Pair.of(true, wholeSeparator));
-        } else {
-          list.add(Pair.of(true, wholeSeparator));
         }
+        list.add(Pair.of(true, wholeSeparator));
         s = e + slen;
       } else {
         if (s < len) {

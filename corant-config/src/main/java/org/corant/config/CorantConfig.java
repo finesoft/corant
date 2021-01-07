@@ -18,15 +18,13 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-import org.corant.config.spi.ConfigAdjuster;
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.Converter;
@@ -41,51 +39,55 @@ public class CorantConfig implements Config, Serializable {
 
   private static final long serialVersionUID = 8788710772538278522L;
   private static final Logger logger = Logger.getLogger(CorantConfig.class.getName());
+  public static final String COARNT_CONFIG_SOURCE_BASE_NAME = "application";
+  public static final String COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX =
+      COARNT_CONFIG_SOURCE_BASE_NAME + "-";
+  public static final String MP_CONFIG_SOURCE_BASE_NAME = "microprofile-config";
+  public static final String MP_CONFIG_SOURCE_BASE_NAME_PREFIX = MP_CONFIG_SOURCE_BASE_NAME + "-";
 
-  final CorantConfigConversion conversion;
-  final AtomicReference<List<ConfigSource>> sources;
+  final CorantConfigConversion configConversion;
+  final AtomicReference<CorantConfigSources> configSources;
 
-  public CorantConfig(CorantConfigConversion conversion, List<ConfigSource> sources) {
-    this.conversion = conversion;
-    this.sources = new AtomicReference<>(sources);
+  public CorantConfig(CorantConfigConversion conversion, CorantConfigSources sources) {
+    configConversion = conversion;
+    configSources = new AtomicReference<>(sources);
   }
 
   @Override
   public Iterable<ConfigSource> getConfigSources() {
-    return sources.get();
+    return forceCast(configSources.get().getSources());
   }
 
   @Override
-  public CorantConfigValue getConfigValue(String propertyName) {
-    // TODO MP 2.0
-    return null;
+  public ConfigValue getConfigValue(String propertyName) {
+    return configSources.get().getConfigValue(propertyName);
   }
 
   public CorantConfigConversion getConversion() {
-    return conversion;
+    return configConversion;
   }
 
   public Object getConvertedValue(String propertyName, Type type, String defaultRawValue) {
-    Object result = conversion.convert(getRawValue(propertyName), type);
+    Object result = configConversion.convert(configSources.get().getValue(propertyName), type);
     if (result == null && defaultRawValue != null
         && !defaultRawValue.equals(ConfigProperty.UNCONFIGURED_VALUE)) {
-      result = conversion.convert(defaultRawValue, type);
+      result = configConversion.convert(defaultRawValue, type);
     }
-    return conversion.convertIfNecessary(result, type);
+    return configConversion.convertIfNecessary(result, type);
   }
 
   @Override
   public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
     // TODO MP 2.0
-    return conversion.getConverter(forType);
+    return configConversion.getConverter(forType);
   }
 
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
     logger.finer(() -> String.format("Retrieve optional config property key [%s] type [%s]",
         propertyName, propertyType.getName()));
-    return Optional
-        .ofNullable(forceCast(conversion.convert(getRawValue(propertyName), propertyType)));
+    return Optional.ofNullable(forceCast(
+        configConversion.convert(configSources.get().getValue(propertyName), propertyType)));
   }
 
   @Override
@@ -98,29 +100,15 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public Iterable<String> getPropertyNames() {
-    Set<String> names = new HashSet<>();
-    for (ConfigSource configSource : sources.get()) {
-      // names.addAll(configSource.getPropertyNames()); // from MP2.0
-      names.addAll(configSource.getProperties().keySet());
-    }
-    return names;
-  }
-
-  public String getRawValue(String propertyName) {
-    for (ConfigSource cs : sources.get()) {
-      String value = cs.getValue(propertyName);
-      if (value != null) {// FIXME
-        return value;
-      }
-    }
-    return null;
+    return configSources.get().getPropertyNames();
   }
 
   @Override
   public <T> T getValue(String propertyName, Class<T> propertyType) {
     logger.fine(() -> String.format("Retrieve config property key [%s] type [%s]", propertyName,
         propertyType.getName()));
-    T value = forceCast(conversion.convert(getRawValue(propertyName), propertyType));
+    T value = forceCast(
+        configConversion.convert(configSources.get().getValue(propertyName), propertyType));
     if (value == null) {
       throw new NoSuchElementException(
           String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
@@ -137,11 +125,11 @@ public class CorantConfig implements Config, Serializable {
     return Arrays.asList(getValue(propertyName, arrayType));
   }
 
-  public void reset(List<ConfigSource> sources, ConfigAdjuster adjuster) {
-    List<ConfigSource> newSources = CorantConfigSource.resolve(sources, adjuster);
+  public void reset(List<ConfigSource> sources, ClassLoader classLoader) {
+    CorantConfigSources configSources = CorantConfigSources.of(sources, classLoader);
     for (;;) {
-      List<ConfigSource> oldSources = this.sources.get();
-      if (this.sources.compareAndSet(oldSources, newSources)) {
+      CorantConfigSources oldConfigSources = this.configSources.get();
+      if (this.configSources.compareAndSet(oldConfigSources, configSources)) {
         return;
       }
     }

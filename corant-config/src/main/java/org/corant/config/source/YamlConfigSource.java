@@ -24,7 +24,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.yaml.snakeyaml.Yaml;
 
@@ -34,7 +33,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author bingo 上午10:10:30
  *
  */
-public class YamlConfigSource extends CorantConfigSource {
+public class YamlConfigSource extends AbstractCorantConfigSource {
 
   private static final long serialVersionUID = 8099900233760280030L;
 

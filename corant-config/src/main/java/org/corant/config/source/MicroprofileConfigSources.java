@@ -15,6 +15,7 @@ package org.corant.config.source;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.corant.config.CorantConfig;
 import org.corant.shared.util.Resources;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -27,11 +28,16 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class MicroprofileConfigSources {
 
   public static final int DEFAULT_ORDINAL = 100;
+  public static final int DEFAULT_PROFILE_ORDINAL = DEFAULT_ORDINAL + 50;
 
   public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES =
-      "META-INF/microprofile-config.properties";
+      "META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + ".properties";
   public static final String WEB_INF_MICROPROFILE_CONFIG_PROPERTIES =
-      "WEB-INF/classes/META-INF/microprofile-config.properties";
+      "WEB-INF/classes/META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + ".properties";
+  public static final String META_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES =
+      "META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + "-*.properties";
+  public static final String WEB_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES =
+      "WEB-INF/classes/META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + "-*.properties";
 
   public static List<ConfigSource> get(ClassLoader classLoader) {
     List<ConfigSource> sources = new LinkedList<>();
@@ -39,6 +45,12 @@ public class MicroprofileConfigSources {
         .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
     Resources.tryFromClassPath(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROPERTIES)
         .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
+    Resources.tryFromClassPath(classLoader, META_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES)
+        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_PROFILE_ORDINAL))
+        .forEach(sources::add);
+    Resources.tryFromClassPath(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES)
+        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_PROFILE_ORDINAL))
+        .forEach(sources::add);
     return sources;
   }
 

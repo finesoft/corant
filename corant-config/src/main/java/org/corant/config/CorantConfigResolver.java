@@ -16,13 +16,11 @@ package org.corant.config;
 import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.aggregate;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.escapedPattern;
-import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.left;
 import static org.corant.shared.util.Strings.replace;
@@ -35,6 +33,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,6 +75,8 @@ public class CorantConfigResolver {
   public static final Pattern EXP_SPTN = escapedPattern(ESCAPE, EXP_PREFIX);
   public static final Pattern VNE_EPTN = escapedPattern(ESCAPE, VNE_SUFFIX);
   public static final Pattern VAR_DPTN = escapedPattern(ESCAPE, VAR_DEFAULT);
+
+  private static final Logger logger = Logger.getLogger(CorantConfigResolver.class.getName());
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
@@ -175,14 +176,9 @@ public class CorantConfigResolver {
     return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
   }
 
-  public static String resolveValue(String key, CorantConfigRawValueProvider provider) {
-    if (key == null || isBlank(key)) {
-      return key;
-    }
-    String value = provider.get(false, key);
-    if (value != null && toBoolean(provider.get(false, Config.PROPERTY_EXPRESSIONS_ENABLED))) {// TODO
+  public static String resolveValue(String value, CorantConfigRawValueProvider provider) {
+    if (value != null) {
       List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
-      stacks.add(key);
       if (value.contains(EXP_PREFIX)) {
         value = expandValue(true, value, provider, stacks);
         value = replace(value, EXP_REP, EXP_PREFIX);
@@ -218,8 +214,9 @@ public class CorantConfigResolver {
         // TODO replace \\} to }
         int end = contents.get().start();
         String extracted = content.substring(0, end);
-        System.out.printf("%s stack%d -> %s \n", "-".repeat(stacks.size()), stacks.size(),
-            extracted);
+        final String logExtracted = extracted;
+        logger.fine(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
+            stacks.size(), logExtracted));
         if (isNotBlank(extracted)) {
           if (!eval && extracted.contains(VAR_DEFAULT)) {
             Optional<MatchResult> defaults = VAR_DPTN.matcher(extracted).results().findFirst();
@@ -258,10 +255,10 @@ public class CorantConfigResolver {
     String result = provider.get(eval, key);
     if (result != null) {
       if (result.contains(EXP_PREFIX)) {
-        return expandValue(false, result, provider, stacks);
+        return expandValue(true, result, provider, stacks);
       }
       if (result.contains(VAR_PREFIX)) {
-        return expandValue(true, result, provider, stacks);
+        return expandValue(false, result, provider, stacks);
       }
     }
     return result;

@@ -11,31 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config.source;
+package org.corant.suites.jndi;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.net.URL;
-import java.util.Map;
+import org.corant.Corant;
+import org.corant.kernel.spi.CorantBootHandler;
 
 /**
- * corant-config
+ * corant-suites-jndi
  *
- * @author bingo 上午10:10:55
+ * @author bingo 下午2:35:41
  *
  */
-public class JsonConfigSource extends AbstractCorantConfigSource {
-
-  private static final long serialVersionUID = 4384365167157384602L;
-
-  JsonConfigSource(URL resourceUrl, int ordinal) {
-    super(shouldNotNull(resourceUrl).toExternalForm(), ordinal);
-    // TODO
-  }
+public class JNDICorantBootHandler implements CorantBootHandler {
+  @Override
+  public void handleAfterStarted(Corant corant, String... args) {}
 
   @Override
-  public Map<String, String> getProperties() {
-    // TODO
-    return null;
-  }
-
+  public void handleBeforeStart(ClassLoader classLoader, String... args) {}
 }

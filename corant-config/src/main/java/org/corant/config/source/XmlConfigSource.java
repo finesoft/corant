@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
-import org.corant.config.CorantConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -32,7 +31,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 上午10:11:23
  *
  */
-public class XmlConfigSource extends CorantConfigSource {
+public class XmlConfigSource extends AbstractCorantConfigSource {
 
   private static final long serialVersionUID = -6510093356770922600L;
 

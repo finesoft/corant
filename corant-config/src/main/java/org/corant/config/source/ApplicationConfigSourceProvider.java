@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import org.corant.config.CorantConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
@@ -45,7 +46,8 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
 
   static Logger logger = Logger.getLogger(ApplicationConfigSourceProvider.class.getName());
-  static String appBaseName = "application";
+  static String appBaseName = CorantConfig.COARNT_CONFIG_SOURCE_BASE_NAME;
+  static String appBaseNamePrefix = CorantConfig.COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX;
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
 

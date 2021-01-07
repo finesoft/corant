@@ -45,6 +45,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Chars;
 import org.eclipse.microprofile.config.Config;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
@@ -90,7 +91,7 @@ public class MongoClientConfig implements NamedObject {
 
   private String username;
 
-  private char[] password = new char[0];
+  private char[] password = Chars.EMPTY_ARRAY;
 
   private boolean bindToJndi = false;
 
@@ -368,7 +369,7 @@ public class MongoClientConfig implements NamedObject {
   }
 
   protected void setPassword(String password) {
-    this.password = isEmpty(password) ? new char[0] : password.toCharArray();
+    this.password = isEmpty(password) ? Chars.EMPTY_ARRAY : password.toCharArray();
   }
 
   /**

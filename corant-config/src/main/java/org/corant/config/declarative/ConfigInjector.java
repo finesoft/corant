@@ -24,11 +24,11 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 上午11:14:06
  *
  */
-public interface ConfigPropertyInjector {
+public interface ConfigInjector {
 
-  ConfigPropertyInjector DEFAULT_INJECTOR = new ConfigPropertyInjector() {};
+  ConfigInjector DEFAULT_INJECTOR = new ConfigInjector() {};
 
-  default void inject(Config config, String infix, Object configObject, ConfigField configField)
+  default void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
       throws Exception {
     CorantConfig corantConfig = forceCast(config);
     Field field = configField.getField();

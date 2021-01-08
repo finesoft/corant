@@ -38,9 +38,12 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 /**
  * corant-config
  *
+ * @deprecated Since microprifle-config 2.0
+ *
  * @author bingo 下午4:34:28
  *
  */
+@Deprecated
 public class ConfigExtension implements Extension {
 
   private static final Logger logger = Logger.getLogger(ConfigExtension.class.getName());

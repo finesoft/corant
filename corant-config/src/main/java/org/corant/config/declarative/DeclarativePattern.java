@@ -37,11 +37,11 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午8:05:35
  *
  */
-public enum DeclarativePattern implements ConfigPropertyInjector {
+public enum DeclarativePattern implements ConfigInjector {
 
   SUFFIX() {
     @Override
-    public void inject(Config config, String infix, Object configObject, ConfigField configField)
+    public void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
         throws Exception {
       CorantConfig corantConfig = forceCast(config);
       Field field = configField.getField();
@@ -57,7 +57,7 @@ public enum DeclarativePattern implements ConfigPropertyInjector {
   PREFIX() {
     @SuppressWarnings("rawtypes")
     @Override
-    public void inject(Config config, String infix, Object configObject, ConfigField configField)
+    public void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
         throws Exception {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();

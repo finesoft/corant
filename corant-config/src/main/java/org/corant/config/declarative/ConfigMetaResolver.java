@@ -37,7 +37,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 上午11:27:11
  *
  */
-public class ConfigMapper {
+public class ConfigMetaResolver {
 
   /**
    * Create declarative configuration metadata
@@ -45,7 +45,7 @@ public class ConfigMapper {
    * @param clazz
    * @return declarative
    */
-  public static ConfigClass declarative(Class<?> clazz) {
+  public static ConfigMetaClass declarative(Class<?> clazz) {
     ConfigKeyRoot configKeyRoot = findAnnotation(clazz, ConfigKeyRoot.class, true);
     if (configKeyRoot == null || isBlank(configKeyRoot.value())) {
       return null;
@@ -53,8 +53,8 @@ public class ConfigMapper {
     String keyRoot = configKeyRoot.value();
     int keyIndex = configKeyRoot.keyIndex();
     boolean ignoreNoAnnotatedItem = configKeyRoot.ignoreNoAnnotatedItem();
-    final ConfigClass configClass =
-        new ConfigClass(keyRoot, keyIndex, clazz, ignoreNoAnnotatedItem);
+    final ConfigMetaClass configClass =
+        new ConfigMetaClass(keyRoot, keyIndex, clazz, ignoreNoAnnotatedItem);
     traverseFields(clazz, field -> {
       if (!Modifier.isFinal(field.getModifiers())) {
         if (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null) {
@@ -84,7 +84,7 @@ public class ConfigMapper {
                   field.getName());
             }
           }
-          configClass.addField(new ConfigField(configClass, theField, keyItem, pattern,
+          configClass.addField(new ConfigMetaField(configClass, theField, keyItem, pattern,
               defaultValue, defaultKey, defaultNull));
         }
       }
@@ -92,13 +92,13 @@ public class ConfigMapper {
     return configClass;
   }
 
-  public static ConfigClass microprofile(Class<?> clazz, String prefix) {
+  public static ConfigMetaClass microprofile(Class<?> clazz, String prefix) {
     ConfigProperties configProperties = findAnnotation(clazz, ConfigProperties.class, true);
     if (configProperties == null) {
       return null;
     }
-    final ConfigClass configClass =
-        new ConfigClass(defaultString(prefix, configProperties.prefix()), 0, clazz, false);
+    final ConfigMetaClass configClass =
+        new ConfigMetaClass(defaultString(prefix, configProperties.prefix()), 0, clazz, false);
     traverseFields(clazz, field -> {
       if (!Modifier.isFinal(field.getModifiers())) {
         Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
@@ -111,8 +111,8 @@ public class ConfigMapper {
         String defaultValue = ConfigProperty.UNCONFIGURED_VALUE;
         String defaultKey = concatKey(prefix, keyItem);
         String defaultNull = ConfigProperty.UNCONFIGURED_VALUE;
-        configClass.addField(new ConfigField(configClass, theField, keyItem,
-            ConfigPropertyInjector.DEFAULT_INJECTOR, defaultValue, defaultKey, defaultNull));
+        configClass.addField(new ConfigMetaField(configClass, theField, keyItem,
+            ConfigInjector.DEFAULT_INJECTOR, defaultValue, defaultKey, defaultNull));
       }
     });
     return configClass;

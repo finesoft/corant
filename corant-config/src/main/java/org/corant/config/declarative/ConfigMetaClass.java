@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
  * @author bingo 11:32:11
  *
  */
-public class ConfigClass {
+public class ConfigMetaClass {
 
   private final String keyRoot;
   private final int keyIndex;
   private final Class<?> clazz;
-  private final List<ConfigField> fields = new ArrayList<>();
+  private final List<ConfigMetaField> fields = new ArrayList<>();
   private final boolean ignoreNoAnnotatedItem;
 
   /**
@@ -38,7 +38,7 @@ public class ConfigClass {
    * @param clazz
    * @param ignoreNoAnnotatedItem
    */
-  protected ConfigClass(String keyRoot, int keyIndex, Class<?> clazz,
+  protected ConfigMetaClass(String keyRoot, int keyIndex, Class<?> clazz,
       boolean ignoreNoAnnotatedItem) {
     super();
     this.keyRoot = keyRoot;
@@ -52,10 +52,10 @@ public class ConfigClass {
   }
 
   public Set<String> getDefaultItemKeys() {
-    return fields.stream().map(ConfigField::getDefaultKey).collect(Collectors.toSet());
+    return fields.stream().map(ConfigMetaField::getDefaultKey).collect(Collectors.toSet());
   }
 
-  public List<ConfigField> getFields() {
+  public List<ConfigMetaField> getFields() {
     return fields;
   }
 
@@ -77,11 +77,11 @@ public class ConfigClass {
         + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
   }
 
-  void addField(ConfigField field) {
+  void addField(ConfigMetaField field) {
     fields.add(field);
   }
 
-  void setFields(List<ConfigField> fields) {
+  void setFields(List<ConfigMetaField> fields) {
     this.fields.clear();
     if (fields != null) {
       this.fields.addAll(fields);

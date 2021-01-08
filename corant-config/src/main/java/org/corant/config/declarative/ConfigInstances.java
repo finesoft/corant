@@ -42,7 +42,7 @@ public class ConfigInstances {
 
   public static <T> T resolveMicroprofile(Class<T> cls, String prefix) {
     Map<String, T> map = new HashMap<>(1);
-    ConfigClass configClass = ConfigMapper.microprofile(cls, prefix);
+    ConfigMetaClass configClass = ConfigMetaResolver.microprofile(cls, prefix);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
@@ -56,7 +56,7 @@ public class ConfigInstances {
 
   public static <T> Map<String, T> resolveMulti(Class<T> cls) {
     Map<String, T> configMaps = null;
-    ConfigClass configClass = ConfigMapper.declarative(cls);
+    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       Set<String> keys = resolveKeys(configClass, config);
@@ -71,7 +71,7 @@ public class ConfigInstances {
 
   public static <T> T resolveSingle(Class<T> cls) {
     Map<String, T> map = new HashMap<>(1);
-    ConfigClass configClass = ConfigMapper.declarative(cls);
+    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
@@ -88,8 +88,8 @@ public class ConfigInstances {
   }
 
   static <T extends DeclarativeConfig> T resolveConfigInstance(Config config, String infix,
-      T configObject, ConfigClass configClass) throws Exception {
-    for (ConfigField cf : configClass.getFields()) {
+      T configObject, ConfigMetaClass configClass) throws Exception {
+    for (ConfigMetaField cf : configClass.getFields()) {
       cf.getInjector().inject(config, infix, configObject, cf);
     }
     return configObject;
@@ -97,13 +97,13 @@ public class ConfigInstances {
 
   @SuppressWarnings("unchecked")
   static <T> Map<String, T> resolveConfigInstances(Config config, Set<String> keys,
-      ConfigClass configClass) throws Exception {
+      ConfigMetaClass configClass) throws Exception {
     if (isNotEmpty(keys)) {
       Map<String, T> configMaps = new HashMap<>(keys.size());
       for (String key : keys) {
         // T configObject = configClass.getClazz().newInstance();// JDK8
         Object configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
-        for (ConfigField cf : configClass.getFields()) {
+        for (ConfigMetaField cf : configClass.getFields()) {
           cf.getInjector().inject(config, key, configObject, cf);
         }
         if (configObject instanceof DeclarativeConfig) {
@@ -121,7 +121,7 @@ public class ConfigInstances {
     return null;
   }
 
-  static Set<String> resolveKeys(ConfigClass configClass, Config config) {
+  static Set<String> resolveKeys(ConfigMetaClass configClass, Config config) {
     final String prefix = regulateKeyPrefix(configClass.getKeyRoot());
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();

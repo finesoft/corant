@@ -23,12 +23,12 @@ import java.lang.reflect.Field;
  * @author bingo 11:32:23
  *
  */
-public class ConfigField {
+public class ConfigMetaField {
 
-  private final ConfigClass configClass;
+  private final ConfigMetaClass configClass;
   private final Field field;
   private final String keyItem;
-  private final ConfigPropertyInjector injector;
+  private final ConfigInjector injector;
   private final String defaultValue;
   private final String defaultKey;
   private final String defaultNull;
@@ -42,8 +42,8 @@ public class ConfigField {
    * @param defaultKey
    * @param defaultNull
    */
-  protected ConfigField(ConfigClass configClass, Field field, String keyItem,
-      ConfigPropertyInjector injector, String defaultValue, String defaultKey, String defaultNull) {
+  protected ConfigMetaField(ConfigMetaClass configClass, Field field, String keyItem,
+      ConfigInjector injector, String defaultValue, String defaultKey, String defaultNull) {
     super();
     this.configClass = configClass;
     this.field = field;
@@ -54,7 +54,7 @@ public class ConfigField {
     this.defaultNull = defaultNull;
   }
 
-  public ConfigClass getConfigClass() {
+  public ConfigMetaClass getConfigClass() {
     return configClass;
   }
 
@@ -70,7 +70,7 @@ public class ConfigField {
     return field;
   }
 
-  public ConfigPropertyInjector getInjector() {
+  public ConfigInjector getInjector() {
     return injector;
   }
 

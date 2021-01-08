@@ -55,7 +55,7 @@ public class ConfigELProcessor {
                   String.class, new Class[] {String.class})
               .invoke(contexts.get(), Objects.EMPTY_ARRAY),
           null);
-    } else if (value.startsWith("randoms")) {
+    } else if (value.startsWith("randoms.")) {
       // randoms.randomLong(5,20)
       String methodName = value.substring(8, value.indexOf('('));// randomLong
       String paramValue = value.substring(value.indexOf('(') + 1, value.indexOf(')'));// 5,20

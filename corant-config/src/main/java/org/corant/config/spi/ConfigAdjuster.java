@@ -14,9 +14,7 @@
 package org.corant.config.spi;
 
 import static org.corant.shared.util.Lists.listOf;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
@@ -32,7 +30,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public interface ConfigAdjuster extends Sortable {
 
   static ConfigAdjuster resolve(ClassLoader classLoader) {
-    ConfigAdjuster adjuster = (m, a) -> m;
+    ConfigAdjuster adjuster = a -> a;
     List<ConfigAdjuster> discoveredAdjusters =
         listOf(ServiceLoader.load(ConfigAdjuster.class, classLoader));
     discoveredAdjusters.sort(Sortable::compare);
@@ -44,15 +42,14 @@ public interface ConfigAdjuster extends Sortable {
 
   default ConfigAdjuster andThen(ConfigAdjuster after) {
     Objects.requireNonNull(after);
-    return (p, ap) -> after.apply(apply(p, ap), ap);
+    return a -> after.apply(apply(a));
   }
 
-  Map<String, String> apply(Map<String, String> properties,
-      Collection<ConfigSource> originalSources);
+  ConfigSource apply(ConfigSource originalSource);
 
   default ConfigAdjuster compose(ConfigAdjuster before) {
     Objects.requireNonNull(before);
-    return (p, ap) -> apply(before.apply(p, ap), ap);
+    return a -> apply(before.apply(a));
   }
 
 }

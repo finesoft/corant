@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.corant.config.expression.ConfigELProcessor;
+import org.corant.config.spi.ConfigAdjuster;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.ubiquity.Mutable.MutableBoolean;
@@ -109,11 +110,11 @@ public class CorantConfigSources {
         enableExpressions.set(toBoolean(expressionEnabled));
       }
     });
-
+    final ConfigAdjuster configAdjuster = ConfigAdjuster.resolve(classLoader);
     List<CorantConfigSource> sources = new ArrayList<>(orginals.size());
     profileSources.forEach(ps -> {
       if (ps.getLeft() == null || Arrays.binarySearch(profiles.get(), ps.getLeft()) != -1) {
-        sources.add(new CorantConfigSource(ps.getRight(), ps.getLeft()));
+        sources.add(new CorantConfigSource(configAdjuster.apply(ps.getRight()), ps.getLeft()));
       }
     });
     sources.sort(CONFIG_SOURCE_COMPARATOR);
@@ -168,7 +169,7 @@ public class CorantConfigSources {
   }
 
   /**
-   * 
+   *
    * @return the expressionsEnabled
    */
   public boolean isExpressionsEnabled() {

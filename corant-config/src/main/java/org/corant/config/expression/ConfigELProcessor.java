@@ -13,12 +13,18 @@
  */
 package org.corant.config.expression;
 
-import static org.corant.shared.util.Objects.asString;
-import java.util.function.Function;
+import com.sun.el.ExpressionFactoryImpl;
+import org.corant.shared.util.Objects;
+import org.corant.shared.util.Randoms;
+import org.corant.shared.util.Strings;
+
+import javax.el.ELClass;
 import javax.el.ExpressionFactory;
 import javax.el.StandardELContext;
-import org.corant.shared.util.Objects;
-import com.sun.el.ExpressionFactoryImpl;
+import javax.el.StaticFieldELResolver;
+import java.util.function.Function;
+
+import static org.corant.shared.util.Objects.asString;
 
 /**
  * corant-config
@@ -51,7 +57,17 @@ public class ConfigELProcessor {
                   String.class, new Class[] {String.class})
               .invoke(contexts.get(), Objects.EMPTY_ARRAY),
           null);
-    } else {
+    }else if(value.startsWith("randoms")){
+      //randoms.randomLong(5,20)
+      String methodName = value.substring("randoms.".length(), value.indexOf("("));// randomLong
+      String paramValue = value.substring(value.indexOf("(") + 1, value.indexOf(")"));// 5,20
+      Object[] params = null;
+      if (Strings.isNotBlank(paramValue)) {
+        params = paramValue.split(",");
+      }
+      StaticFieldELResolver elResolver = new StaticFieldELResolver();
+      return asString(elResolver.invoke(contexts.get(), new ELClass(Randoms.class), methodName, null, params));
+    }else {
       return asString(expressionFactory
           .createValueExpression(contexts.get(), "${".concat(value).concat("}"), String.class)
           .getValue(contexts.get()), null);

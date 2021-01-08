@@ -13,13 +13,15 @@
  */
 package org.corant.config.spi;
 
-import static org.corant.shared.util.Objects.areEqual;
+import org.eclipse.microprofile.config.spi.ConfigSource;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.microprofile.config.spi.ConfigSource;
+
+import static org.corant.shared.util.Objects.areEqual;
 
 /**
  * corant-config
@@ -57,11 +59,11 @@ public class ConfigVariableAdjuster implements ConfigAdjuster {
   }
 
   boolean hasExpression(String v) {
-    return v != null && v.indexOf(EXP) != -1 && v.indexOf(END) != -1;
+    return v != null && v.contains(EXP) && v.contains(END);
   }
 
   boolean hasVariable(String v) {
-    return v != null && v.indexOf(REP) != -1 && v.indexOf(END) != -1;
+    return v != null && v.contains(REP) && v.contains(END);
   }
 
   /**

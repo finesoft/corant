@@ -30,6 +30,7 @@ public class ConfigELProcessor {
 
   final ExpressionFactory expressionFactory;
   final ConfigSourceBean sourceBean;
+  final ThreadLocal<StandardELContext> contexts = new ThreadLocal<>();
 
   public ConfigELProcessor(Function<String, String> provider) {
     sourceBean = new ConfigSourceBean(provider);
@@ -37,17 +38,23 @@ public class ConfigELProcessor {
   }
 
   public String evalValue(final String value) {
-    StandardELContext context = new StandardELContext(expressionFactory);
-    context.getVariableMapper().setVariable("source",
-        expressionFactory.createValueExpression(sourceBean, ConfigSourceBean.class));
+    if (contexts.get() == null) {
+      StandardELContext context = new StandardELContext(expressionFactory);
+      context.getVariableMapper().setVariable("source",
+          expressionFactory.createValueExpression(sourceBean, ConfigSourceBean.class));
+      contexts.set(context);
+    }
     if (value.startsWith("fn:")) {
-      return asString(expressionFactory.createMethodExpression(context,
-          "${".concat(value.substring(3)).concat("}"), String.class, new Class[] {String.class})
-          .invoke(context, Objects.EMPTY_ARRAY), null);
+      return asString(
+          expressionFactory
+              .createMethodExpression(contexts.get(), "${".concat(value.substring(3)).concat("}"),
+                  String.class, new Class[] {String.class})
+              .invoke(contexts.get(), Objects.EMPTY_ARRAY),
+          null);
     } else {
       return asString(expressionFactory
-          .createValueExpression(context, "${".concat(value).concat("}"), String.class)
-          .getValue(context), null);
+          .createValueExpression(contexts.get(), "${".concat(value).concat("}"), String.class)
+          .getValue(contexts.get()), null);
     }
   }
 

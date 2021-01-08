@@ -114,7 +114,10 @@ public class CorantConfigSources {
     List<CorantConfigSource> sources = new ArrayList<>(orginals.size());
     profileSources.forEach(ps -> {
       if (ps.getLeft() == null || Arrays.binarySearch(profiles.get(), ps.getLeft()) != -1) {
-        sources.add(new CorantConfigSource(configAdjuster.apply(ps.getRight()), ps.getLeft()));
+        ConfigSource adjustedSource = configAdjuster.apply(ps.getRight());
+        if (adjustedSource != null) {
+          sources.add(new CorantConfigSource(adjustedSource, ps.getLeft()));
+        }
       }
     });
     sources.sort(CONFIG_SOURCE_COMPARATOR);

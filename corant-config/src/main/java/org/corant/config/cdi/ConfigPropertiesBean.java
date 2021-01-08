@@ -117,10 +117,12 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
   }
 
   String extractPrefix(Annotated annotated) {
-    Class<?> cls = (Class<?>) annotated.getBaseType();
-    ConfigProperties cp = cls.getAnnotation(ConfigProperties.class);
-    if (cp != null) {
-      return cp.prefix().equals(ConfigProperties.UNCONFIGURED_PREFIX) ? null : cp.prefix();
+    if (annotated != null) {
+      Class<?> cls = (Class<?>) annotated.getBaseType();
+      ConfigProperties cp = cls.getAnnotation(ConfigProperties.class);
+      if (cp != null) {
+        return cp.prefix().equals(ConfigProperties.UNCONFIGURED_PREFIX) ? null : cp.prefix();
+      }
     }
     return null;
   }

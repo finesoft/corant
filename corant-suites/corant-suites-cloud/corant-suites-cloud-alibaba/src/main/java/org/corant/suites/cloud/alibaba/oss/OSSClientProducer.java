@@ -24,7 +24,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.Naming;
 import org.corant.shared.util.Strings;
 import com.aliyun.oss.OSS;
@@ -53,7 +53,7 @@ public class OSSClientProducer {
 
   @PostConstruct
   void onPostConstruct() {
-    configs = DeclarativeConfigResolver.resolveMulti(OSSClientConfiguration.class);
+    configs = ConfigInstances.resolveMulti(OSSClientConfiguration.class);
   }
 
   @Produces

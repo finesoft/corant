@@ -25,7 +25,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.NamingReference;
 import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
@@ -62,7 +62,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
    */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     Map<String, DataSourceConfig> configs =
-        DeclarativeConfigResolver.resolveMulti(DataSourceConfig.class);
+        ConfigInstances.resolveMulti(DataSourceConfig.class);
     configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");

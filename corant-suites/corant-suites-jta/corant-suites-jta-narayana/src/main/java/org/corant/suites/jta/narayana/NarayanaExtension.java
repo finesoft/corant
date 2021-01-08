@@ -42,7 +42,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -71,7 +71,7 @@ public class NarayanaExtension implements TransactionExtension {
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
   protected final NarayanaTransactionConfig config =
-      DeclarativeConfigResolver.resolveSingle(NarayanaTransactionConfig.class);
+      ConfigInstances.resolveSingle(NarayanaTransactionConfig.class);
   protected List<String> mbeanNames = new ArrayList<>();
 
   @Override

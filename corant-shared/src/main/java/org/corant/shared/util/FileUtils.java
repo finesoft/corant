@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
@@ -210,7 +211,7 @@ public class FileUtils {
     String fileName = getFileName(path);
     if (fileName != null) {
       String ext = getFileNameExtension(path);
-      if (ext == null) {
+      if (ext == null || areEqual(ext, fileName)) {
         return fileName;
       } else {
         return fileName.substring(0, fileName.length() - ext.length() - 1);

@@ -215,7 +215,7 @@ public class CorantConfigResolver {
         int end = contents.get().start();
         String extracted = content.substring(0, end);
         final String logExtracted = extracted;
-        logger.fine(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
+        logger.finer(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
             stacks.size(), logExtracted));
         if (isNotBlank(extracted)) {
           if (!eval && extracted.contains(VAR_DEFAULT)) {

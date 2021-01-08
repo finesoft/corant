@@ -23,7 +23,7 @@ import org.eclipse.microprofile.config.Config;
  * <p>
  * Declarative configuration object, used to construct configuration information into configuration
  * object. Configuration information comes from microprofile config sources. Usually used with
- * {@link ConfigKeyItem} and {@link ConfigKeyItem} and {@link DeclarativeConfigResolver}.
+ * {@link ConfigKeyItem} and {@link ConfigKeyItem} and {@link ConfigInstances}.
  *
  * <p>
  * For example:

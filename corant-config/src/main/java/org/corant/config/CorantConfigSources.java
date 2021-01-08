@@ -20,9 +20,11 @@ import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.trim;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,10 +32,11 @@ import org.corant.config.expression.ConfigELProcessor;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.ubiquity.Mutable.MutableBoolean;
-import org.corant.shared.ubiquity.Mutable.MutableString;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -54,8 +57,8 @@ public class CorantConfigSources {
   };
 
   protected final List<CorantConfigSource> sources;
-  protected final String profile;
-  protected final String profilePrefix;
+  protected final String[] profiles;
+  protected final String[] profilePrefixs;
   protected final ConfigELProcessor elProcessor;
   protected final boolean expressionsEnabled;
 
@@ -65,15 +68,17 @@ public class CorantConfigSources {
    * @param profile
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
-      String profile) {
+      String[] profiles) {
     super();
     this.sources = sources;
-    this.profile = profile;
+    this.profiles = defaultObject(profiles, Strings.EMPTY_ARRAY);
     this.expressionsEnabled = expressionsEnabled;
-    if (profile != null) {
-      profilePrefix = PROFILE_SPECIFIC_PREFIX + profile + Names.NAME_SPACE_SEPARATOR;
+    if (isNotEmpty(profiles)) {
+      String[] cps = Arrays.copyOf(profiles, profiles.length);
+      Arrays.setAll(cps, i -> PROFILE_SPECIFIC_PREFIX + cps[i] + Names.NAME_SPACE_SEPARATOR);
+      profilePrefixs = cps;
     } else {
-      profilePrefix = null;
+      profilePrefixs = Strings.EMPTY_ARRAY;
     }
     elProcessor = new ConfigELProcessor(this::retrieveValue);
   }
@@ -86,7 +91,7 @@ public class CorantConfigSources {
    */
   public static CorantConfigSources of(List<ConfigSource> orginals, ClassLoader classLoader) {
     shouldNotNull(orginals, "The config sources can not null!");
-    MutableString profile = MutableString.of(null);
+    MutableObject<String[]> profiles = new MutableObject<>(Strings.EMPTY_ARRAY);
     MutableBoolean enableExpressions = MutableBoolean.of(true);
     List<Pair<String, ConfigSource>> profileSources = new ArrayList<>(orginals.size());
     orginals.stream().sorted(CONFIG_SOURCE_COMPARATOR.reversed()).forEachOrdered(cs -> {
@@ -95,7 +100,7 @@ public class CorantConfigSources {
         String propertyProfile =
             defaultString(cs.getValue(ConfigNames.CFG_PROFILE_KEY), cs.getValue(Config.PROFILE));
         if (propertyProfile != null) {
-          profile.set(propertyProfile);
+          profiles.set(CorantConfigResolver.splitValue(propertyProfile));
         }
       }
       profileSources.add(Pair.of(sourceProfile, cs));
@@ -107,21 +112,21 @@ public class CorantConfigSources {
 
     List<CorantConfigSource> sources = new ArrayList<>(orginals.size());
     profileSources.forEach(ps -> {
-      if (ps.getLeft() == null || areEqual(ps.getLeft(), profile.get())) {
+      if (ps.getLeft() == null || Arrays.binarySearch(profiles.get(), ps.getLeft()) != -1) {
         sources.add(new CorantConfigSource(ps.getRight(), ps.getLeft()));
       }
     });
     sources.sort(CONFIG_SOURCE_COMPARATOR);
-    return new CorantConfigSources(sources, enableExpressions.get(), profile.get());
+    return new CorantConfigSources(sources, enableExpressions.get(), profiles.get());
   }
 
   static String resolveSourceProfile(String sourceName) {
     String name = null;
     if (isNotEmpty(name = FileUtils.getFileBaseName(sourceName))) {
       int start = -1;
-      if ((start = name.indexOf(COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX)) > -1) {
+      if ((start = name.indexOf(COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
         name = name.substring(start + COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
-      } else if ((start = name.indexOf(MP_CONFIG_SOURCE_BASE_NAME_PREFIX)) > -1) {
+      } else if ((start = name.indexOf(MP_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
         name = name.substring(start + MP_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
       } else {
         name = null;
@@ -139,8 +144,8 @@ public class CorantConfigSources {
     return new CorantConfigValue(propertyName, null, null, null, 0);
   }
 
-  public String getProfile() {
-    return profile;
+  public String[] getProfiles() {
+    return Arrays.copyOf(profiles, profiles.length);
   }
 
   public Iterable<String> getPropertyNames() {
@@ -163,6 +168,14 @@ public class CorantConfigSources {
   }
 
   /**
+   * 
+   * @return the expressionsEnabled
+   */
+  public boolean isExpressionsEnabled() {
+    return expressionsEnabled;
+  }
+
+  /**
    * Returns the processed value of the EL expression
    *
    * @param value
@@ -179,11 +192,12 @@ public class CorantConfigSources {
    * @return config source and value
    */
   protected Pair<ConfigSource, String> getSourceAndValue(String propertyName) {
-    if (profilePrefix != null) {
+    int i = profilePrefixs.length;
+    while (--i >= 0) {
       String value = null;
-      String key = profilePrefix + propertyName;
+      String key = profilePrefixs[i] + propertyName;
       for (CorantConfigSource cs : sources) {
-        if (areEqual(cs.getSourceProfile(), profile)) {
+        if (areEqual(cs.getSourceProfile(), profiles[i])) {
           value = cs.getValue(propertyName);
         } else {
           value = defaultString(cs.getValue(key), cs.getValue(propertyName));
@@ -192,24 +206,23 @@ public class CorantConfigSources {
           return Pair.of(cs, value);
         }
       }
-    } else {
-      for (CorantConfigSource cs : sources) {
-        String value = cs.getValue(propertyName);
-        if (value != null) {
-          return Pair.of(cs, value);
-        }
+    }
+    for (CorantConfigSource cs : sources) {
+      String value = cs.getValue(propertyName);
+      if (value != null) {
+        return Pair.of(cs, value);
       }
     }
     return Pair.empty();
   }
 
   protected String normalizeName(final String name) {
-    if (profilePrefix != null && name.startsWith(profilePrefix)) {
-      return name.substring(profilePrefix.length());
+    int i = profilePrefixs.length;
+    while (--i >= 0) {
+      if (profilePrefixs[i] != null && name.startsWith(profilePrefixs[i])) {
+        return name.substring(profilePrefixs[i].length());
+      }
     }
-    // else if (name.startsWith("%")) {
-    // return null;
-    // }
     return name;
   }
 

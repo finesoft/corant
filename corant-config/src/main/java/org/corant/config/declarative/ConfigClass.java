@@ -13,10 +13,6 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.shared.util.Annotations.findAnnotation;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Fields.traverseFields;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,30 +24,30 @@ import java.util.stream.Collectors;
  * @author bingo 11:32:11
  *
  */
-public class ConfigClass<T extends DeclarativeConfig> {
+public class ConfigClass {
 
   private final String keyRoot;
   private final int keyIndex;
-  private final Class<T> clazz;
+  private final Class<?> clazz;
   private final List<ConfigField> fields = new ArrayList<>();
   private final boolean ignoreNoAnnotatedItem;
 
-  public ConfigClass(Class<T> clazz) {
+  /**
+   * @param keyRoot
+   * @param keyIndex
+   * @param clazz
+   * @param ignoreNoAnnotatedItem
+   */
+  protected ConfigClass(String keyRoot, int keyIndex, Class<?> clazz,
+      boolean ignoreNoAnnotatedItem) {
+    super();
+    this.keyRoot = keyRoot;
+    this.keyIndex = keyIndex;
     this.clazz = clazz;
-    ConfigKeyRoot configKeyRoot = shouldNotNull(findAnnotation(clazz, ConfigKeyRoot.class, true));
-    keyRoot = configKeyRoot.value();
-    keyIndex = configKeyRoot.keyIndex();
-    ignoreNoAnnotatedItem = configKeyRoot.ignoreNoAnnotatedItem();
-    traverseFields(clazz, field -> {
-      if (!Modifier.isFinal(field.getModifiers())) {
-        if (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null) {
-          fields.add(new ConfigField(this, field));
-        }
-      }
-    });
+    this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
   }
 
-  public Class<T> getClazz() {
+  public Class<?> getClazz() {
     return clazz;
   }
 
@@ -79,6 +75,17 @@ public class ConfigClass<T extends DeclarativeConfig> {
   public String toString() {
     return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
         + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
+  }
+
+  void addField(ConfigField field) {
+    fields.add(field);
+  }
+
+  void setFields(List<ConfigField> fields) {
+    this.fields.clear();
+    if (fields != null) {
+      this.fields.addAll(fields);
+    }
   }
 
 }

@@ -37,17 +37,17 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午8:05:35
  *
  */
-public enum DeclarativePattern {
+public enum DeclarativePattern implements ConfigPropertyInjector {
 
   SUFFIX() {
     @Override
-    public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
-        ConfigField configField) throws Exception {
+    public void inject(Config config, String infix, Object configObject, ConfigField configField)
+        throws Exception {
       CorantConfig corantConfig = forceCast(config);
       Field field = configField.getField();
       String key = configField.getKey(infix);
       Object obj = corantConfig.getConvertedValue(key, field.getGenericType(),
-          configField.getDefaultValue());
+          configField.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE);
       if (obj != null) {
         field.set(configObject, obj);
       }
@@ -57,8 +57,8 @@ public enum DeclarativePattern {
   PREFIX() {
     @SuppressWarnings("rawtypes")
     @Override
-    public <T extends DeclarativeConfig> void resolve(Config config, String infix, T configObject,
-        ConfigField configField) throws Exception {
+    public void inject(Config config, String infix, Object configObject, ConfigField configField)
+        throws Exception {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();
       String key = configField.getKey(infix);
@@ -96,8 +96,5 @@ public enum DeclarativePattern {
       }
     }
   };
-
-  public abstract <T extends DeclarativeConfig> void resolve(Config config, String infix,
-      T configObject, ConfigField configField) throws Exception;
 
 }

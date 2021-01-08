@@ -30,8 +30,11 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
+import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.config.CorantConfigProviderResolver;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
@@ -41,14 +44,16 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  * @author bingo 下午4:34:28
  *
  */
-public class ConfigExtension implements Extension {
+public class ConfigExtension20 implements Extension {
 
-  private static final Logger logger = Logger.getLogger(ConfigExtension.class.getName());
+  private static final Logger logger = Logger.getLogger(ConfigExtension20.class.getName());
 
-  private final Set<InjectionPoint> injectionPoints = new HashSet<>();
+  private final Set<InjectionPoint> configPropertyInjectionPoints = new HashSet<>();
+  private final Set<InjectionPoint> configPropertiesInjectionPoints = new HashSet<>();
+  private final Set<AnnotatedType<?>> configPropertiesTypes = new HashSet<>();
 
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
-    Set<Type> types = injectionPoints.stream().map(ip -> {
+    Set<Type> types = configPropertyInjectionPoints.stream().map(ip -> {
       if (ip.getType() instanceof Class<?>) {
         return wrap((Class<?>) ip.getType());
       } else {
@@ -56,6 +61,8 @@ public class ConfigExtension implements Extension {
       }
     }).collect(Collectors.toSet());
     types.forEach(type -> abd.addBean(new ConfigPropertyBean<>(bm, setOf(type))));
+    configPropertiesTypes.stream().map(t -> new ConfigPropertiesBean<>(bm, t))
+        .forEach(abd::addBean);
   }
 
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd, BeanManager bm) {
@@ -68,19 +75,33 @@ public class ConfigExtension implements Extension {
     if (cfr instanceof CorantConfigProviderResolver) {
       ((CorantConfigProviderResolver) cfr).clear(); // FIXME Is it necessary?
     }
-    injectionPoints.clear();
+    configPropertyInjectionPoints.clear();
+    configPropertiesInjectionPoints.clear();
+    configPropertiesTypes.clear();
+  }
+
+  void onProcessAnnotatedType(
+      @Observes @WithAnnotations({ConfigProperties.class}) ProcessAnnotatedType<?> pat) {
+    if (pat.getAnnotatedType().isAnnotationPresent(ConfigProperties.class)) {
+      pat.veto();
+      configPropertiesTypes.add(pat.getAnnotatedType());
+    }
   }
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperty.class)) {
-      logger.fine(
+      logger.finer(
           () -> String.format("Find config property inject point %s", pip.getInjectionPoint()));
-      injectionPoints.add(pip.getInjectionPoint());
+      configPropertyInjectionPoints.add(pip.getInjectionPoint());
+    }
+    if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperties.class)) {
+      logger.finer(
+          () -> String.format("Find config properties inject point %s", pip.getInjectionPoint()));
+      configPropertiesInjectionPoints.add(pip.getInjectionPoint());
     }
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     // TODO FIXME validate config
   }
-
 }

@@ -15,14 +15,12 @@ package org.corant.config.declarative;
 
 import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.config.CorantConfigResolver.regulateKeyPrefix;
-import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
@@ -40,11 +38,25 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * @author bingo 下午7:42:56
  *
  */
-public class DeclarativeConfigResolver {
+public class ConfigInstances {
 
-  public static <T extends DeclarativeConfig> Map<String, T> resolveMulti(Class<T> cls) {
+  public static <T> T resolveMicroprofile(Class<T> cls, String prefix) {
+    Map<String, T> map = new HashMap<>(1);
+    ConfigClass configClass = ConfigMapper.microprofile(cls, prefix);
+    if (configClass != null) {
+      Config config = ConfigProvider.getConfig();
+      try {
+        map = resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME EMPTY?
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return isEmpty(map) ? null : map.values().iterator().next();
+  }
+
+  public static <T> Map<String, T> resolveMulti(Class<T> cls) {
     Map<String, T> configMaps = null;
-    ConfigClass<T> configClass = resolveConfigClass(cls);
+    ConfigClass configClass = ConfigMapper.declarative(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       Set<String> keys = resolveKeys(configClass, config);
@@ -57,9 +69,9 @@ public class DeclarativeConfigResolver {
     return defaultObject(configMaps, HashMap::new);
   }
 
-  public static <T extends DeclarativeConfig> T resolveSingle(Class<T> cls) {
+  public static <T> T resolveSingle(Class<T> cls) {
     Map<String, T> map = new HashMap<>(1);
-    ConfigClass<T> configClass = resolveConfigClass(cls);
+    ConfigClass configClass = ConfigMapper.declarative(cls);
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
@@ -75,35 +87,33 @@ public class DeclarativeConfigResolver {
     return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
   }
 
-  static <T extends DeclarativeConfig> ConfigClass<T> resolveConfigClass(Class<T> cls) {
-    ConfigKeyRoot ckr = findAnnotation(cls, ConfigKeyRoot.class, true);
-    if (ckr != null && isNotBlank(ckr.value())) {
-      return new ConfigClass<>(cls);
-    }
-    return null;
-  }
-
   static <T extends DeclarativeConfig> T resolveConfigInstance(Config config, String infix,
-      T configObject, ConfigClass<T> configClass) throws Exception {
+      T configObject, ConfigClass configClass) throws Exception {
     for (ConfigField cf : configClass.getFields()) {
-      cf.getPattern().resolve(config, infix, configObject, cf);
+      cf.getInjector().inject(config, infix, configObject, cf);
     }
     return configObject;
   }
 
-  static <T extends DeclarativeConfig> Map<String, T> resolveConfigInstances(Config config,
-      Set<String> keys, ConfigClass<T> configClass) throws Exception {
+  @SuppressWarnings("unchecked")
+  static <T> Map<String, T> resolveConfigInstances(Config config, Set<String> keys,
+      ConfigClass configClass) throws Exception {
     if (isNotEmpty(keys)) {
       Map<String, T> configMaps = new HashMap<>(keys.size());
       for (String key : keys) {
         // T configObject = configClass.getClazz().newInstance();// JDK8
-        T configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
+        Object configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
         for (ConfigField cf : configClass.getFields()) {
-          cf.getPattern().resolve(config, key, configObject, cf);
+          cf.getInjector().inject(config, key, configObject, cf);
         }
-        configObject.onPostConstruct(config, key);
-        if (configObject.isValid()) {
-          configMaps.put(key, configObject);
+        if (configObject instanceof DeclarativeConfig) {
+          DeclarativeConfig declarativeConfigObject = (DeclarativeConfig) configObject;
+          declarativeConfigObject.onPostConstruct(config, key);
+          if (declarativeConfigObject.isValid()) {
+            configMaps.put(key, (T) declarativeConfigObject);
+          }
+        } else {
+          configMaps.put(key, (T) configObject);
         }
       }
       return configMaps;
@@ -111,7 +121,7 @@ public class DeclarativeConfigResolver {
     return null;
   }
 
-  static Set<String> resolveKeys(ConfigClass<?> configClass, Config config) {
+  static Set<String> resolveKeys(ConfigClass configClass, Config config) {
     final String prefix = regulateKeyPrefix(configClass.getKeyRoot());
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();
@@ -130,7 +140,7 @@ public class DeclarativeConfigResolver {
       keys.add(EMPTY);
     }
     itemKeys.removeAll(dfltKeys);
-    if (isNotEmpty(itemKeys)) {
+    if (isNotEmpty(itemKeys) && configClass.getKeyIndex() > 0) {
       keys.addAll(getGroupConfigKeys(config,
           s -> defaultString(s).startsWith(prefix) && dfltKeys.stream().noneMatch(s::startsWith),
           configClass.getKeyIndex()).keySet());

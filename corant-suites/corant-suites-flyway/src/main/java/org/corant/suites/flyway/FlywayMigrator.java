@@ -35,7 +35,7 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Objects;
@@ -170,7 +170,7 @@ public class FlywayMigrator {
 
   @PostConstruct
   protected void onPostConstruct() {
-    globalFlywayConfig = defaultObject(DeclarativeConfigResolver.resolveSingle(FlywayConfig.class),
+    globalFlywayConfig = defaultObject(ConfigInstances.resolveSingle(FlywayConfig.class),
         FlywayConfig.EMPTY);
   }
 

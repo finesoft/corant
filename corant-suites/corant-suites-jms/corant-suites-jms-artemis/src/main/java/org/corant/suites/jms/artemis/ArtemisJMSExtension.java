@@ -30,7 +30,7 @@ import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -105,7 +105,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
   protected void onBeforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {
     Map<String, ArtemisConfig> configs =
-        DeclarativeConfigResolver.resolveMulti(ArtemisConfig.class);
+        ConfigInstances.resolveMulti(ArtemisConfig.class);
     configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");

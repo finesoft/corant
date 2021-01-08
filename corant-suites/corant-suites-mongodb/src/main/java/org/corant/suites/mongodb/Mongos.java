@@ -118,17 +118,24 @@ public class Mongos {
   }
 
   public static void copyGridFSBucket(String srcDatabaseNameSpace, String destDatabaseNameSpace,
-      String srcGridFSBucketName, String destGridFSBucketName, int batchSize) {
+      String srcGridFSBucketName, String destGridFSBucketName, Bson filter, int batchSize) {
     MongoDatabase s = resolve(MongoDatabase.class, NamedLiteral.of(srcDatabaseNameSpace));
     MongoDatabase d = resolve(MongoDatabase.class, NamedLiteral.of(destDatabaseNameSpace));
     GridFSBucket sg = GridFSBuckets.create(s, srcGridFSBucketName);
     GridFSBucket dg = GridFSBuckets.create(d, destGridFSBucketName);
-    batchStream(batchSize, sg.find()).forEach(gfses -> gfses.forEach(gf -> {
-      try (GridFSDownloadStream gfos = sg.openDownloadStream(gf.getId())) {
-        dg.uploadFromStream(gf.getId(), gf.getFilename(), gfos, new GridFSUploadOptions()
-            .metadata(new Document(defaultObject(gf.getMetadata(), Collections::emptyMap))));
-      }
-    }));
+    batchStream(batchSize, filter == null ? sg.find() : sg.find(filter))
+        .forEach(gfses -> gfses.forEach(gf -> {
+          try (GridFSDownloadStream gfos = sg.openDownloadStream(gf.getId())) {
+            dg.uploadFromStream(gf.getId(), gf.getFilename(), gfos, new GridFSUploadOptions()
+                .metadata(new Document(defaultObject(gf.getMetadata(), Collections::emptyMap))));
+          }
+        }));
+  }
+
+  public static void copyGridFSBucket(String srcDatabaseNameSpace, String destDatabaseNameSpace,
+      String srcGridFSBucketName, String destGridFSBucketName, int batchSize) {
+    copyGridFSBucket(srcDatabaseNameSpace, destDatabaseNameSpace, srcGridFSBucketName,
+        destGridFSBucketName, null, batchSize);
   }
 
 }

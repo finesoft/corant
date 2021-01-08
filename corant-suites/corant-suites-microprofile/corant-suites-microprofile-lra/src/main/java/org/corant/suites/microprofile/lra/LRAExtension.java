@@ -6,7 +6,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import io.narayana.lra.filter.ClientLRARequestFilter;
 import io.narayana.lra.filter.ClientLRAResponseFilter;
 import io.narayana.lra.filter.ServerLRAFilter;
@@ -34,7 +34,7 @@ public class LRAExtension implements Extension {
   void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event, BeanManager beanManager) {
 
     config =
-        defaultObject(DeclarativeConfigResolver.resolveSingle(LRAConfig.class), LRAConfig.EMPTY);
+        defaultObject(ConfigInstances.resolveSingle(LRAConfig.class), LRAConfig.EMPTY);
 
     System.setProperty(LRA_COORDINATOR_PORT_KEY, String.valueOf(config.getPort()));
     System.setProperty(LRA_COORDINATOR_HOST_KEY, config.getHost());

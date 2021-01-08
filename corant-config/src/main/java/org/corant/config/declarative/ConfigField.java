@@ -14,16 +14,8 @@
 package org.corant.config.declarative;
 
 import static org.corant.config.CorantConfigResolver.concatKey;
-import static org.corant.config.CorantConfigResolver.dashify;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Map;
 
 /**
  * corant-config
@@ -33,42 +25,36 @@ import java.util.Map;
  */
 public class ConfigField {
 
-  private final ConfigClass<?> configClass;
+  private final ConfigClass configClass;
   private final Field field;
   private final String keyItem;
-  private final DeclarativePattern pattern;
+  private final ConfigPropertyInjector injector;
   private final String defaultValue;
   private final String defaultKey;
+  private final String defaultNull;
 
-  ConfigField(ConfigClass<?> configClass, Field field) {
+  /**
+   * @param configClass
+   * @param field
+   * @param keyItem
+   * @param injector
+   * @param defaultValue
+   * @param defaultKey
+   * @param defaultNull
+   */
+  protected ConfigField(ConfigClass configClass, Field field, String keyItem,
+      ConfigPropertyInjector injector, String defaultValue, String defaultKey, String defaultNull) {
+    super();
     this.configClass = configClass;
-    this.field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-      field.setAccessible(true);
-      return field;
-    });
-    ConfigKeyItem configKeyItem =
-        defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
-    keyItem = isBlank(configKeyItem.value()) ? dashify(field.getName()) : configKeyItem.value();
-    pattern = defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
-    defaultValue = configKeyItem.defaultValue();
-    defaultKey = concatKey(configClass.getKeyRoot(), keyItem);
-
-    if (pattern == DeclarativePattern.PREFIX) {
-      Type fieldType = field.getGenericType();
-      if (fieldType instanceof ParameterizedType) {
-        Type rawType = ((ParameterizedType) fieldType).getRawType();
-        shouldBeTrue(rawType.equals(Map.class),
-            "We only support Map field type for PREFIX pattern %s %s.",
-            configClass.getClazz().getName(), field.getName());
-      } else {
-        shouldBeTrue(fieldType.equals(Map.class),
-            "We only support Map field type for PREFIX pattern %s %s.",
-            configClass.getClazz().getName(), field.getName());
-      }
-    }
+    this.field = field;
+    this.keyItem = keyItem;
+    this.injector = injector;
+    this.defaultValue = defaultValue;
+    this.defaultKey = defaultKey;
+    this.defaultNull = defaultNull;
   }
 
-  public ConfigClass<?> getConfigClass() {
+  public ConfigClass getConfigClass() {
     return configClass;
   }
 
@@ -77,11 +63,15 @@ public class ConfigField {
   }
 
   public String getDefaultValue() {
-    return defaultValue.equals(ConfigKeyItem.NO_DFLT_VALUE) ? null : defaultValue;
+    return defaultValue.equals(defaultNull) ? null : defaultValue;
   }
 
   public Field getField() {
     return field;
+  }
+
+  public ConfigPropertyInjector getInjector() {
+    return injector;
   }
 
   public String getKey(String infix) {
@@ -96,15 +86,11 @@ public class ConfigField {
     return keyItem;
   }
 
-  public DeclarativePattern getPattern() {
-    return pattern;
-  }
-
   @Override
   public String toString() {
     return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
-        + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
-        + "]";
+        + ", pattern=" + injector + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
+        + ", defaultNull=" + defaultNull + "]";
   }
 
 }

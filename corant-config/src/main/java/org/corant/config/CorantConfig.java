@@ -68,9 +68,14 @@ public class CorantConfig implements Config, Serializable {
   }
 
   public Object getConvertedValue(String propertyName, Type type, String defaultRawValue) {
+    return getConvertedValue(propertyName, type, defaultRawValue,
+        ConfigProperty.UNCONFIGURED_VALUE);
+  }
+
+  public Object getConvertedValue(String propertyName, Type type, String defaultRawValue,
+      String unconfiguredValue) {
     Object result = configConversion.convert(configSources.get().getValue(propertyName), type);
-    if (result == null && defaultRawValue != null
-        && !defaultRawValue.equals(ConfigProperty.UNCONFIGURED_VALUE)) {
+    if (result == null && defaultRawValue != null && !defaultRawValue.equals(unconfiguredValue)) {
       result = configConversion.convert(defaultRawValue, type);
     }
     return configConversion.convertIfNecessary(result, type);

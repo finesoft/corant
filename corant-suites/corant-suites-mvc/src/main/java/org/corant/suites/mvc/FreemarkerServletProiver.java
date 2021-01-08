@@ -17,7 +17,7 @@ import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
-import org.corant.config.declarative.DeclarativeConfigResolver;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.suites.servlet.WebMetaDataProvider;
 import org.corant.suites.servlet.metadata.WebInitParamMetaData;
 import org.corant.suites.servlet.metadata.WebServletMetaData;
@@ -36,7 +36,7 @@ public class FreemarkerServletProiver implements WebMetaDataProvider {
   public Stream<WebServletMetaData> servletMetaDataStream() {
     String name = FreemarkerServlet.class.getSimpleName();
     FreemarkerServletConfig config =
-        DeclarativeConfigResolver.resolveSingle(FreemarkerServletConfig.class);
+        ConfigInstances.resolveSingle(FreemarkerServletConfig.class);
     if (config != null) {
       WebInitParamMetaData[] params = streamOf(config.getInitParams())
           .map(e -> new WebInitParamMetaData(e.getKey(), e.getValue(), e.getValue()))
@@ -51,7 +51,7 @@ public class FreemarkerServletProiver implements WebMetaDataProvider {
   protected WebServletMetaData resolveWebInitParamMetaDatas() {
     String name = FreemarkerServlet.class.getSimpleName();
     FreemarkerServletConfig config =
-        DeclarativeConfigResolver.resolveSingle(FreemarkerServletConfig.class);
+        ConfigInstances.resolveSingle(FreemarkerServletConfig.class);
     if (config != null) {
       WebInitParamMetaData[] params = streamOf(config.getInitParams())
           .map(e -> new WebInitParamMetaData(e.getKey(), e.getValue(), e.getValue()))

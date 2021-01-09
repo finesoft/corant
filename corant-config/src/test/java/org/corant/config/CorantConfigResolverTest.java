@@ -13,14 +13,12 @@
  */
 package org.corant.config;
 
-import junit.framework.TestCase;
+import static org.corant.shared.util.Maps.linkedHashMapOf;
+import java.util.Map;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.Test;
-
-import java.util.Map;
-
-import static org.corant.shared.util.Maps.linkedHashMapOf;
+import junit.framework.TestCase;
 
 /**
  * corant-config
@@ -62,13 +60,6 @@ public class CorantConfigResolverTest extends TestCase {
           }));
       System.out.println(resolved);
     });
-  }
-
-  @Test
-  public void test1() {
-    Config config = ConfigProvider.getConfig();
-    String value = config.getValue("a.b", String.class);
-    System.out.println("value = " + value);
   }
 
   @Test

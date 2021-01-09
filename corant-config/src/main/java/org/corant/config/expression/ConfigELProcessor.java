@@ -14,15 +14,22 @@
 package org.corant.config.expression;
 
 import static org.corant.shared.util.Objects.asString;
+import java.util.Base64;
+import java.util.Currency;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.UUID;
 import java.util.function.Function;
-import javax.el.ELClass;
+import javax.el.ELManager;
 import javax.el.ExpressionFactory;
 import javax.el.StandardELContext;
-import javax.el.StaticFieldELResolver;
+import org.corant.shared.normal.Defaults;
+import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Names.ConfigNames;
+import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Randoms;
 import org.corant.shared.util.Strings;
-import com.sun.el.ExpressionFactoryImpl;
 
 /**
  * corant-config
@@ -32,47 +39,54 @@ import com.sun.el.ExpressionFactoryImpl;
  */
 public class ConfigELProcessor {
 
-  final ExpressionFactory expressionFactory;
+  static final ThreadLocal<ELManager> elManagers = new ThreadLocal<>();
   final ConfigSourceBean sourceBean;
-  final ThreadLocal<StandardELContext> contexts = new ThreadLocal<>();
 
   public ConfigELProcessor(Function<String, String> provider) {
     sourceBean = new ConfigSourceBean(provider);
-    expressionFactory = new ExpressionFactoryImpl();
   }
 
   public String evalValue(final String value) {
-    if (contexts.get() == null) {
-      StandardELContext context = new StandardELContext(expressionFactory);
-      context.getVariableMapper().setVariable("source",
-          expressionFactory.createValueExpression(sourceBean, ConfigSourceBean.class));
-      contexts.set(context);
-    }
+    final ExpressionFactory expressionFactory = ELManager.getExpressionFactory();
+    final StandardELContext context = getElManager().getELContext();
     if (value.startsWith("fn:")) {
-      return asString(
-          expressionFactory
-              .createMethodExpression(contexts.get(), "${".concat(value.substring(3)).concat("}"),
-                  String.class, new Class[] {String.class})
-              .invoke(contexts.get(), Objects.EMPTY_ARRAY),
-          null);
-    } else if (value.startsWith("randoms.")) {
-      // randoms.randomLong(5,20)
-      String methodName = value.substring(8, value.indexOf('('));// randomLong
-      String paramValue = value.substring(value.indexOf('(') + 1, value.indexOf(')'));// 5,20
-      Object[] params = null;
-      if (Strings.isNotBlank(paramValue)) {
-        params = paramValue.split(",");
-      }
-      StaticFieldELResolver elResolver = new StaticFieldELResolver();
-      return asString(
-          elResolver.invoke(contexts.get(), new ELClass(Randoms.class), methodName, null, params));
+      return asString(expressionFactory.createMethodExpression(context,
+          "${".concat(value.substring(3)).concat("}"), String.class, new Class[] {String.class})
+          .invoke(context, Objects.EMPTY_ARRAY), null);
     } else {
       return asString(expressionFactory
-          .createValueExpression(contexts.get(), "${".concat(value).concat("}"), String.class)
-          .getValue(contexts.get()), null);
+          .createValueExpression(context, "${".concat(value).concat("}"), String.class)
+          .getValue(context), null);
     }
   }
 
+  protected ELManager getElManager() {
+    if (elManagers.get() == null) {
+      ELManager elm = new ELManager();
+      elm.importClass(Randoms.class.getName());
+      elm.importClass(Strings.class.getName());
+      elm.importClass(Base64.class.getName());
+      elm.importClass(UUID.class.getName());
+      elm.importClass(Defaults.class.getName());
+      elm.importClass(Names.class.getName());
+      elm.importClass(ConfigNames.class.getName());
+      elm.importClass(Conversions.class.getName());
+      elm.importClass(TimeZone.class.getName());
+      elm.importClass(Currency.class.getName());
+      elm.importClass(Locale.class.getName());
+      elm.setVariable("source", ELManager.getExpressionFactory().createValueExpression(sourceBean,
+          ConfigSourceBean.class));
+      elManagers.set(elm);
+    }
+    return elManagers.get();
+  }
+
+  /**
+   * corant-config
+   *
+   * @author bingo 下午11:58:51
+   *
+   */
   public static class ConfigSourceBean {
 
     final Function<String, String> provider;

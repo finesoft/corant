@@ -13,41 +13,27 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.declarative.ConfigInstances;
-import org.corant.shared.util.Strings;
-import org.eclipse.microprofile.config.inject.ConfigProperties;
+import org.corant.config.declarative.DeclarativeConfigKey;
 
-public class ConfigPropertiesBean<T> implements Bean<T> {
-  final Set<Annotation> qualifiers;
+public class DeclarativeConfigBean<T> implements Bean<T> {
+  static final Set<Annotation> qualifiers =
+      Collections.singleton(DeclarativeConfigKey.UNCONFIGURED);
   final BeanManager beanManager;
   final Class<T> clazz;
-  final String prefix;
   final Set<Type> types;
 
-  public ConfigPropertiesBean(BeanManager bm, final AnnotatedType<T> type) {
+  public DeclarativeConfigBean(BeanManager bm, final Class<T> type) {
     this.beanManager = bm;
-    this.clazz = type.getJavaClass();
-    this.prefix = defaultString(extractPrefix(type), Strings.EMPTY);
-    Set<Annotation> qs = new HashSet<>();
-    qs.add(Default.Literal.INSTANCE);
-    if (type.isAnnotationPresent(ConfigProperties.class)) {
-      qs.add(ConfigProperties.Literal.of(prefix));
-    }
-    qualifiers = Collections.unmodifiableSet(qs);
+    this.clazz = type;
     this.types = Collections.singleton(clazz);
   }
 
@@ -55,14 +41,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
   public T create(CreationalContext<T> context) {
     InjectionPoint ip =
         (InjectionPoint) beanManager.getInjectableReference(new CurrentInjectionPoint(), context);
-    String thePrefix = extractPrefix(ip.getAnnotated());
-    if (thePrefix == null) {
-      thePrefix = ip.getQualifiers().stream().filter(ConfigProperties.class::isInstance)
-          .map(ConfigProperties.class::cast).map(ConfigProperties::prefix)
-          .filter(prefix -> !prefix.equals(ConfigProperties.UNCONFIGURED_PREFIX)).findFirst()
-          .orElse(prefix);
-    }
-    return ConfigInstances.resolveMicroprofile(clazz, thePrefix);
+    return ConfigProducer.declarative(ip);
   }
 
   @Override
@@ -82,7 +61,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
 
   @Override
   public String getName() {
-    return "ConfigPropertiesBean_" + clazz.getName();
+    return "DeclarativeConfigBean_" + clazz.getName();
   }
 
   @Override
@@ -117,15 +96,14 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
 
   @Override
   public String toString() {
-    return "ConfigPropertiesBean [clazz=" + clazz + "]";
+    return "DeclarativeConfigBean [clazz=" + clazz + "]";
   }
 
-  String extractPrefix(Annotated annotated) {
+  String extractKey(Class<?> annotated) {
     if (annotated != null) {
-      Class<?> cls = (Class<?>) annotated.getBaseType();
-      ConfigProperties cp = cls.getAnnotation(ConfigProperties.class);
+      DeclarativeConfigKey cp = annotated.getAnnotation(DeclarativeConfigKey.class);
       if (cp != null) {
-        return cp.prefix().equals(ConfigProperties.UNCONFIGURED_PREFIX) ? null : cp.prefix();
+        return cp.value().equals(DeclarativeConfigKey.UNCONFIGURED_KEY) ? null : cp.value();
       }
     }
     return null;

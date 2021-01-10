@@ -15,7 +15,6 @@ package org.corant.config.cdi;
 
 import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
-import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -34,6 +33,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.config.CorantConfigProviderResolver;
+import org.corant.config.declarative.DeclarativeConfigKey;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -51,16 +51,16 @@ public class ConfigExtension20 implements Extension {
   private final Set<InjectionPoint> configPropertyInjectionPoints = new HashSet<>();
   private final Set<InjectionPoint> configPropertiesInjectionPoints = new HashSet<>();
   private final Set<AnnotatedType<?>> configPropertiesTypes = new HashSet<>();
+  private final Set<InjectionPoint> declarativeConfigInjectionPoints = new HashSet<>();
 
   public void onAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
-    Set<Type> types = configPropertyInjectionPoints.stream().map(ip -> {
-      if (ip.getType() instanceof Class<?>) {
-        return wrap((Class<?>) ip.getType());
-      } else {
-        return ip.getType();
-      }
-    }).collect(Collectors.toSet());
-    types.forEach(type -> abd.addBean(new ConfigPropertyBean<>(bm, setOf(type))));
+    configPropertyInjectionPoints.stream()
+        .map(ip -> ip.getType() instanceof Class<?> ? wrap((Class<?>) ip.getType()) : ip.getType())
+        .collect(Collectors.toSet())
+        .forEach(type -> abd.addBean(new ConfigPropertyBean<>(bm, setOf(type))));
+    declarativeConfigInjectionPoints.stream().map(ip -> (Class<?>) ip.getType())
+        .collect(Collectors.toSet())
+        .forEach(type -> abd.addBean(new DeclarativeConfigBean<>(bm, type)));
     configPropertiesTypes.stream().map(t -> new ConfigPropertiesBean<>(bm, t))
         .forEach(abd::addBean);
   }
@@ -77,6 +77,7 @@ public class ConfigExtension20 implements Extension {
     }
     configPropertyInjectionPoints.clear();
     configPropertiesInjectionPoints.clear();
+    declarativeConfigInjectionPoints.clear();
     configPropertiesTypes.clear();
   }
 
@@ -98,6 +99,11 @@ public class ConfigExtension20 implements Extension {
       logger.finer(
           () -> String.format("Find config properties inject point %s", pip.getInjectionPoint()));
       configPropertiesInjectionPoints.add(pip.getInjectionPoint());
+    }
+    if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(DeclarativeConfigKey.class)) {
+      logger.finer(() -> String.format("Find declarative config key inject point %s",
+          pip.getInjectionPoint()));
+      declarativeConfigInjectionPoints.add(pip.getInjectionPoint());
     }
   }
 

@@ -37,8 +37,6 @@ public @interface DeclarativeConfigKey {
 
   String UNCONFIGURED_KEY = "";
 
-  DeclarativeConfigKeyLiteral UNCONFIGURED = DeclarativeConfigKeyLiteral.of(UNCONFIGURED_KEY);
-
   @Nonbinding
   String value() default UNCONFIGURED_KEY;
 
@@ -46,6 +44,9 @@ public @interface DeclarativeConfigKey {
       implements DeclarativeConfigKey {
 
     private static final long serialVersionUID = 6321463899932625786L;
+
+    public static final DeclarativeConfigKeyLiteral UNCONFIGURED =
+        DeclarativeConfigKeyLiteral.of(UNCONFIGURED_KEY);
 
     private final String value;
 

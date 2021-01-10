@@ -23,10 +23,11 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.declarative.DeclarativeConfigKey;
+import org.corant.config.declarative.DeclarativeConfigKey.DeclarativeConfigKeyLiteral;
 
 public class DeclarativeConfigBean<T> implements Bean<T> {
   static final Set<Annotation> qualifiers =
-      Collections.singleton(DeclarativeConfigKey.UNCONFIGURED);
+      Collections.singleton(DeclarativeConfigKeyLiteral.UNCONFIGURED);
   final BeanManager beanManager;
   final Class<T> clazz;
   final Set<Type> types;

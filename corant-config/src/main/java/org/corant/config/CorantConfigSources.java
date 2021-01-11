@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.corant.config.expression.ConfigELProcessor;
+import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.spi.ConfigAdjuster;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.ConfigNames;
@@ -120,6 +121,18 @@ public class CorantConfigSources {
         }
       }
     });
+    if (isNotEmpty(profiles.get())) {
+      for (String profile : profiles.get()) {
+        for (ConfigSource mps : MicroprofileConfigSources.get(classLoader, profile)) {
+          if (mps != null) {
+            ConfigSource adjustedSource = configAdjuster.apply(mps);
+            if (adjustedSource != null) {
+              sources.add(new CorantConfigSource(adjustedSource, profile));
+            }
+          }
+        }
+      }
+    }
     sources.sort(CONFIG_SOURCE_COMPARATOR);
     return new CorantConfigSources(sources, enableExpressions.get(), profiles.get());
   }
@@ -139,13 +152,14 @@ public class CorantConfigSources {
     return isEmpty(name) ? null : trim(name);
   }
 
-  public ConfigValue getConfigValue(String propertyName) {
+  public ConfigValue getConfigValue(String propertyName, String defaultValue) {
     Pair<ConfigSource, String> val = getSourceAndValue(propertyName);
-    if (val != null) {
-      return new CorantConfigValue(propertyName, val.getValue(), resolveValue(val.getValue()),
-          val.getKey().getName(), val.getKey().getOrdinal());
+    if (!val.isEmpty()) {
+      return new CorantConfigValue(propertyName, val.getValue(),
+          defaultString(resolveValue(val.getValue()), defaultValue), val.getKey().getName(),
+          val.getKey().getOrdinal());
     }
-    return new CorantConfigValue(propertyName, null, null, null, 0);
+    return new CorantConfigValue(propertyName, null, defaultValue, null, 0);
   }
 
   public String[] getProfiles() {

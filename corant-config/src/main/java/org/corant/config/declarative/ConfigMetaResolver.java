@@ -108,7 +108,8 @@ public class ConfigMetaResolver {
         ConfigProperty configProperty = field.getAnnotation(ConfigProperty.class);
         String keyItem = configProperty == null || isBlank(configProperty.name()) ? field.getName()
             : configProperty.name();
-        String defaultValue = ConfigProperty.UNCONFIGURED_VALUE;
+        String defaultValue = configProperty != null ? configProperty.defaultValue()
+            : ConfigProperty.UNCONFIGURED_VALUE;
         String defaultKey = concatKey(prefix, keyItem);
         String defaultNull = ConfigProperty.UNCONFIGURED_VALUE;
         configClass.addField(new ConfigMetaField(configClass, theField, keyItem,

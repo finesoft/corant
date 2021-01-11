@@ -28,6 +28,7 @@ import org.corant.config.CorantConfigConversion.OrdinalConverter;
 import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
+import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -55,7 +56,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public ConfigBuilder addDefaultSources() {
     addSource(new SystemPropertiesConfigSource());
     addSource(new SystemEnvironmentConfigSource());
-    MicroprofileConfigSources.get(classLoader).forEach(this::addSource);
+    MicroprofileConfigSources.get(classLoader, Strings.EMPTY).forEach(this::addSource);
     return this;
   }
 

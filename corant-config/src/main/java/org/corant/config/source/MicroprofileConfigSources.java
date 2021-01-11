@@ -13,10 +13,13 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.corant.config.CorantConfig;
-import org.corant.shared.util.Resources;
+import org.corant.shared.util.ClassPaths;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -30,27 +33,30 @@ public class MicroprofileConfigSources {
   public static final int DEFAULT_ORDINAL = 100;
   public static final int DEFAULT_PROFILE_ORDINAL = DEFAULT_ORDINAL + 50;
 
-  public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES =
-      "META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + ".properties";
-  public static final String WEB_INF_MICROPROFILE_CONFIG_PROPERTIES =
-      "WEB-INF/classes/META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + ".properties";
-  public static final String META_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES =
-      "META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + "-*.properties";
-  public static final String WEB_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES =
-      "WEB-INF/classes/META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME + "-*.properties";
+  public static final String META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE =
+      "META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME;
+  public static final String WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE =
+      "WEB-INF/classes/META-INF/" + CorantConfig.MP_CONFIG_SOURCE_BASE_NAME;
+  public static final String MICROPROFILE_CONFIG_EXT = ".properties";
 
-  public static List<ConfigSource> get(ClassLoader classLoader) {
+  public static List<ConfigSource> get(ClassLoader classLoader, String profile) {
     List<ConfigSource> sources = new LinkedList<>();
-    Resources.tryFromClassPath(classLoader, META_INF_MICROPROFILE_CONFIG_PROPERTIES)
-        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
-    Resources.tryFromClassPath(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROPERTIES)
-        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_ORDINAL)).forEach(sources::add);
-    Resources.tryFromClassPath(classLoader, META_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES)
-        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_PROFILE_ORDINAL))
-        .forEach(sources::add);
-    Resources.tryFromClassPath(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROFILE_PROPERTIES)
-        .map(r -> new PropertiesConfigSource(r.getURL(), DEFAULT_PROFILE_ORDINAL))
-        .forEach(sources::add);
+    String suffix = MICROPROFILE_CONFIG_EXT;
+    final int ordinal;
+    if (isNotBlank(profile)) {
+      suffix = "-" + trim(profile) + MICROPROFILE_CONFIG_EXT;
+      ordinal = DEFAULT_PROFILE_ORDINAL;
+    } else {
+      ordinal = DEFAULT_ORDINAL;
+    }
+    try {
+      ClassPaths.from(classLoader, META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix, false)
+          .stream().map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+      ClassPaths.from(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix, false)
+          .stream().map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+    } catch (IOException e) {
+      // Noop
+    }
     return sources;
   }
 

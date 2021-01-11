@@ -226,18 +226,21 @@ public class CorantConfigResolver {
               extracted = extracted.substring(0, defaults.get().start());
               extracted =
                   defaultString(resolveValue(eval, extracted, provider, stacks), defaultValue);
+            } else if (extracted.endsWith(VAR_DEFAULT) && extracted.length() > 1) {
+              extracted =
+                  defaultString(resolveValue(eval, extracted, provider, stacks), Strings.EMPTY);
             }
           } else {
             extracted = resolveValue(eval, extracted, provider, stacks);
           }
         }
-        if (isNotBlank(extracted)) {
+        if (extracted != null) {
           return expandValue(eval, left(value, start.intValue()).concat(extracted)
               .concat(content.substring(end + VE_SUFFIX_LEN)), provider, stacks);
         } else {
-          throw new NoSuchElementException(
-              String.format("Can not expanded value, the extracted not found, the expanded path %s.",
-                  String.join(", ", stacks)));
+          throw new NoSuchElementException(String.format(
+              "Can not expanded value, the extracted not found, the expanded path %s.",
+              String.join(", ", stacks)));
         }
       }
     }

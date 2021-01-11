@@ -60,7 +60,11 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public ConfigValue getConfigValue(String propertyName) {
-    return configSources.get().getConfigValue(propertyName);
+    return getConfigValue(propertyName, null);
+  }
+
+  public ConfigValue getConfigValue(String propertyName, String defaultValue) {
+    return configSources.get().getConfigValue(propertyName, defaultValue);
   }
 
   public CorantConfigConversion getConversion() {

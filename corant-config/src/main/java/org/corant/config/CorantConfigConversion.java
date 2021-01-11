@@ -171,12 +171,6 @@ public class CorantConfigConversion implements Serializable {
             result = convertCollection(rawValue, argType, HashSet::new);
           } else if (Optional.class.isAssignableFrom(typeClass)) {
             result = Optional.ofNullable(convert(rawValue, argType));
-          } else if (OptionalInt.class.isAssignableFrom(typeClass)) {
-            result = OptionalInt.of(convertSingle(rawValue, Integer.class));
-          } else if (OptionalLong.class.isAssignableFrom(typeClass)) {
-            result = OptionalLong.of(convertSingle(rawValue, Long.class));
-          } else if (OptionalDouble.class.isAssignableFrom(typeClass)) {
-            result = OptionalDouble.of(convertSingle(rawValue, Double.class));
           } else if (Supplier.class.isAssignableFrom(typeClass)) {
             result = (Supplier<?>) () -> convert(rawValue, argType);
           } else if (Provider.class.isAssignableFrom(typeClass)) {
@@ -335,7 +329,9 @@ public class CorantConfigConversion implements Serializable {
       if (null != converter) {
         return forceCast(converter.convert(value));
       } else {
-        return forceCast(ImplicitConverters.of(propertyType).orElse(s -> toObject(s, propertyType))
+        return forceCast(ImplicitConverters.of(propertyType)
+            .orElse(forceCast(
+                OptionalsConverters.of(propertyType, this).orElse(s -> toObject(s, propertyType))))
             .convert(value));
       }
     }
@@ -347,11 +343,17 @@ public class CorantConfigConversion implements Serializable {
     if (forType == String.class || forType == Object.class) {
       converter = s -> s;
     }
+    if (forType.isArray()) {
+      converter = v -> convertArray(v, forType.getComponentType());
+    }
     if (null == converter) {
       converter = converters.get().get(wrap(forType));
     }
     if (null == converter) {
       converter = ImplicitConverters.of(forType).orElse(null);
+    }
+    if (null == converter) {
+      converter = OptionalsConverters.of(forType, this).orElse(null);
     }
     if (null == converter) {
       Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
@@ -505,6 +507,44 @@ public class CorantConfigConversion implements Serializable {
       } catch (NoSuchMethodException | SecurityException e) {
         return null;
       }
+    }
+  }
+
+  static class OptionalsConverters {
+
+    OptionalsConverters() {}
+
+    public static <T> Optional<Converter<T>> of(Class<T> type, CorantConfigConversion conversion) {
+      Converter<T> converter = null;
+      if (type.equals(OptionalInt.class)) {
+        converter = s -> {
+          Integer fs = conversion.convertSingle(s, Integer.class);
+          if (fs == null) {
+            return forceCast(OptionalInt.empty());
+          } else {
+            return forceCast(OptionalInt.of(fs));
+          }
+        };
+      } else if (type.equals(OptionalDouble.class)) {
+        converter = s -> {
+          Double fs = conversion.convertSingle(s, Double.class);
+          if (fs == null) {
+            return forceCast(OptionalDouble.empty());
+          } else {
+            return forceCast(OptionalDouble.of(fs));
+          }
+        };
+      } else if (type.equals(OptionalLong.class)) {
+        converter = s -> {
+          Long fs = conversion.convertSingle(s, Long.class);
+          if (fs == null) {
+            return forceCast(OptionalLong.empty());
+          } else {
+            return forceCast(OptionalLong.of(fs));
+          }
+        };
+      }
+      return converter == null ? Optional.empty() : Optional.of(converter);
     }
   }
 

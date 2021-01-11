@@ -31,6 +31,7 @@ import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativeConfigKey;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -71,7 +72,11 @@ public class ConfigProducer implements Serializable {
       }
     }
     final String useKey = key;
-    return config.getConvertedValue(useKey, injectionPoint.getType(), property.defaultValue());
+    if (injectionPoint.getType().equals(ConfigValue.class)) {
+      return config.unwrap(CorantConfig.class).getConfigValue(useKey, property.defaultValue());
+    } else {
+      return config.getConvertedValue(useKey, injectionPoint.getType(), property.defaultValue());
+    }
   }
 
   @Dependent

@@ -41,6 +41,14 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
 
   @Override
   public int getOrdinal() {
+    String configOrdinal = getValue(CONFIG_ORDINAL);
+    if (configOrdinal != null) {
+      try {
+        return Integer.parseInt(configOrdinal);
+      } catch (NumberFormatException ignored) {
+
+      }
+    }
     return SYSTEM_PROPERTIES_ORGINAL;
   }
 

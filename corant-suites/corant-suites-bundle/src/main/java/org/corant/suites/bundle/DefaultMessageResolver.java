@@ -76,13 +76,13 @@ public class DefaultMessageResolver implements MessageResolver {
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(useLocale, params);
     return messageBundle.getMessage(useLocale, codes, parameters,
-        l -> String.format("Can't find any message for %s", codes));
+        l -> String.format("Can't find any message for %s.", codes));
   }
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
     String unknow = ser == MessageSeverity.INF ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
     return messageBundle.getMessage(locale, unknow, new Object[] {code},
-        l -> String.format("Can't find any message for %s", code));
+        l -> String.format("Can't find any message for %s.", code));
   }
 
   @SuppressWarnings("rawtypes")

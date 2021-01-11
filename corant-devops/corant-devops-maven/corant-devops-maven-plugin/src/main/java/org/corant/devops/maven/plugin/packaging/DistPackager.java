@@ -95,7 +95,7 @@ public class DistPackager implements Packager {
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
-    log.info(String.format("(corant) building dist archive: %s", destPath));
+    log.info(String.format("(corant) building dist archive: %s.", destPath));
     try (FileOutputStream fos = new FileOutputStream(destPath.toFile());
         ArchiveOutputStream aos = packArchiveOutput(fos)) {
       // handle entries
@@ -252,7 +252,7 @@ public class DistPackager implements Packager {
     if (entry instanceof FileEntry) {
       file = ((FileEntry) entry).getFile();
     } else {
-      log.debug(String.format("(corant) create temp entry file for entry %s", entryName));
+      log.debug(String.format("(corant) create temp entry file for entry %s.", entryName));
       file = Files.createTempFile("corant-mojo-pack", entry.getName()).toFile();
       IOUtils.copy(entry.getInputStream(), new FileOutputStream(file));
       file.deleteOnExit();
@@ -260,7 +260,7 @@ public class DistPackager implements Packager {
     aos.putArchiveEntry(aos.createArchiveEntry(file, entryName));
     IOUtils.copy(new FileInputStream(file), aos);
     aos.closeArchiveEntry();
-    log.debug(String.format("(corant) packaged entry %s", entryName));
+    log.debug(String.format("(corant) packaged entry %s.", entryName));
   }
 
   private ArchiveOutputStream packArchiveOutput(OutputStream os) throws ArchiveException {

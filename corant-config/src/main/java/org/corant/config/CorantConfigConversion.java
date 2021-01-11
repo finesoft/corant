@@ -197,7 +197,7 @@ public class CorantConfigConversion implements Serializable {
         throw e;
       } catch (RuntimeException e) {
         throw new IllegalArgumentException(
-            String.format("Cannot convert config property value %s with type %s", rawValue, type),
+            String.format("Cannot convert config property value %s with type %s.", rawValue, type),
             e);
       }
     }
@@ -436,7 +436,7 @@ public class CorantConfigConversion implements Serializable {
       return Object.class;
     } else {
       throw new IllegalStateException(
-          String.format("Can not resolve parameterized type %s", ptype));
+          String.format("Can not resolve parameterized type %s.", ptype));
     }
   }
 
@@ -526,7 +526,16 @@ public class CorantConfigConversion implements Serializable {
     }
 
     static OrdinalConverter builtIn(Class<?> type) {
-      return new OrdinalConverter(type, s -> toObject(s, type), BUILT_IN_CONVERTER_ORDINAL);
+      return new OrdinalConverter(type, s -> {
+        if (s == null) {
+          throw new NullPointerException();
+        }
+        try {
+          return toObject(s, type);
+        } catch (Exception e) {
+          throw new IllegalArgumentException("Unable to convert value to type  for value " + s);
+        }
+      }, BUILT_IN_CONVERTER_ORDINAL);
     }
 
     @Override

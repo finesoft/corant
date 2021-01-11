@@ -117,7 +117,7 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
                     new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");
                 t.setStackTrace(thread.getStackTrace());
                 logger.log(Level.INFO, t,
-                    () -> String.format("Transaction %s is %s with active thread %s",
+                    () -> String.format("Transaction %s is %s with active thread %s.",
                         actUid.toString(), isCommit ? "committing" : "aborting", thread.getName()));
               } catch (Exception e) {
                 logger.log(Level.WARNING, e,

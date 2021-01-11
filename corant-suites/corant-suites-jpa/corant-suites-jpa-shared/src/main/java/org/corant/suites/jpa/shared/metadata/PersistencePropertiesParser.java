@@ -122,8 +122,8 @@ public class PersistencePropertiesParser {
         shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
             puimd.getPersistenceUnitName());
       } else {
-        logger
-            .warning(() -> String.format("Can not find any managed classes for persistence unit %s",
+        logger.warning(
+            () -> String.format("Can not find any managed classes for persistence unit %s.",
                 puimd.getPersistenceUnitName()));
       }
     }

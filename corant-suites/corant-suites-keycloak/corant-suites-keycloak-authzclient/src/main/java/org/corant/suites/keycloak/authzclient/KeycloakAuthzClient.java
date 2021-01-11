@@ -119,7 +119,8 @@ public class KeycloakAuthzClient {
       serverConfiguration = authzClient.getServerConfiguration();
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
-      throw new CorantRuntimeException(e, "Can't find keycloak.json from %s", keycloakJsonLocation);
+      throw new CorantRuntimeException(e, "Can't find keycloak.json from %s.",
+          keycloakJsonLocation);
     }
   }
 }

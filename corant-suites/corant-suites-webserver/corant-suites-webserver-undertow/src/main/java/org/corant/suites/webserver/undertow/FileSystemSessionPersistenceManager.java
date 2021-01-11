@@ -78,7 +78,7 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
         UndertowServletLogger.ROOT_LOGGER.failedToPersistSessions(e);
       }
     } else {
-      logger.info(() -> String.format("Can not find persistence session content from file %s",
+      logger.info(() -> String.format("Can not find persistence session content from file %s.",
           file.getAbsolutePath()));
     }
     return null;
@@ -117,12 +117,12 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
         UndertowServletLogger.ROOT_LOGGER.failedToPersistSessions(e);
       }
       if (created) {
-        logger.info(() -> String.format("Created session persistence file %s", path));
+        logger.info(() -> String.format("Created session persistence file %s.", path));
       } else {
-        logger.info(() -> String.format("Can not create session persistence file %s", path));
+        logger.info(() -> String.format("Can not create session persistence file %s.", path));
       }
     }
-    logger.info(() -> String.format("Session persistence file is %s", path));
+    logger.info(() -> String.format("Session persistence file is %s.", path));
     return file;
   }
 

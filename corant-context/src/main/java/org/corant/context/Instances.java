@@ -99,7 +99,7 @@ public class Instances {
     if (inst.isResolvable()) {
       return inst.get();
     }
-    throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+    throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
   }
 
   /**
@@ -117,7 +117,7 @@ public class Instances {
     if (inst.isResolvable()) {
       useConsumer.accept(inst.get());
     } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
   }
 
@@ -148,7 +148,7 @@ public class Instances {
         return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
       }
     } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
   }
 
@@ -178,7 +178,7 @@ public class Instances {
     if (inst.isResolvable()) {
       return useFunction.apply(inst.get());
     } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s", instanceClass);
+      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
   }
 

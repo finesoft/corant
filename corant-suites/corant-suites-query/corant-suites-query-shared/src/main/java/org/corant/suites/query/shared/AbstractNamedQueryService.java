@@ -128,7 +128,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected void log(String name, Object param, String... script) {
     logger.fine(() -> String.format(
-        "%n[QueryService name]: %s; %n[QueryService parameters]: %s; %n[QueryService script]: %s",
+        "%n[QueryService name]: %s; %n[QueryService parameters]: %s; %n[QueryService script]: %s.",
         name,
         getQuerierResolver().getQueryResolver().getObjectMapper().toJsonString(param, false, true),
         String.join(";\n", script)));
@@ -136,7 +136,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected void log(String name, Object[] param, String... script) {
     logger.fine(() -> String.format(
-        "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s",
+        "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s.",
         name, String.join(",", asStrings(param)), String.join(";\n", script)));
   }
 

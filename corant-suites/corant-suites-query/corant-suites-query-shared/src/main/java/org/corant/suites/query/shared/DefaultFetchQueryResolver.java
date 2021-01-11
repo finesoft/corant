@@ -159,7 +159,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
         BeanUtils.setProperty(result, String.join(Names.NAME_SPACE_SEPARATORS, injectProNamePath),
             fetchedResult);
       } catch (IllegalAccessException | InvocationTargetException e) {
-        throw new QueryRuntimeException(e, "Inject fetched result occurred error %s",
+        throw new QueryRuntimeException(e, "Inject fetched result occurred error %s.",
             e.getMessage());
       }
     }

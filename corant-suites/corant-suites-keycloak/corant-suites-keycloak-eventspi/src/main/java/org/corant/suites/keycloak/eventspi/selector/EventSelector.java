@@ -58,7 +58,7 @@ public class EventSelector implements Predicate<Event> {
       sessionId = scope.get("event-sessionId");
       ipAddress = scope.get("event-ipAddress");
     }
-    logger.infof("The event selector is %s", this);
+    logger.infof("The event selector is %s.", this);
   }
 
   @Override

@@ -143,7 +143,7 @@ public class FlywayMigrator {
           .anyMatch(r -> r.getLocation().toLowerCase(Locale.ROOT).endsWith(".sql"));
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can't find any migrated data from location %s", location));
+          () -> String.format("Can't find any migrated data from location %s.", location));
       return false;
     }
   }
@@ -170,8 +170,8 @@ public class FlywayMigrator {
 
   @PostConstruct
   protected void onPostConstruct() {
-    globalFlywayConfig = defaultObject(ConfigInstances.resolveSingle(FlywayConfig.class),
-        FlywayConfig.EMPTY);
+    globalFlywayConfig =
+        defaultObject(ConfigInstances.resolveSingle(FlywayConfig.class), FlywayConfig.EMPTY);
   }
 
   protected DefaultFlywayConfigProvider resolveConfigProvider(String name) {
@@ -184,8 +184,9 @@ public class FlywayMigrator {
         throw new CorantRuntimeException(ex);
       }
     } else if (dataSourceService.isResolvable()) {
-      return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().getManaged(name));
+      return DefaultFlywayConfigProvider.of(getLocation(name),
+          dataSourceService.get().getManaged(name));
     }
-    throw new CorantRuntimeException("Can not found any data source named %s", name);
+    throw new CorantRuntimeException("Can not found any data source named %s.", name);
   }
 }

@@ -130,7 +130,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   @SuppressWarnings("rawtypes")
   private QueryService resolveQueryService() {
     return shouldNotNull(NamedQueryServiceManager.resolveQueryService(queryType, queryQualifier),
-        "Can't find any query service to execute declarative query %s %s %s", proxyType, queryType,
+        "Can't find any query service to execute declarative query %s %s %s.", proxyType, queryType,
         queryQualifier);
   }
 

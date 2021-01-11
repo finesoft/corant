@@ -55,7 +55,7 @@ public class ThreadSafeTest {
       int s = list11.stream().reduce(Integer::sum).get();
       int a = list1.stream().reduce(Integer::sum).get();
       if (s != 6) {
-        throw new CorantRuntimeException("error list1 %s %s", s, a);
+        throw new CorantRuntimeException("error list1 %s %s.", s, a);
       }
       if (i % 100000 == 0) {
         long t = sw.stop().getLastTaskInfo().getTimeMillis();
@@ -75,7 +75,7 @@ public class ThreadSafeTest {
       int s = list22.stream().reduce(Integer::sum).get();
       int a = list2.stream().reduce(Integer::sum).get();
       if (s != 12) {
-        throw new CorantRuntimeException("error list2 %s %s", s, a);
+        throw new CorantRuntimeException("error list2 %s %s.", s, a);
       }
       if (i % 100000 == 0) {
         long t = sw.stop().getLastTaskInfo().getTimeMillis();

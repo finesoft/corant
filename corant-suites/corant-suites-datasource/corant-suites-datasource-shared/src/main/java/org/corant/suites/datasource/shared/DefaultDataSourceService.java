@@ -41,7 +41,7 @@ public class DefaultDataSourceService implements DataSourceService {
       }
     } else {
       return findNamed(DataSource.class, name).orElseThrow(
-          () -> new CorantRuntimeException("Can not find any data source named %s", name));
+          () -> new CorantRuntimeException("Can not find any data source named %s.", name));
     }
   }
 

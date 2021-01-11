@@ -57,7 +57,7 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
         resourcePathPattern = Pattern.compile(resourcePathRegex, Pattern.CASE_INSENSITIVE);
       }
     }
-    logger.infof("The admin event selector is %s", this);
+    logger.infof("The admin event selector is %s.", this);
   }
 
   @Override

@@ -236,7 +236,7 @@ public class CorantConfigResolver {
               .concat(content.substring(end + VE_SUFFIX_LEN)), provider, stacks);
         } else {
           throw new NoSuchElementException(
-              String.format("Can not expanded value, the extracted not found, the expanded path %s",
+              String.format("Can not expanded value, the extracted not found, the expanded path %s.",
                   String.join(", ", stacks)));
         }
       }
@@ -248,7 +248,7 @@ public class CorantConfigResolver {
       Collection<String> stacks) {
     if (stacks.size() > EXPANDED_LIMITED) {
       throw new IllegalArgumentException(String.format(
-          "Can not expanded value, lookups exceeds limit(max: %d), the expanded path %s",
+          "Can not expanded value, lookups exceeds limit(max: %d), the expanded path %s.",
           EXPANDED_LIMITED, String.join(", ", stacks)));
     }
     stacks.add(key);

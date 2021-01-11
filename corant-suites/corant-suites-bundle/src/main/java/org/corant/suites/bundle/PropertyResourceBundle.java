@@ -79,12 +79,12 @@ public class PropertyResourceBundle extends ResourceBundle {
           map.putIfAbsent(fo.getURL().getPath(), new PropertyResourceBundle(fo));
         } catch (IOException e) {
           logger.log(Level.WARNING, e, () -> String
-              .format("Can not load property resource bundle %s", fo.getURL().getPath()));
+              .format("Can not load property resource bundle %s.", fo.getURL().getPath()));
         }
       });
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not load property resource bundles from paths %s", path));
+          () -> String.format("Can not load property resource bundles from paths %s.", path));
     }
     return map;
   }

@@ -61,12 +61,12 @@ public class PropertyMessageBundle implements MessageBundle {
       Locale useLocale = defaultObject(locale, Locale::getDefault);
       Map<String, MessageFormat> mfMap = holder.get(useLocale);
       if (mfMap == null) {
-        throw new NoSuchBundleException("Can't find message for %s with locale %s", key.toString(),
+        throw new NoSuchBundleException("Can't find message for %s with locale %s.", key.toString(),
             useLocale.toString());
       } else {
         MessageFormat mf = mfMap.get(key);
         if (mf == null) {
-          throw new NoSuchBundleException("Can't find message for %s with locale %s",
+          throw new NoSuchBundleException("Can't find message for %s with locale %s.",
               key.toString(), useLocale.toString());
         } else {
           return mf.format(args);
@@ -114,7 +114,7 @@ public class PropertyMessageBundle implements MessageBundle {
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
-                logger.fine(() -> String.format("Find message resource from %s", s));
+                logger.fine(() -> String.format("Find message resource from %s.", s));
                 Map<String, MessageFormat> localeMap = res.dump().entrySet().stream()
                     .collect(Collectors.toMap(Entry::getKey, v -> new MessageFormat(v.getValue())));
                 holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())

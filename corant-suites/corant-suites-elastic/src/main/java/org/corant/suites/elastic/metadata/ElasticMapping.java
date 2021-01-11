@@ -150,7 +150,7 @@ public class ElasticMapping implements Iterable<ElasticMapping> {
     Map<String, Object> convertedMap = ElasticObjectMapper.toMap(doc);
     if (!isEmpty(convertedMap) && getJoinFiledName() != null) {
       shouldBeFalse(convertedMap.containsKey(getJoinFiledName()),
-          "Join field name and property name conflicts %s", getJoinFiledName());
+          "Join field name and property name conflicts %s.", getJoinFiledName());
       if (isRoot()) {
         convertedMap.put(getJoinFiledName(), mapOf("name", getName()));
       } else {

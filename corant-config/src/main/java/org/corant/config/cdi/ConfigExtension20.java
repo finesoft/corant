@@ -92,16 +92,16 @@ public class ConfigExtension20 implements Extension {
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperty.class)) {
       logger.finer(
-          () -> String.format("Find config property inject point %s", pip.getInjectionPoint()));
+          () -> String.format("Find config property inject point %s.", pip.getInjectionPoint()));
       configPropertyInjectionPoints.add(pip.getInjectionPoint());
     }
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperties.class)) {
       logger.finer(
-          () -> String.format("Find config properties inject point %s", pip.getInjectionPoint()));
+          () -> String.format("Find config properties inject point %s.", pip.getInjectionPoint()));
       configPropertiesInjectionPoints.add(pip.getInjectionPoint());
     }
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(DeclarativeConfigKey.class)) {
-      logger.finer(() -> String.format("Find declarative config key inject point %s",
+      logger.finer(() -> String.format("Find declarative config key inject point %s.",
           pip.getInjectionPoint()));
       declarativeConfigInjectionPoints.add(pip.getInjectionPoint());
     }

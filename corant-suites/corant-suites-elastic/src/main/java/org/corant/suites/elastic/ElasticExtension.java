@@ -105,8 +105,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    Map<String, ElasticConfig> configs =
-        ConfigInstances.resolveMulti(ElasticConfig.class);
+    Map<String, ElasticConfig> configs = ConfigInstances.resolveMulti(ElasticConfig.class);
     configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
@@ -169,7 +168,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
             Integer.parseInt(hostPort[1])));
         tc.connectedNodes();
       } catch (NumberFormatException | UnknownHostException e) {
-        throw new CorantRuntimeException(e, "Can not build transport client from %s:%s",
+        throw new CorantRuntimeException(e, "Can not build transport client from %s:%s.",
             (Object[]) hostPort);
       }
     }

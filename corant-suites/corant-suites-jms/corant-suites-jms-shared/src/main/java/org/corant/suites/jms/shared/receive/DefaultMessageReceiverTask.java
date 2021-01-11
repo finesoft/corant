@@ -72,14 +72,14 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     this.breakedInterval = breakedInterval;
     tryThreshold = metaData.getTryThreshold();
-    logger.log(Level.FINE, () -> String.format("Create message receive task for %s", metaData));
+    logger.log(Level.FINE, () -> String.format("Create message receive task for %s.", metaData));
   }
 
   public boolean checkCancelled() {
     if (cancellation.get()) {
       resetMonitors();
       release(true);
-      logger.log(Level.INFO, () -> String.format("Cancelled message receiving task, %s", meta));
+      logger.log(Level.INFO, () -> String.format("Cancelled message receiving task, %s.", meta));
       return true;
     }
     return false;
@@ -145,14 +145,14 @@ public class DefaultMessageReceiverTask extends AbstractMessageReceiverTask {
       release(jmsFailureCounter.compareAndSet(jmsFailureThreshold, 0));// FIXME
     } catch (Exception e) {
       logger.log(Level.SEVERE, e,
-          () -> String.format("The execution status occurred error, %s", meta));
+          () -> String.format("The execution status occurred error, %s.", meta));
     }
   }
 
   protected boolean preRun() {
     if (!CDIs.isEnabled()) {
       logger.log(Level.SEVERE,
-          () -> String.format("The executeion can't run because the CDI not enabled, %s", meta));
+          () -> String.format("The executeion can't run because the CDI not enabled, %s.", meta));
       return false;
     }
     if (state == STATE_BRK) {

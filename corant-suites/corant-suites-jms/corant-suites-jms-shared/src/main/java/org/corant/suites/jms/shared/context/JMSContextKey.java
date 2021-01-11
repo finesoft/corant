@@ -137,7 +137,7 @@ public class JMSContextKey implements Serializable {
       }
       return connectionFactory =
           findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
-              () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
+              () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
                   connectionFactoryId));
     }
   }

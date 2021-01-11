@@ -85,7 +85,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
       Aggregate entity = e.getSource();
       boolean effectImmediately = e.isEffectImmediately();
       handle(entity, e.getAction(), effectImmediately);
-      logger.fine(() -> String.format("Handle %s %s %s", entity.getClass().getName(),
+      logger.fine(() -> String.format("Handle %s %s %s.", entity.getClass().getName(),
           e.getAction().name(), entity.getId()));
     }
   }

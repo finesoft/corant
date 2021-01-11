@@ -167,12 +167,12 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
 
   protected ConnectionFactory createConnectionFactory(String connectionFactoryId) {
     return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
-        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s",
+        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
             connectionFactoryId));
   }
 
   protected synchronized void execute() {
-    logger.log(Level.FINE, () -> String.format("Begin receiving messages, %s", meta));
+    logger.log(Level.FINE, () -> String.format("Begin receiving messages, %s.", meta));
     Throwable throwable = null;
     try {
       if (!cancellation.get() && initialize()) {
@@ -182,7 +182,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
           Message message = consume();
           postConsume(message);
           if (message == null) {
-            logger.log(Level.FINE, () -> String.format("No message for now, %s", meta));
+            logger.log(Level.FINE, () -> String.format("No message for now, %s.", meta));
             break;
           }
         }
@@ -192,7 +192,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
       onException(e);
     } finally {
       lastExecutionSuccessfully = throwable == null;
-      logger.log(Level.FINE, () -> String.format("End receiving messages, %s", meta));
+      logger.log(Level.FINE, () -> String.format("End receiving messages, %s.", meta));
     }
   }
 
@@ -284,21 +284,21 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
       if (xa) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the transaction, %s", meta));
+          logger.log(Level.SEVERE, () -> String.format("Rollback the transaction, %s.", meta));
         }
       } else if (session != null) {
         if (meta.getAcknowledge() == Session.SESSION_TRANSACTED) {
           session.rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the session, %s", meta));
+          logger.log(Level.SEVERE, () -> String.format("Rollback the session, %s.", meta));
         } else if (meta.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE) {
           session.recover();
-          logger.log(Level.SEVERE, () -> String.format("Recover the session, %s", meta));
+          logger.log(Level.SEVERE, () -> String.format("Recover the session, %s.", meta));
         }
       }
     } catch (Exception te) {
       e.addSuppressed(te);
     } finally {
-      logger.log(Level.SEVERE, e, () -> String.format("Execution occurred error!, %s", meta));
+      logger.log(Level.SEVERE, e, () -> String.format("Execution occurred error!, %s.", meta));
     }
   }
 

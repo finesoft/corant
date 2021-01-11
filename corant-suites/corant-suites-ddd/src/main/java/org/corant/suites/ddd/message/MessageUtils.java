@@ -44,7 +44,7 @@ public class MessageUtils {
       }
       final MergableMessage order = oldMgbMsg;
       if (order == null || !((MergableMessage) newMsg).canMerge(order)) {
-        logger.fine(() -> String.format("Enqueue message %s", newMsg.getMetadata()));
+        logger.fine(() -> String.format("Enqueue message %s.", newMsg.getMetadata()));
         queue.add(newMsg);
       } else {
         logger.fine(() -> String.format("Remove message %s from queue.", order.getMetadata()));
@@ -56,7 +56,7 @@ public class MessageUtils {
         }
       }
     } else if (newMsg != null) {
-      logger.fine(() -> String.format("Enqueue message %s", newMsg.getMetadata()));
+      logger.fine(() -> String.format("Enqueue message %s.", newMsg.getMetadata()));
       queue.add(newMsg);
     }
   }

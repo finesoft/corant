@@ -122,7 +122,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       return list;
     } else {
       // FIXME Resolve TemplateHashModel
-      throw new QueryRuntimeException("Unknow arguement,the class is %s",
+      throw new QueryRuntimeException("Unknow arguement,the class is %s.",
           arg == null ? "null" : arg.getClass());
     }
   }

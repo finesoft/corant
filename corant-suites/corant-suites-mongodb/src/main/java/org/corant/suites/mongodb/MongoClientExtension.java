@@ -109,13 +109,13 @@ public class MongoClientExtension implements Extension {
       }
     } else {
       return findNamed(MongoClient.class, name).orElseThrow(
-          () -> new CorantRuntimeException("Can not find any mongo client named %s", name));
+          () -> new CorantRuntimeException("Can not find any mongo client named %s.", name));
     }
   }
 
   public static MongoDatabase getDatabase(String namespace) {
     return findNamed(MongoDatabase.class, namespace).orElseThrow(
-        () -> new CorantRuntimeException("Can not find any mongo database named %s", namespace));
+        () -> new CorantRuntimeException("Can not find any mongo database named %s.", namespace));
   }
 
   public static GridFSBucket getGridFSBucket(String namespace) {
@@ -203,7 +203,7 @@ public class MongoClientExtension implements Extension {
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {
     MongoClient mc =
         find(MongoClient.class, clientConfigManager.getQualifiers(cfg.getClientName())).orElseThrow(
-            () -> new CorantRuntimeException("Can not find mongo data base with client name %s",
+            () -> new CorantRuntimeException("Can not find mongo data base with client name %s.",
                 cfg.getClientName()));
     return mc.getDatabase(cfg.getDatabaseName());
   }

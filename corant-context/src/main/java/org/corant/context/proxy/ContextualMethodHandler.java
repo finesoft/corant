@@ -165,7 +165,7 @@ public class ContextualMethodHandler {
           if (sizeOf(beans) > 1) {
             resolvedBean =
                 beans.stream().filter(b -> b.getBeanClass().equals(clazz)).findFirst().orElseThrow(
-                    () -> new CorantRuntimeException("Can't resolve bean class %s", clazz));
+                    () -> new CorantRuntimeException("Can't resolve bean class %s.", clazz));
           } else {
             resolvedBean = bm.resolve(bm.getBeans(clazz, qualifiers));
           }

@@ -137,7 +137,7 @@ public class JPAConfig {
           });
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Parse persistence meta data from %s error %s", DFLT_PU_XML_LOCATION,
+          () -> String.format("Parse persistence meta data from %s error %s.", DFLT_PU_XML_LOCATION,
               e.getMessage()));
     }
     return cfgs;

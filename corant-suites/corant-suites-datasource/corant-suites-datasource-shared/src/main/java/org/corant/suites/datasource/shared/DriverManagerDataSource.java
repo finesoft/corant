@@ -97,11 +97,11 @@ public class DriverManagerDataSource implements DataSource {
             try {
               driverClass = threadContextClassLoader.loadClass(driverClassName);
               LOGGER.fine(
-                  () -> String.format("Driver class %s found in Thread context class loader %s",
+                  () -> String.format("Driver class %s found in Thread context class loader %s.",
                       driverClassName, threadContextClassLoader));
             } catch (ClassNotFoundException e) {
               LOGGER.fine(() -> String.format(
-                  "Driver class %s not found in Thread context class loader %s, trying classloader %s",
+                  "Driver class %s not found in Thread context class loader %s, trying classloader %s.",
                   driverClassName, threadContextClassLoader, this.getClass().getClassLoader()));
             }
           }
@@ -109,12 +109,12 @@ public class DriverManagerDataSource implements DataSource {
           if (driverClass == null) {
             driverClass = this.getClass().getClassLoader().loadClass(driverClassName);
             LOGGER.fine(() -> String.format(
-                "Driver class %s found in the DriverManagerDataSource class classloader %s",
+                "Driver class %s found in the DriverManagerDataSource class classloader %s.",
                 driverClassName, this.getClass().getClassLoader()));
           }
         } catch (ClassNotFoundException e) {
           LOGGER.fine(() -> String.format(
-              "Failed to load driver class %s from DriverManagerDataSource class classloader %s",
+              "Failed to load driver class %s from DriverManagerDataSource class classloader %s.",
               driverClassName, this.getClass().getClassLoader()));
         }
 
@@ -135,14 +135,14 @@ public class DriverManagerDataSource implements DataSource {
     try {
       if (driver == null) {
         driver = DriverManager.getDriver(jdbcUrl);
-        LOGGER.fine(() -> String.format("Loaded driver with class name %s for jdbcUrl=%s",
+        LOGGER.fine(() -> String.format("Loaded driver with class name %s for jdbcUrl=%s.",
             driver.getClass().getName(), sanitizedUrl));
       } else if (!driver.acceptsURL(jdbcUrl)) {
-        throw new CorantRuntimeException("Driver %s claims to not accept jdbcUrl, %s",
+        throw new CorantRuntimeException("Driver %s claims to not accept jdbcUrl, %s.",
             driverClassName, sanitizedUrl);
       }
     } catch (SQLException e) {
-      throw new CorantRuntimeException(e, "Failed to get driver instance for jdbcUrl=%s",
+      throw new CorantRuntimeException(e, "Failed to get driver instance for jdbcUrl=%s.",
           sanitizedUrl);
     }
   }

@@ -78,7 +78,7 @@ public class JarPackager implements Packager {
         destPath.toUri().getPath()));
     final Path parentPath = Objects.requireNonNull(destPath.getParent());
     Files.createDirectories(parentPath);
-    log.info(String.format("(corant) building jar: %s", destPath));
+    log.info(String.format("(corant) building jar: %s.", destPath));
     try (JarArchiveOutputStream jos =
         new JarArchiveOutputStream(new FileOutputStream(destPath.toFile()))) {
       // handle entries
@@ -89,7 +89,7 @@ public class JarPackager implements Packager {
           jos.putArchiveEntry(jarFileEntry);
           IOUtils.copy(entry.getInputStream(), jos);
           jos.closeArchiveEntry();
-          log.debug(String.format("(corant) packaged entry %s", jarFileEntry.getName()));
+          log.debug(String.format("(corant) packaged entry %s.", jarFileEntry.getName()));
         }
       }
       // handle child archives
@@ -103,7 +103,7 @@ public class JarPackager implements Packager {
             jos.putArchiveEntry(childJarFileEntry);
             IOUtils.copy(childEntry.getInputStream(), jos);
             jos.closeArchiveEntry();
-            log.debug(String.format("(corant) packaged entry %s", childJarFileEntry.getName()));
+            log.debug(String.format("(corant) packaged entry %s.", childJarFileEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());

@@ -303,7 +303,7 @@ public class SqlQueryTemplate {
       return null;
     } else {
       shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, () -> new QueryRuntimeException(
-          "The size %s of query result set must not greater than one and the result record must have only one field. SQL: %s",
+          "The size %s of query result set must not greater than one and the result record must have only one field. SQL: %s.",
           result.size(), sql));
       return toObject(result.get(0).entrySet().iterator().next().getValue(), clazz);
     }

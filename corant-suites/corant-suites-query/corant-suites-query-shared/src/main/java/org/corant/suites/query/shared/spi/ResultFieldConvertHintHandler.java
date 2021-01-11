@@ -194,7 +194,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
           }
         } catch (Exception e) {
           logger.log(Level.WARNING, e,
-              () -> String.format("Hanle result conversion error on property %s with value %s",
+              () -> String.format("Hanle result conversion error on property %s with value %s.",
                   String.join(".", keyPath), orginalVal));
         }
       }

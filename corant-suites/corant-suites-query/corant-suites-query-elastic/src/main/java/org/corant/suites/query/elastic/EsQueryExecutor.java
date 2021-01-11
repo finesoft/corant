@@ -62,7 +62,7 @@ public interface EsQueryExecutor {
     try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
       return SearchSourceBuilder.fromXContent(parser);
     } catch (IOException e) {
-      throw new QueryRuntimeException(e, "Can't build SearchSourceBuilder from %s", script);
+      throw new QueryRuntimeException(e, "Can't build SearchSourceBuilder from %s.", script);
     }
   }
 
@@ -99,6 +99,9 @@ public interface EsQueryExecutor {
       throws Exception {
     return execute(buildSearchRequest(script, properties, indexName));
   }
+
+  Stream<Map<String, Object>> scrolledSearch(String indexName, String script,
+      TimeValue scrollKeepAlive, int batchSize) throws Exception;
 
   default Map<String, Object> search(String indexName, String script,
       Map<String, String> properties) throws Exception {
@@ -144,8 +147,5 @@ public interface EsQueryExecutor {
     }
     return Pair.of(total, list);
   }
-
-  Stream<Map<String, Object>> scrolledSearch(String indexName, String script,
-      TimeValue scrollKeepAlive, int batchSize) throws Exception;
 
 }

@@ -121,7 +121,7 @@ public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
     } else if (driverClass.getName().contains("com.mysql")) {
       return new DomainMySqlDriver();
     } else {
-      throw new NotSupportedException("Can't support domain jdbc driver for %s", driverClass);
+      throw new NotSupportedException("Can't support domain jdbc driver for %s.", driverClass);
     }
   }
 

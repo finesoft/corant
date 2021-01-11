@@ -169,7 +169,7 @@ public class PersistenceXmlParser {
     } else if (value.equalsIgnoreCase("RESOURCE_LOCAL")) {
       return PersistenceUnitTransactionType.RESOURCE_LOCAL;
     } else {
-      throw new CorantRuntimeException("Unknown persistence unit transaction type : %s", value);
+      throw new CorantRuntimeException("Unknown persistence unit transaction type : %s.", value);
     }
   }
 

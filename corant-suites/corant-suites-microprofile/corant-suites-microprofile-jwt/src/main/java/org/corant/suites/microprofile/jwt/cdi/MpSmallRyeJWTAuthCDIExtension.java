@@ -19,8 +19,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.suites.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
 import org.corant.suites.microprofile.jwt.jaxrs.MpJWTAuthJaxRsFeature;
+import org.corant.suites.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
@@ -61,11 +61,11 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
   void addAnnotatedType(BeforeBeanDiscovery event, BeanManager beanManager, Class<?> type) {
     final String id = "SmallRye" + type.getSimpleName();
     event.addAnnotatedType(beanManager.createAnnotatedType(type), id);
-    logger.debugf("Added type: %s", type.getName());
+    logger.debugf("Added type: %s.", type.getName());
   }
 
   void beforeBeanDiscovery(@Observes BeforeBeanDiscovery event, BeanManager beanManager) {
-    logger.debugf("beanManager = %s", beanManager);
+    logger.debugf("beanManager = %s.", beanManager);
 
     // TODO: Do not add CDI beans unless @LoginConfig (or other trigger) is configured
     addAnnotatedType(event, beanManager, ClaimValueProducer.class);

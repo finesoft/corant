@@ -73,7 +73,7 @@ public class KeycloakJMSSender {
       TextMessage textMessage = ctx.createTextMessage(text);
       textMessage.setStringProperty(MESSAGE_TYPE, KEYCLOAK_EVENT);
       jp.send(destination, textMessage);
-      logger.debugf("Sent keycloak event %s", text);
+      logger.debugf("Sent keycloak event %s.", text);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -90,7 +90,7 @@ public class KeycloakJMSSender {
             connectionFactory = (ConnectionFactory) ctx.lookup(cf);
             destination = (Destination) ctx.lookup(dt);
             initialized = true;
-            logger.infof("Initialize keycloak event message sender %s : %s", cf, dt);
+            logger.infof("Initialize keycloak event message sender %s : %s.", cf, dt);
           } catch (NamingException e) {
             throw new RuntimeException("JMS infrastructure lookup failed: " + e.getMessage(), e);
           }

@@ -66,9 +66,12 @@ public class CorantConfigResolverTest extends TestCase {
   public void test() {
     // System.setProperty("vehicle.name", "bingo");
     Config config = ConfigProvider.getConfig();
+    // config.getConverter(OptionalInt.class).map(converter -> converter.convert(null))
+    // .orElseThrow(NoSuchElementException::new);
     // for (String name : config.getPropertyNames()) {
     // System.out.println(name + "\t" + config.getValue(name, String.class));
     // }
+    System.out.println(config.getValue("backslash.comma.string", String.class));
     System.out.println(config.getValue("server.url", String.class));
     System.out.println(config.getValue("vehicle.name", String.class));
     System.out.println(String.join(";", config.getValue("myPets", String[].class)));

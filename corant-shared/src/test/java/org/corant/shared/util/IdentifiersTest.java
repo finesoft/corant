@@ -81,16 +81,16 @@ public class IdentifiersTest extends TestCase {
         tmp.computeIfAbsent(time, k -> new ArrayList<>()).add(seq);
         timestamps.add(time);
         System.out.println(
-            String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s", a, dcid, woid, time, seq));
+            String.format("%s\tDC_ID:%s\tWO_ID:%s\tTIME:%s\tSEQ:%s.", a, dcid, woid, time, seq));
       }
     }
     System.out.println("--------------------------------------------------");
     tmp.forEach((k, v) -> {
       v.stream().sorted()
-          .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s", k, seq)));
+          .forEach(seq -> System.out.println(String.format("TIME:%s\tSEQ:%s.", k, seq)));
     });
 
-    timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s", t)));
+    timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s.", t)));
     es.shutdown();
     assertEquals(set.size(), size);
     System.out.println("FINISHED: " + set.size());

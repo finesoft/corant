@@ -61,7 +61,7 @@ public class DomainDataSourceAccess extends AbstractDomainJDBCAccess {
     } else if (database.equalsIgnoreCase("mysql")) {
       return new DomainMySqlDriver();
     } else {
-      throw new NotSupportedException("Can't support domain jdbc driver for %s", database);
+      throw new NotSupportedException("Can't support domain jdbc driver for %s.", database);
     }
   }
 

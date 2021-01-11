@@ -53,7 +53,7 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
             s -> resolveApply(JMSContextProducer.class, b -> b.create(s.getKey(), s.getValue())));
         Message message = resolveMessage(jmsc, annotatedPayload, send.getSerialization());
         super.send(jmsc, message, send.getDestination(), send.isMulticast());
-        logger.fine(() -> String.format("Send message %s to %s %s", payloadClass,
+        logger.fine(() -> String.format("Send message %s to %s %s.", payloadClass,
             send.getConnectionFactoryId(), send.getDestination()));
       }
     }

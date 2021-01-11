@@ -50,7 +50,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
         if (throwException) {
           throw new ConversionException(e);
         } else {
-          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(t)));
+          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
         }
       }
       return defaultObject(result, defaultValue);
@@ -79,7 +79,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
     } else if (value.getClass().equals(Integer.TYPE)) {
       return targetClass.getEnumConstants()[(int) value];
     } else if (value instanceof Integer) {
-      return targetClass.getEnumConstants()[((Integer) value)];
+      return targetClass.getEnumConstants()[(Integer) value];
     } else {
       String name = null;
       if (value instanceof Map) {
@@ -97,7 +97,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
           }
         }
       }
-      throw new ConversionException("Can not convert %s -> %s", value.getClass(), targetClass);
+      throw new ConversionException("Can not convert %s -> %s.", value.getClass(), targetClass);
     }
   }
 }

@@ -88,7 +88,7 @@ public class Conversion {
         return stringConverter.iterable(transform(value, Objects::asString), hints);
       }
     }
-    throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,
+    throw new ConversionException("Can not find converter for type pair s% -> %s.", sourceClass,
         targetClass);
   }
 
@@ -134,7 +134,7 @@ public class Conversion {
             tryStringConverter = false;
           }
         }
-        return (T) shouldNotNull(converter, "Can not find converter for type pair s% -> %s",
+        return (T) shouldNotNull(converter, "Can not find converter for type pair s% -> %s.",
             sourceClass, targetClass).apply(tryStringConverter ? next.toString() : next, hints);
       }
 
@@ -212,7 +212,7 @@ public class Conversion {
         return stringConverter.apply(value.toString(), hints);
       }
     }
-    throw new ConversionException("Can not find converter for type pair s% -> %s", sourceClass,
+    throw new ConversionException("Can not find converter for type pair s% -> %s.", sourceClass,
         targetClass);
   }
 

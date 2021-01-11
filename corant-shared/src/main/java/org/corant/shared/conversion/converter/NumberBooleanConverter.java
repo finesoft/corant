@@ -35,7 +35,8 @@ public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
     } else if (v == 0) {
       return Boolean.FALSE;
     } else {
-      throw new ConversionException("Can not convert for type pair %s - > %s", "Number", "Boolean");
+      throw new ConversionException("Can not convert for type pair %s - > %s.", "Number",
+          "Boolean");
     }
   }
 

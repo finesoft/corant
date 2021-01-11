@@ -89,11 +89,12 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
         logger.fine(() -> String.format("Load config source from designated locations %s",
             String.join(",", locations)));
         list.addAll(ConfigSourceLoader.load(APPLICATION_ORDINAL, filter, locations));
-      } else {
-        logger.fine(() -> String.format("Load config source from class paths %s",
-            String.join(",", classPaths)));
-        list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
       }
+      // else {
+      logger.fine(() -> String.format("Load config source from class paths %s",
+          String.join(",", classPaths)));
+      list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
+      // }
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

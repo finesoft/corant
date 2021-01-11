@@ -59,7 +59,7 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
         if (throwException) {
           throw new ConversionException(e);
         } else {
-          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(t)));
+          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
         }
       }
       return defaultObject(result, defaultValue);

@@ -239,7 +239,8 @@ public class Resources {
     try {
       return from(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find resource from path %s", path));
+      logger.log(Level.WARNING, e,
+          () -> String.format("Can not find resource from path %s.", path));
     }
     return Stream.empty();
   }
@@ -256,7 +257,7 @@ public class Resources {
       return fromClassPath(classLoader);
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from class loader %s", classLoader));
+          () -> String.format("Can not find resource from class loader %s.", classLoader));
     }
     return Stream.empty();
   }
@@ -275,7 +276,7 @@ public class Resources {
       return fromClassPath(classLoader, classPath);
     } catch (IOException e) {
       logger.log(Level.WARNING, e, () -> String
-          .format("Can not find resource from class loader %s, path %s", classLoader, classPath));
+          .format("Can not find resource from class loader %s, path %s.", classLoader, classPath));
     }
     return Stream.empty();
   }
@@ -292,7 +293,7 @@ public class Resources {
       return fromClassPath(classPath);
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from path %s", classPath));
+          () -> String.format("Can not find resource from path %s.", classPath));
     }
     return Stream.empty();
   }
@@ -308,7 +309,8 @@ public class Resources {
     try {
       return fromFileSystem(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find resource from path %s", path));
+      logger.log(Level.WARNING, e,
+          () -> String.format("Can not find resource from path %s.", path));
     }
     return null;
   }
@@ -324,7 +326,8 @@ public class Resources {
     try {
       return fromFileSystem(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find resource from path %s", path));
+      logger.log(Level.WARNING, e,
+          () -> String.format("Can not find resource from path %s.", path));
     }
     return null;
   }
@@ -357,7 +360,7 @@ public class Resources {
     try {
       return fromUrl(url);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s", url));
+      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
     }
     return null;
   }
@@ -373,7 +376,7 @@ public class Resources {
     try {
       return fromUrl(url);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s", url));
+      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
     }
     return null;
   }
@@ -390,7 +393,7 @@ public class Resources {
     try {
       return fromUrl(url, proxy);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s", url));
+      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
     }
     return null;
   }
@@ -811,7 +814,7 @@ public class Resources {
         return openStream();
       } catch (IOException e) {
         logger.log(Level.WARNING, e,
-            () -> String.format("Can't not open stream from %s", getLocation()));
+            () -> String.format("Can't not open stream from %s.", getLocation()));
       }
       return null;
     }
@@ -852,7 +855,7 @@ public class Resources {
     private final String prefix;
     private final int prefixLength;
 
-    private SourceType(String prefix) {
+    SourceType(String prefix) {
       this.prefix = prefix;
       prefixLength = prefix.length();
     }

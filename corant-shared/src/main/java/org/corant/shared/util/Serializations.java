@@ -42,7 +42,7 @@ public class Serializations {
     try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
       return ois.readObject();
     } catch (IOException | ClassNotFoundException ex) {
-      throw new CorantRuntimeException(ex, "Failed to deserialize object, %s" + ex.getMessage());
+      throw new CorantRuntimeException(ex, "Failed to deserialize object, %s." + ex.getMessage());
     }
   }
 
@@ -56,7 +56,7 @@ public class Serializations {
       oos.flush();
       return baos.toByteArray();
     } catch (IOException ex) {
-      throw new CorantRuntimeException(ex, "Failed to serialize object of type: %s",
+      throw new CorantRuntimeException(ex, "Failed to serialize object of type: %s.",
           object.getClass());
     }
   }

@@ -72,7 +72,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
       if (isThrowException()) {
         throw new ConversionException(e);
       } else {
-        logger.log(Level.WARNING, e, () -> String.format("Can not convert %s", asString(value)));
+        logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(value)));
       }
     }
     return defaultObject(result, this::getDefaultValue);

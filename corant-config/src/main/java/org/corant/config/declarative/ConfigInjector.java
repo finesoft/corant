@@ -13,7 +13,9 @@
  */
 package org.corant.config.declarative;
 
+import static org.corant.config.CorantConfigResolver.concatKey;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Field;
 import org.corant.config.CorantConfig;
 import org.eclipse.microprofile.config.Config;
@@ -28,11 +30,20 @@ public interface ConfigInjector {
 
   ConfigInjector DEFAULT_INJECTOR = new ConfigInjector() {};
 
+  static String resolveInfixKey(String infix, ConfigMetaField field) {
+    return isBlank(infix) ? field.getDefaultKey()
+        : concatKey(field.getConfigClass().getKeyRoot(), infix, field.getKeyItem());
+  }
+
+  static String resolvePrefixKey(ConfigMetaField field) {
+    return concatKey(field.getConfigClass().getKeyRoot(), field.getKeyItem());
+  }
+
   default void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
       throws Exception {
     CorantConfig corantConfig = forceCast(config);
     Field field = configField.getField();
-    String key = configField.getKey(infix);
+    String key = resolvePrefixKey(configField);
     Object obj =
         corantConfig.getConvertedValue(key, field.getGenericType(), configField.getDefaultValue());
     if (obj != null) {

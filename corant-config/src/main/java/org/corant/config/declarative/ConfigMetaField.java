@@ -13,8 +13,6 @@
  */
 package org.corant.config.declarative;
 
-import static org.corant.config.CorantConfigResolver.concatKey;
-import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Field;
 
 /**
@@ -72,14 +70,6 @@ public class ConfigMetaField {
 
   public ConfigInjector getInjector() {
     return injector;
-  }
-
-  public String getKey(String infix) {
-    if (isBlank(infix)) {
-      return defaultKey;
-    } else {
-      return concatKey(configClass.getKeyRoot(), infix, keyItem);
-    }
   }
 
   public String getKeyItem() {

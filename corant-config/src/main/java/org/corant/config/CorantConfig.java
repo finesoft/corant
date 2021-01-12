@@ -14,6 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Objects.forceCast;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -152,5 +154,18 @@ public class CorantConfig implements Config, Serializable {
       return (T) this;
     }
     throw new IllegalArgumentException("Can't unwrap CorantConfig to " + type);
+  }
+
+  private Object writeReplace() throws ObjectStreamException {
+    return SerializableConfig.instance;
+  }
+
+  static class SerializableConfig implements Serializable {
+    private static final long serialVersionUID = -3558605352597004269L;
+    private static final SerializableConfig instance = new SerializableConfig();
+
+    private Object readResolve() throws ObjectStreamException {
+      return ConfigProvider.getConfig();
+    }
   }
 }

@@ -40,28 +40,31 @@ import org.eclipse.microprofile.config.Config;
 public enum DeclarativePattern implements ConfigInjector {
 
   SUFFIX() {
+
     @Override
-    public void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
-        throws Exception {
+    public void inject(Config config, String infix, Object configObject,
+        ConfigMetaField configField) throws Exception {
       CorantConfig corantConfig = forceCast(config);
       Field field = configField.getField();
-      String key = configField.getKey(infix);
+      String key = ConfigInjector.resolveInfixKey(infix, configField);
       Object obj = corantConfig.getConvertedValue(key, field.getGenericType(),
           configField.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE);
       if (obj != null) {
         field.set(configObject, obj);
       }
     }
+
   },
 
   PREFIX() {
+
     @SuppressWarnings("rawtypes")
     @Override
-    public void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
-        throws Exception {
+    public void inject(Config config, String infix, Object configObject,
+        ConfigMetaField configField) throws Exception {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();
-      String key = configField.getKey(infix);
+      String key = ConfigInjector.resolveInfixKey(infix, configField);
       streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> rawMap
           .put(removeSplitor(k.substring(key.length())), config.getOptionalValue(k, String.class)));
 
@@ -92,9 +95,11 @@ public enum DeclarativePattern implements ConfigInjector {
           }
         }
         valueMap = conversion.convertMap(rawMap, factory, keyType, valueType);
-        field.set(configObject, valueMap); // FIXME need merge???
+        field.set(configObject, valueMap); // FIXME
+                                           // need
+                                           // merge???
       }
     }
-  };
+  }
 
 }

@@ -43,9 +43,10 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
     this.clazz = type.getJavaClass();
     this.prefix = defaultString(extractPrefix(type), Strings.EMPTY);
     Set<Annotation> qs = new HashSet<>();
-    qs.add(Default.Literal.INSTANCE);
     if (type.isAnnotationPresent(ConfigProperties.class)) {
       qs.add(ConfigProperties.Literal.of(prefix));
+    } else {
+      qs.add(Default.Literal.INSTANCE);
     }
     qualifiers = Collections.unmodifiableSet(qs);
     this.types = Collections.singleton(clazz);
@@ -55,13 +56,10 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
   public T create(CreationalContext<T> context) {
     InjectionPoint ip =
         (InjectionPoint) beanManager.getInjectableReference(new CurrentInjectionPoint(), context);
-    String thePrefix = extractPrefix(ip.getAnnotated());
-    if (thePrefix == null) {
-      thePrefix = ip.getQualifiers().stream().filter(ConfigProperties.class::isInstance)
-          .map(ConfigProperties.class::cast).map(ConfigProperties::prefix)
-          .filter(prefix -> !prefix.equals(ConfigProperties.UNCONFIGURED_PREFIX)).findFirst()
-          .orElse(prefix);
-    }
+    String thePrefix = ip.getQualifiers().stream().filter(ConfigProperties.class::isInstance)
+        .map(ConfigProperties.class::cast).map(ConfigProperties::prefix)
+        .filter(prefix -> !prefix.equals(ConfigProperties.UNCONFIGURED_PREFIX)).findFirst()
+        .orElse(prefix);
     return ConfigInstances.resolveMicroprofile(clazz, thePrefix);
   }
 

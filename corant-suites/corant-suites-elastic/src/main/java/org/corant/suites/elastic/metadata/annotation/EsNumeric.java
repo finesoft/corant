@@ -104,7 +104,7 @@ public @interface EsNumeric {
    */
   EsNumericType type();
 
-  public static enum EsNumericType {
+  enum EsNumericType {
 
     /**
      * A signed 64-bit integer with a minimum value of -2^63 and a maximum value of 2^63-1.
@@ -141,7 +141,7 @@ public @interface EsNumeric {
 
     private final String value;
 
-    private EsNumericType(String value) {
+    EsNumericType(String value) {
       this.value = value;
     }
 

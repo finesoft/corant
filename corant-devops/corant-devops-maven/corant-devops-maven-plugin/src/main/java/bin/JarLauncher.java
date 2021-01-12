@@ -65,9 +65,10 @@ public class JarLauncher {
   private Manifest manifest;
 
   JarLauncher(String... args) throws IOException {
-    this.args = Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '-').toArray(String[]::new);
-    Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '+').map(arg -> Paths.get(arg.substring(1)))
-        .forEach(classpaths::add);
+    this.args = Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '-')
+        .toArray(String[]::new);
+    Arrays.stream(args).filter(arg -> !arg.isEmpty() && arg.charAt(0) == '+')
+        .map(arg -> Paths.get(arg.substring(1))).forEach(classpaths::add);
     initialize();
   }
 
@@ -229,9 +230,9 @@ public class JarLauncher {
       }
     } else {
       if (newLine) {
-        System.out.println(String.format(msgOrFmt, args));
+        System.out.printf(msgOrFmt + "%n", args);
       } else {
-        System.out.print(String.format(msgOrFmt, args));
+        System.out.printf(msgOrFmt, args);
       }
     }
   }

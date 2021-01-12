@@ -30,7 +30,7 @@ public interface FlywayConfigProvider {
 
   Collection<String> getLocations();
 
-  public static class DefaultFlywayConfigProvider implements FlywayConfigProvider {
+  class DefaultFlywayConfigProvider implements FlywayConfigProvider {
 
     final DataSource dataSource;
     final Set<String> locations;

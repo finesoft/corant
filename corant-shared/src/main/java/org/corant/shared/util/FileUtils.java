@@ -63,7 +63,7 @@ public class FileUtils {
   public static final char UNIX_SEPARATOR = '/';
   public static final String UNIX_SEPARATOR_STR = Character.toString(UNIX_SEPARATOR);
   public static final char WINDOWS_SEPARATOR = '\\';
-  public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB * 16L;
+  public static final long FILE_COPY_BUFFER_SIZE = Defaults.ONE_MB << 4;
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());

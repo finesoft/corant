@@ -150,7 +150,7 @@ public class ElasticConfig extends AbstractNamedObject implements DeclarativeCon
       ClassPathResource setting = Resources.tryFromClassPath(path).findFirst().orElse(null);
       if (setting != null) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream();
-            InputStream is = setting.openStream();) {
+            InputStream is = setting.openStream()) {
           Streams.copy(is, os);
           this.setting.putAll(XContentHelper
               .convertToMap(new BytesArray(os.toByteArray()), true, XContentType.JSON).v2());

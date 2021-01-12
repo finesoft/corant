@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.normal.Defaults.MAX_BUFFERED_BYTES;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.emptyConsumer;
@@ -190,7 +191,6 @@ public class Streams {
    */
   public static byte[] readAllBytes(InputStream is) throws IOException {
     byte[] buf = new byte[4096];
-    int maxBufferSize = Integer.MAX_VALUE - 8;
     int capacity = buf.length;
     int nread = 0;
     int n;
@@ -202,13 +202,13 @@ public class Streams {
       if (n < 0) {
         break;
       }
-      if (capacity <= maxBufferSize - capacity) {
+      if (capacity <= MAX_BUFFERED_BYTES - capacity) {
         capacity = capacity << 1;
       } else {
-        if (capacity == maxBufferSize) {
+        if (capacity == MAX_BUFFERED_BYTES) {
           throw new OutOfMemoryError("Required array size too large");
         }
-        capacity = maxBufferSize;
+        capacity = MAX_BUFFERED_BYTES;
       }
       buf = Arrays.copyOf(buf, capacity);
     }

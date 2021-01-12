@@ -75,7 +75,7 @@ public @interface EsRange {
    */
   RangeType type();
 
-  public static enum RangeType {
+  enum RangeType {
     /**
      * A range of signed 32-bit integers with a minimum value of -2^31 and maximum of 2^31-1.
      */
@@ -100,7 +100,7 @@ public @interface EsRange {
 
     private final String value;
 
-    private RangeType(String value) {
+    RangeType(String value) {
       this.value = value;
     }
 

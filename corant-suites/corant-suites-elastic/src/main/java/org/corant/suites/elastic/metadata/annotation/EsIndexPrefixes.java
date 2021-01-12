@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface EsIndexPrefixes {
 
-  public static final EsIndexPrefixes DefaultEsIndexPrefixes = new EsIndexPrefixes() {
+  EsIndexPrefixes DefaultEsIndexPrefixes = new EsIndexPrefixes() {
 
     @Override
     public Class<? extends Annotation> annotationType() {

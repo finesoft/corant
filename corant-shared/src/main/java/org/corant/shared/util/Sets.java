@@ -140,7 +140,7 @@ public class Sets {
    * @return treeSetOf
    */
   @SafeVarargs
-  public static <T> Set<T> treeSetOf(final T... objects) {
+  public static <T> TreeSet<T> treeSetOf(final T... objects) {
     TreeSet<T> set = new TreeSet<>();
     if (objects != null) {
       Collections.addAll(set, objects);

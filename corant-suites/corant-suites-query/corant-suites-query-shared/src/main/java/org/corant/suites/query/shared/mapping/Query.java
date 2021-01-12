@@ -338,6 +338,6 @@ public class Query implements Serializable {
   }
 
   public enum QueryType {
-    SQL, MG, JPQL, ES, CAS;
+    SQL, MG, JPQL, ES, CAS
   }
 }

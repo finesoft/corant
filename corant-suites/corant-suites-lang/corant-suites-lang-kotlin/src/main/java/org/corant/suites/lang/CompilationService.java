@@ -28,7 +28,7 @@ public interface CompilationService {
 
   void compile(Context context);
 
-  public static class Context {
+  class Context {
     private final String id;
     private final Set<File> classpaths;
     private final Set<File> sourceDirectories;

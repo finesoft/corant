@@ -176,13 +176,13 @@ public @interface EsText {
    */
   EsTermVector term_vector() default EsTermVector.NO;
 
-  public static enum EsTermVector {
+  enum EsTermVector {
     NO("no"), YES("yes"), WITH_POSITIONS("with_positions"), WITH_OFFSETS(
         "with_offsets"), WITH_POSITIONS_OFFSETS("with_positions_offsets");
 
     private final String value;
 
-    private EsTermVector(String value) {
+    EsTermVector(String value) {
       this.value = value;
     }
 

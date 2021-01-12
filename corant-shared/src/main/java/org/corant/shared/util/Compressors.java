@@ -50,7 +50,7 @@ public class Compressors {
   public static void compress(InputStream is, OutputStream os) throws IOException {
     final Deflater def = new Deflater(Deflater.DEFAULT_COMPRESSION);
     try (Closeable cdef = (Closeable) def::end;
-        DeflaterOutputStream dos = new DeflaterOutputStream(os, def, 4096, false);) {
+        DeflaterOutputStream dos = new DeflaterOutputStream(os, def, 4096, false)) {
       copy(is, dos);
     }
   }

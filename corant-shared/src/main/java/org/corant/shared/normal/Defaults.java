@@ -31,9 +31,11 @@ public interface Defaults {
 
   Charset DFLT_CHARSET = StandardCharsets.UTF_8;
 
+  int MAX_BUFFERED_BYTES = Integer.MAX_VALUE - 8;
+
   int ONE_KB = 1024;
 
-  int SIXTEEN_KBS = ONE_KB * 16;
+  int SIXTEEN_KBS = ONE_KB << 4;
 
   long ONE_MB = ONE_KB * (long) ONE_KB;
 

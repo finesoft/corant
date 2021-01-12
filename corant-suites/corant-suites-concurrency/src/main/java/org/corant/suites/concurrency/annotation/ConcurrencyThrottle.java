@@ -34,7 +34,7 @@ import javax.interceptor.InterceptorBinding;
 @Retention(RUNTIME)
 public @interface ConcurrencyThrottle {
 
-  static final int DFLT_THRON = 1;
+  int DFLT_THRON = 1;
 
   @Nonbinding
   boolean fair() default true;

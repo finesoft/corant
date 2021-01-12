@@ -40,7 +40,7 @@ public @interface DeclarativeConfigKey {
   @Nonbinding
   String value() default UNCONFIGURED_KEY;
 
-  static class DeclarativeConfigKeyLiteral extends AnnotationLiteral<DeclarativeConfigKey>
+  class DeclarativeConfigKeyLiteral extends AnnotationLiteral<DeclarativeConfigKey>
       implements DeclarativeConfigKey {
 
     private static final long serialVersionUID = 6321463899932625786L;

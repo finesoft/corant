@@ -13,6 +13,7 @@
  */
 package org.corant.kernel.logging;
 
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Objects.tryNewInstance;
 import java.lang.reflect.Field;
@@ -72,6 +73,6 @@ public class LoggerFactory {
   @Produces
   @Dependent
   protected Logger createLogger(InjectionPoint injectionPoint) {
-    return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+    return Logger.getLogger(getUserClass(injectionPoint.getMember().getDeclaringClass()).getName());
   }
 }

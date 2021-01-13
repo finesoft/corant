@@ -163,6 +163,8 @@ public class UndertowWebServer extends AbstractWebServer {
         fi.setAsyncSupported(wfm.isAsyncSupported());
         wfm.getInitParamsAsMap().forEach(fi::addInitParam);
         di.addFilter(fi);
+        logger.fine(() -> String.format("Resolve filter [%s] url patterns [%s].",
+            wfm.getClazz().getName(), String.join(", ", wfm.getUrlPatterns())));
         streamOf(wfm.getServletNames()).forEach(sn -> {
           streamOf(wfm.getDispatcherTypes()).forEach(dt -> {
             di.addFilterServletNameMapping(wfm.getFilterName(), sn, dt);
@@ -184,8 +186,10 @@ public class UndertowWebServer extends AbstractWebServer {
   protected void resolveListener(DeploymentInfo di) {
     // weld listener
     di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
-    getListenerMetaDatas().map(WebListenerMetaData::getClazz).map(ListenerInfo::new)
-        .forEach(di::addListener);
+    getListenerMetaDatas().map(WebListenerMetaData::getClazz).map(ListenerInfo::new).forEach(l -> {
+      logger.fine(() -> String.format("Resolve listener [%s].", l.getListenerClass().getName()));
+      di.addListener(l);
+    });
   }
 
   protected Undertow resolveServer() throws IOException {
@@ -306,6 +310,8 @@ public class UndertowWebServer extends AbstractWebServer {
               wsm.getMultipartConfig().getMaxRequestSize(),
               wsm.getMultipartConfig().getFileSizeThreshold()));
         }
+        logger.fine(() -> String.format("Resolve servlet [%s], url patterns [%s].", wsm.getName(),
+            String.join(", ", wsm.getUrlPatterns())));
         return si;
       }
       return null;
@@ -332,6 +338,9 @@ public class UndertowWebServer extends AbstractWebServer {
       String servPath = specConfig.getStaticServingPath().get();
       SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);
       String usePath = st.resolve(path);
+      logger.fine(
+          () -> String.format("Resolve static coontent source path [%s].", Paths.get(usePath)));
+      logger.fine(() -> String.format("Resolve static coontent serving path [%s].", servPath));
       if (st == SourceType.FILE_SYSTEM) {
         handler.addPrefixPath(servPath,
             new ResourceHandler(new PathResourceManager(Paths.get(usePath))));
@@ -354,7 +363,10 @@ public class UndertowWebServer extends AbstractWebServer {
   protected void resolveWebSocket(DeploymentInfo di) {
     if (!isEmpty(webSocketExtension.getEndpointClasses())) {
       WebSocketDeploymentInfo wsdi = new WebSocketDeploymentInfo();
-      webSocketExtension.getEndpointClasses().forEach(wsdi::addEndpoint);
+      webSocketExtension.getEndpointClasses().forEach(es -> {
+        wsdi.addEndpoint(es);
+        logger.fine(() -> String.format("Resolve websocket endpoint class [%s].", es.getName()));
+      });
       di.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsdi);
     }
   }

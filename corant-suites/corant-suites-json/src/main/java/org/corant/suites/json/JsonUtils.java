@@ -14,10 +14,13 @@
 package org.corant.suites.json;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
@@ -52,6 +55,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 public class JsonUtils {
 
   static final ObjectMapper objectMapper = new ObjectMapper();
+  static final Logger logger = Logger.getLogger(JsonUtils.class.getName());
 
   static {
     SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
@@ -222,6 +226,37 @@ public class JsonUtils {
         }
       } catch (JsonProcessingException e) {
         throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, obj);
+      }
+    }
+    return null;
+  }
+
+  public static <T> T tryFromBytes(byte[] bytes, Class<T> cls) {
+    if (isNotEmpty(bytes)) {
+      try {
+        return objectMapper.readerFor(cls).readValue(bytes);
+      } catch (IOException e) {
+        logger.log(Level.WARNING, e,
+            () -> String.format("Can't deserialize bytes to %s object.", cls.getName()));
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Convert input string to type object.
+   *
+   * @param cmd
+   * @param clazz
+   * @return
+   */
+  public static <T> T tryFromString(String cmd, Class<T> clazz) {
+    if (isNotBlank(cmd)) {
+      try {
+        return objectMapper.readValue(cmd, clazz);
+      } catch (IOException e) {
+        logger.log(Level.WARNING, e,
+            () -> String.format("Can't deserialize String to %s object.", clazz.getName()));
       }
     }
     return null;

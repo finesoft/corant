@@ -41,9 +41,9 @@ public class CorantConfig implements Config, Serializable {
 
   private static final long serialVersionUID = 8788710772538278522L;
   private static final Logger logger = Logger.getLogger(CorantConfig.class.getName());
-  public static final String COARNT_CONFIG_SOURCE_BASE_NAME = "application";
-  public static final String COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX =
-      COARNT_CONFIG_SOURCE_BASE_NAME + "-";
+  public static final String CORANT_CONFIG_SOURCE_BASE_NAME = "application";
+  public static final String CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX =
+      CORANT_CONFIG_SOURCE_BASE_NAME + "-";
   public static final String MP_CONFIG_SOURCE_BASE_NAME = "microprofile-config";
   public static final String MP_CONFIG_SOURCE_BASE_NAME_PREFIX = MP_CONFIG_SOURCE_BASE_NAME + "-";
 

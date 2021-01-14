@@ -16,7 +16,9 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -56,6 +58,51 @@ public class Conversions {
 
   private Conversions() {
     super();
+  }
+
+  /**
+   * Convert an object to array, only supports array object or collection object as source.
+   *
+   * @param <T> the type of target array element.
+   * @param obj the source object only supports array object or collection object as source.
+   * @param elementClazz the class of target array element.
+   */
+  public static <T> T[] toArray(Object obj, Class<T> elementClazz) {
+    return toArray(obj, elementClazz, null);
+  }
+
+  /**
+   * Convert an object to array with hints, only supports array object or collection object as
+   * source.
+   *
+   * @param <T> the type of target array element.
+   * @param obj the source object only supports array object or collection object as source.
+   * @param elementClazz the class of target array element.
+   * @param hints the convert hints
+   */
+  public static <T> T[] toArray(Object obj, Class<T> elementClazz, Map<String, ?> hints) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Object[]) {
+      Object[] arrayObj = (Object[]) obj;
+      int length = arrayObj.length;
+      Object array = Array.newInstance(elementClazz, length);
+      for (int i = 0; i < length; i++) {
+        Array.set(array, i, forceCast(toObject(arrayObj[i], elementClazz, hints)));
+      }
+      return forceCast(array);
+    } else if (obj instanceof Collection) {
+      Collection<?> collObj = (Collection<?>) obj;
+      int length = collObj.size();
+      Object array = Array.newInstance(elementClazz, length);
+      int i = 0;
+      for (Object e : collObj) {
+        Array.set(array, i, forceCast(toObject(e, elementClazz, hints)));
+        i++;
+      }
+      return forceCast(array);
+    }
+    throw new NotSupportedException("Only support Collection and Array as source");
   }
 
   /**
@@ -361,7 +408,7 @@ public class Conversions {
     } else if (obj instanceof Object[]) {
       return Conversion.convert((Object[]) obj, ArrayList::new, clazz, hints);
     }
-    return Conversion.convert(obj, clazz, ArrayList::new, hints);
+    return Conversion.convert(obj, clazz, ArrayList::new, hints);// FIXME weird
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -372,7 +419,7 @@ public class Conversions {
     } else if (obj instanceof Object[]) {
       return streamOf((Object[]) obj).map(convert).collect(Collectors.toList());
     }
-    throw new NotSupportedException("Only support Iterable and Array");
+    throw new NotSupportedException("Only support Iterable or Array");
   }
 
   public static LocalDate toLocalDate(Object obj) {
@@ -475,10 +522,16 @@ public class Conversions {
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz) {
+    if (clazz != null && clazz.isArray()) {
+      return forceCast(toArray(obj, clazz.getComponentType()));
+    }
     return Conversion.convert(obj, clazz);
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    if (clazz != null && clazz.isArray()) {
+      return forceCast(toArray(obj, clazz.getComponentType(), hints));
+    }
     return Conversion.convert(obj, clazz, hints);
   }
 
@@ -498,7 +551,7 @@ public class Conversions {
     } else if (obj instanceof Object[]) {
       return Conversion.convert((Object[]) obj, HashSet::new, clazz, hints);
     }
-    return Conversion.convert(obj, clazz, HashSet::new, hints);
+    return Conversion.convert(obj, clazz, HashSet::new, hints);// FIXME weird
   }
 
   public static <T> Set<T> toSet(Object obj, Function<Object, T> convert) {

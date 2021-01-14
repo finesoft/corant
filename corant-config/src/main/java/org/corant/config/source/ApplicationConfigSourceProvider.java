@@ -46,8 +46,8 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
 
   static Logger logger = Logger.getLogger(ApplicationConfigSourceProvider.class.getName());
-  static String appBaseName = CorantConfig.COARNT_CONFIG_SOURCE_BASE_NAME;
-  static String appBaseNamePrefix = CorantConfig.COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX;
+  static String appBaseName = CorantConfig.CORANT_CONFIG_SOURCE_BASE_NAME;
+  static String appBaseNamePrefix = CorantConfig.CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX;
   static String[] appExtName = {".yaml", ".yml", ".properties", ".json", ".xml"};
   static String metaInf = "META-INF/";
 

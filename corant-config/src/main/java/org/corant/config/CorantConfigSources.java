@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import static org.corant.config.CorantConfig.COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX;
+import static org.corant.config.CorantConfig.CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX;
 import static org.corant.config.CorantConfig.MP_CONFIG_SOURCE_BASE_NAME_PREFIX;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -141,8 +141,8 @@ public class CorantConfigSources {
     String name = null;
     if (isNotEmpty(name = FileUtils.getFileBaseName(sourceName))) {
       int start = -1;
-      if ((start = name.indexOf(COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
-        name = name.substring(start + COARNT_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
+      if ((start = name.indexOf(CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
+        name = name.substring(start + CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
       } else if ((start = name.indexOf(MP_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
         name = name.substring(start + MP_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
       } else {

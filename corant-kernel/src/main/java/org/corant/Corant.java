@@ -222,7 +222,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Return a CDI bean instance through the bean class and qualifiers; mainly used for temporary
-   * works. If the Coarnt application is not started, this method will try to start it with incoming
+   * works. If the Corant application is not started, this method will try to start it with incoming
    * arguments, and this method does not directly close it.
    *
    * @param <T> The bean type
@@ -248,7 +248,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Return a CDI bean instance through the bean class(non synthetic) and qualifiers; mainly used
-   * for temporary works. If the Coarnt application is not started, this method will try to start
+   * for temporary works. If the Corant application is not started, this method will try to start
    * it, and this method does not directly close it.
    *
    * @param <T>
@@ -262,7 +262,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Return a CDI bean instance through the bean class(synthetic); mainly used for temporary works.
-   * If the Coarnt application is not started, this method will try to start it, and this method
+   * If the Corant application is not started, this method will try to start it, and this method
    * does not directly close it.
    *
    * @param <T>
@@ -309,7 +309,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Shut down the Corant application, If you want to start it again, you can only start it through
-   * the {@link #startup()} method, or instantiate Coarnt and call the {@link #start(Consumer)}
+   * the {@link #startup()} method, or instantiate Corant and call the {@link #start(Consumer)}
    * method.
    */
   public static synchronized void shutdown() {
@@ -325,9 +325,9 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Startup the Coarnt application, construct Corant instance and start it.
+   * Startup the Corant application, construct Corant instance and start it.
    *
-   * @return The Coarnt instance
+   * @return The Corant instance
    */
   public static synchronized Corant startup() {
     return startup(Classes.EMPTY_ARRAY, null, null);

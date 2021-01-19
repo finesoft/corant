@@ -349,12 +349,15 @@ public class CorantConfigConversion implements Serializable {
     if (null == converter) {
       converter = converters.get().get(wrap(forType));
     }
-    if (null == converter) {
-      converter = ImplicitConverters.of(forType).orElse(null);
-    }
+
     if (null == converter) {
       converter = OptionalsConverters.of(forType, this).orElse(null);
     }
+
+    if (null == converter) {
+      converter = ImplicitConverters.of(forType).orElse(null);
+    }
+
     if (null == converter) {
       Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
           Converters.lookup(String.class, forType);

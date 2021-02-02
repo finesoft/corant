@@ -41,9 +41,8 @@ import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.boot.Power;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
-import org.corant.kernel.event.PostContainerStartedEvent;
+import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
-import org.corant.kernel.event.PreContainerStopEvent;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -65,7 +64,7 @@ import org.corant.shared.util.Strings;
  * container class loader and add configuration classes to the set of bean classes for the synthetic
  * bean archive if necessary.</li>
  * <li>Construct the CDI container and initialize it, after the CDI container initialized then fire
- * PostContainerStartedEvent to listeners, those listeners may be use to configure some components
+ * PostContainerReadyEvent to listeners, those listeners may be use to configure some components
  * after CDI initialized such as web server.</li>
  * <li>After the above execution was completed, fire PostCorantReadyEvent to listeners.</li>
  * </ul>
@@ -523,8 +522,6 @@ public class Corant implements AutoCloseable {
    */
   public synchronized void stop() {
     if (isRunning()) {
-      LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-      emitter.fire(new PreContainerStopEvent(arguments));
       container.close();
     }
     container = null;
@@ -545,7 +542,7 @@ public class Corant implements AutoCloseable {
     stopWatch.start("All suites are initialized");
 
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostContainerStartedEvent(arguments));
+    emitter.fire(new PostContainerReadyEvent(arguments));
 
     stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }

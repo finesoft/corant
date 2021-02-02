@@ -18,16 +18,20 @@ import java.util.Arrays;
 /**
  * corant-kernel
  *
- * @author bingo 上午11:59:20
+ * <pre>
+ * CDI container started, embedded server started, ready for service.
+ * </pre>
+ *
+ * @author bingo 上午10:59:20
  *
  */
-public class PreContainerStopEvent implements CorantLifecycleEvent {
+public class PostContainerReadyEvent implements CorantLifecycleEvent {
   private final String[] args;
 
   /**
    * @param args
    */
-  public PreContainerStopEvent(String[] args) {
+  public PostContainerReadyEvent(String[] args) {
     super();
     this.args = Arrays.copyOf(args, args.length);
   }

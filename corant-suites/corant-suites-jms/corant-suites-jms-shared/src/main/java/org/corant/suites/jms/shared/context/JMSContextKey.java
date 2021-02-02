@@ -58,7 +58,7 @@ public class JMSContextKey implements Serializable {
     this.connectionFactoryId = defaultTrim(connectionFactoryId);
     this.sessionMode = sessionMode;
     xa = shouldNotNull(AbstractJMSExtension.getConfig(this.connectionFactoryId),
-        "Can not find connection factory config by id [%s]", this.connectionFactoryId).isXa();
+        "Can not find JMS connection factory config by id [%s]", this.connectionFactoryId).isXa();
     hash = Objects.hash(connectionFactoryId, sessionMode);
   }
 

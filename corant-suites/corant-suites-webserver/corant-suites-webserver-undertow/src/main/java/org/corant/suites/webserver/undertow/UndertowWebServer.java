@@ -27,10 +27,10 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
-import org.corant.Corant;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Objects;
@@ -251,7 +251,7 @@ public class UndertowWebServer extends AbstractWebServer {
     }
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
-        Corant.current().getBeanManager());
+        CDI.current().getBeanManager());
     getServletContextAttributes().forEach(di::addServletContextAttribute);
     di.addInitParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
         UndertowContainer.class.getName());

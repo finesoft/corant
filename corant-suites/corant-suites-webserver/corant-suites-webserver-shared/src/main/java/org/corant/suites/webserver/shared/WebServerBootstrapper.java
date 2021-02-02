@@ -25,7 +25,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
-import org.corant.kernel.event.PostContainerStartedEvent;
+import org.corant.context.ContainerEvents.PostContainerStartedEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

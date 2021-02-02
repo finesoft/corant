@@ -2,13 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.corant</groupId>
-    <artifactId>corant-suites</artifactId>
+    <artifactId>corant-suites-quartz</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-suites-quartz</artifactId>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>corant-suites-quartz-embeddable</module>
-  	<module>corant-suites-quartz-standalone</module>
-  </modules>
+  <artifactId>corant-suites-quartz-embeddable</artifactId>
 </project>

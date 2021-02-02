@@ -14,12 +14,14 @@
 package org.corant.suites.ddd.model;
 
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.suites.bundle.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletionStage;
 import java.util.logging.Logger;
 import org.corant.context.CDIs;
 import org.corant.suites.bundle.GlobalMessageCodes;
@@ -116,19 +118,17 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   }
 
   @Override
-  public void fireAsyncEvent(Event event, Annotation... qualifiers) {
-    if (event != null) {
-      logger.fine(() -> String.format(FIRE_LOG, event.toString()));
-      CDIs.fireAsyncEvent(event, qualifiers);
-    }
+  public <U extends Event> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers) {
+    shouldNotNull(event);
+    logger.fine(() -> String.format(FIRE_LOG, event.toString()));
+    return CDIs.fireAsyncEvent(event, qualifiers);
   }
 
   @Override
   public void fireEvent(Event event, Annotation... qualifiers) {
-    if (event != null) {
-      logger.fine(() -> String.format(FIRE_LOG, event.toString()));
-      CDIs.fireEvent(event, qualifiers);
-    }
+    shouldNotNull(event);
+    logger.fine(() -> String.format(FIRE_LOG, event.toString()));
+    CDIs.fireEvent(event, qualifiers);
   }
 
   @Override

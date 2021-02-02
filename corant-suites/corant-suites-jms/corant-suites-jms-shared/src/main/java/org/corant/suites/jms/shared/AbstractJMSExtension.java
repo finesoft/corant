@@ -15,6 +15,7 @@ package org.corant.suites.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
 import static org.corant.context.Instances.select;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,10 +27,16 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.inject.spi.WithAnnotations;
+import javax.jms.JMSConnectionFactory;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
+import org.corant.suites.jms.shared.annotation.MessageSend;
+import org.corant.suites.jms.shared.annotation.MessageSends;
 import org.corant.suites.jms.shared.annotation.MessageStream;
 
 /**
@@ -41,6 +48,7 @@ import org.corant.suites.jms.shared.annotation.MessageStream;
 public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
+  protected final Set<String> connectionFactories = newSetFromMap(new ConcurrentHashMap<>());
   protected final Set<ContextualMethodHandler> receiveMethods =
       newSetFromMap(new ConcurrentHashMap<>());
   protected final Set<ContextualMethodHandler> streamMethods =
@@ -74,8 +82,23 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
-      MessageStream.class}) ProcessAnnotatedType<?> pat) {
+      MessageStream.class, MessageSend.class, MessageSends.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
+
+    MessageSend[] mss = beanClass.getAnnotationsByType(MessageSend.class);
+    if (isNotEmpty(mss)) {
+      for (MessageSend ms : mss) {
+        connectionFactories.add(ms.connectionFactoryId());
+      }
+    }
+
+    MessageSends ms = beanClass.getAnnotation(MessageSends.class);
+    if (ms != null) {
+      for (MessageSend m : ms.value()) {
+        connectionFactories.add(m.connectionFactoryId());
+      }
+    }
+
     logger
         .fine(() -> String.format("Scanning JMS message consumer type: %s.", beanClass.getName()));
     ContextualMethodHandler
@@ -84,6 +107,8 @@ public abstract class AbstractJMSExtension implements Extension {
               "Found annotated JMS message consumer method %s.%s, adding for further processing.",
               beanClass.getName(), cm.getMethod().getName()));
           receiveMethods.add(cm);
+          connectionFactories
+              .add(cm.getMethod().getAnnotation(MessageReceive.class).connectionFactoryId());
         });
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageStream.class))
         .forEach(cm -> {
@@ -91,11 +116,30 @@ public abstract class AbstractJMSExtension implements Extension {
               "Found annotated JMS message stream method %s.%s, for now we do not support it.",
               beanClass.getName(), cm.getMethod().getName()));
           streamMethods.add(cm);
+          connectionFactories
+              .add(cm.getMethod().getAnnotation(MessageReceive.class).connectionFactoryId());
         });
   }
 
+  void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
+    if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(JMSConnectionFactory.class)) {
+      JMSConnectionFactory cf =
+          pip.getInjectionPoint().getAnnotated().getAnnotation(JMSConnectionFactory.class);
+      connectionFactories.add(cf.value());// FIXME JNDI
+    } else if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(MessageDispatch.class)) {
+      MessageDispatch md =
+          pip.getInjectionPoint().getAnnotated().getAnnotation(MessageDispatch.class);
+      connectionFactories.add(md.connectionFactoryId());// FIXME JNDI
+    }
+  }
+
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
-    // TODO FIXME validate config
+    for (String cf : connectionFactories) {
+      if (configManager.get(cf) == null) {
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "Can not find JMS connection factory config by id [%s]", cf));
+      }
+    }
   }
 
 }

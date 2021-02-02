@@ -15,11 +15,15 @@ package org.corant.suites.jpa.shared;
 
 import static org.corant.context.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,8 +39,13 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
+import org.corant.context.Instances;
 import org.corant.context.NamingReference;
+import org.corant.context.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.suites.jpa.shared.cdi.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -113,5 +122,23 @@ public class JPAExtension implements Extension {
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     // TODO FIXME validate config check data source etc
+    final String jndiPrefix = JndiNames.JNDI_COMP_NME + "/Datasources";
+    Set<String> dataSourceNames = new HashSet<>();
+    persistenceUnitInfoMetaDatas.values().forEach(pu -> {
+      if (pu.getTransactionType() == PersistenceUnitTransactionType.JTA) {
+        dataSourceNames.add(defaultString(pu.getJtaDataSourceName()));
+      } else {
+        dataSourceNames.add(defaultString(pu.getNonJtaDataSourceName()));
+      }
+    });
+    dataSourceNames.removeIf(f -> f.startsWith(jndiPrefix));
+    if (isNotEmpty(dataSourceNames)) {
+      Qualifiers.resolveNameds(dataSourceNames).forEach((k, qs) -> {
+        if (!Instances.select(DataSource.class, qs).isResolvable()) {
+          adv.addDeploymentProblem(new CorantRuntimeException(
+              "Can't not find data source named %s for JPA persistence unit!", k));
+        }
+      });
+    }
   }
 }

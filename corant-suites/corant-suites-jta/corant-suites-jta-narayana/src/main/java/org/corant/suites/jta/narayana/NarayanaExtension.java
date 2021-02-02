@@ -43,7 +43,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionScoped;
 import javax.transaction.UserTransaction;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.kernel.event.PreContainerStopEvent;
+import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;

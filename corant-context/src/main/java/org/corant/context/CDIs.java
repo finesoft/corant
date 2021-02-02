@@ -13,8 +13,10 @@
  */
 package org.corant.context;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.CDI;
@@ -31,23 +33,21 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  */
 public abstract class CDIs {
 
-  public static void fireAsyncEvent(Object event, Annotation... qualifiers) {
-    if (event != null) {
-      if (qualifiers.length > 0) {
-        CDI.current().getBeanManager().getEvent().select(qualifiers).fireAsync(event);
-      } else {
-        CDI.current().getBeanManager().getEvent().fireAsync(event);
-      }
+  public static <U> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers) {
+    shouldNotNull(event, "Fire async event error, the event object can not null!");
+    if (qualifiers.length > 0) {
+      return CDI.current().getBeanManager().getEvent().select(qualifiers).fireAsync(event);
+    } else {
+      return CDI.current().getBeanManager().getEvent().fireAsync(event);
     }
   }
 
   public static void fireEvent(Object event, Annotation... qualifiers) {
-    if (event != null) {
-      if (qualifiers.length > 0) {
-        CDI.current().getBeanManager().getEvent().select(qualifiers).fire(event);
-      } else {
-        CDI.current().getBeanManager().getEvent().fire(event);
-      }
+    shouldNotNull(event, "Fire event error, the event object can not null!");
+    if (qualifiers.length > 0) {
+      CDI.current().getBeanManager().getEvent().select(qualifiers).fire(event);
+    } else {
+      CDI.current().getBeanManager().getEvent().fire(event);
     }
   }
 

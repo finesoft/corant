@@ -16,6 +16,7 @@ package org.corant.suites.ddd.model;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import org.corant.suites.ddd.event.Event;
 import org.corant.suites.ddd.message.Message;
 import org.corant.suites.ddd.unitwork.UnitOfWork;
@@ -58,7 +59,7 @@ public interface AggregateAssistant {
   /**
    * fire aggregate asynchronous event
    */
-  void fireAsyncEvent(Event event, Annotation... qualifiers);
+  <U extends Event> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers);
 
   /**
    * fire aggregate event

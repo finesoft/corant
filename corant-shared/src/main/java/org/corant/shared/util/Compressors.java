@@ -17,11 +17,10 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Objects.isNoneNull;
-import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Streams.copy;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
-import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.isBlank;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,7 +34,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -179,14 +178,12 @@ public class Compressors {
     }
   }
 
-  public static void zip(File zipFile, String... files) throws IOException {
-    Set<String> filePaths = linkedHashSetOf(files);
-    if (isNotEmpty(filePaths)) {
+  public static void zip(List<File> files, File zipFile) throws IOException {
+    if (isNotEmpty(files)) {
       try (FileOutputStream os = new FileOutputStream(zipFile);
           CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
           ZipOutputStream zos = new ZipOutputStream(cos)) {
-        for (String filePath : filePaths) {
-          File file = new File(filePath);
+        for (File file : files) {
           if (file.exists()) {
             zip(file, EMPTY, zos);
           }
@@ -201,19 +198,19 @@ public class Compressors {
     Pair<File, String> source = null;
     while ((source = sources.poll()) != null) {
       File curFile = source.left();
-      String curName = curFile.getName();
       String parent = source.right();
+      String path = isBlank(parent) ? curFile.getName() : parent + "/" + curFile.getName();
       if (curFile.isDirectory()) {
         File[] subFiles = curFile.listFiles();
         if (isNotEmpty(subFiles)) {
-          streamOf(subFiles).map(f -> Pair.of(f, zipPath(parent, curName))).forEach(sources::offer);
+          streamOf(subFiles).map(f -> Pair.of(f, path)).forEach(sources::offer);
         } else {
-          zos.putNextEntry(new ZipEntry(zipPath(parent, curName) + "/"));
+          zos.putNextEntry(new ZipEntry(path + "/"));
         }
         zos.closeEntry();
       } else {
         try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(curFile))) {
-          zos.putNextEntry(new ZipEntry(zipPath(parent, curName)));
+          zos.putNextEntry(new ZipEntry(path));
           copy(bis, zos);
           zos.closeEntry();
         }
@@ -221,11 +218,4 @@ public class Compressors {
     }
   }
 
-  private static String zipPath(String parent, String name) {
-    if (isNotBlank(parent)) {
-      return parent + "/" + name;
-    } else {
-      return name;
-    }
-  }
 }

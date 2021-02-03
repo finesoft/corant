@@ -16,9 +16,12 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Objects.isNoneNull;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Streams.copy;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,8 +32,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
@@ -134,26 +139,24 @@ public class Compressors {
     }
   }
 
-  public static void unzip(Path from, Path to) throws IOException {
-    File src = from.toFile();
-    File dest = to.toFile();
-    shouldBeTrue(src.exists());
-    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(src))) {
+  public static void unzip(File zipFile, Charset charset, File destFile) throws IOException {
+    shouldBeTrue(isNoneNull(zipFile, charset, destFile) && zipFile.exists());
+    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile), charset)) {
       ZipEntry zipEntry = zis.getNextEntry();
+      final String destDir = destFile.getCanonicalPath() + File.separator;
       while (zipEntry != null) {
-        File newFile = new File(dest, zipEntry.getName());
-        shouldBeTrue(
-            newFile.getCanonicalPath().startsWith(dest.getCanonicalPath() + File.separator));
-        if (zipEntry.getName().endsWith(File.separator)) {
-          if (!newFile.isDirectory() && !newFile.mkdirs()) {
-            throw new IOException("Unzip error, failed to create directory " + newFile);
+        File file = new File(destFile, zipEntry.getName());
+        shouldBeTrue(file.getCanonicalPath().startsWith(destDir));
+        if (zipEntry.isDirectory()) {
+          if (!file.isDirectory() && !file.mkdirs()) {
+            throw new IOException("Unzip error, failed to create directory " + file);
           }
         } else {
-          File parent = newFile.getParentFile(); // fix for Windows-created archives
+          File parent = file.getParentFile();
           if (!parent.isDirectory() && !parent.mkdirs()) {
             throw new IOException("Unzip error, failed to create directory " + parent);
           }
-          try (FileOutputStream fos = new FileOutputStream(newFile)) {
+          try (FileOutputStream fos = new FileOutputStream(file)) {
             copy(zis, fos);
           }
         }
@@ -163,35 +166,66 @@ public class Compressors {
     }
   }
 
-  public static void zip(Path from, Path to) throws IOException {
-    File fromFile = from.toFile();
-    File toFile = to.toFile();
-    shouldBeTrue(fromFile.exists());
-    try (FileOutputStream os = new FileOutputStream(toFile);
+  public static void unzip(File zipFile, File destDir) throws IOException {
+    unzip(zipFile, StandardCharsets.UTF_8, destDir);
+  }
+
+  public static void zip(File file, File zipFile) throws IOException {
+    shouldBeTrue(file != null && file.exists());
+    try (FileOutputStream os = new FileOutputStream(zipFile);
         CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
         ZipOutputStream zos = new ZipOutputStream(cos)) {
-      LinkedList<Pair<File, Path>> fileAndDirs = linkedListOf(Pair.of(fromFile, Path.of(EMPTY)));
-      Pair<File, Path> fileAndDir = null;
-      while ((fileAndDir = fileAndDirs.poll()) != null) {
-        File file = fileAndDir.left();
-        Path dir = fileAndDir.right();
-        if (file.isDirectory()) {
-          File[] subFiles = file.listFiles();
-          if (isNotEmpty(subFiles)) {
-            streamOf(subFiles).map(sf -> Pair.of(sf, dir.resolve(file.getName())))
-                .forEach(fileAndDirs::offer);
-          } else {
-            zos.putNextEntry(new ZipEntry(dir.resolve(file.getName()).toString() + File.separator));
-          }
-          zos.closeEntry();
-        } else {
-          try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-            zos.putNextEntry(new ZipEntry(dir.resolve(file.getName()).toString()));
-            copy(bis, zos);
-            zos.closeEntry();
+      zip(file, EMPTY, zos);
+    }
+  }
+
+  public static void zip(File zipFile, String... files) throws IOException {
+    Set<String> filePaths = linkedHashSetOf(files);
+    if (isNotEmpty(filePaths)) {
+      try (FileOutputStream os = new FileOutputStream(zipFile);
+          CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
+          ZipOutputStream zos = new ZipOutputStream(cos)) {
+        for (String filePath : filePaths) {
+          File file = new File(filePath);
+          if (file.exists()) {
+            zip(file, EMPTY, zos);
           }
         }
       }
+    }
+  }
+
+  static void zip(File file, String dir, ZipOutputStream zos) throws IOException {
+    shouldBeTrue(file.exists());
+    LinkedList<Pair<File, String>> sources = linkedListOf(Pair.of(file, dir));
+    Pair<File, String> source = null;
+    while ((source = sources.poll()) != null) {
+      File curFile = source.left();
+      String curName = curFile.getName();
+      String parent = source.right();
+      if (curFile.isDirectory()) {
+        File[] subFiles = curFile.listFiles();
+        if (isNotEmpty(subFiles)) {
+          streamOf(subFiles).map(f -> Pair.of(f, zipPath(parent, curName))).forEach(sources::offer);
+        } else {
+          zos.putNextEntry(new ZipEntry(zipPath(parent, curName) + "/"));
+        }
+        zos.closeEntry();
+      } else {
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(curFile))) {
+          zos.putNextEntry(new ZipEntry(zipPath(parent, curName)));
+          copy(bis, zos);
+          zos.closeEntry();
+        }
+      }
+    }
+  }
+
+  private static String zipPath(String parent, String name) {
+    if (isNotBlank(parent)) {
+      return parent + "/" + name;
+    } else {
+      return name;
     }
   }
 }

@@ -116,6 +116,18 @@ public interface Tuple {
       return left == null && right == null;
     }
 
+    public L key() {
+      return left;
+    }
+
+    public L left() {
+      return left;
+    }
+
+    public R right() {
+      return right;
+    }
+
     @Override
     public R setValue(R value) {
       throw new NotSupportedException();
@@ -124,6 +136,10 @@ public interface Tuple {
     @Override
     public String toString() {
       return asString("[%s,%s]");
+    }
+
+    public R value() {
+      return right;
     }
 
     public Pair<L, R> withKey(final L key) {
@@ -154,14 +170,14 @@ public interface Tuple {
     @SuppressWarnings({"unchecked", "rawtypes"})
     static final Range emptyInstance = new Range(null, null);
 
-    protected final T start;
-    protected final T end;
+    protected final T min;
+    protected final T max;
 
-    protected Range(T start, T end) {
+    protected Range(T min, T max) {
       super();
-      shouldBeTrue(compare(start, end) <= 0, IllegalArgumentException::new);
-      this.start = start;
-      this.end = end;
+      shouldBeTrue(compare(min, max) <= 0, IllegalArgumentException::new);
+      this.min = min;
+      this.max = max;
     }
 
     @SuppressWarnings("unchecked")
@@ -169,12 +185,12 @@ public interface Tuple {
       return emptyInstance;
     }
 
-    public static <T extends Comparable<T>> Range<T> of(T start, T end) {
-      return new Range<>(start, end);
+    public static <T extends Comparable<T>> Range<T> of(T min, T max) {
+      return new Range<>(min, max);
     }
 
     public String asString(final String format) {
-      return String.format(format, start, end);
+      return String.format(format, min, max);
     }
 
     public boolean coincide(Range<T> other) {
@@ -183,16 +199,20 @@ public interface Tuple {
       } else if (this.equals(other)) {
         return true;
       } else {
-        return compare(start, other.start) == 0 && compare(end, other.end) == 0;
+        return compare(min, other.min) == 0 && compare(max, other.max) == 0;
       }
     }
 
     public boolean cover(Range<T> other) {
-      return lae(start, other.start) && gae(end, other.end);
+      return lae(min, other.min) && gae(max, other.max);
     }
 
     public boolean cover(T value) {
-      return lae(start, value) && gae(end, value);
+      return lae(min, value) && gae(max, value);
+    }
+
+    public T max() {
+      return max;
     }
 
     @SuppressWarnings("rawtypes")
@@ -208,52 +228,56 @@ public interface Tuple {
         return false;
       }
       Range other = (Range) obj;
-      if (end == null) {
-        if (other.end != null) {
+      if (max == null) {
+        if (other.max != null) {
           return false;
         }
-      } else if (!end.equals(other.end)) {
+      } else if (!max.equals(other.max)) {
         return false;
       }
-      if (start == null) {
-        if (other.start != null) {
+      if (min == null) {
+        if (other.min != null) {
           return false;
         }
-      } else if (!start.equals(other.start)) {
+      } else if (!min.equals(other.min)) {
         return false;
       }
       return true;
     }
 
-    public T getEnd() {
-      return end;
+    public T getMax() {
+      return max;
     }
 
-    public T getStart() {
-      return start;
+    public T getMin() {
+      return min;
     }
 
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (end == null ? 0 : end.hashCode());
-      result = prime * result + (start == null ? 0 : start.hashCode());
+      result = prime * result + (max == null ? 0 : max.hashCode());
+      result = prime * result + (min == null ? 0 : min.hashCode());
       return result;
     }
 
     public boolean intersect(Range<T> other) {
-      return gae(start, other.start) && lae(start, other.end)
-          || lae(start, other.start) && gae(end, other.end)
-          || gae(end, other.start) && lae(end, other.end);
+      return gae(min, other.min) && lae(min, other.max)
+          || lae(min, other.min) && gae(max, other.max)
+          || gae(max, other.min) && lae(max, other.max);
     }
 
     public boolean isEmpty() {
-      return start == null && end == null;
+      return min == null && max == null;
+    }
+
+    public T min() {
+      return min;
     }
 
     public Pair<T, T> toPair() {
-      return Pair.of(start, end);
+      return Pair.of(min, max);
     }
 
     @Override
@@ -261,12 +285,12 @@ public interface Tuple {
       return asString("[%s,%s]");
     }
 
-    public Range<T> withEnd(T end) {
-      return of(start, end);
+    public Range<T> withMax(T max) {
+      return of(min, max);
     }
 
-    public Range<T> withStart(T start) {
-      return of(start, end);
+    public Range<T> withMin(T min) {
+      return of(min, max);
     }
 
     private boolean gae(T d1, T d2) {
@@ -356,6 +380,18 @@ public interface Tuple {
 
     public boolean isEmpty() {
       return left == null && middle == null && right == null;
+    }
+
+    public L left() {
+      return left;
+    }
+
+    public M middle() {
+      return middle;
+    }
+
+    public R right() {
+      return right;
     }
 
     @Override

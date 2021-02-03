@@ -325,8 +325,8 @@ public class JsonUtils {
     public void serialize(Range range, JsonGenerator gen, SerializerProvider serializerProvider)
         throws IOException {
       gen.writeStartArray(range, 2);
-      gen.writeObject(range.getStart());
-      gen.writeObject(range.getEnd());
+      gen.writeObject(range.getMin());
+      gen.writeObject(range.getMax());
       gen.writeEndArray();
     }
   }

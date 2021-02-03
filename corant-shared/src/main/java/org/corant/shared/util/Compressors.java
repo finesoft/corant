@@ -13,18 +13,35 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Streams.copy;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-shared
@@ -114,6 +131,67 @@ public class Compressors {
       decompress(is, os);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void unzip(Path from, Path to) throws IOException {
+    File src = from.toFile();
+    File dest = to.toFile();
+    shouldBeTrue(src.exists());
+    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(src))) {
+      ZipEntry zipEntry = zis.getNextEntry();
+      while (zipEntry != null) {
+        File newFile = new File(dest, zipEntry.getName());
+        shouldBeTrue(
+            newFile.getCanonicalPath().startsWith(dest.getCanonicalPath() + File.separator));
+        if (zipEntry.getName().endsWith(File.separator)) {
+          if (!newFile.isDirectory() && !newFile.mkdirs()) {
+            throw new IOException("Unzip error, failed to create directory " + newFile);
+          }
+        } else {
+          File parent = newFile.getParentFile(); // fix for Windows-created archives
+          if (!parent.isDirectory() && !parent.mkdirs()) {
+            throw new IOException("Unzip error, failed to create directory " + parent);
+          }
+          try (FileOutputStream fos = new FileOutputStream(newFile)) {
+            copy(zis, fos);
+          }
+        }
+        zipEntry = zis.getNextEntry();
+      }
+      zis.closeEntry();
+    }
+  }
+
+  public static void zip(Path from, Path to) throws IOException {
+    File fromFile = from.toFile();
+    File toFile = to.toFile();
+    shouldBeTrue(fromFile.exists());
+    try (FileOutputStream os = new FileOutputStream(toFile);
+        CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
+        ZipOutputStream zos = new ZipOutputStream(cos)) {
+      LinkedList<Pair<File, Path>> fileAndDirs = linkedListOf(Pair.of(fromFile, Path.of(EMPTY)));
+      Pair<File, Path> fileAndDir = null;
+      while ((fileAndDir = fileAndDirs.poll()) != null) {
+        File file = fileAndDir.left();
+        Path dir = fileAndDir.right();
+        if (file.isDirectory()) {
+          File[] subFiles = file.listFiles();
+          if (isNotEmpty(subFiles)) {
+            streamOf(subFiles).map(sf -> Pair.of(sf, dir.resolve(file.getName())))
+                .forEach(fileAndDirs::offer);
+          } else {
+            zos.putNextEntry(new ZipEntry(dir.resolve(file.getName()).toString() + File.separator));
+          }
+          zos.closeEntry();
+        } else {
+          try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+            zos.putNextEntry(new ZipEntry(dir.resolve(file.getName()).toString()));
+            copy(bis, zos);
+            zos.closeEntry();
+          }
+        }
+      }
     }
   }
 }

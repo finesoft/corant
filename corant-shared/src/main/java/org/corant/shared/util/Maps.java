@@ -48,6 +48,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import org.corant.shared.conversion.Conversion;
+import org.corant.shared.conversion.converter.StringCurrencyConverter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -274,22 +275,63 @@ public class Maps {
     return collectionFactory.apply(0);
   }
 
+  /**
+   * Returns the Currency value that the specified key is mapped to, convert if necessary.
+   *
+   * @see StringCurrencyConverter
+   * @param map
+   * @param key
+   * @return getMapCurrency
+   */
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toCurrency, null);
   }
 
+  /**
+   * Returns the Currency value that the specified key is mapped to, convert if necessary, and
+   * return the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @see StringCurrencyConverter
+   * @param map
+   * @param key
+   * @param nvt
+   * @return getMapCurrency
+   */
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key, Currency nvt) {
     return getMapObject(map, key, Conversions::toCurrency, nvt);
   }
 
+  /**
+   * Returns the Double value that the specified key is mapped to, convert if necessary.
+   *
+   * @param map
+   * @param key
+   * @return getMapDouble
+   */
   public static Double getMapDouble(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toDouble, null);
   }
 
+  /**
+   * Returns the Double value that the specified key is mapped to, convert if necessary, and return
+   * the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map
+   * @param key
+   * @param nvt
+   * @return getMapDouble
+   */
   public static Double getMapDouble(final Map<?, ?> map, final Object key, Double nvt) {
     return getMapObject(map, key, Conversions::toDouble, nvt);
   }
 
+  /**
+   * Returns the Duration value that the specified key is mapped to, convert if necessary.
+   *
+   * @param map
+   * @param key
+   * @return getMapDuration
+   */
   public static Duration getMapDuration(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toDuration, null);
   }

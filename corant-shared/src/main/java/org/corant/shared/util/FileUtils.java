@@ -16,7 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
@@ -36,7 +36,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +47,8 @@ import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.util.PathMatcher.GlobMatcher;
+import org.corant.shared.util.PathMatcher.RegexMatcher;
 import org.corant.shared.util.Resources.SourceType;
 
 /**
@@ -58,6 +59,7 @@ import org.corant.shared.util.Resources.SourceType;
  */
 public class FileUtils {
 
+  public static final File[] EMPTY_ARRAY = new File[0];
   public static final char EXTENSION_SEPARATOR = '.';
   public static final String EXTENSION_SEPARATOR_STR = Character.toString(EXTENSION_SEPARATOR);
   public static final char UNIX_SEPARATOR = '/';
@@ -194,19 +196,37 @@ public class FileUtils {
     }
   }
 
-  public static String getContentType(String fileName) {
+  /**
+   * Returns the file content type corresponding to the path.
+   *
+   * @param filePath
+   * @return getContentType
+   */
+  public static String getContentType(String filePath) {
     try {
-      return java.nio.file.Files.probeContentType(Paths.get(fileName));
+      return java.nio.file.Files.probeContentType(Paths.get(filePath));
     } catch (IOException e) {
       // Noop!
     }
     return null;
   }
 
+  /**
+   * Returns the file base name from file, base name is the file name without extension.
+   *
+   * @param file
+   * @return getFileBaseName
+   */
   public static String getFileBaseName(File file) {
     return getFileBaseName(shouldNotNull(file.getPath()));
   }
 
+  /**
+   * Returns the file base name from path, base name is the file name without extension.
+   *
+   * @param path
+   * @return getFileBaseName
+   */
   public static String getFileBaseName(String path) {
     String fileName = getFileName(path);
     if (fileName != null) {
@@ -220,6 +240,12 @@ public class FileUtils {
     return null;
   }
 
+  /**
+   * Returns the file name from path
+   *
+   * @param path
+   * @return getFileName
+   */
   public static String getFileName(String path) {
     if (isBlank(path)) {
       return null;
@@ -230,6 +256,12 @@ public class FileUtils {
     }
   }
 
+  /**
+   * Returns the file extension from path
+   *
+   * @param path
+   * @return getFileNameExtension
+   */
   public static String getFileNameExtension(String path) {
     if (path == null) {
       return null;
@@ -244,6 +276,15 @@ public class FileUtils {
     }
   }
 
+  /**
+   * Compare whether two files are the same by byte, if the file is a directory or the file is not
+   * readable, it returns False.
+   *
+   * @param file1
+   * @param file2
+   * @return
+   * @throws IOException isSameContent
+   */
   public static boolean isSameContent(final File file1, final File file2) throws IOException {
     if (file1 == null || file2 == null || !file1.isFile() || !file2.isFile() || !file1.canRead()
         || !file2.canRead()) {
@@ -269,8 +310,19 @@ public class FileUtils {
     return true;
   }
 
-  public static List<File> selectFiles(String path) {
-    String pathExp = SourceType.FILE_SYSTEM.resolve(path);
+  /**
+   * Search for files by file path or path expression, only return files without directories;
+   * case-insensitive, support Glob and Regex file name expression search, if it is not a path
+   * expression, return all files under the specified file or directory.
+   *
+   * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
+   * @see GlobMatcher
+   * @see RegexMatcher
+   * @param pathExpress
+   * @return searchFiles
+   */
+  public static List<File> searchFiles(String pathExpress) {
+    String pathExp = SourceType.FILE_SYSTEM.resolve(pathExpress);
     pathExp = isNotBlank(pathExp) ? pathExp.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR) : pathExp;
     Optional<PathMatcher> matcher = PathMatcher.decidePathMatcher(pathExp, false, true);
     if (matcher.isPresent()) {
@@ -287,28 +339,32 @@ public class FileUtils {
     }
   }
 
-  public static List<File> selectFiles(String directoryName, Predicate<File> p) {
-    final File directory = new File(directoryName);
-    final Predicate<File> up = p == null ? t -> true : p;
+  /**
+   * Select file by file path and filter.
+   *
+   * @param path
+   * @param filter
+   * @return selectFiles
+   */
+  public static List<File> selectFiles(String path, Predicate<File> filter) {
+    final File root = new File(path);
+    final Predicate<File> predicate = defaultObject(filter, Functions.emptyPredicate(true));
     List<File> files = new ArrayList<>();
-    if (directory.isFile() && up.test(directory)) {
-      files.add(directory);
-      return files;
-    }
-    List<File> tmp = new LinkedList<>();
-    File[] dirFiles = directory.listFiles();
-    if (dirFiles != null) {
-      Collections.addAll(tmp, dirFiles);
-      while (!tmp.isEmpty()) {
-        File f = tmp.remove(0);
-        if (f.isFile() && up.test(f)) {
-          files.add(f);
-        } else if (f.isDirectory() && (dirFiles = f.listFiles()) != null) {
-          tmp.addAll(listOf(dirFiles));
+    if (root.exists()) {
+      LinkedList<File> candidates = linkedListOf(root);
+      File candidate = null;
+      while ((candidate = candidates.poll()) != null) {
+        if (candidate.isFile()) {
+          if (predicate.test(candidate)) {
+            files.add(candidate);
+          }
+        } else {
+          for (File file : defaultObject(candidate.listFiles(), EMPTY_ARRAY)) {
+            candidates.offer(file);
+          }
         }
       }
     }
     return files;
   }
-
 }

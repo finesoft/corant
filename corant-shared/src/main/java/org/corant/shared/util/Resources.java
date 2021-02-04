@@ -166,7 +166,7 @@ public class Resources {
    */
   public static Stream<FileSystemResource> fromFileSystem(String path) throws IOException {
     String pathExp = SourceType.FILE_SYSTEM.resolve(path);
-    return FileUtils.selectFiles(pathExp).stream().map(FileSystemResource::new);
+    return FileUtils.searchFiles(pathExp).stream().map(FileSystemResource::new);
   }
 
   /**

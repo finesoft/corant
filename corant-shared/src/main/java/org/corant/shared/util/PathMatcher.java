@@ -60,8 +60,8 @@ public interface PathMatcher extends Predicate<String> {
    * {@code GlobMatcher}, and the pattern is {@code xxxx/**}</li>
    * <li>3. If {@code *} or {@code ?} appears in the path expression, it is also regarded as
    * {@code GlobMatcher}</li>
-   * <li>4. In addition to the above description and ignore case, it is regarded as
-   * {@code CaseInsensitiveMatcher}</li>
+   * <li><del>4. In addition to the above description and ignore case, it is regarded as
+   * {@code CaseInsensitiveMatcher}</del></li>
    * </ul>
    *
    * @param pathExp
@@ -87,9 +87,10 @@ public interface PathMatcher extends Predicate<String> {
       }
       if (glob) {
         matcher = new GlobMatcher(dos, ignoreCase, path);
-      } else if (ignoreCase) {
-        matcher = new CaseInsensitiveMatcher(path);
       }
+      // else if (ignoreCase) {
+      // matcher = new CaseInsensitiveMatcher(path);
+      // } //since 1.5.8-SNAPSHOT
     }
     return Optional.ofNullable(matcher);
   }

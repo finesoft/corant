@@ -14,14 +14,18 @@
 package org.corant.suites.webserver.undertow;
 
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -332,24 +336,33 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected void resolveStaticContent(PathHandler handler) {
+    Map<String, String> paths = new HashMap<>();
     if (specConfig.getStaticContentPath().isPresent()
         && specConfig.getStaticServingPath().isPresent()) {
-      String path = specConfig.getStaticContentPath().get();
-      String servPath = specConfig.getStaticServingPath().get();
-      SourceType st = SourceType.decide(path).orElse(SourceType.CLASS_PATH);
-      String usePath = st.resolve(path);
-      logger.fine(
-          () -> String.format("Resolve static coontent source path [%s].", Paths.get(usePath)));
-      logger.fine(() -> String.format("Resolve static coontent serving path [%s].", servPath));
+      paths.put(specConfig.getStaticServingPath().get(), specConfig.getStaticContentPath().get());
+    }
+    specConfig.getStaticPaths().ifPresent(ps -> {
+      for (String path : split(ps, ";", true, true)) {
+        String[] urls = split(path, "->", true, true);
+        shouldBeTrue(urls.length == 2);
+        paths.put(urls[0], urls[1]);
+      }
+    });
+    paths.forEach((s, c) -> {
+      SourceType st = SourceType.decide(c).orElse(SourceType.CLASS_PATH);
+      String contentPath = st.resolve(c);
+      String servingPath = s;
+      logger.fine(() -> String.format("Resolve static content path [%s].", contentPath));
+      logger.fine(() -> String.format("Resolve static serving path [%s].", servingPath));
       if (st == SourceType.FILE_SYSTEM) {
-        handler.addPrefixPath(servPath,
-            new ResourceHandler(new PathResourceManager(Paths.get(usePath))));
+        handler.addPrefixPath(servingPath,
+            new ResourceHandler(new PathResourceManager(Paths.get(contentPath))));
       } else {
         // TODO FIXME virtual path handler...
-        handler.addPrefixPath(servPath, new ResourceHandler(
-            new ClassPathResourceManager(this.getClass().getClassLoader(), usePath)));
+        handler.addPrefixPath(servingPath, new ResourceHandler(
+            new ClassPathResourceManager(this.getClass().getClassLoader(), contentPath)));
       }
-    }
+    });
   }
 
   protected void resolveTransportGuaranteeType(ServletSecurityInfo ssi, TransportGuarantee std) {

@@ -105,6 +105,10 @@ public class UndertowWebServerConfig {
   private Optional<String> staticServingPath;
 
   @Inject
+  @ConfigProperty(name = "webserver.undertow.static-paths")
+  private Optional<String> staticPaths;
+
+  @Inject
   @ConfigProperty(name = "webserver.undertow.persistence-session", defaultValue = "false")
   private boolean persistenceSession;
 
@@ -218,6 +222,14 @@ public class UndertowWebServerConfig {
    */
   public Optional<String> getStaticContentPath() {
     return staticContentPath;
+  }
+
+  /**
+   * 
+   * @return the staticPaths
+   */
+  public Optional<String> getStaticPaths() {
+    return staticPaths;
   }
 
   /**

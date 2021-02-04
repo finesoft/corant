@@ -105,6 +105,7 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
   protected void onPreDestroy() {
     final long ms = terminationTimeout.toMillis();
     try {
+      dispatcher.shutdown();
       dispatcher.awaitTermination(ms, TimeUnit.MICROSECONDS);
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, e,

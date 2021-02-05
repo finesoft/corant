@@ -217,6 +217,11 @@ public interface Aggregate extends Entity {
       throw new GeneralRuntimeException(ERR_PARAM);
     }
 
+    static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
+      return Aggregates.tryResolve(cls, id)
+          .orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD));
+    }
+
     @Override
     default T retrieve() {
       return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
@@ -246,11 +251,7 @@ public interface Aggregate extends Entity {
           }
         }
       } while (resolvedClass == null && (referenceClass = referenceClass.getSuperclass()) != null);
-      if (resolvedClass != null && getId() != null) {
-        return Optional
-            .ofNullable(Aggregates.resolveRepository(resolvedClass).get(resolvedClass, getId()));
-      }
-      return Optional.empty();
+      return Aggregates.tryResolve(resolvedClass, getId());
     }
   }
 

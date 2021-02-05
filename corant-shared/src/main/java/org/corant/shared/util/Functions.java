@@ -18,6 +18,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Throwing.ThrowingSupplier;
 
 /**
  * corant-shared
@@ -60,6 +62,18 @@ public class Functions {
 
   public static <T> Optional<T> optional(T obj) {
     return Optional.ofNullable(obj);
+  }
+
+  public static <T, E extends Throwable> T throwingSupplied(ThrowingSupplier<T, E> supplier) {
+    T supplied = null;
+    if (supplier != null) {
+      try {
+        supplied = supplier.get();
+      } catch (Throwable e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return supplied;
   }
 
   public static <T> T trySupplied(Supplier<T> supplier) {

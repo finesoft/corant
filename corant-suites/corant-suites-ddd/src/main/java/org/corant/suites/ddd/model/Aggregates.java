@@ -72,7 +72,7 @@ public class Aggregates {
     throw new GeneralRuntimeException(ERR_PARAM);
   }
 
-  public static <X extends Aggregate> List<X> resolveList(Class<X> cls, String namedQuery,
+  public static <X extends Aggregate> List<X> select(Class<X> cls, String namedQuery,
       Object... params) {
     return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
   }

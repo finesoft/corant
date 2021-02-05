@@ -17,6 +17,7 @@ import static org.corant.context.Qualifiers.resolveNamedQualifiers;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
@@ -24,9 +25,14 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -37,6 +43,27 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 public class Instances {
+
+  public static <T> T create(Class<T> clazz, Annotation... qualifiers) {
+    if (clazz != null && CDIs.isEnabled()) {
+      BeanManager bm = CDI.current().getBeanManager();
+      Set<Bean<?>> beans = bm.getBeans(clazz, qualifiers);
+      if (isNotEmpty(beans)) {
+        if (beans.size() > 1) {
+          beans = beans.stream().filter(b -> (b.getBeanClass().equals(clazz) || b.isAlternative()))
+              .collect(Collectors.toSet());
+        }
+        if (isNotEmpty(beans)) {
+          Bean<?> bean = bm.resolve(beans);
+          if (bean != null) {
+            CreationalContext<?> context = bm.createCreationalContext(bean);
+            return context != null ? clazz.cast(bm.getReference(bean, clazz, context)) : null;
+          }
+        }
+      }
+    }
+    return null;
+  }
 
   /**
    * Find CDI bean instance
@@ -71,9 +98,8 @@ public class Instances {
       return Optional.empty();
     }
     String useName = defaultTrim(name);
-    if (isBlank(useName) && inst.isResolvable()) {
-      return Optional.of(inst.get());
-    } else if ((inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
+    if (isBlank(useName) && inst.isResolvable()
+        || (inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
       return Optional.of(inst.get());
     } else {
       return Optional.empty();

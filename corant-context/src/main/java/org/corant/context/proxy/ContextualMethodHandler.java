@@ -14,7 +14,6 @@
 package org.corant.context.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -25,11 +24,7 @@ import java.security.PrivilegedAction;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.context.Instances;
 
 /**
  * corant-context
@@ -159,18 +154,10 @@ public class ContextualMethodHandler {
     if (instance == null) {
       synchronized (this) {
         if (instance == null) {
-          final BeanManager bm = CDI.current().getBeanManager();
-          final Set<Bean<?>> beans = bm.getBeans(clazz, qualifiers);
-          Bean<?> resolvedBean;
-          if (sizeOf(beans) > 1) {
-            resolvedBean =
-                beans.stream().filter(b -> b.getBeanClass().equals(clazz)).findFirst().orElseThrow(
-                    () -> new CorantRuntimeException("Can't resolve bean class %s.", clazz));
-          } else {
-            resolvedBean = bm.resolve(bm.getBeans(clazz, qualifiers));
-          }
-          CreationalContext<?> creationalContext = bm.createCreationalContext(resolvedBean);
-          instance = bm.getReference(resolvedBean, clazz, creationalContext);
+          // FIXME cache or not
+          instance = shouldNotNull(Instances.create(clazz, qualifiers),
+              "Can't not initialize bean instance for contextual method handler, bean class is %s.",
+              clazz);
         }
       }
     }

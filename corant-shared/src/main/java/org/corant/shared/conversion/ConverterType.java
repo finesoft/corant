@@ -35,7 +35,6 @@ public class ConverterType<S, T> implements Serializable {
    * @param targetClass
    */
   public ConverterType(Class<S> sourceClass, Class<T> targetClass) {
-    super();
     this.sourceClass = shouldNotNull(sourceClass);
     this.targetClass = shouldNotNull(targetClass);
     this.hash = Objects.hash(sourceClass, targetClass);
@@ -66,13 +65,10 @@ public class ConverterType<S, T> implements Serializable {
       return false;
     }
     if (targetClass == null) {
-      if (other.targetClass != null) {
-        return false;
-      }
-    } else if (!targetClass.equals(other.targetClass)) {
-      return false;
+      return other.targetClass == null;
+    } else {
+      return targetClass.equals(other.targetClass);
     }
-    return true;
   }
 
   /**

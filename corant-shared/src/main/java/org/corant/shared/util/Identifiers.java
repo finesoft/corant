@@ -44,9 +44,7 @@ public class Identifiers {
 
   public static final long TIME_EPOCH_MILLS = 1_451_372_606_990L;
 
-  private Identifiers() {
-    super();
-  }
+  private Identifiers() {}
 
   public static long calMask(long bits) {
     return -1L ^ -1L << bits;
@@ -68,10 +66,8 @@ public class Identifiers {
       while (allowEq ? timestamp < lastTimestamp : timestamp <= lastTimestamp) {
         timestamp = toLong(timeGener.get());
       }
-      return timestamp;
-    } else {
-      return timestamp;
     }
+    return timestamp;
   }
 
   /**
@@ -102,7 +98,7 @@ public class Identifiers {
 
     protected volatile long lastTimestamp = -1L;
     protected volatile long localLastTimestamp = -1L;
-    protected AtomicLong sequence = new AtomicLong(0L);
+    protected final AtomicLong sequence = new AtomicLong(0L);
 
     /**
      * Construct a generator with no delay
@@ -220,10 +216,7 @@ public class Identifiers {
       if (!Arrays.equals(workerSegms, other.workerSegms)) {
         return false;
       }
-      if (workersBits != other.workersBits) {
-        return false;
-      }
-      return true;
+      return workersBits == other.workersBits;
     }
 
     @Override
@@ -441,10 +434,7 @@ public class Identifiers {
       if (dataCenterId != other.dataCenterId) {
         return false;
       }
-      if (workerId != other.workerId) {
-        return false;
-      }
-      return true;
+      return workerId == other.workerId;
     }
 
     @Override
@@ -515,13 +505,10 @@ public class Identifiers {
       }
       SnowflakeIpv4HostUUIDGenerator other = (SnowflakeIpv4HostUUIDGenerator) obj;
       if (ip == null) {
-        if (other.ip != null) {
-          return false;
-        }
-      } else if (!ip.equals(other.ip)) {
-        return false;
+        return other.ip == null;
+      } else {
+        return ip.equals(other.ip);
       }
-      return true;
     }
 
     public Inet4Address getIp() {
@@ -585,10 +572,7 @@ public class Identifiers {
         return false;
       }
       SnowflakeW10S12UUIDGenerator other = (SnowflakeW10S12UUIDGenerator) obj;
-      if (workerId != other.workerId) {
-        return false;
-      }
-      return true;
+      return workerId == other.workerId;
     }
 
     @Override

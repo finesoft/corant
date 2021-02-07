@@ -32,17 +32,15 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
   protected T defaultValue = null;
   protected boolean throwException = true;
-  protected Logger logger = Logger.getLogger(this.getClass().getName());
+  protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   public AbstractConverter() {
-    super();
   }
 
   /**
    * @param throwException
    */
   public AbstractConverter(boolean throwException) {
-    super();
     this.throwException = throwException;
   }
 
@@ -58,7 +56,6 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    * @param throwException
    */
   public AbstractConverter(T defaultValue, boolean throwException) {
-    super();
     this.defaultValue = defaultValue;
     this.throwException = throwException;
   }

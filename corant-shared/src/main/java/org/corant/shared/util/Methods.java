@@ -38,7 +38,6 @@ public class Methods {
   private static final Pattern IS_PTN = Pattern.compile("^is[A-Z].*");
 
   private Methods() {
-    super();
   }
 
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
@@ -53,13 +52,12 @@ public class Methods {
       if (methodName.equals(method.getName())
           && Objects.deepEquals(parameterTypes, method.getParameterTypes())) {
         return method;
-      } else if (methodName.equals(method.getName())
-          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)) {
-        if (inexactMatch == null
-            || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
-                inexactMatch.getParameterTypes())) {
-          inexactMatch = method;
-        }
+      } else if ((methodName.equals(method.getName())
+          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true))
+          && (inexactMatch == null
+              || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
+                  inexactMatch.getParameterTypes()))) {
+        inexactMatch = method;
       }
     }
     methods.clear();
@@ -72,10 +70,8 @@ public class Methods {
           && !method.getReturnType().equals(void.class)) {
         return true;
       }
-      if (IS_PTN.matcher(method.getName()).matches()
-          && method.getReturnType().equals(boolean.class)) {
-        return true;
-      }
+      return IS_PTN.matcher(method.getName()).matches()
+          && method.getReturnType().equals(boolean.class);
     }
     return false;
   }

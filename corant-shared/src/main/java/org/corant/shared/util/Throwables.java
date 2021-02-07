@@ -90,9 +90,7 @@ public class Throwables {
         return supplier.get();
       } catch (Exception e) {
         causes(e).forEach(ce -> {
-          Iterator<Case<S>> it = cases.iterator();
-          for (; it.hasNext();) {
-            Case<S> cas = it.next();
+          for (Case<S> cas : cases) {
             if (cas.ifThrow != null && cas.ifThrow.test(ce) && cas.rethrow != null) {
               throw cas.rethrow.get();
             }
@@ -105,7 +103,7 @@ public class Throwables {
     }
 
     public Case<S> ifThrow(final Class<? extends Throwable> causeClass) {
-      return ifThrow((t) -> causeClass.isInstance(t));
+      return ifThrow(t -> causeClass.isInstance(t));
     }
 
     public Case<S> ifThrow(final Predicate<Throwable> p) {

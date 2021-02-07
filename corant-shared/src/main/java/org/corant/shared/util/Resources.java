@@ -445,13 +445,10 @@ public class Resources {
         return false;
       }
       if (classPath == null) {
-        if (other.classPath != null) {
-          return false;
-        }
-      } else if (!classPath.equals(other.classPath)) {
-        return false;
+        return other.classPath == null;
+      } else {
+        return classPath.equals(other.classPath);
       }
-      return true;
     }
 
     public ClassLoader getClassLoader() {
@@ -533,13 +530,10 @@ public class Resources {
       }
       ClassResource other = (ClassResource) obj;
       if (className == null) {
-        if (other.className != null) {
-          return false;
-        }
-      } else if (!className.equals(other.className)) {
-        return false;
+        return other.className == null;
+      } else {
+        return className.equals(other.className);
       }
-      return true;
     }
 
     public String getClassName() {
@@ -614,13 +608,10 @@ public class Resources {
       }
       FileSystemResource other = (FileSystemResource) obj;
       if (file == null) {
-        if (other.file != null) {
-          return false;
-        }
-      } else if (!file.equals(other.file)) {
-        return false;
+        return other.file == null;
+      } else {
+        return file.equals(other.file);
       }
-      return true;
     }
 
     public File getFile() {
@@ -677,14 +668,12 @@ public class Resources {
      * @param name
      */
     public InputStreamResource(InputStream inputStream, String name) {
-      super();
       this.name = name;
       this.inputStream = inputStream;
       location = null;
     }
 
     public InputStreamResource(InputStream inputStream, String location, String name) {
-      super();
       this.name = name;
       this.location = location;
       this.inputStream = inputStream;

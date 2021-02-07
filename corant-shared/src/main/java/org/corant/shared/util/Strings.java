@@ -87,9 +87,7 @@ public class Strings {
   public static final String CRLF             = "\r\n";
   //@formatter:on
 
-  private Strings() {
-    super();
-  }
+  private Strings() {}
 
   /**
    * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
@@ -908,7 +906,6 @@ public class Strings {
      * @param wildcardExpress
      */
     protected WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
-      super();
       this.ignoreCase = ignoreCase;
       this.wildcardExpress = wildcardExpress;
       tokens = splitOnTokens(wildcardExpress);
@@ -938,13 +935,10 @@ public class Strings {
         return false;
       }
       if (wildcardExpress == null) {
-        if (other.wildcardExpress != null) {
-          return false;
-        }
-      } else if (!wildcardExpress.equals(other.wildcardExpress)) {
-        return false;
+        return other.wildcardExpress == null;
+      } else {
+        return wildcardExpress.equals(other.wildcardExpress);
       }
-      return true;
     }
 
     public String[] getTokens() {

@@ -604,13 +604,10 @@ public interface Mutable<T> extends Supplier<T> {
       }
       MutableNumber other = (MutableNumber) obj;
       if (value == null) {
-        if (other.value != null) {
-          return false;
-        }
-      } else if (!value.equals(other.value)) {
-        return false;
+        return other.value == null;
+      } else {
+        return value.equals(other.value);
       }
-      return true;
     }
 
     @Override
@@ -705,11 +702,9 @@ public interface Mutable<T> extends Supplier<T> {
     T value;
 
     public MutableObject() {
-      super();
     }
 
     public MutableObject(final T value) {
-      super();
       this.value = value;
     }
 
@@ -837,7 +832,6 @@ public interface Mutable<T> extends Supplier<T> {
   class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
     protected MutableString() {
-      super();
     }
 
     protected MutableString(final String value) {

@@ -197,7 +197,6 @@ public class Retry {
 
     protected DefaultRetryInterval(BackoffAlgorithm backoffAlgo, Duration interval,
         Duration maxInterval, Double backoffFactor) {
-      super();
       this.backoffAlgo = shouldNotNull(backoffAlgo, "The retry interval algo can't null!");
       shouldBeTrue(interval != null && interval.toMillis() >= 0, "The retry interval error!");
       this.interval = interval;
@@ -262,13 +261,10 @@ public class Retry {
         return false;
       }
       if (maxInterval == null) {
-        if (other.maxInterval != null) {
-          return false;
-        }
-      } else if (!maxInterval.equals(other.maxInterval)) {
-        return false;
+        return other.maxInterval == null;
+      } else {
+        return maxInterval.equals(other.maxInterval);
       }
-      return true;
     }
 
     public BackoffAlgorithm getBackoffAlgo() {
@@ -351,7 +347,7 @@ public class Retry {
     }
 
     public <T> T execute(final Supplier<T> supplier) {
-      return doExecute((i) -> forceCast(supplier.get()));
+      return doExecute(i -> forceCast(supplier.get()));
     }
 
     /**

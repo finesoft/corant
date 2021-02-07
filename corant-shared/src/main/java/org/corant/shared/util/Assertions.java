@@ -140,11 +140,10 @@ public class Assertions {
    * @param ex
    * @return shouldBeNull
    */
-  public static <T> T shouldBeNull(T obj, Supplier<? extends RuntimeException> ex) {
+  public static void shouldBeNull(Object obj, Supplier<? extends RuntimeException> ex) {
     if (obj != null) {
       throw ex.get();
     }
-    return null;
   }
 
   /**

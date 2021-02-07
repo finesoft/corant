@@ -174,7 +174,6 @@ public interface Tuple {
     protected final T max;
 
     protected Range(T min, T max) {
-      super();
       shouldBeTrue(compare(min, max) <= 0, IllegalArgumentException::new);
       this.min = min;
       this.max = max;
@@ -211,10 +210,6 @@ public interface Tuple {
       return lae(min, value) && gae(max, value);
     }
 
-    public T max() {
-      return max;
-    }
-
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
@@ -236,13 +231,10 @@ public interface Tuple {
         return false;
       }
       if (min == null) {
-        if (other.min != null) {
-          return false;
-        }
-      } else if (!min.equals(other.min)) {
-        return false;
+        return other.min == null;
+      } else {
+        return min.equals(other.min);
       }
-      return true;
     }
 
     public T getMax() {
@@ -270,6 +262,10 @@ public interface Tuple {
 
     public boolean isEmpty() {
       return min == null && max == null;
+    }
+
+    public T max() {
+      return max;
     }
 
     public T min() {

@@ -29,7 +29,7 @@ public class MpJWTRolesAuthorizer extends AbstractMpJWTAuthorizer {
 
   @Override
   protected boolean isAllowed(Predicate<String> p, JsonWebToken jwt) {
-    if (isNotEmpty(jwt.getGroups())) {
+    if (jwt != null && isNotEmpty(jwt.getGroups())) {
       return jwt.getGroups().stream().anyMatch(p);
     }
     return false;

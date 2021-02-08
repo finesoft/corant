@@ -29,7 +29,7 @@ public class MpJWTPermitsAuthorizer extends AbstractMpJWTAuthorizer {
 
   @Override
   protected boolean isAllowed(Predicate<String> p, JsonWebToken jwt) {
-    if (isNotEmpty(jwt.getGroups())) { // FIXME use another
+    if (jwt != null && isNotEmpty(jwt.getGroups())) { // FIXME use another
       return jwt.getGroups().stream().anyMatch(p);
     }
     return false;

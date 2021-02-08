@@ -1,19 +1,16 @@
 package org.corant.suites.quartz.embeddable;
 
-import org.corant.context.proxy.SerializableContextualMethodHandler;
-
+import static java.util.Collections.newSetFromMap;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static java.util.Collections.newSetFromMap;
+import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
  * config-tck <br>
@@ -23,10 +20,10 @@ import static java.util.Collections.newSetFromMap;
  */
 public class CorantJobExtension implements Extension {
 
-  protected final Set<SerializableContextualMethodHandler> jobMethods =
+  protected final Set<ContextualMethodHandler> jobMethods =
       newSetFromMap(new ConcurrentHashMap<>());
 
-  public Set<SerializableContextualMethodHandler> getJobMethods() {
+  public Set<ContextualMethodHandler> getJobMethods() {
     return Collections.unmodifiableSet(jobMethods);
   }
 
@@ -37,8 +34,7 @@ public class CorantJobExtension implements Extension {
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
-    SerializableContextualMethodHandler.fromDeclared(
-            beanClass, m -> m.isAnnotationPresent(CorantTrigger.class), NamedLiteral.of("hello"))
+    ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
         .forEach(cm -> jobMethods.add(cm));
   }
 }

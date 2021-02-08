@@ -83,15 +83,14 @@ public abstract class AbstractJMSExtension implements Extension {
 
   protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
       MessageStream.class, MessageSend.class, MessageSends.class}) ProcessAnnotatedType<?> pat) {
-    final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
 
+    final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
     MessageSend[] mss = beanClass.getAnnotationsByType(MessageSend.class);
     if (isNotEmpty(mss)) {
       for (MessageSend ms : mss) {
         connectionFactories.add(ms.connectionFactoryId());
       }
     }
-
     MessageSends ms = beanClass.getAnnotation(MessageSends.class);
     if (ms != null) {
       for (MessageSend m : ms.value()) {

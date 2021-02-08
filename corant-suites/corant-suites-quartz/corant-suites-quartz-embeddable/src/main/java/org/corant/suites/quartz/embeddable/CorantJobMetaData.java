@@ -1,6 +1,6 @@
 package org.corant.suites.quartz.embeddable;
 
-import org.corant.context.proxy.SerializableContextualMethodHandler;
+import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
  * config-tck <br>
@@ -9,22 +9,22 @@ import org.corant.context.proxy.SerializableContextualMethodHandler;
  * @since
  */
 public class CorantJobMetaData {
-  private final SerializableContextualMethodHandler method;
+  private final ContextualMethodHandler method;
   private final String triggerKey;
   private final String triggerGroup;
   private final String cron;
   private final long initialDelaySeconds;
 
-  public CorantJobMetaData(SerializableContextualMethodHandler method) {
+  public CorantJobMetaData(ContextualMethodHandler method) {
     this.method = method;
     final CorantTrigger ann = method.getMethod().getAnnotation(CorantTrigger.class);
-    this.cron = ann.cron();
-    this.triggerKey = ann.key();
-    this.triggerGroup = ann.group();
-    this.initialDelaySeconds = ann.initialDelaySeconds();
+    cron = ann.cron();
+    triggerKey = ann.key();
+    triggerGroup = ann.group();
+    initialDelaySeconds = ann.initialDelaySeconds();
   }
 
-  public static CorantJobMetaData of(SerializableContextualMethodHandler method) {
+  public static CorantJobMetaData of(ContextualMethodHandler method) {
     return new CorantJobMetaData(method);
   }
 
@@ -36,7 +36,7 @@ public class CorantJobMetaData {
     return initialDelaySeconds;
   }
 
-  public SerializableContextualMethodHandler getMethod() {
+  public ContextualMethodHandler getMethod() {
     return method;
   }
 

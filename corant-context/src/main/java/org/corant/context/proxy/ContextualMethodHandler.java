@@ -15,16 +15,22 @@ package org.corant.context.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.corant.context.Instances;
+import org.corant.shared.util.Methods.MethodSignature;
 
 /**
  * corant-context
@@ -32,11 +38,14 @@ import org.corant.context.Instances;
  * @author bingo 下午2:26:15
  *
  */
-public class ContextualMethodHandler {
-  final Class<?> clazz;
-  final Method method;
-  final Annotation[] qualifiers;
-  transient volatile Object instance;
+public class ContextualMethodHandler implements Serializable {
+
+  private static final long serialVersionUID = -195173432418927348L;
+
+  protected Annotation[] qualifiers;
+  protected Class<?> clazz;
+  protected Method method;
+  protected MethodSignature methodSignature;
 
   public ContextualMethodHandler(Method method) {
     this(null, method);
@@ -45,6 +54,7 @@ public class ContextualMethodHandler {
   protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
       Annotation... qualifiers) {
     method = shouldNotNull(beanMethod);
+    methodSignature = MethodSignature.of(method);
     clazz = defaultObject(beanClass, beanMethod::getDeclaringClass);
     this.qualifiers = qualifiers;
   }
@@ -65,6 +75,7 @@ public class ContextualMethodHandler {
   public static Set<ContextualMethodHandler> fromDeclared(Class<?> clazz,
       Predicate<Method> methodPredicate, Annotation... qualifiers) {
     Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
+    // FIXME the class qualifiers
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getDeclaredMethods()) {
         if (methodPredicate.test(m)) {
@@ -121,14 +132,6 @@ public class ContextualMethodHandler {
 
   /**
    *
-   * @return the instance
-   */
-  public Object getInstance() {
-    return instance;
-  }
-
-  /**
-   *
    * @return the method
    */
   public Method getMethod() {
@@ -146,20 +149,16 @@ public class ContextualMethodHandler {
 
   public Object invoke(Object... parameters)
       throws IllegalAccessException, InvocationTargetException {
-    initialize();
-    return method.invoke(instance, parameters);
+    return method.invoke(Instances.resolve(clazz, qualifiers), parameters);
   }
 
-  protected void initialize() {
-    if (instance == null) {
-      synchronized (this) {
-        if (instance == null) {
-          // FIXME cache or not
-          instance = shouldNotNull(Instances.create(clazz, qualifiers),
-              "Can't not initialize bean instance for contextual method handler, bean class is %s.",
-              clazz);
-        }
-      }
-    }
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    method = Arrays.stream(clazz.getDeclaredMethods()).filter(methodSignature::matches).findFirst()
+        .orElseThrow();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
   }
 }

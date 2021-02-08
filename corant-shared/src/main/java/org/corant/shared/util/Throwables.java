@@ -21,6 +21,8 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -92,7 +94,7 @@ public class Throwables {
         causes(e).forEach(ce -> {
           for (Case<S> cas : cases) {
             if (cas.ifThrow != null && cas.ifThrow.test(ce) && cas.rethrow != null) {
-              throw cas.rethrow.get();
+              throw cas.rethrow.apply(e, ce);
             }
           }
         });
@@ -117,19 +119,27 @@ public class Throwables {
   public static class Case<S> {
     final Attempt<S> attempt;
     Predicate<Throwable> ifThrow;
-    Supplier<RuntimeException> rethrow;
+    BiFunction<Throwable, Throwable, RuntimeException> rethrow;
 
     private Case(Attempt<S> attempt) {
       this.attempt = attempt;
     }
 
+    public Attempt<S> rethrow(final BiFunction<Throwable, Throwable, RuntimeException> rethrow) {
+      this.rethrow = shouldNotNull(rethrow);
+      return attempt;
+    }
+
+    public Attempt<S> rethrow(final Function<Throwable, RuntimeException> rethrow) {
+      return rethrow((rc, c) -> shouldNotNull(rethrow).apply(c));
+    }
+
     public Attempt<S> rethrow(final RuntimeException rethrow) {
-      return rethrow(() -> rethrow);
+      return rethrow((rc, c) -> shouldNotNull(rethrow));
     }
 
     public Attempt<S> rethrow(final Supplier<RuntimeException> rethrow) {
-      this.rethrow = rethrow;
-      return attempt;
+      return rethrow((rc, c) -> shouldNotNull(rethrow).get());
     }
   }
 }

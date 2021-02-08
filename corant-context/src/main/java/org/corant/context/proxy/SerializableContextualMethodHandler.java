@@ -15,16 +15,22 @@ package org.corant.context.proxy;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.corant.context.Instances;
+import org.corant.shared.util.Methods.MethodSignature;
 
 /**
  * corant-context
@@ -32,39 +38,42 @@ import org.corant.context.Instances;
  * @author bingo 下午2:26:15
  *
  */
-public class ContextualMethodHandler {
-  final Class<?> clazz;
-  final Method method;
-  final Annotation[] qualifiers;
+public class SerializableContextualMethodHandler implements Serializable {
+  private static final long serialVersionUID = -6009740790817941524L;
+  Class<?> clazz;
+  transient Method method;
   transient volatile Object instance;
+  Annotation[] qualifiers;
+  MethodSignature methodSerial;
 
-  public ContextualMethodHandler(Method method) {
+  public SerializableContextualMethodHandler(Method method) {
     this(null, method);
   }
 
-  protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
+  protected SerializableContextualMethodHandler(Class<?> beanClass, Method beanMethod,
       Annotation... qualifiers) {
     method = shouldNotNull(beanMethod);
     clazz = defaultObject(beanClass, beanMethod::getDeclaringClass);
     this.qualifiers = qualifiers;
+    methodSerial = MethodSignature.of(method);
   }
 
-  public static Set<ContextualMethodHandler> from(Class<?> clazz, Predicate<Method> methodPredicate,
-      Annotation... qualifiers) {
-    Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
+  public static Set<SerializableContextualMethodHandler> from(Class<?> clazz,
+      Predicate<Method> methodPredicate, Annotation... qualifiers) {
+    Set<SerializableContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getMethods()) {
         if (methodPredicate.test(m)) {
-          annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
+          annotatedMethods.add(new SerializableContextualMethodHandler(clazz, m, qualifiers));
         }
       }
     }
     return annotatedMethods;
   }
 
-  public static Set<ContextualMethodHandler> fromDeclared(Class<?> clazz,
+  public static Set<SerializableContextualMethodHandler> fromDeclared(Class<?> clazz,
       Predicate<Method> methodPredicate, Annotation... qualifiers) {
-    Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
+    Set<SerializableContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getDeclaredMethods()) {
         if (methodPredicate.test(m)) {
@@ -75,7 +84,7 @@ public class ContextualMethodHandler {
               return null;
             });
           }
-          annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
+          annotatedMethods.add(new SerializableContextualMethodHandler(clazz, m, qualifiers));
         }
       }
     }
@@ -93,7 +102,7 @@ public class ContextualMethodHandler {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    ContextualMethodHandler other = (ContextualMethodHandler) obj;
+    SerializableContextualMethodHandler other = (SerializableContextualMethodHandler) obj;
     if (clazz == null) {
       if (other.clazz != null) {
         return false;
@@ -161,5 +170,17 @@ public class ContextualMethodHandler {
         }
       }
     }
+  }
+
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    methodSerial = (MethodSignature) stream.readObject();
+    method = Arrays.stream(clazz.getDeclaredMethods()).filter(methodSerial::matches).findFirst()
+        .orElseThrow();
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+    stream.writeObject(methodSerial);
   }
 }

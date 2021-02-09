@@ -6,7 +6,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
 /**
- * config-tck <br>
+ * corant-suites-quartz-embeddable <br>
  *
  * @author sushuaihao 2021/1/19
  * @since

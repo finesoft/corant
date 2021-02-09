@@ -459,6 +459,11 @@
 				<artifactId>corant-suites-security-shared</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-quartz-embeddable</artifactId>
+				<version>${revision}</version>
+			</dependency>
 
 			<!-- Third Party -->
 			<dependency>

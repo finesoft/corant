@@ -3,7 +3,7 @@ package org.corant.suites.quartz.embeddable;
 import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
- * config-tck <br>
+ * corant-suites-quartz-embeddable <br>
  *
  * @author sushuaihao 2021/1/22
  * @since

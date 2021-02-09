@@ -1,23 +1,33 @@
 package org.corant.suites.quartz.embeddable;
 
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.quartz.Scheduler;
+import org.quartz.Trigger;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+/**
+ * corant-suites-quartz-embeddable
+ *
+ * @author bingo 下午8:09:45
+ *
+ */
 @Target({METHOD})
 @Retention(RUNTIME)
 @Documented
 public @interface CorantTrigger {
+
+  /**
+   * The trigger cron expression string to base the schedule on.
+   *
+   * @return cron
+   */
   String cron() default "";
 
   /**
-   * end at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+   * The trigger end at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
    *
    * @return
    */
@@ -31,17 +41,22 @@ public @interface CorantTrigger {
    */
   String group() default Scheduler.DEFAULT_GROUP;
 
+  /**
+   * Trigger key, combined with the {@link #group()} to form a trigger unique identifier.
+   *
+   * @return key
+   */
   String key() default "";
 
   /**
-   * start at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+   * The trigger start at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
    *
    * @return
    */
   long startAtEpochMilli() default -1;
 
   /**
-   * delay seconds start , if #startAtEpochMilli() be set. This will be invalid.
+   * The trigger delay seconds start , if #startAtEpochMilli() be set. This will be invalid.
    *
    * @see #startAtEpochMilli()
    * @return

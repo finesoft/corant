@@ -6,35 +6,34 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
- * config-tck <br>
+ * corant-suites-quartz-embeddable <br>
  *
  * @author sushuaihao 2021/1/22
  * @since
  */
 public class CorantJobExtension implements Extension {
 
-  protected final Set<ContextualMethodHandler> jobMethods =
-      newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<CorantJobMetaData> jobMetaDatas = newSetFromMap(new ConcurrentHashMap<>());
 
-  public Set<ContextualMethodHandler> getJobMethods() {
-    return Collections.unmodifiableSet(jobMethods);
+  public Set<CorantJobMetaData> getJobMetaDatas() {
+    return Collections.unmodifiableSet(jobMetaDatas);
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
-    jobMethods.clear();
+  protected void onBeforeShutdown(@Observes @Priority(0) PreContainerStopEvent bs) {
+    jobMetaDatas.clear();
   }
 
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
-        .forEach(cm -> jobMethods.add(cm));
+        .stream().map(CorantJobMetaData::of).forEach(cm -> jobMetaDatas.add(cm));
   }
 }

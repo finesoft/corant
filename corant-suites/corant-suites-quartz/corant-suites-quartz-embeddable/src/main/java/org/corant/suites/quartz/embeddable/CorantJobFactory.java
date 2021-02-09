@@ -9,7 +9,7 @@ import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 
 /**
- * config-tck <br>
+ * corant-suites-quartz-embeddable <br>
  *
  * @author sushuaihao 2021/2/5
  * @since

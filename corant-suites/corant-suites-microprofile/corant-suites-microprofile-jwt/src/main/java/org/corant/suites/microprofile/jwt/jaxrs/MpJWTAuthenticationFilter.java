@@ -69,7 +69,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));
           logger.debugf("Success");
         } catch (Exception e) {
-          logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
+          logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
           requestContext.setProperty(JTW_EXCEPTION_KEY, e);
         }
       }

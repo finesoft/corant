@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,6 +36,43 @@ import java.util.stream.IntStream;
 public class Atomics {
 
   private Atomics() {}
+
+  public static <T> Supplier<T> atomicInitializer(final Supplier<T> supplier) {
+    return new Supplier<T>() {
+      final AtomicReference<T> supplied = new AtomicReference<>();
+
+      @Override
+      public T get() {
+        T result = supplied.get();
+        if (result == null) {
+          result = supplier.get();
+          if (!supplied.compareAndSet(null, result)) {
+            result = supplied.get();
+          }
+        }
+        return result;
+      }
+    };
+  }
+
+  public static <T> Supplier<T> atomicOnceInitializer(final Supplier<T> supplier) {
+    return new Supplier<T>() {
+      final AtomicReference<Supplier<T>> factory = new AtomicReference<>();
+      final AtomicReference<T> supplied = new AtomicReference<>();
+
+      @Override
+      public T get() {
+        T result;
+        while ((result = supplied.get()) == null) {
+          if (factory.compareAndSet(null, supplier)) {
+            supplied.set(factory.get().get());
+          }
+        }
+        return result;
+      }
+
+    };
+  }
 
   /**
    * corant-shared

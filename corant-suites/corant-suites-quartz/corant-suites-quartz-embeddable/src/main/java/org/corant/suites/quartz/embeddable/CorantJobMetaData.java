@@ -13,7 +13,10 @@ public class CorantJobMetaData {
   private final String triggerKey;
   private final String triggerGroup;
   private final String cron;
-  private final long initialDelaySeconds;
+  private final long startDelaySeconds;
+  private final long startAtEpochMilli;
+  private final long endAtEpochMilli;
+  private final int triggerPriority;
 
   public CorantJobMetaData(ContextualMethodHandler method) {
     this.method = method;
@@ -21,7 +24,10 @@ public class CorantJobMetaData {
     cron = ann.cron();
     triggerKey = ann.key();
     triggerGroup = ann.group();
-    initialDelaySeconds = ann.initialDelaySeconds();
+    startDelaySeconds = ann.startDelaySeconds();
+    triggerPriority = ann.triggerPriority();
+    startAtEpochMilli = ann.startAtEpochMilli();
+    endAtEpochMilli = ann.endAtEpochMilli();
   }
 
   public static CorantJobMetaData of(ContextualMethodHandler method) {
@@ -32,12 +38,20 @@ public class CorantJobMetaData {
     return cron;
   }
 
-  public long getInitialDelaySeconds() {
-    return initialDelaySeconds;
+  public long getEndAtEpochMilli() {
+    return endAtEpochMilli;
   }
 
   public ContextualMethodHandler getMethod() {
     return method;
+  }
+
+  public long getStartAtEpochMilli() {
+    return startAtEpochMilli;
+  }
+
+  public long getStartDelaySeconds() {
+    return startDelaySeconds;
   }
 
   public String getTriggerGroup() {
@@ -46,5 +60,9 @@ public class CorantJobMetaData {
 
   public String getTriggerKey() {
     return triggerKey;
+  }
+
+  public int getTriggerPriority() {
+    return triggerPriority;
   }
 }

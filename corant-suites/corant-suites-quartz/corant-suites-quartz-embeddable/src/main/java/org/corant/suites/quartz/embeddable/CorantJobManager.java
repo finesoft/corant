@@ -33,26 +33,36 @@ public class CorantJobManager {
 
   protected final Set<CorantJobMetaData> jobMetaDatas = Sets.newConcurrentHashSet();
   @Inject protected CorantJobExtension extension;
-  @Inject
-  CorantJobFactory cdiJobFactory;
+  @Inject CorantJobFactory cdiJobFactory;
   private Scheduler sched;
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
       throws SchedulerException {
-    SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-    sched = schedFact.getScheduler();
+    SchedulerFactory schedulerFactory = new org.quartz.impl.StdSchedulerFactory();
+    sched = schedulerFactory.getScheduler();
     sched.setJobFactory(cdiJobFactory);
     sched.start();
     for (final CorantJobMetaData metaData : jobMetaDatas) {
       JobDetail job = newJob(ContextualJobImpl.class).build();
       job.getJobDataMap().put(String.valueOf(job.getKey()), metaData.getMethod());
-      TriggerBuilder<Trigger> triggerBuilder =
-          newTrigger().withIdentity(metaData.getTriggerKey(), metaData.getTriggerGroup());
-      if (metaData.getInitialDelaySeconds() > 0) {
-        triggerBuilder.startAt(
-            Date.from(Instant.now().plusSeconds(metaData.getInitialDelaySeconds())));
+      TriggerBuilder<Trigger> triggerBuilder = newTrigger();
+      triggerBuilder.withPriority(metaData.getTriggerPriority());
+      if (Strings.isNotBlank(metaData.getTriggerKey())) {
+        triggerBuilder.withIdentity(metaData.getTriggerKey(), metaData.getTriggerGroup());
+      }
+      if (metaData.getStartDelaySeconds() > 0 || metaData.getStartAtEpochMilli() > 0) {
+        if (metaData.getStartDelaySeconds() > 0) {
+          triggerBuilder.startAt(
+              Date.from(Instant.now().plusSeconds(metaData.getStartDelaySeconds())));
+        }
+        if (metaData.getStartAtEpochMilli() > 0) {
+          triggerBuilder.startAt(Date.from(Instant.ofEpochMilli(metaData.getStartAtEpochMilli())));
+        }
       } else {
         triggerBuilder.startNow();
+      }
+      if (metaData.getEndAtEpochMilli() > 0) {
+        triggerBuilder.endAt(new Date(metaData.getEndAtEpochMilli()));
       }
       if (Strings.isNotBlank(metaData.getCron())) {
         triggerBuilder.withSchedule(cronSchedule(metaData.getCron()));

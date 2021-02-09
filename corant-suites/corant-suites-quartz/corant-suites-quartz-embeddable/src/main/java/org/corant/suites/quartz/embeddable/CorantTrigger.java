@@ -16,14 +16,36 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface CorantTrigger {
   String cron() default "";
 
+  /**
+   * end at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+   *
+   * @return
+   */
   long endAtEpochMilli() default -1;
 
+  /**
+   * if only group be set , will be invalid. Required with #key() and key's value can't be "".
+   *
+   * @see #key()
+   * @return
+   */
   String group() default Scheduler.DEFAULT_GROUP;
 
   String key() default "";
 
+  /**
+   * start at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+   *
+   * @return
+   */
   long startAtEpochMilli() default -1;
 
+  /**
+   * delay seconds start , if #startAtEpochMilli() be set. This will be invalid.
+   *
+   * @see #startAtEpochMilli()
+   * @return
+   */
   long startDelaySeconds() default -1;
 
   /**

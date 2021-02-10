@@ -40,7 +40,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 @SuppressWarnings("rawtypes")
-public class PropertyEnumerationBundle implements EnumerationBundle {
+public class PropertyEnumerationSource implements EnumerationSource {
 
   @Inject
   protected Logger logger;

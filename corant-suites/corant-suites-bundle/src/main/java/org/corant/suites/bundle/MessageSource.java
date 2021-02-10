@@ -13,33 +13,20 @@
  */
 package org.corant.suites.bundle;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.function.Function;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-suites-bundle
  *
- * @author bingo 下午3:44:33
+ * @author bingo 下午3:45:34
  *
  */
-@SuppressWarnings("rawtypes")
-public interface EnumerationBundle {
+public interface MessageSource extends Sortable {
 
-  default List<Class<Enum>> getAllEnumClass() {
-    return Collections.emptyList();
-  }
+  String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException;
 
-  default String getEnumClassLiteral(Class<?> enumClass, Locale locale) {
-    return null;
-  }
-
-  default String getEnumItemLiteral(Enum enumVal, Locale locale) {
-    return enumVal.name();
-  }
-
-  default <T extends Enum> Map<T, String> getEnumItemLiterals(Class<T> enumClass, Locale locale) {
-    return Collections.emptyMap();
-  }
+  String getMessage(Locale locale, Object key, Object[] args,
+      Function<Locale, String> defaultMessage);
 }

@@ -29,13 +29,13 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Objects;
 import org.corant.suites.bundle.MessageResolver;
 import org.corant.suites.bundle.MessageResolver.MessageSeverity;
-import org.corant.suites.bundle.MessageResolver.MessageSource;
+import org.corant.suites.bundle.MessageResolver.MessageParameter;
 
 /**
  * @author bingo 下午6:19:52
  *
  */
-public class GeneralRuntimeException extends CorantRuntimeException implements MessageSource {
+public class GeneralRuntimeException extends CorantRuntimeException implements MessageParameter {
 
   private static final long serialVersionUID = -3720369148530068164L;
 

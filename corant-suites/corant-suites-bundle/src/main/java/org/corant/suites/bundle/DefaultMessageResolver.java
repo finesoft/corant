@@ -16,8 +16,8 @@ package org.corant.suites.bundle;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_ERR_CODE;
-import static org.corant.suites.bundle.MessageResolver.MessageSource.UNKNOW_INF_CODE;
+import static org.corant.suites.bundle.MessageResolver.MessageParameter.UNKNOW_ERR_CODE;
+import static org.corant.suites.bundle.MessageResolver.MessageParameter.UNKNOW_INF_CODE;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,10 +28,15 @@ import java.util.Arrays;
 import java.util.Locale;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.corant.shared.ubiquity.Mutable.MutableString;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-suites-bundle
@@ -47,10 +52,12 @@ public class DefaultMessageResolver implements MessageResolver {
       .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 
   @Inject
-  protected PropertyMessageBundle messageBundle;
+  @Any
+  protected Instance<MessageSource> messageSources;
 
   @Inject
-  protected EnumerationBundle enumBundle;
+  @Any
+  protected Instance<EnumerationSource> enumerationSources;
 
   public Object[] genParameters(Locale locale, Object[] parameters) {
     if (parameters.length > 0) {
@@ -60,35 +67,58 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   @Override
-  public String getMessage(Locale locale, MessageSource messageSource) {
+  public String getMessage(Locale locale, MessageParameter messageSource) {
     if (messageSource == null) {
       return null;
     }
     String codes = asDefaultString(messageSource.getCodes());
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(useLocale, messageSource.getParameters());
-    return messageBundle.getMessage(useLocale, codes, parameters,
-        l -> getUnknowMessage(l, messageSource.getMessageSeverity(), codes));
+    MutableString ms = MutableString.of(null);
+    if (!messageSources.isUnsatisfied()) {
+      messageSources.stream().sorted(Sortable::reverseCompare)
+          .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
+          .findFirst().ifPresent(ms::set);
+    }
+    return defaultObject(ms.get(),
+        () -> getUnknowMessage(useLocale, messageSource.getMessageSeverity(), codes));
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(useLocale, params);
-    return messageBundle.getMessage(useLocale, codes, parameters,
-        l -> String.format("Can't find any message for %s.", codes));
+    MutableString ms = MutableString.of(null);
+    if (!messageSources.isUnsatisfied()) {
+      messageSources.stream().sorted(Sortable::reverseCompare)
+          .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
+          .findFirst().ifPresent(ms::set);
+    }
+    return defaultObject(ms.get(), () -> String.format("Can't find any message for %s.", codes));
   }
 
   public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
     String unknow = ser == MessageSeverity.INF ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
-    return messageBundle.getMessage(locale, unknow, new Object[] {code},
-        l -> String.format("Can't find any message for %s.", code));
+
+    MutableString ms = MutableString.of(null);
+    if (!messageSources.isUnsatisfied()) {
+      messageSources.stream().sorted(Sortable::reverseCompare)
+          .map(b -> b.getMessage(locale, unknow, new Object[] {code})).filter(Strings::isNotBlank)
+          .findFirst().ifPresent(ms::set);
+    }
+    return defaultObject(ms.get(), () -> String.format("Can't find any message for %s.", code));
   }
 
   @SuppressWarnings("rawtypes")
   protected Object handleParameter(Locale locale, Object obj) {
     if (obj instanceof Enum) {
-      String literal = enumBundle.getEnumItemLiteral((Enum) obj, locale);
+      MutableString ms = MutableString.of(null);
+      if (!enumerationSources.isUnsatisfied()) {
+        enumerationSources.stream().sorted(Sortable::reverseCompare)
+            .map(b -> b.getEnumItemLiteral((Enum) obj, locale)).filter(Strings::isNotBlank)
+            .findFirst().ifPresent(ms::set);
+      }
+      String literal = ms.get();
       return literal == null ? obj : literal;
     } else if (obj instanceof Instant || obj instanceof ZonedDateTime) {
       return DATE_TIME_FMT.format((TemporalAccessor) obj);

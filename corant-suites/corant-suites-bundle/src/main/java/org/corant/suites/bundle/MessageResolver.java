@@ -39,7 +39,7 @@ public interface MessageResolver {
     return sb.toString();
   }
 
-  String getMessage(Locale locale, MessageSource messageSource);
+  String getMessage(Locale locale, MessageParameter messageSource);
 
   String getMessage(Locale locale, Object codes, Object... params);
 
@@ -51,7 +51,7 @@ public interface MessageResolver {
     }
   }
 
-  interface MessageSource {
+  interface MessageParameter {
 
     String UNKNOW_INF_CODE = "INF.message.unknow";
     String UNKNOW_ERR_CODE = "ERR.message.unknow";

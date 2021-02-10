@@ -32,6 +32,10 @@ public interface Sortable {
     return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal()) * -1;
   }
 
+  static int reverseCompare(Sortable ccf1, Sortable ccf2) {
+    return -1 * compare(ccf1, ccf2);
+  }
+
   default int getOrdinal() {
     return 0;
   }

@@ -38,7 +38,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  */
 @ApplicationScoped
-public class PropertyMessageBundle implements MessageBundle {
+public class PropertyMessageSource implements MessageSource {
 
   protected final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
 

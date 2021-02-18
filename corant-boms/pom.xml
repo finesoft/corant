@@ -461,6 +461,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-mail</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
 				<artifactId>corant-suites-quartz-embeddable</artifactId>
 				<version>${revision}</version>
 			</dependency>

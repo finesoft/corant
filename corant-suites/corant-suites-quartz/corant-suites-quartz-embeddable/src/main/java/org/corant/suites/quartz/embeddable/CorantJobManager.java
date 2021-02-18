@@ -1,12 +1,13 @@
 package org.corant.suites.quartz.embeddable;
 
-import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Strings;
+import org.corant.shared.ubiquity.Atomics;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -40,7 +41,7 @@ public class CorantJobManager {
   protected CorantJobExtension extension;
 
   @Inject
-  protected CorantJobFactory cdiJobFactory;
+  protected CorantJobFactory jobFactory;
 
   @Inject
   @ConfigProperty(name = "quartz.scheduler.shutdown.wait-for-jobs-complete", defaultValue = "false")
@@ -50,31 +51,34 @@ public class CorantJobManager {
   @ConfigProperty(name = "quartz.scheduler.start-delayed")
   protected Optional<Integer> startDelayed;
 
-  protected Scheduler scheduler;
-
-  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
-      throws SchedulerException {
+  protected Supplier<Scheduler> schedulerSupplier = Atomics.atomicOneOffInitializer(() -> {
     try {
       SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-      scheduler = schedulerFactory.getScheduler();
-      scheduler.setJobFactory(cdiJobFactory);
+      Scheduler scheduler = schedulerFactory.getScheduler();
+      scheduler.setJobFactory(jobFactory);
       if (startDelayed.isEmpty()) {
         scheduler.start();
       } else {
         scheduler.startDelayed(startDelayed.get());
       }
+      return scheduler;
     } catch (SchedulerException e) {
       throw new CorantRuntimeException(e);
     }
-    if (isEmpty(extension.getJobMetaDatas())) {
-      return;
-    }
+  });
+
+  public Scheduler getScheduler() {
+    return schedulerSupplier.get();
+  }
+
+  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
+      throws SchedulerException {
     for (final CorantJobMetaData metaData : extension.getJobMetaDatas()) {
       JobDetail job = newJob(ContextualJobImpl.class).build();
       job.getJobDataMap().put(String.valueOf(job.getKey()), metaData.getMethod());
       TriggerBuilder<Trigger> triggerBuilder = newTrigger();
       triggerBuilder.withPriority(metaData.getTriggerPriority());
-      if (Strings.isNotBlank(metaData.getTriggerKey())) {
+      if (isNotBlank(metaData.getTriggerKey())) {
         triggerBuilder.withIdentity(metaData.getTriggerKey(), metaData.getTriggerGroup());
       }
       if (metaData.getStartDelaySeconds() > 0 || metaData.getStartAtEpochMilli() > 0) {
@@ -91,18 +95,18 @@ public class CorantJobManager {
       if (metaData.getEndAtEpochMilli() > 0) {
         triggerBuilder.endAt(new Date(metaData.getEndAtEpochMilli()));
       }
-      if (Strings.isNotBlank(metaData.getCron())) {
+      if (isNotBlank(metaData.getCron())) {
         triggerBuilder.withSchedule(cronSchedule(metaData.getCron()));
       }
       Trigger trigger = triggerBuilder.build();
-      scheduler.scheduleJob(job, trigger);
+      getScheduler().scheduleJob(job, trigger);
     }
   }
 
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent pse) {
     try {
-      if (scheduler != null && !scheduler.isShutdown()) {
-        scheduler.shutdown(waitForJobsToComplete);
+      if (getScheduler() != null && !getScheduler().isShutdown()) {
+        getScheduler().shutdown(waitForJobsToComplete);
       }
     } catch (SchedulerException e) {
       throw new CorantRuntimeException(e);

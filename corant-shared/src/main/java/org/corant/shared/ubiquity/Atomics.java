@@ -17,6 +17,7 @@ import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.intBitsToFloat;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -37,7 +38,23 @@ public class Atomics {
 
   private Atomics() {}
 
+  /**
+   * Return the atomic instance supplier. Suitable for singleton object construction in
+   * multi-threaded scenarios; in most cases, it can replace those code blocks that use the volatile
+   * or synchronized keywords for one-off singleton object construction.
+   *
+   * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
+   * called, otherwise an exception will be thrown, the {@code supplier} may be called more then
+   * once.
+   *
+   * Partial code block come from org.apache.commons.
+   *
+   * @param <T> the instance type
+   * @param supplier the actual instance construction
+   * @return the atomic instance supplier
+   */
   public static <T> Supplier<T> atomicInitializer(final Supplier<T> supplier) {
+    shouldNotNull(supplier);
     return new Supplier<T>() {
       final AtomicReference<T> supplied = new AtomicReference<>();
 
@@ -45,7 +62,7 @@ public class Atomics {
       public T get() {
         T result = supplied.get();
         if (result == null) {
-          result = supplier.get();
+          result = shouldNotNull(supplier.get());
           if (!supplied.compareAndSet(null, result)) {
             result = supplied.get();
           }
@@ -55,7 +72,23 @@ public class Atomics {
     };
   }
 
-  public static <T> Supplier<T> atomicOnceInitializer(final Supplier<T> supplier) {
+  /**
+   * Return the atomic instance supplier, and ensure that the incoming {@code supplier} is only
+   * called once. Suitable for singleton object construction inmulti-threaded scenarios; in most
+   * cases, it can replace those code blocks that use the volatile or synchronized keywords for
+   * one-off singleton object construction.
+   *
+   * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
+   * called, otherwise an exception will be thrown.
+   *
+   * Partial code block come from org.apache.commons.
+   *
+   * @param <T> the instance type
+   * @param supplier the actual instance construction
+   * @return the atomic instance supplier
+   */
+  public static <T> Supplier<T> atomicOneOffInitializer(final Supplier<T> supplier) {
+    shouldNotNull(supplier);
     return new Supplier<T>() {
       final AtomicReference<Supplier<T>> factory = new AtomicReference<>();
       final AtomicReference<T> supplied = new AtomicReference<>();
@@ -65,12 +98,11 @@ public class Atomics {
         T result;
         while ((result = supplied.get()) == null) {
           if (factory.compareAndSet(null, supplier)) {
-            supplied.set(factory.get().get());
+            supplied.set(shouldNotNull(factory.get().get()));
           }
         }
         return result;
       }
-
     };
   }
 

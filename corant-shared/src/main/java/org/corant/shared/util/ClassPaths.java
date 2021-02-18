@@ -16,9 +16,11 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.immutableSetOf;
+import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.replace;
@@ -37,7 +39,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -72,10 +73,10 @@ import org.corant.shared.util.Resources.URLResource;
 public class ClassPaths {
 
   public static final char PATH_SEPARATOR = '/';
+  public static final String PATH_SEPARATOR_STRING = "/";
   public static final String JAR_URL_SEPARATOR = "!/";
-  public static final String PATH_SEPARATOR_STRING = Character.toString(PATH_SEPARATOR);
   public static final String CLASSES = "classes";
-  public static final String CLASSES_FOLDER = CLASSES + PATH_SEPARATOR_STRING;
+  public static final String CLASSES_FOLDER = "classes/";
   public static final String JAR_EXT = ".jar";
   public static final String WAR_EXT = ".war";
   public static final String META_INF = "META-INF";
@@ -83,6 +84,10 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
+  public static final String SYS_PATH_SEPARATOR = System.getProperty("path.separator");
+  public static final String SYS_CLASS_PATH = System.getProperty("java.class.path");
+  public static final String SYS_BOOT_CLASS_PATH = System.getProperty("sun.boot.class.path");
+  public static final String SYS_EXT_DIRS = System.getProperty("java.ext.dirs");
 
   protected static final Set<String> sysLibs =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
@@ -91,9 +96,7 @@ public class ClassPaths {
 
   private static final Logger logger = Logger.getLogger(ClassPaths.class.getName());
 
-  private ClassPaths() {
-    super();
-  }
+  private ClassPaths() {}
 
   /**
    * Build an war class loader, Careful use may result in leakage. We only extract WEB-INF folder to
@@ -234,36 +237,32 @@ public class ClassPaths {
       for (URL url : getClassPathResourceUrls(classLoader, path)) {
         entries.putIfAbsent(url.toURI(), classLoader);
       }
-      if (loadAll(path)) {
-        ClassLoader currClsLoader = classLoader;
-        do {
-          if (currClsLoader instanceof URLClassLoader) {
-            @SuppressWarnings("resource")
-            URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
-            for (URL entry : currUrlClsLoader.getURLs()) {
-              entries.putIfAbsent(entry.toURI(), currClsLoader);
+      ClassLoader currClsLoader = classLoader;
+      do {
+        if (currClsLoader instanceof URLClassLoader) {
+          @SuppressWarnings("resource")
+          URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
+          for (URL entry : currUrlClsLoader.getURLs()) {
+            entries.putIfAbsent(entry.toURI(), currClsLoader);
+          }
+        }
+        if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
+          Set<String> sysClsPaths = linkedHashSetOf(split(SYS_CLASS_PATH, SYS_PATH_SEPARATOR));
+          if (loadAll(path)) {
+            sysClsPaths.addAll(listOf(split(SYS_BOOT_CLASS_PATH, SYS_PATH_SEPARATOR)));
+            sysClsPaths.addAll(listOf(split(SYS_EXT_DIRS, SYS_PATH_SEPARATOR)));
+          }
+          for (String classPath : sysClsPaths) {
+            try {
+              entries.putIfAbsent(new File(classPath).toURI(), currClsLoader);
+            } catch (SecurityException e) {
+              entries.putIfAbsent(
+                  new URL(FILE_SCHEMA, null, new File(classPath).getAbsolutePath()).toURI(),
+                  currClsLoader);
             }
           }
-          if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
-            Set<String> sysClassPaths = new HashSet<>();
-            sysClassPaths.addAll(Arrays.asList(split(System.getProperty("sun.boot.class.path"),
-                System.getProperty("path.separator"))));
-            sysClassPaths.addAll(Arrays.asList(
-                split(System.getProperty("java.ext.dirs"), System.getProperty("path.separator"))));
-            sysClassPaths.addAll(Arrays.asList(split(System.getProperty("java.class.path"),
-                System.getProperty("path.separator"))));
-            for (String classPath : sysClassPaths) {
-              try {
-                entries.putIfAbsent(new File(classPath).toURI(), currClsLoader);
-              } catch (SecurityException e) {
-                entries.putIfAbsent(
-                    new URL(FILE_SCHEMA, null, new File(classPath).getAbsolutePath()).toURI(),
-                    currClsLoader);
-              }
-            }
-          }
-        } while ((currClsLoader = currClsLoader.getParent()) != null);
-      }
+        }
+      } while ((currClsLoader = currClsLoader.getParent()) != null);
     } catch (IOException | URISyntaxException e) {
       throw new IllegalArgumentException(e);
     }
@@ -335,7 +334,6 @@ public class ClassPaths {
     }
 
     public Scanner(String root) {
-      super();
       this.root = root;
     }
 
@@ -355,12 +353,16 @@ public class ClassPaths {
     }
 
     public Scanner scan(URI uri, ClassLoader classloader) throws IOException {
-      if (uri.getScheme().equals(FILE_SCHEMA) && scannedUris.add(uri)) {
-        scanFromFile(new File(uri).getCanonicalFile(), classloader);
-      } else if (uri.getScheme().equals(JAR_SCHEMA) && scannedUris.add(uri)) {
-        scanFromJar(uri, classloader);
+      if (uri.getScheme().equals(FILE_SCHEMA)) {
+        if (scannedUris.add(uri)) {
+          scanFromFile(new File(uri), classloader);
+        }
+      } else if (uri.getScheme().equals(JAR_SCHEMA)) {
+        if (scannedUris.add(uri)) {
+          scanFromJar(uri, classloader);
+        }
       } else {
-        logger.warning(() -> "Invalid uri schema " + uri.getScheme());
+        logger.warning(() -> "Invalid uri " + uri + ", schema " + uri.getScheme());
       }
       return this;
     }
@@ -446,15 +448,30 @@ public class ClassPaths {
     }
 
     protected void scanFromFile(File file, ClassLoader classloader) throws IOException {
-      if (!file.exists()) {
-        return;
+      File useFile = file;
+      if (!useFile.exists()) {
+        String filePath = useFile.getPath();
+        if (PathMatcher.isDos()) {
+          while (filePath.endsWith("*")) {
+            filePath = filePath.substring(0, filePath.length() - 1);
+          }
+          if (filePath.length() > 0) {
+            useFile = new File(filePath);
+          }
+          if (!useFile.exists()) {
+            return;
+          }
+        } else {
+          return;
+        }
       }
-      if (file.isDirectory()) {
+      useFile = useFile.getCanonicalFile();
+      if (useFile.isDirectory()) {
         Set<File> ancestors = new LinkedHashSet<>();
-        scanDirectory(file, classloader, ancestors);
+        scanDirectory(useFile, classloader, ancestors);
         ancestors.clear();
       } else {
-        scanSingleFile(file, classloader);
+        scanSingleFile(useFile, classloader);
       }
     }
 

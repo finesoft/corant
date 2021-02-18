@@ -367,20 +367,6 @@ public class Texts {
   }
 
   /**
-   * String lines from file input stream, use for read text file line by line.
-   *
-   * Note: The caller must maintain resource release by himself
-   *
-   * @param fis the text file input stream
-   * @param offset the offset start from 0
-   * @param limit the number of lines returned
-   */
-  public static Stream<String> lines(final FileInputStream fis, final int offset, final int limit) {
-    return lines(new InputStreamReader(fis, StandardCharsets.UTF_8), offset,
-        (i, t) -> limit >= 1 && i > limit);
-  }
-
-  /**
    * String lines from input stream, use for read text file line by line.
    *
    * Note: The caller must maintain resource release by himself
@@ -418,6 +404,20 @@ public class Texts {
   public static Stream<String> lines(final InputStream is, final int offset,
       final BiPredicate<Integer, String> terminator) {
     return lines(new InputStreamReader(is, StandardCharsets.UTF_8), offset, terminator);
+  }
+
+  /**
+   * String lines from input stream, use for read text file line by line.
+   *
+   * Note: The caller must maintain resource release by himself
+   *
+   * @param is the text file input stream
+   * @param offset the offset start from 0
+   * @param limit the number of lines returned
+   */
+  public static Stream<String> lines(final InputStream is, final int offset, final int limit) {
+    return lines(new InputStreamReader(is, StandardCharsets.UTF_8), offset,
+        (i, t) -> limit >= 1 && i > limit);
   }
 
   /**

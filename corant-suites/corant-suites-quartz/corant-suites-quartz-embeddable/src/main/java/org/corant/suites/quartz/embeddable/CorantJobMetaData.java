@@ -1,5 +1,8 @@
 package org.corant.suites.quartz.embeddable;
 
+import static org.corant.shared.util.Strings.isNotBlank;
+import org.corant.config.Configs;
+import org.corant.config.CorantConfigResolver;
 import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
@@ -21,7 +24,11 @@ public class CorantJobMetaData {
   public CorantJobMetaData(ContextualMethodHandler method) {
     this.method = method;
     final CorantTrigger ann = method.getMethod().getAnnotation(CorantTrigger.class);
-    cron = ann.cron();
+    if (isNotBlank(ann.cron()) && ann.cron().startsWith(CorantConfigResolver.VAR_PREFIX)) {
+      cron = Configs.assemblyStringConfigProperty(ann.cron());
+    } else {
+      cron = ann.cron();
+    }
     triggerKey = ann.key();
     triggerGroup = ann.group();
     startDelaySeconds = ann.startDelaySeconds();

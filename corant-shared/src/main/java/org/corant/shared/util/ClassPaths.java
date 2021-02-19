@@ -451,17 +451,13 @@ public class ClassPaths {
       File useFile = file;
       if (!useFile.exists()) {
         String filePath = useFile.getPath();
-        if (PathMatcher.isDos()) {
-          while (filePath.endsWith("*")) {
-            filePath = filePath.substring(0, filePath.length() - 1);
-          }
-          if (filePath.length() > 0) {
-            useFile = new File(filePath);
-          }
-          if (!useFile.exists()) {
-            return;
-          }
-        } else {
+        while (filePath.endsWith("*")) {
+          filePath = filePath.substring(0, filePath.length() - 1);
+        }
+        if (filePath.length() > 0) {
+          useFile = new File(filePath);
+        }
+        if (!useFile.exists()) {
           return;
         }
       }

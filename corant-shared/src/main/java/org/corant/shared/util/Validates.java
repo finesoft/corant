@@ -38,29 +38,30 @@ import org.xml.sax.SAXParseException;
  */
 public class Validates {
 
-  public static final Pattern MOB_NUM_PTN = Pattern.compile(
-      "^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$");
+  public static final Pattern MOB_NUM_PTN =
+      Pattern.compile("^((13[0-9])|(15[^4])|(18[0-9])|(17[0-9])|(147))\\d{8}$");
+  public static final Pattern MAIL_ADDR_PTN = Pattern.compile(
+      "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$",
+      Pattern.CASE_INSENSITIVE);
+  public static final Pattern WEB_URL_PTN = Pattern.compile(
+      "^(https?|ftp|file|rtsp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
+      Pattern.CASE_INSENSITIVE);
+  public static final Pattern IP_V4_PTN =
+      Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+          + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+          + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
+          + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b");
+  public static final Pattern ZH_ID_PTN = Pattern.compile("\\d{15}|\\d{18}");
+  public static final Pattern ZH_PHONE_PTN =
+      Pattern.compile("\\d{4}-\\d{8}|\\d{4}-\\d{7}|\\d(3)-\\d(8)");
+  public static final Pattern ZH_PC_PTN = Pattern.compile("[1-9]\\d{5}(?!\\d)");
 
-  private Validates() {
-    super();
-  }
-
-  /**
-   * @param httpUrl
-   * @return isHttpUrl
-   */
-  public static boolean isHttpUrl(String httpUrl) {
-    return isNotBlank(httpUrl) && httpUrl.matches("[a-zA-z]+://[^\\s]*");
-  }
-
-  public static boolean isId(Long id) {
-    return id != null && id > 0;
-  }
+  private Validates() {}
 
   /**
    * Check if input stream is image format, the process prereads the input stream. If input stream
    * not support mark, then return false.
-   * 
+   *
    * @param is
    * @return
    */
@@ -100,11 +101,7 @@ public class Validates {
    * @return
    */
   public static boolean isIp4Address(String ipAddress) {
-    return isNotBlank(ipAddress)
-        && Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\"
-            + ".((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b").matcher(ipAddress).matches();
+    return isNotBlank(ipAddress) && IP_V4_PTN.matcher(ipAddress).matches();
   }
 
   /**
@@ -112,9 +109,17 @@ public class Validates {
    * @return
    */
   public static boolean isMailAddress(String mailAddress) {
-    return isNotBlank(mailAddress)
-        && Pattern.compile("^(\\w+)([\\-+.\\'][\\w]+)*@(\\w[\\-\\w]*\\.){1,5}([A-Za-z]){2,6}$")
-            .matcher(mailAddress).matches();
+    return isNotBlank(mailAddress) && MAIL_ADDR_PTN.matcher(mailAddress).matches();
+  }
+
+  /**
+   * Return http(s)/ftp/file/rtsp url
+   *
+   * @param url
+   * @return isHttpUrl
+   */
+  public static boolean isWebUrl(String url) {
+    return isNotBlank(url) && WEB_URL_PTN.matcher(url).matches();
   }
 
   /**
@@ -122,7 +127,7 @@ public class Validates {
    * @return
    */
   public static boolean isZhIDCardNumber(String idCardNumber) {
-    return isNotBlank(idCardNumber) && idCardNumber.matches("\\d{15}|\\d{18}");
+    return isNotBlank(idCardNumber) && ZH_ID_PTN.matcher(idCardNumber).matches();
   }
 
   /**
@@ -130,19 +135,7 @@ public class Validates {
    * @return
    */
   public static boolean isZhMobileNumber(String mobileNumber) {
-    if (isNotBlank(mobileNumber)) {
-      return MOB_NUM_PTN.matcher(mobileNumber).matches();
-    }
-    return false;
-  }
-
-  /**
-   * @param name
-   * @param length
-   * @return
-   */
-  public static boolean isZhName(String name, int length) {
-    return isNotBlank(name) && name.matches("^[\u4e00-\u9fa5]+$") && name.length() <= length;
+    return isNotBlank(mobileNumber) && MOB_NUM_PTN.matcher(mobileNumber).matches();
   }
 
   /**
@@ -150,8 +143,7 @@ public class Validates {
    * @return
    */
   public static boolean isZhPhoneNumber(String phoneNumber) {
-    return isNotBlank(phoneNumber) && Pattern.compile("\\d{4}-\\d{8}|\\d{4}-\\d{7}|\\d(3)-\\d(8)")
-        .matcher(phoneNumber).matches();
+    return isNotBlank(phoneNumber) && ZH_PHONE_PTN.matcher(phoneNumber).matches();
   }
 
   /**
@@ -159,7 +151,7 @@ public class Validates {
    * @return
    */
   public static boolean isZhPostcode(String postcode) {
-    return isNotBlank(postcode) && postcode.matches("[1-9]\\d{5}(?!\\d)");
+    return isNotBlank(postcode) && ZH_PC_PTN.matcher(postcode).matches();
   }
 
   /**
@@ -192,7 +184,7 @@ public class Validates {
 
   /**
    * Validate Xml document with schema
-   * 
+   *
    * @param doc
    * @param schema
    * @return validateXmlDocument

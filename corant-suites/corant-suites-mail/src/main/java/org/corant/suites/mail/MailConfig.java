@@ -13,94 +13,95 @@
  */
 package org.corant.suites.mail;
 
-import java.util.Map;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
+import org.eclipse.microprofile.config.Config;
+
+import javax.mail.Authenticator;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.corant.shared.util.Maps.toProperties;
+import static org.corant.shared.util.Strings.isNoneBlank;
 
 /**
  * corant-suites-mail
  *
  * @author bingo 下午12:01:55
- *
  */
 @ConfigKeyRoot("mail")
-public class MailConfig {
+public class MailConfig implements DeclarativeConfig {
 
-  @ConfigKeyItem
-  private String protocol;
+  @ConfigKeyItem private String protocol;
 
-  @ConfigKeyItem
-  private String host;
+  @ConfigKeyItem private String host;
 
-  @ConfigKeyItem
-  private int port;
+  @ConfigKeyItem private int port;
 
-  @ConfigKeyItem
-  private String username;
+  @ConfigKeyItem private String username;
 
-  @ConfigKeyItem
-  private String password;
+  @ConfigKeyItem private String password;
 
-  @ConfigKeyItem
-  private int connectionTimeout;
+  @ConfigKeyItem private int connectionTimeout;
 
-  @ConfigKeyItem
-  private Map<String, String> properties;
+  @ConfigKeyItem private Map<String, String> properties;
 
-  /**
-   *
-   * @return the connectionTimeout
-   */
+  private Properties mailProperties;
+
+  private Authenticator authenticator;
+
+  /** @return the connectionTimeout */
   public int getConnectionTimeout() {
     return connectionTimeout;
   }
 
-  /**
-   *
-   * @return the host
-   */
+  /** @return the host */
   public String getHost() {
     return host;
   }
 
-  /**
-   *
-   * @return the password
-   */
+  /** @return the password */
   public String getPassword() {
     return password;
   }
 
-  /**
-   *
-   * @return the port
-   */
+  /** @return the port */
   public int getPort() {
     return port;
   }
 
-  /**
-   *
-   * @return the properties
-   */
+  /** @return the properties */
   public Map<String, String> getProperties() {
     return properties;
   }
 
-  /**
-   *
-   * @return the protocol
-   */
+  /** @return the protocol */
   public String getProtocol() {
     return protocol;
   }
 
-  /**
-   *
-   * @return the username
-   */
+  /** @return the username */
   public String getUsername() {
     return username;
   }
 
+  public Properties getMailProperties() {
+    return mailProperties;
+  }
+
+  public Authenticator getAuthenticator() {
+    return authenticator;
+  }
+
+  @Override
+  public boolean isValid() {
+    return isNoneBlank(this.protocol, this.host);
+  }
+
+  @Override
+  public void onPostConstruct(Config config, String key) {
+    this.mailProperties = toProperties(this.properties);
+    this.authenticator = new DefaultAuthenticator(this.username, this.password);
+  }
 }

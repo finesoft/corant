@@ -13,12 +13,24 @@
  */
 package org.corant.suites.mail;
 
+import org.corant.shared.util.Resources;
+
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+import java.util.List;
+import java.util.function.Function;
+
 /**
  * corant-suites-mail
  *
  * @author bingo 下午12:09:38
- *
  */
 public interface MailSender {
 
+  void send(Function<Session, MimeMessage> messageProvider) throws MessagingException;
+
+  void send(
+      String subject, String message, List<String> toAddressList, Resources.Resource... resources)
+      throws MessagingException;
 }

@@ -1,0 +1,98 @@
+package org.corant.suites.mail;
+
+import org.corant.config.declarative.ConfigInstances;
+import org.corant.shared.util.Resources;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.util.Date;
+import java.util.List;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@ApplicationScoped
+public class DefaultMailSender implements MailSender {
+
+  @Inject Logger logger;
+
+  protected MailConfig getConfig() {
+    return ConfigInstances.resolveSingle(MailConfig.class);
+  }
+
+  protected Session getSession() {
+    MailConfig config = getConfig();
+    return Session.getInstance(config.getMailProperties(), config.getAuthenticator());
+  }
+
+  public void send(MimeMessage mimeMessage) throws MessagingException {
+    MailConfig config = getConfig();
+    logger.log(
+        Level.FINE, () -> String.format("Connecting to %s:%s", config.getHost(), config.getPort()));
+    try (Transport transport = getSession().getTransport(config.getProtocol())) {
+      transport.connect(
+          config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+      if (mimeMessage.getSentDate() == null) {
+        mimeMessage.setSentDate(new Date());
+      }
+      String messageId = mimeMessage.getMessageID();
+      mimeMessage.saveChanges();
+      if (messageId != null) {
+        mimeMessage.setHeader("Message-ID", messageId);
+      }
+      logger.log(
+          Level.FINE,
+          () ->
+              String.format("Sending message id : %s using host: %s", messageId, config.getHost()));
+      transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+    }
+  }
+
+  @Override
+  public void send(Function<Session, MimeMessage> messageProvider) throws MessagingException {
+    this.send(messageProvider.apply(getSession()));
+  }
+
+  @Override
+  public void send(
+      String subject,
+      String htmlMessage,
+      List<String> toAddressList,
+      Resources.Resource... resources)
+      throws MessagingException {
+    MailConfig config = getConfig();
+    Multipart multipart = new MimeMultipart();
+    BodyPart htmlPart = new MimeBodyPart();
+    htmlPart.setContent(htmlMessage, "text/html");
+    multipart.addBodyPart(htmlPart);
+    MimeMessage mimeMessage = new MimeMessage(getSession());
+    mimeMessage.setFrom(config.getUsername());
+    mimeMessage.setContent(multipart);
+    mimeMessage.setSubject(subject);
+    InternetAddress[] toAddresses =
+        toAddressList.stream()
+            .map(
+                x -> {
+                  try {
+                    return new InternetAddress(x);
+                  } catch (AddressException e) {
+                    e.printStackTrace();
+                  }
+                  return null;
+                })
+            .toArray(InternetAddress[]::new);
+    mimeMessage.setRecipients(Message.RecipientType.TO, toAddresses);
+    this.send(mimeMessage);
+  }
+}

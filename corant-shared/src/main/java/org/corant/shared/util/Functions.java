@@ -13,12 +13,15 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Throwing.ThrowingFunction;
+import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
 import org.corant.shared.ubiquity.Throwing.ThrowingSupplier;
 
 /**
@@ -64,18 +67,6 @@ public class Functions {
     return Optional.ofNullable(obj);
   }
 
-  public static <T, E extends Throwable> T throwingSupplied(ThrowingSupplier<T, E> supplier) {
-    T supplied = null;
-    if (supplier != null) {
-      try {
-        supplied = supplier.get();
-      } catch (Throwable e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-    return supplied;
-  }
-
   public static <T> T trySupplied(Supplier<T> supplier) {
     T supplied = null;
     if (supplier != null) {
@@ -86,5 +77,45 @@ public class Functions {
       }
     }
     return supplied;
+  }
+
+  public static <T, R, E extends Throwable> Function<T, R> uncheckedComputer(
+      ThrowingFunction<T, R, E> computer) {
+    return t -> {
+      try {
+        return shouldNotNull(computer).apply(t);
+      } catch (Throwable e) {
+        throw new CorantRuntimeException(e);
+      }
+    };
+  }
+
+  public static <E extends Throwable> Runnable uncheckedRunner(ThrowingRunnable<E> runner) {
+    return () -> {
+      try {
+        shouldNotNull(runner).run();
+      } catch (Throwable e) {
+        throw new CorantRuntimeException(e);
+      }
+    };
+  }
+
+  public static <T, E extends Throwable> T uncheckedSupplied(ThrowingSupplier<T, E> supplier) {
+    try {
+      return shouldNotNull(supplier).get();
+    } catch (Throwable e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <T, E extends Throwable> Supplier<T> uncheckedSupplier(
+      final ThrowingSupplier<T, E> supplier) {
+    return () -> {
+      try {
+        return shouldNotNull(supplier).get();
+      } catch (Throwable e) {
+        throw new CorantRuntimeException(e);
+      }
+    };
   }
 }

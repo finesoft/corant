@@ -59,8 +59,8 @@
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>3.4.5</version.hikariCP>
 		<version.icu4j>67.1</version.icu4j>
-		<version.jackson>2.12.0</version.jackson>
-		<version.jandex>2.2.2.Final</version.jandex>
+		<version.jackson>2.12.1</version.jackson>
+		<version.jandex>2.2.3.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javassist>3.27.0.GA</version.javassist>
 		<version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
@@ -126,7 +126,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.13.4</version.redisson>
 		<version.rest-assured>4.3.1</version.rest-assured>
-		<version.resteasy>4.5.8.Final</version.resteasy>
+		<version.resteasy>4.6.0.Final</version.resteasy>
 		<version.rsocket>1.0.2</version.rsocket>
 		<version.shiro-all>1.6.0</version.shiro-all>
 		<version.smallrye-config>1.7.0</version.smallrye-config>
@@ -140,11 +140,11 @@
 		<version.swagger>2.0.8</version.swagger>
 
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.2.3.Final</version.undertow>
+		<version.undertow>2.2.4.Final</version.undertow>
 		<version.vertx>3.9.3</version.vertx>
-		<version.weld-junit4>2.0.1.Final</version.weld-junit4>
-		<version.weld-junit5>2.0.1.Final</version.weld-junit5>
-		<version.weld>3.1.5.SP1</version.weld>
+		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
+		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
+		<version.weld>3.1.6.Final</version.weld>
 		<version.xadisk>1.2.2</version.xadisk>
 		<version.xnio>3.8.2.Final</version.xnio>
 		<version.zxing>3.4.1</version.zxing>

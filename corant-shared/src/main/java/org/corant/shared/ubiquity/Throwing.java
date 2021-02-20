@@ -48,6 +48,11 @@ public class Throwing {
   }
 
   @FunctionalInterface
+  public interface ThrowingRunnable<E extends Throwable> {
+    void run() throws E;
+  }
+
+  @FunctionalInterface
   public interface ThrowingSupplier<T, E extends Throwable> {
 
     T get() throws E;

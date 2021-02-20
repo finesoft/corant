@@ -13,17 +13,15 @@
  */
 package org.corant.suites.mail;
 
+import static org.corant.shared.util.Maps.toProperties;
+import static org.corant.shared.util.Strings.isNoneBlank;
+import java.util.Map;
+import java.util.Properties;
+import javax.mail.Authenticator;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.eclipse.microprofile.config.Config;
-
-import javax.mail.Authenticator;
-import java.util.Map;
-import java.util.Properties;
-
-import static org.corant.shared.util.Maps.toProperties;
-import static org.corant.shared.util.Strings.isNoneBlank;
 
 /**
  * corant-suites-mail
@@ -33,23 +31,36 @@ import static org.corant.shared.util.Strings.isNoneBlank;
 @ConfigKeyRoot("mail")
 public class MailConfig implements DeclarativeConfig {
 
-  @ConfigKeyItem private String protocol;
+  private static final long serialVersionUID = -230483402482161319L;
 
-  @ConfigKeyItem private String host;
+  @ConfigKeyItem
+  private String protocol;
 
-  @ConfigKeyItem private int port;
+  @ConfigKeyItem
+  private String host;
 
-  @ConfigKeyItem private String username;
+  @ConfigKeyItem
+  private int port;
 
-  @ConfigKeyItem private String password;
+  @ConfigKeyItem
+  private String username;
 
-  @ConfigKeyItem private int connectionTimeout;
+  @ConfigKeyItem
+  private String password;
 
-  @ConfigKeyItem private Map<String, String> properties;
+  @ConfigKeyItem
+  private int connectionTimeout;
+
+  @ConfigKeyItem
+  private Map<String, String> properties;
 
   private Properties mailProperties;
 
   private Authenticator authenticator;
+
+  public Authenticator getAuthenticator() {
+    return authenticator;
+  }
 
   /** @return the connectionTimeout */
   public int getConnectionTimeout() {
@@ -59,6 +70,10 @@ public class MailConfig implements DeclarativeConfig {
   /** @return the host */
   public String getHost() {
     return host;
+  }
+
+  public Properties getMailProperties() {
+    return mailProperties;
   }
 
   /** @return the password */
@@ -86,22 +101,14 @@ public class MailConfig implements DeclarativeConfig {
     return username;
   }
 
-  public Properties getMailProperties() {
-    return mailProperties;
-  }
-
-  public Authenticator getAuthenticator() {
-    return authenticator;
-  }
-
   @Override
   public boolean isValid() {
-    return isNoneBlank(this.protocol, this.host);
+    return isNoneBlank(protocol, host);
   }
 
   @Override
   public void onPostConstruct(Config config, String key) {
-    this.mailProperties = toProperties(this.properties);
-    this.authenticator = new DefaultAuthenticator(this.username, this.password);
+    mailProperties = toProperties(properties);
+    authenticator = new DefaultAuthenticator(username, password);
   }
 }

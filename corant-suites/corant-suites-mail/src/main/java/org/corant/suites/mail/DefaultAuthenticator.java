@@ -3,6 +3,11 @@ package org.corant.suites.mail;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 
+/**
+ * corant-suites-mail
+ *
+ * @author jiang 2021/2/20
+ */
 public class DefaultAuthenticator extends Authenticator {
 
   private final String username;
@@ -13,7 +18,6 @@ public class DefaultAuthenticator extends Authenticator {
     this.username = username;
   }
 
-  /** Returns an authenticator object for use in sessions */
   @Override
   public PasswordAuthentication getPasswordAuthentication() {
     return new PasswordAuthentication(username, password);

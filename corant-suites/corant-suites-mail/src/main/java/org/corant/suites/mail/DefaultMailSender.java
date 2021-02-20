@@ -22,6 +22,11 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * corant-suites-mail
+ *
+ * @author jiang 2021/2/20
+ */
 @ApplicationScoped
 public class DefaultMailSender implements MailSender {
 

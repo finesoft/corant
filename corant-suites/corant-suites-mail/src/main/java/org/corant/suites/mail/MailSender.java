@@ -33,4 +33,7 @@ public interface MailSender {
   void send(
       String subject, String message, List<String> toAddressList, Resources.Resource... resources)
       throws MessagingException;
+
+  void send(String subject, String htmlMessage, String toAddress, String ccAddress)
+      throws MessagingException;
 }

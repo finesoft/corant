@@ -13,15 +13,17 @@
  */
 package org.corant.suites.mail;
 
-import static org.corant.shared.util.Maps.toProperties;
-import static org.corant.shared.util.Strings.isNoneBlank;
-import java.util.Map;
-import java.util.Properties;
-import javax.mail.Authenticator;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.eclipse.microprofile.config.Config;
+
+import javax.mail.Authenticator;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.corant.shared.util.Maps.toProperties;
+import static org.corant.shared.util.Strings.isNoneBlank;
 
 /**
  * corant-suites-mail
@@ -33,30 +35,40 @@ public class MailConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = -230483402482161319L;
 
-  @ConfigKeyItem
-  private String protocol;
+  @ConfigKeyItem private String protocol;
 
-  @ConfigKeyItem
-  private String host;
+  @ConfigKeyItem private String host;
 
-  @ConfigKeyItem
-  private int port;
+  @ConfigKeyItem private int port;
 
-  @ConfigKeyItem
-  private String username;
+  @ConfigKeyItem private String username;
 
-  @ConfigKeyItem
-  private String password;
+  @ConfigKeyItem private String password;
 
-  @ConfigKeyItem
-  private int connectionTimeout;
+  @ConfigKeyItem private int connectionTimeout;
 
-  @ConfigKeyItem
-  private Map<String, String> properties;
+  @ConfigKeyItem private Map<String, String> properties;
 
   private Properties mailProperties;
 
   private Authenticator authenticator;
+
+  public MailConfig(
+      String protocol,
+      String host,
+      int port,
+      String username,
+      String password,
+      int connectionTimeout,
+      Map<String, String> properties) {
+    this.protocol = protocol;
+    this.host = host;
+    this.port = port;
+    this.username = username;
+    this.password = password;
+    this.connectionTimeout = connectionTimeout;
+    this.properties = properties;
+  }
 
   public Authenticator getAuthenticator() {
     return authenticator;

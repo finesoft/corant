@@ -68,7 +68,7 @@ public class DefaultMailSender implements MailSender {
     MailConfig config = getConfig();
     Multipart multipart = new MimeMultipart();
     BodyPart htmlPart = new MimeBodyPart();
-    htmlPart.setContent(htmlMessage, "text/html");
+    htmlPart.setContent(htmlMessage, "text/html;charset=utf-8");
     multipart.addBodyPart(htmlPart);
     MimeMessage mimeMessage = new MimeMessage(getSession());
     mimeMessage.setFrom(config.getUsername());
@@ -88,7 +88,7 @@ public class DefaultMailSender implements MailSender {
     MailConfig config = getConfig();
     Multipart multipart = new MimeMultipart();
     BodyPart htmlPart = new MimeBodyPart();
-    htmlPart.setContent(htmlMessage, "text/html");
+    htmlPart.setContent(htmlMessage, "text/html;charset=utf-8");
     multipart.addBodyPart(htmlPart);
     MimeMessage mimeMessage = new MimeMessage(getSession());
     mimeMessage.setFrom(config.getUsername());

@@ -13,6 +13,7 @@
  */
 package org.corant.suites.ddd.message;
 
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.isNotNull;
@@ -27,6 +28,7 @@ import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.transaction.Transactional;
+import org.corant.suites.ddd.message.Message.MessageDestination;
 
 /**
  * corant-suites-ddd
@@ -39,8 +41,56 @@ import javax.transaction.Transactional;
 public abstract class AbstractJMSMessageDispatcher implements MessageDispatcher {
 
   @Override
+  public void accept(Message[] t) {
+    for (Message msg : t) {
+      MessageDestination[] dests =
+          shouldNotEmpty(shouldNotNull(msg).getMetadata().getDestinations());
+      for (MessageDestination dest : dests) {
+        send(dest.isMulticast(), dest.getDestination().toString(),
+            obtainMessageConverter().apply(msg));
+      }
+    }
+  }
+
+  @Override
   public void prepare() {
     shouldNotNull(obtainJmsContext(), "Can not find any JMS Context!");
+  }
+
+  public void send(boolean multicast, String destination, byte[] payload) {
+    if (isNotEmpty(payload)) {
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
+    }
+  }
+
+  public void send(boolean multicast, String destination, InputStream payload) throws IOException {
+    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+      copy(payload, buffer);
+      byte[] bytes = buffer.toByteArray();
+      send(multicast, destination, bytes);
+    }
+  }
+
+  public void send(boolean multicast, String destination, javax.jms.Message message) {
+    obtainJmsProducer().send(createDestination(multicast, destination), message);
+  }
+
+  public void send(boolean multicast, String destination, Map<String, Object> payload) {
+    if (isNotEmpty(payload)) {
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
+    }
+  }
+
+  public void send(boolean multicast, String destination, Serializable payload) {
+    if (isNotNull(payload)) {
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
+    }
+  }
+
+  public void send(boolean multicast, String destination, String payload) {
+    if (isNotNull(payload)) {
+      obtainJmsProducer().send(createDestination(multicast, destination), payload);
+    }
   }
 
   protected Destination createDestination(boolean multicast, String destination) {
@@ -54,36 +104,5 @@ public abstract class AbstractJMSMessageDispatcher implements MessageDispatcher 
     return obtainJmsContext().createProducer();
   }
 
-  protected void send(boolean multicast, String destination, byte[] payload) {
-    if (isNotEmpty(payload)) {
-      obtainJmsProducer().send(createDestination(multicast, destination), payload);
-    }
-  }
-
-  protected void send(boolean multicast, String destination, InputStream payload)
-      throws IOException {
-    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-      copy(payload, buffer);
-      byte[] bytes = buffer.toByteArray();
-      send(multicast, destination, bytes);
-    }
-  }
-
-  protected void send(boolean multicast, String destination, Map<String, Object> payload) {
-    if (isNotEmpty(payload)) {
-      obtainJmsProducer().send(createDestination(multicast, destination), payload);
-    }
-  }
-
-  protected void send(boolean multicast, String destination, Serializable payload) {
-    if (isNotNull(payload)) {
-      obtainJmsProducer().send(createDestination(multicast, destination), payload);
-    }
-  }
-
-  protected void send(boolean multicast, String destination, String payload) {
-    if (isNotNull(payload)) {
-      obtainJmsProducer().send(createDestination(multicast, destination), payload);
-    }
-  }
+  protected abstract JMSMessageConverter obtainMessageConverter();
 }

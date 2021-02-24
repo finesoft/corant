@@ -7,23 +7,24 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Atomics;
+import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.simpl.RAMJobStore;
+import org.quartz.simpl.SimpleThreadPool;
 
 /**
  * corant-suites-quartz-embeddable <br>
@@ -34,6 +35,15 @@ import org.quartz.impl.StdSchedulerFactory;
 @ApplicationScoped
 public class CorantJobManager {
 
+  public static final String DECLARATIVE_SCHEDULER_NAME =
+      Names.CORANT_PREFIX + "declarative.scheduler";
+
+  public static final String DECLARATIVE_SCHEDULER_JOB_THREAD_PREFIX =
+      Names.CORANT_PREFIX + "declarative.scheduler.job";
+
+  protected static final DirectSchedulerFactory schedulerFactory =
+      DirectSchedulerFactory.getInstance();
+
   @Inject
   Logger logger;
 
@@ -41,7 +51,8 @@ public class CorantJobManager {
   protected CorantJobExtension extension;
 
   @Inject
-  protected CorantJobFactory jobFactory;
+  @ConfigProperty(name = "quartz.scheduler.declarative.job.threads", defaultValue = "10")
+  protected Integer declarativeJobThreads;
 
   @Inject
   @ConfigProperty(name = "quartz.scheduler.shutdown.wait-for-jobs-complete", defaultValue = "false")
@@ -51,30 +62,48 @@ public class CorantJobManager {
   @ConfigProperty(name = "quartz.scheduler.start-delayed")
   protected Optional<Integer> startDelayed;
 
-  protected Supplier<Scheduler> schedulerSupplier = Atomics.atomicOneOffInitializer(() -> {
+  protected Scheduler declarativeScheduler;
+
+  public DirectSchedulerFactory getSchedulerFactory() {
+    return schedulerFactory;
+  }
+
+  protected Scheduler getDeclarativeScheduler() {
+    return declarativeScheduler;
+  }
+
+  protected synchronized void initializeDeclarativeScheduler() {
     try {
-      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-      Scheduler scheduler = schedulerFactory.getScheduler();
-      scheduler.setJobFactory(jobFactory);
-      if (startDelayed.isEmpty()) {
-        scheduler.start();
-      } else {
-        scheduler.startDelayed(startDelayed.get());
+      declarativeScheduler = schedulerFactory.getScheduler(DECLARATIVE_SCHEDULER_NAME);
+      if (declarativeScheduler == null) {
+        SimpleThreadPool stp = new SimpleThreadPool(declarativeJobThreads, Thread.NORM_PRIORITY);
+        stp.setThreadNamePrefix(DECLARATIVE_SCHEDULER_JOB_THREAD_PREFIX);
+        schedulerFactory.createScheduler(DECLARATIVE_SCHEDULER_NAME, DECLARATIVE_SCHEDULER_NAME,
+            stp, new RAMJobStore());
+        declarativeScheduler = schedulerFactory.getScheduler(DECLARATIVE_SCHEDULER_NAME);
+        declarativeScheduler.setJobFactory(new CorantDeclarativeJobFactory());
       }
-      return scheduler;
+      if (!declarativeScheduler.isStarted()) {
+        if (startDelayed.isEmpty()) {
+          declarativeScheduler.start();
+        } else {
+          declarativeScheduler.startDelayed(startDelayed.get());
+        }
+      }
     } catch (SchedulerException e) {
       throw new CorantRuntimeException(e);
     }
-  });
+  }
 
-  public Scheduler getScheduler() {
-    return schedulerSupplier.get();
+  @PostConstruct
+  protected void onPostConstruct() {
+    initializeDeclarativeScheduler();
   }
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
       throws SchedulerException {
     for (final CorantJobMetaData metaData : extension.getJobMetaDatas()) {
-      JobDetail job = newJob(ContextualJobImpl.class).build();
+      JobDetail job = newJob(CorantDeclarativeJobImpl.class).build();
       job.getJobDataMap().put(String.valueOf(job.getKey()), metaData.getMethod());
       TriggerBuilder<Trigger> triggerBuilder = newTrigger();
       triggerBuilder.withPriority(metaData.getTriggerPriority());
@@ -99,18 +128,17 @@ public class CorantJobManager {
         triggerBuilder.withSchedule(cronSchedule(metaData.getCron()));
       }
       Trigger trigger = triggerBuilder.build();
-      getScheduler().scheduleJob(job, trigger);
+      getDeclarativeScheduler().scheduleJob(job, trigger);
     }
   }
 
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent pse) {
     try {
-      if (getScheduler() != null && !getScheduler().isShutdown()) {
-        getScheduler().shutdown(waitForJobsToComplete);
+      if (getDeclarativeScheduler() != null && !getDeclarativeScheduler().isShutdown()) {
+        getDeclarativeScheduler().shutdown(waitForJobsToComplete);
       }
     } catch (SchedulerException e) {
       throw new CorantRuntimeException(e);
     }
   }
-
 }

@@ -105,7 +105,7 @@ public class Throwables {
     }
 
     public Case<S> ifThrow(final Class<? extends Throwable> causeClass) {
-      return ifThrow(t -> causeClass.isInstance(t));
+      return ifThrow(causeClass::isInstance);
     }
 
     public Case<S> ifThrow(final Predicate<Throwable> p) {

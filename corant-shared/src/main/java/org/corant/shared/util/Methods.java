@@ -37,8 +37,7 @@ public class Methods {
   private static final Pattern GETTER_PTN = Pattern.compile("^get[A-Z].*");
   private static final Pattern IS_PTN = Pattern.compile("^is[A-Z].*");
 
-  private Methods() {
-  }
+  private Methods() {}
 
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
       final Class<?>... parameterTypes) {
@@ -52,8 +51,8 @@ public class Methods {
       if (methodName.equals(method.getName())
           && Objects.deepEquals(parameterTypes, method.getParameterTypes())) {
         return method;
-      } else if ((methodName.equals(method.getName())
-          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true))
+      } else if (methodName.equals(method.getName())
+          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)
           && (inexactMatch == null
               || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
                   inexactMatch.getParameterTypes()))) {
@@ -154,9 +153,10 @@ public class Methods {
 
     public MethodSignature(Method method) {
       methodName = method.getName();
-      parameterTypes = new String[method.getParameterTypes().length];
-      for (int i = 0; i < method.getParameterTypes().length; i++) {
-        parameterTypes[i] = method.getParameterTypes()[i].getName();
+      Class<?>[] methodParameterTypes = method.getParameterTypes();
+      parameterTypes = new String[methodParameterTypes.length];
+      for (int i = 0; i < methodParameterTypes.length; i++) {
+        parameterTypes[i] = methodParameterTypes[i].getName();
       }
     }
 

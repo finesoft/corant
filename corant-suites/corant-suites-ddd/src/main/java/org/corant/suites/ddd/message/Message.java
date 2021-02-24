@@ -13,8 +13,12 @@
  */
 package org.corant.suites.ddd.message;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Arrays;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-suites-ddd
@@ -22,6 +26,8 @@ import java.time.Instant;
  * @author bingo 上午10:41:55
  */
 public interface Message extends Serializable {
+
+  MessageDestination[] EMPTY_DESTINATIONS = new MessageDestination[0];
 
   static int compare(Message m1, Message m2) {
     int occuredTimeCmpr = compareOccurredTime(m1, m2);
@@ -45,6 +51,60 @@ public interface Message extends Serializable {
   interface ExchangedMessage extends Message {
 
     MessageIdentifier getOriginalMessage();
+
+  }
+
+  class MessageDestination implements Serializable {
+
+    private static final long serialVersionUID = -7393678217089712798L;
+
+    protected Serializable destination;
+    protected boolean multicast;
+
+    /**
+     * @param destination
+     * @param multicast
+     */
+    public MessageDestination(Serializable destination, boolean multicast) {
+      this.destination = shouldNotNull(destination);
+      this.multicast = multicast;
+    }
+
+    protected MessageDestination() {
+
+    }
+
+    public static MessageDestination[] anycastTo(Serializable... destinations) {
+      if (isNotEmpty(destinations)) {
+        return Arrays.stream(destinations).filter(Objects::isNotNull)
+            .map(x -> new MessageDestination(x, false)).toArray(MessageDestination[]::new);
+      }
+      return EMPTY_DESTINATIONS;
+    }
+
+    public static MessageDestination[] multicastTo(Serializable... destinations) {
+      if (isNotEmpty(destinations)) {
+        return Arrays.stream(destinations).filter(Objects::isNotNull)
+            .map(x -> new MessageDestination(x, true)).toArray(MessageDestination[]::new);
+      }
+      return EMPTY_DESTINATIONS;
+    }
+
+    /**
+     *
+     * @return the destination
+     */
+    public Serializable getDestination() {
+      return destination;
+    }
+
+    /**
+     *
+     * @return the multicast
+     */
+    public boolean isMulticast() {
+      return multicast;
+    }
 
   }
 
@@ -73,10 +133,13 @@ public interface Message extends Serializable {
 
   interface MessageMetadata extends Serializable {
 
+    default MessageDestination[] getDestinations() {
+      return EMPTY_DESTINATIONS;
+    }
+
     Instant getOccurredTime();
 
-    Object getSource();
-
+    Serializable getSource();
   }
 
   interface MessageQueues {

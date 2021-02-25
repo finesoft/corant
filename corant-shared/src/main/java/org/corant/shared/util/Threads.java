@@ -13,6 +13,11 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Functions.uncheckedRunner;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
+
 /**
  * corant-shared
  *
@@ -20,6 +25,26 @@ package org.corant.shared.util;
  *
  */
 public class Threads {
+
+  public static <E extends Throwable> void delayRunInDaemon(Duration delay,
+      ThrowingRunnable<E> runner) {
+    Thread daemonThread = new Thread(() -> {
+      try {
+        TimeUnit.MICROSECONDS.sleep(delay.toMillis());
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+      }
+      uncheckedRunner(runner).run();
+    });
+    daemonThread.setDaemon(true);
+    daemonThread.start();
+  }
+
+  public static <E extends Throwable> void runInDaemon(ThrowingRunnable<E> runner) {
+    Thread daemonThread = new Thread(uncheckedRunner(runner));
+    daemonThread.setDaemon(true);
+    daemonThread.start();
+  }
 
   public static void tryThreadSleep(long ms) {
     try {

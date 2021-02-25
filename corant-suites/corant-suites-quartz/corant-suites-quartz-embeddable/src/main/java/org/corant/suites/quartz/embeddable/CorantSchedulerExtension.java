@@ -18,22 +18,24 @@ import org.corant.context.proxy.ContextualMethodHandler;
  * @author sushuaihao 2021/1/22
  * @since
  */
-public class CorantJobExtension implements Extension {
+public class CorantSchedulerExtension implements Extension {
 
-  protected final Set<CorantJobMetaData> jobMetaDatas = newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<CorantDeclarativeJobMetaData> declarativeJobMetaDatas =
+      newSetFromMap(new ConcurrentHashMap<>());
 
-  public Set<CorantJobMetaData> getJobMetaDatas() {
-    return Collections.unmodifiableSet(jobMetaDatas);
+  public Set<CorantDeclarativeJobMetaData> getDeclarativeJobMetaDatas() {
+    return Collections.unmodifiableSet(declarativeJobMetaDatas);
   }
 
   protected void onBeforeShutdown(@Observes @Priority(0) PreContainerStopEvent bs) {
-    jobMetaDatas.clear();
+    declarativeJobMetaDatas.clear();
   }
 
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
-        .stream().map(CorantJobMetaData::of).forEach(cm -> jobMetaDatas.add(cm));
+        .stream().map(CorantDeclarativeJobMetaData::of)
+        .forEach(cm -> declarativeJobMetaDatas.add(cm));
   }
 }

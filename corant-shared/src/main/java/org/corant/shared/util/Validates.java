@@ -112,6 +112,18 @@ public class Validates {
     return isNotBlank(mailAddress) && MAIL_ADDR_PTN.matcher(mailAddress).matches();
   }
 
+  public static boolean isValidMacAddress(byte[] address) {
+    if (address == null || address.length != 6) {
+      return false;
+    }
+    for (byte b : address) {
+      if (b != 0x00) {
+        return true; // If any of the bytes are non zero assume a good address
+      }
+    }
+    return false;
+  }
+
   /**
    * Return http(s)/ftp/file/rtsp url
    *

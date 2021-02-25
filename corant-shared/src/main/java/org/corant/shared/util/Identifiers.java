@@ -590,7 +590,7 @@ public class Identifiers {
     static final SecureRandom SEC_RDM_INST = new SecureRandom();
 
     private static final byte[] SECURE_MUNGED_ADDRESS =
-        MacAddrs.getSecureMungedAddress(SEC_RDM_INST);
+        Systems.getSecureMungedAddress(SEC_RDM_INST);
 
     static {
       assert SECURE_MUNGED_ADDRESS.length == 6;

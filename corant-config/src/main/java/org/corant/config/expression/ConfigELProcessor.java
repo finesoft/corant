@@ -30,6 +30,7 @@ import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Randoms;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-config
@@ -74,6 +75,7 @@ public class ConfigELProcessor {
       elm.importClass(TimeZone.class.getName());
       elm.importClass(Currency.class.getName());
       elm.importClass(Locale.class.getName());
+      elm.importClass(Systems.class.getName());
       elm.setVariable("source", ELManager.getExpressionFactory().createValueExpression(sourceBean,
           ConfigSourceBean.class));
       elManagers.set(elm);
@@ -95,7 +97,6 @@ public class ConfigELProcessor {
      * @param provider
      */
     ConfigSourceBean(Function<String, String> provider) {
-      super();
       this.provider = provider;
     }
 

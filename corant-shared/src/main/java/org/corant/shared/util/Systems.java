@@ -15,6 +15,9 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Conversions.toLong;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.split;
 import static org.corant.shared.util.Validates.isValidMacAddress;
 import java.io.File;
@@ -25,7 +28,9 @@ import java.net.SocketException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
+import java.util.Optional;
 import java.util.Random;
+import javax.management.ObjectName;
 
 /**
  * corant-shared
@@ -108,7 +113,6 @@ public class Systems {
       javaVersion = javaVersion.substring(0, lastDashNdx);
     }
     if (javaVersion.startsWith("1.")) {
-      // up to java 8
       final int index = javaVersion.indexOf('.', 2);
       return Integer.parseInt(javaVersion.substring(2, index));
     } else {
@@ -187,6 +191,18 @@ public class Systems {
     return getSysPro("path.separator");
   }
 
+  public static Optional<Long> getPhysicalMemory() {
+    try {
+      Object attribute = ManagementFactory.getPlatformMBeanServer().getAttribute(
+          new ObjectName("java.lang", "type", "OperatingSystem"), "TotalPhysicalMemorySize");
+      if (attribute != null) {
+        return Optional.of(toLong(attribute.toString()));
+      }
+    } catch (Exception e) {
+    }
+    return Optional.empty();
+  }
+
   public static byte[] getSecureMungedAddress(Random rd) {
     byte[] address = null;
     try {
@@ -225,11 +241,7 @@ public class Systems {
   }
 
   public static String getUserCountry() {
-    return getSysPro("user.country") == null ? getSysPro("user.region") : getSysPro("user.country");
-  }
-
-  public static String getUserDir() {
-    return getSysPro("user.dir");
+    return defaultObject(getSysPro("user.country"), () -> getSysPro("user.country"));
   }
 
   public static String getUserHome() {
@@ -242,6 +254,10 @@ public class Systems {
 
   public static String getUserName() {
     return getSysPro("user.name");
+  }
+
+  public static String getWorkingDir() {
+    return getSysPro("user.dir");
   }
 
   public static boolean isAix() {
@@ -293,6 +309,10 @@ public class Systems {
     return detectOS("Windows");
   }
 
+  public static boolean isWindows10() {
+    return detectOS("Windows", "10");
+  }
+
   public static boolean isWindows2000() {
     return detectOS("Windows", "5.0");
   }
@@ -313,6 +333,18 @@ public class Systems {
     return detectOS("Windows NT");
   }
 
+  public static boolean isWindowsServer() {
+    return detectOS("Windows Server");
+  }
+
+  public static boolean isWindowsServer2016() {
+    return detectOS("Windows Server", "2016");
+  }
+
+  public static boolean isWindowsServer2019() {
+    return detectOS("Windows Server", "2019");
+  }
+
   public static boolean isWindowsXP() {
     return detectOS("Windows", "5.1");
   }
@@ -325,10 +357,8 @@ public class Systems {
   static boolean detectOS(final String osNamePrefix, final String osVersionPrefix) {
     String osn = getSysPro("os.name");
     String osv = getSysPro("os.version");
-    if (osn == null || osv == null) {
-      return false;
-    }
-    return osn.startsWith(osNamePrefix) && osv.startsWith(osVersionPrefix);
+    return osn != null && osv != null && osn.startsWith(osNamePrefix)
+        && osv.startsWith(osVersionPrefix);
   }
 
   static String getSysPro(final String name) {
@@ -347,12 +377,7 @@ public class Systems {
       }
     } catch (final Exception ignore) {
     }
-
-    if (value == null) {
-      return defaultValue;
-    }
-
-    return value;
+    return defaultString(value, defaultValue);
   }
 
   private static byte[] constructDummyMulticastAddress(Random rd) {

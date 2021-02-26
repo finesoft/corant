@@ -15,7 +15,7 @@ package org.corant.suites.microprofile.jwt.authorization;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -67,7 +67,7 @@ public abstract class AbstractMpJWTAuthorizer
   }
 
   protected Predicate<String> getPredicate(String t) {
-    String use = trim(t);
+    String use = strip(t);
     if (isEmpty(use)) {
       return s -> true;
     } else if (WildcardMatcher.hasWildcard(use)) {

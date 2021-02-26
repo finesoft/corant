@@ -20,7 +20,7 @@ import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -399,8 +399,8 @@ public class CorantConfigConversion implements Serializable {
     for (String val : values) {
       int s = val.indexOf('=');
       if (s > 0 && s < val.length()) {
-        String kvKey = trim(val.substring(0, s));
-        String kvVal = trim(val.substring(s + 1));
+        String kvKey = strip(val.substring(0, s));
+        String kvVal = strip(val.substring(s + 1));
         if (isNotBlank(kvKey)) {
           vals.add(kvKey);// key
           vals.add(kvVal);// value

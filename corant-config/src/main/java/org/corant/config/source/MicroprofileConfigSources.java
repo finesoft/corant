@@ -14,7 +14,7 @@
 package org.corant.config.source;
 
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class MicroprofileConfigSources {
     String suffix = MICROPROFILE_CONFIG_EXT;
     final int ordinal;
     if (isNotBlank(profile)) {
-      suffix = "-" + trim(profile) + MICROPROFILE_CONFIG_EXT;
+      suffix = "-" + strip(profile) + MICROPROFILE_CONFIG_EXT;
       ordinal = DEFAULT_PROFILE_ORDINAL;
     } else {
       ordinal = DEFAULT_ORDINAL;

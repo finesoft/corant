@@ -13,7 +13,7 @@
  */
 package org.corant.suites.datasource.shared;
 
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -63,7 +63,7 @@ public class DriverManagerDataSource implements DataSource {
 
   public DriverManagerDataSource(String jdbcUrl, String driverClassName, Properties properties,
       String username, String password, String catalog, String schema) {
-    this.jdbcUrl = Configs.assemblyStringConfigProperty(trim(jdbcUrl));
+    this.jdbcUrl = Configs.assemblyStringConfigProperty(strip(jdbcUrl));
     this.catalog = Configs.assemblyStringConfigProperty(catalog);
     this.schema = Configs.assemblyStringConfigProperty(schema);
     this.properties = new Properties();

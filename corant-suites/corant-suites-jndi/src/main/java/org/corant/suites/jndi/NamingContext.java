@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.naming.Binding;
 import javax.naming.CompositeName;
@@ -75,11 +76,12 @@ public class NamingContext implements Context {
   @Override
   public Object addToEnvironment(String propName, Object propVal) {
     checkClosed();
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.readLock().lock();
       return environment.put(propName, propVal);
     } finally {
-      RWL.readLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -97,7 +99,7 @@ public class NamingContext implements Context {
 
   @Override
   public void close() throws NamingException {
-    // We are in memory so wo don't close, bind some object may throw exception.
+    // We are in memory so we don't close, bind some object may throw exception.
   }
 
   @Override
@@ -114,13 +116,14 @@ public class NamingContext implements Context {
   @Override
   public Context createSubcontext(Name name) throws NamingException {
     checkClosed();
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.writeLock().lock();
       NamingContext subContext = new NamingContext(this.name + ":" + name, getEnvironment(), null);
       bind(name, subContext);
       return subContext;
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -136,8 +139,9 @@ public class NamingContext implements Context {
     if (useName.isEmpty()) {
       throw new NamingException("Name is not valid");
     }
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.writeLock().lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
@@ -159,7 +163,7 @@ public class NamingContext implements Context {
         }
       }
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -171,7 +175,13 @@ public class NamingContext implements Context {
   @Override
   public Hashtable<?, ?> getEnvironment() {
     checkClosed();
-    return new Hashtable<>(environment);
+    Lock lock = RWL.readLock();
+    lock.lock();
+    try {
+      return new Hashtable<>(environment);
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
@@ -183,20 +193,21 @@ public class NamingContext implements Context {
   public NameParser getNameParser(Name name) throws NamingException {
     checkClosed();
     Name useName = skipEmptyComponent(name);
-    if (useName.size() > 1) {
-      try {
-        RWL.readLock().lock();
+    Lock lock = RWL.readLock();
+    lock.lock();
+    try {
+      if (useName.size() > 1) {
         Object obj = bindings.get(useName.get(0));
         if (obj instanceof Context) {
           return ((Context) obj).getNameParser(useName.getSuffix(1));
         } else {
           throw new NotContextException("Name is not bound to a Context");
         }
-      } finally {
-        RWL.readLock().unlock();
+      } else {
+        return nameParser;
       }
-    } else {
-      return nameParser;
+    } finally {
+      lock.unlock();
     }
   }
 
@@ -212,8 +223,9 @@ public class NamingContext implements Context {
     if (useName.isEmpty()) {
       return new NamingNameClassPairEnumeration(bindings.values().iterator());
     }
+    Lock lock = RWL.readLock();
+    lock.lock();
     try {
-      RWL.readLock().lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
@@ -225,7 +237,7 @@ public class NamingContext implements Context {
       }
       return ((Context) entry.value).list(useName.getSuffix(1));
     } finally {
-      RWL.readLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -241,8 +253,9 @@ public class NamingContext implements Context {
     if (useName.isEmpty()) {
       return new NamingBindingEnumeration(bindings.values().iterator(), this);
     }
+    Lock lock = RWL.readLock();
+    lock.lock();
     try {
-      RWL.readLock().lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
@@ -254,7 +267,7 @@ public class NamingContext implements Context {
       }
       return ((Context) entry.value).listBindings(useName.getSuffix(1));
     } finally {
-      RWL.readLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -295,12 +308,13 @@ public class NamingContext implements Context {
 
   public void release() {
     if (!closed) {
+      Lock lock = RWL.writeLock();
+      lock.lock();
       try {
-        RWL.writeLock().lock();
         closed = true;
         environment.clear();
       } finally {
-        RWL.writeLock().unlock();
+        lock.unlock();
       }
     }
   }
@@ -308,25 +322,26 @@ public class NamingContext implements Context {
   @Override
   public Object removeFromEnvironment(String propName) {
     checkClosed();
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.writeLock().lock();
       return environment.remove(propName);
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
-
   }
 
   @Override
   public void rename(Name oldName, Name newName) throws NamingException {
     checkClosed();
     Object value = lookup(oldName);
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.writeLock().lock();
       bind(newName, value);
       unbind(oldName);
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -343,8 +358,9 @@ public class NamingContext implements Context {
     if (useName.isEmpty()) {
       throw new NamingException("Name is not valid");
     }
+    Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      RWL.writeLock().lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
@@ -361,7 +377,7 @@ public class NamingContext implements Context {
         bindings.remove(useName.get(0));
       }
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -389,8 +405,9 @@ public class NamingContext implements Context {
     if (useName.isEmpty()) {
       throw new NamingException("Name is not valid, can not be empty.");
     }
+    Lock lock = RWL.writeLock();
     try {
-      RWL.writeLock().lock();
+      lock.lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (useName.size() > 1) {
         if (entry == null) {
@@ -427,7 +444,7 @@ public class NamingContext implements Context {
         }
       }
     } finally {
-      RWL.writeLock().unlock();
+      lock.unlock();
     }
   }
 
@@ -446,8 +463,9 @@ public class NamingContext implements Context {
    */
   protected Object lookup(Name name, boolean resolveLinks) throws NamingException {
     Name useName = skipEmptyComponent(name);
+    Lock lock = RWL.readLock();
     try {
-      RWL.readLock().lock();
+      lock.lock();
       if (useName.isEmpty()) {
         return new NamingContext(this.name, getEnvironment(), bindings);
       }
@@ -486,7 +504,7 @@ public class NamingContext implements Context {
         }
       }
     } finally {
-      RWL.readLock().unlock();
+      lock.unlock();
     }
   }
 

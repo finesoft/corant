@@ -22,7 +22,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -71,7 +71,6 @@ public class CorantConfigSources {
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
       String[] profiles) {
-    super();
     this.sources = sources;
     this.profiles = defaultObject(profiles, Strings.EMPTY_ARRAY);
     this.expressionsEnabled = expressionsEnabled;
@@ -149,7 +148,7 @@ public class CorantConfigSources {
         name = null;
       }
     }
-    return isEmpty(name) ? null : trim(name);
+    return isEmpty(name) ? null : strip(name);
   }
 
   public ConfigValue getConfigValue(String propertyName, String defaultValue) {

@@ -337,7 +337,7 @@ public class Strings {
    */
   public static boolean isNoneBlank(final CharSequence... css) {
     if (css == null || css.length == 0) {
-      return true;
+      return false;
     }
     for (final CharSequence cs : css) {
       if (isBlank(cs)) {
@@ -617,7 +617,7 @@ public class Strings {
   }
 
   /**
-   * Segment string into a string array with Predicate, delete blank elements or trim elements as
+   * Segment string into a string array with Predicate, delete blank elements or strip elements as
    * needed. The difference with {@link #split(String, Predicate)} is that this method does not
    * delete any characters.
    *
@@ -625,13 +625,13 @@ public class Strings {
    *
    * @param str
    * @param removeBlank
-   * @param trim
+   * @param strip
    * @param predicate
    * @return segments
    */
-  public static String[] segment(final String str, final boolean removeBlank, final boolean trim,
+  public static String[] segment(final String str, final boolean removeBlank, final boolean strip,
       final Predicate<Character> predicate) {
-    return regulateSplits(segment(str, predicate), removeBlank, trim);
+    return regulateSplits(segment(str, predicate), removeBlank, strip);
   }
 
   /**
@@ -701,13 +701,13 @@ public class Strings {
    *
    * @param str
    * @param removeBlank
-   * @param trim
+   * @param strip
    * @param p
    * @return split
    */
-  public static String[] split(final String str, final boolean removeBlank, final boolean trim,
+  public static String[] split(final String str, final boolean removeBlank, final boolean strip,
       Predicate<Character> p) {
-    return regulateSplits(split(str, p), removeBlank, trim);
+    return regulateSplits(split(str, p), removeBlank, strip);
   }
 
   /**
@@ -812,17 +812,50 @@ public class Strings {
   }
 
   /**
-   * Split the string into a string array, delete blank elements or trim elements as needed.
+   * Split the string into a string array, delete blank elements or strip elements as needed.
    *
    * @param str
    * @param wholeSpreator
    * @param removeBlank
-   * @param trim
+   * @param strip
    * @return split
    */
   public static String[] split(final String str, final String wholeSpreator,
-      final boolean removeBlank, final boolean trim) {
-    return regulateSplits(split(str, wholeSpreator), removeBlank, trim);
+      final boolean removeBlank, final boolean strip) {
+    return regulateSplits(split(str, wholeSpreator), removeBlank, strip);
+  }
+
+  /**
+   * Null-safe strip string
+   *
+   *
+   * from JDK-11
+   *
+   * @param str
+   * @return strip
+   */
+  public static String strip(final String str) {
+    return str == null ? null : str.strip();
+  }
+
+  /**
+   * Null-safe strip leading
+   *
+   * @param str
+   * @return strip
+   */
+  public static String stripLeading(final String str) {
+    return str == null ? null : str.stripLeading();
+  }
+
+  /**
+   * Null-safe strip trainling
+   *
+   * @param str
+   * @return strip
+   */
+  public static String stripTrailing(final String str) {
+    return str == null ? null : str.stripTrailing();
   }
 
   /**
@@ -872,15 +905,15 @@ public class Strings {
   }
 
   private static String[] regulateSplits(String[] splits, final boolean removeBlank,
-      final boolean trim) {
-    if (!removeBlank && !trim) {
+      final boolean strip) {
+    if (!removeBlank && !strip) {
       return splits;
     } else {
       String[] result = new String[splits.length];
       int i = 0;
       for (String e : splits) {
         if (isNotBlank(e) || isBlank(e) && !removeBlank) {
-          result[i++] = trim ? trim(e) : e;
+          result[i++] = strip ? strip(e) : e;
         }
       }
       return Arrays.copyOf(result, i);

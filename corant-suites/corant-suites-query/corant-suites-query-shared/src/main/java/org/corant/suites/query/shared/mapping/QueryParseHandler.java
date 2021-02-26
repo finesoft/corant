@@ -23,7 +23,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -501,16 +501,15 @@ public class QueryParseHandler extends DefaultHandler {
           }
           q.setPredicateScript(obj);
         }
-      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_INJECTION_SCRIPT)) {
-        if (this.currentObject() instanceof FetchQuery) {
-          FetchQuery q = this.currentObject();
-          if (q == null || !obj.isValid()) {
-            throw new QueryRuntimeException(
-                "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!",
-                url);
-          }
-          q.setInjectionScript(obj);
+      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_INJECTION_SCRIPT)
+          && (this.currentObject() instanceof FetchQuery)) {
+        FetchQuery q = this.currentObject();
+        if (q == null || !obj.isValid()) {
+          throw new QueryRuntimeException(
+              "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!",
+              url);
         }
+        q.setInjectionScript(obj);
       }
 
       nameStack.pop();
@@ -518,10 +517,10 @@ public class QueryParseHandler extends DefaultHandler {
   }
 
   String resolveScript(String src) {
-    Optional<SourceType> st = SourceType.decide(trim(src));
+    Optional<SourceType> st = SourceType.decide(strip(src));
     if (st.isPresent()) {
       try {
-        Optional<URLResource> or = Resources.from(trim(src)).findFirst();
+        Optional<URLResource> or = Resources.from(strip(src)).findFirst();
         if (or.isPresent()) {
           try (InputStream is = or.get().openStream()) {
             return Texts.fromInputStream(is);

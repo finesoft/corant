@@ -14,7 +14,7 @@
 package org.corant.suites.cloud.alibaba.oss;
 
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.strip;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class OSSClientProducer {
     }
     String name = Strings.EMPTY;
     if (naming != null) {
-      name = trim(naming.value());
+      name = strip(naming.value());
     }
     OSSClientConfiguration config = configs.get(Configs.assemblyStringConfigProperty(name));
     if (config != null) {

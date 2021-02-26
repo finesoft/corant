@@ -158,7 +158,7 @@ public class CorantDeclarativeScheduler {
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent pse) {
     try {
       if (getQuartzScheduler() != null && !getQuartzScheduler().isShutdown()) {
-        logger.info(() -> "Shotdown the bulit-in declarative job scheduler!");
+        logger.info(() -> "Shutdown the bulit-in declarative job scheduler!");
         getQuartzScheduler().shutdown(waitForJobsToComplete);
       }
     } catch (SchedulerException e) {

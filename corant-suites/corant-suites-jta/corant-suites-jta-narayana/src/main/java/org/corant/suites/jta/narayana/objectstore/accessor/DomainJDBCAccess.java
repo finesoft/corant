@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.narayana.extend;
+package org.corant.suites.jta.narayana.objectstore.accessor;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Maps.getMapInteger;
@@ -40,6 +40,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.sql.DataSource;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.suites.jta.narayana.objectstore.driver.AbstractDomainJDBCDriver;
+import org.corant.suites.jta.narayana.objectstore.driver.DomainDB2Driver;
+import org.corant.suites.jta.narayana.objectstore.driver.DomainMSSqlDriver;
+import org.corant.suites.jta.narayana.objectstore.driver.DomainMySqlDriver;
+import org.corant.suites.jta.narayana.objectstore.driver.DomainOracleDriver;
+import org.corant.suites.jta.narayana.objectstore.driver.DomainPostgreDriver;
 import com.arjuna.ats.arjuna.exceptions.FatalError;
 
 /**
@@ -50,7 +56,7 @@ import com.arjuna.ats.arjuna.exceptions.FatalError;
  */
 public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
 
-  protected static final DomainJDBCAccess instance = new DomainJDBCAccess();
+  public static final DomainJDBCAccess instance = new DomainJDBCAccess();
   protected volatile BlockingQueue<XConnection> cachedConnections;
   protected volatile BlockingQueue<XConnection> holdedConnections;
   private volatile int validateConnectionTimeout = 8;
@@ -120,6 +126,12 @@ public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
       return new DomainMSSqlDriver();
     } else if (driverClass.getName().contains("com.mysql")) {
       return new DomainMySqlDriver();
+    } else if (driverClass.getName().contains("com.oracle")) {
+      return new DomainOracleDriver();
+    } else if (driverClass.getName().contains("com.ibm.db2")) {
+      return new DomainDB2Driver();
+    } else if (driverClass.getName().contains("org.postgresql")) {
+      return new DomainPostgreDriver();
     } else {
       throw new NotSupportedException("Can't support domain jdbc driver for %s.", driverClass);
     }

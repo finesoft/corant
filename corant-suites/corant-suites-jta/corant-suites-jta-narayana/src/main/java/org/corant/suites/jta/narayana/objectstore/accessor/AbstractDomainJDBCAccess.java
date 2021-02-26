@@ -11,12 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.narayana.extend;
+package org.corant.suites.jta.narayana.objectstore.accessor;
 
 import static org.corant.shared.util.Strings.isNoneBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.HashMap;
 import java.util.Map;
+import org.corant.suites.jta.narayana.objectstore.driver.AbstractDomainJDBCDriver;
 import com.arjuna.ats.arjuna.objectstore.jdbc.JDBCAccess;
 
 /**

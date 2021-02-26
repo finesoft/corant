@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.narayana.extend;
+package org.corant.suites.jta.narayana.objectstore;
 
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.StringTokenizer;
+import org.corant.suites.jta.narayana.objectstore.accessor.DomainJDBCAccess;
+import org.corant.suites.jta.narayana.objectstore.driver.AbstractDomainJDBCDriver;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.exceptions.ObjectStoreException;
 import com.arjuna.ats.arjuna.logging.tsLogger;
@@ -25,7 +27,7 @@ import com.arjuna.ats.arjuna.logging.tsLogger;
  * @author bingo 下午4:52:52
  *
  */
-public class DomainDataSourceStore extends AbstractDomainObjectStore {
+public class DomainJDBCStore extends AbstractDomainObjectStore {
 
   /**
    * Create a new JDBCStore
@@ -33,7 +35,7 @@ public class DomainDataSourceStore extends AbstractDomainObjectStore {
    * @param jdbcStoreEnvironmentBean The environment bean containing the configuration
    * @throws ObjectStoreException In case the store environment bean was not correctly configured
    */
-  public DomainDataSourceStore(ObjectStoreEnvironmentBean jdbcStoreEnvironmentBean)
+  public DomainJDBCStore(ObjectStoreEnvironmentBean jdbcStoreEnvironmentBean)
       throws ObjectStoreException {
     super(jdbcStoreEnvironmentBean);
     String connectionDetails = jdbcStoreEnvironmentBean.getJdbcAccess();
@@ -51,8 +53,9 @@ public class DomainDataSourceStore extends AbstractDomainObjectStore {
     _storeName = storeNames.get(key);
     if (_theImple == null) {
       try {
-        DomainDataSourceAccess jdbcAccess = DomainDataSourceAccess.instance;
-        jdbcAccess.initialise(new StringTokenizer(connectionDetails));
+        DomainJDBCAccess jdbcAccess = DomainJDBCAccess.instance;
+        StringTokenizer stringTokenizer = new StringTokenizer(connectionDetails, "|");
+        jdbcAccess.initialise(stringTokenizer);
         AbstractDomainJDBCDriver jdbcImple = jdbcAccess.getDriver();
         _storeName = jdbcAccess.getClass().getName() + ":" + tableName;
         _theImple = jdbcImple;

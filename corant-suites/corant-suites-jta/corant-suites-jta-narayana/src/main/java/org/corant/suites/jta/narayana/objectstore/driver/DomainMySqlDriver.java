@@ -11,22 +11,36 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.narayana.extend;
+package org.corant.suites.jta.narayana.objectstore.driver;
 
-import javax.enterprise.context.ApplicationScoped;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * corant-suites-jta-narayana
  *
- * @author bingo 下午3:20:05
+ * @author bingo 上午11:00:15
  *
  */
-@ApplicationScoped
-public class DomainStoreManager {
+public class DomainMySqlDriver extends AbstractDomainJDBCDriver {
 
-  public void clear() {
-    DomainDataSourceAccess.instance.finalize();
-    DomainJDBCAccess.instance.finalize();
+  @Override
+  protected void checkCreateTableError(SQLException ex) throws SQLException {
+    if (!ex.getSQLState().equals("42S01")) {
+      throw ex;
+    }
   }
 
+  @Override
+  protected void checkDropTableException(Connection connection, SQLException ex)
+      throws SQLException {
+    if (!ex.getSQLState().equals("42S02")) {
+      throw ex;
+    }
+  }
+
+  @Override
+  protected String getObjectStateSQLType() {
+    return "BLOB";
+  }
 }

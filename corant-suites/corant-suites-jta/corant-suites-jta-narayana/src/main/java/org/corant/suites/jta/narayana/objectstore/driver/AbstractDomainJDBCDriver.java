@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.jta.narayana.extend;
+package org.corant.suites.jta.narayana.objectstore.driver;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.naming.NamingException;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.suites.jta.narayana.objectstore.accessor.AbstractDomainJDBCAccess;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.exceptions.ObjectStoreException;

@@ -13,7 +13,7 @@ import org.quartz.JobExecutionContext;
  */
 public class CorantDeclarativeJobImpl implements Job {
 
-  private ContextualMethodHandler methodHandler;
+  private final ContextualMethodHandler methodHandler;
 
   public CorantDeclarativeJobImpl(ContextualMethodHandler methodHandler) {
     this.methodHandler = methodHandler;

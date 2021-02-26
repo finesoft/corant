@@ -35,7 +35,6 @@ public class CorantSchedulerExtension implements Extension {
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
-        .stream().map(CorantDeclarativeJobMetaData::of)
-        .forEach(cm -> declarativeJobMetaDatas.add(cm));
+        .stream().map(CorantDeclarativeJobMetaData::of).forEach(declarativeJobMetaDatas::add);
   }
 }

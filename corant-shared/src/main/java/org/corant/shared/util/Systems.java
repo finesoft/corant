@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Conversions.toLong;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.split;
@@ -56,11 +57,11 @@ public class Systems {
   }
 
   public static String getFileEncoding() {
-    return getSysPro("file.encoding");
+    return getSystemProperty("file.encoding");
   }
 
   public static String getFileSeparator() {
-    return getSysPro("file.separator");
+    return getSystemProperty("file.separator");
   }
 
   public static long getFreeMemory() {
@@ -79,31 +80,31 @@ public class Systems {
   }
 
   public static String getJavaHomeDir() {
-    return getSysPro("java.home");
+    return getSystemProperty("java.home");
   }
 
   public static String getJavaSpecificationName() {
-    return getSysPro("java.specification.name");
+    return getSystemProperty("java.specification.name");
   }
 
   public static String getJavaSpecificationVendor() {
-    return getSysPro("java.specification.vendor");
+    return getSystemProperty("java.specification.vendor");
   }
 
   public static String getJavaSpecificationVersion() {
-    return getSysPro("java.specification.version");
+    return getSystemProperty("java.specification.version");
   }
 
   public static String getJavaVendor() {
-    return getSysPro("java.vendor");
+    return getSystemProperty("java.vendor");
   }
 
   public static String getJavaVendorURL() {
-    return getSysPro("java.vendor.url");
+    return getSystemProperty("java.vendor.url");
   }
 
   public static String getJavaVersion() {
-    return getSysPro("java.version");
+    return getSystemProperty("java.version");
   }
 
   public static int getJavaVersionNumber() {
@@ -122,35 +123,35 @@ public class Systems {
   }
 
   public static String getJvmInfo() {
-    return getSysPro("java.vm.info");
+    return getSystemProperty("java.vm.info");
   }
 
   public static String getJvmName() {
-    return getSysPro("java.vm.name");
+    return getSystemProperty("java.vm.name");
   }
 
   public static String getJvmSpecificationName() {
-    return getSysPro("java.vm.specification.name");
+    return getSystemProperty("java.vm.specification.name");
   }
 
   public static String getJvmSpecificationVendor() {
-    return getSysPro("java.vm.specification.vendor");
+    return getSystemProperty("java.vm.specification.vendor");
   }
 
   public static String getJvmSpecificationVersion() {
-    return getSysPro("java.vm.specification.version");
+    return getSystemProperty("java.vm.specification.version");
   }
 
   public static String getJvmVendor() {
-    return getSysPro("java.vm.vendor");
+    return getSystemProperty("java.vm.vendor");
   }
 
   public static String getJvmVersion() {
-    return getSysPro("java.vm.version");
+    return getSystemProperty("java.vm.version");
   }
 
   public static String getLineSeparator() {
-    return getSysPro("line.separator");
+    return getSystemProperty("line.separator");
   }
 
   public static byte[] getMacAddress() throws SocketException {
@@ -176,19 +177,19 @@ public class Systems {
   }
 
   public static String getOsArchitecture() {
-    return getSysPro("os.arch");
+    return getSystemProperty("os.arch");
   }
 
   public static String getOsName() {
-    return getSysPro("os.name");
+    return getSystemProperty("os.name");
   }
 
   public static String getOsVersion() {
-    return getSysPro("os.version");
+    return getSystemProperty("os.version");
   }
 
   public static String getPathSeparator() {
-    return getSysPro("path.separator");
+    return getSystemProperty("path.separator");
   }
 
   public static Optional<Long> getPhysicalMemory() {
@@ -225,11 +226,34 @@ public class Systems {
   }
 
   public static String[] getSystemClasspath() {
-    return split(getSysPro("java.class.path"), File.pathSeparator);
+    return split(getSystemProperty("java.class.path"), File.pathSeparator);
+  }
+
+  public static String getSystemProperty(final String name) {
+    return getSystemProperty(name, (String) null);
+  }
+
+  public static <T> T getSystemProperty(final String name, Class<T> type) {
+    return toObject(getSystemProperty(name), type);
+  }
+
+  public static String getSystemProperty(final String name, final String defaultValue) {
+    shouldNotNull(name);
+    String value = null;
+    try {
+      if (System.getSecurityManager() == null) {
+        value = System.getProperty(name);
+      } else {
+        value = AccessController
+            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
+      }
+    } catch (final Exception ignore) {
+    }
+    return defaultString(value, defaultValue);
   }
 
   public static String getTempDir() {
-    return getSysPro("java.io.tmpdir");
+    return getSystemProperty("java.io.tmpdir");
   }
 
   public static long getTotalMemory() {
@@ -241,23 +265,24 @@ public class Systems {
   }
 
   public static String getUserCountry() {
-    return defaultObject(getSysPro("user.country"), () -> getSysPro("user.country"));
+    return defaultObject(getSystemProperty("user.country"),
+        () -> getSystemProperty("user.country"));
   }
 
   public static String getUserHome() {
-    return getSysPro("user.home");
+    return getSystemProperty("user.home");
   }
 
   public static String getUserLanguage() {
-    return getSysPro("user.language");
+    return getSystemProperty("user.language");
   }
 
   public static String getUserName() {
-    return getSysPro("user.name");
+    return getSystemProperty("user.name");
   }
 
   public static String getWorkingDir() {
-    return getSysPro("user.dir");
+    return getSystemProperty("user.dir");
   }
 
   public static boolean isAix() {
@@ -350,34 +375,15 @@ public class Systems {
   }
 
   static boolean detectOS(final String osNamePrefix) {
-    String osn = getSysPro("os.name");
+    String osn = getSystemProperty("os.name");
     return osn != null && osn.startsWith(osNamePrefix);
   }
 
   static boolean detectOS(final String osNamePrefix, final String osVersionPrefix) {
-    String osn = getSysPro("os.name");
-    String osv = getSysPro("os.version");
+    String osn = getSystemProperty("os.name");
+    String osv = getSystemProperty("os.version");
     return osn != null && osv != null && osn.startsWith(osNamePrefix)
         && osv.startsWith(osVersionPrefix);
-  }
-
-  static String getSysPro(final String name) {
-    return getSysPro(name, null);
-  }
-
-  static String getSysPro(final String name, final String defaultValue) {
-    shouldNotNull(name);
-    String value = null;
-    try {
-      if (System.getSecurityManager() == null) {
-        value = System.getProperty(name);
-      } else {
-        value = AccessController
-            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
-      }
-    } catch (final Exception ignore) {
-    }
-    return defaultString(value, defaultValue);
   }
 
   private static byte[] constructDummyMulticastAddress(Random rd) {

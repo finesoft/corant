@@ -25,7 +25,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:48:41
  *
  */
-@ConfigKeyRoot(value = "concurrent.thread-factory", ignoreNoAnnotatedItem = false, keyIndex = 2)
+@ConfigKeyRoot(value = "concurrent.thread.factory", ignoreNoAnnotatedItem = false, keyIndex = 3)
 public class ManagedThreadFactoryConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = -293822931326474344L;

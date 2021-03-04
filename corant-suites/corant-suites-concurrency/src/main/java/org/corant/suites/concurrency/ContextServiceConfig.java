@@ -25,7 +25,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:53:53
  *
  */
-@ConfigKeyRoot(value = "concurrent.context-service", ignoreNoAnnotatedItem = false, keyIndex = 2)
+@ConfigKeyRoot(value = "concurrent.context.service", ignoreNoAnnotatedItem = false, keyIndex = 3)
 public class ContextServiceConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = -5306010134920490346L;

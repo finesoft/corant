@@ -13,8 +13,16 @@
  */
 package org.corant.suites.concurrency;
 
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
+import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.shared.util.Systems;
+import org.eclipse.microprofile.config.Config;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.RejectPolicy;
 
 /**
@@ -23,9 +31,11 @@ import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.Reject
  * @author bingo 下午7:56:44
  *
  */
-public class MESConfig {
+@ConfigKeyRoot(value = "concurrent.executor", ignoreNoAnnotatedItem = false, keyIndex = 2)
+public class ManagedExecutorConfig extends AbstractNamedObject implements DeclarativeConfig {
 
-  private String name;
+  private static final long serialVersionUID = -1732163277606881747L;
+
   private boolean longRunningTasks;
   private long hungTaskThreshold;
   private int corePoolSize;
@@ -35,8 +45,7 @@ public class MESConfig {
   private RejectPolicy rejectPolicy;
   private int threadPriority;
   private String threadName;
-  private int queueCapacity;
-  private boolean fair;
+  private int queueCapacity = Integer.MAX_VALUE;
 
   @Override
   public boolean equals(Object obj) {
@@ -49,7 +58,7 @@ public class MESConfig {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    MESConfig other = (MESConfig) obj;
+    ManagedExecutorConfig other = (ManagedExecutorConfig) obj;
     if (name == null) {
       if (other.name != null) {
         return false;
@@ -65,7 +74,7 @@ public class MESConfig {
    * @return the corePoolSize
    */
   public int getCorePoolSize() {
-    return corePoolSize;
+    return max(corePoolSize, Systems.getCPUs());
   }
 
   /**
@@ -73,7 +82,7 @@ public class MESConfig {
    * @return the hungTaskThreshold
    */
   public long getHungTaskThreshold() {
-    return hungTaskThreshold;
+    return hungTaskThreshold <= 0 ? 60000L : hungTaskThreshold;
   }
 
   /**
@@ -81,7 +90,7 @@ public class MESConfig {
    * @return the keepAliveTime
    */
   public Duration getKeepAliveTime() {
-    return keepAliveTime;
+    return defaultObject(keepAliveTime, () -> Duration.ofSeconds(5));
   }
 
   /**
@@ -89,13 +98,14 @@ public class MESConfig {
    * @return the maxPoolSize
    */
   public int getMaxPoolSize() {
-    return maxPoolSize;
+    return maxPoolSize <= getCorePoolSize() ? getCorePoolSize() : maxPoolSize;
   }
 
   /**
    *
    * @return the name
    */
+  @Override
   public String getName() {
     return name;
   }
@@ -105,7 +115,7 @@ public class MESConfig {
    * @return the queueCapacity
    */
   public int getQueueCapacity() {
-    return queueCapacity;
+    return queueCapacity < 0 ? Integer.MAX_VALUE : queueCapacity;
   }
 
   /**
@@ -113,7 +123,7 @@ public class MESConfig {
    * @return the rejectPolicy
    */
   public RejectPolicy getRejectPolicy() {
-    return rejectPolicy;
+    return defaultObject(rejectPolicy, () -> RejectPolicy.ABORT);
   }
 
   /**
@@ -129,7 +139,7 @@ public class MESConfig {
    * @return the threadName
    */
   public String getThreadName() {
-    return threadName;
+    return defaultObject(threadName, () -> name + "-thread");
   }
 
   /**
@@ -137,7 +147,7 @@ public class MESConfig {
    * @return the threadPriority
    */
   public int getThreadPriority() {
-    return threadPriority;
+    return threadPriority <= 0 ? Thread.NORM_PRIORITY : threadPriority;
   }
 
   @Override
@@ -150,18 +160,20 @@ public class MESConfig {
 
   /**
    *
-   * @return the fair
-   */
-  public boolean isFair() {
-    return fair;
-  }
-
-  /**
-   *
    * @return the longRunningTasks
    */
   public boolean isLongRunningTasks() {
     return longRunningTasks;
+  }
+
+  @Override
+  public boolean isValid() {
+    return isNotBlank(getName());
+  }
+
+  @Override
+  public void onPostConstruct(Config config, String key) {
+    setName(key);
   }
 
   /**
@@ -170,14 +182,6 @@ public class MESConfig {
    */
   protected void setCorePoolSize(int corePoolSize) {
     this.corePoolSize = corePoolSize;
-  }
-
-  /**
-   *
-   * @param fair the fair to set
-   */
-  protected void setFair(boolean fair) {
-    this.fair = fair;
   }
 
   /**
@@ -216,6 +220,7 @@ public class MESConfig {
    *
    * @param name the name to set
    */
+  @Override
   protected void setName(String name) {
     this.name = defaultTrim(name);
   }

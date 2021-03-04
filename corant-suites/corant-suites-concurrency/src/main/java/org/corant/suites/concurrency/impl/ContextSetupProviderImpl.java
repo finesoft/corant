@@ -43,7 +43,6 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   @Override
   public ContextHandle saveContext(ContextService contextService,
       Map<String, String> contextObjectProperties) {
-    // TODO Auto-generated method stub
     return null;
   }
 

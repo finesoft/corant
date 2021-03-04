@@ -66,15 +66,13 @@ public class Retry {
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
    *
-   * @param backoffFactor
    * @param cap
    * @param base
    * @param attempts
    * @param sleep
    * @return computeExpoBackoffDecorr
    */
-  public static long computeExpoBackoffDecorr(double backoffFactor, long cap, long base,
-      int attempts, long sleep) {
+  public static long computeExpoBackoffDecorr(long cap, long base, int attempts, long sleep) {
     long result = min(cap, Randoms.randomLong(base, (sleep <= 0 ? base : sleep) * 3));
     return result > 0 ? result : cap;
   }
@@ -222,8 +220,8 @@ public class Retry {
         case EXPO:
           return computeExpoBackoff(backoffFactor, maxInterval.toMillis(), base, attempts);
         case EXPO_DECORR:
-          return base = computeExpoBackoffDecorr(backoffFactor, maxInterval.toMillis(),
-              interval.toMillis(), attempts, base);
+          return base =
+              computeExpoBackoffDecorr(maxInterval.toMillis(), interval.toMillis(), attempts, base);
         case EXPO_EQUAL_JITTER:
           return computeExpoBackoffEqualJitter(backoffFactor, maxInterval.toMillis(), base,
               attempts);

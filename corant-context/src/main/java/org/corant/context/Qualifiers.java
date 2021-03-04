@@ -188,7 +188,7 @@ public class Qualifiers {
 
     abstract class AbstractNamedObject implements NamedObject {
 
-      private String name;
+      protected String name;
 
       @Override
       public boolean equals(Object obj) {

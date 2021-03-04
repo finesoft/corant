@@ -19,6 +19,10 @@
 			<artifactId>corant-config</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-context</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.enterprise.concurrent</groupId>
 			<artifactId>jakarta.enterprise.concurrent-api</artifactId>
 		</dependency>

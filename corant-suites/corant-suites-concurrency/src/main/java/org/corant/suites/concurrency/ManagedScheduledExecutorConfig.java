@@ -13,12 +13,17 @@
  */
 package org.corant.suites.concurrency;
 
+import org.corant.config.declarative.ConfigKeyRoot;
+
 /**
  * corant-suites-concurrency
  *
  * @author bingo 下午7:57:40
  *
  */
-public class MSESConfig extends MESConfig {
+@ConfigKeyRoot(value = "concurrent.scheduled.executor", ignoreNoAnnotatedItem = false, keyIndex = 3)
+public class ManagedScheduledExecutorConfig extends ManagedExecutorConfig {
+
+  private static final long serialVersionUID = 7985921715758101731L;
 
 }

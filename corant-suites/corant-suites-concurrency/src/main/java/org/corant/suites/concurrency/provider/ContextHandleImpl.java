@@ -11,25 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.suites.concurrency.impl;
+package org.corant.suites.concurrency.provider;
 
-import javax.transaction.Transaction;
-import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
+import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 
 /**
  * corant-suites-concurrency
  *
- * @author bingo 下午7:52:27
+ * @author bingo 下午9:25:41
  *
  */
-public class TransactionHandleImpl implements TransactionHandle {
-  private Transaction transaction;
+public class ContextHandleImpl implements ContextHandle {
 
-  public TransactionHandleImpl(Transaction transaction) {
-    this.transaction = transaction;
-  }
+  private static final long serialVersionUID = 4619888829612192057L;
 
-  public Transaction getTransaction() {
-    return transaction;
-  }
 }

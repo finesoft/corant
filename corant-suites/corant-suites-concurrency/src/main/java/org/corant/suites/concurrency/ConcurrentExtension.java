@@ -33,6 +33,7 @@ import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.suites.concurrency.provider.BlockingQueueProvider;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**

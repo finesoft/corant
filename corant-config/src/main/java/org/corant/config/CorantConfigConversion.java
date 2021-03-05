@@ -68,6 +68,7 @@ import org.eclipse.microprofile.config.spi.Converter;
  */
 public class CorantConfigConversion implements Serializable {
 
+  public static final String EMPTY_ARRAY_VALUE = "None";
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
@@ -211,6 +212,8 @@ public class CorantConfigConversion implements Serializable {
     int length = values.length;
     if (length == 0) {
       return null;
+    } else if (length == 1 && values[0].equals(EMPTY_ARRAY_VALUE)) {
+      length = 0; // MP 2.0 ??
     }
     Object array = Array.newInstance(propertyComponentType, length);
     for (int i = 0; i < length; i++) {

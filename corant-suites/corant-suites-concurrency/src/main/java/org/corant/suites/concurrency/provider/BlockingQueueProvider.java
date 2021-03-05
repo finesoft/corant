@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,10 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.suites.concurrency.provider;
+
+import java.util.concurrent.BlockingQueue;
+import org.corant.suites.concurrency.ManagedExecutorConfig;
+
 /**
  * corant-suites-concurrency
  *
- * @author bingo 下午7:48:53
+ * @author bingo 下午2:55:50
  *
  */
-package org.corant.suites.concurrency.impl;
+public interface BlockingQueueProvider {
+
+  <T extends BlockingQueue<?>> T provide(ManagedExecutorConfig config);
+
+}

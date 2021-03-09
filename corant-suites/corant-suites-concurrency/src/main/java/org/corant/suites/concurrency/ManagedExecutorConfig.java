@@ -19,6 +19,7 @@ import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -40,7 +41,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
-  public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(Names.CORANT);
+  public static final ManagedExecutorConfig DFLT_INST =
+      new ManagedExecutorConfig(Names.CORANT.toUpperCase(Locale.ROOT));
 
   protected boolean longRunningTasks;
   protected long hungTaskThreshold;

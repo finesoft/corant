@@ -121,9 +121,17 @@ public class Contexts {
       this.propagate = propagate;
       this.manager = manager;
       contextToApply = propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
-      logger.fine(
-          () -> String.format("Create context installer with propagate=%s, context to apply %s",
+      logger.finer(
+          () -> String.format("Create CDI context installer with propagate=%s, context to apply %s",
               propagate, contextToApply));
+    }
+
+    /**
+     * 
+     * @return the contextToApply
+     */
+    public ContextSnapshot getContextToApply() {
+      return contextToApply;
     }
 
     /**
@@ -131,15 +139,15 @@ public class Contexts {
      */
     public ContextRestorer install() {
       final ContextSnapshot existingContexts = capture(manager);
-      logger.fine(() -> String.format("Capture current thread context %s", existingContexts));
+      logger.finer(() -> String.format("Capture current thread CDI context %s", existingContexts));
       BoundRequestContext requestCtx =
           resolveBoundContext(existingContexts.getRequestContext(), BoundRequestContext.class);
       BoundSessionContext sessionCtx =
           resolveBoundContext(existingContexts.getSessionContext(), BoundSessionContext.class);
       BoundConversationContext conversationCtx = resolveBoundContext(
           existingContexts.getConversationContext(), BoundConversationContext.class);
-      logger.fine(() -> String.format("Propagate pre-context %s to current thread if necessary",
-          contextToApply));
+      logger.finer(() -> String
+          .format("Propagate captured context %s to current thread if necessary", contextToApply));
       Map<String, Object> requestMap = new HashMap<>();
       Map<String, Object> sessionMap = new HashMap<>();
       if (existingContexts.getRequestContext() != null) {
@@ -189,8 +197,8 @@ public class Contexts {
         } else {
           conversationCtx.deactivate();
         }
-        logger.fine(() -> String.format("Restore thread context %s to current thread if necessary",
-            existingContexts));
+        logger.finer(() -> String.format(
+            "Restore thread CDI context %s to current thread if necessary", existingContexts));
         if (propagate && contextToApply.getBeanCount() != afterTaskContexts.getBeanCount()) {
           Set<ContextualInstance<?>> lazilyRegisteredBeans =
               new HashSet<>(afterTaskContexts.getRequestInstances());

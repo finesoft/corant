@@ -13,10 +13,13 @@
  */
 package org.corant.suites.concurrency;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.isNoneBlank;
+import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -30,7 +33,19 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   private static final long serialVersionUID = -5306010134920490346L;
 
-  protected String[] contextInfo;
+  public static final ContextServiceConfig DFLT_INST = new ContextServiceConfig(Names.CORANT);
+
+  protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
+
+  public ContextServiceConfig() {}
+
+  private ContextServiceConfig(String name) {
+    setName(name);
+  }
+
+  public Set<ContextInfo> getContextInfos() {
+    return contextInfos;
+  }
 
   @Override
   public boolean isValid() {
@@ -40,5 +55,13 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
   @Override
   public void onPostConstruct(Config config, String key) {
     setName(key);
+  }
+
+  protected void setContextInfos(Set<ContextInfo> contextInfos) {
+    this.contextInfos = contextInfos;
+  }
+
+  public enum ContextInfo {
+    SECURITY, APPLICATION, CDI
   }
 }

@@ -216,7 +216,7 @@ public class Instances {
   }
 
   public static <T> T tryResolve(Class<T> instanceClass, Annotation... qualifiers) {
-    return find(instanceClass, qualifiers).orElse(null);
+    return CDIs.isEnabled() ? find(instanceClass, qualifiers).orElse(null) : null;
   }
 
   public static <T> T tryResolve(Instance<T> instance) {
@@ -226,18 +226,22 @@ public class Instances {
   public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
     Consumer<T> useConsumer = shouldNotNull(consumer);
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
-      useConsumer.accept(inst.get());
+    if (CDIs.isEnabled()) {
+      Instance<T> inst = select(instanceClass, qualifiers);
+      if (inst.isResolvable()) {
+        useConsumer.accept(inst.get());
+      }
     }
   }
 
   public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
     Function<T, R> useFunction = shouldNotNull(function);
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
-      return useFunction.apply(inst.get());
+    if (CDIs.isEnabled()) {
+      Instance<T> inst = select(instanceClass, qualifiers);
+      if (inst.isResolvable()) {
+        return useFunction.apply(inst.get());
+      }
     }
     return null;
   }

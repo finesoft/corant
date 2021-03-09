@@ -13,6 +13,9 @@
  */
 package org.corant.suites.concurrency.provider;
 
+import org.corant.context.Contexts.ContextInstaller;
+import org.corant.context.Contexts.ContextRestorer;
+import org.corant.context.SecurityContext;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 
 /**
@@ -24,5 +27,91 @@ import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 public class ContextHandleImpl implements ContextHandle {
 
   private static final long serialVersionUID = 4619888829612192057L;
+
+  private transient ContextInstaller CDIContextInstaller;
+  private transient ContextRestorer CDIContextRestorer;
+  private transient ClassLoader contextClassLoader;
+  private transient SecurityContext securityContext;
+  private boolean useTransactionOfExecutionThread;
+
+  /**
+   * 
+   * @return the cDIContextInstaller
+   */
+  public ContextInstaller getCDIContextInstaller() {
+    return CDIContextInstaller;
+  }
+
+  /**
+   * 
+   * @return the cDIContextRestorer
+   */
+  public ContextRestorer getCDIContextRestorer() {
+    return CDIContextRestorer;
+  }
+
+  /**
+   *
+   * @return the contextClassLoader
+   */
+  public ClassLoader getContextClassLoader() {
+    return contextClassLoader;
+  }
+
+  /**
+   *
+   * @return the securityContext
+   */
+  public SecurityContext getSecurityContext() {
+    return securityContext;
+  }
+
+  /**
+   *
+   * @return the useTransactionOfExecutionThread
+   */
+  public boolean isUseTransactionOfExecutionThread() {
+    return useTransactionOfExecutionThread;
+  }
+
+  /**
+   *
+   * @param cDIContextInstaller the cDIContextInstaller to set
+   */
+  protected void setCDIContextInstaller(ContextInstaller cDIContextInstaller) {
+    CDIContextInstaller = cDIContextInstaller;
+  }
+
+  /**
+   *
+   * @param cDIContextRestorer the cDIContextRestorer to set
+   */
+  protected void setCDIContextRestorer(ContextRestorer cDIContextRestorer) {
+    CDIContextRestorer = cDIContextRestorer;
+  }
+
+  /**
+   *
+   * @param contextClassLoader the contextClassLoader to set
+   */
+  protected void setContextClassLoader(ClassLoader contextClassLoader) {
+    this.contextClassLoader = contextClassLoader;
+  }
+
+  /**
+   *
+   * @param securityContext the securityContext to set
+   */
+  protected void setSecurityContext(SecurityContext securityContext) {
+    this.securityContext = securityContext;
+  }
+
+  /**
+   *
+   * @param useTransactionOfExecutionThread the useTransactionOfExecutionThread to set
+   */
+  protected void setUseTransactionOfExecutionThread(boolean useTransactionOfExecutionThread) {
+    this.useTransactionOfExecutionThread = useTransactionOfExecutionThread;
+  }
 
 }

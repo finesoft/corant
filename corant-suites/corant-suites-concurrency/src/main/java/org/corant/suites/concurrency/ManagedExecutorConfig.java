@@ -15,13 +15,17 @@ package org.corant.suites.concurrency;
 
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
+import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.Systems;
+import org.corant.suites.concurrency.ContextServiceConfig.ContextInfo;
 import org.eclipse.microprofile.config.Config;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.RejectPolicy;
 
@@ -36,16 +40,25 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
-  private boolean longRunningTasks;
-  private long hungTaskThreshold;
-  private int corePoolSize;
-  private int maxPoolSize;
-  private Duration keepAliveTime;
-  private Duration threadLifeTime;
-  private RejectPolicy rejectPolicy;
-  private int threadPriority;
-  private String threadName;
-  private int queueCapacity = Integer.MAX_VALUE;
+  public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(Names.CORANT);
+
+  protected boolean longRunningTasks;
+  protected long hungTaskThreshold;
+  protected int corePoolSize;
+  protected int maxPoolSize;
+  protected Duration keepAliveTime;
+  protected Duration threadLifeTime;
+  protected RejectPolicy rejectPolicy;
+  protected int threadPriority;
+  protected String threadName;
+  protected int queueCapacity = Integer.MAX_VALUE;
+  protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
+
+  public ManagedExecutorConfig() {}
+
+  private ManagedExecutorConfig(String name) {
+    setName(name);
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -69,83 +82,47 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return true;
   }
 
-  /**
-   *
-   * @return the corePoolSize
-   */
+  public Set<ContextInfo> getContextInfos() {
+    return contextInfos;
+  }
+
   public int getCorePoolSize() {
     return max(corePoolSize, Systems.getCPUs());
   }
 
-  /**
-   *
-   * @return the hungTaskThreshold
-   */
   public long getHungTaskThreshold() {
     return hungTaskThreshold <= 0 ? 60000L : hungTaskThreshold;
   }
 
-  /**
-   *
-   * @return the keepAliveTime
-   */
   public Duration getKeepAliveTime() {
     return defaultObject(keepAliveTime, () -> Duration.ofSeconds(5));
   }
 
-  /**
-   *
-   * @return the maxPoolSize
-   */
   public int getMaxPoolSize() {
     return maxPoolSize <= getCorePoolSize() ? getCorePoolSize() : maxPoolSize;
   }
 
-  /**
-   *
-   * @return the name
-   */
   @Override
   public String getName() {
     return name;
   }
 
-  /**
-   *
-   * @return the queueCapacity
-   */
   public int getQueueCapacity() {
     return queueCapacity < 0 ? Integer.MAX_VALUE : queueCapacity;
   }
 
-  /**
-   *
-   * @return the rejectPolicy
-   */
   public RejectPolicy getRejectPolicy() {
     return defaultObject(rejectPolicy, () -> RejectPolicy.ABORT);
   }
 
-  /**
-   *
-   * @return the threadLifeTime
-   */
   public Duration getThreadLifeTime() {
     return threadLifeTime;
   }
 
-  /**
-   *
-   * @return the threadName
-   */
   public String getThreadName() {
     return defaultObject(threadName, () -> name + "-thread");
   }
 
-  /**
-   *
-   * @return the threadPriority
-   */
   public int getThreadPriority() {
     return threadPriority <= 0 ? Thread.NORM_PRIORITY : threadPriority;
   }
@@ -158,10 +135,6 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return result;
   }
 
-  /**
-   *
-   * @return the longRunningTasks
-   */
   public boolean isLongRunningTasks() {
     return longRunningTasks;
   }
@@ -174,6 +147,14 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   @Override
   public void onPostConstruct(Config config, String key) {
     setName(key);
+  }
+
+  /**
+   *
+   * @param contextInfos the contextInfos to set
+   */
+  protected void setContextInfos(Set<ContextInfo> contextInfos) {
+    this.contextInfos = contextInfos;
   }
 
   /**

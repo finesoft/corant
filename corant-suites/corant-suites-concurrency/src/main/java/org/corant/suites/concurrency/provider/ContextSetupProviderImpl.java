@@ -13,10 +13,22 @@
  */
 package org.corant.suites.concurrency.provider;
 
+import static org.corant.context.Instances.tryResolve;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
+import java.util.Set;
 import javax.enterprise.concurrent.ContextService;
+import javax.enterprise.inject.Instance;
+import org.corant.context.Contexts.ContextInstaller;
+import org.corant.context.Instances;
+import org.corant.context.SecurityContext.SecurityContextService;
+import org.corant.suites.concurrency.ContextServiceConfig.ContextInfo;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
+import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-suites-concurrency
@@ -28,31 +40,141 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   private static final long serialVersionUID = -5397394660587586147L;
 
+  final Set<ContextInfo> contextInfos;
+
+  public ContextSetupProviderImpl(ContextInfo... infos) {
+    contextInfos = immutableSetOf(infos);
+  }
+
   @Override
   public void reset(ContextHandle contextHandle) {
-    // TODO Auto-generated method stub
-
+    shouldBeTrue(contextHandle instanceof ContextHandleImpl);
+    ContextHandleImpl resetContextHandle = (ContextHandleImpl) contextHandle;
+    resetCDIContext(resetContextHandle);
+    resetSecurityContext(resetContextHandle);
+    resetApplicationContext(resetContextHandle);
   }
 
   @Override
   public ContextHandle saveContext(ContextService contextService) {
-    // TODO Auto-generated method stub
-    return null;
+    return saveContext(contextService, null);
   }
 
   @Override
   public ContextHandle saveContext(ContextService contextService,
       Map<String, String> contextObjectProperties) {
-    return null;
+    ContextHandleImpl contextHandle = new ContextHandleImpl();
+    saveApplicationContext(contextHandle, contextService, contextObjectProperties);
+    saveCDIContext(contextHandle, contextService, contextObjectProperties);
+    saveSecurityContext(contextHandle, contextService, contextObjectProperties);
+    return contextHandle;
   }
 
   @Override
   public ContextHandle setup(ContextHandle contextHandle) throws IllegalStateException {
-    // TODO Auto-generated method stub
-    return null;
+    shouldBeTrue(contextHandle instanceof ContextHandleImpl);
+    ContextHandleImpl preContextHandle = (ContextHandleImpl) contextHandle;
+    ContextHandleImpl resetContextHandle = new ContextHandleImpl();
+    setupApplication(preContextHandle, resetContextHandle);
+    setupSecurityContext(preContextHandle, resetContextHandle);
+    setupCDIContext(preContextHandle, resetContextHandle);
+    return resetContextHandle;
   }
 
-  public enum ContextType {
-    CLASSLOADER, SECURITY, NAMING, WORKAREA
+  protected void resetApplicationContext(ContextHandleImpl contextHandle) {
+    if (contextInfos.contains(ContextInfo.APPLICATION)
+        && contextHandle.getContextClassLoader() != null) {
+      final ClassLoader classLoaderToSet = contextHandle.getContextClassLoader();
+      final Thread currentThread = Thread.currentThread();
+      if (classLoaderToSet != currentThread.getContextClassLoader()) {
+        if (System.getSecurityManager() == null) {
+          currentThread.setContextClassLoader(classLoaderToSet);
+        } else {
+          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            currentThread.setContextClassLoader(classLoaderToSet);
+            return null;
+          });
+        }
+      }
+    }
+  }
+
+  protected void resetCDIContext(ContextHandleImpl contextHandle) {
+    if (contextInfos.contains(ContextInfo.CDI) && contextHandle.getCDIContextRestorer() != null) {
+      contextHandle.getCDIContextRestorer().restore();
+    }
+  }
+
+  protected void resetSecurityContext(ContextHandleImpl contextHandle) {
+    if (contextInfos.contains(ContextInfo.SECURITY)) {
+      contextHandle.setSecurityContext(contextHandle.getSecurityContext());
+    }
+  }
+
+  protected void saveApplicationContext(ContextHandleImpl contextHandle,
+      ContextService contextService, Map<String, String> contextObjectProperties) {
+    if (contextInfos.contains(ContextInfo.APPLICATION)) {
+      ClassLoader contextClassloader = null;
+      if (Thread.currentThread().getContextClassLoader() != null) {
+        contextClassloader = Thread.currentThread().getContextClassLoader();
+      } else {
+        contextClassloader = ClassLoader.getSystemClassLoader();
+      }
+      contextHandle.setContextClassLoader(contextClassloader);
+    }
+  }
+
+  protected void saveCDIContext(ContextHandleImpl contextHandle, ContextService contextService,
+      Map<String, String> contextObjectProperties) {
+    if (contextInfos.contains(ContextInfo.CDI)) {
+      contextHandle
+          .setCDIContextInstaller(new ContextInstaller(true, tryResolve(WeldManager.class)));
+    }
+  }
+
+  protected void saveSecurityContext(ContextHandleImpl contextHandle, ContextService contextService,
+      Map<String, String> contextObjectProperties) {
+    Instance<SecurityContextService> scp = Instances.select(SecurityContextService.class);
+    if (contextInfos.contains(ContextInfo.SECURITY) && scp.isResolvable()) {
+      contextHandle.setSecurityContext(scp.get().get());
+    }
+  }
+
+  protected void setupApplication(ContextHandleImpl preContextHandle,
+      ContextHandleImpl resetContextHandle) {
+    if (contextInfos.contains(ContextInfo.APPLICATION)
+        && preContextHandle.getContextClassLoader() != null) {
+      final ClassLoader classLoaderToSet = preContextHandle.getContextClassLoader();
+      final Thread currentThread = Thread.currentThread();
+      final ClassLoader originalClassLoader = currentThread.getContextClassLoader();
+      if (classLoaderToSet != originalClassLoader) {
+        if (System.getSecurityManager() == null) {
+          currentThread.setContextClassLoader(classLoaderToSet);
+        } else {
+          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            currentThread.setContextClassLoader(classLoaderToSet);
+            return null;
+          });
+        }
+      }
+      resetContextHandle.setContextClassLoader(originalClassLoader);
+    }
+  }
+
+  protected void setupCDIContext(ContextHandleImpl preContextHandle,
+      ContextHandleImpl resetContextHandle) {
+    if (contextInfos.contains(ContextInfo.CDI)
+        && preContextHandle.getCDIContextInstaller() != null) {
+      resetContextHandle.setCDIContextRestorer(preContextHandle.getCDIContextInstaller().install());
+    }
+  }
+
+  protected void setupSecurityContext(ContextHandleImpl preContextHandle,
+      ContextHandleImpl resetContextHandle) {
+    Instance<SecurityContextService> scp = Instances.select(SecurityContextService.class);
+    if (contextInfos.contains(ContextInfo.SECURITY) && scp.isResolvable()) {
+      resetContextHandle.setSecurityContext(scp.get().get());
+      scp.get().set(preContextHandle.getSecurityContext());
+    }
   }
 }

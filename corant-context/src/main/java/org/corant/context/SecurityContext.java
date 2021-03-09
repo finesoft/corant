@@ -13,7 +13,9 @@
  */
 package org.corant.context;
 
+import java.io.Serializable;
 import java.security.Principal;
+import javax.security.auth.Subject;
 
 /**
  * corant-suites-security-shared
@@ -21,14 +23,84 @@ import java.security.Principal;
  * @author bingo 下午5:20:40
  *
  */
-public interface SecurityContext {
+public interface SecurityContext extends Serializable {
+
+  DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null, null, null);
+
+  String getAuthenticationScheme();
 
   Principal getPrincipal();
 
-  interface SecurityContextService {
+  Subject getSubject();
 
-    SecurityContext get();
+  <T> T unwrap(Class<T> type);
 
-    void set(SecurityContext ctx);
+  public static class DefaultSecurityContext implements SecurityContext {
+
+    private static final long serialVersionUID = 4329263253208902621L;
+
+    protected final String authenticationScheme;
+    protected final Principal principal;
+    protected final Subject subject;
+    protected final Object delegate;
+
+    public DefaultSecurityContext(Object delegate, String authenticationScheme, Subject subject,
+        Principal principal) {
+      this.authenticationScheme = authenticationScheme;
+      this.principal = principal;
+      this.subject = subject;
+      this.delegate = delegate;
+    }
+
+    @Override
+    public String getAuthenticationScheme() {
+      return authenticationScheme;
+    }
+
+    @Override
+    public Principal getPrincipal() {
+      return principal;
+    }
+
+    @Override
+    public Subject getSubject() {
+      return subject;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(Class<T> type) {
+      if (delegate.getClass().isAssignableFrom(type)) {
+        return (T) delegate;
+      }
+      throw new IllegalArgumentException("Can't unwrap security context to " + type);
+    }
+
   }
+
+  public static class SecurityContexts {
+
+    static final InheritableThreadLocal<SecurityContext> currentSecCtx =
+        new InheritableThreadLocal<>();
+
+    public static SecurityContext getCurrent() {
+      SecurityContext sc = currentSecCtx.get();
+      if (sc == null) {
+        sc = EMPTY_INST;
+      }
+      return sc;
+    }
+
+    public static void setCurrent(SecurityContext sc) {
+      if (sc != null && sc != EMPTY_INST) {
+        SecurityContext current = currentSecCtx.get();
+        if (sc != current) {
+          currentSecCtx.set(sc);
+        }
+      } else {
+        currentSecCtx.set(sc);
+      }
+    }
+  }
+
 }

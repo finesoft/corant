@@ -20,11 +20,10 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.enterprise.concurrent.ContextService;
-import javax.enterprise.inject.Instance;
 import org.corant.context.Contexts.ContextInstaller;
-import org.corant.context.Instances;
-import org.corant.context.SecurityContext.SecurityContextService;
+import org.corant.context.SecurityContext.SecurityContexts;
 import org.corant.suites.concurrency.ContextServiceConfig.ContextInfo;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
@@ -39,6 +38,8 @@ import org.jboss.weld.manager.api.WeldManager;
 public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   private static final long serialVersionUID = -5397394660587586147L;
+
+  static final Logger logger = Logger.getLogger(ContextSetupProviderImpl.class.getName());
 
   final Set<ContextInfo> contextInfos;
 
@@ -82,8 +83,11 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   }
 
   protected void resetApplicationContext(ContextHandleImpl contextHandle) {
+    logger.fine(() -> "Reset application context if necessary!");
     if (contextInfos.contains(ContextInfo.APPLICATION)
         && contextHandle.getContextClassLoader() != null) {
+      logger.fine(
+          () -> String.format("Reset class loader %s", contextHandle.getContextClassLoader()));
       final ClassLoader classLoaderToSet = contextHandle.getContextClassLoader();
       final Thread currentThread = Thread.currentThread();
       if (classLoaderToSet != currentThread.getContextClassLoader()) {
@@ -100,32 +104,37 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   }
 
   protected void resetCDIContext(ContextHandleImpl contextHandle) {
+    logger.fine(() -> "Reset CDI context if necessary!");
     if (contextInfos.contains(ContextInfo.CDI) && contextHandle.getCDIContextRestorer() != null) {
       contextHandle.getCDIContextRestorer().restore();
     }
   }
 
   protected void resetSecurityContext(ContextHandleImpl contextHandle) {
+    logger.fine(() -> "Reset Security context if necessary!");
     if (contextInfos.contains(ContextInfo.SECURITY)) {
-      contextHandle.setSecurityContext(contextHandle.getSecurityContext());
+      SecurityContexts.setCurrent(contextHandle.getSecurityContext());
     }
   }
 
   protected void saveApplicationContext(ContextHandleImpl contextHandle,
       ContextService contextService, Map<String, String> contextObjectProperties) {
+    logger.fine(() -> "Save application context if necessary!");
     if (contextInfos.contains(ContextInfo.APPLICATION)) {
-      ClassLoader contextClassloader = null;
+      final ClassLoader contextClassloader;
       if (Thread.currentThread().getContextClassLoader() != null) {
         contextClassloader = Thread.currentThread().getContextClassLoader();
       } else {
         contextClassloader = ClassLoader.getSystemClassLoader();
       }
+      logger.fine(() -> String.format("Save class loader %s", contextClassloader));
       contextHandle.setContextClassLoader(contextClassloader);
     }
   }
 
   protected void saveCDIContext(ContextHandleImpl contextHandle, ContextService contextService,
       Map<String, String> contextObjectProperties) {
+    logger.fine(() -> "Save CDI context if necessary!");
     if (contextInfos.contains(ContextInfo.CDI)) {
       contextHandle
           .setCDIContextInstaller(new ContextInstaller(true, tryResolve(WeldManager.class)));
@@ -134,14 +143,15 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void saveSecurityContext(ContextHandleImpl contextHandle, ContextService contextService,
       Map<String, String> contextObjectProperties) {
-    Instance<SecurityContextService> scp = Instances.select(SecurityContextService.class);
-    if (contextInfos.contains(ContextInfo.SECURITY) && scp.isResolvable()) {
-      contextHandle.setSecurityContext(scp.get().get());
+    logger.fine(() -> "Save security context if necessary!");
+    if (contextInfos.contains(ContextInfo.SECURITY)) {
+      contextHandle.setSecurityContext(SecurityContexts.getCurrent());
     }
   }
 
   protected void setupApplication(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
+    logger.fine(() -> "Setup application context if necessary!");
     if (contextInfos.contains(ContextInfo.APPLICATION)
         && preContextHandle.getContextClassLoader() != null) {
       final ClassLoader classLoaderToSet = preContextHandle.getContextClassLoader();
@@ -157,12 +167,14 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
           });
         }
       }
+      logger.fine(() -> String.format("Setup class loader %s", classLoaderToSet));
       resetContextHandle.setContextClassLoader(originalClassLoader);
     }
   }
 
   protected void setupCDIContext(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
+    logger.fine(() -> "Setup CDI context if necessary!");
     if (contextInfos.contains(ContextInfo.CDI)
         && preContextHandle.getCDIContextInstaller() != null) {
       resetContextHandle.setCDIContextRestorer(preContextHandle.getCDIContextInstaller().install());
@@ -171,10 +183,10 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void setupSecurityContext(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
-    Instance<SecurityContextService> scp = Instances.select(SecurityContextService.class);
-    if (contextInfos.contains(ContextInfo.SECURITY) && scp.isResolvable()) {
-      resetContextHandle.setSecurityContext(scp.get().get());
-      scp.get().set(preContextHandle.getSecurityContext());
+    logger.fine(() -> "Setup Security context if necessary!");
+    if (contextInfos.contains(ContextInfo.SECURITY)) {
+      resetContextHandle.setSecurityContext(SecurityContexts.getCurrent());
+      SecurityContexts.setCurrent(preContextHandle.getSecurityContext());
     }
   }
 }

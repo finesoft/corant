@@ -47,7 +47,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   protected int corePoolSize;
   protected int maxPoolSize;
   protected Duration keepAliveTime;
-  protected Duration threadLifeTime;
+  protected Duration threadLifeTime = Duration.ofSeconds(30L);
   protected RejectPolicy rejectPolicy;
   protected int threadPriority;
   protected String threadName;
@@ -120,7 +120,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   }
 
   public String getThreadName() {
-    return defaultObject(threadName, () -> name + "-thread");
+    return defaultObject(threadName, () -> name);
   }
 
   public int getThreadPriority() {

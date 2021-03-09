@@ -13,7 +13,6 @@
  */
 package org.corant.suites.concurrency;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +22,8 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -58,8 +59,10 @@ public class ConcurrentExtension implements Extension {
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
-      if (isEmpty(executorConfigs)) {
+      if (executorConfigs.isEmpty()) {
         event.<ManagedExecutorService>addBean().addTransitiveTypeClosure(ExecutorService.class)
+            .addTransitiveTypeClosure(ManagedExecutorService.class)
+            .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
             .beanClass(DefaultManagedExecutorService.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
@@ -71,6 +74,7 @@ public class ConcurrentExtension implements Extension {
       } else {
         executorConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
           event.<ManagedExecutorService>addBean().addQualifiers(esn)
+              .addTransitiveTypeClosure(ManagedExecutorService.class)
               .addTransitiveTypeClosure(ExecutorService.class)
               .beanClass(DefaultManagedExecutorService.class).scope(ApplicationScoped.class)
               .produceWith(beans -> {
@@ -83,8 +87,9 @@ public class ConcurrentExtension implements Extension {
         });
       }
 
-      if (isEmpty(contextServiceConfigs)) {
+      if (contextServiceConfigs.isEmpty()) {
         event.<ContextService>addBean().addTransitiveTypeClosure(ContextService.class)
+            .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
             .beanClass(DefaultContextService.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
@@ -98,6 +103,7 @@ public class ConcurrentExtension implements Extension {
       scheduledExecutorConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
         event.<ManagedScheduledExecutorService>addBean().addQualifiers(esn)
             .addTransitiveTypeClosure(ScheduledExecutorService.class)
+            .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
             .beanClass(DefaultManagedScheduledExecutorService.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
@@ -114,7 +120,7 @@ public class ConcurrentExtension implements Extension {
     executorConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ManagedExecutorConfig.class).values());
     if (executorConfigs.isEmpty()) {
-      logger.info(() -> "Can not find any managed executor configurations.");
+      logger.info(() -> "Use default managed executor.");
     } else {
       logger.fine(() -> String.format("Find %s managed executor named [%s].",
           executorConfigs.size(), String.join(", ", executorConfigs.getAllDisplayNames())));
@@ -131,10 +137,10 @@ public class ConcurrentExtension implements Extension {
     contextServiceConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ContextServiceConfig.class).values());
     if (contextServiceConfigs.isEmpty()) {
-      logger.info(() -> "Can not find any managed executor configurations.");
+      logger.info(() -> "Use default context service.");
     } else {
       logger.fine(
-          () -> String.format("Find %s managed executor named [%s].", contextServiceConfigs.size(),
+          () -> String.format("Find %s context service named [%s].", contextServiceConfigs.size(),
               String.join(", ", contextServiceConfigs.getAllDisplayNames())));
     }
   }

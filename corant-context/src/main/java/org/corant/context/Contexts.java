@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
@@ -110,6 +111,8 @@ public class Contexts {
    */
   public static class ContextInstaller {
 
+    static final Logger logger = Logger.getLogger(ContextInstaller.class.getName());
+
     final boolean propagate;
     final WeldManager manager;
     final ContextSnapshot contextToApply;
@@ -118,6 +121,9 @@ public class Contexts {
       this.propagate = propagate;
       this.manager = manager;
       contextToApply = propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
+      logger.fine(
+          () -> String.format("Create context installer with propagate=%s, context to apply %s",
+              propagate, contextToApply));
     }
 
     /**
@@ -125,13 +131,15 @@ public class Contexts {
      */
     public ContextRestorer install() {
       final ContextSnapshot existingContexts = capture(manager);
+      logger.fine(() -> String.format("Capture current thread context %s", existingContexts));
       BoundRequestContext requestCtx =
           resolveBoundContext(existingContexts.getRequestContext(), BoundRequestContext.class);
       BoundSessionContext sessionCtx =
           resolveBoundContext(existingContexts.getSessionContext(), BoundSessionContext.class);
       BoundConversationContext conversationCtx = resolveBoundContext(
           existingContexts.getConversationContext(), BoundConversationContext.class);
-
+      logger.fine(() -> String.format("Propagate pre-context %s to current thread if necessary",
+          contextToApply));
       Map<String, Object> requestMap = new HashMap<>();
       Map<String, Object> sessionMap = new HashMap<>();
       if (existingContexts.getRequestContext() != null) {
@@ -181,7 +189,8 @@ public class Contexts {
         } else {
           conversationCtx.deactivate();
         }
-
+        logger.fine(() -> String.format("Restore thread context %s to current thread if necessary",
+            existingContexts));
         if (propagate && contextToApply.getBeanCount() != afterTaskContexts.getBeanCount()) {
           Set<ContextualInstance<?>> lazilyRegisteredBeans =
               new HashSet<>(afterTaskContexts.getRequestInstances());

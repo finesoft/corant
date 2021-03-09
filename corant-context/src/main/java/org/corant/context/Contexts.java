@@ -42,6 +42,27 @@ import org.jboss.weld.manager.api.WeldManager;
  */
 public class Contexts {
 
+  /**
+   * Captures a snapshot of the set of contextual instances for the currently active
+   * WeldAlterableContexts for the Request, Session, and Conversation scope.
+   *
+   * @return capture
+   */
+  public static ContextSnapshot capture() {
+    return capture(tryResolve(WeldManager.class));
+  }
+
+  /**
+   * Captures a snapshot of the set of contextual instances for the currently active
+   * WeldAlterableContexts for the Request, Session, and Conversation scope.
+   *
+   * @param wt
+   * @return capture
+   */
+  public static ContextSnapshot capture(WeldManager wt) {
+    return wt == null ? ContextSnapshot.EMPTY_INST : new ContextSnapshot(wt);
+  }
+
   public static ContextInstaller createInstaller(boolean propagate) {
     return createInstaller(propagate, tryResolve(WeldManager.class));
   }
@@ -72,6 +93,18 @@ public class Contexts {
    * if no thread does it. Note that this problem only concerns request, session and conversation
    * beans.
    *
+   * @see <a href=
+   *      "https://docs.jboss.org/weld/reference/latest-3.1/en-US/html_single/#contexts">Weld
+   *      Context Management</a>
+   *
+   * @see <a href=
+   *      "https://docs.jboss.org/weld/reference/latest-3.1/en-US/html_single/#_available_contexts_in_weld">Available
+   *      Contexts in Weld</a>
+   *
+   * @see <a href=
+   *      "https://docs.jboss.org/weld/reference/latest-3.1/en-US/html_single/#_pitfalls_and_drawbacks">Pitfalls
+   *      and drawbacks</a>
+   *
    * @author bingo 下午2:23:45
    *
    */
@@ -84,14 +117,14 @@ public class Contexts {
     public ContextInstaller(boolean propagate, WeldManager manager) {
       this.propagate = propagate;
       this.manager = manager;
-      contextToApply = propagate ? ContextSnapshot.capture(manager) : ContextSnapshot.EMPTY_INST;
+      contextToApply = propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
     }
 
     /**
      * Install the context and return the restore handle, which is used when the task ends.
      */
     public ContextRestorer install() {
-      final ContextSnapshot existingContexts = ContextSnapshot.capture(manager);
+      final ContextSnapshot existingContexts = capture(manager);
       BoundRequestContext requestCtx =
           resolveBoundContext(existingContexts.getRequestContext(), BoundRequestContext.class);
       BoundSessionContext sessionCtx =
@@ -128,7 +161,7 @@ public class Contexts {
 
       return () -> {
         ContextSnapshot afterTaskContexts =
-            propagate ? ContextSnapshot.capture(manager) : ContextSnapshot.EMPTY_INST;
+            propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
 
         if (existingContexts.getRequestContext() != null) {
           existingContexts.getRequestContext().clearAndSet(existingContexts.getRequestInstances());
@@ -222,14 +255,6 @@ public class Contexts {
     private ContextSnapshot() {
       requestInstances = sessionInstances = conversationInstances = Collections.emptySet();
       requestContext = sessionContext = conversationContext = null;
-    }
-
-    public static ContextSnapshot capture() {
-      return capture(tryResolve(WeldManager.class));
-    }
-
-    public static ContextSnapshot capture(WeldManager wt) {
-      return wt == null ? EMPTY_INST : new ContextSnapshot(wt);
     }
 
     public int getBeanCount() {

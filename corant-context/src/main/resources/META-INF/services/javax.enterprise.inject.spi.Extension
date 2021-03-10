@@ -1,1 +1,2 @@
 org.corant.context.required.RequiredExtension
+org.corant.context.concurrent.ConcurrentExtension

@@ -13,7 +13,7 @@
  */
 package org.corant.suites.jpa.shared;
 
-import static org.corant.context.Qualifiers.resolveNameds;
+import static org.corant.context.qualifier.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultString;
@@ -42,8 +42,8 @@ import javax.persistence.PersistenceUnit;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import org.corant.context.Instances;
-import org.corant.context.NamingReference;
-import org.corant.context.Qualifiers;
+import org.corant.context.naming.NamingReference;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceUnitLiteral;

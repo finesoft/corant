@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.naming;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.service;
 
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Collection;

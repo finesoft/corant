@@ -10,7 +10,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.config.Configs;
-import org.corant.context.SURI;
+import org.corant.context.qualifier.SURI;
 
 /**
  * corant <br>

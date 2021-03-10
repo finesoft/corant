@@ -18,7 +18,7 @@ import static org.corant.shared.util.Strings.isNoneBlank;
 import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.Config;
 

@@ -32,8 +32,6 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
 import org.corant.context.concurrent.executor.DefaultContextService;
 import org.corant.context.concurrent.executor.DefaultManagedExecutorService;
@@ -42,6 +40,8 @@ import org.corant.context.concurrent.executor.DefaultManagedThreadFactory;
 import org.corant.context.concurrent.provider.BlockingQueueProvider;
 import org.corant.context.concurrent.provider.ContextSetupProviderImpl;
 import org.corant.context.concurrent.provider.TransactionSetupProviderImpl;
+import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.service;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -23,6 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.SURI;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.URLResource;

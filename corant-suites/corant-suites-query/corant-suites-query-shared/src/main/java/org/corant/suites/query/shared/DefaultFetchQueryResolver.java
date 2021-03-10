@@ -35,7 +35,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.commons.beanutils.BeanUtils;
-import org.corant.context.ConversionService;
+import org.corant.context.service.ConversionService;
 import org.corant.shared.normal.Names;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.FetchQuery;

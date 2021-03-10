@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.qualifier;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -32,11 +32,11 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface Unnamed {
+public @interface AutoCreated {
 
-  UnnamedLiteral INST = new UnnamedLiteral();
+  AutoCreatedLiteral INST = new AutoCreatedLiteral();
 
-  class UnnamedLiteral extends AnnotationLiteral<Unnamed> {
+  class AutoCreatedLiteral extends AnnotationLiteral<AutoCreated> {
 
     private static final long serialVersionUID = 1401984266283097479L;
 

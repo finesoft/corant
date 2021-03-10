@@ -17,7 +17,7 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 
 /**
  * corant-suites-rpc-grpc

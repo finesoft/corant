@@ -25,7 +25,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.context.Naming;
+import org.corant.context.naming.Naming;
 import org.corant.shared.util.Strings;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;

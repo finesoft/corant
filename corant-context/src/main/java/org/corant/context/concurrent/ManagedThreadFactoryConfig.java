@@ -16,7 +16,7 @@ package org.corant.context.concurrent;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.eclipse.microprofile.config.Config;
 
 /**

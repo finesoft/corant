@@ -26,9 +26,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.context.NamingReference;
-import org.corant.context.Qualifiers.DefaultNamedQualifierObjectManager;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager;
+import org.corant.context.naming.NamingReference;
+import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**

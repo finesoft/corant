@@ -32,7 +32,7 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import org.corant.context.Qualifiers;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.ddd.annotation.stereotype.Repositories;
 import org.corant.suites.ddd.model.AggregateLifecycleManager;

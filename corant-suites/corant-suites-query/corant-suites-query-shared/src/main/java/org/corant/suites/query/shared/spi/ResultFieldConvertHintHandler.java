@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.context.ConversionService;
+import org.corant.context.service.ConversionService;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.suites.query.shared.QueryService.Forwarding;

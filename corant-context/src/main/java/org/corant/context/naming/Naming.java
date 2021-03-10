@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.naming;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,25 +30,25 @@ import javax.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
-public @interface SURI {
+public @interface Naming {
 
-  SURILiteral INSTANCE = new SURILiteral("");
+  NamingLiteral INSTANCE = new NamingLiteral("");
 
   @Nonbinding
   String value() default "";
 
-  class SURILiteral extends AnnotationLiteral<SURI> implements SURI {
+  class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
 
-    private static final long serialVersionUID = 4186590008857391708L;
+    private static final long serialVersionUID = 2627528079165566439L;
 
     private final String value;
 
-    private SURILiteral(String value) {
+    private NamingLiteral(String value) {
       this.value = value;
     }
 
-    public static SURILiteral of(String value) {
-      return new SURILiteral(value);
+    public static NamingLiteral of(String value) {
+      return new NamingLiteral(value);
     }
 
     @Override

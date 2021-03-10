@@ -31,7 +31,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.context.ConversionService;
+import org.corant.context.service.ConversionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.suites.query.shared.mapping.Query;

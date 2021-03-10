@@ -27,7 +27,7 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.context.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;

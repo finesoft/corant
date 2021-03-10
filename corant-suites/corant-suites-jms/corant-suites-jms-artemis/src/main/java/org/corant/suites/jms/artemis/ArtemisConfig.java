@@ -37,7 +37,7 @@ import org.corant.config.CorantConfigResolver;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.context.Qualifiers;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Methods;
 import org.corant.suites.jms.shared.AbstractJMSConfig;

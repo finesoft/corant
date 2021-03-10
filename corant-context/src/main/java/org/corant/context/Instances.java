@@ -13,7 +13,7 @@
  */
 package org.corant.context;
 
-import static org.corant.context.Qualifiers.resolveNamedQualifiers;
+import static org.corant.context.qualifier.Qualifiers.resolveNamedQualifiers;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;

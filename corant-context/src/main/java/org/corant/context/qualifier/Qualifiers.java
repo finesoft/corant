@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context;
+package org.corant.context.qualifier;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isBlank;
@@ -40,6 +40,11 @@ public class Qualifiers {
     return Strings.defaultTrim(named);
   }
 
+  public static Annotation[] resolveNamedQualifiers(String name) {
+    return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
+        : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
+  }
+
   public static Map<String, Annotation[]> resolveNameds(Set<String> names) {
     if (isNotEmpty(names)) {
       Map<String, Annotation[]> nameds = new HashMap<>(names.size());
@@ -60,11 +65,6 @@ public class Qualifiers {
       return nameds;
     }
     return new HashMap<>(0);
-  }
-
-  static Annotation[] resolveNamedQualifiers(String name) {
-    return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
-        : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
   }
 
   public static class DefaultNamedQualifierObjectManager<T extends NamedObject>

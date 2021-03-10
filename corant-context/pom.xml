@@ -43,6 +43,10 @@
 			<artifactId>jandex</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.microprofile.context-propagation</groupId>
+			<artifactId>microprofile-context-propagation-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.enterprise.concurrent</groupId>
 			<artifactId>jakarta.enterprise.concurrent-api</artifactId>
 			<scope>provided</scope>

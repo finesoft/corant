@@ -21,7 +21,7 @@ public class DefaultSecurityContext implements SecurityContext {
   private static final long serialVersionUID = 4329263253208902621L;
 
   protected final String authenticationScheme;
-  protected final Principal principal;
+  protected final Principal principal;// FIXME Serializable
   protected final Subject subject;
   protected final Object delegate;
 

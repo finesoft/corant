@@ -17,7 +17,6 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
@@ -44,14 +43,14 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   public static final ManagedExecutorConfig DFLT_INST =
       new ManagedExecutorConfig(Names.CORANT.toUpperCase(Locale.ROOT));
 
-  protected boolean longRunningTasks;
-  protected long hungTaskThreshold;
-  protected int corePoolSize;
-  protected int maxPoolSize;
-  protected Duration keepAliveTime;
+  protected boolean longRunningTasks = false;
+  protected long hungTaskThreshold = 60000L;// millis
+  protected int corePoolSize = Systems.getCPUs() << 1;
+  protected int maxPoolSize = Systems.getCPUs() << 2;
+  protected Duration keepAliveTime = Duration.ofSeconds(5L);
   protected Duration threadLifeTime = Duration.ofSeconds(30L);
-  protected RejectPolicy rejectPolicy;
-  protected int threadPriority;
+  protected RejectPolicy rejectPolicy = RejectPolicy.ABORT;
+  protected int threadPriority = Thread.NORM_PRIORITY;
   protected String threadName;
   protected int queueCapacity = Integer.MAX_VALUE;
   protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
@@ -75,13 +74,10 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     }
     ManagedExecutorConfig other = (ManagedExecutorConfig) obj;
     if (name == null) {
-      if (other.name != null) {
-        return false;
-      }
-    } else if (!name.equals(other.name)) {
-      return false;
+      return other.name == null;
+    } else {
+      return name.equals(other.name);
     }
-    return true;
   }
 
   public Set<ContextInfo> getContextInfos() {
@@ -141,14 +137,23 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return longRunningTasks;
   }
 
-  @Override
-  public boolean isValid() {
-    return isNotBlank(getName());
-  }
+  // @Override
+  // public boolean isValid() {
+  // return isNotBlank(getName());
+  // }
 
   @Override
   public void onPostConstruct(Config config, String key) {
     setName(key);
+  }
+
+  @Override
+  public String toString() {
+    return "ManagedExecutorConfig [longRunningTasks=" + longRunningTasks + ", hungTaskThreshold="
+        + hungTaskThreshold + ", corePoolSize=" + corePoolSize + ", maxPoolSize=" + maxPoolSize
+        + ", keepAliveTime=" + keepAliveTime + ", threadLifeTime=" + threadLifeTime
+        + ", rejectPolicy=" + rejectPolicy + ", threadPriority=" + threadPriority + ", threadName="
+        + threadName + ", queueCapacity=" + queueCapacity + ", contextInfos=" + contextInfos + "]";
   }
 
   /**

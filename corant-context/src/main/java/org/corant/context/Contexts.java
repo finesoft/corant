@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import org.corant.config.Configs;
 import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.WeldAlterableContext;
 import org.jboss.weld.context.api.ContextualInstance;
@@ -42,6 +43,9 @@ import org.jboss.weld.manager.api.WeldManager;
  *
  */
 public class Contexts {
+
+  static final boolean propagateStrictly =
+      Configs.getValue("context.propagate.strictly", Boolean.class, Boolean.FALSE);
 
   /**
    * Captures a snapshot of the set of contextual instances for the currently active
@@ -127,7 +131,7 @@ public class Contexts {
     }
 
     /**
-     * 
+     *
      * @return the contextToApply
      */
     public ContextSnapshot getContextToApply() {
@@ -177,7 +181,7 @@ public class Contexts {
 
       return () -> {
         ContextSnapshot afterTaskContexts =
-            propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
+            propagate && propagateStrictly ? capture(manager) : ContextSnapshot.EMPTY_INST;
 
         if (existingContexts.getRequestContext() != null) {
           existingContexts.getRequestContext().clearAndSet(existingContexts.getRequestInstances());
@@ -199,15 +203,18 @@ public class Contexts {
         }
         logger.finer(() -> String.format(
             "Restore thread CDI context %s to current thread if necessary", existingContexts));
-        if (propagate && contextToApply.getBeanCount() != afterTaskContexts.getBeanCount()) {
-          Set<ContextualInstance<?>> lazilyRegisteredBeans =
+        if (propagate && propagateStrictly
+            && contextToApply.getBeanCount() != afterTaskContexts.getBeanCount()) {
+          Set<ContextualInstance<?>> diffRegisteredBeans =
               new HashSet<>(afterTaskContexts.getRequestInstances());
-          lazilyRegisteredBeans.addAll(afterTaskContexts.getSessionInstances());
-          lazilyRegisteredBeans.addAll(afterTaskContexts.getConversationInstances());
-          lazilyRegisteredBeans.removeAll(contextToApply.getRequestInstances());
-          lazilyRegisteredBeans.removeAll(contextToApply.getSessionInstances());
-          lazilyRegisteredBeans.removeAll(contextToApply.getConversationInstances());
-          throw new IllegalStateException();
+          diffRegisteredBeans.addAll(afterTaskContexts.getSessionInstances());
+          diffRegisteredBeans.addAll(afterTaskContexts.getConversationInstances());
+          diffRegisteredBeans.removeAll(contextToApply.getRequestInstances());
+          diffRegisteredBeans.removeAll(contextToApply.getSessionInstances());
+          diffRegisteredBeans.removeAll(contextToApply.getConversationInstances());
+          throw new IllegalStateException(String.format(
+              "The following CDI beans must be reachable before the context was captured: %s",
+              diffRegisteredBeans));
         }
       };
     }

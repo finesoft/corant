@@ -204,10 +204,9 @@ public class Qualifiers {
         AbstractNamedObject other = (AbstractNamedObject) obj;
         if (name == null) {
           return other.name == null;
-        } else if (!name.equals(other.name)) {
-          return false;
+        } else {
+          return name.equals(other.name);
         }
-        return true;
       }
 
       @Override

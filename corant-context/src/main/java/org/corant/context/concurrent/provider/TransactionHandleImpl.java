@@ -23,7 +23,7 @@ import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
  *
  */
 public class TransactionHandleImpl implements TransactionHandle {
-  private Transaction transaction;
+  private final Transaction transaction;
 
   public TransactionHandleImpl(Transaction transaction) {
     this.transaction = transaction;

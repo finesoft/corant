@@ -57,6 +57,11 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
     setName(key);
   }
 
+  @Override
+  public String toString() {
+    return "ContextServiceConfig [contextInfos=" + contextInfos + "]";
+  }
+
   protected void setContextInfos(Set<ContextInfo> contextInfos) {
     this.contextInfos = contextInfos;
   }
@@ -64,4 +69,5 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
   public enum ContextInfo {
     SECURITY, APPLICATION, CDI
   }
+
 }

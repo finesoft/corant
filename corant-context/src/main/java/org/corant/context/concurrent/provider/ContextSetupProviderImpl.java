@@ -20,6 +20,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.concurrent.ContextService;
 import org.corant.context.Contexts.ContextInstaller;
@@ -106,7 +107,13 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   protected void resetCDIContext(ContextHandleImpl contextHandle) {
     logger.fine(() -> "Reset CDI context if necessary!");
     if (contextInfos.contains(ContextInfo.CDI) && contextHandle.getCDIContextRestorer() != null) {
-      contextHandle.getCDIContextRestorer().restore();
+      try {
+        contextHandle.getCDIContextRestorer().restore();
+      } catch (Exception ex) {
+        logger.log(Level.SEVERE, ex, () -> "Reset CDI context occurred error!");
+      } finally {
+        contextHandle.setCDIContextRestorer(null);
+      }
     }
   }
 

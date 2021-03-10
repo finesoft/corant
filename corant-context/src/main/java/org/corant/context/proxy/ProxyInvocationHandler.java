@@ -61,13 +61,10 @@ public class ProxyInvocationHandler implements InvocationHandler {
     }
     ProxyInvocationHandler other = (ProxyInvocationHandler) obj;
     if (clazz == null) {
-      if (other.clazz != null) {
-        return false;
-      }
-    } else if (!clazz.equals(other.clazz)) {
-      return false;
+      return other.clazz == null;
+    } else {
+      return clazz.equals(other.clazz);
     }
-    return true;
   }
 
   public Class<?> getClazz() {

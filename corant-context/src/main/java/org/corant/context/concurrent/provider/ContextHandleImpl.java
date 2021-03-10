@@ -31,11 +31,11 @@ public class ContextHandleImpl implements ContextHandle {
   private transient ContextInstaller CDIContextInstaller;
   private transient ContextRestorer CDIContextRestorer;
   private transient ClassLoader contextClassLoader;
-  private transient SecurityContext securityContext;
+  private SecurityContext securityContext;
   private boolean useTransactionOfExecutionThread;
 
   /**
-   * 
+   *
    * @return the cDIContextInstaller
    */
   public ContextInstaller getCDIContextInstaller() {
@@ -43,7 +43,7 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   * 
+   *
    * @return the cDIContextRestorer
    */
   public ContextRestorer getCDIContextRestorer() {

@@ -13,6 +13,8 @@
  */
 package org.corant.context.concurrent.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.concurrent.ManagedTask;
@@ -20,6 +22,7 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import org.corant.context.Instances;
 import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
 import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
 
@@ -38,7 +41,6 @@ public class TransactionSetupProviderImpl implements TransactionSetupProvider {
    * @param transactionManager
    */
   public TransactionSetupProviderImpl(TransactionManager transactionManager) {
-    super();
     this.transactionManager = transactionManager;
   }
 
@@ -66,6 +68,11 @@ public class TransactionSetupProviderImpl implements TransactionSetupProvider {
       }
     }
     return null;
+  }
+
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    transactionManager = Instances.resolve(TransactionManager.class);
   }
 
 }

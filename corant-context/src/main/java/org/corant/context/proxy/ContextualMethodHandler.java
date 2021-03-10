@@ -13,9 +13,8 @@
  */
 package org.corant.context.proxy;
 
-import org.corant.context.Instances;
-import org.corant.shared.util.Methods.MethodSignature;
-
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,9 +29,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Objects.defaultObject;
+import org.corant.context.Instances;
+import org.corant.shared.util.Methods.MethodSignature;
 
 /**
  * corant-context
@@ -118,8 +116,8 @@ public class ContextualMethodHandler implements Serializable {
       if (other.method != null) {
         return false;
       }
-    } else if (!method.equals(other.method)) {
-      return false;
+    } else {
+      return method.equals(other.method);
     }
     return true;
   }

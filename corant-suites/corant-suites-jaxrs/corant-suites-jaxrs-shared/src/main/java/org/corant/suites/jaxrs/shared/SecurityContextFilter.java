@@ -27,8 +27,8 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import org.corant.context.SecurityContext.DefaultSecurityContext;
-import org.corant.context.SecurityContext.SecurityContexts;
+import org.corant.context.security.DefaultSecurityContext;
+import org.corant.context.security.SecurityContexts;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**

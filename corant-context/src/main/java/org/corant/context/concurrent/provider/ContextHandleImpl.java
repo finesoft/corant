@@ -15,7 +15,7 @@ package org.corant.context.concurrent.provider;
 
 import org.corant.context.Contexts.ContextInstaller;
 import org.corant.context.Contexts.ContextRestorer;
-import org.corant.context.SecurityContext;
+import org.corant.context.security.SecurityContext;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 
 /**

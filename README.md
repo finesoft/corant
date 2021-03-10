@@ -37,7 +37,9 @@ and related pre-processing and post-processing.
 ``` 
 ### 7. corant-context 
 ```text
-Container and context processing module, providing some convenient context processing classes.
+Container, context and concurrent processing module, providing some convenient context processing classes 
+and managed executor service. This module will be fully compatible with microprofile-context-propagation 
+in the future.
 ```
 ### 8. corant-suites
 ```text

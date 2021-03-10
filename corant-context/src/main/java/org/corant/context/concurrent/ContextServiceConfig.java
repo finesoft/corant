@@ -23,7 +23,7 @@ import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.Config;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午3:53:53
  *

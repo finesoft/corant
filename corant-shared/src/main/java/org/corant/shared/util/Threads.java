@@ -30,7 +30,7 @@ public class Threads {
       ThrowingRunnable<E> runner) {
     Thread daemonThread = new Thread(() -> {
       try {
-        TimeUnit.MICROSECONDS.sleep(delay.toMillis());
+        TimeUnit.MILLISECONDS.sleep(delay.toMillis());
       } catch (InterruptedException ex) {
         Thread.currentThread().interrupt();
       }

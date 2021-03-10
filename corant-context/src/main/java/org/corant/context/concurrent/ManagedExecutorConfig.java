@@ -30,7 +30,7 @@ import org.eclipse.microprofile.config.Config;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.RejectPolicy;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午7:56:44
  *
@@ -49,6 +49,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   protected int maxPoolSize = Systems.getCPUs() << 2;
   protected Duration keepAliveTime = Duration.ofSeconds(5L);
   protected Duration threadLifeTime = Duration.ofSeconds(30L);
+  protected Duration awaitTermination = Duration.ofSeconds(5L);
   protected RejectPolicy rejectPolicy = RejectPolicy.ABORT;
   protected int threadPriority = Thread.NORM_PRIORITY;
   protected String threadName;
@@ -78,6 +79,14 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     } else {
       return name.equals(other.name);
     }
+  }
+
+  /**
+   *
+   * @return the awaitTermination
+   */
+  public Duration getAwaitTermination() {
+    return awaitTermination;
   }
 
   public Set<ContextInfo> getContextInfos() {
@@ -133,14 +142,14 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return result;
   }
 
-  public boolean isLongRunningTasks() {
-    return longRunningTasks;
-  }
-
   // @Override
   // public boolean isValid() {
   // return isNotBlank(getName());
   // }
+
+  public boolean isLongRunningTasks() {
+    return longRunningTasks;
+  }
 
   @Override
   public void onPostConstruct(Config config, String key) {
@@ -152,8 +161,17 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return "ManagedExecutorConfig [longRunningTasks=" + longRunningTasks + ", hungTaskThreshold="
         + hungTaskThreshold + ", corePoolSize=" + corePoolSize + ", maxPoolSize=" + maxPoolSize
         + ", keepAliveTime=" + keepAliveTime + ", threadLifeTime=" + threadLifeTime
-        + ", rejectPolicy=" + rejectPolicy + ", threadPriority=" + threadPriority + ", threadName="
-        + threadName + ", queueCapacity=" + queueCapacity + ", contextInfos=" + contextInfos + "]";
+        + ", awaitTermination=" + awaitTermination + ", rejectPolicy=" + rejectPolicy
+        + ", threadPriority=" + threadPriority + ", threadName=" + threadName + ", queueCapacity="
+        + queueCapacity + ", contextInfos=" + contextInfos + "]";
+  }
+
+  /**
+   *
+   * @param awaitTermination the awaitTermination to set
+   */
+  protected void setAwaitTermination(Duration awaitTermination) {
+    this.awaitTermination = awaitTermination;
   }
 
   /**

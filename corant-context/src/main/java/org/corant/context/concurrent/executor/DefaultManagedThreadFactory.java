@@ -16,7 +16,7 @@ package org.corant.context.concurrent.executor;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 上午10:24:41
  *

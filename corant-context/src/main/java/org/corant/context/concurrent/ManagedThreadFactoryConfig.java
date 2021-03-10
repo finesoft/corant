@@ -20,7 +20,7 @@ import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.Abstr
 import org.eclipse.microprofile.config.Config;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午3:48:41
  *

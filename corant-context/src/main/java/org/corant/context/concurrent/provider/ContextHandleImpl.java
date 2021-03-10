@@ -19,7 +19,7 @@ import org.corant.context.security.SecurityContext;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午9:25:41
  *

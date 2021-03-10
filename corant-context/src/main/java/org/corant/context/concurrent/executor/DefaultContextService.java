@@ -19,7 +19,7 @@ import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
 import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 上午10:18:55
  *

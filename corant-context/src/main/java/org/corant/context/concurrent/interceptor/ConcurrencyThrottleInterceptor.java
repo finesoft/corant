@@ -26,7 +26,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Methods.MethodSignature;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 上午9:50:43
  *

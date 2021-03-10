@@ -37,16 +37,16 @@ import org.corant.context.concurrent.executor.DefaultContextService;
 import org.corant.context.concurrent.executor.DefaultManagedExecutorService;
 import org.corant.context.concurrent.executor.DefaultManagedScheduledExecutorService;
 import org.corant.context.concurrent.executor.DefaultManagedThreadFactory;
+import org.corant.context.concurrent.executor.ExecutorServiceManager;
 import org.corant.context.concurrent.provider.BlockingQueueProvider;
 import org.corant.context.concurrent.provider.ContextSetupProviderImpl;
 import org.corant.context.concurrent.provider.TransactionSetupProviderImpl;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午2:51:48
  *
@@ -74,7 +74,7 @@ public class ConcurrentExtension implements Extension {
               } catch (NamingException e) {
                 throw new CorantRuntimeException(e);
               }
-            }).disposeWith((exe, beans) -> exe.shutdown());
+            })/* .disposeWith((exe, beans) -> exe.shutdown()) */;
       } else {
         executorConfigs.getAllWithQualifiers()
             .forEach((cfg, esn) -> event.<ManagedExecutorService>addBean().addQualifiers(esn)
@@ -83,11 +83,11 @@ public class ConcurrentExtension implements Extension {
                 .beanClass(DefaultManagedExecutorService.class).scope(ApplicationScoped.class)
                 .produceWith(beans -> {
                   try {
-                    return produce(beans, cfg);
+                    return register(beans, produce(beans, cfg));
                   } catch (NamingException e) {
                     throw new CorantRuntimeException(e);
                   }
-                }).disposeWith((exe, beans) -> exe.shutdown()));
+                })/* .disposeWith((exe, beans) -> exe.shutdown()) */);
       }
 
       if (contextServiceConfigs.isEmpty()) {
@@ -110,11 +110,11 @@ public class ConcurrentExtension implements Extension {
               .beanClass(DefaultManagedScheduledExecutorService.class)
               .scope(ApplicationScoped.class).produceWith(beans -> {
                 try {
-                  return produce(beans, cfg);
+                  return register(beans, produce(beans, cfg));
                 } catch (NamingException e) {
                   throw new CorantRuntimeException(e);
                 }
-              }).disposeWith((exe, beans) -> exe.shutdown()));
+              })/* .disposeWith((exe, beans) -> exe.shutdown()) */);
     }
   }
 
@@ -158,7 +158,7 @@ public class ConcurrentExtension implements Extension {
 
   protected DefaultManagedExecutorService produce(Instance<Object> instance,
       ManagedExecutorConfig cfg) throws NamingException {
-    ManagedThreadFactoryImpl mtf = new DefaultManagedThreadFactory(cfg.getThreadName());
+    DefaultManagedThreadFactory mtf = new DefaultManagedThreadFactory(cfg.getThreadName());
     String name = cfg.getName();
     Instance<BlockingQueueProvider> ques =
         instance.select(BlockingQueueProvider.class, NamedLiteral.of(name));
@@ -174,16 +174,16 @@ public class ConcurrentExtension implements Extension {
       return new DefaultManagedExecutorService(cfg.getName(), mtf, cfg.getHungTaskThreshold(),
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
           cfg.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
-          cfg.getThreadLifeTime().toMillis(), contextService, cfg.getRejectPolicy(),
-          ques.get().provide(cfg));
+          cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(), contextService,
+          cfg.getRejectPolicy(), ques.get().provide(cfg));
     } else {
       logger.fine(
           () -> String.format("Create managed executor service %s with %s.", cfg.getName(), cfg));
       return new DefaultManagedExecutorService(cfg.getName(), mtf, cfg.getHungTaskThreshold(),
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
           cfg.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
-          cfg.getThreadLifeTime().toMillis(), cfg.getQueueCapacity(), contextService,
-          cfg.getRejectPolicy());
+          cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(), cfg.getQueueCapacity(),
+          contextService, cfg.getRejectPolicy());
     }
   }
 
@@ -197,8 +197,20 @@ public class ConcurrentExtension implements Extension {
     return new DefaultManagedScheduledExecutorService(cfg.getName(),
         new DefaultManagedThreadFactory(cfg.getThreadName()), cfg.getHungTaskThreshold(),
         cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getKeepAliveTime().toMillis(),
-        TimeUnit.MILLISECONDS, cfg.getThreadLifeTime().toMillis(), contextService,
-        cfg.getRejectPolicy());
+        TimeUnit.MILLISECONDS, cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(),
+        contextService, cfg.getRejectPolicy());
+  }
+
+  protected DefaultManagedExecutorService register(Instance<Object> instance,
+      DefaultManagedExecutorService service) {
+    instance.select(ExecutorServiceManager.class).get().register(service);
+    return service;
+  }
+
+  protected DefaultManagedScheduledExecutorService register(Instance<Object> instance,
+      DefaultManagedScheduledExecutorService service) {
+    instance.select(ExecutorServiceManager.class).get().register(service);
+    return service;
   }
 
   protected TransactionManager resolveTransactionManager(Instance<Object> instance) {
@@ -208,4 +220,5 @@ public class ConcurrentExtension implements Extension {
     }
     return null;
   }
+
 }

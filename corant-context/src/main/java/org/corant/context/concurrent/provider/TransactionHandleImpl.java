@@ -17,7 +17,7 @@ import javax.transaction.Transaction;
 import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午7:52:27
  *

@@ -23,7 +23,7 @@ import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 上午9:50:15
  *

@@ -17,7 +17,7 @@ import java.util.concurrent.BlockingQueue;
 import org.corant.context.concurrent.ManagedExecutorConfig;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午2:55:50
  *

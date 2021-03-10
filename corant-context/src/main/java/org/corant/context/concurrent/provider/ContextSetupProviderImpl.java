@@ -31,7 +31,7 @@ import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
 import org.jboss.weld.manager.api.WeldManager;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午8:44:55
  *

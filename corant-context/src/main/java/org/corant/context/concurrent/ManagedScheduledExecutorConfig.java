@@ -16,7 +16,7 @@ package org.corant.context.concurrent;
 import org.corant.config.declarative.ConfigKeyRoot;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 下午7:57:40
  *

@@ -13,18 +13,27 @@
  */
 package org.corant.context.concurrent.executor;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedScheduledExecutorServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**
- * corant-suites-concurrency
+ * corant-context
  *
  * @author bingo 上午10:23:58
  *
  */
 public class DefaultManagedScheduledExecutorService extends ManagedScheduledExecutorServiceImpl {
+
+  static final Logger logger =
+      Logger.getLogger(DefaultManagedScheduledExecutorService.class.getName());
+
+  final Duration awaitTermination;
 
   /**
    * @param name
@@ -41,10 +50,53 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
   public DefaultManagedScheduledExecutorService(String name,
       ManagedThreadFactoryImpl managedThreadFactory, long hungTaskThreshold,
       boolean longRunningTasks, int corePoolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
-      long threadLifeTime, ContextServiceImpl contextService, RejectPolicy rejectPolicy) {
+      long threadLifeTime, Duration awaitTermination, ContextServiceImpl contextService,
+      RejectPolicy rejectPolicy) {
     super(name, managedThreadFactory, hungTaskThreshold, longRunningTasks, corePoolSize,
         keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService, rejectPolicy);
-    // TODO Auto-generated constructor stub
+    this.awaitTermination = awaitTermination;
+  }
+
+  @Override
+  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    throw new IllegalStateException(
+        "Can't performe isShutdown, the lifecycle of a ManagedScheduledExecutorService is managed by corant.");
+  }
+
+  @Override
+  public boolean isShutdown() {
+    throw new IllegalStateException(
+        "Can't performe isShutdown, the lifecycle of a ManagedScheduledExecutorService is managed by corant.");
+  }
+
+  @Override
+  public boolean isTerminated() {
+    throw new IllegalStateException(
+        "Can't performe isTerminated, the lifecycle of a ManagedScheduledExecutorService is managed by corant.");
+  }
+
+  @Override
+  public void shutdown() {
+    throw new IllegalStateException(
+        "Can't performe shutdown, the lifecycle of a ManagedScheduledExecutorService is managed by corant.");
+  }
+
+  @Override
+  public List<Runnable> shutdownNow() {
+    throw new IllegalStateException(
+        "Can't performe shutdownNow, the lifecycle of a ManagedScheduledExecutorService is managed by corant.");
+  }
+
+  void stop() {
+    try {
+      super.shutdown();
+      if (awaitTermination != null) {
+        super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS);
+      }
+    } catch (InterruptedException e) {
+      logger.log(Level.WARNING, e,
+          () -> String.format("Shutdown managed scheduled executor service occurred error!", name));
+    }
   }
 
 }

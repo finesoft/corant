@@ -158,7 +158,7 @@ public class ConcurrentExtension implements Extension {
 
   protected DefaultManagedExecutorService produce(Instance<Object> instance,
       ManagedExecutorConfig cfg) throws NamingException {
-    DefaultManagedThreadFactory mtf = new DefaultManagedThreadFactory(cfg.getThreadName());
+    DefaultManagedThreadFactory mtf = new DefaultManagedThreadFactory(cfg.getName());
     String name = cfg.getName();
     Instance<BlockingQueueProvider> ques =
         instance.select(BlockingQueueProvider.class, NamedLiteral.of(name));
@@ -195,7 +195,7 @@ public class ConcurrentExtension implements Extension {
     logger.fine(() -> String.format("Create managed scheduled executor service %s with %s.",
         cfg.getName(), cfg));
     return new DefaultManagedScheduledExecutorService(cfg.getName(),
-        new DefaultManagedThreadFactory(cfg.getThreadName()), cfg.getHungTaskThreshold(),
+        new DefaultManagedThreadFactory(cfg.getName()), cfg.getHungTaskThreshold(),
         cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getKeepAliveTime().toMillis(),
         TimeUnit.MILLISECONDS, cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(),
         contextService, cfg.getRejectPolicy());

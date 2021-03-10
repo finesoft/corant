@@ -16,6 +16,7 @@ package org.corant.context.concurrent;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Sets.immutableSetOf;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
 import java.time.Duration;
 import java.util.Locale;
@@ -40,8 +41,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
-  public static final ManagedExecutorConfig DFLT_INST =
-      new ManagedExecutorConfig(Names.CORANT.toUpperCase(Locale.ROOT));
+  public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT);
+  public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(DFLT_NAME);
 
   protected boolean longRunningTasks = false;
   protected long hungTaskThreshold = 60000L;// millis
@@ -127,7 +128,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   }
 
   public String getThreadName() {
-    return defaultObject(threadName, () -> name);
+    return defaultString(threadName, defaultString(name, DFLT_NAME));
   }
 
   public int getThreadPriority() {

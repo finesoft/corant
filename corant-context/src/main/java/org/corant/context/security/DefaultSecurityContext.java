@@ -13,7 +13,6 @@
  */
 package org.corant.context.security;
 
-import java.security.Principal;
 import javax.security.auth.Subject;
 
 public class DefaultSecurityContext implements SecurityContext {
@@ -21,16 +20,14 @@ public class DefaultSecurityContext implements SecurityContext {
   private static final long serialVersionUID = 4329263253208902621L;
 
   protected final String authenticationScheme;
-  protected final Principal principal;// FIXME Serializable
+  protected final DefaultPrincipal principal;
   protected final Subject subject;
-  protected final Object delegate;
 
-  public DefaultSecurityContext(Object delegate, String authenticationScheme, Subject subject,
-      Principal principal) {
+  public DefaultSecurityContext(String authenticationScheme, Subject subject,
+      DefaultPrincipal principal) {
     this.authenticationScheme = authenticationScheme;
     this.principal = principal;
     this.subject = subject;
-    this.delegate = delegate;
   }
 
   @Override
@@ -39,22 +36,13 @@ public class DefaultSecurityContext implements SecurityContext {
   }
 
   @Override
-  public Principal getPrincipal() {
+  public DefaultPrincipal getPrincipal() {
     return principal;
   }
 
   @Override
   public Subject getSubject() {
     return subject;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T unwrap(Class<T> type) {
-    if (delegate.getClass().isAssignableFrom(type)) {
-      return (T) delegate;
-    }
-    throw new IllegalArgumentException("Can't unwrap security context to " + type);
   }
 
 }

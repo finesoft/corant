@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.context;
 
+import static org.corant.suites.jms.shared.MessagePropertyNames.MSG_SERIAL_SCHAME;
 import java.io.Serializable;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
@@ -27,8 +28,6 @@ import org.corant.suites.jms.shared.annotation.MessageSend.SerializationSchema;
  *
  */
 public interface MessageSerializer {
-
-  String MSG_SERIAL_SCHAME = "__CORANT_MSG_SERIAL_SCHAME__";
 
   <T> T deserialize(Message message, Class<T> clazz);
 

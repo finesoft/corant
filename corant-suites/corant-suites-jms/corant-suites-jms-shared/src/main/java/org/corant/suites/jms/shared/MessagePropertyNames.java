@@ -11,26 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context.security;
-
-import java.io.Serializable;
-import java.security.Principal;
-import javax.security.auth.Subject;
+package org.corant.suites.jms.shared;
 
 /**
- * corant-suites-security-shared
+ * corant-suites-jms-shared
  *
- * @author bingo 下午5:20:40
+ * @author bingo 下午5:28:21
  *
  */
-public interface SecurityContext extends Serializable {
-
-  DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null, null);
-
-  String getAuthenticationScheme();
-
-  Principal getPrincipal();
-
-  Subject getSubject();
-
+public interface MessagePropertyNames {
+  String SECURITY_CONTEXT_PROPERTY_NAME = "__CORANT_SECURITY_CONTEXT__";
+  String MSG_SERIAL_SCHAME = "__CORANT_MSG_SERIAL_SCHAME__";
 }

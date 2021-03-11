@@ -53,6 +53,9 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   @Inject
   private PrincipalProducer producer;
 
+  @Inject
+  private MpSecurityContextManager securityManager;
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     final SecurityContext securityContext = requestContext.getSecurityContext();
@@ -67,6 +70,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));
+          securityManager.initialize(securityContext, jwtPrincipal);
           logger.debugf("Success");
         } catch (Exception e) {
           logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());

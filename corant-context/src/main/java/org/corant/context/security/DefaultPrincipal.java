@@ -15,22 +15,42 @@ package org.corant.context.security;
 
 import java.io.Serializable;
 import java.security.Principal;
-import javax.security.auth.Subject;
+import java.util.Map;
 
 /**
- * corant-suites-security-shared
+ * corant-context
  *
- * @author bingo 下午5:20:40
+ * @author bingo 下午4:30:10
  *
  */
-public interface SecurityContext extends Serializable {
+public class DefaultPrincipal implements Principal, Serializable {
 
-  DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null, null);
+  private static final long serialVersionUID = 282297555381317944L;
 
-  String getAuthenticationScheme();
+  protected String name;
+  protected Map<String, String> properties;
 
-  Principal getPrincipal();
+  /**
+   * @param name
+   * @param properties
+   */
+  public DefaultPrincipal(String name, Map<String, String> properties) {
+    this.name = name;
+    this.properties = properties;
+  }
 
-  Subject getSubject();
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  @Override
+  public String toString() {
+    return "DefaultPrincipal [name=" + name + ", properties=" + properties + "]";
+  }
 
 }

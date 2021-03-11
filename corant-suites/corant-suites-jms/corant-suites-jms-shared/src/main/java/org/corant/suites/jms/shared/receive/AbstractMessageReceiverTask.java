@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.receive;
 
+import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.findNamed;
 import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
@@ -38,11 +39,16 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.xa.XAResource;
 import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.context.security.SecurityContext;
+import org.corant.context.security.SecurityContexts;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.suites.jms.shared.MessagePropertyNames;
 import org.corant.suites.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.suites.jms.shared.context.JMSExceptionListener;
 import org.corant.suites.jms.shared.context.MessageSerializer;
+import org.corant.suites.jms.shared.context.SecurityContextPropagator;
+import org.corant.suites.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.suites.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
 import org.corant.suites.jta.shared.TransactionService;
 
@@ -89,7 +95,6 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
   protected final AtomicBoolean cancellation = new AtomicBoolean();
 
   protected AbstractMessageReceiverTask(MessageReceiverMetaData metaData) {
-    super();
     meta = metaData;
     xa = metaData.xa();
     connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
@@ -357,9 +362,9 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
 
     final ContextualMethodHandler method;
     final Class<?> messageClass;
+    final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 
     MessageHandler(ContextualMethodHandler method) {
-      super();
       this.method = method;
       messageClass = method.getMethod().getParameters()[0].getType();
     }
@@ -367,15 +372,29 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     @Override
     public void onMessage(Message message) {
       try {
+        resolveSecurityContext(message);
         method.invoke(resolvePayload(message));
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
           | JMSException e) {
         throw new CorantRuntimeException(e);
+      } finally {
+        SecurityContexts.setCurrent(null);
+      }
+    }
+
+    void resolveSecurityContext(Message message) {
+      try {
+        SecurityContext ctx = find(SecurityContextPropagator.class)
+            .orElse(SimpleSecurityContextPropagator.INSTANCE).extract(message);
+        SecurityContexts.setCurrent(ctx);
+      } catch (Exception e) {
+        logger.log(Level.SEVERE, e,
+            () -> "Resolve security context propagation from message occurred error!");
       }
     }
 
     Object resolvePayload(Message message) throws JMSException {
-      String serialSchema = message.getStringProperty(MessageSerializer.MSG_SERIAL_SCHAME);
+      String serialSchema = message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME);
       if (isNotBlank(serialSchema)) {
         MessageSerializer serializer =
             resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));

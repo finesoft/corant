@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jms.shared.context;
 
+import static org.corant.context.Instances.find;
 import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.ConnectionMetaData;
@@ -36,6 +37,7 @@ import javax.transaction.xa.XAResource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.suites.jms.shared.context.JMSContextManager.RsJMSContextManager;
 import org.corant.suites.jms.shared.context.JMSContextManager.TsJMSContextManager;
+import org.corant.suites.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.suites.jta.shared.TransactionService;
 
 /**
@@ -92,7 +94,6 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
    */
   public ExtendedJMSContext(JMSContextKey key, RsJMSContextManager reqCtxManager,
       TsJMSContextManager txCtxManager) {
-    super();
     this.key = key;
     this.reqCtxManager = reqCtxManager;
     this.txCtxManager = txCtxManager;
@@ -192,7 +193,10 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public JMSProducer createProducer() {
-    return context().createProducer();
+    JMSProducer producer = context().createProducer();
+    find(SecurityContextPropagator.class).orElse(SimpleSecurityContextPropagator.INSTANCE)
+        .propagate(producer);
+    return producer;
   }
 
   @Override

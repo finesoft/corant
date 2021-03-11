@@ -14,7 +14,6 @@
 package org.corant.context.concurrent.executor;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -59,6 +58,9 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         maxPoolSize, keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService, rejectPolicy,
         queue);
     this.awaitTermination = awaitTermination;
+    if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler());
+    }
     // TODO Auto-generated constructor stub
   }
 
@@ -86,37 +88,9 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         maxPoolSize, keepAliveTime, keepAliveTimeUnit, threadLifeTime, queueCapacity,
         contextService, rejectPolicy);
     this.awaitTermination = awaitTermination;
-    // TODO Auto-generated constructor stub
-  }
-
-  @Override
-  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-    throw new IllegalStateException(
-        "Can't performe isShutdown, the lifecycle of a ManagedExecutorService is managed by corant.");
-  }
-
-  @Override
-  public boolean isShutdown() {
-    throw new IllegalStateException(
-        "Can't performe isShutdown, the lifecycle of a ManagedExecutorService is managed by corant.");
-  }
-
-  @Override
-  public boolean isTerminated() {
-    throw new IllegalStateException(
-        "Can't performe isTerminated, the lifecycle of a ManagedExecutorService is managed by corant.");
-  }
-
-  @Override
-  public void shutdown() {
-    throw new IllegalStateException(
-        "Can't performe shutdown, the lifecycle of a ManagedExecutorService is managed by corant.");
-  }
-
-  @Override
-  public List<Runnable> shutdownNow() {
-    throw new IllegalStateException(
-        "Can't performe shutdownNow, the lifecycle of a ManagedExecutorService is managed by corant.");
+    if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler());
+    }
   }
 
   void stop() {

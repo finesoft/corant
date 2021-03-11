@@ -37,6 +37,8 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
 
+  protected boolean enableJndi = false;
+
   public ContextServiceConfig() {}
 
   private ContextServiceConfig(String name) {
@@ -45,6 +47,10 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   public Set<ContextInfo> getContextInfos() {
     return contextInfos;
+  }
+
+  public boolean isEnableJndi() {
+    return enableJndi;
   }
 
   @Override
@@ -64,6 +70,10 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   protected void setContextInfos(Set<ContextInfo> contextInfos) {
     this.contextInfos = contextInfos;
+  }
+
+  protected void setEnableJndi(boolean enableJndi) {
+    this.enableJndi = enableJndi;
   }
 
   public enum ContextInfo {

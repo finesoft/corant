@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent;
 
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,9 @@ import org.corant.context.concurrent.provider.TransactionSetupProviderImpl;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.JndiNames;
+import org.glassfish.enterprise.concurrent.ManagedExecutorServiceAdapter;
+import org.glassfish.enterprise.concurrent.ManagedScheduledExecutorServiceAdapter;
 
 /**
  * corant-context
@@ -53,6 +57,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class ConcurrentExtension implements Extension {
 
+  public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/concurrent";
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected volatile NamedQualifierObjectManager<ManagedExecutorConfig> executorConfigs =
       NamedQualifierObjectManager.empty();
@@ -67,27 +72,28 @@ public class ConcurrentExtension implements Extension {
         event.<ManagedExecutorService>addBean().addTransitiveTypeClosure(ExecutorService.class)
             .addTransitiveTypeClosure(ManagedExecutorService.class)
             .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
-            .beanClass(DefaultManagedExecutorService.class).scope(ApplicationScoped.class)
+            .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
-                return produce(beans, ManagedExecutorConfig.DFLT_INST);
+                return register(beans, produce(beans, ManagedExecutorConfig.DFLT_INST),
+                    ManagedExecutorConfig.DFLT_INST);
               } catch (NamingException e) {
                 throw new CorantRuntimeException(e);
               }
-            })/* .disposeWith((exe, beans) -> exe.shutdown()) */;
+            });
       } else {
         executorConfigs.getAllWithQualifiers()
             .forEach((cfg, esn) -> event.<ManagedExecutorService>addBean().addQualifiers(esn)
                 .addTransitiveTypeClosure(ManagedExecutorService.class)
                 .addTransitiveTypeClosure(ExecutorService.class)
-                .beanClass(DefaultManagedExecutorService.class).scope(ApplicationScoped.class)
+                .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
                 .produceWith(beans -> {
                   try {
-                    return register(beans, produce(beans, cfg));
+                    return register(beans, produce(beans, cfg), cfg);
                   } catch (NamingException e) {
                     throw new CorantRuntimeException(e);
                   }
-                })/* .disposeWith((exe, beans) -> exe.shutdown()) */);
+                }));
       }
 
       if (contextServiceConfigs.isEmpty()) {
@@ -107,14 +113,14 @@ public class ConcurrentExtension implements Extension {
           .forEach((cfg, esn) -> event.<ManagedScheduledExecutorService>addBean().addQualifiers(esn)
               .addTransitiveTypeClosure(ScheduledExecutorService.class)
               .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
-              .beanClass(DefaultManagedScheduledExecutorService.class)
+              .beanClass(ManagedScheduledExecutorServiceAdapter.class)
               .scope(ApplicationScoped.class).produceWith(beans -> {
                 try {
-                  return register(beans, produce(beans, cfg));
+                  return register(beans, produce(beans, cfg), cfg);
                 } catch (NamingException e) {
                   throw new CorantRuntimeException(e);
                 }
-              })/* .disposeWith((exe, beans) -> exe.shutdown()) */);
+              }));
     }
   }
 
@@ -151,9 +157,13 @@ public class ConcurrentExtension implements Extension {
       throws NamingException {
     TransactionManager tm = resolveTransactionManager(instance);
     logger.fine(() -> String.format("Create context service %s with %s.", cfg.getName(), cfg));
-    return new DefaultContextService(cfg.getName(),
+    DefaultContextService service = new DefaultContextService(cfg.getName(),
         new ContextSetupProviderImpl(cfg.getContextInfos().toArray(ContextInfo[]::new)),
         new TransactionSetupProviderImpl(tm));
+    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+      // TODO register to JNDI
+    }
+    return service;
   }
 
   protected DefaultManagedExecutorService produce(Instance<Object> instance,
@@ -164,8 +174,7 @@ public class ConcurrentExtension implements Extension {
         instance.select(BlockingQueueProvider.class, NamedLiteral.of(name));
     TransactionManager tm = resolveTransactionManager(instance);
     DefaultContextService contextService = new DefaultContextService(cfg.getName(),
-        new ContextSetupProviderImpl(cfg.getContextInfos().toArray(ContextInfo[]::new)),
-        new TransactionSetupProviderImpl(tm));
+        new ContextSetupProviderImpl(cfg.getContextInfos()), new TransactionSetupProviderImpl(tm));
 
     if (ques.isResolvable()) {
       logger.fine(
@@ -190,7 +199,7 @@ public class ConcurrentExtension implements Extension {
   protected DefaultManagedScheduledExecutorService produce(Instance<Object> instance,
       ManagedScheduledExecutorConfig cfg) throws NamingException {
     DefaultContextService contextService = new DefaultContextService(cfg.getName(),
-        new ContextSetupProviderImpl(cfg.getContextInfos().toArray(ContextInfo[]::new)),
+        new ContextSetupProviderImpl(cfg.getContextInfos()),
         new TransactionSetupProviderImpl(instance.select(TransactionManager.class).get()));
     logger.fine(() -> String.format("Create managed scheduled executor service %s with %s.",
         cfg.getName(), cfg));
@@ -201,16 +210,22 @@ public class ConcurrentExtension implements Extension {
         contextService, cfg.getRejectPolicy());
   }
 
-  protected DefaultManagedExecutorService register(Instance<Object> instance,
-      DefaultManagedExecutorService service) {
+  protected ManagedExecutorServiceAdapter register(Instance<Object> instance,
+      DefaultManagedExecutorService service, ManagedExecutorConfig cfg) {
     instance.select(ExecutorServiceManager.class).get().register(service);
-    return service;
+    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+      // TODO register to JNDI
+    }
+    return service.getAdapter();
   }
 
-  protected DefaultManagedScheduledExecutorService register(Instance<Object> instance,
-      DefaultManagedScheduledExecutorService service) {
+  protected ManagedScheduledExecutorServiceAdapter register(Instance<Object> instance,
+      DefaultManagedScheduledExecutorService service, ManagedScheduledExecutorConfig cfg) {
     instance.select(ExecutorServiceManager.class).get().register(service);
-    return service;
+    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+      // TODO register to JNDI
+    }
+    return service.getAdapter();
   }
 
   protected TransactionManager resolveTransactionManager(Instance<Object> instance) {

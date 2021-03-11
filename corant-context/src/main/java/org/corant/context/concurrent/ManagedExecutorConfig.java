@@ -15,12 +15,10 @@ package org.corant.context.concurrent;
 
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
-import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
 import java.time.Duration;
 import java.util.Locale;
-import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
@@ -55,7 +53,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   protected int threadPriority = Thread.NORM_PRIORITY;
   protected String threadName;
   protected int queueCapacity = Integer.MAX_VALUE;
-  protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
+  protected ContextInfo[] contextInfos = ContextInfo.values();
+  protected boolean enableJndi = false;
 
   public ManagedExecutorConfig() {}
 
@@ -90,7 +89,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return awaitTermination;
   }
 
-  public Set<ContextInfo> getContextInfos() {
+  public ContextInfo[] getContextInfos() {
     return contextInfos;
   }
 
@@ -143,10 +142,13 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
     return result;
   }
 
-  // @Override
-  // public boolean isValid() {
-  // return isNotBlank(getName());
-  // }
+  /**
+   *
+   * @return the enableJndi
+   */
+  public boolean isEnableJndi() {
+    return enableJndi;
+  }
 
   public boolean isLongRunningTasks() {
     return longRunningTasks;
@@ -164,110 +166,62 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
         + ", keepAliveTime=" + keepAliveTime + ", threadLifeTime=" + threadLifeTime
         + ", awaitTermination=" + awaitTermination + ", rejectPolicy=" + rejectPolicy
         + ", threadPriority=" + threadPriority + ", threadName=" + threadName + ", queueCapacity="
-        + queueCapacity + ", contextInfos=" + contextInfos + "]";
+        + queueCapacity + ", contextInfos=" + contextInfos + ", enableJndi=" + enableJndi + "]";
   }
 
-  /**
-   *
-   * @param awaitTermination the awaitTermination to set
-   */
   protected void setAwaitTermination(Duration awaitTermination) {
     this.awaitTermination = awaitTermination;
   }
 
-  /**
-   *
-   * @param contextInfos the contextInfos to set
-   */
-  protected void setContextInfos(Set<ContextInfo> contextInfos) {
+  protected void setContextInfos(ContextInfo[] contextInfos) {
     this.contextInfos = contextInfos;
   }
 
-  /**
-   *
-   * @param corePoolSize the corePoolSize to set
-   */
   protected void setCorePoolSize(int corePoolSize) {
     this.corePoolSize = corePoolSize;
   }
 
-  /**
-   *
-   * @param hungTaskThreshold the hungTaskThreshold to set
-   */
+  protected void setEnableJndi(boolean enableJndi) {
+    this.enableJndi = enableJndi;
+  }
+
   protected void setHungTaskThreshold(long hungTaskThreshold) {
     this.hungTaskThreshold = hungTaskThreshold;
   }
 
-  /**
-   *
-   * @param keepAliveTime the keepAliveTime to set
-   */
   protected void setKeepAliveTime(Duration keepAliveTime) {
     this.keepAliveTime = keepAliveTime;
   }
 
-  /**
-   *
-   * @param longRunningTasks the longRunningTasks to set
-   */
   protected void setLongRunningTasks(boolean longRunningTasks) {
     this.longRunningTasks = longRunningTasks;
   }
 
-  /**
-   *
-   * @param maxPoolSize the maxPoolSize to set
-   */
   protected void setMaxPoolSize(int maxPoolSize) {
     this.maxPoolSize = maxPoolSize;
   }
 
-  /**
-   *
-   * @param name the name to set
-   */
   @Override
   protected void setName(String name) {
     this.name = defaultTrim(name);
   }
 
-  /**
-   *
-   * @param queueCapacity the queueCapacity to set
-   */
   protected void setQueueCapacity(int queueCapacity) {
     this.queueCapacity = queueCapacity;
   }
 
-  /**
-   *
-   * @param rejectPolicy the rejectPolicy to set
-   */
   protected void setRejectPolicy(RejectPolicy rejectPolicy) {
     this.rejectPolicy = rejectPolicy;
   }
 
-  /**
-   *
-   * @param threadLifeTime the threadLifeTime to set
-   */
   protected void setThreadLifeTime(Duration threadLifeTime) {
     this.threadLifeTime = threadLifeTime;
   }
 
-  /**
-   *
-   * @param threadName the threadName to set
-   */
   protected void setThreadName(String threadName) {
     this.threadName = threadName;
   }
 
-  /**
-   *
-   * @param threadPriority the threadPriority to set
-   */
   protected void setThreadPriority(int threadPriority) {
     this.threadPriority = threadPriority;
   }

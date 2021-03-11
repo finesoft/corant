@@ -31,7 +31,7 @@ public interface SecurityContextSerializer {
 
   String serialize(SecurityContext securityContext);
 
-  public class Base64SecurityContextSerializer implements SecurityContextSerializer {
+  class Base64SecurityContextSerializer implements SecurityContextSerializer {
 
     public static final Base64SecurityContextSerializer INSTANCE =
         new Base64SecurityContextSerializer();

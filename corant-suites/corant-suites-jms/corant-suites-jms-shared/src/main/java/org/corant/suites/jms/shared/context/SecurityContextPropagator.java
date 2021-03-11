@@ -39,7 +39,7 @@ public interface SecurityContextPropagator {
 
   void propagate(Message message);
 
-  public static class SimpleSecurityContextPropagator implements SecurityContextPropagator {
+  class SimpleSecurityContextPropagator implements SecurityContextPropagator {
 
     public static final SimpleSecurityContextPropagator INSTANCE =
         new SimpleSecurityContextPropagator();

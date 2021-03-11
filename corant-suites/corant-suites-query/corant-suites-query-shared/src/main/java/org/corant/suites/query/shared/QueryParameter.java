@@ -16,6 +16,8 @@ package org.corant.suites.query.shared;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Collections;
@@ -208,6 +210,7 @@ public interface QueryParameter extends Serializable {
 
     public GenericQueryParameter() {}
 
+    @JsonIgnore
     @Override
     public Map<String, Object> getContext() {
       return this.context;

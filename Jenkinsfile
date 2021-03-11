@@ -20,14 +20,12 @@ pipeline {
   }
   post {
     success {
-      slackSend channel: '#jenkins',
-        color: 'good',
-        message: "successfully\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n revision: ${revision} \n ${env.BUILD_URL}"
+      slackSend channel: '#jenkins',color: 'good',
+        message: "successfully @here\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n revision: ${revision} \n ${env.BUILD_URL}"
     }
     failure {
-      slackSend channel: '#jenkins',
-        color: '#EA4335',
-        message: "failed!!!\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n${env.BUILD_URL}"
+      slackSend channel: '#jenkins',color: '#EA4335',
+        message: "failed!!! @here\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n${env.BUILD_URL}"
     }
   }
 }

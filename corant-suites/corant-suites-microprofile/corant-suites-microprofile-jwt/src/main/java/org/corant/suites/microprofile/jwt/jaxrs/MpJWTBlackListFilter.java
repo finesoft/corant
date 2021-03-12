@@ -34,7 +34,7 @@ public class MpJWTBlackListFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) {
     CDI.current().select(MpJWTBlackListFilterHandler.class).forEach(h -> h.handle(requestContext));
-    logger.debugf("Success");
+    logger.debugf("Blacklist filter handle successfully");
   }
 
 }

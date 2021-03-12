@@ -70,8 +70,8 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));
-          securityManager.initialize(securityContext, jwtPrincipal);
-          logger.debugf("Success");
+          securityManager.bind(securityContext, jwtPrincipal);
+          logger.debugf("JWT authentication filter handle successfully");
         } catch (Exception e) {
           logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
           requestContext.setProperty(JTW_EXCEPTION_KEY, e);

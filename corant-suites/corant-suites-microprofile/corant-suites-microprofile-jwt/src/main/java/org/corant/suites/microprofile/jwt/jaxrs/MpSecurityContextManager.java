@@ -42,9 +42,9 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 public class MpSecurityContextManager {
   static final Logger logger = Logger.getLogger(MpSecurityContextManager.class.getName());
 
-  void initialize(SecurityContext securityContext, JsonWebToken principal) {
+  void bind(SecurityContext securityContext, JsonWebToken principal) {
     if (securityContext != null && principal != null) {
-      logger.fine(() -> "Initialize current microprofile-jwt principal to SecurityContexts.");
+      logger.fine(() -> "Bind current microprofile-JWT principal to SecurityContexts.");
       Map<String, Serializable> map = new HashMap<>();
       String subject = principal.getSubject();
       for (String cn : principal.getClaimNames()) {
@@ -57,14 +57,14 @@ public class MpSecurityContextManager {
           .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
               new DefaultSubject(subject), new DefaultPrincipal(principal.getName(), map)));
     } else {
-      logger.fine(() -> "Initialize empty security context to SecurityContexts.");
+      logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);
     }
   }
 
   @PreDestroy
   void onPreDestroy() {
-    logger.fine(() -> "Clean current security context from SecurityContexts.");
+    logger.fine(() -> "Unbind current security context from SecurityContexts.");
     SecurityContexts.setCurrent(null);
   }
 

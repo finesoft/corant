@@ -44,7 +44,7 @@ public class MpSecurityContextManager {
 
   void initialize(SecurityContext securityContext, JsonWebToken principal) {
     if (securityContext != null && principal != null) {
-      logger.fine(() -> "Initialize current JAXRS security context to SecurityContexts.");
+      logger.fine(() -> "Initialize current microprofile-jwt principal to SecurityContexts.");
       Map<String, Serializable> map = new HashMap<>();
       String subject = principal.getSubject();
       for (String cn : principal.getClaimNames()) {

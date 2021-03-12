@@ -21,6 +21,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.core.SecurityContext;
 import org.corant.context.security.DefaultPrincipal;
 import org.corant.context.security.DefaultSecurityContext;
+import org.corant.context.security.DefaultSubject;
 import org.corant.context.security.SecurityContexts;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -38,6 +39,7 @@ public class MpSecurityContextManager {
     if (securityContext != null && principal != null) {
       logger.fine(() -> "Initialize current JAXRS security context to SecurityContexts.");
       Map<String, String> map = new HashMap<>();
+      String subject = principal.getSubject();
       for (String cn : principal.getClaimNames()) {
         Object co = principal.getClaim(cn);
         if (!cn.equals("raw_token")) {
@@ -45,8 +47,8 @@ public class MpSecurityContextManager {
         }
       }
       SecurityContexts
-          .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(), null,
-              new DefaultPrincipal(principal.getName(), map)));
+          .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
+              new DefaultSubject(subject), new DefaultPrincipal(principal.getName(), map)));
     } else {
       logger.fine(() -> "Initialize empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);

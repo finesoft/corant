@@ -14,21 +14,15 @@
 package org.corant.context.security;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
- * corant-suites-security-shared
+ * corant-context
  *
- * @author bingo 下午5:20:40
+ * @author bingo 下午12:00:56
  *
  */
-public interface SecurityContext extends Serializable {
+public interface Principal extends java.security.Principal, Serializable {
 
-  DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null, null);
-
-  String getAuthenticationScheme();
-
-  Principal getPrincipal();
-
-  Subject getSubject();
-
+  Map<String, ? extends Serializable> getProperties();
 }

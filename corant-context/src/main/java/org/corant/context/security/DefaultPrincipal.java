@@ -16,7 +16,6 @@ package org.corant.context.security;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.getMapString;
 import java.io.Serializable;
-import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -30,13 +29,13 @@ public class DefaultPrincipal implements Principal, Serializable {
   private static final long serialVersionUID = 282297555381317944L;
 
   protected String name;
-  protected Map<String, String> properties;
+  protected Map<String, ? extends Serializable> properties;
 
   /**
    * @param name
    * @param properties
    */
-  public DefaultPrincipal(String name, Map<String, String> properties) {
+  public DefaultPrincipal(String name, Map<String, ? extends Serializable> properties) {
     this.name = name;
     this.properties = properties;
   }
@@ -46,7 +45,8 @@ public class DefaultPrincipal implements Principal, Serializable {
     return name;
   }
 
-  public Map<String, String> getProperties() {
+  @Override
+  public Map<String, ? extends Serializable> getProperties() {
     return properties;
   }
 

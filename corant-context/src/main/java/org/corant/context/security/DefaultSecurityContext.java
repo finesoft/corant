@@ -13,8 +13,6 @@
  */
 package org.corant.context.security;
 
-import javax.security.auth.Subject;
-
 public class DefaultSecurityContext implements SecurityContext {
 
   private static final long serialVersionUID = 4329263253208902621L;
@@ -43,6 +41,12 @@ public class DefaultSecurityContext implements SecurityContext {
   @Override
   public Subject getSubject() {
     return subject;
+  }
+
+  @Override
+  public String toString() {
+    return "DefaultSecurityContext [authenticationScheme=" + authenticationScheme + ", principal="
+        + principal + ", subject=" + subject + "]";
   }
 
 }

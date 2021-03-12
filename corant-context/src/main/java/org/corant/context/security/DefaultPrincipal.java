@@ -13,6 +13,8 @@
  */
 package org.corant.context.security;
 
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.getMapString;
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.Map;
@@ -48,9 +50,12 @@ public class DefaultPrincipal implements Principal, Serializable {
     return properties;
   }
 
+  public <T> T getProperty(String name, Class<T> type) {
+    return toObject(getMapString(properties, name), type);
+  }
+
   @Override
   public String toString() {
     return "DefaultPrincipal [name=" + name + ", properties=" + properties + "]";
   }
-
 }

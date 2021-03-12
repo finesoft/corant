@@ -13,6 +13,7 @@
  */
 package org.corant.context.security;
 
+import static org.corant.shared.util.Conversions.toObject;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -25,4 +26,48 @@ import java.util.Map;
 public interface Principal extends java.security.Principal, Serializable {
 
   Map<String, ? extends Serializable> getProperties();
+
+  <T> T getProperty(String propertyName, Class<T> propertyType);
+
+  class DefaultPrincipal implements Principal, Serializable {
+
+    private static final long serialVersionUID = 282297555381317944L;
+
+    protected String name;
+    protected Map<String, ? extends Serializable> properties;
+
+    /**
+     * @param name
+     * @param properties
+     */
+    public DefaultPrincipal(String name, Map<String, ? extends Serializable> properties) {
+      this.name = name;
+      this.properties = properties;
+    }
+
+    @Override
+    public String getName() {
+      return name;
+    }
+
+    @Override
+    public Map<String, ? extends Serializable> getProperties() {
+      return properties;
+    }
+
+    @Override
+    public <T> T getProperty(String name, Class<T> type) {
+      Object property;
+      if (properties != null && (property = properties.get(name)) != null) {
+        return toObject(property, type);
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return "DefaultPrincipal [name=" + name + ", properties=" + properties + "]";
+    }
+  }
+
 }

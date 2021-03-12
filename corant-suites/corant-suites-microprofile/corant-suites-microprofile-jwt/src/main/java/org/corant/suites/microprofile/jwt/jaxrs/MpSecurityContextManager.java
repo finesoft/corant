@@ -13,16 +13,23 @@
  */
 package org.corant.suites.microprofile.jwt.jaxrs;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.ws.rs.core.SecurityContext;
-import org.corant.context.security.DefaultPrincipal;
-import org.corant.context.security.DefaultSecurityContext;
-import org.corant.context.security.DefaultSubject;
+import org.corant.context.security.Principal.DefaultPrincipal;
+import org.corant.context.security.SecurityContext.DefaultSecurityContext;
 import org.corant.context.security.SecurityContexts;
+import org.corant.context.security.Subject.DefaultSubject;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -38,12 +45,12 @@ public class MpSecurityContextManager {
   void initialize(SecurityContext securityContext, JsonWebToken principal) {
     if (securityContext != null && principal != null) {
       logger.fine(() -> "Initialize current JAXRS security context to SecurityContexts.");
-      Map<String, String> map = new HashMap<>();
+      Map<String, Serializable> map = new HashMap<>();
       String subject = principal.getSubject();
       for (String cn : principal.getClaimNames()) {
         Object co = principal.getClaim(cn);
         if (!cn.equals("raw_token")) {
-          map.put(cn, co != null ? co.toString() : null);
+          map.put(cn, convert(co));
         }
       }
       SecurityContexts
@@ -59,5 +66,36 @@ public class MpSecurityContextManager {
   void onPreDestroy() {
     logger.fine(() -> "Clean current security context from SecurityContexts.");
     SecurityContexts.setCurrent(null);
+  }
+
+  private Serializable convert(Object claimValue) {
+    if (claimValue instanceof JsonString) {
+      return ((JsonString) claimValue).getString();
+    } else if (claimValue instanceof JsonNumber) {
+      JsonNumber jcv = (JsonNumber) claimValue;
+      if (jcv.isIntegral()) {
+        return Long.valueOf(jcv.longValue());
+      } else {
+        return Double.valueOf(jcv.doubleValue());
+      }
+    } else if (claimValue instanceof JsonArray) {
+      JsonArray ja = (JsonArray) claimValue;
+      ArrayList<Serializable> list = new ArrayList<>(ja.size());
+      for (JsonValue jv : ja) {
+        list.add(convert(jv));
+      }
+      return list;
+    } else if (claimValue instanceof JsonObject) {
+      JsonObject jo = (JsonObject) claimValue;
+      HashMap<String, Serializable> map = new HashMap<>(jo.size());
+      jo.forEach((k, v) -> {
+        map.put(k, convert(v));
+      });
+      return map;
+    } else if (claimValue instanceof Serializable) {
+      return (Serializable) claimValue;
+    } else {
+      return claimValue != null ? claimValue.toString() : null;
+    }
   }
 }

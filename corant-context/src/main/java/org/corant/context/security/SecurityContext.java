@@ -14,6 +14,7 @@
 package org.corant.context.security;
 
 import java.io.Serializable;
+import org.corant.context.security.Principal.DefaultPrincipal;
 
 /**
  * corant-suites-security-shared
@@ -31,4 +32,41 @@ public interface SecurityContext extends Serializable {
 
   Subject getSubject();
 
+  class DefaultSecurityContext implements SecurityContext {
+
+    private static final long serialVersionUID = 4329263253208902621L;
+
+    protected final String authenticationScheme;
+    protected final DefaultPrincipal principal;
+    protected final Subject subject;
+
+    public DefaultSecurityContext(String authenticationScheme, Subject subject,
+        DefaultPrincipal principal) {
+      this.authenticationScheme = authenticationScheme;
+      this.principal = principal;
+      this.subject = subject;
+    }
+
+    @Override
+    public String getAuthenticationScheme() {
+      return authenticationScheme;
+    }
+
+    @Override
+    public DefaultPrincipal getPrincipal() {
+      return principal;
+    }
+
+    @Override
+    public Subject getSubject() {
+      return subject;
+    }
+
+    @Override
+    public String toString() {
+      return "DefaultSecurityContext [authenticationScheme=" + authenticationScheme + ", principal="
+          + principal + ", subject=" + subject + "]";
+    }
+
+  }
 }

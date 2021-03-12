@@ -25,4 +25,25 @@ public interface Subject extends Serializable {
 
   Serializable getId();
 
+  class DefaultSubject implements Subject {
+
+    private static final long serialVersionUID = 3435651508945136478L;
+
+    private Serializable id;
+
+    public DefaultSubject(Serializable id) {
+      this.id = id;
+    }
+
+    @Override
+    public Serializable getId() {
+      return id;
+    }
+
+    @Override
+    public String toString() {
+      return "DefaultSubject [id=" + id + "]";
+    }
+
+  }
 }

@@ -28,6 +28,7 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -118,7 +119,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   protected synchronized void onPostConstruct() {
     final PersistenceService persistenceService = find(PersistenceService.class)
         .orElseThrow(() -> new CorantRuntimeException("Can't find Persistence service!"));
-    select(EntityManagerFactory.class).forEach(emf -> {
+    select(EntityManagerFactory.class, Any.Literal.INSTANCE).forEach(emf -> {
       String puNme = asString(emf.getProperties().get(PersistenceNames.PU_NME_KEY), null);
       Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
       entities.stream().map(ManagedType::getJavaType)

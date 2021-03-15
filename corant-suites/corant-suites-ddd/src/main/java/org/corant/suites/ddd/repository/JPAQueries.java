@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.enterprise.inject.Any;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
@@ -381,8 +382,9 @@ public class JPAQueries {
     if (persistenceClasses.isEmpty()) {
       synchronized (JPAQueries.class) {
         if (persistenceClasses.isEmpty()) {
-          select(EntityManagerFactory.class).forEach(emf -> emf.getMetamodel().getEntities()
-              .stream().map(ManagedType::getJavaType).forEach(persistenceClasses::add));
+          select(EntityManagerFactory.class, Any.Literal.INSTANCE)
+              .forEach(emf -> emf.getMetamodel().getEntities().stream()
+                  .map(ManagedType::getJavaType).forEach(persistenceClasses::add));
         }
       }
     }

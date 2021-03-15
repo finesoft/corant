@@ -15,6 +15,7 @@ package org.corant.suites.jpa.shared;
 
 import static org.corant.context.qualifier.Qualifiers.resolveNameds;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
@@ -131,7 +132,7 @@ public class JPAExtension implements Extension {
         dataSourceNames.add(defaultString(pu.getNonJtaDataSourceName()));
       }
     });
-    dataSourceNames.removeIf(f -> f.startsWith(jndiPrefix));
+    dataSourceNames.removeIf(f -> f.startsWith(jndiPrefix) || isEmpty(f));
     if (isNotEmpty(dataSourceNames)) {
       Qualifiers.resolveNameds(dataSourceNames).forEach((k, qs) -> {
         if (!Instances.select(DataSource.class, qs).isResolvable()) {

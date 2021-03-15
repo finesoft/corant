@@ -252,7 +252,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-suites-jpa-hibernate</artifactId>
+				<artifactId>corant-suites-jpa-hibernate-orm</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-suites-jpa-hibernate-ogm</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

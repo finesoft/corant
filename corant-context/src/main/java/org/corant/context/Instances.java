@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -93,7 +94,7 @@ public class Instances {
    * @return findNamed
    */
   public static <T> Optional<T> findNamed(Class<T> instanceClass, String name) {
-    Instance<T> inst = select(instanceClass);
+    Instance<T> inst = select(instanceClass, Any.Literal.INSTANCE);
     if (inst.isUnsatisfied()) {
       return Optional.empty();
     }

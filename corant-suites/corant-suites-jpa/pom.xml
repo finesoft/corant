@@ -11,6 +11,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>corant-suites-jpa-shared</module>
-		<module>corant-suites-jpa-hibernate</module>
+		<module>corant-suites-jpa-hibernate-orm</module>
+		<module>corant-suites-jpa-hibernate-ogm</module>
 	</modules>
 </project>

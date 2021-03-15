@@ -15,6 +15,7 @@ package org.corant.suites.jpa.hibernate.orm;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.io.Serializable;
@@ -57,13 +58,21 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static final int workerId;
   static final String ip = Configs.getValue(IG_SF_WK_IP, String.class);
   static final boolean usePst = Configs.getValue(IG_SF_UP_TM, Boolean.class, Boolean.TRUE);
-  static final long delayedTiming = Configs.getValue(IG_SF_DL_TM, Long.class, 16000L);
   static final boolean useSec;
-  static final HibernateSnowflakeIdTimeService specTimeGenerator;
+  static final HibernateSnowflakeIdTimeService specTimeGenerator =
+      ServiceLoader.load(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).stream()
+          .map(Provider::get).sorted(Sortable::compare).findFirst()
+          .orElse((u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+  static final List<HibernateSessionTimeService> sessionTimeServices =
+      ServiceLoader.load(HibernateSessionTimeService.class, defaultClassLoader()).stream()
+          .map(Provider::get).sorted(Sortable::compare).collect(Collectors.toList());
+  static final long delayedTiming =
+      Configs.getValue(IG_SF_DL_TM, Long.class, sizeOf(sessionTimeServices) > 1 ? 0L : 16000L);
+
   static Map<Class<?>, HibernateSessionTimeService> timeResolvers = new ConcurrentHashMap<>();
-  static final List<HibernateSessionTimeService> sessionTimeServices;
 
   static {
+
     dataCenterId = getConfig().getOptionalValue(IG_SF_DC_ID, Integer.class).orElse(-1);
     workerId = getConfig().getOptionalValue(IG_SF_WK_ID, Integer.class).orElse(-1);
     if (workerId >= 0) {
@@ -80,14 +89,6 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
       generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
       useSec = true;
     }
-
-    specTimeGenerator =
-        ServiceLoader.load(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).stream()
-            .map(Provider::get).sorted(Sortable::compare).findFirst().orElse(
-                (u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
-    sessionTimeServices =
-        ServiceLoader.load(HibernateSessionTimeService.class, defaultClassLoader()).stream()
-            .map(Provider::get).sorted(Sortable::compare).collect(Collectors.toList());
 
     logger.info(() -> String.format("Use %s.", generator.description()));
 

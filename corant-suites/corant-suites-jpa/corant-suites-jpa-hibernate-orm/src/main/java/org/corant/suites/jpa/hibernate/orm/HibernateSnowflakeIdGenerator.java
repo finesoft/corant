@@ -72,8 +72,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
-    String ptu = asString(
-        session.getFactory().getProperties().get("hibernate.ejb.entitymanager_factory_name"));
+    String ptu = asString(session.getFactory().getProperties()
+        .get(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME));
     return generators.computeIfAbsent(ptu, this::createGenerator).generate(session, object);
   }
 
@@ -98,17 +98,24 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     } else {
       generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
     }
-    logger.info(
-        () -> String.format("Create id generator for persistence unit[%s], the generator desc: %s.",
-            ptu, generator.description()));
+    logger.info(() -> String.format(
+        "Create identifier generator for persistence unit[%s], the generator is %s.", ptu,
+        generator.description()));
     return new Generator(tryAsClass(metaData.getPersistenceProviderClassName()), generator, usePst);
   }
 
+  /**
+   * corant-suites-jpa-hibernate-orm
+   *
+   * @author bingo 下午4:14:47
+   *
+   */
   public static class Generator {
     final GeneralSnowflakeUUIDGenerator snowflakeGenerator;
     final boolean usePst;
     final Class<?> providerClass;
     final boolean useSecond;
+    final HibernateSessionTimeService timeService;
 
     public Generator(final Class<?> providerClass, GeneralSnowflakeUUIDGenerator snowflakeGenerator,
         boolean usePst) {
@@ -116,21 +123,16 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
       this.snowflakeGenerator = snowflakeGenerator;
       this.usePst = usePst;
       useSecond = snowflakeGenerator.getUnit() == ChronoUnit.SECONDS;
+      if (!usePst) {
+        timeService = (u, s, o) -> specTimeGenerator.fromEpoch(u, s, o);
+      } else {
+        timeService = sessionTimeServices.stream().filter(s -> s.accept(providerClass)).findFirst()
+            .orElse((u, s, o) -> specTimeGenerator.fromEpoch(u, s, o));
+      }
     }
 
     public long generate(SharedSessionContractImplementor session, Object object) {
-      return snowflakeGenerator.generate(() -> {
-        if (!usePst) {
-          return specTimeGenerator.fromEpoch(useSecond, session, object);
-        } else {
-          for (HibernateSessionTimeService s : sessionTimeServices) {
-            if (s.accept(providerClass)) {
-              return s.resolve(useSecond, session, object);
-            }
-          }
-          return specTimeGenerator.fromEpoch(useSecond, session, object);
-        }
-      });
+      return snowflakeGenerator.generate(() -> timeService.resolve(useSecond, session, object));
     }
   }
 

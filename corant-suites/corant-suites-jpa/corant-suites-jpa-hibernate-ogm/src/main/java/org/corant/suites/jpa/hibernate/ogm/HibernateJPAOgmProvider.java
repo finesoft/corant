@@ -74,7 +74,7 @@ public class HibernateJPAOgmProvider implements JPAProvider {
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
-    properties.put("hibernate.ejb.entitymanager_factory_name",
+    properties.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
         defaultString(metaData.getPersistenceUnitName()));
     return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, properties);
   }

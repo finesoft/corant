@@ -13,6 +13,7 @@
  */
 package org.corant.suites.jpa.hibernate.ogm;
 
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -73,6 +74,8 @@ public class HibernateJPAOgmProvider implements JPAProvider {
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
+    properties.put("hibernate.ejb.entitymanager_factory_name",
+        defaultString(metaData.getPersistenceUnitName()));
     return new HibernateOgmPersistence().createContainerEntityManagerFactory(metaData, properties);
   }
 

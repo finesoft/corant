@@ -14,6 +14,7 @@
 package org.corant.suites.jpa.hibernate.orm;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -73,6 +74,8 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
+    properties.put("hibernate.ejb.entitymanager_factory_name",
+        defaultString(metaData.getPersistenceUnitName()));
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         properties);
   }

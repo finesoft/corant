@@ -29,6 +29,11 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeService {
 
   @Override
+  public boolean accept(Class<?> provider) {
+    return provider.equals(org.hibernate.ogm.jpa.HibernateOgmPersistence.class);
+  }
+
+  @Override
   public int getOrdinal() {
     return super.getOrdinal() + 1;
   }

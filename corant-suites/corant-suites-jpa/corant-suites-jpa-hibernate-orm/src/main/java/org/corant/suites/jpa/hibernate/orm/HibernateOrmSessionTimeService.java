@@ -29,6 +29,11 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 public class HibernateOrmSessionTimeService implements HibernateSessionTimeService {
 
   @Override
+  public boolean accept(Class<?> provider) {
+    return provider.equals(org.hibernate.jpa.HibernatePersistenceProvider.class);
+  }
+
+  @Override
   public long resolve(boolean useEpochSeconds, SharedSessionContractImplementor session,
       Object object) {
     final String timeSql = session.getFactory().getServiceRegistry().getService(JdbcServices.class)

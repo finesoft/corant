@@ -25,7 +25,7 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 @FunctionalInterface
 public interface HibernateSessionTimeService extends Sortable {
 
-  default boolean accept(SharedSessionContractImplementor session, Object object) {
+  default boolean accept(Class<?> provider) {
     return true;
   }
 

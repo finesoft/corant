@@ -241,6 +241,14 @@ public class Identifiers {
     }
 
     /**
+     * 
+     * @return the unit
+     */
+    public ChronoUnit getUnit() {
+      return unit;
+    }
+
+    /**
      * Returns the ordered workers pairs, every pair contains two values, one is the worker bits the
      * other is the worker id.
      *

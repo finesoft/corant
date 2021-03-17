@@ -14,6 +14,7 @@
 package org.corant.suites.security.shared.util;
 
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
 import java.util.function.Consumer;
 import org.jose4j.jwk.PublicJsonWebKey;
@@ -21,6 +22,8 @@ import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
 
 /**
@@ -31,7 +34,7 @@ import org.jose4j.lang.JoseException;
  */
 public class JsonWebTokens {
 
-  public static String grantJWTAccessToken(PublicJsonWebKey key, Consumer<JwtClaims> setting,
+  public static String generateJWT(PublicJsonWebKey key, Consumer<JwtClaims> setting,
       String algo) throws JoseException {
     JwtClaims claims = new JwtClaims();
     if (setting != null) {
@@ -45,16 +48,33 @@ public class JsonWebTokens {
     return jws.getCompactSerialization();
   }
 
-  public static String grantJWTRSASHA256AccessToken(String rsaPublicKeyPem, String rsaPrivateKeyPem,
+  public static JwtClaims getJWTClaims(Key key, String jwt) throws InvalidJwtException {
+    return new JwtConsumerBuilder().setVerificationKey(key).build().processToClaims(jwt);
+  }
+
+  public static String generateRSASHA256JWT(String rsaPublicKeyPem, String rsaPrivateKeyPem,
       String sha256keyId, Consumer<JwtClaims> setting)
       throws JoseException, GeneralSecurityException {
+    return generateJWT(
+        createRSASHA256JsonWebKey(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId), setting,
+        AlgorithmIdentifiers.RSA_USING_SHA256);
+  }
 
+  public static JwtClaims getRSASHA256JWTClaims(String rsaPublicKeyPem, String rsaPrivateKeyPem,
+      String sha256keyId, String jwt) throws InvalidJwtException, GeneralSecurityException {
+    return new JwtConsumerBuilder()
+        .setVerificationKey(
+            createRSASHA256JsonWebKey(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId).getKey())
+        .build().processToClaims(jwt);
+  }
+
+  public static RsaJsonWebKey createRSASHA256JsonWebKey(String rsaPublicKeyPem,
+      String rsaPrivateKeyPem, String sha256keyId) throws GeneralSecurityException {
     RsaJsonWebKey rsaJsonWebKey =
         new RsaJsonWebKey((RSAPublicKey) Keys.decodePublicKey(rsaPublicKeyPem, "RSA"));
     rsaJsonWebKey.setKeyId(sha256keyId);
     rsaJsonWebKey.setPrivateKey(Keys.decodePrivateKey(rsaPrivateKeyPem, "RSA"));
-
-    return grantJWTAccessToken(rsaJsonWebKey, setting, AlgorithmIdentifiers.RSA_USING_SHA256);
+    return rsaJsonWebKey;
   }
 
 }

@@ -20,8 +20,8 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
-import org.corant.context.qualifier.Unnamed;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
+import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
@@ -129,19 +129,19 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   protected Duration maxLifetime = Duration.ofMinutes(0);
 
   /**
-   * Connections idle for longer than this time period are validated (background validation). A
-   * duration of {@link Duration#ZERO} means that a this feature is disabled.
+   * Sets the duration of background validation interval. Default is {@link Duration#ZERO} meaning
+   * that this feature is disabled.
    */
-  @ConfigKeyItem(defaultValue = "PT60M")
-  protected Duration validationTimeout = Duration.ofMinutes(60);
+  @ConfigKeyItem(defaultValue = "PT3M")
+  protected Duration validationTimeout = Duration.ofMinutes(3);
 
   /**
    * Connections idle for longer than this time period are validated before being acquired
    * (foreground validation). A duration of {@link Duration#ZERO} means that a this feature is
    * disabled.
    */
-  @ConfigKeyItem(defaultValue = "PT0S")
-  protected Duration idleValidationTimeout = Duration.ofSeconds(0);
+  @ConfigKeyItem(defaultValue = "PT30M")
+  protected Duration idleValidationTimeout = Duration.ofMinutes(30);
 
   /**
    * Connections idle for longer than this time period are flushed from the pool. A duration of

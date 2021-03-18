@@ -13,17 +13,19 @@
  */
 package org.corant.context.concurrent.interceptor;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
+import org.corant.context.concurrent.annotation.ConcurrencyThrottle;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Methods.MethodSignature;
+
 import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import org.corant.context.concurrent.annotation.ConcurrencyThrottle;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Methods.MethodSignature;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
+import static org.corant.shared.util.Assertions.shouldNotNull;
 
 /**
  * corant-context
@@ -46,13 +48,17 @@ public class ConcurrencyThrottleInterceptor {
     final boolean fair = ann.fair();
     Semaphore counting = ConcurrencyThrottleInterceptor.THROTTLES
         .computeIfAbsent(new MethodSignature(ctx.getMethod()), k -> new Semaphore(max, fair));
+    boolean acquireSuccess = false;
     try {
       counting.acquire();
+      acquireSuccess = true;
       return ctx.proceed();
     } catch (Exception ex) {
       throw new CorantRuntimeException(ex);
     } finally {
-      counting.release();
+      if (acquireSuccess) {
+        counting.release();
+      }
     }
   }
 }

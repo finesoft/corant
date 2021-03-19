@@ -13,21 +13,14 @@
  */
 package org.corant.context.required;
 
-import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Objects.isNotNull;
-import static org.corant.shared.util.Objects.isNull;
-import static org.corant.shared.util.Streams.streamOf;
-import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Sets.newConcurrentHashSet;
 import java.util.Set;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.config.Configs;
 
 /**
  * corant-context
@@ -37,58 +30,18 @@ import org.corant.config.Configs;
  */
 public class RequiredExtension implements Extension {
 
-  public <T> void checkRequired(
-      @WithAnnotations({RequiredClassNotPresent.class, RequiredClassPresent.class,
-          RequiredConfiguration.class}) @Observes ProcessAnnotatedType<T> event) {
-    AnnotatedType<?> type = event.getAnnotatedType();
-    if (checkVeto(type.getAnnotations(RequiredClassPresent.class),
-        type.getAnnotations(RequiredClassNotPresent.class),
-        type.getAnnotations(RequiredConfiguration.class))) {
-      event.veto();
-    }
+  private static final Set<Class<?>> vetoes = newConcurrentHashSet();
+
+  public static boolean isVetoed(Class<?> beanType) {
+    return beanType != null && vetoes.contains(beanType);
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  boolean checkVeto(Set<RequiredClassPresent> requiredClassNames,
-      Set<RequiredClassNotPresent> requiredNotClassNames,
-      Set<RequiredConfiguration> requireConfigs) {
-    boolean veto = false;
-    if (isNotEmpty(requiredClassNames)) {
-      veto = requiredClassNames.stream().flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNull(tryAsClass(r)));
+  public <T> void checkRequired(
+      @WithAnnotations({RequiredClassNotPresent.class, RequiredClassPresent.class,
+          RequiredConfiguration.class}) @Observes @Priority(99999) ProcessAnnotatedType<T> event) {
+    AnnotatedType<?> type = event.getAnnotatedType();
+    if (Required.shouldVeto(type)) {
+      event.veto();
     }
-
-    if (isNotEmpty(requiredNotClassNames) && !veto) {
-      veto = requiredNotClassNames.stream().flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNotNull(tryAsClass(r)));
-    }
-
-    if (isNotEmpty(requireConfigs) && !veto) {
-      veto = requireConfigs.stream().allMatch(c -> {
-        String key = c.key();
-        if (isBlank(key)) {
-          return true;
-        }
-        Object configValue = Configs.getValue(key, c.type());
-        Object value = c.value();
-        switch (c.predicate()) {
-          case NO_BLANK:
-            return isNotBlank((String) configValue);
-          case NO_NULL:
-            return isNotNull(configValue);
-          case GTE:
-            return ((Comparable) configValue).compareTo(value) >= 0;
-          case GT:
-            return ((Comparable) configValue).compareTo(value) > 0;
-          case LT:
-            return ((Comparable) configValue).compareTo(value) < 0;
-          case LTE:
-            return ((Comparable) configValue).compareTo(value) <= 0;
-          default:
-            return areEqual(c.value(), Configs.getValue(key, c.type()));
-        }
-      });
-    }
-    return veto;
   }
 }

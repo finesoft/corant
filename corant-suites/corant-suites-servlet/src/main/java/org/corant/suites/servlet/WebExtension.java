@@ -31,6 +31,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
+import org.corant.context.required.Required;
 import org.corant.suites.servlet.metadata.WebFilterMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
 import org.corant.suites.servlet.metadata.WebServletMetaData;
@@ -85,6 +86,9 @@ public class WebExtension implements Extension, WebMetaDataProvider {
 
   void findServletMetaDatas(@Observes @WithAnnotations({
       WebServlet.class}) ProcessAnnotatedType<? extends HttpServlet> pat) {
+    if (Required.shouldVeto(pat.getAnnotatedType())) {
+      return;
+    }
     ServletSecurity servletSecurity = null;
     MultipartConfig multipartConfig = null;
     if (pat.getAnnotatedType().isAnnotationPresent(ServletSecurity.class)) {

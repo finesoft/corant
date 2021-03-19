@@ -11,6 +11,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.context.required.Required;
 
 /**
  * corant-suites-quartz-embeddable <br>
@@ -33,6 +34,9 @@ public class CorantSchedulerExtension implements Extension {
 
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
+    if (Required.shouldVeto(pat.getAnnotatedType())) {
+      return;
+    }
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
         .stream().map(CorantDeclarativeJobMetaData::of).forEach(declarativeJobMetaDatas::add);

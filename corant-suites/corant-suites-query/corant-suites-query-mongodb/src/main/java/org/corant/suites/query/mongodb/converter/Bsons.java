@@ -20,6 +20,7 @@ import org.bson.conversions.Bson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -31,10 +32,10 @@ import com.mongodb.BasicDBObject;
 public class Bsons {
 
   public static final ObjectMapper OM = new ObjectMapper();// TODO FIXME
+  public static final ObjectWriter EOW = OM.writer(JsonpCharacterEscapes.instance());
 
   public static Bson toBson(Object x) throws JsonProcessingException {
-    return x == null ? null
-        : BasicDBObject.parse(OM.writer(JsonpCharacterEscapes.instance()).writeValueAsString(x));
+    return x == null ? null : BasicDBObject.parse(EOW.writeValueAsString(x));
   }
 
   public static List<Bson> toBsons(Collection<?> x) throws JsonProcessingException {

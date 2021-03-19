@@ -28,11 +28,17 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 @ApplicationScoped
 public class DefaultQueryObjectMapper implements QueryObjectMapper {
 
-  protected ObjectMapper OM = JsonUtils.copyMapper();
+  protected ObjectMapper objectMapper = JsonUtils.copyMapper();
+  protected ObjectWriter objectWriter = objectMapper.writer();
+  protected ObjectWriter ppObjectWriter = objectMapper.writerWithDefaultPrettyPrinter();
+  protected ObjectWriter escapeObjectWriter = objectWriter.with(JsonpCharacterEscapes.instance());
+  protected ObjectWriter escapePpObjectWriter =
+      ppObjectWriter.with(JsonpCharacterEscapes.instance());
 
+  @Override
   public <T> T fromJsonString(String jsonString, Class<T> type) {
     try {
-      return OM.readValue(jsonString, type);
+      return objectMapper.readValue(jsonString, type);
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
@@ -43,12 +49,20 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     if (object == null) {
       return null;
     }
-    final ObjectWriter writer = pretty ? OM.writerWithDefaultPrettyPrinter() : OM.writer();
-    if (escape) {
-      writer.with(JsonpCharacterEscapes.instance());
-    }
     try {
-      return writer.writeValueAsString(object);
+      if (pretty) {
+        if (escape) {
+          return escapePpObjectWriter.writeValueAsString(object);
+        } else {
+          return ppObjectWriter.writeValueAsString(object);
+        }
+      } else {
+        if (escape) {
+          return escapeObjectWriter.writeValueAsString(object);
+        } else {
+          return objectWriter.writeValueAsString(object);
+        }
+      }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
@@ -63,7 +77,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
       if (type.isInstance(from)) {
         return (T) from;
       } else {
-        return OM.convertValue(from, type);
+        return objectMapper.convertValue(from, type);
       }
     }
   }

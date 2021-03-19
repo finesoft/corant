@@ -85,6 +85,17 @@ public class Strings {
   public static final String DOLLAR_LEFT_BRACE= "${";
   public static final String HASH_LEFT_BRACE  = "#{";
   public static final String CRLF             = "\r\n";
+
+  public static final String NUMBERS = "0123456789";
+  public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String UPPER_CASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+  public static final String NUMBERS_AND_LETTERS =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String NUMBERS_AND_UPPER_CASE_LETTERS =
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  public static final String NUMBERS_AND_LOWER_CASE_LETTERS =
+      "0123456789abcdefghijklmnopqrstuvwxyz";
   //@formatter:on
 
   private Strings() {}

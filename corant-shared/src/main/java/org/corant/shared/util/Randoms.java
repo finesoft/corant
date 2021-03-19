@@ -15,6 +15,13 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Strings.LETTERS;
+import static org.corant.shared.util.Strings.LOWER_CASE_LETTERS;
+import static org.corant.shared.util.Strings.NUMBERS;
+import static org.corant.shared.util.Strings.NUMBERS_AND_LETTERS;
+import static org.corant.shared.util.Strings.NUMBERS_AND_LOWER_CASE_LETTERS;
+import static org.corant.shared.util.Strings.NUMBERS_AND_UPPER_CASE_LETTERS;
+import static org.corant.shared.util.Strings.UPPER_CASE_LETTERS;
 import java.util.Random;
 
 /**
@@ -24,17 +31,8 @@ import java.util.Random;
  *
  */
 public class Randoms {
+
   private static final Random RANDOM = new Random();
-  public static final String NUMBERS = "0123456789";
-  public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  public static final String UPPER_CASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
-  public static final String NUMBERS_AND_LETTERS =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  public static final String NUMBERS_AND_UPPER_CASE_LETTERS =
-      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  public static final String NUMBERS_AND_LOWER_CASE_LETTERS =
-      "0123456789abcdefghijklmnopqrstuvwxyz";
 
   public static boolean randomBoolean() {
     return RANDOM.nextBoolean();

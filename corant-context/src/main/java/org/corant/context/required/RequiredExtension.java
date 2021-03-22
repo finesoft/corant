@@ -41,6 +41,7 @@ public class RequiredExtension implements Extension {
           RequiredConfiguration.class}) @Observes @Priority(99999) ProcessAnnotatedType<T> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
     if (Required.shouldVeto(type)) {
+      vetoes.add(event.getAnnotatedType().getJavaClass());
       event.veto();
     }
   }

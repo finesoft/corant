@@ -51,12 +51,12 @@ public class Required {
     boolean veto = false;
     if (isNotEmpty(requiredClassNames)) {
       veto = requiredClassNames.stream().flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNull(tryAsClass(r)));
+          .allMatch(r -> isNull(tryAsClass(r)));
     }
 
     if (!veto && isNotEmpty(requiredNotClassNames)) {
       veto = requiredNotClassNames.stream().flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNotNull(tryAsClass(r)));
+          .allMatch(r -> isNotNull(tryAsClass(r)));
     }
 
     if (!veto && isNotEmpty(requireConfigs)) {

@@ -12,6 +12,7 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.required.Required;
+import org.corant.shared.normal.Priorities;
 
 /**
  * corant-suites-quartz-embeddable <br>
@@ -28,7 +29,8 @@ public class CorantSchedulerExtension implements Extension {
     return Collections.unmodifiableSet(declarativeJobMetaDatas);
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) PreContainerStopEvent bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) PreContainerStopEvent bs) {
     declarativeJobMetaDatas.clear();
   }
 

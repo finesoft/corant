@@ -30,6 +30,7 @@ import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Priorities;
 
 /**
  * corant-suites-datasource-shared
@@ -61,8 +62,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
    * @param bbd onBeforeBeanDiscovery
    */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    Map<String, DataSourceConfig> configs =
-        ConfigInstances.resolveMulti(DataSourceConfig.class);
+    Map<String, DataSourceConfig> configs = ConfigInstances.resolveMulti(DataSourceConfig.class);
     configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
@@ -72,7 +72,8 @@ public abstract class AbstractDataSourceExtension implements Extension {
     }
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     configManager.destroy();
   }
 

@@ -58,6 +58,7 @@ import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManage
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.mongodb.MongoClientConfig.MongodbConfig;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClient;
@@ -181,7 +182,8 @@ public class MongoClientExtension implements Extension {
     }
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     clientConfigManager.destroy();
     databaseConfigManager.destroy();
   }

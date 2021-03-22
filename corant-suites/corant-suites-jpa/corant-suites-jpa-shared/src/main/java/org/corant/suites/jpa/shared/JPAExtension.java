@@ -47,6 +47,7 @@ import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.suites.jpa.shared.cdi.EntityManagerFactoryBean;
 import org.corant.suites.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -83,7 +84,8 @@ public class JPAExtension implements Extension {
     return Collections.unmodifiableMap(persistenceUnitInfoMetaDatas);
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     persistenceUnitInfoMetaDatas.clear();
   }
 

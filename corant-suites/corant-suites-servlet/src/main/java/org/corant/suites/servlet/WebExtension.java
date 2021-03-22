@@ -32,6 +32,7 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import org.corant.context.required.Required;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.servlet.metadata.WebFilterMetaData;
 import org.corant.suites.servlet.metadata.WebListenerMetaData;
 import org.corant.suites.servlet.metadata.WebServletMetaData;
@@ -67,7 +68,8 @@ public class WebExtension implements Extension, WebMetaDataProvider {
     return servletMetaDatas.stream();
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     listenerMetaDatas.clear();
     servletMetaDatas.clear();
     filterMetaDatas.clear();

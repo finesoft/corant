@@ -27,6 +27,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.required.Required;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.query.shared.declarative.DeclarativeQueryService;
 import org.corant.suites.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
 
@@ -44,7 +45,8 @@ public class QueryExtension implements Extension {
 
   Set<Class<?>> declarativeQueryServiceClasses = new LinkedHashSet<>();
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     declarativeQueryServiceClasses.clear();
   }
 

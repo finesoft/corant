@@ -21,6 +21,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.shared.normal.Priorities;
 
 /**
  * corant-context
@@ -36,9 +37,9 @@ public class RequiredExtension implements Extension {
     return beanType != null && vetoes.contains(beanType);
   }
 
-  public <T> void checkRequired(
-      @WithAnnotations({RequiredClassNotPresent.class, RequiredClassPresent.class,
-          RequiredConfiguration.class}) @Observes @Priority(99999) ProcessAnnotatedType<T> event) {
+  public <T> void checkRequired(@WithAnnotations({RequiredClassNotPresent.class,
+      RequiredClassPresent.class,
+      RequiredConfiguration.class}) @Observes @Priority(Priorities.FRAMEWORK_HIGHER) ProcessAnnotatedType<T> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
     if (Required.shouldVeto(type)) {
       vetoes.add(event.getAnnotatedType().getJavaClass());

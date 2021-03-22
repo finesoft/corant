@@ -40,6 +40,7 @@ import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.elastic.metadata.resolver.AbstractElasticIndexingResolver;
 import org.corant.suites.elastic.metadata.resolver.ElasticIndexingResolver;
 import org.corant.suites.elastic.service.AbstractElasticDocumentService;
@@ -115,7 +116,8 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     }
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     configManager.destroy();
     clients.clear();
   }

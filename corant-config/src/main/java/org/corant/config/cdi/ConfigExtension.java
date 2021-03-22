@@ -32,6 +32,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import org.corant.config.CorantConfigProviderResolver;
+import org.corant.shared.normal.Priorities;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
@@ -66,7 +67,8 @@ public class ConfigExtension implements Extension {
     bbd.addAnnotatedType(configBean, ConfigProducer.class.getName());
   }
 
-  synchronized void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  synchronized void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     ConfigProviderResolver cfr = ConfigProviderResolver.instance();
     if (cfr instanceof CorantConfigProviderResolver) {
       ((CorantConfigProviderResolver) cfr).clear(); // FIXME Is it necessary?

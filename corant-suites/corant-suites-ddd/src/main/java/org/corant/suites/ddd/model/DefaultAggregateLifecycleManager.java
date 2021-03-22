@@ -13,7 +13,6 @@
  */
 package org.corant.suites.ddd.model;
 
-import static javax.interceptor.Interceptor.Priority.APPLICATION;
 import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Objects.asString;
@@ -38,6 +37,7 @@ import javax.persistence.metamodel.ManagedType;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.suites.ddd.event.AggregateLifecycleManageEvent;
 import org.corant.suites.ddd.model.Aggregate.Lifecycle;
@@ -80,8 +80,8 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   }
 
   @Override
-  public void on(@Observes(during = TransactionPhase.IN_PROGRESS) @Priority(APPLICATION
-      + 1000) AggregateLifecycleManageEvent e) {
+  public void on(@Observes(
+      during = TransactionPhase.IN_PROGRESS) @Priority(Priorities.APPLICATION_HIGHER) AggregateLifecycleManageEvent e) {
     if (e.getSource() != null) {
       Aggregate entity = e.getSource();
       boolean effectImmediately = e.isEffectImmediately();

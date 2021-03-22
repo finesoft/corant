@@ -34,6 +34,7 @@ import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.required.Required;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Priorities;
 import org.corant.suites.jms.shared.annotation.MessageDispatch;
 import org.corant.suites.jms.shared.annotation.MessageReceive;
 import org.corant.suites.jms.shared.annotation.MessageSend;
@@ -76,7 +77,8 @@ public abstract class AbstractJMSExtension implements Extension {
     return Collections.unmodifiableSet(streamMethods);
   }
 
-  protected void onBeforeShutdown(@Observes @Priority(0) BeforeShutdown bs) {
+  protected void onBeforeShutdown(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     configManager.destroy();
     receiveMethods.clear();
     streamMethods.clear();

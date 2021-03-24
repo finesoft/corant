@@ -1,6 +1,9 @@
 def REVISION = 'none'
 pipeline {
   agent any
+  parameters {
+    choice(name: 'repo', choices: ['-SNAPSHOT', '.RELEASE'])
+  }
   stages {
     stage('Build') {
       agent {
@@ -12,7 +15,8 @@ pipeline {
       steps {
         script {
           def pom = readMavenPom file: 'pom.xml'
-          revision = pom.properties['revision'].replace('-SNAPSHOT','.RELEASE')
+          revision = pom.properties['revision'].replace('-SNAPSHOT','')
+          revision = revision + params.repo
           sh "mvn clean deploy -Dmaven.test.skip=true -Drevision=${revision}"
         }
       }

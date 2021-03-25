@@ -17,12 +17,12 @@ import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Randoms.SECURITY_RANDOM;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -241,7 +241,7 @@ public class Identifiers {
     }
 
     /**
-     * 
+     *
      * @return the unit
      */
     public ChronoUnit getUnit() {
@@ -595,16 +595,14 @@ public class Identifiers {
 
   public static class TimeBasedUUIDGenerator implements IdentifierGenerator {
 
-    static final SecureRandom SEC_RDM_INST = new SecureRandom();
-
     private static final byte[] SECURE_MUNGED_ADDRESS =
-        Systems.getSecureMungedAddress(SEC_RDM_INST);
+        Systems.getSecureMungedAddress(SECURITY_RANDOM);
 
     static {
       assert SECURE_MUNGED_ADDRESS.length == 6;
     }
 
-    private final AtomicInteger sequence = new AtomicInteger(SEC_RDM_INST.nextInt());
+    private final AtomicInteger sequence = new AtomicInteger(SECURITY_RANDOM.nextInt());
 
     private long lastTimestamp;
 

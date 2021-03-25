@@ -22,6 +22,7 @@ import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.split;
 import static org.corant.shared.util.Validates.isValidMacAddress;
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -31,7 +32,9 @@ import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Random;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 /**
  * corant-shared
@@ -42,6 +45,13 @@ import javax.management.ObjectName;
 public class Systems {
 
   private Systems() {}
+
+  public static void dumpHeap(String filePath, boolean live) throws IOException {
+    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+    HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(server,
+        "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+    mxBean.dumpHeap(filePath, live);
+  }
 
   public static long getAvailableMemory() {
     return Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()

@@ -22,6 +22,7 @@ import static org.corant.shared.util.Strings.NUMBERS_AND_LETTERS;
 import static org.corant.shared.util.Strings.NUMBERS_AND_LOWER_CASE_LETTERS;
 import static org.corant.shared.util.Strings.NUMBERS_AND_UPPER_CASE_LETTERS;
 import static org.corant.shared.util.Strings.UPPER_CASE_LETTERS;
+import java.security.SecureRandom;
 import java.util.Random;
 
 /**
@@ -32,7 +33,9 @@ import java.util.Random;
  */
 public class Randoms {
 
-  private static final Random RANDOM = new Random();
+  public static final SecureRandom SECURITY_RANDOM = new SecureRandom();
+
+  public static final Random RANDOM = new Random();
 
   public static boolean randomBoolean() {
     return RANDOM.nextBoolean();

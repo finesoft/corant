@@ -82,7 +82,7 @@
 		<version.jakarta.validation-api>2.0.2</version.jakarta.validation-api>
 		<version.jakarta.websocket-api>1.1.2</version.jakarta.websocket-api>
 		<version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
-		<version.javax.jaxb-api>2.3.1</version.javax.jaxb-api>
+		<version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
 		<version.jcip-annotations>1.0-1</version.jcip-annotations>
 		<version.jose4j>0.7.6</version.jose4j>
 		<version.junit>4.13.1</version.junit>
@@ -1345,7 +1345,8 @@
 				<artifactId>weld-junit5</artifactId>
 				<version>${version.weld-junit5}</version>
 			</dependency>
-			<!-- Java & Javax -->
+			
+			<!-- Java & Javax & Jakarta -->
 			<dependency>
 				<groupId>jakarta.enterprise</groupId>
 				<artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -1371,9 +1372,9 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${version.javax.jaxb-api}</version>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${version.jakarta.jaxb-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.json.bind</groupId>

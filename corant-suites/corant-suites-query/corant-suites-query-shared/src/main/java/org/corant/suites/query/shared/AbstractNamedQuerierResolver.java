@@ -31,16 +31,16 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
   protected QueryMappingService mappingService;
 
   @Inject
-  protected QueryResolver queryResolver;
+  protected QueryHandler queryResolver;
 
   @Inject
-  protected FetchQueryResolver fetchQueryResolver;
+  protected FetchQueryHandler fetchQueryResolver;
 
   /**
    *
    * @return the fetchQueryResolver
    */
-  public FetchQueryResolver getFetchQueryResolver() {
+  public FetchQueryHandler getFetchQueryResolver() {
     return fetchQueryResolver;
   }
 
@@ -56,7 +56,7 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
    *
    * @return the queryResolver
    */
-  public QueryResolver getQueryResolver() {
+  public QueryHandler getQueryResolver() {
     return queryResolver;
   }
 

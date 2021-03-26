@@ -15,9 +15,9 @@ package org.corant.suites.query.sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.dynamic.javascript.JavascriptDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -35,8 +35,8 @@ public class JavascriptSqlQuerierBuilder
    * @param queryResolver
    * @param fetchQueryResolver
    */
-  public JavascriptSqlQuerierBuilder(Query query, QueryResolver queryResolver,
-      FetchQueryResolver fetchQueryResolver) {
+  public JavascriptSqlQuerierBuilder(Query query, QueryHandler queryResolver,
+      FetchQueryHandler fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
   }
 

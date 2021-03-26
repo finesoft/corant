@@ -50,7 +50,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSour
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
-public class DefaultFetchQueryResolver implements FetchQueryResolver {
+public class DefaultFetchQueryResolver implements FetchQueryHandler {
 
   @Inject
   protected ConversionService conversionService;
@@ -73,7 +73,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   }
 
   @Override
-  public void resolveFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
+  public void handleFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
     if (result == null) {
       return;
     }
@@ -95,7 +95,7 @@ public class DefaultFetchQueryResolver implements FetchQueryResolver {
   }
 
   @Override
-  public void resolveFetchedResults(List<?> results, List<?> fetchedResults,
+  public void handleFetchedResults(List<?> results, List<?> fetchedResults,
       FetchQuery fetchQuery) {
     if (isEmpty(results)) {
       return;

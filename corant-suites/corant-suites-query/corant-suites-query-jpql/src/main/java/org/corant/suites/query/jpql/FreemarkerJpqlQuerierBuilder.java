@@ -14,9 +14,9 @@
 package org.corant.suites.query.jpql;
 
 import org.corant.shared.ubiquity.Tuple.Triple;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.suites.query.shared.mapping.Query;
@@ -35,8 +35,8 @@ public class FreemarkerJpqlQuerierBuilder
    * @param queryResolver
    * @param fetchQueryResolver
    */
-  public FreemarkerJpqlQuerierBuilder(Query query, QueryResolver queryResolver,
-      FetchQueryResolver fetchQueryResolver) {
+  public FreemarkerJpqlQuerierBuilder(Query query, QueryHandler queryResolver,
+      FetchQueryHandler fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
   }
 

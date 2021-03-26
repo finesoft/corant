@@ -53,11 +53,11 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         fetchedList = getExecutor().select(ks, cql, scriptParameter);
       }
       fetch(fetchedList, querier);
-      querier.resolveResultHints(fetchedList);
+      querier.handleResultHints(fetchedList);
       if (result instanceof List) {
-        parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
       } else {
-        parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
       }
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
@@ -87,7 +87,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         }
         this.fetch(list, querier);
       }
-      return result.withResults(querier.resolveResult(list));
+      return result.withResults(querier.handleResults(list));
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the forward query [%s].", queryName);
@@ -104,7 +104,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       log(queryName, scriptParameter, cql);
       Map<String, Object> result = getExecutor().get(ks, cql, scriptParameter);
       this.fetch(result, querier);
-      return querier.resolveResult(result);
+      return querier.handleResult(result);
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
           queryName);
@@ -133,7 +133,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         }
         this.fetch(list, querier);
       }
-      return result.withResults(querier.resolveResult(list));
+      return result.withResults(querier.handleResults(list));
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
           queryName);
@@ -160,7 +160,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         }
         this.fetch(results, querier);
       }
-      return querier.resolveResult(results);
+      return querier.handleResults(results);
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
           queryName);

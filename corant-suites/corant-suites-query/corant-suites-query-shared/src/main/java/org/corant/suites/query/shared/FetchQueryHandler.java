@@ -22,7 +22,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery;
  * @author bingo 上午10:03:39
  *
  */
-public interface FetchQueryResolver {
+public interface FetchQueryHandler {
 
   /**
    * Decide whether to fetch, generally, the parameter 'result' is a single result record. If the
@@ -50,7 +50,7 @@ public interface FetchQueryResolver {
    * @param fetchResults
    * @param fetchQuery
    */
-  void resolveFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
+  void handleFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
    * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
@@ -60,7 +60,7 @@ public interface FetchQueryResolver {
    * @param fetchResults
    * @param fetchQuery
    */
-  void resolveFetchedResults(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
+  void handleFetchedResults(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
    * Resolve fetch query parameter. Generally, the fetch query parameters are composed of parent

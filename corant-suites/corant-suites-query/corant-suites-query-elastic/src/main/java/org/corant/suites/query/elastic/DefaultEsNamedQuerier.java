@@ -20,9 +20,9 @@ import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -49,7 +49,7 @@ public class DefaultEsNamedQuerier extends
    */
   @SuppressWarnings("rawtypes")
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver,
+      QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver,
       Map<Object, Object> scriptMap) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();

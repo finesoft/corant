@@ -56,9 +56,9 @@ public interface Querier {
    * @param result
    * @param fetchedResult
    * @param fetchQuery
-   * @see FetchQueryResolver#resolveFetchedResult(Object, List, FetchQuery)
+   * @see FetchQueryHandler#handleFetchedResult(Object, List, FetchQuery)
    */
-  void resolveFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
+  void handleFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
 
   /**
    * Inject the fetched result to result list
@@ -66,9 +66,33 @@ public interface Querier {
    * @param result
    * @param fetchedResult
    * @param fetchQuery
-   * @see FetchQueryResolver#resolveFetchedResults(List, List, FetchQuery)
+   * @see FetchQueryHandler#handleFetchedResults(List, List, FetchQuery)
    */
-  void resolveFetchedResults(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
+  void handleFetchedResults(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
+
+  /**
+   * Handle result, handle hints and conversions.
+   *
+   * @param <T>
+   * @param result
+   * @see QueryHandler#handleResult(Object, Class, List, QueryParameter)
+   */
+  <T> T handleResult(Object result);
+
+  /**
+   * @param result the result to handle
+   * @see QueryHandler#handleResultHints(Object, Class, List, QueryParameter)
+   */
+  void handleResultHints(Object result);
+
+  /**
+   * Handle result list, handle hints and conversions.
+   *
+   * @param <T>
+   * @param results
+   * @see QueryHandler#handleResults(List, Class, List, QueryParameter)
+   */
+  <T> List<T> handleResults(List<?> results);
 
   /**
    * Resolve fetch query parameter, merge parent querier criteria.
@@ -78,28 +102,4 @@ public interface Querier {
    * @see QueryParameterResolver#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
    */
   QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery);
-
-  /**
-   * Resolve result, handle hints and conversions.
-   *
-   * @param <T>
-   * @param results
-   * @see QueryResolver#resolveResults(List, Class, List, QueryParameter)
-   */
-  <T> List<T> resolveResult(List<?> results);
-
-  /**
-   * Resolve result, handle hints and conversions.
-   *
-   * @param <T>
-   * @param result
-   * @see QueryResolver#resolveResult(Object, Class, List, QueryParameter)
-   */
-  <T> T resolveResult(Object result);
-
-  /**
-   * @param result resolveResultHints
-   * @see QueryResolver#resolveResultHints(Object, Class, List, QueryParameter)
-   */
-  void resolveResultHints(Object result);
 }

@@ -40,7 +40,7 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
 
 @ApplicationScoped
 // @Alternative
-public class DefaultQueryResolver implements QueryResolver {
+public class DefaultQueryHandler implements QueryHandler {
 
   @Inject
   protected Logger logger;
@@ -83,19 +83,19 @@ public class DefaultQueryResolver implements QueryResolver {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T resolveResult(Object result, Class<T> resultClass, List<QueryHint> hints,
+  public <T> T handleResult(Object result, Class<T> resultClass, List<QueryHint> hints,
       QueryParameter parameter) {
     if (result == null) {
       return null;
     } else {
-      resolveResultHints(result, resultClass, hints, parameter);
+      handleResultHints(result, resultClass, hints, parameter);
       return Map.class.isAssignableFrom(resultClass) ? (T) result
           : convertRecord(result, resultClass);
     }
   }
 
   @Override
-  public void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+  public void handleResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
       QueryParameter parameter) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       hints.forEach(qh -> {
@@ -117,10 +117,10 @@ public class DefaultQueryResolver implements QueryResolver {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> resolveResults(List<Object> results, Class<T> resultClass,
+  public <T> List<T> handleResults(List<Object> results, Class<T> resultClass,
       List<QueryHint> hints, QueryParameter parameter) {
     if (!isEmpty(results)) {
-      resolveResultHints(results, resultClass, hints, parameter);
+      handleResultHints(results, resultClass, hints, parameter);
       final boolean needConvert = !Map.class.isAssignableFrom(resultClass);
       results.replaceAll(e -> needConvert ? convertRecord(e, resultClass) : (T) e);
     }

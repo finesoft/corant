@@ -16,9 +16,9 @@ package org.corant.suites.query.shared.dynamic;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.List;
 import java.util.Map;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.mapping.FetchQuery;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -31,28 +31,28 @@ import org.corant.suites.query.shared.mapping.Query;
 public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
 
   protected final Query query;
-  protected final QueryResolver queryResolver;
-  protected final FetchQueryResolver fetchQueryResolver;
+  protected final QueryHandler queryHandler;
+  protected final FetchQueryHandler fetchQueryHandler;
   protected final QueryParameter queryParameter;
 
   /**
    * @param query
    * @param queryParameter
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param queryHandler
+   * @param fetchQueryHandler
    */
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver) {
+      QueryHandler queryHandler, FetchQueryHandler fetchQueryHandler) {
     super();
     this.query = query;
     this.queryParameter = queryParameter;
-    this.queryResolver = queryResolver;
-    this.fetchQueryResolver = fetchQueryResolver;
+    this.queryHandler = queryHandler;
+    this.fetchQueryHandler = fetchQueryHandler;
   }
 
   @Override
   public boolean decideFetch(Object result, FetchQuery fetchQuery) {
-    return fetchQueryResolver.canFetch(result, queryParameter, fetchQuery);
+    return fetchQueryHandler.canFetch(result, queryParameter, fetchQuery);
   }
 
   @Override
@@ -66,36 +66,36 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
-  public void resolveFetchedResult(Object result, List<?> fetchResult, FetchQuery fetchQuery) {
-    fetchQueryResolver.resolveFetchedResult(result, fetchResult, fetchQuery);
+  public void handleFetchedResult(Object result, List<?> fetchResult, FetchQuery fetchQuery) {
+    fetchQueryHandler.handleFetchedResult(result, fetchResult, fetchQuery);
   }
 
   @Override
-  public void resolveFetchedResults(List<?> results, List<?> fetchResult, FetchQuery fetchQuery) {
-    fetchQueryResolver.resolveFetchedResults(results, fetchResult, fetchQuery);
+  public void handleFetchedResults(List<?> results, List<?> fetchResult, FetchQuery fetchQuery) {
+    fetchQueryHandler.handleFetchedResults(results, fetchResult, fetchQuery);
   }
 
   @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery) {
-    return fetchQueryResolver.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
+    return fetchQueryHandler.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> resolveResult(List<?> results) {
-    return queryResolver.resolveResults((List<Object>) results,
+  public <T> List<T> handleResults(List<?> results) {
+    return queryHandler.handleResults((List<Object>) results,
         forceCast(getQuery().getResultClass()), getQuery().getHints(), getQueryParameter());
   }
 
   @Override
-  public <T> T resolveResult(Object result) {
-    return queryResolver.resolveResult(result, forceCast(getQuery().getResultClass()),
+  public <T> T handleResult(Object result) {
+    return queryHandler.handleResult(result, forceCast(getQuery().getResultClass()),
         getQuery().getHints(), getQueryParameter());
   }
 
   @Override
-  public void resolveResultHints(Object result) {
-    queryResolver.resolveResultHints(result, Map.class, getQuery().getHints(),
+  public void handleResultHints(Object result) {
+    queryHandler.handleResultHints(result, Map.class, getQuery().getHints(),
         getQueryParameter());// FIXME map class
   }
 

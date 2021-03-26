@@ -14,9 +14,9 @@
 package org.corant.suites.query.cassandra;
 
 import java.util.Map;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
 
@@ -42,7 +42,7 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
    * @param script
    */
   protected DefaultCasNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver, Object[] scriptParameter,
+      QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();

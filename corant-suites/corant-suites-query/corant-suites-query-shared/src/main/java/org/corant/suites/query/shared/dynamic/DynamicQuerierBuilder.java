@@ -13,7 +13,7 @@
  */
 package org.corant.suites.query.shared.dynamic;
 
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.mapping.Query;
 
 /**
@@ -30,6 +30,6 @@ public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 
   Query getQuery();
 
-  QueryResolver getQueryResolver();
+  QueryHandler getQueryResolver();
 
 }

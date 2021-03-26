@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.corant.suites.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.suites.query.mongodb.converter.Bsons;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.suites.query.shared.mapping.Query;
@@ -53,7 +53,7 @@ public class DefaultMgNamedQuerier
    * @param originalScript
    */
   protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
-      QueryResolver queryResolver, FetchQueryResolver fetchQueryResolver, Map<?, ?> mgQuery,
+      QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Map<?, ?> mgQuery,
       String originalScript) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();

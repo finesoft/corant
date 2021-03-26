@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import org.corant.shared.ubiquity.Tuple.Triple;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.suites.query.shared.dynamic.DynamicQuerier;
@@ -56,8 +56,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
    * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected FreemarkerDynamicQuerierBuilder(Query query, QueryResolver queryResolver,
-      FetchQueryResolver fetchQueryResolver) {
+  protected FreemarkerDynamicQuerierBuilder(Query query, QueryHandler queryResolver,
+      FetchQueryHandler fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
     try {
       String scriptSource =

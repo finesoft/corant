@@ -116,7 +116,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         streamOf(ai).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
             .collect(Collectors.toList());
     this.fetch(list, querier);
-    return querier.resolveResult(list);
+    return querier.handleResults(list);
   }
 
   @Override
@@ -129,11 +129,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
     List<Map<String, Object>> fetchedList = listOf(fi);// streamOf(fi).collect(Collectors.toList());
     fetch(fetchedList, querier);
-    querier.resolveResultHints(fetchedList);
+    querier.handleResultHints(fetchedList);
     if (result instanceof List) {
-      parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
+      parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
     } else {
-      parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+      parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
     }
   }
 
@@ -156,7 +156,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
       this.fetch(list, querier);
     }
-    return result.withResults(querier.resolveResult(list));
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
@@ -167,7 +167,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Map<String, Object> result =
         convertDocument(fi.iterator().tryNext(), querier, isAutoSetIdField(querier));
     this.fetch(result, querier);
-    return querier.resolveResult(result);
+    return querier.handleResult(result);
   }
 
   @Override
@@ -190,7 +190,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
       this.fetch(list, querier);
     }
-    return result.withResults(querier.resolveResult(list));
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
@@ -211,7 +211,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
       this.fetch(list, querier);
     }
-    return querier.resolveResult(list);
+    return querier.handleResults(list);
   }
 
   protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
@@ -390,7 +390,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           list.add(it.next());
         }
         fetch(list, querier);
-        return Forwarding.of(querier.resolveResult(list), it.hasNext());
+        return Forwarding.of(querier.handleResults(list), it.hasNext());
       }
 
       private void initialize() {

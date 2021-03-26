@@ -16,9 +16,9 @@ package org.corant.suites.query.elastic;
 import java.io.IOException;
 import java.util.Map;
 import org.corant.shared.ubiquity.Tuple.Triple;
-import org.corant.suites.query.shared.FetchQueryResolver;
+import org.corant.suites.query.shared.FetchQueryHandler;
 import org.corant.suites.query.shared.QueryParameter;
-import org.corant.suites.query.shared.QueryResolver;
+import org.corant.suites.query.shared.QueryHandler;
 import org.corant.suites.query.shared.QueryRuntimeException;
 import org.corant.suites.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.suites.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
@@ -41,8 +41,8 @@ public class FreemarkerEsQuerierBuilder extends
    * @param queryResolver
    * @param fetchQueryResolver
    */
-  protected FreemarkerEsQuerierBuilder(Query query, QueryResolver queryResolver,
-      FetchQueryResolver fetchQueryResolver) {
+  protected FreemarkerEsQuerierBuilder(Query query, QueryHandler queryResolver,
+      FetchQueryHandler fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
   }
 

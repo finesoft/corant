@@ -46,7 +46,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     try {
       Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(querier),
           script, querier.getQuery().getProperties());
-      querier.resolveResultHints(result);
+      querier.handleResultHints(result);
       return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
@@ -66,11 +66,11 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
       fetch(fetchedList, querier);
-      querier.resolveResultHints(fetchedList);
+      querier.handleResultHints(fetchedList);
       if (result instanceof List) {
-        parentQuerier.resolveFetchedResults((List<?>) result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
       } else {
-        parentQuerier.resolveFetchedResult(result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
       }
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
@@ -121,7 +121,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
           .scrolledSearch(resolveIndexName(querier), script, scrollKeepAlive, batchSize)
           .map(result -> {
             this.fetch(result, querier);
-            return querier.resolveResult(result);
+            return querier.handleResult(result);
           });
     } catch (Exception e) {
       throw new QueryRuntimeException(e);
@@ -135,7 +135,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     try {
       Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script,
           querier.getQuery().getProperties());
-      querier.resolveResultHints(result);
+      querier.handleResultHints(result);
       return result;
     } catch (Exception e) {
       throw new QueryRuntimeException(e, "An error occurred while executing the search query [%s].",
@@ -181,7 +181,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       List<T> result = new ArrayList<>();
       if (!isEmpty(hits.getValue())) {
         this.fetch(hits.getValue(), querier);
-        result = querier.resolveResult(hits.getValue());
+        result = querier.handleResults(hits.getValue());
       }
       return Pair.of(hits.getLeft(), result);
     } catch (Exception e) {

@@ -24,7 +24,7 @@ import org.corant.suites.query.shared.spi.ResultHintHandler;
  * @author bingo 下午4:56:52
  *
  */
-public interface QueryResolver {
+public interface QueryHandler {
 
   /**
    * Return the QueryObjectMapper to process result type conversion or query script conversion.
@@ -34,48 +34,38 @@ public interface QueryResolver {
   QueryObjectMapper getObjectMapper();
 
   /**
-   * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
-   * return it.
-   *
-   * @param query
-   * @param parameter
-   * @return query parameter
-   */
-  QueryParameter resolveParameter(Query query, Object parameter);
-
-  /**
-   * Resolve single result {@link #resolveResult(List, Class, List, QueryParameter)}
+   * Handle single result {@link #handleResults(List, Class, List, QueryParameter)}
    *
    * @param <T> the result class
    * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>
    * @param resultClass
    * @param hints
    * @param parameter
-   * @return resolve
+   *
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
    */
-  <T> T resolveResult(Object result, Class<T> resultClass, List<QueryHint> hints,
+  <T> T handleResult(Object result, Class<T> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
 
   /**
-   * Resolve query hints, in this step the result set may be adjusted or inserted with certain
+   * Handle query hints, in this step the result set may be adjusted or inserted with certain
    * values.
    *
    * @param result
    * @param resultClass
    * @param hints
-   * @param parameter resolveResultHints
+   * @param parameter
    */
-  void resolveResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+  void handleResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
 
   /**
-   * Resolve result list, The steps are as follows:
+   * Handle result list, The steps are as follows:
    *
    * <pre>
-   * 1.Resolve query hints, in this step the result set may be adjusted or inserted with
+   * 1.Handle query hints, in this step the result set may be adjusted or inserted with
    * certain values.
    *
    * 2.Convert result by result class.
@@ -86,11 +76,22 @@ public interface QueryResolver {
    * @param resultClass
    * @param hints
    * @param parameter
-   * @return resolve
+   *
+   *
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
    */
-  <T> List<T> resolveResults(List<Object> results, Class<T> resultClass, List<QueryHint> hints,
+  <T> List<T> handleResults(List<Object> results, Class<T> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
+
+  /**
+   * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
+   * return it.
+   *
+   * @param query
+   * @param parameter
+   * @return query parameter
+   */
+  QueryParameter resolveParameter(Query query, Object parameter);
 }

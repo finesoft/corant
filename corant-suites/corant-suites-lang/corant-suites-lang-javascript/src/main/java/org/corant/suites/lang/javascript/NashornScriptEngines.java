@@ -183,7 +183,7 @@ public class NashornScriptEngines {
   public static ScriptEngine createEngine() {
     // -doe Dump a stack trace on errors.
     // --global-per-engine Use single Global instance per script engine instance
-    return createEngine("-doe", "--global-per-engine");
+    return createEngine("-doe", "--global-per-engine", "--no-deprecation-warning");
   }
 
   /**

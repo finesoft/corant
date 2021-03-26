@@ -40,9 +40,10 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
-import org.corant.kernel.jmx.Power;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.jmx.Power;
+import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -134,9 +135,10 @@ import org.corant.shared.util.Strings;
  */
 public class Corant implements AutoCloseable {
 
-  public static final String DISABLE_BOOST_LINE_CMD = "-disable_boost-line";
-  public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before-start-handler";
-  public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after-started-handler";
+  public static final String DISABLE_BOOST_LINE_CMD = "-disable_boost_line";
+  public static final String ENABLE_ACCESS_WARNINGS = "-enable_access_warnings";
+  public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before_start_handler";
+  public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after_started_handler";
   public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
   public static final String POWER_MBEAN_NAME = applicationName() + ":type=kernel,name=Power";
 
@@ -577,6 +579,9 @@ public class Corant implements AutoCloseable {
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
     stopWatch
         .start("Starting " + applicationName() + ", the pre-start SPI processing is completed");
+    if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
+      LoggerFactory.disableAccessWarnings();
+    }
     if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }

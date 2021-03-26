@@ -56,9 +56,7 @@ import org.corant.shared.exception.NotSupportedException;
  */
 public class Conversions {
 
-  private Conversions() {
-    super();
-  }
+  private Conversions() {}
 
   /**
    * Convert an object to array, only supports array object or collection object as source.
@@ -522,14 +520,16 @@ public class Conversions {
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz) {
-    if (clazz != null && clazz.isArray()) {
+    if (clazz != null && clazz.isArray()
+        && (obj instanceof Object[] || obj instanceof Collection)) {
       return forceCast(toArray(obj, clazz.getComponentType()));
     }
     return Conversion.convert(obj, clazz);
   }
 
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (clazz != null && clazz.isArray()) {
+    if (clazz != null && clazz.isArray()
+        && (obj instanceof Object[] || obj instanceof Collection)) {
       return forceCast(toArray(obj, clazz.getComponentType(), hints));
     }
     return Conversion.convert(obj, clazz, hints);

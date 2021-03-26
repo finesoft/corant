@@ -24,6 +24,7 @@ import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
 import org.corant.shared.util.Types;
@@ -77,8 +79,8 @@ public class ConverterRegistry {
    * @param converter deregister
    */
   public static synchronized <S, T> void deregister(Converter<S, T> converter) {
-    Type[] type = resolveTypes(converter);
-    deregister(ConverterType.of((Class) type[0], (Class) type[1])); // FIXME consider other ways
+    Class[] type = resolveTypes(converter);
+    deregister(ConverterType.of(type[0], type[1])); // FIXME consider other ways
   }
 
   /**
@@ -130,8 +132,8 @@ public class ConverterRegistry {
    * @param converter register
    */
   public static synchronized <S, T> void register(Converter<S, T> converter) {
-    Type[] types = resolveTypes(converter);
-    register((Class) types[0], (Class) types[1], converter);
+    Class[] types = resolveTypes(converter);
+    register(types[0], types[1], converter);
   }
 
   /**
@@ -262,12 +264,12 @@ public class ConverterRegistry {
     }
   }
 
-  static Type[] resolveTypes(Converter<?, ?> converter) {
-    Type[] types =
-        Types.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class);
-    shouldBeTrue(types.length == 2 && types[0] instanceof Class && types[1] instanceof Class,
-        "The converter %s parametered type must be actual type!", converter.toString());
-    return types;
+  static Class[] resolveTypes(Converter<?, ?> converter) {
+    Class[] classes = resolveClasses(
+        Types.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class));
+    shouldBeTrue(classes.length == 2, "The converter %s parametered type must be actual type!",
+        converter.toString());
+    return classes;
   }
 
   static Type[] resolveTypes(ConverterFactory<?, ?> converterFactory) {
@@ -290,5 +292,18 @@ public class ConverterRegistry {
   private static void removeNotSupportType(ConverterType<?, ?> converterType) {
     NOT_SUPPORT_TYPES.removeIf(
         p -> Converters.match(p, converterType.getSourceClass(), converterType.getTargetClass()));
+  }
+
+  private static Class[] resolveClasses(Type[] types) {
+    Class[] classes = new Class<?>[types.length];
+    int i = 0;
+    for (Type type : types) {
+      Class<?> typeClass = Classes.getClass(type);
+      if (typeClass != null) {
+        classes[i] = typeClass;
+        i++;
+      }
+    }
+    return Arrays.copyOf(classes, i);
   }
 }

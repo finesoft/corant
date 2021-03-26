@@ -18,8 +18,11 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -47,9 +50,7 @@ public class Classes {
   public static final float CLASS_VERSION =
       Float.parseFloat(System.getProperty("java.class.version"));
 
-  private Classes() {
-    super();
-  }
+  private Classes() {}
 
   /**
    * Convert the class name string to Class using {@code classLoader}
@@ -213,10 +214,27 @@ public class Classes {
   }
 
   public static Set<Class<?>> getAllSuperclassesAndInterfaces(final Class<?> clazz) {
-    Set<Class<?>> set = new LinkedHashSet<>();
-    set.addAll(getAllSuperClasses(clazz));
+    Set<Class<?>> set = new LinkedHashSet<>(getAllSuperClasses(clazz));
     set.addAll(getAllInterfaces(clazz));
     return set;
+  }
+
+  public static Class<?> getClass(Type type) {
+    if (type instanceof Class<?>) {
+      return (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      return getClass(((ParameterizedType) type).getRawType());
+    } else if (type instanceof GenericArrayType) {
+      Type componentType = ((GenericArrayType) type).getGenericComponentType();
+      Class<?> componentClass = getClass(componentType);
+      if (componentClass != null) {
+        return Array.newInstance(componentClass, 0).getClass();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   /**

@@ -23,6 +23,7 @@ org.corant.shared.conversion.converter.StringBigIntegerConverter
 org.corant.shared.conversion.converter.StringBooleanConverter
 org.corant.shared.conversion.converter.StringByteConverter
 org.corant.shared.conversion.converter.StringCharacterConverter
+org.corant.shared.conversion.converter.StringCharArrayConverter
 org.corant.shared.conversion.converter.StringCharsetConverter
 org.corant.shared.conversion.converter.StringCurrencyConverter
 org.corant.shared.conversion.converter.StringDoubleConverter

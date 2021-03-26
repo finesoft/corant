@@ -156,7 +156,7 @@ public class CorantConfigConversion implements Serializable {
       }
 
       try {
-        if (typeClass.isArray()) {
+        if (typeClass.isArray() && !typeClass.equals(char[].class)) {
           if (!parameterized) {
             result = convertArray(rawValue, typeClass.getComponentType());
           } else {

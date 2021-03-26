@@ -28,6 +28,7 @@ import static org.corant.shared.util.Conversions.toShort;
 import static org.corant.shared.util.Conversions.toTimeZone;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.junit.Assert.assertArrayEquals;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -239,6 +240,12 @@ public class ConversionsTest extends TestCase {
         }
       }
     });
+  }
+
+  @Test
+  public void testStringCharArray() {
+    String str = "bingo";
+    assertArrayEquals(toObject(str, char[].class), str.toCharArray());
   }
 
   @Test

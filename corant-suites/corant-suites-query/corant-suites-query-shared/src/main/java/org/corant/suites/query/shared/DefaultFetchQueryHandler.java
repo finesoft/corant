@@ -50,7 +50,7 @@ import org.corant.suites.query.shared.mapping.FetchQuery.FetchQueryParameterSour
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
-public class DefaultFetchQueryResolver implements FetchQueryHandler {
+public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @Inject
   protected ConversionService conversionService;

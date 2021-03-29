@@ -74,7 +74,7 @@ import org.corant.suites.query.shared.mapping.QueryHint.QueryHintParameter;
  * </pre>
  * </p>
  *
- * @see ResultMapperResolver
+ * @see ResultScriptMapperHintHandler
  *
  * @author bingo 下午12:02:08
  *

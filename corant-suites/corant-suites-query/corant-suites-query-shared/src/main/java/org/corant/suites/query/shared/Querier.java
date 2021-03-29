@@ -99,7 +99,7 @@ public interface Querier {
    *
    * @param result
    * @param fetchQuery
-   * @see QueryParameterResolver#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
+   * @see FetchQueryHandler#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
    */
   QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery);
 }

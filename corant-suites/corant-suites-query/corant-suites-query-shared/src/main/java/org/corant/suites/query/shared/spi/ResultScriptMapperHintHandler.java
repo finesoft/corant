@@ -69,7 +69,7 @@ import org.corant.suites.query.shared.mapping.QueryHint;
  * </pre>
  * </p>
  *
- * @see ResultMapperResolver
+ * @see ResultBeanMapperHintHandler
  *
  * @author bingo 下午12:02:08
  *

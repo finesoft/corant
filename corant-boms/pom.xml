@@ -11,7 +11,7 @@
 	<artifactId>corant-boms</artifactId>
 	<properties>
 
-		<version.agroal>1.9</version.agroal>
+		<version.agroal>1.10</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
@@ -59,7 +59,7 @@
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>3.4.5</version.hikariCP>
 		<version.icu4j>67.1</version.icu4j>
-		<version.jackson>2.12.1</version.jackson>
+		<version.jackson>2.12.2</version.jackson>
 		<version.jandex>2.2.3.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javassist>3.27.0.GA</version.javassist>
@@ -117,7 +117,7 @@
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 		<version.ojdbc8>19.8.0.0</version.ojdbc8>
-		<version.narayana>5.10.6.Final</version.narayana>
+		<version.narayana>5.11.0.Final</version.narayana>
 		<version.netty>4.1.52.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
 		<version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>

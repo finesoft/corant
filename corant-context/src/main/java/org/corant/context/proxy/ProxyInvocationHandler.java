@@ -112,15 +112,4 @@ public class ProxyInvocationHandler implements InvocationHandler {
   public String toString() {
     return "Corant proxy for ".concat(clazz.getName());
   }
-
-  /**
-   * corant-suites-cdi
-   *
-   * @author bingo 上午10:38:27
-   *
-   */
-  @FunctionalInterface
-  public interface MethodInvoker {
-    Object invoke(Object target, Object[] args);
-  }
 }

@@ -101,6 +101,12 @@ public class PropertyMessageSource implements MessageSource {
     load();
   }
 
+  protected synchronized void clear() {
+    holder.forEach((k, v) -> v.clear());
+    holder.clear();
+    initialized = false;
+  }
+
   protected boolean isInitialized() {
     return initialized;
   }
@@ -110,7 +116,8 @@ public class PropertyMessageSource implements MessageSource {
       synchronized (this) {
         if (!isInitialized()) {
           try {
-            onPreDestroy();
+            clear();
+            logger.fine(() -> "Clear property message bundle holder for initializing.");
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
@@ -142,10 +149,7 @@ public class PropertyMessageSource implements MessageSource {
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
-    holder.forEach((k, v) -> v.clear());
-    holder.clear();
-    initialized = false;
+    clear();
     logger.fine(() -> "Clear property message bundle holder.");
   }
-
 }

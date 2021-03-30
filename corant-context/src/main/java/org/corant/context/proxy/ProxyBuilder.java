@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.enterprise.inject.spi.BeanManager;
-import org.corant.context.proxy.ProxyInvocationHandler.MethodInvoker;
 
 /**
  * corant-context

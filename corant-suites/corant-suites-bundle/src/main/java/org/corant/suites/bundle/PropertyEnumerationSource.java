@@ -91,6 +91,15 @@ public class PropertyEnumerationSource implements EnumerationSource {
     load();
   }
 
+  protected synchronized void clear() {
+    holder.forEach((k, v) -> {
+      v.classLiteral.clear();
+      v.enumLiterals.clear();
+    });
+    holder.clear();
+    initialized = false;
+  }
+
   protected boolean isInitialized() {
     return initialized;
   }
@@ -101,7 +110,8 @@ public class PropertyEnumerationSource implements EnumerationSource {
       synchronized (this) {
         if (!isInitialized()) {
           try {
-            onPreDestroy();
+            clear();
+            logger.fine(() -> "Clear property enumerations bundle holder for initializing.");
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(Strings::isNotBlank).forEach(path -> {
               PropertyResourceBundle.getBundles(path, r -> true).forEach((s, res) -> {
@@ -150,12 +160,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
-    holder.forEach((k, v) -> {
-      v.classLiteral.clear();
-      v.enumLiterals.clear();
-    });
-    holder.clear();
-    initialized = false;
+    clear();
     logger.fine(() -> "Clear property enumerations bundle holder.");
   }
 

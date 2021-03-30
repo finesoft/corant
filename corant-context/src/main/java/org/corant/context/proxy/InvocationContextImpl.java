@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.interceptor.InvocationContext;
-import org.corant.context.proxy.ProxyInvocationHandler.MethodInvoker;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**

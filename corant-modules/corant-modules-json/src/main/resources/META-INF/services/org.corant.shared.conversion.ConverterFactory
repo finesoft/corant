@@ -1,0 +1,2 @@
+org.corant.modules.json.converter.JacksonJPATupleObjectConverterFactory
+org.corant.modules.json.converter.JsonNumberNumberConverterFactory

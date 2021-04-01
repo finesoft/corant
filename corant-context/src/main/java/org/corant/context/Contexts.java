@@ -14,7 +14,10 @@
 package org.corant.context;
 
 import static org.corant.context.Instances.tryResolve;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +51,19 @@ public class Contexts {
       Configs.getValue("context.propagate.strictly", Boolean.class, Boolean.FALSE);
 
   /**
+   * Returns whether there is an active context for all given scope types.
+   *
+   * @param scopeTypes
+   * @return areContextsActive
+   */
+  public static boolean areContextsActive(
+      @SuppressWarnings("unchecked") Class<? extends Annotation>... scopeTypes) {
+    final WeldManager wm;
+    return isNotEmpty(scopeTypes) && (wm = tryResolve(WeldManager.class)) != null
+        && Arrays.stream(scopeTypes).allMatch(wm::isContextActive);
+  }
+
+  /**
    * Captures a snapshot of the set of contextual instances for the currently active
    * WeldAlterableContexts for the Request, Session, and Conversation scope.
    *
@@ -61,11 +77,11 @@ public class Contexts {
    * Captures a snapshot of the set of contextual instances for the currently active
    * WeldAlterableContexts for the Request, Session, and Conversation scope.
    *
-   * @param wt
+   * @param weldManager
    * @return capture
    */
-  public static ContextSnapshot capture(WeldManager wt) {
-    return wt == null ? ContextSnapshot.EMPTY_INST : new ContextSnapshot(wt);
+  public static ContextSnapshot capture(WeldManager weldManager) {
+    return weldManager == null ? ContextSnapshot.EMPTY_INST : new ContextSnapshot(weldManager);
   }
 
   public static ContextInstaller createInstaller(boolean propagate) {
@@ -74,6 +90,18 @@ public class Contexts {
 
   public static ContextInstaller createInstaller(boolean propagate, WeldManager manager) {
     return new ContextInstaller(propagate, manager);
+  }
+
+  /**
+   * Returns whether there is an active context for a given scope type.
+   *
+   * @param scopeType
+   * @return isContextActive
+   */
+  public static boolean isContextActive(Class<? extends Annotation> scopeType) {
+    final WeldManager wm;
+    return scopeType != null && (wm = tryResolve(WeldManager.class)) != null
+        && wm.isContextActive(scopeType);
   }
 
   /**

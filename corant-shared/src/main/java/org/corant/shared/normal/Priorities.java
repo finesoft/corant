@@ -25,8 +25,8 @@ public interface Priorities {
   int APPLICATION_LOWER = 2999;
   int FRAMEWORK_HIGHER = 200;
   int FRAMEWORK_LOWER = 5000;
-  int SUITES_HIGHER = 1000;
-  int SUITES_LOWER = 3000;
+  int MODULES_HIGHER = 1000;
+  int MODULES_LOWER = 3000;
 
   interface ConfigPriorities {
     int FRAMEWORK_DEFAULTS_ORDINAL = -1000;

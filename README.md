@@ -41,9 +41,9 @@ Container, context and concurrent processing module, providing some convenient c
 and managed executor service. This module will be fully compatible with microprofile-context-propagation 
 in the future.
 ```
-### 8. corant-suites
+### 8. corant-modules
 ```text
-Integration project. This project includes many subprojects, integrate JEE or other open source
+Extension project. This project includes many subprojects, integrate JEE or other open source
  components to make integration and development easier.
 Currently we have supported specifications JTA/JPA/JMS/JNDI/JAXRS/SERVLET/JCACHE/MICROPROFILES ,etc.,
 supported components or frameworks include ElasticSearch/Mongodb/Redis/Undertow, etc.,
@@ -75,7 +75,7 @@ Learn how to create a Hello World app quickly and efficiently.
 ```
 <dependency>
     <groupId>org.corant</groupId>
-    <artifactId>corant-suites-webserver-undertow</artifactId>
+    <artifactId>corant-modules-webserver-undertow</artifactId>
     <version>${version.corant}</version>
 </dependency>
 ```
@@ -93,7 +93,7 @@ public class App  {
 ```
 <dependency>
     <groupId>org.corant</groupId>
-    <artifactId>corant-suites-jaxrs-resteasy</artifactId>
+    <artifactId>corant-modules-jaxrs-resteasy</artifactId>
     <version>${version.corant}</version>
 </dependency>
 ```

@@ -1,9 +1,0 @@
-org.corant.suites.query.mongodb.converter.LongBsonDateTimeConverter
-org.corant.suites.query.mongodb.converter.LongBsonTimeStampConverter
-org.corant.suites.query.mongodb.converter.MapBsonRegexConverter
-org.corant.suites.query.mongodb.converter.StringBsonObjectIdConverter
-org.corant.suites.query.mongodb.converter.StringBsonRegexConverter
-org.corant.suites.query.mongodb.converter.TemporalBsonDateTimeConverter
-org.corant.suites.query.mongodb.converter.StringBsonDbPointerConverter
-org.corant.suites.query.mongodb.converter.StringDBRefConverter
-org.corant.suites.query.mongodb.converter.StringBsonSymbolConverter

@@ -18,11 +18,14 @@ import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashMap;
 import java.util.Map;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.persistence.EntityManagerFactory;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.modules.jta.shared.TransactionService;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
@@ -46,6 +49,9 @@ public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenc
     if (emf == null) {
       Map thePros = properties == null ? new HashMap<>() : new HashMap<>(properties);
       HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach((k, v) -> thePros.putIfAbsent(k, v));
+      thePros.put(AvailableSettings.JTA_PLATFORM,
+          new JTAPlatform(resolve(TransactionService.class)));
+      thePros.put(AvailableSettings.CDI_BEAN_MANAGER, resolve(BeanManager.class));
       EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, thePros);
       if (builder != null) {
         return builder.build();

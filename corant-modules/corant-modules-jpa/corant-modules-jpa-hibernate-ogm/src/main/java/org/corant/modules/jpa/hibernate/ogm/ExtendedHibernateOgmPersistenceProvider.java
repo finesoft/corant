@@ -18,10 +18,13 @@ import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.persistence.EntityManagerFactory;
+import org.corant.modules.jpa.hibernate.orm.JTAPlatform;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.modules.jta.shared.TransactionService;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
@@ -45,6 +48,9 @@ public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersist
     EntityManagerFactory emf = super.createEntityManagerFactory(persistenceUnitName, properties);
     if (emf == null) {
       Map thePros = properties == null ? new HashMap<>() : new HashMap<>(properties);
+      thePros.put(AvailableSettings.JTA_PLATFORM,
+          new JTAPlatform(resolve(TransactionService.class)));
+      thePros.put(AvailableSettings.CDI_BEAN_MANAGER, resolve(BeanManager.class));
       HibernateJPAOgmProvider.DEFAULT_MONGODB_PROPERTIES.forEach((k, v) -> {
         thePros.putIfAbsent(k, v);
       });

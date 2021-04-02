@@ -44,7 +44,7 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "query.sql.mapping-file.paths")
+  @ConfigProperty(name = "corant.query.sql.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
 
   @Override

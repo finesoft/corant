@@ -13,10 +13,20 @@
  */
 package org.corant.modules.jpa.hibernate.ogm;
 
+import static org.corant.context.Instances.resolve;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
-import org.corant.modules.jpa.hibernate.orm.ExtendedHibernateOrmPersistenceProvider;
+import org.corant.modules.jpa.shared.JPAExtension;
+import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
+import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
+import org.hibernate.jpa.boot.spi.Bootstrap;
+import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
+import org.hibernate.ogm.cfg.OgmProperties;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 
 /**
@@ -27,17 +37,38 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  */
 public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersistence {
 
-  final HibernatePersistenceProvider extendedDelegate =
-      new ExtendedHibernateOrmPersistenceProvider();
-
   @Override
   public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName,
       @SuppressWarnings("rawtypes") Map properties) {
     EntityManagerFactory emf = super.createEntityManagerFactory(persistenceUnitName, properties);
     if (emf == null) {
-      // TODO
+      EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, properties);
+      if (builder != null) {
+        return builder.build();
+      }
     }
     return emf;
   }
 
+  @SuppressWarnings("unchecked")
+  protected EntityManagerFactoryBuilder resolveBuilder(String persistenceUnitName,
+      @SuppressWarnings("rawtypes") Map map) {
+    PersistenceUnitInfoMetaData pui = resolve(JPAExtension.class)
+        .getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(persistenceUnitName));
+    if (pui != null
+        && pui.getPersistenceProviderClassName().equals(HibernateOgmPersistence.class.getName())) {
+      Map<?, ?> integration =
+          map == null ? Collections.emptyMap() : Collections.unmodifiableMap(map);
+      Map<Object, Object> protectiveCopy = new HashMap<Object, Object>(integration);
+      protectiveCopy.put(AvailableSettings.DATASOURCE, "---PlaceHolderDSForOGM---");
+      protectiveCopy.put(OgmProperties.ENABLED, true);
+      protectiveCopy.put(org.hibernate.jpa.AvailableSettings.PROVIDER,
+          HibernatePersistenceProvider.class.getName());
+      final PersistenceUnitInfoMetaData thePui =
+          pui.with(pui.getProperties(), pui.getPersistenceUnitTransactionType());
+      return Bootstrap.getEntityManagerFactoryBuilder(new PersistenceUnitInfoDescriptor(thePui),
+          protectiveCopy, (ClassLoader) null);
+    }
+    return null;
+  }
 }

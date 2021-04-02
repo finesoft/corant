@@ -29,10 +29,12 @@ public class Threads {
   public static <E extends Throwable> void delayRunInDaemon(Duration delay,
       ThrowingRunnable<E> runner) {
     Thread daemonThread = new Thread(() -> {
-      try {
-        TimeUnit.MILLISECONDS.sleep(delay.toMillis());
-      } catch (InterruptedException ex) {
-        Thread.currentThread().interrupt();
+      if (delay != null) {
+        try {
+          TimeUnit.MILLISECONDS.sleep(delay.toMillis());
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+        }
       }
       uncheckedRunner(runner).run();
     });
@@ -41,9 +43,7 @@ public class Threads {
   }
 
   public static <E extends Throwable> void runInDaemon(ThrowingRunnable<E> runner) {
-    Thread daemonThread = new Thread(uncheckedRunner(runner));
-    daemonThread.setDaemon(true);
-    daemonThread.start();
+    delayRunInDaemon(null, runner);
   }
 
   public static void tryThreadSleep(long ms) {

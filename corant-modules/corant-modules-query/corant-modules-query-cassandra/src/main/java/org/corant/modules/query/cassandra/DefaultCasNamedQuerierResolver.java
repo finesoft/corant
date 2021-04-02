@@ -47,7 +47,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "query.cassandra.mapping-file.paths")
+  @ConfigProperty(name = "corant.query.cassandra.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
 
   @Override

@@ -39,7 +39,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class UnitOfWorks {
 
   @Inject
-  @ConfigProperty(name = "ddd.unitofwork.use-xa", defaultValue = "true")
+  @ConfigProperty(name = "corant.ddd.unitofwork.use-xa", defaultValue = "true")
   protected boolean useJtaXa;
 
   public Optional<AbstractJTAJPAUnitOfWork> currentDefaultUnitOfWork() {

@@ -33,9 +33,9 @@ public class CaffeineJCacheExtension implements Extension {
   public static final String CACHE_PROVIDER_NAME = CaffeineCachingProvider.class.getName();
 
   // config caffeine's caches from this resource
-  private String caffeineConfigResource =
-      ConfigProvider.getConfig().getOptionalValue("caffeine.config.resource", String.class)
-          .orElse("META-INF/application.properties");
+  private String caffeineConfigResource = ConfigProvider.getConfig()
+      .getOptionalValue("corant.jcache.caffeine.config.resource", String.class)
+      .orElse("META-INF/application.properties");
 
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
     System.setProperty("config.resource", caffeineConfigResource);

@@ -28,7 +28,8 @@ import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;
  */
 public class MpRestClientBuilderListener implements RestClientBuilderListener {
 
-  public static final String DFLT_CTX_RESOLER_KEY = "mp.restclient.default-context-resolver.enable";
+  public static final String DFLT_CTX_RESOLER_KEY =
+      "corant.microprofile.restclient.default-context-resolver.enable";
   public static final boolean enableDefaultContextResolver = ConfigProvider.getConfig()
       .getOptionalValue(DFLT_CTX_RESOLER_KEY, Boolean.class).orElse(Boolean.TRUE);
 

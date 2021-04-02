@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-lang-javascript
+ * corant-modules-lang-javascript
  *
  * @author bingo 下午2:55:03
  *

@@ -44,7 +44,7 @@ import io.undertow.servlet.api.SessionPersistenceManager;
 public class FileSystemSessionPersistenceManager implements SessionPersistenceManager {
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.session-persistence-path")
+  @ConfigProperty(name = "corant.webserver.undertow.session-persistence-path")
   protected Optional<String> path;
 
   @Inject

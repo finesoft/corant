@@ -22,19 +22,19 @@ import org.redisson.config.SingleServerConfig;
 public class RedissonClientProducer {
 
   @Inject
-  @ConfigProperty(name = "redis.database")
+  @ConfigProperty(name = "corant.redis.database")
   protected Optional<Integer> database;
 
   @Inject
-  @ConfigProperty(name = "redis.address")
+  @ConfigProperty(name = "corant.redis.address")
   protected String address;
 
   @Inject
-  @ConfigProperty(name = "redis.password")
+  @ConfigProperty(name = "corant.redis.password")
   protected Optional<String> password;
 
   @Inject
-  @ConfigProperty(name = "redis.timeout")
+  @ConfigProperty(name = "corant.redis.timeout")
   protected Optional<Integer> timeout;
 
   public String getAddress() {

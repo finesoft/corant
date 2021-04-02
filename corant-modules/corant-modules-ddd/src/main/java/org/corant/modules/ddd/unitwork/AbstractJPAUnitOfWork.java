@@ -63,7 +63,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
 
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
-      .getOptionalValue("ddd.unitofwork.use-manual-flush", Boolean.class).orElse(Boolean.FALSE);
+      .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
+      .orElse(Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
 

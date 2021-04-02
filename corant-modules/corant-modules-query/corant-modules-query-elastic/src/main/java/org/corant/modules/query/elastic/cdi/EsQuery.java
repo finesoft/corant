@@ -33,7 +33,7 @@ import javax.inject.Qualifier;
  * Elastic name query service qualifier.
  *
  * <pre>
- *  The property value is cluster name, usually with <b>corant-suites-elastic</b>.
+ *  The property value is cluster name, usually with <b>corant-modules-elastic-data</b>.
  * </pre>
  *
  * @author bingo 下午6:05:00
@@ -54,7 +54,7 @@ public @interface EsQuery {
   String value() default "";
 
   /**
-   * corant-suites-query-elastic
+   * corant-modules-query-elastic
    *
    * @author bingo 上午11:42:58
    *

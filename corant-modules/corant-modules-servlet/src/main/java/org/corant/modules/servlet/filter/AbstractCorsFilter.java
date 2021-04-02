@@ -35,22 +35,22 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public abstract class AbstractCorsFilter implements Filter {
 
   @Inject
-  @ConfigProperty(name = "servlet.cors.enabled", defaultValue = "false")
+  @ConfigProperty(name = "corant.servlet.cors.enabled", defaultValue = "false")
   protected boolean enabled;
   @Inject
-  @ConfigProperty(name = "servlet.cors.origin", defaultValue = "*")
+  @ConfigProperty(name = "corant.servlet.cors.origin", defaultValue = "*")
   protected String origin;
   @Inject
-  @ConfigProperty(name = "servlet.cors.headers", defaultValue = "")
+  @ConfigProperty(name = "corant.servlet.cors.headers", defaultValue = "")
   protected String headers;
   @Inject
-  @ConfigProperty(name = "servlet.cors.credentials", defaultValue = "false")
+  @ConfigProperty(name = "corant.servlet.cors.credentials", defaultValue = "false")
   protected String credentials;
   @Inject
-  @ConfigProperty(name = "servlet.cors.methods", defaultValue = "GET, POST, OPTIONS")
+  @ConfigProperty(name = "corant.servlet.cors.methods", defaultValue = "GET, POST, OPTIONS")
   protected String methods;
   @Inject
-  @ConfigProperty(name = "servlet.cors.maxAge", defaultValue = "")
+  @ConfigProperty(name = "corant.servlet.cors.max-age", defaultValue = "")
   protected String maxAge;
 
   @Override

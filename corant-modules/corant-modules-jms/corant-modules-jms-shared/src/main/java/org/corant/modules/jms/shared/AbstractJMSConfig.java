@@ -27,7 +27,7 @@ import org.corant.shared.util.Strings;
  * @author bingo 上午10:30:53
  *
  */
-@ConfigKeyRoot("jms")
+@ConfigKeyRoot(value = "corant.jms", keyIndex = 2)
 public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfig {
 
   private static final long serialVersionUID = 2263743463205278263L;

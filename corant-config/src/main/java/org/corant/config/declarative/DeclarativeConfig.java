@@ -31,7 +31,7 @@ import org.eclipse.microprofile.config.Config;
  * <pre>
  * The declarative configuration object:
  *
- * &#64;ConfigKeyRoot(value = "datasource")
+ * &#64;ConfigKeyRoot(value = "corant.datasource", keyIndex = 2)
  * public class DatasourceConfig implements DeclarativeConfig {
  *   String url;
  *   Class<?> driver;

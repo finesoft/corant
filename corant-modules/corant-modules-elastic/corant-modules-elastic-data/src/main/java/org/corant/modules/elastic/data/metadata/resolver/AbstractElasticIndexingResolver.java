@@ -74,7 +74,7 @@ import org.corant.shared.util.Resources.ClassResource;
 import org.elasticsearch.index.VersionType;
 
 /**
- * corant-suites-elastic
+ * corant-modules-elastic-data
  *
  * <p>
  * This class is an abstract implementation of the ElasticIndexingResolver, managed by the CDI

@@ -105,7 +105,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   }
 
   /**
-   * corant-suites-jpa-hibernate-orm
+   * corant-modules-jpa-hibernate-orm
    *
    * @author bingo 下午4:14:47
    *

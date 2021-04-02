@@ -85,7 +85,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
   }
 
   /**
-   * corant-suites-jaxrs-resteasy
+   * corant-modules-jaxrs-resteasy
    *
    * @author bingo 下午9:06:17
    *

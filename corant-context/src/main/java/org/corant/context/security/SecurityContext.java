@@ -16,7 +16,7 @@ package org.corant.context.security;
 import java.io.Serializable;
 
 /**
- * corant-suites-security-shared
+ * corant-context
  *
  * @author bingo 下午5:20:40
  *

@@ -48,7 +48,7 @@ public class PropertyMessageSource implements MessageSource {
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "bundle.message-file.paths",
+  @ConfigProperty(name = "corant.bundle.message-file.paths",
       defaultValue = "META-INF/**Messages_*.properties")
   protected String bundleFilePaths;
 

@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-jms-shared
+ * corant-modules-jms-shared
  *
  * @author bingo 下午2:22:10
  *

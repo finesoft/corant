@@ -226,7 +226,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   }
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 上午9:26:56
    *

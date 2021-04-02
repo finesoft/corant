@@ -63,7 +63,7 @@ public interface MessageDispatcher {
   }
 
   /**
-   * corant-suites-jms-shared
+   * corant-modules-jms-shared
    *
    * @author bingo 下午7:45:18
    *
@@ -117,7 +117,7 @@ public interface MessageDispatcher {
   }
 
   /**
-   * corant-suites-jms-artemis
+   * corant-modules-jms-artemis
    *
    * @author bingo 下午4:29:24
    *

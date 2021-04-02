@@ -15,7 +15,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-jcache-shared</artifactId>
+			<artifactId>corant-modules-jcache-shared</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.enterprise</groupId>

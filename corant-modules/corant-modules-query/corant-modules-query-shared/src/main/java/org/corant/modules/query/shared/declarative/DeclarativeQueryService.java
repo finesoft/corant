@@ -102,7 +102,7 @@ public @interface DeclarativeQueryService {
   QueryType type() default QueryType.SQL;
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 下午7:20:19
    *

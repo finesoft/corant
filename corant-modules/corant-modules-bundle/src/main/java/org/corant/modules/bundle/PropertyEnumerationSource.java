@@ -50,7 +50,8 @@ public class PropertyEnumerationSource implements EnumerationSource {
   protected volatile boolean initialized = false;
 
   @Inject
-  @ConfigProperty(name = "bundle.enum-file.paths", defaultValue = "META-INF/**Enums_*.properties")
+  @ConfigProperty(name = "corant.bundle.enum-file.paths",
+      defaultValue = "META-INF/**Enums_*.properties")
   protected String bundleFilePaths;
 
   @SuppressWarnings("unchecked")

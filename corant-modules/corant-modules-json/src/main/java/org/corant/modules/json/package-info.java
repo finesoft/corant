@@ -14,7 +14,7 @@ package org.corant.modules.json;
  * the License.
  */
 /**
- * corant-suites-json
+ * corant-modules-json
  *
  * // TODO Hasn't started yet
  *

@@ -40,7 +40,7 @@ import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
  */
 public class MpSmallRyeJWTAuthCDIExtension implements Extension {
 
-  public static final String ENABLE_EE_SECURITY = "security.ee.enable";
+  public static final String ENABLE_EE_SECURITY = "corant.security.ee.enable";
 
   private static Logger logger = Logger.getLogger(MpSmallRyeJWTAuthCDIExtension.class);
 

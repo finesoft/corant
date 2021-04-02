@@ -71,39 +71,39 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "query.sql.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "corant.query.sql.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
   @Inject
-  @ConfigProperty(name = "query.sql.limit", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.sql.limit", defaultValue = "16")
   protected Integer limit;
 
   @Inject
-  @ConfigProperty(name = "query.sql.fetch-size", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.sql.fetch-size", defaultValue = "16")
   protected Integer fetchSize;
 
   @Inject
-  @ConfigProperty(name = "query.sql.fetch-direction")
+  @ConfigProperty(name = "corant.query.sql.fetch-direction")
   protected Optional<Integer> fetchDirection;
 
   @Inject
-  @ConfigProperty(name = "query.sql.timeout", defaultValue = "0")
+  @ConfigProperty(name = "corant.query.sql.timeout", defaultValue = "0")
   protected Integer timeout;
 
   @Inject
-  @ConfigProperty(name = "query.sql.max-field-size", defaultValue = "0")
+  @ConfigProperty(name = "corant.query.sql.max-field-size", defaultValue = "0")
   protected Integer maxFieldSize;
 
   @Inject
-  @ConfigProperty(name = "query.sql.max-rows", defaultValue = "0")
+  @ConfigProperty(name = "corant.query.sql.max-rows", defaultValue = "0")
   protected Integer maxRows;
 
   @Inject
-  @ConfigProperty(name = "query.sql.default-qualifier-value")
+  @ConfigProperty(name = "corant.query.sql.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
   @Inject
-  @ConfigProperty(name = "query.sql.default-qualifier-dialect", defaultValue = "MYSQL")
+  @ConfigProperty(name = "corant.query.sql.default-qualifier-dialect", defaultValue = "MYSQL")
   protected DBMS defaultQualifierDialect;
 
   @Override
@@ -171,7 +171,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   /**
-   * corant-suites-query-sql
+   * corant-modules-query-sql
    *
    * @author bingo 下午6:54:23
    *

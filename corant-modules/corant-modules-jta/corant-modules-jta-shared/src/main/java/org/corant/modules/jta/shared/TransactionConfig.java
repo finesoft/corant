@@ -25,7 +25,7 @@ import org.corant.config.declarative.DeclarativeConfig;
  * @author bingo 下午9:11:21
  *
  */
-@ConfigKeyRoot(value = "jta.transaction", keyIndex = 2, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.jta.transaction", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class TransactionConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = -6080028917760002437L;

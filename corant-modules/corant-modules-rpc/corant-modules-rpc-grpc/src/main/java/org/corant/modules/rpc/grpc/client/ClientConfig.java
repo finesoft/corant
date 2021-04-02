@@ -25,7 +25,7 @@ import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.Abstr
  * @author bingo 下午5:20:08
  *
  */
-@ConfigKeyRoot(value = "rpc.grpc", keyIndex = 2, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.rpc.grpc", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class ClientConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = 6342527084682440153L;

@@ -164,7 +164,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:40
    *
@@ -187,7 +187,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:46:08
    *
@@ -210,7 +210,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:44
    *
@@ -238,7 +238,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:49
    *
@@ -261,7 +261,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:52
    *
@@ -289,7 +289,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:46:01
    *
@@ -312,7 +312,7 @@ public abstract class TransactionalAction<T> {
   }
 
   /**
-   * corant-suites-jta-shared
+   * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:58
    *

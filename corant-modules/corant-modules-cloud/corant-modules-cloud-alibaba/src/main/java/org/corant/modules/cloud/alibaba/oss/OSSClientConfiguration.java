@@ -35,7 +35,7 @@ import com.aliyun.oss.common.auth.RequestSigner;
  * @author bingo 17:46:25
  *
  */
-@ConfigKeyRoot(value = "cloud.alibaba.oss", keyIndex = 3, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.cloud.alibaba.oss", keyIndex = 4, ignoreNoAnnotatedItem = false)
 public class OSSClientConfiguration extends ClientBuilderConfiguration
     implements DeclarativeConfig {
 

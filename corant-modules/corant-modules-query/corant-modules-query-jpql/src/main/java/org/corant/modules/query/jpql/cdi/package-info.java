@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-query-jpql
+ * corant-modules-query-jpql
  *
  * @author bingo 上午11:58:54
  *

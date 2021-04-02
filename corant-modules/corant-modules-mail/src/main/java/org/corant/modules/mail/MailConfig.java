@@ -28,7 +28,7 @@ import org.eclipse.microprofile.config.Config;
  *
  * @author bingo 下午12:01:55
  */
-@ConfigKeyRoot("mail")
+@ConfigKeyRoot(value = "corant.mail", keyIndex = 2)
 public class MailConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = -230483402482161319L;

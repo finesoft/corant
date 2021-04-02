@@ -47,7 +47,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 /**
- * corant-suites-json
+ * corant-modules-json
  *
  * @author bingo 下午2:40:27
  *
@@ -263,7 +263,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:10
    *
@@ -279,7 +279,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:14
    *
@@ -297,7 +297,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:10
    *
@@ -314,7 +314,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:14
    *
@@ -348,7 +348,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:10
    *
@@ -364,7 +364,7 @@ public class Jsons {
   }
 
   /**
-   * corant-suites-json
+   * corant-modules-json
    *
    * @author bingo 下午12:10:14
    *

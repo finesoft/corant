@@ -33,7 +33,7 @@ import javax.inject.Qualifier;
  * MongoDB name query service qualifier.
  *
  * <pre>
- *  The property value is mongo data base name, usually with <b>corant-suites-mongodb</b>.
+ *  The property value is mongo data base name, usually with <b>corant-modules-mongodb</b>.
  * </pre>
  *
  * @author bingo 下午6:05:00

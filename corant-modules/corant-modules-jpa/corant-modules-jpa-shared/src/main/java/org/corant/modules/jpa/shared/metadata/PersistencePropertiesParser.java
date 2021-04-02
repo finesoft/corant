@@ -55,7 +55,7 @@ public class PersistencePropertiesParser {
         .orElse(null);
     doParse(config, dfltPuNme, dfltCfgKeys, cfgs);// defaults
     Map<String, List<String>> namedCfgKeys = getGroupConfigKeys(config,
-        s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+        s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 2);
     namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, cfgs);
       logger.fine(() -> String.format("Parsed persistence unit [%s] from config file.", k));

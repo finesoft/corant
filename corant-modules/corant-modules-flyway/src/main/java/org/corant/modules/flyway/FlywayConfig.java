@@ -24,7 +24,7 @@ import org.flywaydb.core.api.configuration.ClassicConfiguration;
  * @author bingo 下午12:48:02
  *
  */
-@ConfigKeyRoot(value = "flyway.migrate", keyIndex = 2, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.flyway.migrate", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class FlywayConfig extends ClassicConfiguration implements DeclarativeConfig {
 
   private static final long serialVersionUID = 3571486311594362397L;

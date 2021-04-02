@@ -44,7 +44,7 @@ public interface ConversionService {
   void register(Converter<?, ?> converter);
 
   /**
-   * corant-suites-cdi
+   * corant-context
    *
    * @author bingo 下午6:47:49
    *

@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-redis
+ * corant-modules-redis
  *
  * // TODO Hasn't started yet
  *

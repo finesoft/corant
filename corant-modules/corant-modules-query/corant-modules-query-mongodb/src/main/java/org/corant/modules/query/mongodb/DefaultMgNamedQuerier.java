@@ -30,7 +30,7 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
 import org.corant.modules.query.shared.mapping.Query;
 
 /**
- * corant-suites-query
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午4:35:55
  *

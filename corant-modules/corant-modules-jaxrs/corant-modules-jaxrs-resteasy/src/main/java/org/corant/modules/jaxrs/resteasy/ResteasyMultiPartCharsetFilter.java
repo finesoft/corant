@@ -38,16 +38,17 @@ import org.jboss.resteasy.spi.HttpRequest;
 public class ResteasyMultiPartCharsetFilter implements ContainerRequestFilter {
 
   @Inject
-  @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.enable", defaultValue = "true")
+  @ConfigProperty(name = "corant.resteasy.multi-part.request-charset-filter.enable",
+      defaultValue = "true")
   protected boolean enable;
 
   @Inject
-  @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.charset",
+  @ConfigProperty(name = "corant.resteasy.multi-part.request-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
   protected String charset;
 
   @Inject
-  @ConfigProperty(name = "resteasy.multi-part.request-charset-filter.context-type",
+  @ConfigProperty(name = "corant.resteasy.multi-part.request-charset-filter.context-type",
       defaultValue = "text/plain; charset=" + Defaults.DFLT_CHARSET_STR)
   protected String contextType;
 

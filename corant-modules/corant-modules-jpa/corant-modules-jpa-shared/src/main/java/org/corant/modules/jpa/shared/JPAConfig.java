@@ -48,7 +48,7 @@ public class JPAConfig {
 
   public static final String BIND_JNDI = "bind-to-jndi";
 
-  public static final String JC_PREFIX = "jpa.";
+  public static final String JC_PREFIX = "corant.jpa.";
 
   public static final String JCX_TAG = "persistence-pu";
   public static final String JCX_NME = "name";

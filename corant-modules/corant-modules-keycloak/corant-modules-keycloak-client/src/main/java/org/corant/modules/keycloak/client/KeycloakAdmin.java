@@ -49,31 +49,31 @@ public class KeycloakAdmin {
   Logger logger;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.json")
+  @ConfigProperty(name = "corant.keycloak.admin_client.json")
   protected Optional<String> keycloakJson;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.location")
+  @ConfigProperty(name = "corant.keycloak.admin_client.location")
   protected Optional<String> keycloakJsonLocation;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.username")
+  @ConfigProperty(name = "corant.keycloak.admin_client.username")
   protected Optional<String> username;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.password")
+  @ConfigProperty(name = "corant.keycloak.admin_client.password")
   protected Optional<String> password;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.server_url")
+  @ConfigProperty(name = "corant.keycloak.admin_client.server_url")
   protected Optional<String> serverUrl;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.realm")
+  @ConfigProperty(name = "corant.keycloak.admin_client.realm")
   protected Optional<String> realm;
 
   @Inject
-  @ConfigProperty(name = "keycloak.admin_client.client_id")
+  @ConfigProperty(name = "corant.keycloak.admin_client.client_id")
   protected Optional<String> clientId;
 
   @Inject

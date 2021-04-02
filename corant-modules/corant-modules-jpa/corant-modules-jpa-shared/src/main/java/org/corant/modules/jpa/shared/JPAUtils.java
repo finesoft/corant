@@ -39,7 +39,7 @@ import org.corant.shared.util.Resources.ClassResource;
 
 /**
  *
- * corant-suites-jpa-shared
+ * corant-modules-jpa-shared
  *
  * @author bingo 下午6:27:53
  *

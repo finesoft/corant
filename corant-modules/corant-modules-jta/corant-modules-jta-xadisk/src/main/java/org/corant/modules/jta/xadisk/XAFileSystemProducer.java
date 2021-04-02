@@ -38,104 +38,105 @@ public class XAFileSystemProducer {
   protected static final String defaultDiskHome = Defaults.corantUserDir("xadisk").toString();
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.disk-home")
+  @ConfigProperty(name = "corant.jta.xadisk.disk-home")
   private Optional<String> diskHome;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.instance-id", defaultValue = "instance-1")
+  @ConfigProperty(name = "corant.jta.xadisk.instance-id", defaultValue = "instance-1")
   private String instanceId;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.work-manager-core-pool-size", defaultValue = "10")
+  @ConfigProperty(name = "corant.jta.xadisk.work-manager-core-pool-size", defaultValue = "10")
   private Integer workManagerCorePoolSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.work-manager-max-pool-size", defaultValue = "1024")
+  @ConfigProperty(name = "corant.jta.xadisk.work-manager-max-pool-size", defaultValue = "1024")
   private Integer workManagerMaxPoolSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.work-manager-keep-alive-time", defaultValue = "60")
+  @ConfigProperty(name = "corant.jta.xadisk.work-manager-keep-alive-time", defaultValue = "60")
   private Long workManagerKeepAliveTime;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.direct-buffer-pool-size", defaultValue = "1000")
+  @ConfigProperty(name = "corant.jta.xadisk.direct-buffer-pool-size", defaultValue = "1000")
   private Integer directBufferPoolSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.nondirect-buffer-pool-size", defaultValue = "1000")
+  @ConfigProperty(name = "corant.jta.xadisk.nondirect-buffer-pool-size", defaultValue = "1000")
   private Integer nonDirectBufferPoolSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.buffer-size", defaultValue = "4096")
+  @ConfigProperty(name = "corant.jta.xadisk.buffer-size", defaultValue = "4096")
   private Integer bufferSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.transaction-log-file-max-size", defaultValue = "1000000000")
+  @ConfigProperty(name = "corant.jta.xadisk.transaction-log-file-max-size",
+      defaultValue = "1000000000")
   private Long transactionLogFileMaxSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.cumulative-buffer-size-for-disk-write",
+  @ConfigProperty(name = "corant.jta.xadisk.cumulative-buffer-size-for-disk-write",
       defaultValue = "1000000")
   private Integer cumulativeBufferSizeForDiskWrite;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.direct-buffer-idle-time", defaultValue = "100")
+  @ConfigProperty(name = "corant.jta.xadisk.direct-buffer-idle-time", defaultValue = "100")
   private Integer directBufferIdleTime;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.nondirect-buffer-idle-time", defaultValue = "100")
+  @ConfigProperty(name = "corant.jta.xadisk.nondirect-buffer-idle-time", defaultValue = "100")
   private Integer nonDirectBufferIdleTime;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.buffer-pool-reliever-interval", defaultValue = "60")
+  @ConfigProperty(name = "corant.jta.xadisk.buffer-pool-reliever-interval", defaultValue = "60")
   private Integer bufferPoolRelieverInterval;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.max-nonpooled-buffer-size", defaultValue = "1000000")
+  @ConfigProperty(name = "corant.jta.xadisk.max-nonpooled-buffer-size", defaultValue = "1000000")
   private Long maxNonPooledBufferSize;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.dead-lock-detector-interval", defaultValue = "30")
+  @ConfigProperty(name = "corant.jta.xadisk.dead-lock-detector-interval", defaultValue = "30")
   private Integer deadLockDetectorInterval;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.lock-timeout", defaultValue = "10000")
+  @ConfigProperty(name = "corant.jta.xadisk.lock-timeout", defaultValue = "10000")
   private Integer lockTimeOut;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.max-concurrent-event-deliveries", defaultValue = "20")
+  @ConfigProperty(name = "corant.jta.xadisk.max-concurrent-event-deliveries", defaultValue = "20")
   private Integer maximumConcurrentEventDeliveries;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.transaction-timeout", defaultValue = "60")
+  @ConfigProperty(name = "corant.jta.xadisk.transaction-timeout", defaultValue = "60")
   private Integer transactionTimeout;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.enable-remote-invocations", defaultValue = "false")
+  @ConfigProperty(name = "corant.jta.xadisk.enable-remote-invocations", defaultValue = "false")
   private Boolean enableRemoteInvocations;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.server-host", defaultValue = "127.0.0.1")
+  @ConfigProperty(name = "corant.jta.xadisk.server-host", defaultValue = "127.0.0.1")
   private String serverHost;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.server-port", defaultValue = "9999")
+  @ConfigProperty(name = "corant.jta.xadisk.server-port", defaultValue = "9999")
   private Integer serverPort;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.synchronize-directory-changes", defaultValue = "true")
+  @ConfigProperty(name = "corant.jta.xadisk.synchronize-directory-changes", defaultValue = "true")
   private Boolean synchronizeDirectoryChanges;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.enable-cluster-mode", defaultValue = "false")
+  @ConfigProperty(name = "corant.jta.xadisk.enable-cluster-mode", defaultValue = "false")
   private Boolean enableClusterMode;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.cluster-master-host")
+  @ConfigProperty(name = "corant.jta.xadisk.cluster-master-host")
   private Optional<String> clusterMasterHost;
 
   @Inject
-  @ConfigProperty(name = "jta.xadisk.cluster-master-port")
+  @ConfigProperty(name = "corant.jta.xadisk.cluster-master-port")
   private Optional<Integer> clusterMasterPort;
 
   StandaloneFileSystemConfiguration config;

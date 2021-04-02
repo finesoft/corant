@@ -25,7 +25,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-json</artifactId>
+			<artifactId>corant-modules-json</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.enterprise</groupId>

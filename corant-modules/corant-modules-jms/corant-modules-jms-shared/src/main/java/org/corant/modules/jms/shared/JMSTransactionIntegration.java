@@ -95,7 +95,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
   }
 
   /**
-   * corant-suites-jms-shared
+   * corant-modules-jms-shared
    *
    * FIXME: Make XAResource {@link Serializable}, may use jms config ({@link #config}) to rebuild
    * the {@link #factory}, and the {@link #connection} and the {@link #session}}.

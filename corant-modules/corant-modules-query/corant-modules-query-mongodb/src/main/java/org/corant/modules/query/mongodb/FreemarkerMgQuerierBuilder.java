@@ -25,7 +25,7 @@ import org.corant.modules.query.shared.mapping.Query;
 import org.corant.shared.ubiquity.Tuple.Triple;
 
 /**
- * corant-suites-query
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午8:25:44
  *

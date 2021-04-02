@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-jms-artemis
+ * corant-modules-jms-artemis
  *
  * @author bingo 下午4:34:24
  *

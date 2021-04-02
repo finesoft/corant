@@ -22,7 +22,7 @@ import org.corant.config.declarative.DeclarativeConfig;
  *
  * @author bingo 下午3:52:27
  */
-@ConfigKeyRoot("mp.lra")
+@ConfigKeyRoot(value = "corant.microprofile.lra", keyIndex = 3)
 public class LRAConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = -3095817375062098398L;

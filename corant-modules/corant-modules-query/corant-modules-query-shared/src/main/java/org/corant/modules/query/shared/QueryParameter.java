@@ -83,7 +83,7 @@ public interface QueryParameter extends Serializable {
   }
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 下午4:09:56
    *
@@ -195,7 +195,7 @@ public interface QueryParameter extends Serializable {
 
   /**
    *
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 下午6:56:58
    *
@@ -255,7 +255,7 @@ public interface QueryParameter extends Serializable {
   }
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 下午3:14:48
    *
@@ -274,8 +274,7 @@ public interface QueryParameter extends Serializable {
 
     protected transient BiConsumer<Object, StreamQueryParameter> enhancer;
 
-    public StreamQueryParameter() {
-    }
+    public StreamQueryParameter() {}
 
     public StreamQueryParameter(QueryParameter other) {
       super(other);

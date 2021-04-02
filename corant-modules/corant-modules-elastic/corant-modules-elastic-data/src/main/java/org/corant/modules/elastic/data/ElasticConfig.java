@@ -43,7 +43,7 @@ import org.elasticsearch.common.xcontent.XContentType;
  * @author bingo 上午11:54:10
  *
  */
-@ConfigKeyRoot("elastic")
+@ConfigKeyRoot(value = "corant.elastic", keyIndex = 2)
 public class ElasticConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = 6721730236951712908L;

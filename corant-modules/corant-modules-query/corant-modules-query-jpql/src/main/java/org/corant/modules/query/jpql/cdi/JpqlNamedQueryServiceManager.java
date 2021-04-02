@@ -60,15 +60,15 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "query.jpql.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "corant.query.jpql.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
   @Inject
-  @ConfigProperty(name = "query.jpql.limit", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.jpql.limit", defaultValue = "16")
   protected Integer limit;
 
   @Inject
-  @ConfigProperty(name = "query.jpql.default-qualifier-value")
+  @ConfigProperty(name = "corant.query.jpql.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
   @Override
@@ -113,7 +113,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   /**
-   * corant-suites-query-jpql
+   * corant-modules-query-jpql
    *
    * @author bingo 下午12:02:33
    *

@@ -1,8 +1,7 @@
 package org.corant.modules.cloud.tencent.wechat;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
 
 /**
  * corant-modules-cloud-tencent
@@ -10,23 +9,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author sushuaihao 2020/9/11
  * @since
  */
-@ApplicationScoped
-public class WechatOAuthConfig {
+@ConfigKeyRoot(value = "corant.cloud.tencent.wechat", keyIndex = 4, ignoreNoAnnotatedItem = false)
+public class WechatOAuthConfig implements DeclarativeConfig {
 
-  @Inject
-  @ConfigProperty(name = "cloud.tencent.wechat.appid")
+  private static final long serialVersionUID = 4325579136120573042L;
+
   private String appid;
 
-  @Inject
-  @ConfigProperty(name = "cloud.tencent.wechat.secret")
   private String secret;
 
-  @Inject
-  @ConfigProperty(name = "cloud.tencent.wechat.redirect-uri")
   private String redirectUri;
 
-  @Inject
-  @ConfigProperty(name = "cloud.tencent.wechat.qr-code-url")
   private String qrCodeUrl;
 
   /**

@@ -15,7 +15,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.corant</groupId>
-			<artifactId>corant-suites-microprofile-restclient</artifactId>
+			<artifactId>corant-modules-microprofile-restclient</artifactId>
 		</dependency>
 	</dependencies>
 	<description>The Corant tencent cloud integration.</description>

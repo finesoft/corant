@@ -64,7 +64,7 @@ public class MongoClientConfig implements NamedObject {
   public static final String DEFAULT_HOST = "localhost";
   public static final String DEFAULT_URI = "mongodb://localhost/test";
 
-  public static final String MC_PREFIX = "mongodb.";
+  public static final String MC_PREFIX = "corant.mongodb.";
   public static final String MC_APP_NAME = ".applicationName";
   public static final String MC_HOST_PORTS = ".host-ports";
   public static final String MC_URI = ".uri";
@@ -100,7 +100,7 @@ public class MongoClientConfig implements NamedObject {
     Set<String> dfltCfgKeys = defaultPropertyNames(config);
     // handle named client
     Map<String, List<String>> clientCfgs = getGroupConfigKeys(config,
-        s -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 1);
+        s -> defaultString(s).startsWith(MC_PREFIX) && !dfltCfgKeys.contains(s), 2);
     clientCfgs.forEach((k, v) -> {
       MongoClientConfig cfg = of(config, k, v);
       shouldBeTrue(cfgs.add(cfg), "Mongo client databaseName %s dup!", k);
@@ -389,7 +389,7 @@ public class MongoClientConfig implements NamedObject {
   }
 
   /**
-   * corant-suites-mongodb
+   * corant-modules-mongodb
    *
    * @author bingo 下午7:25:05
    *

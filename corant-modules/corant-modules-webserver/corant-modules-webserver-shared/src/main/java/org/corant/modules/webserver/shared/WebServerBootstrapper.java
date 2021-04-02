@@ -45,7 +45,7 @@ public class WebServerBootstrapper {
   BeanManager beanManager;
 
   @Inject
-  @ConfigProperty(name = "webserver.auto-start", defaultValue = "true")
+  @ConfigProperty(name = "corant.webserver.auto-start", defaultValue = "true")
   Boolean autoStart;
 
   WebServer server = null;

@@ -33,7 +33,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 下午3:45:45
  *
  */
-@ConfigKeyRoot("datasource")
+@ConfigKeyRoot(value = "corant.datasource", keyIndex = 2)
 public class DataSourceConfig extends AbstractNamedObject implements DeclarativeConfig {
 
   private static final long serialVersionUID = -7623266774880311110L;

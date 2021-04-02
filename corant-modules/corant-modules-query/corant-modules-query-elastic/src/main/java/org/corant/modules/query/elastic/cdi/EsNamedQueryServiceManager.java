@@ -63,15 +63,15 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Function<String, TransportClient> transportClientManager;
 
   @Inject
-  @ConfigProperty(name = "query.elastic.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "corant.query.elastic.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
   @Inject
-  @ConfigProperty(name = "query.elastic.limit", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.elastic.limit", defaultValue = "16")
   protected Integer limit;
 
   @Inject
-  @ConfigProperty(name = "query.elastic.default-qualifier-value")
+  @ConfigProperty(name = "corant.query.elastic.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
   @Override
@@ -115,7 +115,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   /**
-   * corant-suites-query-elastic
+   * corant-modules-query-elastic
    *
    * @author bingo 上午10:50:50
    *

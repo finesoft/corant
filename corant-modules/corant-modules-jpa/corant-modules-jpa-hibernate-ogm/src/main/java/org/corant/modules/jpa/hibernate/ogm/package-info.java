@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-jpa-hibernate-ogm
+ * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 上午11:19:52
  *

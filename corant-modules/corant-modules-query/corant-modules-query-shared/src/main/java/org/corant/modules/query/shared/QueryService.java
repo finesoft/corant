@@ -172,7 +172,7 @@ public interface QueryService<Q, P> {
   <T> Stream<T> stream(Q q, P p);
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * Forward query result list, Consists of the result list and has next result mark.
    *
@@ -249,7 +249,7 @@ public interface QueryService<Q, P> {
   }
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * Paging query result list.
    *

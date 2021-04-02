@@ -29,99 +29,99 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class UndertowWebServerConfig {
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.io-threads")
+  @ConfigProperty(name = "corant.webserver.undertow.io-threads")
   private Optional<Integer> ioThreads;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.not-request-timeout", defaultValue = "60000")
+  @ConfigProperty(name = "corant.webserver.undertow.not-request-timeout", defaultValue = "60000")
   private int notRequestTimeout;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.high-water", defaultValue = "1048576")
+  @ConfigProperty(name = "corant.webserver.undertow.high-water", defaultValue = "1048576")
   private int highWater;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.low-water", defaultValue = "1048576")
+  @ConfigProperty(name = "corant.webserver.undertow.low-water", defaultValue = "1048576")
   private int lowWater;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.tcp-nodelay", defaultValue = "true")
+  @ConfigProperty(name = "corant.webserver.undertow.tcp-nodelay", defaultValue = "true")
   private boolean tcpNoDelay;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.reuse-address", defaultValue = "true")
+  @ConfigProperty(name = "corant.webserver.undertow.reuse-address", defaultValue = "true")
   private boolean reuseAddress;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.cork", defaultValue = "true")
+  @ConfigProperty(name = "corant.webserver.undertow.cork", defaultValue = "true")
   private boolean cork;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.enable-default-servlet", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.enable-default-servlet", defaultValue = "false")
   private boolean enableDefaultServlet;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.buffer-size", defaultValue = "16364")
+  @ConfigProperty(name = "corant.webserver.undertow.buffer-size", defaultValue = "16364")
   private int bufferSize;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.eager-filter-init", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.eager-filter-init", defaultValue = "false")
   private boolean eagerFilterInit;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.enable-http2", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.enable-http2", defaultValue = "false")
   private boolean enableHttp2;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.enable-ajp", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.enable-ajp", defaultValue = "false")
   private boolean enableAjp;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.balancing-tokens", defaultValue = "1")
+  @ConfigProperty(name = "corant.webserver.undertow.balancing-tokens", defaultValue = "1")
   private int balancingTokens;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.balancing-connections", defaultValue = "2")
+  @ConfigProperty(name = "corant.webserver.undertow.balancing-connections", defaultValue = "2")
   private int balancingConnections;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.back-log", defaultValue = "1000")
+  @ConfigProperty(name = "corant.webserver.undertow.back-log", defaultValue = "1000")
   private int backLog;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.jsp-content-path")
+  @ConfigProperty(name = "corant.webserver.undertow.jsp-content-path")
   private Optional<String> jspContentPath;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.jsp-serving-path")
+  @ConfigProperty(name = "corant.webserver.undertow.jsp-serving-path")
   private Optional<String> jspServingPath;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.static-content-path")
+  @ConfigProperty(name = "corant.webserver.undertow.static-content-path")
   private Optional<String> staticContentPath;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.static-serving-path")
+  @ConfigProperty(name = "corant.webserver.undertow.static-serving-path")
   private Optional<String> staticServingPath;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.static-paths")
+  @ConfigProperty(name = "corant.webserver.undertow.static-paths")
   private Optional<String> staticPaths;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.persistence-session", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.persistence-session", defaultValue = "false")
   private boolean persistenceSession;
 
   @Inject
-  @ConfigProperty(name = "webserver.undertow.escape-error-message", defaultValue = "true")
+  @ConfigProperty(name = "corant.webserver.undertow.escape-error-message", defaultValue = "true")
   private boolean escapeErrorMessage;
 
   @Inject
-  @ConfigProperty(name = "webserver.default-request-charset")
+  @ConfigProperty(name = "corant.webserver.default-request-charset")
   private Optional<String> defaultRequestCharset;
 
   @Inject
-  @ConfigProperty(name = "webserver.default-response-charset")
+  @ConfigProperty(name = "corant.webserver.default-response-charset")
   private Optional<String> defaultResponseCharset;
 
   /**

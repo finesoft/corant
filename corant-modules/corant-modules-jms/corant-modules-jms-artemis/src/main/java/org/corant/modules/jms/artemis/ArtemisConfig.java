@@ -49,7 +49,7 @@ import org.eclipse.microprofile.config.Config;
  * @author bingo 上午10:08:11
  *
  */
-@ConfigKeyRoot(value = "jms.artemis", keyIndex = 2)
+@ConfigKeyRoot(value = "corant.jms.artemis", keyIndex = 3)
 public class ArtemisConfig extends AbstractJMSConfig {
 
   private static final long serialVersionUID = 7757438714150588283L;

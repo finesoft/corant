@@ -35,7 +35,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
 /**
- * corant-suites-elastic
+ * corant-modules-elastic-data
  *
  * <p>
  * This class is used for all elastic document conversion

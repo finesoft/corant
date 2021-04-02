@@ -1,8 +1,9 @@
 package org.corant.modules.cloud.alibaba.pay;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.corant.config.declarative.ConfigKeyItem;
+import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.config.declarative.DeclarativeConfig;
+import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-modules-cloud-alibaba
@@ -10,47 +11,30 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author sushuaihao 2020/10/29
  * @since
  */
-@ApplicationScoped
-public class AlipayConfig {
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.appid")
+@ConfigKeyRoot(value = "corant.cloud.alibaba.pay", keyIndex = 4, ignoreNoAnnotatedItem = false)
+public class AlipayConfig implements DeclarativeConfig {
+
+  private static final long serialVersionUID = 6560494718072597103L;
+
   private String appid;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.merchant-private-key")
   private String merchantPrivateKey;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.app-public-key-path")
   private String appPublicKeyPath;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.cert-public-key-path")
-  private String alipayCertPublicKeyPath;
+  private String certPublicKeyPath;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.notify-url")
   private String notifyUrl;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.root-cert-path")
   private String rootCertPath;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.sign-type", defaultValue = "RSA2")
+  @ConfigKeyItem(value = "sign-type", defaultValue = "RSA2")
   private String signType;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.charset", defaultValue = "utf-8")
+  @ConfigKeyItem(value = "charset", defaultValue = "utf-8")
   private String charset;
 
-  @Inject
-  @ConfigProperty(name = "cloud.alibaba.web.pay.gateway-url")
   private String gatewayUrl;
-
-  public String getAlipayCertPublicKeyPath() {
-    return alipayCertPublicKeyPath;
-  }
 
   public String getAppid() {
     return appid;
@@ -58,6 +42,10 @@ public class AlipayConfig {
 
   public String getAppPublicKeyPath() {
     return appPublicKeyPath;
+  }
+
+  public String getCertPublicKeyPath() {
+    return certPublicKeyPath;
   }
 
   public String getCharset() {
@@ -83,4 +71,15 @@ public class AlipayConfig {
   public String getSignType() {
     return signType;
   }
+
+  @Override
+  public boolean isValid() {
+    return DeclarativeConfig.super.isValid();
+  }
+
+  @Override
+  public void onPostConstruct(Config config, String key) {
+    DeclarativeConfig.super.onPostConstruct(config, key);
+  }
+
 }

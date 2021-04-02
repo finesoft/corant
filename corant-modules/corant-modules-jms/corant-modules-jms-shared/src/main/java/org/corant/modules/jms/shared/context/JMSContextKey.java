@@ -164,7 +164,7 @@ public class JMSContextKey implements Serializable {
   }
 
   /**
-   * corant-suites-jms-shared
+   * corant-modules-jms-shared
    *
    * @author bingo 下午8:29:15
    *

@@ -60,15 +60,15 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<CasNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "query.cassandra.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "corant.query.cassandra.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
   @Inject
-  @ConfigProperty(name = "query.cassandra.limit", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.cassandra.limit", defaultValue = "16")
   protected Integer limit;
 
   @Inject
-  @ConfigProperty(name = "query.cassandra.default-qualifier-value")
+  @ConfigProperty(name = "corant.query.cassandra.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
   @Override
@@ -113,7 +113,7 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   /**
-   * corant-suites-query-cassandra
+   * corant-modules-query-cassandra
    *
    * @author bingo 下午3:41:34
    *

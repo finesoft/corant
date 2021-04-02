@@ -149,7 +149,7 @@ public class JPAService implements PersistenceService {
   }
 
   /**
-   * corant-suites-jpa-shared
+   * corant-modules-jpa-shared
    *
    * TODO use entity manager factory as components key
    *
@@ -185,7 +185,7 @@ public class JPAService implements PersistenceService {
   }
 
   /**
-   * corant-suites-jpa-shared
+   * corant-modules-jpa-shared
    *
    * @author bingo 下午4:09:58
    *
@@ -198,7 +198,7 @@ public class JPAService implements PersistenceService {
   }
 
   /**
-   * corant-suites-jpa-shared
+   * corant-modules-jpa-shared
    *
    * @author bingo 下午4:10:01
    *

@@ -41,7 +41,7 @@ import org.corant.shared.exception.NotSupportedException;
  *
  * <b>
  * jta.transaction.object-store-environment.jdbcAccess = domain=the-domain-name;database=mysql;non-xa-datasource=the-data-source
- * jta.transaction.object-store-environment.objectStoreType = org.corant.suites.jta.narayana.extend.DomainDataSourceStore
+ * jta.transaction.object-store-environment.objectStoreType = org.corant.modules.jta.narayana.extend.DomainDataSourceStore
  * </b>
 
  * param explain:

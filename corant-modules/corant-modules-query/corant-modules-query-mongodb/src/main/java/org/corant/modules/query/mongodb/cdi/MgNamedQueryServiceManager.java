@@ -64,19 +64,19 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "query.mongodb.max-select-size", defaultValue = "128")
+  @ConfigProperty(name = "corant.query.mongodb.max-select-size", defaultValue = "128")
   protected Integer maxSelectSize;
 
   @Inject
-  @ConfigProperty(name = "query.mongodb.limit", defaultValue = "16")
+  @ConfigProperty(name = "corant.query.mongodb.limit", defaultValue = "16")
   protected Integer limit;
 
   @Inject
-  @ConfigProperty(name = "query.mongodb.default-qualifier-value")
+  @ConfigProperty(name = "corant.query.mongodb.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
   @Inject
-  @ConfigProperty(name = "query.mongodb.convert-decimal", defaultValue = "true")
+  @ConfigProperty(name = "corant.query.mongodb.convert-decimal", defaultValue = "true")
   protected boolean convertDecimal;
 
   @Override
@@ -123,7 +123,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   /**
-   * corant-suites-query-mongodb
+   * corant-modules-query-mongodb
    *
    * @author bingo 下午3:41:34
    *

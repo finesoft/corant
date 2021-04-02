@@ -34,7 +34,7 @@ import javax.inject.Qualifier;
  * JPQL name query service qualifier.
  *
  * <pre>
- *  The property value is persistence unit name, usually with <b>corant-suites-jpa</b>.
+ *  The property value is persistence unit name, usually with <b>corant-modules-jpa-hibernate-orm</b>.
  * </pre>
  *
  * @author bingo 下午6:05:00
@@ -55,7 +55,7 @@ public @interface JpqlQuery {
   String value() default "";
 
   /**
-   * corant-suites-query-jpql
+   * corant-modules-query-jpql
    *
    * @author bingo 上午11:41:54
    *

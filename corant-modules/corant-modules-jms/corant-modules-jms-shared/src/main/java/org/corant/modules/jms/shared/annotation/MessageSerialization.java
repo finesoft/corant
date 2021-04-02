@@ -39,7 +39,7 @@ public @interface MessageSerialization {
   SerializationSchema schema();
 
   /**
-   * corant-suites-jms-shared
+   * corant-modules-jms-shared
    *
    * @author bingo 下午5:29:27
    *

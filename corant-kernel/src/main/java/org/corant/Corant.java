@@ -541,7 +541,7 @@ public class Corant implements AutoCloseable {
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {
-    stopWatch.start("All suites are initialized");
+    stopWatch.start("All modules are initialized");
 
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerReadyEvent(arguments));

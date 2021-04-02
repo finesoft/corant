@@ -54,16 +54,16 @@ public class CorantDeclarativeScheduler {
   protected CorantSchedulerExtension extension;
 
   @Inject
-  @ConfigProperty(name = "corant.declarative.scheduler.job.threads")
+  @ConfigProperty(name = "corant.quartz.declarative.scheduler.job.threads")
   protected Optional<Integer> jobThreads;
 
   @Inject
-  @ConfigProperty(name = "corant.declarative.scheduler.shutdown.wait-for-jobs-complete",
+  @ConfigProperty(name = "corant.quartz.declarative.scheduler.shutdown.wait-for-jobs-complete",
       defaultValue = "false")
   protected boolean waitForJobsToComplete;
 
   @Inject
-  @ConfigProperty(name = "corant.declarative.scheduler.start-delayed")
+  @ConfigProperty(name = "corant.quartz.declarative.scheduler.start-delayed")
   protected Optional<Duration> startDelayed;
 
   protected Scheduler scheduler;

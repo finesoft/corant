@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-logging
+ * corant-modules-logging
  *
  * @author bingo 上午10:34:39
  *

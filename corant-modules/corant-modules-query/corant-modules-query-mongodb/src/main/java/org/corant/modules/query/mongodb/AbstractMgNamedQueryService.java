@@ -58,7 +58,7 @@ import com.mongodb.client.model.CollationStrength;
 import com.mongodb.client.model.CountOptions;
 
 /**
- * corant-suites-query
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午8:20:43
  */

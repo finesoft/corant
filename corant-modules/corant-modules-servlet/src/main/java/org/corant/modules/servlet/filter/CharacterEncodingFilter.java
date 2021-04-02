@@ -36,20 +36,20 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class CharacterEncodingFilter implements Filter {
 
   @Inject
-  @ConfigProperty(name = "servlet.request-charset-filter.enable", defaultValue = "true")
+  @ConfigProperty(name = "corant.servlet.request-charset-filter.enable", defaultValue = "true")
   protected boolean enableReq;
 
   @Inject
-  @ConfigProperty(name = "servlet.response-charset-filter.enable", defaultValue = "true")
+  @ConfigProperty(name = "corant.servlet.response-charset-filter.enable", defaultValue = "true")
   protected boolean enableRes;
 
   @Inject
-  @ConfigProperty(name = "servlet.request-charset-filter.charset",
+  @ConfigProperty(name = "corant.servlet.request-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
   protected String reqCharset;
 
   @Inject
-  @ConfigProperty(name = "servlet.response-charset-filter.charset",
+  @ConfigProperty(name = "corant.servlet.response-charset-filter.charset",
       defaultValue = Defaults.DFLT_CHARSET_STR)
   protected String resCharset;
 

@@ -18,7 +18,7 @@ import org.bson.Document;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
- * corant-suites-query-mongodb
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午7:44:08
  *

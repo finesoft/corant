@@ -27,7 +27,7 @@ import org.corant.config.declarative.DeclarativePattern;
  * @author bingo 下午9:18:05
  *
  */
-@ConfigKeyRoot(value = "mvc", keyIndex = 0)
+@ConfigKeyRoot(value = "corant.mvc", keyIndex = 1)
 public class FreemarkerServletConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = 1447267350656863451L;

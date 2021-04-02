@@ -68,7 +68,7 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
   protected Instance<Supplier<List<Message>>> lastUndispatchMessages;
 
   @Inject
-  @ConfigProperty(name = "ddd.unitofwork.use-rl.termination-timeout", defaultValue = "PT5S")
+  @ConfigProperty(name = "corant.ddd.unitofwork.use-rl.termination-timeout", defaultValue = "PT5S")
   protected Duration terminationTimeout;
 
   @Override

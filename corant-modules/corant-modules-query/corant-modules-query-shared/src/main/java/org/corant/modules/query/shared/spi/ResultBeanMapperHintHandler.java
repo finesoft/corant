@@ -158,7 +158,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   }
 
   /**
-   * corant-suites-query-shared
+   * corant-modules-query-shared
    *
    * @author bingo 上午11:33:20
    *

@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-cloud-alibaba
+ * corant-modules-cloud-alibaba
  *
  * @author bingo 21:37:29
  *

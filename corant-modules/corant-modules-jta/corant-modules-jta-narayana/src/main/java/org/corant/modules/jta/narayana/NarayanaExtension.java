@@ -57,7 +57,7 @@ import com.arjuna.ats.jta.utils.JNDIManager;
 import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 
 /**
- * corant-suites-jta-narayana
+ * corant-modules-jta-narayana
  *
  * FIXME org.jboss.logging.annotations.Message.Format.MESSAGE_FORMAT version issue!!!!
  *

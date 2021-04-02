@@ -32,7 +32,7 @@ import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
 
 /**
- * corant-suites-jta-narayana
+ * corant-modules-jta-narayana
  *
  * @author bingo 上午12:02:18
  *

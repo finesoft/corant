@@ -56,7 +56,7 @@ public class QueryMappingService {
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
+  @ConfigProperty(name = "corant.query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
   protected String mappingFilePaths;
 
   @Inject

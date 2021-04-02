@@ -48,7 +48,7 @@ import org.jboss.weld.manager.api.WeldManager;
 public class Contexts {
 
   static final boolean propagateStrictly =
-      Configs.getValue("context.propagate.strictly", Boolean.class, Boolean.FALSE);
+      Configs.getValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
 
   /**
    * Returns whether there is an active context for all given scope types.

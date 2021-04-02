@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-elastic
+ * corant-modules-elastic-data
  *
  * @author bingo 上午11:40:50
  *

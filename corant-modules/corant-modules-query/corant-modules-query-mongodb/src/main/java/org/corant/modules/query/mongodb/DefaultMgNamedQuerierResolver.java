@@ -24,7 +24,7 @@ import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.Query;
 
 /**
- * corant-suites-query
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午3:16:56
  *

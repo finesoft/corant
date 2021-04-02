@@ -21,22 +21,22 @@ import org.jboss.resteasy.plugins.interceptors.CorsFilter;
 public class ResteasyCorsProvider implements Feature {
 
   @Inject
-  @ConfigProperty(name = "rs.cors.enabled", defaultValue = "false")
+  @ConfigProperty(name = "corant.rs.cors.enabled", defaultValue = "false")
   protected boolean enabled;
   @Inject
-  @ConfigProperty(name = "rs.cors.origin", defaultValue = "*")
+  @ConfigProperty(name = "corant.rs.cors.origin", defaultValue = "*")
   protected String origin;
   @Inject
-  @ConfigProperty(name = "rs.cors.headers", defaultValue = "")
+  @ConfigProperty(name = "corant.rs.cors.headers", defaultValue = "")
   protected String headers;
   @Inject
-  @ConfigProperty(name = "rs.cors.credentials", defaultValue = "false")
+  @ConfigProperty(name = "corant.rs.cors.credentials", defaultValue = "false")
   protected boolean credentials;
   @Inject
-  @ConfigProperty(name = "rs.cors.methods", defaultValue = "GET, POST, OPTIONS")
+  @ConfigProperty(name = "corant.rs.cors.methods", defaultValue = "GET, POST, OPTIONS")
   protected String methods;
   @Inject
-  @ConfigProperty(name = "rs.cors.maxAge", defaultValue = "86400")
+  @ConfigProperty(name = "corant.rs.cors.maxAge", defaultValue = "86400")
   protected int maxAge;
 
   @Override

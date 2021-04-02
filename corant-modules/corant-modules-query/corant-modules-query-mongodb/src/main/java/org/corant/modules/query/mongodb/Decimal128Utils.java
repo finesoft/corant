@@ -22,7 +22,7 @@ import org.bson.Document;
 import org.bson.types.Decimal128;
 
 /**
- * corant-suites-query-mongodb
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午4:14:22
  *

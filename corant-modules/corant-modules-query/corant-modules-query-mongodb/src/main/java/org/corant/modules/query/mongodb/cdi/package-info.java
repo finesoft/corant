@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-query-mongodb
+ * corant-modules-query-mongodb
  *
  * @author bingo 下午6:15:34
  *

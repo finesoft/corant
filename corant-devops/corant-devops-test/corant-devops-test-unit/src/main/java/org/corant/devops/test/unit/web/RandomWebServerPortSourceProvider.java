@@ -39,7 +39,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
   public static class RandomWebServerPortConfigSource implements ConfigSource {
 
-    public static final String WEB_SERVER_PORT_PN = "webserver.port";
+    public static final String WEB_SERVER_PORT_PN = "corant.webserver.port";
     final Map<String, String> properties = new HashMap<>();
     final int port;
 

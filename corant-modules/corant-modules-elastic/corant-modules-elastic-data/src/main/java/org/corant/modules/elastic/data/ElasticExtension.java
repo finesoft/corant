@@ -180,7 +180,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   /**
-   * corant-suites-elastic
+   * corant-modules-elastic-data
    *
    * @author bingo 下午4:56:09
    *
@@ -206,7 +206,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   /**
-   * corant-suites-elastic
+   * corant-modules-elastic-data
    *
    * @author bingo 下午4:58:18
    *
@@ -237,7 +237,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   /**
-   * corant-suites-elastic
+   * corant-modules-elastic-data
    *
    * @author bingo 下午4:59:59
    *

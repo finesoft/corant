@@ -12,7 +12,7 @@
  * the License.
  */
 /**
- * corant-suites-jpa-shared
+ * corant-modules-jpa-shared
  *
  * @author bingo 上午10:34:14
  *

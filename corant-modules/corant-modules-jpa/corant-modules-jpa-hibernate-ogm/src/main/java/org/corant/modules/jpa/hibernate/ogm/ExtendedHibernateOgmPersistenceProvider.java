@@ -14,6 +14,7 @@
 package org.corant.modules.jpa.hibernate.ogm;
 
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +38,17 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  */
 public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersistence {
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName,
-      @SuppressWarnings("rawtypes") Map properties) {
+      Map properties) {
     EntityManagerFactory emf = super.createEntityManagerFactory(persistenceUnitName, properties);
     if (emf == null) {
-      EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, properties);
+      Map thePros = properties == null ? new HashMap<>() : new HashMap<>(properties);
+      HibernateJPAOgmProvider.DEFAULT_MONGODB_PROPERTIES.forEach((k, v) -> {
+        thePros.putIfAbsent(k, v);
+      });
+      EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, thePros);
       if (builder != null) {
         return builder.build();
       }
@@ -66,6 +72,8 @@ public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersist
           HibernatePersistenceProvider.class.getName());
       final PersistenceUnitInfoMetaData thePui =
           pui.with(pui.getProperties(), pui.getPersistenceUnitTransactionType());
+      protectiveCopy.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
+          defaultString(pui.getPersistenceUnitName()));
       return Bootstrap.getEntityManagerFactoryBuilder(new PersistenceUnitInfoDescriptor(thePui),
           protectiveCopy, (ClassLoader) null);
     }

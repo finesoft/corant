@@ -40,16 +40,8 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider implements JPAProvider {
 
-  @Inject
-  protected TransactionService transactionService;
-
-  @Inject
-  protected BeanManager beanManager;
-
-  protected final Map<String, Object> PROPERTIES = new HashMap<>();
-
-  protected final Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
-  {
+  protected static final Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
+  static {
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.create_database", true);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",
         AssociationStorageStrategy.IN_ENTITY);
@@ -60,6 +52,14 @@ public class HibernateJPAOgmProvider implements JPAProvider {
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.connectTimeout", 300000);
     DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.autoConnectRetry", true);
   }
+
+  @Inject
+  protected TransactionService transactionService;
+
+  @Inject
+  protected BeanManager beanManager;
+
+  protected final Map<String, Object> PROPERTIES = new HashMap<>();
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,

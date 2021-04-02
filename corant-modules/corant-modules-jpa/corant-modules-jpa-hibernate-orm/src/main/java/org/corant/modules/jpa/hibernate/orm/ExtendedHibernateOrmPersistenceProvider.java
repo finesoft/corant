@@ -15,6 +15,8 @@ package org.corant.modules.jpa.hibernate.orm;
 
 import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Strings.defaultString;
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import org.corant.modules.datasource.shared.DataSourceService;
@@ -36,12 +38,15 @@ import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
  */
 public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenceProvider {
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName,
-      @SuppressWarnings("rawtypes") Map properties) {
+      Map properties) {
     EntityManagerFactory emf = super.createEntityManagerFactory(persistenceUnitName, properties);
     if (emf == null) {
-      EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, properties);
+      Map thePros = properties == null ? new HashMap<>() : new HashMap<>(properties);
+      HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach((k, v) -> thePros.putIfAbsent(k, v));
+      EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, thePros);
       if (builder != null) {
         return builder.build();
       }
@@ -62,15 +67,19 @@ public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenc
     return gen;
   }
 
-  protected EntityManagerFactoryBuilder resolveBuilder(String persistenceUnitName,
-      @SuppressWarnings("rawtypes") Map map) {
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  protected EntityManagerFactoryBuilder resolveBuilder(String persistenceUnitName, Map map) {
     PersistenceUnitInfoMetaData pui = resolve(JPAExtension.class)
         .getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(persistenceUnitName));
-    if (pui != null) {
+    if (pui != null && pui.getPersistenceProviderClassName()
+        .equals(HibernatePersistenceProvider.class.getName())) {
       final PersistenceUnitInfoMetaData thePui =
           pui.with(pui.getProperties(), pui.getPersistenceUnitTransactionType());
       find(DataSourceService.class).ifPresent(ds -> thePui.configDataSource(ds::getManaged));
-      return getEntityManagerFactoryBuilder(new PersistenceUnitInfoDescriptor(thePui), map,
+      Map thePros = new HashMap<>(map);
+      thePros.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
+          defaultString(pui.getPersistenceUnitName()));
+      return getEntityManagerFactoryBuilder(new PersistenceUnitInfoDescriptor(thePui), thePros,
           (ClassLoader) null);
     }
     return null;

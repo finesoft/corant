@@ -15,6 +15,7 @@ package org.corant.modules.ddd.model;
 
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * corant-modules-ddd
@@ -27,7 +28,12 @@ import java.util.Optional;
  * @author bingo 上午10:31:05
  *
  */
-public interface Reference<T> extends Serializable {
+public interface Reference<T> extends Supplier<T>, Serializable {
+
+  @Override
+  default T get() {
+    return retrieve();
+  }
 
   /**
    * Retrieve the object to which the reference refers, and throws an exception if it is not found.

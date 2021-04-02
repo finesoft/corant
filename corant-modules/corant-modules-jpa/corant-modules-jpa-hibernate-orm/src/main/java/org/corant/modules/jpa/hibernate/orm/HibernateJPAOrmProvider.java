@@ -41,16 +41,8 @@ import org.hibernate.tool.schema.Action;
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJPAOrmProvider implements JPAProvider {
 
-  @Inject
-  protected TransactionService transactionService;
-
-  @Inject
-  protected BeanManager beanManager;
-
-  protected final Map<String, Object> PROPERTIES = new HashMap<>();
-
-  protected final Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
-  {
+  protected static final Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
+  static {
     DEFAULT_PROPERTIES.put("hibernate.show_sql", false);
     DEFAULT_PROPERTIES.put("hibernate.format_sql", false);
     DEFAULT_PROPERTIES.put("hibernate.use_sql_comments", false);
@@ -59,6 +51,14 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     DEFAULT_PROPERTIES.put("javax.persistence.query.timeout", 100000);
     DEFAULT_PROPERTIES.put("javax.persistence.schema-generation.database.action", Action.NONE);
   }
+
+  @Inject
+  protected TransactionService transactionService;
+
+  @Inject
+  protected BeanManager beanManager;
+
+  protected final Map<String, Object> PROPERTIES = new HashMap<>();
 
   @Inject
   protected DataSourceService dataSourceService;

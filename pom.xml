@@ -20,6 +20,7 @@
     <module>corant-shared</module>
     <module>corant-context</module>
     <module>corant-modules</module>
+    <module>corant-suites</module>
   </modules>
   <build>
     <plugins>
